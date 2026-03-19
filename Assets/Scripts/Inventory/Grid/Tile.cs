@@ -12,5 +12,15 @@ namespace Inventory.Grid
         [field: SerializeField] public ItemInInventory ItemInInventory { get; private set; }
 
         public bool IsFree => ItemInInventory is null;
+        
+        public Tile(Vector2Int index)
+        {
+            Index = index;
+        }
+
+        public void SetItem(ItemInInventory itemInInventory)
+        {
+            ItemInInventory = itemInInventory;
+        }
     }
 }

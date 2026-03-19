@@ -37,7 +37,7 @@ namespace Container
             builder.RegisterEntryPoint<PlayerInteractableLogic>().AsSelf();
             builder.RegisterEntryPoint<ItemHolderInteractableLogic>().AsSelf();
             
-            builder.Register<PlayerInventory>(Lifetime.Scoped).As<IInventory>().AsSelf();
+            builder.RegisterEntryPoint<PlayerInventory>().As<IInventory>().AsSelf();
         }
     }
-}
+}   

@@ -2,6 +2,7 @@
 using TMPro;
 using UI.Configs;
 using UnityEngine;
+using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
 
@@ -43,15 +44,59 @@ namespace UI.Pages
             var infoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
             var infoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
             var inventory = resolver.Instantiate(uiConfig.InventoryView, rightRect);
-            Debug.Log($"Tiles: {playerInventory.Tiles.tiles.Length}");
+
             for (var y = 0; y < playerInventory.Tiles.tiles.GetLength(1); y++)
             for (var x = 0; x < playerInventory.Tiles.tiles.GetLength(0); x++)
             {
                 var tile = resolver.Instantiate(uiConfig.Tile, inventory.ContentForTiles);
                 tile.GetComponentInChildren<TMP_Text>().text = $"{x}:{y}";
             }
+            
+            DrawItems(inventory);
         }
-        
+
+        private void DrawItems(Inventory.InventoryView inventory)
+        {
+            Debug.Log($"ItemsDraw {playerInventory.Items}");
+            var gridLayoutGroup = inventory.ContentForTiles.GetComponent<GridLayoutGroup>();
+            if (gridLayoutGroup == null)
+            {
+                return;
+            }
+
+            foreach (var item in playerInventory.Items)
+            {
+                var itemImageObject = new GameObject($"Item [{item.ItemConfig.Id}]", typeof(RectTransform),
+                                                     typeof(CanvasRenderer), typeof(Image));
+                var itemImageRect = itemImageObject.GetComponent<RectTransform>();
+                itemImageRect.SetParent(inventory.ContentForItems, false);
+                itemImageRect.anchorMin = new Vector2(0, 1);
+                itemImageRect.anchorMax = new Vector2(0, 1);
+                itemImageRect.pivot = new Vector2(0.5f, 0.5f);
+
+                var itemSize = item.ItemConfig.Size;
+                itemImageRect.sizeDelta = new Vector2(
+                                                      itemSize.x * gridLayoutGroup.cellSize.x +
+                                                      (itemSize.x - 1) * gridLayoutGroup.spacing.x,
+                                                      itemSize.y * gridLayoutGroup.cellSize.y +
+                                                      (itemSize.y - 1) * gridLayoutGroup.spacing.y);
+
+                var itemCenterPosition = item.Position.GetColumn(3);
+                itemImageRect.anchoredPosition = new Vector2(
+                                                             gridLayoutGroup.padding.left
+                                                           + (itemCenterPosition.x + 0.5f) * gridLayoutGroup.cellSize.x
+                                                           + itemCenterPosition.x * gridLayoutGroup.spacing.x,
+                                                             -(gridLayoutGroup.padding.top
+                                                             + (itemCenterPosition.y + 0.5f) *
+                                                               gridLayoutGroup.cellSize.y
+                                                             + itemCenterPosition.y * gridLayoutGroup.spacing.y));
+
+                var itemImage = itemImageObject.GetComponent<Image>();
+                itemImage.sprite = item.ItemConfig.Icon;
+                itemImage.preserveAspect = true;
+            }
+        }
+
         public override void Hide()
         {
             if (contentRect)

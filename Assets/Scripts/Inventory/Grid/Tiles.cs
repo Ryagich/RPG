@@ -12,6 +12,12 @@ namespace Inventory.Grid
         public Tiles(int width, int height)
         {
             tiles = new Tile[width, height];
+
+            for (var x = 0; x < width; x++)
+            for (var y = 0; y < height; y++)
+            {
+                tiles[x, y] = new Tile(new Vector2Int(x, y));
+            }
         }
         
         public Tile GetTile(int x, int y)
@@ -61,9 +67,10 @@ namespace Inventory.Grid
                     {
                         continue;
                     }
-                    if (GetTile(x, y) != null)
+                    var tile = GetTile(x, y);
+                    if (tile != null)
                     {
-                        result.Add(GetTile(x, y));
+                        result.Add(tile);
                     }
                 }
             }
