@@ -1,0 +1,57 @@
+﻿using CameraScripts;
+using GameModes;
+using MessagePipe;
+using Messages;
+using UnityEngine;
+using VContainer.Unity;
+
+namespace Movement
+{
+    // ReSharper disable once ClassNeverInstantiated.Global
+    public class PlayerMovementController : IStartable
+    {
+        private readonly Transform transform;
+        private readonly PlayerMovement playerMovement;
+        private readonly CameraMotor cameraMotor;
+        private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
+
+        private Vector2 direction;
+        
+        public PlayerMovementController
+            (
+                Transform transform,
+                PlayerMovement playerMovement,
+                CameraMotor cameraMotor,
+                ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber,
+                ISubscriber<PlayerMoveMessage> playerMoveSubscriber
+            )
+        {
+            this.transform = transform;
+            this.playerMovement = playerMovement;
+            this.cameraMotor = cameraMotor;
+            this.gameModeChangedSubscriber = gameModeChangedSubscriber;
+
+            playerMoveSubscriber.Subscribe(OnMove);
+        }
+
+        public void Start()
+        {
+            gameModeChangedSubscriber.Subscribe(OnGameModeChanged);
+        }
+
+        private void OnGameModeChanged(GameModeChangedMessage msg)
+        {
+            if (msg.GameMode is GameMode.Game)
+            {
+                playerMovement.ChangeState(true);
+                cameraMotor.ChangeGameplayTarget(transform);
+            }
+            else if (msg.GameMode is GameMode.Inventory)
+            {
+                playerMovement.ChangeState(false);
+            }
+        }
+        
+        private void OnMove(PlayerMoveMessage msg) => direction = msg.Direction;
+    }
+}

@@ -1,4 +1,10 @@
-﻿using Input;
+﻿using CameraScripts;
+using Gravity;
+using Input;
+using Interactable;
+using Localization;
+using Movement;
+using UI.Configs;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -8,13 +14,25 @@ namespace Container.Project
     public class ProjectLifetimeScope : LifetimeScope
     {
         [field: SerializeField] public InputConfig InputConfig { get; private set; }
-
+        [field: SerializeField] public CameraConfig CameraConfig { get; private set; }
+        [field: SerializeField] public PlayerMovementConfig PlayerMovementConfig { get; private set; }
+        [field: SerializeField] public GravityConfig GravityConfig { get; private set; }
+        [field: SerializeField] public UIConfig UIConfig { get; private set; }
+        [field: SerializeField] public LocalizationConfig LocalizationConfig { get; private set; }
+        [field: SerializeField] public InteractableConfig InteractableConfig { get; private set; }
+        
         protected override void Configure(IContainerBuilder builder)
         {
             // === Общие зависимости ===
             builder.RegisterInstance(InputConfig).AsSelf();
-     
-            // builder.RegisterEntryPoint<Bootloader>().AsSelf();
+            builder.RegisterInstance(CameraConfig).AsSelf();
+            builder.RegisterInstance(PlayerMovementConfig).AsSelf();
+            builder.RegisterInstance(GravityConfig).AsSelf();
+            builder.RegisterInstance(UIConfig).AsSelf();
+            builder.RegisterInstance(LocalizationConfig).AsSelf();
+            builder.RegisterInstance(InteractableConfig).AsSelf();
+
+            builder.RegisterEntryPoint<Bootloader>().AsSelf();
         }
     }
 }

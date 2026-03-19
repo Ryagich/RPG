@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cf309fd99184af69ce236bec5dce091, type: 3}
+  m_Name: UI Config
+  m_EditorClassIdentifier: Assembly-CSharp::UI.Configs.UIConfig
+  <ContentPref>k__BackingField: {fileID: 6283447299029665644, guid: fabe0134d8cc07240987699f46cdcb63, type: 3}
+  <InteractableText>k__BackingField: {fileID: 1042406616399098687, guid: 9135cd225f633e243b1ffa243718093a, type: 3}
+  <Tile>k__BackingField: {fileID: 6241725035277156722, guid: 2765049fb2cddd54db80c1519b88a3fd, type: 3}
+  <RightSection>k__BackingField: {fileID: 2905255636178868728, guid: de5de57fdf6539143b7b9f46d772ccc8, type: 3}
+  <InventoryView>k__BackingField: {fileID: 2695229041853354339, guid: d51f424532a90824190ae26cb62a8f7f, type: 3}
+  <InfoAboutInventory>k__BackingField: {fileID: 4248279467150377410, guid: 2792d016ebedd1c489e5f08ff6be9004, type: 3}
+  <InfoAboutPlayer>k__BackingField: {fileID: 1558630750454747041, guid: a13a6008c3052644ea080a95629a3a2d, type: 3}

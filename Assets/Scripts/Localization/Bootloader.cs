@@ -2,6 +2,9 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using VContainer.Unity;
+using YG;
+using YG.Insides;
+
 // using YG;
 // using YG.Insides;
 
@@ -17,28 +20,30 @@ namespace Localization
         
         public async UniTask StartAsync(CancellationToken cancellation = default)
         {
-            // Debug.Log($"Bootloader starting: YG2Enabled={YG2.isSDKEnabled}");
+            Debug.Log($"Bootloader starting: YG2Enabled={YG2.isSDKEnabled}");
             
-            // await YG2Awaiter.WaitForSDKDataAsync();
+            await YG2Awaiter.WaitForSDKDataAsync();
             
             Debug.Log("Waiting for SDK data");
-            //
-            // YG2.InitMetrica();
-            // YG2.GetAuth();
-            // YG2.GetLanguage();
+
+            YG2.InitMetrica();
+            YG2.GetAuth();
+            YG2.GetLanguage();
             
-            // Debug.Log($"Configuring language: '{YG2.lang}'");
-            // YGInsides.LoadProgress();
+            Debug.Log($"Configuring language: '{YG2.lang}'");
+            YGInsides.LoadProgress();
             
-            // await LocalizationHelper.InvalidateAsync(YG2.lang);
+            await LocalizationHelper.InvalidateAsync(YG2.lang);
             LocalizationAwaiter.SignalReady();
-            // YG2.GameReadyAPI();
-            //
-            // if (!YG2.saves.GameReadyMetricSend)
-            // {
-            //     YG2.MetricaSend("GameReady");
-            //     YG2.saves.GameReadyMetricSend = true;
-            // }
+            YG2.GameReadyAPI();
+
+            if (!YG2.saves.GameReadyMetricSend)
+            {
+                YG2.MetricaSend("GameReady");
+                YG2.saves.GameReadyMetricSend = true;
+            }
+            
+            BootSignal.Signal();
         }
     }
 }

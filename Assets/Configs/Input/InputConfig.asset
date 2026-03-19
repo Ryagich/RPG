@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a86435c8a3cc470393a58d3bdf5836b9, type: 3}
+  m_Name: InputConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Input.InputConfig
+  <Movement>k__BackingField: {fileID: 2825569042851830485, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <Interactable>k__BackingField: {fileID: 7222810679227997303, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <Inventory>k__BackingField: {fileID: -8915502896001070619, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
