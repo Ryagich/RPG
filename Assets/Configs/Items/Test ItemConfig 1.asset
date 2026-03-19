@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Test ItemConfig 1
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
   <Id>k__BackingField: Test 1 Item Config ID
+  <ItemType>k__BackingField: 0
   <Price>k__BackingField: 1
   <Icon>k__BackingField: {fileID: 21300000, guid: feff93c1978bc224c93e4d892462632f, type: 3}
   <Name>k__BackingField:
@@ -24,8 +25,8 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  <HandPrefab>k__BackingField: {fileID: 0}
-  <Size>k__BackingField: {x: 1, y: 1}
+  <HandPrefab>k__BackingField: {fileID: 4483478044381914341, guid: 5afbc8be798853645accf4e1ff65110d, type: 3}
+  <Size>k__BackingField: {x: 2, y: 2}
   references:
     version: 2
     RefIds: []

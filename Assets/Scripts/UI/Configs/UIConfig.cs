@@ -10,7 +10,7 @@ namespace UI.Configs
     {
         [field: SerializeField] public RectTransform ContentPref { get; private set; }
         [field: SerializeField] public TMP_Text InteractableText { get; private set; }
-        [field: SerializeField] public RectTransform Tile { get; private set; }
+        [field: SerializeField] public InventoryTilePointerHandler Tile { get; private set; }
         [field: SerializeField] public RectTransform RightSection { get; private set; }
         [field: SerializeField] public InventoryView InventoryView { get; private set; }
         [field: SerializeField] public InfoAboutInventory InfoAboutInventory { get; private set; }

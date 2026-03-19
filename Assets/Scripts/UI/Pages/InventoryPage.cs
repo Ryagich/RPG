@@ -49,6 +49,7 @@ namespace UI.Pages
             for (var x = 0; x < playerInventory.Tiles.tiles.GetLength(0); x++)
             {
                 var tile = resolver.Instantiate(uiConfig.Tile, inventory.ContentForTiles);
+                tile.Initialize(playerInventory, playerInventory.Tiles.GetTile(x, y));
                 tile.GetComponentInChildren<TMP_Text>().text = $"{x}:{y}";
             }
             
@@ -57,7 +58,6 @@ namespace UI.Pages
 
         private void DrawItems(Inventory.InventoryView inventory)
         {
-            Debug.Log($"ItemsDraw {playerInventory.Items}");
             var gridLayoutGroup = inventory.ContentForTiles.GetComponent<GridLayoutGroup>();
             if (gridLayoutGroup == null)
             {
@@ -73,13 +73,6 @@ namespace UI.Pages
                 itemImageRect.anchorMin = new Vector2(0, 1);
                 itemImageRect.anchorMax = new Vector2(0, 1);
                 itemImageRect.pivot = new Vector2(0.5f, 0.5f);
-
-                var itemSize = item.ItemConfig.Size;
-                itemImageRect.sizeDelta = new Vector2(
-                                                      itemSize.x * gridLayoutGroup.cellSize.x +
-                                                      (itemSize.x - 1) * gridLayoutGroup.spacing.x,
-                                                      itemSize.y * gridLayoutGroup.cellSize.y +
-                                                      (itemSize.y - 1) * gridLayoutGroup.spacing.y);
 
                 var itemCenterPosition = item.Position.GetColumn(3);
                 itemImageRect.anchoredPosition = new Vector2(
