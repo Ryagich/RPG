@@ -12,13 +12,18 @@ namespace Inventory
     {
         public ReactiveCollection<ItemInInventory> Items { get; private set; } = new();
         public List<Slot> Slots = new();
-        public ReactiveProperty<Slot> HandSlot;
+        public ReactiveProperty<Slot> HandSlot { get; } = new(new Slot());
 
         public Tiles Tiles;
         
         public PlayerInventory()
         {
             Tiles = new Tiles(7, 11);
+        }
+        
+        public bool CanAdd(ItemConfig config, Tile tile)
+        {
+            return TryGetAvailableTiles(config, tile, out _);
         }
         
         public bool CanAdd(ItemConfig config)
@@ -56,36 +61,106 @@ namespace Inventory
                 {
                     continue;
                 }
-
-                var averagePosition = itemTiles
-                                     .Select(tile => new Vector3(tile.Index.x, tile.Index.y, 0))
-                                     .Aggregate(Vector3.zero, (current, position) => current + position) / itemTiles.Count;
-
-                var itemInInventory = new ItemInInventory(config, Matrix4x4.Translate(averagePosition));
-
-                foreach (var tile in itemTiles)
-                {
-                    tile.SetItem(itemInInventory);
-                }
-
-                Items.Add(itemInInventory);
+                AddItem(config, itemTiles);
                 return true;
             }
 
             return false;
         }
         
+        public bool TryAdd(ItemConfig config, Tile tile)
+        {
+            if (!TryGetAvailableTiles(config, tile, out var itemTiles))
+            {
+                return false;
+            }
+
+            AddItem(config, itemTiles);
+            return true;
+        }
+        
         public void Add(ItemConfig config, Matrix4x4 position)
         {
+            var itemCenterPosition = position.GetColumn(3);
+            var startPosition = new Vector2Int(Mathf.RoundToInt(itemCenterPosition.x - (config.Size.x - 1) * 0.5f),
+                                               Mathf.RoundToInt(itemCenterPosition.y - (config.Size.y - 1) * 0.5f));
+            if (Tiles.TryGetTile(startPosition.x, startPosition.y, out var tile))
+            {
+                TryAdd(config, tile);
+            }
         }
 
         public bool CanGet(ItemInInventory itemInInventory)
         {
-            return false;
+            return itemInInventory != null && Items.Contains(itemInInventory);
         }
+        
+        public bool TryGet(Tile tile, out ItemInInventory itemInInventory)
+        {
+            itemInInventory = tile?.ItemInInventory;
+            if (!CanGet(itemInInventory))
+            {
+                itemInInventory = null;
+                return false;
+            }
 
+            Remove(itemInInventory);
+            return true;
+        }
+        
         public void Remove(ItemInInventory itemInInventory)
         {
+            if (!CanGet(itemInInventory))
+            {
+                return;
+            }
+
+            foreach (var tile in Tiles.tiles)
+            {
+                if (tile.ItemInInventory == itemInInventory)
+                {
+                    tile.SetItem(null);
+                }
+            }
+
+            Items.Remove(itemInInventory);
+        }
+        
+        private bool TryGetAvailableTiles(ItemConfig config, Tile tile, out List<Tile> itemTiles)
+        {
+            itemTiles = null;
+            if (config is null || tile is null)
+            {
+                return false;
+            }
+
+            var availableTiles = Tiles.GetTilesAround(tile.Index, config.Size);
+            if (availableTiles.Count != config.Size.x * config.Size.y || availableTiles.Any(currentTile => !currentTile.IsFree))
+            {
+                return false;
+            }
+
+            itemTiles = availableTiles;
+            return true;
+        }
+        
+        private void AddItem(ItemConfig config, List<Tile> itemTiles)
+        {
+            var averagePosition = itemTiles
+                                 .Select(tile => new Vector3(tile.Index.x, tile.Index.y, 0))
+                                 .Aggregate(Vector3.zero, (current, position) => current + position) / itemTiles.Count;
+
+            var itemInInventory = new ItemInInventory(config, Matrix4x4.Translate(averagePosition))
+                                  {
+                                      Tiles = itemTiles
+                                  };
+
+            foreach (var tile in itemTiles)
+            {
+                tile.SetItem(itemInInventory);
+            }
+
+            Items.Add(itemInInventory);
         }
     }
 }

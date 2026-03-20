@@ -38,6 +38,7 @@ namespace Container
             builder.RegisterEntryPoint<ItemHolderInteractableLogic>().AsSelf();
             
             builder.RegisterEntryPoint<PlayerInventory>().As<IInventory>().AsSelf();
+            builder.RegisterEntryPoint<InventoryHandController>().AsSelf();
         }
     }
 }   
