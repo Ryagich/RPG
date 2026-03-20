@@ -13,19 +13,25 @@ namespace Input
         private readonly IPublisher<PlayerMoveMessage> playerMovePublisher;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
         private readonly IPublisher<InteractableInputMessage> interactableInputPublisher;
+        private readonly IPublisher<MouseDown> mouseDown;
+        private readonly IPublisher<MouseUp> mouseUp;
 
         private InputHandler
             (
                 InputConfig inputConfig,
                 IPublisher<PlayerMoveMessage> playerMovePublisher,
                 IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
-                IPublisher<InteractableInputMessage> interactableInputPublisher
+                IPublisher<InteractableInputMessage> interactableInputPublisher,
+                IPublisher<MouseDown> mouseDown,
+                IPublisher<MouseUp> mouseUp
             )
         {
             this.inputConfig = inputConfig;
             this.playerMovePublisher = playerMovePublisher;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
             this.interactableInputPublisher = interactableInputPublisher;
+            this.mouseDown = mouseDown;
+            this.mouseUp = mouseUp;
         }
 
         public void Start()
@@ -34,22 +40,33 @@ namespace Input
             inputConfig.Movement.action.canceled += OnMove;
             inputConfig.Interactable.action.started += Interactable;
             inputConfig.Inventory.action.started += OpenInventory;
+            inputConfig.LeftClick.action.started += MouseDown;
+            inputConfig.LeftClick.action.canceled += MouseUp;
         }
         
         private void OnMove(InputAction.CallbackContext context)
         {
-            var dir = context.ReadValue<Vector2>();
-            playerMovePublisher.Publish(new PlayerMoveMessage(dir));
+            playerMovePublisher.Publish(new PlayerMoveMessage(context.ReadValue<Vector2>()));
         }
         
         private void Interactable(InputAction.CallbackContext context)
         {
-            interactableInputPublisher.Publish(new InteractableInputMessage());
+            interactableInputPublisher.Publish(new());
         }
         
         private void OpenInventory(InputAction.CallbackContext context)
         {   
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameModes.GameMode.Inventory));
+        }
+
+        private void MouseDown(InputAction.CallbackContext context)
+        {
+            mouseDown.Publish(new());
+        }
+
+        private void MouseUp(InputAction.CallbackContext context)
+        {
+            mouseUp.Publish(new());
         }
     }
 }

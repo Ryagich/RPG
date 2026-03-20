@@ -12,13 +12,12 @@ namespace Inventory
     {
         public ReactiveCollection<ItemInInventory> Items { get; private set; } = new();
         public List<Slot> Slots = new();
+        public ReactiveProperty<Slot> HandSlot;
 
         public Tiles Tiles;
         
         public PlayerInventory()
         {
-            Debug.Log($"PlayerInventory");
-
             Tiles = new Tiles(7, 11);
         }
         

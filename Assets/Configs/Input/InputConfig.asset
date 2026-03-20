@@ -15,3 +15,4 @@ MonoBehaviour:
   <Movement>k__BackingField: {fileID: 2825569042851830485, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
   <Interactable>k__BackingField: {fileID: 7222810679227997303, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
   <Inventory>k__BackingField: {fileID: -8915502896001070619, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <LeftClick>k__BackingField: {fileID: 5637978892861409632, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}

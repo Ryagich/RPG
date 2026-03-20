@@ -24,4 +24,6 @@ namespace Messages
     }
     
     public readonly struct InteractableInputMessage { }
+    public readonly struct MouseDown { }
+    public readonly struct MouseUp { }
 }

@@ -9,5 +9,6 @@ namespace Input
         [field: SerializeField] public InputActionReference Movement { get; private set; } = null!;
         [field: SerializeField] public InputActionReference Interactable { get; private set; }
         [field: SerializeField] public InputActionReference Inventory { get; private set; }
+        [field: SerializeField] public InputActionReference LeftClick { get; private set; }
     }
 }
