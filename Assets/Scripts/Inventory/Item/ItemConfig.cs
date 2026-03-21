@@ -13,5 +13,6 @@ namespace Inventory.Item
         [field: SerializeField] public LocalizedString Name { get; private set; }
         [field: SerializeField] public ItemHolder HandPrefab { get; private set; }
         [field: SerializeField] public Vector2Int Size { get; private set; } = new(1, 1);
+        [field: SerializeField] public Vector2Int SizeInInventory { get; private set; } = new(50, 50);
     }
 }

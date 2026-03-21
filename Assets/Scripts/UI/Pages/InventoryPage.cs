@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Inventory;
+using Inventory.Item;
 using TMPro;
 using UI.Configs;
 using UniRx;
@@ -14,8 +15,6 @@ namespace UI.Pages
     // ReSharper disable once ClassNeverInstantiated.Global
     public class InventoryPage : BasePage, ITickable
     {
-        private static readonly Vector2 HandSlotSize = new(96f, 96f);
-        private static readonly Vector2 HandSlotPadding = new(8f, 8f);
         private static readonly Vector2 CursorOffset = new(24f, -24f);
 
         public override PageType Type { get; } = PageType.Inventory;
@@ -117,36 +116,27 @@ namespace UI.Pages
             if (handSlotRect)
             {
                 Object.Destroy(handSlotRect.gameObject);
+                handSlotRect = null;
             }
 
-            var handSlotObject = new GameObject("Hand Slot", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            handSlotRect = handSlotObject.GetComponent<RectTransform>();
+            var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
+            if (handItemConfig == null)
+            {
+                return;
+            }
+
+            var handItemObject = new GameObject($"Hand Item [{handItemConfig.Id}]", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            handSlotRect = handItemObject.GetComponent<RectTransform>();
             handSlotRect.SetParent(canvasRect, false);
             handSlotRect.anchorMin = new Vector2(0.5f, 0.5f);
             handSlotRect.anchorMax = new Vector2(0.5f, 0.5f);
             handSlotRect.pivot = new Vector2(0.5f, 0.5f);
-            handSlotRect.sizeDelta = HandSlotSize;
+            handSlotRect.sizeDelta = handItemConfig.SizeInInventory;
 
-            var backgroundImage = handSlotObject.GetComponent<Image>();
-            backgroundImage.color = new Color(0f, 0f, 0f, 0.4f);
-            backgroundImage.raycastTarget = false;
-
-            var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
-            if (handItemConfig != null)
-            {
-                var handItemObject = new GameObject($"Hand Item [{handItemConfig.Id}]", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-                var handItemRect = handItemObject.GetComponent<RectTransform>();
-                handItemRect.SetParent(handSlotRect, false);
-                handItemRect.anchorMin = Vector2.zero;
-                handItemRect.anchorMax = Vector2.one;
-                handItemRect.offsetMin = HandSlotPadding;
-                handItemRect.offsetMax = -HandSlotPadding;
-
-                var handItemImage = handItemObject.GetComponent<Image>();
-                handItemImage.sprite = handItemConfig.Icon;
-                handItemImage.preserveAspect = true;
-                handItemImage.raycastTarget = false;
-            }
+            var handItemImage = handItemObject.GetComponent<Image>();
+            handItemImage.sprite = handItemConfig.Icon;
+            handItemImage.preserveAspect = true;
+            handItemImage.raycastTarget = false;
 
             UpdateHandSlotPosition();
         }
@@ -200,7 +190,8 @@ namespace UI.Pages
                 itemImageRect.anchorMin = new Vector2(0, 1);
                 itemImageRect.anchorMax = new Vector2(0, 1);
                 itemImageRect.pivot = new Vector2(0.5f, 0.5f);
-
+                itemImageRect.sizeDelta = item.ItemConfig.SizeInInventory;
+                
                 var itemCenterPosition = item.Position.GetColumn(3);
                 itemImageRect.anchoredPosition = new Vector2(
                     gridLayoutGroup.padding.left
