@@ -14,8 +14,8 @@ namespace UI
             builder.RegisterInstance(Canvas).As<Canvas>();
 
             builder.Register<MainPage>(Lifetime.Singleton);
-            builder.Register<InventoryPage>(Lifetime.Singleton);
-
+           
+            builder.RegisterEntryPoint<InventoryPage>().AsSelf();
             builder.RegisterEntryPoint<PagesController>();
         }
     }

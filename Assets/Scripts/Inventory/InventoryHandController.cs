@@ -1,9 +1,12 @@
-﻿using GameModes;
+﻿using System.Collections.Generic;
+using GameModes;
 using Inventory.Item;
 using MessagePipe;
 using Messages;
 using UI.Inventory;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using VContainer.Unity;
 
 namespace Inventory
@@ -63,14 +66,45 @@ namespace Inventory
             }
             var itemConfig = playerInventory.HandSlot.Value.ItemConfig;
 
-            if (TryAddToHoveredTile(itemConfig) || playerInventory.TryAdd(itemConfig))
+            if (TryAddToHoveredTile(itemConfig))
+            {
+                ClearHand();
+                return;
+            }
+            
+            if (IsPointerOverInventory() && playerInventory.TryAdd(itemConfig))
             {
                 ClearHand();
                 return;
             }
             ThrowItem(itemConfig);
         }
+        
+        private static bool IsPointerOverInventory()
+        {
+            if (EventSystem.current == null || Pointer.current == null)
+            {
+                return false;
+            }
 
+            var pointerEventData = new PointerEventData(EventSystem.current)
+                                   {
+                                       position = Pointer.current.position.ReadValue()
+                                   };
+            var raycastResults = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(pointerEventData, raycastResults);
+
+            foreach (var raycastResult in raycastResults)
+            {
+                if (raycastResult.gameObject.GetComponentInParent<InventoryView>() != null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        
         private void OnGameModeChanged(GameModeChangedMessage msg)
         {
             if (msg.GameMode == GameMode.Inventory || !HasItemInHand())
