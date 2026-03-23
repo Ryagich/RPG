@@ -1,7 +1,6 @@
 ﻿using System;
 using Inventory.Item;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Inventory.Grid
 {

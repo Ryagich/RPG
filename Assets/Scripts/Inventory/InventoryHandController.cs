@@ -49,8 +49,8 @@ namespace Inventory
             CaptureGrabOffset();
 
             if (gameModesController.GameMode != GameMode.Inventory || HasItemInHand()
-             || !InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out var hoveredTile)
-             || !hoveredInventory.TryGet(hoveredTile, out var itemInInventory))
+                                                                   || !InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out var hoveredTile)
+                                                                   || !hoveredInventory.TryGet(hoveredTile, out var itemInInventory))
             {
                 return;
             }
