@@ -15,10 +15,9 @@ namespace UI.Pages
     // ReSharper disable once ClassNeverInstantiated.Global
     public class InventoryPage : BasePage, ITickable
     {
-        private static readonly Vector2 CursorOffset = new(24f, -24f);
-
         public override PageType Type { get; } = PageType.Inventory;
-
+        public static InventoryPage Current { get; private set; }
+        
         private readonly UIConfig uiConfig;
         private readonly PlayerInventory playerInventory;
         private readonly Canvas canvas;
@@ -31,6 +30,8 @@ namespace UI.Pages
         private RectTransform handSlotRect = null!;
         private readonly CompositeDisposable redrawDisposables = new();
         private ScrollRect inventoryScrollRect = null!;
+        private readonly List<RectTransform> itemRects = new();
+        private Vector2 handGrabOffset;
         
         public InventoryPage
             (
@@ -50,6 +51,7 @@ namespace UI.Pages
 
         public override void Draw()
         {
+            Current = this;
             contentRect = resolver.Instantiate(uiConfig.ContentPref, canvasRect);
             contentRect.name = $"{uiConfig.ContentPref.name} | {Type}";
 
@@ -96,9 +98,39 @@ namespace UI.Pages
             }
 
             UpdateInventoryScrollState();
+            itemRects.Clear();
             ClearChildren(inventoryView.ContentForItems);
             DrawItems(inventoryView);
             DrawHandSlot();
+        }
+        
+        public bool TryCaptureGrabOffset(Vector2 screenPoint)
+        {
+            var eventCamera = GetEventCamera();
+
+            for (var i = itemRects.Count - 1; i >= 0; i--)
+            {
+                var itemRect = itemRects[i];
+                if (!itemRect || !RectTransformUtility.RectangleContainsScreenPoint(itemRect, screenPoint, eventCamera))
+                {
+                    continue;
+                }
+
+                if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(itemRect, screenPoint, eventCamera, out var localPoint))
+                {
+                    continue;
+                }
+
+                handGrabOffset = localPoint;
+                return true;
+            }
+
+            return false;
+        }
+
+        public void ResetGrabOffset()
+        {
+            handGrabOffset = Vector2.zero;
         }
         
         private void UpdateInventoryScrollState()
@@ -150,13 +182,19 @@ namespace UI.Pages
             }
 
             var pointerPosition = pointer.position.ReadValue();
-            var eventCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
-            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, pointerPosition, eventCamera, out var localPoint))
+            var dragParentRect = handSlotRect.parent as RectTransform;
+            if (dragParentRect == null)
             {
                 return;
             }
 
-            handSlotRect.anchoredPosition = localPoint + CursorOffset;
+            var eventCamera = GetEventCamera();
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(dragParentRect, pointerPosition, eventCamera, out var localPoint))
+            {
+                return;
+            }
+
+            handSlotRect.anchoredPosition = localPoint - handGrabOffset;
         }
 
         private static void ClearChildren(Transform parent)
@@ -191,6 +229,7 @@ namespace UI.Pages
                 itemImageRect.anchorMax = new Vector2(0, 1);
                 itemImageRect.pivot = new Vector2(0.5f, 0.5f);
                 itemImageRect.sizeDelta = item.ItemConfig.SizeInInventory;
+                itemRects.Add(itemImageRect);
                 
                 var itemCenterPosition = item.Position.GetColumn(3);
                 itemImageRect.anchoredPosition = new Vector2(
@@ -207,11 +246,14 @@ namespace UI.Pages
                 itemImage.raycastTarget = false;
             }
         }
-
+        
+        private Camera GetEventCamera() => canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+        
         public override void Hide()
         {
             redrawDisposables.Clear();
-
+            itemRects.Clear();
+            
             if (contentRect)
             {
                 Object.Destroy(contentRect.gameObject);

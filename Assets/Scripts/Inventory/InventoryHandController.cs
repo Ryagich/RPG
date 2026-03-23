@@ -4,6 +4,7 @@ using Inventory.Item;
 using MessagePipe;
 using Messages;
 using UI.Inventory;
+using UI.Pages;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -45,6 +46,8 @@ namespace Inventory
 
         private void OnMouseDown(MouseDown _)
         {
+            CaptureGrabOffset();
+
             if (gameModesController.GameMode != GameMode.Inventory || HasItemInHand()
              || !InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out var hoveredTile)
              || !hoveredInventory.TryGet(hoveredTile, out var itemInInventory))
@@ -132,8 +135,31 @@ namespace Inventory
         }
 
         private bool HasItemInHand() => playerInventory.HandSlot.Value?.ItemConfig != null;
-        private void ClearHand() => playerInventory.HandSlot.Value = new Slot();
+       
+        private void ClearHand()
+        {
+            playerInventory.HandSlot.Value = new Slot();
+            InventoryPage.Current?.ResetGrabOffset();
+        }
 
+        private static void CaptureGrabOffset()
+        {
+            var pointer = Pointer.current;
+            if (pointer == null)
+            {
+                InventoryPage.Current?.ResetGrabOffset();
+                return;
+            }
+
+            var inventoryPage = InventoryPage.Current;
+            if (inventoryPage == null || inventoryPage.TryCaptureGrabOffset(pointer.position.ReadValue()))
+            {
+                return;
+            }
+
+            inventoryPage.ResetGrabOffset();
+        }
+        
         private void ThrowItem(ItemConfig itemConfig)
         {
             var spawnPosition = playerTransform.position + playerTransform.forward * ThrowForwardOffset + Vector3.up * ThrowUpOffset;

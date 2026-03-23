@@ -27,7 +27,7 @@ MonoBehaviour:
     m_LocalVariables: []
   <HandPrefab>k__BackingField: {fileID: 4483478044381914341, guid: 5afbc8be798853645accf4e1ff65110d, type: 3}
   <Size>k__BackingField: {x: 2, y: 2}
-  <SizeInInventory>k__BackingField: {x: 50, y: 20}
+  <SizeInInventory>k__BackingField: {x: 200, y: 55}
   references:
     version: 2
     RefIds: []
