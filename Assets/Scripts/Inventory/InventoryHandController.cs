@@ -126,13 +126,26 @@ namespace Inventory
 
         private bool TryAddToHoveredTile(ItemConfig itemConfig)
         {
-            if (!InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out var hoveredTile))
+            if (!InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out _))
             {
                 return false;
             }
 
-            return hoveredInventory.TryAdd(itemConfig, hoveredTile);
+            var inventoryPage = InventoryPage.Current;
+            var pointer = Pointer.current;
+            if (inventoryPage == null || pointer == null)
+            {
+                return false;
+            }
+
+            if (!inventoryPage.TryGetPlacementTile(pointer.position.ReadValue(), out var placementTile))
+            {
+                return false;
+            }
+
+            return hoveredInventory.TryAdd(itemConfig, placementTile);
         }
+
 
         private bool HasItemInHand() => playerInventory.HandSlot.Value?.ItemConfig != null;
        

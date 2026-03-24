@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Inventory;
+using Inventory.Grid;
 using TMPro;
 using UI.Configs;
 using UniRx;
@@ -211,8 +212,143 @@ namespace UI.Pages
             {
                 return;
             }
-
+            
+            if (TryGetSnappedHandPosition(pointerPosition, eventCamera, dragParentRect, out var snappedPosition))
+            {
+                handSlotRect.anchoredPosition = snappedPosition;
+                return;
+            }
+            
             handSlotRect.anchoredPosition = localPoint - handGrabOffset;
+        }
+        public bool TryGetPlacementTile(Vector2 screenPoint, out Tile tile)
+        {
+            tile = null;
+            if (!TryGetPlacementCell(screenPoint, out var placementCell))
+            {
+                return false;
+            }
+
+            return playerInventory.Tiles.TryGetTile(placementCell.x, placementCell.y, out tile);
+        }
+
+        private bool TryGetSnappedHandPosition(Vector2 screenPoint, Camera eventCamera, RectTransform dragParentRect, out Vector2 snappedPosition)
+        {
+            snappedPosition = Vector2.zero;
+            if (!TryGetSnappedPositionInGridLocal(screenPoint, out var snappedLocalPosition))
+            {
+                return false;
+            }
+
+            var snappedWorldPosition = inventoryView.ContentForTiles.TransformPoint(snappedLocalPosition);
+            var snappedScreenPosition = RectTransformUtility.WorldToScreenPoint(eventCamera, snappedWorldPosition);
+            return RectTransformUtility.ScreenPointToLocalPointInRectangle(dragParentRect, snappedScreenPosition, eventCamera, out snappedPosition);
+        }
+
+        private bool TryGetPlacementCell(Vector2 screenPoint, out Vector2Int placementCell)
+        {
+            placementCell = default;
+            if (!TryGetCursorCellAndLayout(screenPoint, out var cursorCell, out var gridLayoutGroup))
+            {
+                return false;
+            }
+
+            var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
+            if (handItemConfig == null)
+            {
+                return false;
+            }
+
+            var itemGrabSize = GetItemGrabSize(gridLayoutGroup, handItemConfig.Size);
+            var stepX = gridLayoutGroup.cellSize.x + gridLayoutGroup.spacing.x;
+            var stepY = gridLayoutGroup.cellSize.y + gridLayoutGroup.spacing.y;
+            if (stepX <= 0 || stepY <= 0)
+            {
+                return false;
+            }
+
+            var grabFromLeft = handGrabOffset.x + itemGrabSize.x * 0.5f;
+            var grabFromTop = itemGrabSize.y * 0.5f - handGrabOffset.y;
+            var grabOffsetX = Mathf.Clamp(Mathf.FloorToInt(grabFromLeft / stepX), 0, handItemConfig.Size.x - 1);
+            var grabOffsetY = Mathf.Clamp(Mathf.FloorToInt(grabFromTop / stepY), 0, handItemConfig.Size.y - 1);
+
+            placementCell = new Vector2Int(cursorCell.x - grabOffsetX, cursorCell.y - grabOffsetY);
+            return true;
+        }
+
+        private bool TryGetSnappedPositionInGridLocal(Vector2 screenPoint, out Vector3 snappedLocalPosition)
+        {
+            snappedLocalPosition = Vector3.zero;
+            if (!TryGetPlacementCell(screenPoint, out var placementCell))
+            {
+                return false;
+            }
+
+            var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
+            var gridLayoutGroup = inventoryView.ContentForTiles.GetComponent<GridLayoutGroup>();
+            if (handItemConfig == null || gridLayoutGroup == null)
+            {
+                return false;
+            }
+
+            var snappedAnchoredPosition = new Vector2(
+                gridLayoutGroup.padding.left
+                + (placementCell.x + handItemConfig.Size.x * 0.5f) * gridLayoutGroup.cellSize.x
+                + (placementCell.x + (handItemConfig.Size.x - 1) * 0.5f) * gridLayoutGroup.spacing.x,
+                -(gridLayoutGroup.padding.top
+                + (placementCell.y + handItemConfig.Size.y * 0.5f) * gridLayoutGroup.cellSize.y
+                + (placementCell.y + (handItemConfig.Size.y - 1) * 0.5f) * gridLayoutGroup.spacing.y));
+
+            snappedLocalPosition = new Vector3(snappedAnchoredPosition.x, snappedAnchoredPosition.y, 0f);
+            return true;
+        }
+
+        private bool TryGetCursorCellAndLayout(Vector2 screenPoint, out Vector2Int cursorCell, out GridLayoutGroup gridLayoutGroup)
+        {
+            cursorCell = default;
+            gridLayoutGroup = null;
+            if (!inventoryView)
+            {
+                return false;
+            }
+
+            var gridRect = inventoryView.ContentForTiles;
+            if (!gridRect)
+            {
+                return false;
+            }
+
+            var eventCamera = GetEventCamera();
+            if (!RectTransformUtility.RectangleContainsScreenPoint(gridRect, screenPoint, eventCamera))
+            {
+                return false;
+            }
+
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(gridRect, screenPoint, eventCamera, out var localPoint))
+            {
+                return false;
+            }
+
+            gridLayoutGroup = gridRect.GetComponent<GridLayoutGroup>();
+            if (gridLayoutGroup == null)
+            {
+                return false;
+            }
+
+            var rect = gridRect.rect;
+            var xFromLeft = localPoint.x + rect.width * gridRect.pivot.x;
+            var yFromTop = rect.height * (1f - gridRect.pivot.y) - localPoint.y;
+            var stepX = gridLayoutGroup.cellSize.x + gridLayoutGroup.spacing.x;
+            var stepY = gridLayoutGroup.cellSize.y + gridLayoutGroup.spacing.y;
+            if (stepX <= 0 || stepY <= 0)
+            {
+                return false;
+            }
+
+            var xInCells = (xFromLeft - gridLayoutGroup.padding.left) / stepX;
+            var yInCells = (yFromTop - gridLayoutGroup.padding.top) / stepY;
+            cursorCell = new Vector2Int(Mathf.FloorToInt(xInCells), Mathf.FloorToInt(yInCells));
+            return true;
         }
 
         private static void ClearChildren(Transform parent)
