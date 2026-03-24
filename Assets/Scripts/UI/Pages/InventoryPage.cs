@@ -290,7 +290,19 @@ namespace UI.Pages
             {
                 return false;
             }
-
+            
+            var gridWidth = playerInventory.Tiles.tiles.GetLength(0);
+            var gridHeight = playerInventory.Tiles.tiles.GetLength(1);
+            var isFullyInsideGrid =
+                placementCell.x >= 0
+             && placementCell.y >= 0
+             && placementCell.x + handItemConfig.Size.x <= gridWidth
+             && placementCell.y + handItemConfig.Size.y <= gridHeight;
+            if (!isFullyInsideGrid)
+            {
+                return false;
+            }
+            
             var snappedAnchoredPosition = new Vector2(
                 gridLayoutGroup.padding.left
                 + (placementCell.x + handItemConfig.Size.x * 0.5f) * gridLayoutGroup.cellSize.x
