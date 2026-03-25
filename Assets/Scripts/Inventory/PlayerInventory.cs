@@ -52,6 +52,21 @@ namespace Inventory
         
         public bool TryAdd(ItemConfig config)
         {
+            if (config == null)
+            {
+                return false;
+            }
+
+            if (TryAddToFreeSlot(config))
+            {
+                return true;
+            }
+
+            return TryAddToGrid(config);
+        }
+
+        public bool TryAddToGrid(ItemConfig config)
+        {
             if (!CanAdd(config))
             {
                 return false;
@@ -70,6 +85,36 @@ namespace Inventory
             }
 
             return false;
+        }
+        public bool TryTakeFromSlot(ItemType slotType, out ItemConfig itemConfig)
+        {
+            itemConfig = null;
+            if (!TryGetSlot(slotType, out var slot) || slot.ItemConfig == null)
+            {
+                return false;
+            }
+
+            itemConfig = slot.ItemConfig;
+            slot.ItemConfig = null;
+            return true;
+        }
+
+        public bool TryPlaceInSlot(ItemType slotType, ItemConfig newItemConfig, out ItemConfig replacedItemConfig)
+        {
+            replacedItemConfig = null;
+            if (newItemConfig == null || !TryGetSlot(slotType, out var slot))
+            {
+                return false;
+            }
+
+            if (slot.ItemType != newItemConfig.ItemType)
+            {
+                return false;
+            }
+
+            replacedItemConfig = slot.ItemConfig;
+            slot.ItemConfig = newItemConfig;
+            return true;
         }
         
         public bool TryAdd(ItemConfig config, Tile tile)
@@ -165,6 +210,44 @@ namespace Inventory
             }
 
             Items.Add(itemInInventory);
+        }
+        private bool TryAddToFreeSlot(ItemConfig config)
+        {
+            if (config == null)
+            {
+                return false;
+            }
+
+            foreach (var slot in GetSlots())
+            {
+                if (slot.ItemType == config.ItemType && slot.ItemConfig == null)
+                {
+                    slot.ItemConfig = config;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool TryGetSlot(ItemType slotType, out SlotModel slot)
+        {
+            slot = slotType switch
+                   {
+                       ItemType.Helm => HelmSlot,
+                       ItemType.Body => BodySlot,
+                       ItemType.Backpack => BackpackSlot,
+                       _ => null
+                   };
+
+            return slot != null;
+        }
+
+        private IEnumerable<SlotModel> GetSlots()
+        {
+            yield return HelmSlot;
+            yield return BodySlot;
+            yield return BackpackSlot;
         }
     }
 }

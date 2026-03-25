@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
 using UnityEngine.InputSystem;
+using Inventory.Item;
 
 namespace UI.Pages
 {
@@ -35,6 +36,10 @@ namespace UI.Pages
         private readonly List<RectTransform> itemRects = new();
         private readonly List<RectTransform> itemGrabRects = new();
         private Vector2 handGrabOffset;
+
+        private ItemConfig lastHelmItemConfig;
+        private ItemConfig lastBodyItemConfig;
+        private ItemConfig lastBackpackItemConfig;
         
         public InventoryPage
             (
@@ -87,12 +92,14 @@ namespace UI.Pages
 
         public void Tick()
         {
-            if (!handSlotRect)
+            if (handSlotRect)
             {
-                return;
+                UpdateHandSlotPosition();
             }
-
-            UpdateHandSlotPosition();
+            if (HaveSlotsChanged())
+            {
+                ReDraw();
+            }
         }
 
         public void ReDraw()
@@ -107,7 +114,9 @@ namespace UI.Pages
             itemGrabRects.Clear();
             ClearChildren(inventoryView.ContentForItems);
             DrawItems(inventoryView);
+            DrawSlotItems();
             DrawHandSlot();
+            CacheSlotItems();
         }
         
         public bool TryCaptureGrabOffset(Vector2 screenPoint)
@@ -239,6 +248,11 @@ namespace UI.Pages
         private bool TryGetSnappedHandPosition(Vector2 screenPoint, Camera eventCamera, RectTransform dragParentRect, out Vector2 snappedPosition)
         {
             snappedPosition = Vector2.zero;
+            if (TryGetSnappedPositionInSlot(screenPoint, eventCamera, dragParentRect, out var slotSnappedPosition))
+            {
+                snappedPosition = slotSnappedPosition;
+                return true;
+            }
             if (!TryGetSnappedPositionInGridLocal(screenPoint, out var snappedLocalPosition))
             {
                 return false;
@@ -248,7 +262,157 @@ namespace UI.Pages
             var snappedScreenPosition = RectTransformUtility.WorldToScreenPoint(eventCamera, snappedWorldPosition);
             return RectTransformUtility.ScreenPointToLocalPointInRectangle(dragParentRect, snappedScreenPosition, eventCamera, out snappedPosition);
         }
+        public bool TryGetHoveredSlot(Vector2 screenPoint, out SlotModel slotModel)
+        {
+            slotModel = null;
+            if (!slotsViewContainer)
+            {
+                return false;
+            }
 
+            var handItemType = playerInventory.HandSlot.Value?.ItemConfig?.ItemType;
+            if (TryGetSlotUnderPointer(slotsViewContainer.HeadSlot, playerInventory.HelmSlot, screenPoint, handItemType, out slotModel))
+            {
+                return true;
+            }
+
+            if (TryGetSlotUnderPointer(slotsViewContainer.BodySlot, playerInventory.BodySlot, screenPoint, handItemType, out slotModel))
+            {
+                return true;
+            }
+
+            return TryGetSlotUnderPointer(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot, screenPoint, handItemType, out slotModel);
+        }
+        
+        private void DrawSlotItems()
+        {
+            DrawSlotItem(slotsViewContainer.HeadSlot, playerInventory.HelmSlot);
+            DrawSlotItem(slotsViewContainer.BodySlot, playerInventory.BodySlot);
+            DrawSlotItem(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot);
+        }
+
+        private void DrawSlotItem(SlotView slotView, SlotModel slotModel)
+        {
+            if (!slotView)
+            {
+                return;
+            }
+
+            var slotRect = slotView.GetComponent<RectTransform>();
+            if (!slotRect)
+            {
+                return;
+            }
+
+            ClearChildren(slotRect);
+            if (slotModel?.ItemConfig == null)
+            {
+                return;
+            }
+
+            var itemImageObject = new GameObject($"Slot Item [{slotModel.ItemConfig.Id}]", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            var itemImageRect = itemImageObject.GetComponent<RectTransform>();
+            itemImageRect.SetParent(slotRect, false);
+            itemImageRect.anchorMin = new Vector2(0.5f, 0.5f);
+            itemImageRect.anchorMax = new Vector2(0.5f, 0.5f);
+            itemImageRect.pivot = new Vector2(0.5f, 0.5f);
+            itemImageRect.anchoredPosition = Vector2.zero;
+            itemImageRect.sizeDelta = slotModel.ItemConfig.SizeInInventory;
+            itemRects.Add(itemImageRect);
+            itemGrabRects.Add(itemImageRect);
+
+            var itemImage = itemImageObject.GetComponent<Image>();
+            itemImage.sprite = slotModel.ItemConfig.Icon;
+            itemImage.preserveAspect = true;
+            itemImage.raycastTarget = false;
+        }
+
+        private bool TryGetSnappedPositionInSlot(Vector2 screenPoint, Camera eventCamera, RectTransform dragParentRect, out Vector2 snappedPosition)
+        {
+            snappedPosition = Vector2.zero;
+            if (!TryGetHoveredSlot(screenPoint, out var slotModel) || slotModel == null)
+            {
+                return false;
+            }
+
+            var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
+            if (handItemConfig == null || slotModel.ItemType != handItemConfig.ItemType)
+            {
+                return false;
+            }
+
+            if (!TryGetSlotRect(slotModel, out var slotRect))
+            {
+                return false;
+            }
+
+            var slotWorldPosition = slotRect.TransformPoint(Vector3.zero);
+            var slotScreenPosition = RectTransformUtility.WorldToScreenPoint(eventCamera, slotWorldPosition);
+            return RectTransformUtility.ScreenPointToLocalPointInRectangle(dragParentRect, slotScreenPosition, eventCamera, out snappedPosition);
+        }
+
+        private bool TryGetSlotRect(SlotModel slotModel, out RectTransform slotRect)
+        {
+            slotRect = null;
+            if (slotModel == playerInventory.HelmSlot && slotsViewContainer.HeadSlot)
+            {
+                slotRect = slotsViewContainer.HeadSlot.GetComponent<RectTransform>();
+            }
+            else if (slotModel == playerInventory.BodySlot && slotsViewContainer.BodySlot)
+            {
+                slotRect = slotsViewContainer.BodySlot.GetComponent<RectTransform>();
+            }
+            else if (slotModel == playerInventory.BackpackSlot && slotsViewContainer.BackpackSlot)
+            {
+                slotRect = slotsViewContainer.BackpackSlot.GetComponent<RectTransform>();
+            }
+
+            return slotRect;
+        }
+
+        private bool TryGetSlotUnderPointer(SlotView slotView, SlotModel slotModel, Vector2 screenPoint, ItemType? requiredType, out SlotModel hoveredSlotModel)
+        {
+            hoveredSlotModel = null;
+            if (!slotView)
+            {
+                return false;
+            }
+
+            var slotRect = slotView.GetComponent<RectTransform>();
+            if (!slotRect)
+            {
+                return false;
+            }
+
+            if (requiredType.HasValue && slotModel.ItemType != requiredType.Value)
+            {
+                return false;
+            }
+
+            var eventCamera = GetEventCamera();
+            if (!RectTransformUtility.RectangleContainsScreenPoint(slotRect, screenPoint, eventCamera))
+            {
+                return false;
+            }
+
+            hoveredSlotModel = slotModel;
+            return true;
+        }
+
+        private bool HaveSlotsChanged()
+        {
+            return lastHelmItemConfig != playerInventory.HelmSlot.ItemConfig
+                || lastBodyItemConfig != playerInventory.BodySlot.ItemConfig
+                || lastBackpackItemConfig != playerInventory.BackpackSlot.ItemConfig;
+        }
+
+        private void CacheSlotItems()
+        {
+            lastHelmItemConfig = playerInventory.HelmSlot.ItemConfig;
+            lastBodyItemConfig = playerInventory.BodySlot.ItemConfig;
+            lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;
+        }
+        
         private bool TryGetPlacementCell(Vector2 screenPoint, out Vector2Int placementCell)
         {
             placementCell = default;

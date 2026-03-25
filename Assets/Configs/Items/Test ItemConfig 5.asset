@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60723d5f93cc4ad190a060664630a272, type: 3}
-  m_Name: Test ItemConfig 1
+  m_Name: Test ItemConfig 5
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
-  <Id>k__BackingField: Test 1 Item Config ID
-  <ItemType>k__BackingField: 4
+  <Id>k__BackingField: Test 5 Item Config ID
+  <ItemType>k__BackingField: 2
   <Price>k__BackingField: 1
-  <Icon>k__BackingField: {fileID: 21300000, guid: 919c26403d4491942b8573871036d991, type: 3}
+  <Icon>k__BackingField: {fileID: 21300000, guid: d4b969e113fcc3c4f933f417e1904363, type: 3}
   <Name>k__BackingField:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
@@ -25,9 +25,9 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  <HandPrefab>k__BackingField: {fileID: 4483478044381914341, guid: 5afbc8be798853645accf4e1ff65110d, type: 3}
+  <HandPrefab>k__BackingField: {fileID: 8275672548770247764, guid: 59835dd5a4706e2479356952db87106f, type: 3}
   <Size>k__BackingField: {x: 2, y: 2}
-  <SizeInInventory>k__BackingField: {x: 200, y: 155}
+  <SizeInInventory>k__BackingField: {x: 155, y: 155}
   references:
     version: 2
     RefIds: []

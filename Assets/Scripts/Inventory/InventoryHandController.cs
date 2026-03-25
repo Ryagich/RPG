@@ -49,12 +49,27 @@ namespace Inventory
         {
             CaptureGrabOffset();
 
-            if (gameModesController.GameMode != GameMode.Inventory || HasItemInHand()
-                                                                   || !InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out var hoveredTile)
-                                                                   || !hoveredInventory.TryGet(hoveredTile, out var itemInInventory))
+            if (gameModesController.GameMode != GameMode.Inventory || HasItemInHand())
             {
                 return;
             }
+
+            var inventoryPage = InventoryPage.Current;
+            var pointer = Pointer.current;
+            if (inventoryPage != null && pointer != null
+                                      && inventoryPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel)
+                                      && playerInventory.TryTakeFromSlot(slotModel.ItemType, out var slotItemConfig))
+            {
+                playerInventory.HandSlot.Value = new SlotModel(slotItemConfig.ItemType, slotItemConfig);
+                return;
+            }
+
+            if (!InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out var hoveredTile)
+             || !hoveredInventory.TryGet(hoveredTile, out var itemInInventory))
+            {
+                return;
+            }
+
             playerInventory.HandSlot.Value = new SlotModel(itemInInventory.ItemConfig.ItemType, itemInInventory.ItemConfig);
         }
 
@@ -65,6 +80,12 @@ namespace Inventory
                 return;
             }
             var itemConfig = playerInventory.HandSlot.Value.ItemConfig;
+
+            if (TryAddToHoveredSlot(itemConfig))
+            {
+                ClearHand();
+                return;
+            }
 
             if (TryAddToHoveredTile(itemConfig))
             {
@@ -79,7 +100,30 @@ namespace Inventory
             }
             ThrowItem(itemConfig);
         }
-        
+        private bool TryAddToHoveredSlot(ItemConfig itemConfig)
+        {
+            var inventoryPage = InventoryPage.Current;
+            var pointer = Pointer.current;
+            if (inventoryPage == null || pointer == null
+                                      || !inventoryPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel)
+                                      || !playerInventory.TryPlaceInSlot(slotModel.ItemType, itemConfig, out var replacedItemConfig))
+            {
+                return false;
+            }
+
+            if (replacedItemConfig == null)
+            {
+                return true;
+            }
+
+            if (playerInventory.TryAddToGrid(replacedItemConfig))
+            {
+                return true;
+            }
+
+            ThrowItem(replacedItemConfig);
+            return true;
+        }
         private static bool IsPointerOverInventory()
         {
             if (EventSystem.current == null || Pointer.current == null)
