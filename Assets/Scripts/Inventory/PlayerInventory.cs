@@ -2,6 +2,7 @@
 using System.Linq;
 using Inventory.Grid;
 using Inventory.Item;
+using Inventory.Slot;
 using UniRx;
 using UnityEngine;
 
@@ -11,11 +12,14 @@ namespace Inventory
     public class PlayerInventory : IInventory
     {
         public ReactiveCollection<ItemInInventory> Items { get; private set; } = new();
-        public List<Slot> Slots = new();
-        public ReactiveProperty<Slot> HandSlot { get; } = new(new Slot());
+        public ReactiveProperty<SlotModel> HandSlot { get; } = new(new SlotModel(ItemType.None, null));
 
         public Tiles Tiles;
         
+        public SlotModel HelmSlot = new(ItemType.Helm);
+        public SlotModel BodySlot = new(ItemType.Body);
+        public SlotModel BackpackSlot = new(ItemType.Backpack);
+
         public PlayerInventory()
         {
             Tiles = new Tiles(7, 11);

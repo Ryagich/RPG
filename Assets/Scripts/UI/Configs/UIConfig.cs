@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using Inventory.Slot;
+using TMPro;
 using UI.Inventory;
 using UI.UIElements;
 using UnityEngine;
@@ -12,6 +13,7 @@ namespace UI.Configs
         [field: SerializeField] public TMP_Text InteractableText { get; private set; }
         [field: SerializeField] public InventoryTilePointerHandler Tile { get; private set; }
         [field: SerializeField] public RectTransform RightSection { get; private set; }
+        [field: SerializeField] public SlotsViewContainer CenterSection { get; private set; }
         [field: SerializeField] public InventoryView InventoryView { get; private set; }
         [field: SerializeField] public InfoAboutInventory InfoAboutInventory { get; private set; }
         [field: SerializeField] public InfoAboutPlayer InfoAboutPlayer { get; private set; }

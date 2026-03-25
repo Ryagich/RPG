@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using GameModes;
 using Inventory.Item;
+using Inventory.Slot;
 using MessagePipe;
 using Messages;
 using UI.Inventory;
@@ -54,11 +55,7 @@ namespace Inventory
             {
                 return;
             }
-            playerInventory.HandSlot.Value = new Slot
-                                             {
-                                                 ItemConfig = itemInInventory.ItemConfig,
-                                                 ItemType = itemInInventory.ItemConfig.ItemType
-                                             };
+            playerInventory.HandSlot.Value = new SlotModel(itemInInventory.ItemConfig.ItemType, itemInInventory.ItemConfig);
         }
 
         private void OnMouseUp(MouseUp _)
@@ -151,7 +148,7 @@ namespace Inventory
        
         private void ClearHand()
         {
-            playerInventory.HandSlot.Value = new Slot();
+            playerInventory.HandSlot.Value = new SlotModel(ItemType.None, null);
             InventoryPage.Current?.ResetGrabOffset();
         }
 

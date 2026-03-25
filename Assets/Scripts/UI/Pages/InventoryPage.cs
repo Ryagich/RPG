@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Inventory;
 using Inventory.Grid;
+using Inventory.Slot;
 using TMPro;
 using UI.Configs;
 using UniRx;
@@ -26,6 +27,7 @@ namespace UI.Pages
 
         private RectTransform contentRect = null!;
         private RectTransform rightRect = null!;
+        private SlotsViewContainer slotsViewContainer = null!;
         private Inventory.InventoryView inventoryView = null!;
         private RectTransform handSlotRect = null!;
         private readonly CompositeDisposable redrawDisposables = new();
@@ -57,6 +59,8 @@ namespace UI.Pages
             contentRect.name = $"{uiConfig.ContentPref.name} | {Type}";
 
             rightRect = resolver.Instantiate(uiConfig.RightSection, contentRect);
+            slotsViewContainer = resolver.Instantiate(uiConfig.CenterSection, contentRect);
+            
             var infoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
             var infoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
             inventoryView = resolver.Instantiate(uiConfig.InventoryView, rightRect);
@@ -452,6 +456,7 @@ namespace UI.Pages
 
             contentRect = null;
             rightRect = null;
+            slotsViewContainer = null;
             inventoryView = null;
             inventoryScrollRect = null;
             handSlotRect = null;

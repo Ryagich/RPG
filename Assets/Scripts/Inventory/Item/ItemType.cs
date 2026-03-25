@@ -6,7 +6,7 @@
         Consumable,
         Backpack,
         Weapon,
-        Armor,
+        Body,
         Helm,
     }
 }
