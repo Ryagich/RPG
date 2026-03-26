@@ -93,11 +93,18 @@ namespace Inventory
                 return;
             }
             
-            if (IsPointerOverInventory() && playerInventory.TryAdd(itemConfig))
+            if (IsPointerOverSlot() && playerInventory.TryAdd(itemConfig))
             {
                 ClearHand();
                 return;
             }
+            
+            if (IsPointerOverInventory() && (playerInventory.TryAddToGrid(itemConfig) || playerInventory.TryAdd(itemConfig)))
+            {
+                ClearHand();
+                return;
+            }
+            
             ThrowItem(itemConfig);
         }
         private bool TryAddToHoveredSlot(ItemConfig itemConfig)
@@ -126,6 +133,16 @@ namespace Inventory
         }
         private static bool IsPointerOverInventory()
         {
+            return IsPointerOver<InventoryView>();
+        }
+
+        private static bool IsPointerOverSlot()
+        {
+            return IsPointerOver<SlotView>();
+        }
+
+        private static bool IsPointerOver<T>() where T : Component
+        {
             if (EventSystem.current == null || Pointer.current == null)
             {
                 return false;
@@ -140,7 +157,7 @@ namespace Inventory
 
             foreach (var raycastResult in raycastResults)
             {
-                if (raycastResult.gameObject.GetComponentInParent<InventoryView>() != null)
+                if (raycastResult.gameObject.GetComponentInParent<T>() != null)
                 {
                     return true;
                 }
