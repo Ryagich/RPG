@@ -284,6 +284,18 @@ namespace UI.Pages
             return TryGetSlotUnderPointer(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot, screenPoint, handItemType, out slotModel);
         }
         
+        public bool IsInRightOrCenterSection(Vector2 screenPoint)
+        {
+            var eventCamera = GetEventCamera();
+            if (rightRect && RectTransformUtility.RectangleContainsScreenPoint(rightRect, screenPoint, eventCamera))
+            {
+                return true;
+            }
+
+            var centerRect = slotsViewContainer ? slotsViewContainer.GetComponent<RectTransform>() : null;
+            return centerRect && RectTransformUtility.RectangleContainsScreenPoint(centerRect, screenPoint, eventCamera);
+        }
+        
         private void DrawSlotItems()
         {
             DrawSlotItem(slotsViewContainer.HeadSlot, playerInventory.HelmSlot);

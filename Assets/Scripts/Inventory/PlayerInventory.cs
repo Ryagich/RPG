@@ -22,7 +22,7 @@ namespace Inventory
 
         public PlayerInventory()
         {
-            Tiles = new Tiles(7, 11);
+            Tiles = new Tiles(7, 2);
         }
         
         public bool CanAdd(ItemConfig config, Tile tile)

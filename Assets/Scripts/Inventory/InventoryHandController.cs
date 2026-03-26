@@ -105,6 +105,17 @@ namespace Inventory
                 return;
             }
             
+            var inventoryPage = InventoryPage.Current;
+            var pointer = Pointer.current;
+            if (inventoryPage != null
+             && pointer != null
+             && inventoryPage.IsInRightOrCenterSection(pointer.position.ReadValue())
+             && playerInventory.TryAdd(itemConfig))
+            {
+                ClearHand();
+                return;
+            }
+            
             ThrowItem(itemConfig);
         }
         private bool TryAddToHoveredSlot(ItemConfig itemConfig)
