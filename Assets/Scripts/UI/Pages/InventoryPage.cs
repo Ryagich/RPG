@@ -345,8 +345,8 @@ namespace UI.Pages
             {
                 return false;
             }
-
-            var slotWorldPosition = slotRect.TransformPoint(Vector3.zero);
+            
+            var slotWorldPosition = slotRect.TransformPoint(slotRect.rect.center);
             var slotScreenPosition = RectTransformUtility.WorldToScreenPoint(eventCamera, slotWorldPosition);
             return RectTransformUtility.ScreenPointToLocalPointInRectangle(dragParentRect, slotScreenPosition, eventCamera, out snappedPosition);
         }
