@@ -40,6 +40,7 @@ namespace UI.Pages
         private ItemConfig lastHelmItemConfig;
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastBackpackItemConfig;
+        private Vector2Int lastGridSize = new(-1, -1);
         
         public InventoryPage
             (
@@ -71,13 +72,7 @@ namespace UI.Pages
             inventoryView = resolver.Instantiate(uiConfig.InventoryView, rightRect);
             inventoryScrollRect = inventoryView.GetComponent<ScrollRect>();
             
-            for (var y = 0; y < playerInventory.Tiles.tiles.GetLength(1); y++)
-            for (var x = 0; x < playerInventory.Tiles.tiles.GetLength(0); x++)
-            {
-                var tile = resolver.Instantiate(uiConfig.Tile, inventoryView.ContentForTiles);
-                tile.Initialize(playerInventory, playerInventory.Tiles.GetTile(x, y));
-                tile.GetComponentInChildren<TMP_Text>().text = $"{x}:{y}";
-            }
+            DrawTiles();
 
             playerInventory.Items
                            .ObserveCountChanged()
@@ -109,6 +104,7 @@ namespace UI.Pages
                 return;
             }
 
+            EnsureTilesMatchInventorySize();
             UpdateInventoryScrollState();
             itemRects.Clear();
             itemGrabRects.Clear();
@@ -612,6 +608,39 @@ namespace UI.Pages
             }
         }
         
+        private void DrawTiles()
+        {
+            if (!inventoryView)
+            {
+                return;
+            }
+
+            ClearChildren(inventoryView.ContentForTiles);
+            var gridWidth = playerInventory.Tiles.tiles.GetLength(0);
+            var gridHeight = playerInventory.Tiles.tiles.GetLength(1);
+
+            for (var y = 0; y < gridHeight; y++)
+            for (var x = 0; x < gridWidth; x++)
+            {
+                var tile = resolver.Instantiate(uiConfig.Tile, inventoryView.ContentForTiles);
+                tile.Initialize(playerInventory, playerInventory.Tiles.GetTile(x, y));
+                tile.GetComponentInChildren<TMP_Text>().text = $"{x}:{y}";
+            }
+
+            lastGridSize = new Vector2Int(gridWidth, gridHeight);
+        }
+
+        private void EnsureTilesMatchInventorySize()
+        {
+            var currentSize = new Vector2Int(playerInventory.Tiles.tiles.GetLength(0), playerInventory.Tiles.tiles.GetLength(1));
+            if (currentSize == lastGridSize)
+            {
+                return;
+            }
+
+            DrawTiles();
+        }
+
         private Camera GetEventCamera() => canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
         
         public override void Hide()

@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 60723d5f93cc4ad190a060664630a272, type: 3}
-  m_Name: Test ItemConfig 5
-  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
-  <Id>k__BackingField: Test 5 Item Config ID
+  m_Script: {fileID: 11500000, guid: 3c683b90b3f2473f9c7a8fbca87c7fc4, type: 3}
+  m_Name: BackpackItemConfig 3
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.BackpackItemConfig
+  <Id>k__BackingField: Backpack Item Config ID Test 3
   <ItemType>k__BackingField: 2
   <Price>k__BackingField: 1
   <Icon>k__BackingField: {fileID: 21300000, guid: d4b969e113fcc3c4f933f417e1904363, type: 3}
@@ -27,7 +27,8 @@ MonoBehaviour:
     m_LocalVariables: []
   <HandPrefab>k__BackingField: {fileID: 8275672548770247764, guid: 59835dd5a4706e2479356952db87106f, type: 3}
   <Size>k__BackingField: {x: 2, y: 2}
-  <SizeInInventory>k__BackingField: {x: 155, y: 155}
+  <SizeInInventory>k__BackingField: {x: 125, y: 125}
+  <BackpackSize>k__BackingField: {x: 7, y: 4}
   references:
     version: 2
     RefIds: []

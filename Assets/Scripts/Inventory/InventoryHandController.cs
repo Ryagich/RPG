@@ -23,6 +23,8 @@ namespace Inventory
         private readonly PlayerInventory playerInventory;
         private readonly Transform playerTransform;
         private readonly GameModesController gameModesController;
+        private bool backpackResizePendingAfterHandAction;
+        private ItemConfig backpackTakenFromSlot;
 
         public InventoryHandController
             (
@@ -60,6 +62,12 @@ namespace Inventory
                                       && inventoryPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel)
                                       && playerInventory.TryTakeFromSlot(slotModel.ItemType, out var slotItemConfig))
             {
+                if (slotModel.ItemType == ItemType.Backpack)
+                {
+                    backpackResizePendingAfterHandAction = true;
+                    backpackTakenFromSlot = slotItemConfig;
+                }
+
                 playerInventory.HandSlot.Value = new SlotModel(slotItemConfig.ItemType, slotItemConfig);
                 return;
             }
@@ -131,7 +139,17 @@ namespace Inventory
 
             if (replacedItemConfig == null)
             {
+                if (slotModel.ItemType == ItemType.Backpack)
+                {
+                    RebuildInventoryAndThrowOverflowItems();
+                }
+
                 return true;
+            }
+
+            if (slotModel.ItemType == ItemType.Backpack)
+            {
+                RebuildInventoryAndThrowOverflowItems();
             }
 
             if (playerInventory.TryAddToGrid(replacedItemConfig))
@@ -222,6 +240,7 @@ namespace Inventory
         {
             playerInventory.HandSlot.Value = new SlotModel(ItemType.None, null);
             InventoryPage.Current?.ResetGrabOffset();
+            ProcessDelayedBackpackResize();
         }
 
         private static void CaptureGrabOffset()
@@ -244,6 +263,40 @@ namespace Inventory
         
         private void ThrowItem(ItemConfig itemConfig)
         {
+            SpawnItemInWorld(itemConfig);
+            ClearHand();
+        }
+
+        private void RebuildInventoryAndThrowOverflowItems()
+        {
+            var droppedItems = playerInventory.RebuildInventoryFromCurrentBackpack();
+            foreach (var droppedItem in droppedItems)
+            {
+                SpawnItemInWorld(droppedItem);
+            }
+        }
+
+        private void ProcessDelayedBackpackResize()
+        {
+            if (!backpackResizePendingAfterHandAction)
+            {
+                return;
+            }
+
+            backpackResizePendingAfterHandAction = false;
+            var currentBackpack = playerInventory.BackpackSlot.ItemConfig;
+            if (currentBackpack == backpackTakenFromSlot)
+            {
+                backpackTakenFromSlot = null;
+                return;
+            }
+
+            backpackTakenFromSlot = null;
+            RebuildInventoryAndThrowOverflowItems();
+        }
+
+        private void SpawnItemInWorld(ItemConfig itemConfig)
+        {
             var spawnPosition = playerTransform.position + playerTransform.forward * ThrowForwardOffset + Vector3.up * ThrowUpOffset;
             var itemHolder = Object.Instantiate(itemConfig.HandPrefab, spawnPosition, Quaternion.identity);
             itemHolder.CanInteractable = true;
@@ -253,8 +306,6 @@ namespace Inventory
                 var throwDirection = (playerTransform.forward + Vector3.up * 0.35f).normalized;
                 rigidbody.AddForce(throwDirection * ThrowForce, ForceMode.Impulse);
             }
-
-            ClearHand();
         }
     }
 }

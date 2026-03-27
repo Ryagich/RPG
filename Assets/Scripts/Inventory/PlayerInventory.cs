@@ -11,6 +11,8 @@ namespace Inventory
     // ReSharper disable once ClassNeverInstantiated.Global
     public class PlayerInventory : IInventory
     {
+        private readonly InventoryConfig inventoryConfig;
+        
         public ReactiveCollection<ItemInInventory> Items { get; private set; } = new();
         public ReactiveProperty<SlotModel> HandSlot { get; } = new(new SlotModel(ItemType.None, null));
 
@@ -22,7 +24,9 @@ namespace Inventory
 
         public PlayerInventory(InventoryConfig inventoryConfig)
         {
-            Tiles = new Tiles(inventoryConfig.Size.x, inventoryConfig.Size.y);
+            this.inventoryConfig = inventoryConfig;
+            var inventorySize = GetCurrentInventorySize();
+            Tiles = new Tiles(inventorySize.x, inventorySize.y);
         }
         
         public bool CanAdd(ItemConfig config, Tile tile)
@@ -193,6 +197,182 @@ namespace Inventory
             return true;
         }
         
+        public IReadOnlyList<ItemConfig> RebuildInventoryFromCurrentBackpack()
+        {
+            var newSize = GetCurrentInventorySize();
+            var currentWidth = Tiles.tiles.GetLength(0);
+            var currentHeight = Tiles.tiles.GetLength(1);
+            if (currentWidth == newSize.x && currentHeight == newSize.y)
+            {
+                return System.Array.Empty<ItemConfig>();
+            }
+
+            var transferEntries = CollectItemsInTileOrder(Tiles);
+            var rebuiltTiles = new Tiles(newSize.x, newSize.y);
+            var rebuiltItems = new List<ItemInInventory>(transferEntries.Count);
+            var notPlacedEntries = new List<TransferEntry>();
+            var droppedItems = new List<ItemConfig>();
+
+            foreach (var entry in transferEntries)
+            {
+                if (TryAddAtPosition(rebuiltTiles, rebuiltItems, entry.Config, entry.PreferredPosition))
+                {
+                    continue;
+                }
+
+                notPlacedEntries.Add(entry);
+            }
+
+            var failedSizes = new List<Vector2Int>();
+            foreach (var entry in notPlacedEntries)
+            {
+                var itemSize = entry.Config.Size;
+                if (failedSizes.Any(size => itemSize.x >= size.x && itemSize.y >= size.y))
+                {
+                    droppedItems.Add(entry.Config);
+                    continue;
+                }
+
+                if (TryAddToFirstFreePosition(rebuiltTiles, rebuiltItems, entry.Config))
+                {
+                    continue;
+                }
+
+                failedSizes.Add(itemSize);
+                droppedItems.Add(entry.Config);
+            }
+
+            Tiles = rebuiltTiles;
+            Items.Clear();
+            foreach (var item in rebuiltItems)
+            {
+                Items.Add(item);
+            }
+
+            return droppedItems;
+        }
+         private Vector2Int GetCurrentInventorySize()
+        {
+            if (BackpackSlot.ItemConfig is BackpackItemConfig backpackConfig)
+            {
+                return backpackConfig.Size;
+            }
+
+            return inventoryConfig.Size;
+        }
+
+        private static List<TransferEntry> CollectItemsInTileOrder(Tiles sourceTiles)
+        {
+            var result = new List<TransferEntry>();
+            var uniqueItems = new HashSet<ItemInInventory>();
+
+            for (var y = 0; y < sourceTiles.tiles.GetLength(1); y++)
+            for (var x = 0; x < sourceTiles.tiles.GetLength(0); x++)
+            {
+                var currentItem = sourceTiles.tiles[x, y].ItemInInventory;
+                if (currentItem == null || !uniqueItems.Add(currentItem))
+                {
+                    continue;
+                }
+
+                var topLeftPosition = GetTopLeftTilePosition(currentItem);
+                result.Add(new TransferEntry(currentItem.ItemConfig, topLeftPosition));
+            }
+
+            return result;
+        }
+
+        private static Vector2Int GetTopLeftTilePosition(ItemInInventory itemInInventory)
+        {
+            var minX = int.MaxValue;
+            var minY = int.MaxValue;
+            foreach (var tile in itemInInventory.Tiles)
+            {
+                if (tile.Index.x < minX)
+                {
+                    minX = tile.Index.x;
+                }
+
+                if (tile.Index.y < minY)
+                {
+                    minY = tile.Index.y;
+                }
+            }
+
+            return new Vector2Int(minX, minY);
+        }
+
+        private static bool TryAddAtPosition(Tiles targetTiles, List<ItemInInventory> targetItems, ItemConfig config, Vector2Int position)
+        {
+            if (!targetTiles.TryGetTile(position.x, position.y, out var tile))
+            {
+                return false;
+            }
+
+            var itemTiles = targetTiles.GetTilesAround(tile.Index, config.Size);
+            if (itemTiles.Count != config.Size.x * config.Size.y || itemTiles.Any(currentTile => !currentTile.IsFree))
+            {
+                return false;
+            }
+
+            AddItemToCollections(targetItems, config, itemTiles);
+            return true;
+        }
+
+        private static bool TryAddToFirstFreePosition(Tiles targetTiles, List<ItemInInventory> targetItems, ItemConfig config)
+        {
+            for (var y = 0; y < targetTiles.tiles.GetLength(1); y++)
+            for (var x = 0; x < targetTiles.tiles.GetLength(0); x++)
+            {
+                if (!targetTiles.TryGetTile(x, y, out var tile))
+                {
+                    continue;
+                }
+
+                var itemTiles = targetTiles.GetTilesAround(tile.Index, config.Size);
+                if (itemTiles.Count != config.Size.x * config.Size.y || itemTiles.Any(currentTile => !currentTile.IsFree))
+                {
+                    continue;
+                }
+
+                AddItemToCollections(targetItems, config, itemTiles);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static void AddItemToCollections(List<ItemInInventory> targetItems, ItemConfig config, List<Tile> itemTiles)
+        {
+            var averagePosition = itemTiles
+                                 .Select(tile => new Vector3(tile.Index.x, tile.Index.y, 0))
+                                 .Aggregate(Vector3.zero, (current, position) => current + position) / itemTiles.Count;
+
+            var itemInInventory = new ItemInInventory(config, Matrix4x4.Translate(averagePosition))
+                                  {
+                                      Tiles = itemTiles
+                                  };
+
+            foreach (var tile in itemTiles)
+            {
+                tile.SetItem(itemInInventory);
+            }
+
+            targetItems.Add(itemInInventory);
+        }
+
+        private readonly struct TransferEntry
+        {
+            public readonly ItemConfig Config;
+            public readonly Vector2Int PreferredPosition;
+
+            public TransferEntry(ItemConfig config, Vector2Int preferredPosition)
+            {
+                Config = config;
+                PreferredPosition = preferredPosition;
+            }
+        }
+
         private void AddItem(ItemConfig config, List<Tile> itemTiles)
         {
             var averagePosition = itemTiles
