@@ -55,3 +55,4 @@ MonoBehaviour:
   <UIConfig>k__BackingField: {fileID: 11400000, guid: 9a8de918ae5a2374e9c6b6f80731575a, type: 2}
   <LocalizationConfig>k__BackingField: {fileID: 11400000, guid: 218bbd0d351ca0241a663a64b9ff391e, type: 2}
   <InteractableConfig>k__BackingField: {fileID: 11400000, guid: f195d5bf3de756241b499edc07dd19bb, type: 2}
+  <InventoryConfig>k__BackingField: {fileID: 11400000, guid: c944c7194d92c2a4b809de1b4768183a, type: 2}

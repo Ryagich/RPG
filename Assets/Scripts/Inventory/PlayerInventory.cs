@@ -20,9 +20,9 @@ namespace Inventory
         public SlotModel BodySlot = new(ItemType.Body);
         public SlotModel BackpackSlot = new(ItemType.Backpack);
 
-        public PlayerInventory()
+        public PlayerInventory(InventoryConfig inventoryConfig)
         {
-            Tiles = new Tiles(7, 2);
+            Tiles = new Tiles(inventoryConfig.Size.x, inventoryConfig.Size.y);
         }
         
         public bool CanAdd(ItemConfig config, Tile tile)

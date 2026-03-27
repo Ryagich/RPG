@@ -2,6 +2,7 @@
 using Gravity;
 using Input;
 using Interactable;
+using Inventory;
 using Localization;
 using Movement;
 using UI.Configs;
@@ -20,6 +21,7 @@ namespace Container.Project
         [field: SerializeField] public UIConfig UIConfig { get; private set; }
         [field: SerializeField] public LocalizationConfig LocalizationConfig { get; private set; }
         [field: SerializeField] public InteractableConfig InteractableConfig { get; private set; }
+        [field: SerializeField] public InventoryConfig InventoryConfig { get; private set; }
         
         protected override void Configure(IContainerBuilder builder)
         {
@@ -31,6 +33,7 @@ namespace Container.Project
             builder.RegisterInstance(UIConfig).AsSelf();
             builder.RegisterInstance(LocalizationConfig).AsSelf();
             builder.RegisterInstance(InteractableConfig).AsSelf();
+            builder.RegisterInstance(InventoryConfig).AsSelf();
 
             builder.RegisterEntryPoint<Bootloader>().AsSelf();
         }
