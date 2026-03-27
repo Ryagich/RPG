@@ -255,7 +255,7 @@ namespace Inventory
         {
             if (BackpackSlot.ItemConfig is BackpackItemConfig backpackConfig)
             {
-                return backpackConfig.Size;
+                return backpackConfig.BackpackSize;
             }
 
             return inventoryConfig.Size;
@@ -403,6 +403,10 @@ namespace Inventory
                 if (slot.ItemType == config.ItemType && slot.ItemConfig == null)
                 {
                     slot.ItemConfig = config;
+                    if (slot.ItemType == ItemType.Backpack)
+                    {
+                        RebuildInventoryFromCurrentBackpack();
+                    }
                     return true;
                 }
             }
