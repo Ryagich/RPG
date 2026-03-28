@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GameModes;
+using Inventory.Inventories;
 using Inventory.Item;
 using Inventory.Slot;
 using MessagePipe;

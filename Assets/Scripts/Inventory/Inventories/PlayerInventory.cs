@@ -6,7 +6,7 @@ using Inventory.Slot;
 using UniRx;
 using UnityEngine;
 
-namespace Inventory
+namespace Inventory.Inventories
 {
     // ReSharper disable once ClassNeverInstantiated.Global
     public class PlayerInventory : IInventory

@@ -14,6 +14,7 @@ namespace UI.Configs
         [field: SerializeField] public InventoryTilePointerHandler Tile { get; private set; }
         [field: SerializeField] public RectTransform RightSection { get; private set; }
         [field: SerializeField] public SlotsViewContainer CenterSection { get; private set; }
+        [field: SerializeField] public RectTransform LeftSection { get; private set; }
         [field: SerializeField] public InventoryView InventoryView { get; private set; }
         [field: SerializeField] public InfoAboutInventory InfoAboutInventory { get; private set; }
         [field: SerializeField] public InfoAboutPlayer InfoAboutPlayer { get; private set; }

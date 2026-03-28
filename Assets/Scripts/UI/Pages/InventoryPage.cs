@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Inventory;
 using Inventory.Grid;
+using Inventory.Inventories;
 using Inventory.Slot;
 using TMPro;
 using UI.Configs;

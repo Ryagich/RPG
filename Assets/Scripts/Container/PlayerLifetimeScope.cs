@@ -1,6 +1,7 @@
 ﻿using CameraScripts;
 using Interactable;
 using Inventory;
+using Inventory.Inventories;
 using MessagePipe;
 using Messages;
 using Movement;

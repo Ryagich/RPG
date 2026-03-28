@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Inventory;
+using Inventory.Inventories;
 using Inventory.Item;
 using MessagePipe;
 using Messages;

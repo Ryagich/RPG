@@ -1,4 +1,6 @@
 ﻿using Interactable;
+using Inventory;
+using Inventory.Inventories;
 using VContainer;
 using VContainer.Unity;
 
@@ -12,6 +14,7 @@ namespace Container
             interactable.InteractionMode = InteractionMode.Manual;
             
             builder.RegisterInstance(interactable);
+            builder.RegisterEntryPoint<ChestInventory>().As<IInventory>().AsSelf();
         }
     }
 }

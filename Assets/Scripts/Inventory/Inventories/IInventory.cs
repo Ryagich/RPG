@@ -1,9 +1,9 @@
-﻿using Inventory.Item;
-using Inventory.Grid;
+﻿using Inventory.Grid;
+using Inventory.Item;
 using UniRx;
 using UnityEngine;
 
-namespace Inventory
+namespace Inventory.Inventories
 {
     public interface IInventory
     {

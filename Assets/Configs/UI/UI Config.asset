@@ -17,6 +17,7 @@ MonoBehaviour:
   <Tile>k__BackingField: {fileID: 3521090342024453214, guid: 2765049fb2cddd54db80c1519b88a3fd, type: 3}
   <RightSection>k__BackingField: {fileID: 2905255636178868728, guid: de5de57fdf6539143b7b9f46d772ccc8, type: 3}
   <CenterSection>k__BackingField: {fileID: 8295545419508832720, guid: 1e1551f3122f49b489a1227175beda0a, type: 3}
+  <LeftSection>k__BackingField: {fileID: 4744890346096254285, guid: 98f1ad6627c19ac43a4f1b5d13c41cee, type: 3}
   <InventoryView>k__BackingField: {fileID: 2695229041853354339, guid: d51f424532a90824190ae26cb62a8f7f, type: 3}
   <InfoAboutInventory>k__BackingField: {fileID: 4248279467150377410, guid: 2792d016ebedd1c489e5f08ff6be9004, type: 3}
   <InfoAboutPlayer>k__BackingField: {fileID: 1558630750454747041, guid: a13a6008c3052644ea080a95629a3a2d, type: 3}
