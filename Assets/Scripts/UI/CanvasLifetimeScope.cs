@@ -16,6 +16,7 @@ namespace UI
             builder.Register<MainPage>(Lifetime.Singleton);
            
             builder.RegisterEntryPoint<InventoryPage>().AsSelf();
+            builder.RegisterEntryPoint<LootingPage>().AsSelf();
             builder.RegisterEntryPoint<PagesController>();
         }
     }

@@ -11,18 +11,21 @@ namespace UI.Pages
     {
         private readonly MainPage mainPage;
         private readonly InventoryPage inventoryPage;
+        private readonly LootingPage lootingPage;
 
         private BasePage currentPage;
         
         public PagesController 
             (
                 MainPage mainPage,
-                InventoryPage inventoryPage, 
+                InventoryPage inventoryPage,
+                LootingPage lootingPage,
                 ISubscriber<GameModeChangedMessage> gameModeChangeSubscriber
             )
         {
             this.mainPage = mainPage;
             this.inventoryPage = inventoryPage;
+            this.lootingPage = lootingPage;
 
             gameModeChangeSubscriber.Subscribe(OnGameModeChanged);
         }
@@ -43,7 +46,10 @@ namespace UI.Pages
                     break;
                 case GameMode.Inventory:
                     currentPage = inventoryPage;
-                    break; 
+                    break;
+                case GameMode.Looting:
+                    currentPage = lootingPage;
+                    break;
                 default:
                     currentPage = mainPage;
                     break;
@@ -65,5 +71,6 @@ namespace UI.Pages
     {
         MainGame,
         Inventory,
+        Looting,
     }
 }

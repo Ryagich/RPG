@@ -5,6 +5,7 @@ using Messages;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using Inventory.Looting;
 
 namespace Container.Game
 {
@@ -38,6 +39,7 @@ namespace Container.Game
                                           {
                                               playerScope = CreateChildFromPrefab(PlayerPrefab, _ => { });
                                           });
+            builder.Register<LootingContext>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<GameModesController>().AsSelf();
         }
     }

@@ -61,5 +61,6 @@ namespace GameModes
     {
         Game,
         Inventory,
+        Looting,
     }
 }

@@ -1,5 +1,5 @@
-﻿using Interactable;
-using Inventory;
+﻿using Container.Chest;
+using Interactable;
 using Inventory.Inventories;
 using VContainer;
 using VContainer.Unity;
@@ -15,6 +15,7 @@ namespace Container
             
             builder.RegisterInstance(interactable);
             builder.RegisterEntryPoint<ChestInventory>().As<IInventory>().AsSelf();
+            builder.RegisterEntryPoint<ChestInteractableLogic>().AsSelf();
         }
     }
 }

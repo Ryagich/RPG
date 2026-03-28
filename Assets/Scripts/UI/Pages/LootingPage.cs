@@ -1,60 +1,66 @@
 ﻿using System.Collections.Generic;
-using Inventory;
+using System.Linq;
 using Inventory.Grid;
 using Inventory.Inventories;
+using Inventory.Looting;
 using Inventory.Slot;
 using TMPro;
 using UI.Configs;
 using UniRx;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
-using UnityEngine.InputSystem;
 using Inventory.Item;
+using UI.Inventory;
 
 namespace UI.Pages
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class InventoryPage : BasePage, ITickable, IInventoryInteractionPage
+    public class LootingPage : BasePage, ITickable, IInventoryInteractionPage
     {
-        public override PageType Type { get; } = PageType.Inventory;
-        public static InventoryPage Current { get; private set; }
+        public override PageType Type { get; } = PageType.Looting;
+        public static LootingPage Current { get; private set; }
         public static IInventoryInteractionPage CurrentInteractionPage => Current;
-        
+
         private readonly UIConfig uiConfig;
         private readonly PlayerInventory playerInventory;
+        private readonly LootingContext lootingContext;
         private readonly Canvas canvas;
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
 
         private RectTransform contentRect = null!;
         private RectTransform rightRect = null!;
+        private RectTransform leftRect = null!;
         private SlotsViewContainer slotsViewContainer = null!;
-        private Inventory.InventoryView inventoryView = null!;
+        private Inventory.InventoryView playerInventoryView = null!;
+        private Inventory.InventoryView targetInventoryView = null!;
         private RectTransform handSlotRect = null!;
         private readonly CompositeDisposable redrawDisposables = new();
-        private ScrollRect inventoryScrollRect = null!;
+        private ScrollRect playerInventoryScrollRect = null!;
         private readonly List<RectTransform> itemRects = new();
         private readonly List<RectTransform> itemGrabRects = new();
+        private readonly Dictionary<IInventory, Inventory.InventoryView> inventoryViews = new();
+        private readonly Dictionary<IInventory, Vector2Int> lastGridSizes = new();
         private Vector2 handGrabOffset;
 
         private ItemConfig lastHelmItemConfig;
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastBackpackItemConfig;
-        private Vector2Int lastGridSize = new(-1, -1);
-        
-        public InventoryPage
-            (
-                UIConfig uiConfig,
-                Canvas canvas,
-                PlayerInventory playerInventory,
-                IObjectResolver resolver
-            )
+
+        public LootingPage(
+            UIConfig uiConfig,
+            Canvas canvas,
+            PlayerInventory playerInventory,
+            LootingContext lootingContext,
+            IObjectResolver resolver)
         {
             this.uiConfig = uiConfig;
             this.canvas = canvas;
             this.playerInventory = playerInventory;
+            this.lootingContext = lootingContext;
             this.resolver = resolver;
 
             canvasRect = canvas.GetComponent<RectTransform>();
@@ -62,27 +68,39 @@ namespace UI.Pages
 
         public override void Draw()
         {
+            var targetInventory = lootingContext.CurrentTargetInventory;
+            if (targetInventory == null)
+            {
+                return;
+            }
+
             Current = this;
             contentRect = resolver.Instantiate(uiConfig.ContentPref, canvasRect);
             contentRect.name = $"{uiConfig.ContentPref.name} | {Type}";
 
-            rightRect = resolver.Instantiate(uiConfig.RightSection, contentRect);
+            leftRect = resolver.Instantiate(uiConfig.LeftSection, contentRect);
             slotsViewContainer = resolver.Instantiate(uiConfig.CenterSection, contentRect);
-            
-            var infoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
-            var infoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
-            inventoryView = resolver.Instantiate(uiConfig.InventoryView, rightRect);
-            inventoryScrollRect = inventoryView.GetComponent<ScrollRect>();
-            
-            DrawTiles();
+            rightRect = resolver.Instantiate(uiConfig.RightSection, contentRect);
 
-            playerInventory.Items
-                           .ObserveCountChanged()
-                           .Subscribe(_ => ReDraw())
-                           .AddTo(redrawDisposables);
-            playerInventory.HandSlot
-                           .Subscribe(_ => ReDraw())
-                           .AddTo(redrawDisposables);
+            resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
+            resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
+            playerInventoryView = resolver.Instantiate(uiConfig.InventoryView, rightRect);
+            playerInventoryScrollRect = playerInventoryView.GetComponent<ScrollRect>();
+
+            resolver.Instantiate(uiConfig.InfoAboutPlayer, leftRect);
+            resolver.Instantiate(uiConfig.InfoAboutInventory, leftRect);
+            targetInventoryView = resolver.Instantiate(uiConfig.InventoryView, leftRect);
+
+            inventoryViews.Clear();
+            inventoryViews[playerInventory] = playerInventoryView;
+            inventoryViews[targetInventory] = targetInventoryView;
+
+            DrawTiles(playerInventory);
+            DrawTiles(targetInventory);
+
+            playerInventory.Items.ObserveCountChanged().Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
+            targetInventory.Items.ObserveCountChanged().Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
+            playerInventory.HandSlot.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
 
             ReDraw();
         }
@@ -93,7 +111,8 @@ namespace UI.Pages
             {
                 UpdateHandSlotPosition();
             }
-            if (HaveSlotsChanged())
+
+            if (HaveSlotsChanged() || HaveGridChanged())
             {
                 ReDraw();
             }
@@ -101,7 +120,7 @@ namespace UI.Pages
 
         public void ReDraw()
         {
-            if (!inventoryView)
+            if (!playerInventoryView)
             {
                 return;
             }
@@ -110,13 +129,22 @@ namespace UI.Pages
             UpdateInventoryScrollState();
             itemRects.Clear();
             itemGrabRects.Clear();
-            ClearChildren(inventoryView.ContentForItems);
-            DrawItems(inventoryView);
+
+            foreach (var view in inventoryViews.Values)
+            {
+                ClearChildren(view.ContentForItems);
+            }
+
+            foreach (var pair in inventoryViews)
+            {
+                DrawItems(pair.Key, pair.Value);
+            }
+
             DrawSlotItems();
             DrawHandSlot();
             CacheSlotItems();
         }
-        
+
         public bool TryCaptureGrabOffset(Vector2 screenPoint)
         {
             var eventCamera = GetEventCamera();
@@ -157,26 +185,77 @@ namespace UI.Pages
 
             return false;
         }
-        
+
         public void ResetGrabOffset()
         {
             handGrabOffset = Vector2.zero;
         }
-        
+
+        public bool TryGetHoveredSlot(Vector2 screenPoint, out SlotModel slotModel)
+        {
+            slotModel = null;
+            if (!slotsViewContainer)
+            {
+                return false;
+            }
+
+            var handItemType = playerInventory.HandSlot.Value?.ItemConfig?.ItemType;
+            if (TryGetSlotUnderPointer(slotsViewContainer.HeadSlot, playerInventory.HelmSlot, screenPoint, handItemType, out slotModel))
+            {
+                return true;
+            }
+
+            if (TryGetSlotUnderPointer(slotsViewContainer.BodySlot, playerInventory.BodySlot, screenPoint, handItemType, out slotModel))
+            {
+                return true;
+            }
+
+            return TryGetSlotUnderPointer(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot, screenPoint, handItemType, out slotModel);
+        }
+
         public bool TryGetPlacementTile(Vector2 screenPoint, IInventory inventory, out Tile tile)
         {
             tile = null;
-            return inventory == playerInventory && TryGetPlacementTile(screenPoint, out tile);
+            if (inventory == null || !TryGetPlacementCell(screenPoint, inventory, out var placementCell))
+            {
+                return false;
+            }
+
+            var tiles = GetTiles(inventory);
+            return tiles != null && tiles.TryGetTile(placementCell.x, placementCell.y, out tile);
+        }
+
+        public bool IsInPlayerSections(Vector2 screenPoint)
+        {
+            var eventCamera = GetEventCamera();
+            if (rightRect && RectTransformUtility.RectangleContainsScreenPoint(rightRect, screenPoint, eventCamera))
+            {
+                return true;
+            }
+
+            var centerRect = slotsViewContainer ? slotsViewContainer.GetComponent<RectTransform>() : null;
+            return centerRect && RectTransformUtility.RectangleContainsScreenPoint(centerRect, screenPoint, eventCamera);
+        }
+
+        public bool IsInTargetSection(Vector2 screenPoint)
+        {
+            var eventCamera = GetEventCamera();
+            return leftRect && RectTransformUtility.RectangleContainsScreenPoint(leftRect, screenPoint, eventCamera);
+        }
+
+        public IInventory GetTargetInventory()
+        {
+            return lootingContext.CurrentTargetInventory;
         }
 
         private void UpdateInventoryScrollState()
         {
-            if (!inventoryScrollRect)
+            if (!playerInventoryScrollRect)
             {
                 return;
             }
 
-            inventoryScrollRect.enabled = playerInventory.HandSlot.Value?.ItemConfig == null;
+            playerInventoryScrollRect.enabled = playerInventory.HandSlot.Value?.ItemConfig == null;
         }
 
         private void DrawHandSlot()
@@ -229,24 +308,14 @@ namespace UI.Pages
             {
                 return;
             }
-            
+
             if (TryGetSnappedHandPosition(pointerPosition, eventCamera, dragParentRect, out var snappedPosition))
             {
                 handSlotRect.anchoredPosition = snappedPosition;
                 return;
             }
-            
-            handSlotRect.anchoredPosition = localPoint - handGrabOffset;
-        }
-        public bool TryGetPlacementTile(Vector2 screenPoint, out Tile tile)
-        {
-            tile = null;
-            if (!TryGetPlacementCell(screenPoint, out var placementCell))
-            {
-                return false;
-            }
 
-            return playerInventory.Tiles.TryGetTile(placementCell.x, placementCell.y, out tile);
+            handSlotRect.anchoredPosition = localPoint - handGrabOffset;
         }
 
         private bool TryGetSnappedHandPosition(Vector2 screenPoint, Camera eventCamera, RectTransform dragParentRect, out Vector2 snappedPosition)
@@ -257,95 +326,21 @@ namespace UI.Pages
                 snappedPosition = slotSnappedPosition;
                 return true;
             }
-            if (!TryGetSnappedPositionInGridLocal(screenPoint, out var snappedLocalPosition))
+
+            if (!InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out _)
+             || !TryGetSnappedPositionInInventoryGridLocal(screenPoint, hoveredInventory, out var snappedLocalPosition))
             {
                 return false;
             }
 
-            var snappedWorldPosition = inventoryView.ContentForTiles.TransformPoint(snappedLocalPosition);
+            if (!inventoryViews.TryGetValue(hoveredInventory, out var hoveredView))
+            {
+                return false;
+            }
+
+            var snappedWorldPosition = hoveredView.ContentForTiles.TransformPoint(snappedLocalPosition);
             var snappedScreenPosition = RectTransformUtility.WorldToScreenPoint(eventCamera, snappedWorldPosition);
             return RectTransformUtility.ScreenPointToLocalPointInRectangle(dragParentRect, snappedScreenPosition, eventCamera, out snappedPosition);
-        }
-        public bool TryGetHoveredSlot(Vector2 screenPoint, out SlotModel slotModel)
-        {
-            slotModel = null;
-            if (!slotsViewContainer)
-            {
-                return false;
-            }
-
-            var handItemType = playerInventory.HandSlot.Value?.ItemConfig?.ItemType;
-            if (TryGetSlotUnderPointer(slotsViewContainer.HeadSlot, playerInventory.HelmSlot, screenPoint, handItemType, out slotModel))
-            {
-                return true;
-            }
-
-            if (TryGetSlotUnderPointer(slotsViewContainer.BodySlot, playerInventory.BodySlot, screenPoint, handItemType, out slotModel))
-            {
-                return true;
-            }
-
-            return TryGetSlotUnderPointer(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot, screenPoint, handItemType, out slotModel);
-        }
-        
-        public bool IsInPlayerSections(Vector2 screenPoint)
-        {
-            var eventCamera = GetEventCamera();
-            if (rightRect && RectTransformUtility.RectangleContainsScreenPoint(rightRect, screenPoint, eventCamera))
-            {
-                return true;
-            }
-
-            var centerRect = slotsViewContainer ? slotsViewContainer.GetComponent<RectTransform>() : null;
-            return centerRect && RectTransformUtility.RectangleContainsScreenPoint(centerRect, screenPoint, eventCamera);
-        }
-
-        public bool IsInRightOrCenterSection(Vector2 screenPoint)
-        {
-            return IsInPlayerSections(screenPoint);
-        }
-        
-        private void DrawSlotItems()
-        {
-            DrawSlotItem(slotsViewContainer.HeadSlot, playerInventory.HelmSlot);
-            DrawSlotItem(slotsViewContainer.BodySlot, playerInventory.BodySlot);
-            DrawSlotItem(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot);
-        }
-
-        private void DrawSlotItem(SlotView slotView, SlotModel slotModel)
-        {
-            if (!slotView)
-            {
-                return;
-            }
-
-            var slotRect = slotView.GetComponent<RectTransform>();
-            if (!slotRect)
-            {
-                return;
-            }
-
-            ClearChildren(slotRect);
-            if (slotModel?.ItemConfig == null)
-            {
-                return;
-            }
-
-            var itemImageObject = new GameObject($"Slot Item [{slotModel.ItemConfig.Id}]", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            var itemImageRect = itemImageObject.GetComponent<RectTransform>();
-            itemImageRect.SetParent(slotRect, false);
-            itemImageRect.anchorMin = new Vector2(0.5f, 0.5f);
-            itemImageRect.anchorMax = new Vector2(0.5f, 0.5f);
-            itemImageRect.pivot = new Vector2(0.5f, 0.5f);
-            itemImageRect.anchoredPosition = Vector2.zero;
-            itemImageRect.sizeDelta = slotModel.ItemConfig.SizeInInventory;
-            itemRects.Add(itemImageRect);
-            itemGrabRects.Add(itemImageRect);
-
-            var itemImage = itemImageObject.GetComponent<Image>();
-            itemImage.sprite = slotModel.ItemConfig.Icon;
-            itemImage.preserveAspect = true;
-            itemImage.raycastTarget = false;
         }
 
         private bool TryGetSnappedPositionInSlot(Vector2 screenPoint, Camera eventCamera, RectTransform dragParentRect, out Vector2 snappedPosition)
@@ -366,7 +361,7 @@ namespace UI.Pages
             {
                 return false;
             }
-            
+
             var slotWorldPosition = slotRect.TransformPoint(slotRect.rect.center);
             var slotScreenPosition = RectTransformUtility.WorldToScreenPoint(eventCamera, slotWorldPosition);
             return RectTransformUtility.ScreenPointToLocalPointInRectangle(dragParentRect, slotScreenPosition, eventCamera, out snappedPosition);
@@ -423,8 +418,28 @@ namespace UI.Pages
         private bool HaveSlotsChanged()
         {
             return lastHelmItemConfig != playerInventory.HelmSlot.ItemConfig
-                || lastBodyItemConfig != playerInventory.BodySlot.ItemConfig
-                || lastBackpackItemConfig != playerInventory.BackpackSlot.ItemConfig;
+                   || lastBodyItemConfig != playerInventory.BodySlot.ItemConfig
+                   || lastBackpackItemConfig != playerInventory.BackpackSlot.ItemConfig;
+        }
+
+        private bool HaveGridChanged()
+        {
+            foreach (var pair in inventoryViews)
+            {
+                var tiles = GetTiles(pair.Key);
+                if (tiles == null)
+                {
+                    continue;
+                }
+
+                var currentSize = new Vector2Int(tiles.tiles.GetLength(0), tiles.tiles.GetLength(1));
+                if (!lastGridSizes.TryGetValue(pair.Key, out var lastSize) || currentSize != lastSize)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void CacheSlotItems()
@@ -433,11 +448,11 @@ namespace UI.Pages
             lastBodyItemConfig = playerInventory.BodySlot.ItemConfig;
             lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;
         }
-        
-        private bool TryGetPlacementCell(Vector2 screenPoint, out Vector2Int placementCell)
+
+        private bool TryGetPlacementCell(Vector2 screenPoint, IInventory inventory, out Vector2Int placementCell)
         {
             placementCell = default;
-            if (!TryGetCursorCellAndLayout(screenPoint, out var cursorCell, out var gridLayoutGroup))
+            if (!TryGetCursorCellAndLayout(screenPoint, inventory, out var cursorCell, out var gridLayoutGroup))
             {
                 return false;
             }
@@ -465,55 +480,56 @@ namespace UI.Pages
             return true;
         }
 
-        private bool TryGetSnappedPositionInGridLocal(Vector2 screenPoint, out Vector3 snappedLocalPosition)
+        private bool TryGetSnappedPositionInInventoryGridLocal(Vector2 screenPoint, IInventory inventory, out Vector3 snappedLocalPosition)
         {
             snappedLocalPosition = Vector3.zero;
-            if (!TryGetPlacementCell(screenPoint, out var placementCell))
+            if (!TryGetPlacementCell(screenPoint, inventory, out var placementCell) || !inventoryViews.TryGetValue(inventory, out var view))
             {
                 return false;
             }
 
             var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
-            var gridLayoutGroup = inventoryView.ContentForTiles.GetComponent<GridLayoutGroup>();
-            if (handItemConfig == null || gridLayoutGroup == null)
+            var gridLayoutGroup = view.ContentForTiles.GetComponent<GridLayoutGroup>();
+            var tiles = GetTiles(inventory);
+            if (handItemConfig == null || gridLayoutGroup == null || tiles == null)
             {
                 return false;
             }
-            
-            var gridWidth = playerInventory.Tiles.tiles.GetLength(0);
-            var gridHeight = playerInventory.Tiles.tiles.GetLength(1);
+
+            var gridWidth = tiles.tiles.GetLength(0);
+            var gridHeight = tiles.tiles.GetLength(1);
             var isFullyInsideGrid =
                 placementCell.x >= 0
-             && placementCell.y >= 0
-             && placementCell.x + handItemConfig.Size.x <= gridWidth
-             && placementCell.y + handItemConfig.Size.y <= gridHeight;
+                && placementCell.y >= 0
+                && placementCell.x + handItemConfig.Size.x <= gridWidth
+                && placementCell.y + handItemConfig.Size.y <= gridHeight;
             if (!isFullyInsideGrid)
             {
                 return false;
             }
-            
+
             var snappedAnchoredPosition = new Vector2(
                 gridLayoutGroup.padding.left
                 + (placementCell.x + handItemConfig.Size.x * 0.5f) * gridLayoutGroup.cellSize.x
                 + (placementCell.x + (handItemConfig.Size.x - 1) * 0.5f) * gridLayoutGroup.spacing.x,
                 -(gridLayoutGroup.padding.top
-                + (placementCell.y + handItemConfig.Size.y * 0.5f) * gridLayoutGroup.cellSize.y
-                + (placementCell.y + (handItemConfig.Size.y - 1) * 0.5f) * gridLayoutGroup.spacing.y));
+                  + (placementCell.y + handItemConfig.Size.y * 0.5f) * gridLayoutGroup.cellSize.y
+                  + (placementCell.y + (handItemConfig.Size.y - 1) * 0.5f) * gridLayoutGroup.spacing.y));
 
             snappedLocalPosition = new Vector3(snappedAnchoredPosition.x, snappedAnchoredPosition.y, 0f);
             return true;
         }
 
-        private bool TryGetCursorCellAndLayout(Vector2 screenPoint, out Vector2Int cursorCell, out GridLayoutGroup gridLayoutGroup)
+        private bool TryGetCursorCellAndLayout(Vector2 screenPoint, IInventory inventory, out Vector2Int cursorCell, out GridLayoutGroup gridLayoutGroup)
         {
             cursorCell = default;
             gridLayoutGroup = null;
-            if (!inventoryView)
+            if (!inventoryViews.TryGetValue(inventory, out var view))
             {
                 return false;
             }
 
-            var gridRect = inventoryView.ContentForTiles;
+            var gridRect = view.ContentForTiles;
             if (!gridRect)
             {
                 return false;
@@ -552,6 +568,49 @@ namespace UI.Pages
             return true;
         }
 
+        private void DrawSlotItems()
+        {
+            DrawSlotItem(slotsViewContainer.HeadSlot, playerInventory.HelmSlot);
+            DrawSlotItem(slotsViewContainer.BodySlot, playerInventory.BodySlot);
+            DrawSlotItem(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot);
+        }
+
+        private void DrawSlotItem(SlotView slotView, SlotModel slotModel)
+        {
+            if (!slotView)
+            {
+                return;
+            }
+
+            var slotRect = slotView.GetComponent<RectTransform>();
+            if (!slotRect)
+            {
+                return;
+            }
+
+            ClearChildren(slotRect);
+            if (slotModel?.ItemConfig == null)
+            {
+                return;
+            }
+
+            var itemImageObject = new GameObject($"Slot Item [{slotModel.ItemConfig.Id}]", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            var itemImageRect = itemImageObject.GetComponent<RectTransform>();
+            itemImageRect.SetParent(slotRect, false);
+            itemImageRect.anchorMin = new Vector2(0.5f, 0.5f);
+            itemImageRect.anchorMax = new Vector2(0.5f, 0.5f);
+            itemImageRect.pivot = new Vector2(0.5f, 0.5f);
+            itemImageRect.anchoredPosition = Vector2.zero;
+            itemImageRect.sizeDelta = slotModel.ItemConfig.SizeInInventory;
+            itemRects.Add(itemImageRect);
+            itemGrabRects.Add(itemImageRect);
+
+            var itemImage = itemImageObject.GetComponent<Image>();
+            itemImage.sprite = slotModel.ItemConfig.Icon;
+            itemImage.preserveAspect = true;
+            itemImage.raycastTarget = false;
+        }
+
         private static void ClearChildren(Transform parent)
         {
             var children = new List<GameObject>();
@@ -565,51 +624,50 @@ namespace UI.Pages
                 Object.Destroy(child);
             }
         }
-        
+
         private static Vector2 GetItemGrabSize(GridLayoutGroup gridLayoutGroup, Vector2Int itemSize)
         {
             return new Vector2(
-                               itemSize.x * gridLayoutGroup.cellSize.x + (itemSize.x - 1) * gridLayoutGroup.spacing.x,
-                               itemSize.y * gridLayoutGroup.cellSize.y + (itemSize.y - 1) * gridLayoutGroup.spacing.y);
+                itemSize.x * gridLayoutGroup.cellSize.x + (itemSize.x - 1) * gridLayoutGroup.spacing.x,
+                itemSize.y * gridLayoutGroup.cellSize.y + (itemSize.y - 1) * gridLayoutGroup.spacing.y);
         }
 
-        private void DrawItems(Inventory.InventoryView inventory)
+        private void DrawItems(IInventory inventory, Inventory.InventoryView inventoryView)
         {
-            var gridLayoutGroup = inventory.ContentForTiles.GetComponent<GridLayoutGroup>();
+            var gridLayoutGroup = inventoryView.ContentForTiles.GetComponent<GridLayoutGroup>();
             if (gridLayoutGroup == null)
             {
                 return;
             }
 
-            foreach (var item in playerInventory.Items)
+            foreach (var item in inventory.Items)
             {
-                var itemImageObject = new GameObject($"Item [{item.ItemConfig.Id}]", typeof(RectTransform),
-                                                     typeof(CanvasRenderer), typeof(Image));
+                var itemImageObject = new GameObject($"Item [{item.ItemConfig.Id}]", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
                 var itemImageRect = itemImageObject.GetComponent<RectTransform>();
-                itemImageRect.SetParent(inventory.ContentForItems, false);
+                itemImageRect.SetParent(inventoryView.ContentForItems, false);
                 itemImageRect.anchorMin = new Vector2(0, 1);
                 itemImageRect.anchorMax = new Vector2(0, 1);
                 itemImageRect.pivot = new Vector2(0.5f, 0.5f);
                 itemImageRect.sizeDelta = item.ItemConfig.SizeInInventory;
                 itemRects.Add(itemImageRect);
-                
+
                 var itemGrabRectObject = new GameObject($"Item Grab [{item.ItemConfig.Id}]", typeof(RectTransform));
                 var itemGrabRect = itemGrabRectObject.GetComponent<RectTransform>();
-                itemGrabRect.SetParent(inventory.ContentForItems, false);
+                itemGrabRect.SetParent(inventoryView.ContentForItems, false);
                 itemGrabRect.anchorMin = new Vector2(0, 1);
                 itemGrabRect.anchorMax = new Vector2(0, 1);
                 itemGrabRect.pivot = new Vector2(0.5f, 0.5f);
                 itemGrabRect.sizeDelta = GetItemGrabSize(gridLayoutGroup, item.ItemConfig.Size);
                 itemGrabRects.Add(itemGrabRect);
-                
+
                 var itemCenterPosition = item.Position.GetColumn(3);
                 var itemAnchoredPosition = new Vector2(
-                                                       gridLayoutGroup.padding.left
-                                                     + (itemCenterPosition.x + 0.5f) * gridLayoutGroup.cellSize.x
-                                                     + itemCenterPosition.x * gridLayoutGroup.spacing.x,
-                                                       -(gridLayoutGroup.padding.top
-                                                       + (itemCenterPosition.y + 0.5f) * gridLayoutGroup.cellSize.y
-                                                       + itemCenterPosition.y * gridLayoutGroup.spacing.y));
+                    gridLayoutGroup.padding.left
+                    + (itemCenterPosition.x + 0.5f) * gridLayoutGroup.cellSize.x
+                    + itemCenterPosition.x * gridLayoutGroup.spacing.x,
+                    -(gridLayoutGroup.padding.top
+                      + (itemCenterPosition.y + 0.5f) * gridLayoutGroup.cellSize.y
+                      + itemCenterPosition.y * gridLayoutGroup.spacing.y));
 
                 itemImageRect.anchoredPosition = itemAnchoredPosition;
                 itemGrabRect.anchoredPosition = itemAnchoredPosition;
@@ -620,48 +678,73 @@ namespace UI.Pages
                 itemImage.raycastTarget = false;
             }
         }
-        
-        private void DrawTiles()
+
+        private void DrawTiles(IInventory inventory)
         {
-            if (!inventoryView)
+            if (!inventoryViews.TryGetValue(inventory, out var view))
             {
                 return;
             }
 
-            ClearChildren(inventoryView.ContentForTiles);
-            var gridWidth = playerInventory.Tiles.tiles.GetLength(0);
-            var gridHeight = playerInventory.Tiles.tiles.GetLength(1);
+            var tiles = GetTiles(inventory);
+            if (tiles == null)
+            {
+                return;
+            }
+
+            ClearChildren(view.ContentForTiles);
+            var gridWidth = tiles.tiles.GetLength(0);
+            var gridHeight = tiles.tiles.GetLength(1);
 
             for (var y = 0; y < gridHeight; y++)
             for (var x = 0; x < gridWidth; x++)
             {
-                var tile = resolver.Instantiate(uiConfig.Tile, inventoryView.ContentForTiles);
-                tile.Initialize(playerInventory, playerInventory.Tiles.GetTile(x, y));
+                var tile = resolver.Instantiate(uiConfig.Tile, view.ContentForTiles);
+                tile.Initialize(inventory, tiles.GetTile(x, y));
                 tile.GetComponentInChildren<TMP_Text>().text = $"{x}:{y}";
             }
 
-            lastGridSize = new Vector2Int(gridWidth, gridHeight);
+            lastGridSizes[inventory] = new Vector2Int(gridWidth, gridHeight);
         }
 
         private void EnsureTilesMatchInventorySize()
         {
-            var currentSize = new Vector2Int(playerInventory.Tiles.tiles.GetLength(0), playerInventory.Tiles.tiles.GetLength(1));
-            if (currentSize == lastGridSize)
+            foreach (var inventory in inventoryViews.Keys.ToArray())
             {
-                return;
-            }
+                var tiles = GetTiles(inventory);
+                if (tiles == null)
+                {
+                    continue;
+                }
 
-            DrawTiles();
+                var currentSize = new Vector2Int(tiles.tiles.GetLength(0), tiles.tiles.GetLength(1));
+                if (!lastGridSizes.TryGetValue(inventory, out var lastSize) || currentSize != lastSize)
+                {
+                    DrawTiles(inventory);
+                }
+            }
+        }
+
+        private static Tiles GetTiles(IInventory inventory)
+        {
+            return inventory switch
+            {
+                PlayerInventory player => player.Tiles,
+                ChestInventory chest => chest.Tiles,
+                _ => null,
+            };
         }
 
         private Camera GetEventCamera() => canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
-        
+
         public override void Hide()
         {
             redrawDisposables.Clear();
             itemRects.Clear();
             itemGrabRects.Clear();
-            
+            inventoryViews.Clear();
+            lastGridSizes.Clear();
+
             if (contentRect)
             {
                 Object.Destroy(contentRect.gameObject);
@@ -674,9 +757,11 @@ namespace UI.Pages
 
             contentRect = null;
             rightRect = null;
+            leftRect = null;
             slotsViewContainer = null;
-            inventoryView = null;
-            inventoryScrollRect = null;
+            playerInventoryView = null;
+            targetInventoryView = null;
+            playerInventoryScrollRect = null;
             handSlotRect = null;
             Current = null;
         }

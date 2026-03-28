@@ -1940,6 +1940,7 @@ GameObject:
   - component: {fileID: 1358161556329534282}
   - component: {fileID: 1849981193000879310}
   - component: {fileID: 9141871603821371955}
+  - component: {fileID: 9141871603821371956}
   m_Layer: 0
   m_Name: Chest
   m_TagString: Untagged
@@ -2031,6 +2032,22 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &9141871603821371956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8143119502095670715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 624c097af817475490d6ad66d96663d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Container.ChestLifetimeScope
+  parentReference:
+    TypeName: Container.Game.GameLifetimeScope
+  autoRun: 1
+  autoInjectGameObjects: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

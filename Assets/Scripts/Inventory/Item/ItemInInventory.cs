@@ -16,5 +16,12 @@ namespace Inventory.Item
             ItemConfig = itemConfig;
             Position = position;
         }
+        
+        public ItemInInventory(ItemConfig itemConfig, Matrix4x4 position, List<Tile> tiles)
+        {
+            ItemConfig = itemConfig;
+            Position = position;
+            Tiles = tiles;
+        }
     }
 }

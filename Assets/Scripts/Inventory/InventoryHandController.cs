@@ -52,16 +52,16 @@ namespace Inventory
         {
             CaptureGrabOffset();
 
-            if (gameModesController.GameMode != GameMode.Inventory || HasItemInHand())
+            if (!IsInventoryInteractionMode(gameModesController.GameMode) || HasItemInHand())
             {
                 return;
             }
 
-            var inventoryPage = InventoryPage.Current;
+            var interactionPage = GetCurrentInteractionPage();
             var pointer = Pointer.current;
-            if (inventoryPage != null && pointer != null
-                                      && inventoryPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel)
-                                      && playerInventory.TryTakeFromSlot(slotModel.ItemType, out var slotItemConfig))
+            if (interactionPage != null && pointer != null
+                                        && interactionPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel)
+                                        && playerInventory.TryTakeFromSlot(slotModel.ItemType, out var slotItemConfig))
             {
                 if (slotModel.ItemType == ItemType.Backpack)
                 {
@@ -84,7 +84,7 @@ namespace Inventory
 
         private void OnMouseUp(MouseUp _)
         {
-            if (gameModesController.GameMode != GameMode.Inventory || !HasItemInHand())
+            if (!IsInventoryInteractionMode(gameModesController.GameMode) || !HasItemInHand())
             {
                 return;
             }
@@ -114,26 +114,38 @@ namespace Inventory
                 return;
             }
             
-            var inventoryPage = InventoryPage.Current;
+            var interactionPage = GetCurrentInteractionPage();
             var pointer = Pointer.current;
-            if (inventoryPage != null
+            if (interactionPage != null
              && pointer != null
-             && inventoryPage.IsInRightOrCenterSection(pointer.position.ReadValue())
+             && interactionPage.IsInPlayerSections(pointer.position.ReadValue())
              && playerInventory.TryAdd(itemConfig))
             {
                 ClearHand();
                 return;
             }
             
+            if (LootingPage.Current != null
+             && pointer != null
+             && LootingPage.Current.IsInTargetSection(pointer.position.ReadValue()))
+            {
+                var targetInventory = LootingPage.Current.GetTargetInventory();
+                if (targetInventory != null && targetInventory.TryAdd(itemConfig))
+                {
+                    ClearHand();
+                    return;
+                }
+            }
+            
             ThrowItem(itemConfig);
         }
         private bool TryAddToHoveredSlot(ItemConfig itemConfig)
         {
-            var inventoryPage = InventoryPage.Current;
+            var interactionPage = GetCurrentInteractionPage();
             var pointer = Pointer.current;
-            if (inventoryPage == null || pointer == null
-                                      || !inventoryPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel)
-                                      || !playerInventory.TryPlaceInSlot(slotModel.ItemType, itemConfig, out var replacedItemConfig))
+            if (interactionPage == null || pointer == null
+                                        || !interactionPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel)
+                                        || !playerInventory.TryPlaceInSlot(slotModel.ItemType, itemConfig, out var replacedItemConfig))
             {
                 return false;
             }
@@ -198,7 +210,7 @@ namespace Inventory
         
         private void OnGameModeChanged(GameModeChangedMessage msg)
         {
-            if (msg.GameMode == GameMode.Inventory || !HasItemInHand())
+            if (IsInventoryInteractionMode(msg.GameMode) || !HasItemInHand())
             {
                 return;
             }
@@ -219,14 +231,14 @@ namespace Inventory
                 return false;
             }
 
-            var inventoryPage = InventoryPage.Current;
+            var interactionPage = GetCurrentInteractionPage();
             var pointer = Pointer.current;
-            if (inventoryPage == null || pointer == null)
+            if (interactionPage == null || pointer == null)
             {
                 return false;
             }
 
-            if (!inventoryPage.TryGetPlacementTile(pointer.position.ReadValue(), out var placementTile))
+            if (!interactionPage.TryGetPlacementTile(pointer.position.ReadValue(), hoveredInventory, out var placementTile))
             {
                 return false;
             }
@@ -240,7 +252,7 @@ namespace Inventory
         private void ClearHand()
         {
             playerInventory.HandSlot.Value = new SlotModel(ItemType.None, null);
-            InventoryPage.Current?.ResetGrabOffset();
+            GetCurrentInteractionPage()?.ResetGrabOffset();
             ProcessDelayedBackpackResize();
         }
 
@@ -253,13 +265,23 @@ namespace Inventory
                 return;
             }
 
-            var inventoryPage = InventoryPage.Current;
-            if (inventoryPage == null || inventoryPage.TryCaptureGrabOffset(pointer.position.ReadValue()))
+            var interactionPage = GetCurrentInteractionPage();
+            if (interactionPage == null || interactionPage.TryCaptureGrabOffset(pointer.position.ReadValue()))
             {
                 return;
             }
+            
+            interactionPage.ResetGrabOffset();
+        }
+        
+        private static IInventoryInteractionPage GetCurrentInteractionPage()
+        {
+            return LootingPage.CurrentInteractionPage ?? InventoryPage.CurrentInteractionPage;
+        }
 
-            inventoryPage.ResetGrabOffset();
+        private static bool IsInventoryInteractionMode(GameMode mode)
+        {
+            return mode == GameMode.Inventory || mode == GameMode.Looting;
         }
         
         private void ThrowItem(ItemConfig itemConfig)
