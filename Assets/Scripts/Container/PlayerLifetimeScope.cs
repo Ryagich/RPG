@@ -2,8 +2,6 @@
 using Interactable;
 using Inventory;
 using Inventory.Inventories;
-using MessagePipe;
-using Messages;
 using Movement;
 using UI;
 using UnityEngine;
@@ -15,7 +13,8 @@ namespace Container
     public class PlayerLifetimeScope : LifetimeScope
     {
         [SerializeField] private CanvasLifetimeScope canvasLifetimeScope;
-        
+        [SerializeField] private Character.CharacterInfo characterInfo;
+
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterComponentInHierarchy<CharacterController>().AsSelf();
@@ -23,6 +22,8 @@ namespace Container
             builder.RegisterInstance(transform);
             builder.RegisterInstance("Player").Keyed("Scope ID"); 
             
+            builder.RegisterInstance(characterInfo).AsSelf();
+                
             var founder = gameObject.AddComponent<InteractableFounder>();
             builder.RegisterComponent(founder).AsSelf();
             

@@ -1,8 +1,10 @@
-﻿using Inventory.Slot;
+﻿using Dialogue;
+using Inventory.Slot;
 using TMPro;
 using UI.Inventory;
 using UI.UIElements;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace UI.Configs
 {
@@ -18,5 +20,11 @@ namespace UI.Configs
         [field: SerializeField] public InventoryView InventoryView { get; private set; }
         [field: SerializeField] public InfoAboutInventory InfoAboutInventory { get; private set; }
         [field: SerializeField] public InfoAboutPlayer InfoAboutPlayer { get; private set; }
+        [field: SerializeField] public DialogueContainer DialogueContainer { get; private set; }
+        
+        //Trade
+        [field: SerializeField] public ScrollRect SellInventory { get; private set; }
+        [field: SerializeField] public ScrollRect InventoryInTrading { get; private set; }
+        [field: SerializeField] public SellInfo SellInfo { get; private set; }
     }
 }

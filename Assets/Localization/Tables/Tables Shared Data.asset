@@ -19,6 +19,16 @@ MonoBehaviour:
     m_Key: Test String
     m_Metadata:
       m_Items: []
+  - m_Id: 7531139094003712
+    m_Key: Player_Name_Test
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7531326545838080
+    m_Key: 'Player_Fraction_Test
+
+'
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

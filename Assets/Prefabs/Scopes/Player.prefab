@@ -52,6 +52,7 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects: []
   canvasLifetimeScope: {fileID: 8169136782938169325, guid: 5b115a6e80acde043bffd817553046d0, type: 3}
+  characterInfo: {fileID: 11400000, guid: 3e00ca4ee5487f047ba759a296c3372a, type: 2}
 --- !u!33 &1248298156774760158
 MeshFilter:
   m_ObjectHideFlags: 0
