@@ -30,6 +30,14 @@ MonoBehaviour:
     m_Localized: Eng Fraction
     m_Metadata:
       m_Items: []
+  - m_Id: 7558277448843264
+    m_Localized: Box
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7558344167636992
+    m_Localized: Cashe
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

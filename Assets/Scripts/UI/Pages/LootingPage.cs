@@ -14,6 +14,8 @@ using VContainer;
 using VContainer.Unity;
 using Inventory.Item;
 using UI.Inventory;
+using UI.UIElements;
+using Localization;
 
 namespace UI.Pages
 {
@@ -26,6 +28,7 @@ namespace UI.Pages
 
         private readonly UIConfig uiConfig;
         private readonly PlayerInventory playerInventory;
+        private readonly Character.CharacterInfo playerCharacterInfo;
         private readonly LootingContext lootingContext;
         private readonly Canvas canvas;
         private readonly RectTransform canvasRect;
@@ -54,12 +57,14 @@ namespace UI.Pages
             UIConfig uiConfig,
             Canvas canvas,
             PlayerInventory playerInventory,
+            Character.CharacterInfo playerCharacterInfo,
             LootingContext lootingContext,
             IObjectResolver resolver)
         {
             this.uiConfig = uiConfig;
             this.canvas = canvas;
             this.playerInventory = playerInventory;
+            this.playerCharacterInfo = playerCharacterInfo;
             this.lootingContext = lootingContext;
             this.resolver = resolver;
 
@@ -81,15 +86,17 @@ namespace UI.Pages
             leftRect = resolver.Instantiate(uiConfig.LeftSection, contentRect);
             slotsViewContainer = resolver.Instantiate(uiConfig.CenterSection, contentRect);
             rightRect = resolver.Instantiate(uiConfig.RightSection, contentRect);
-
-            resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
+            
+            var rightInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
             resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
             playerInventoryView = resolver.Instantiate(uiConfig.InventoryView, rightRect);
             playerInventoryScrollRect = playerInventoryView.GetComponent<ScrollRect>();
-
-            resolver.Instantiate(uiConfig.InfoAboutPlayer, leftRect);
+            FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo);
+            
+            var leftInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, leftRect);
             resolver.Instantiate(uiConfig.InfoAboutInventory, leftRect);
             targetInventoryView = resolver.Instantiate(uiConfig.InventoryView, leftRect);
+            FillInfoAboutPlayer(leftInfoAboutPlayer, lootingContext.CurrentTargetCharacterInfo);
 
             inventoryViews.Clear();
             inventoryViews[playerInventory] = playerInventoryView;
@@ -104,7 +111,19 @@ namespace UI.Pages
 
             ReDraw();
         }
+        
+        private static void FillInfoAboutPlayer(InfoAboutPlayer infoAboutPlayer, Character.CharacterInfo currentCharacterInfo)
+        {
+            if (infoAboutPlayer == null || currentCharacterInfo == null)
+            {
+                return;
+            }
 
+            infoAboutPlayer.Photo.sprite = currentCharacterInfo.Photo;
+            infoAboutPlayer.Name.text = currentCharacterInfo.Name.GetLocalizedStringCached();
+            infoAboutPlayer.Group.text = currentCharacterInfo.Fraction.GetLocalizedStringCached();
+        }
+        
         public void Tick()
         {
             if (handSlotRect)

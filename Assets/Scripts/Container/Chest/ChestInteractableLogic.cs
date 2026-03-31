@@ -1,4 +1,5 @@
 ﻿using System;
+using Character;
 using GameModes;
 using Interactable;
 using Inventory.Inventories;
@@ -14,6 +15,7 @@ namespace Container.Chest
     {
         private readonly Interactable.Interactable interactable;
         private readonly ChestInventory chestInventory;
+        private readonly CharacterInfo characterInfo;
         private readonly LootingContext lootingContext;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
 
@@ -21,12 +23,14 @@ namespace Container.Chest
             (
                 Interactable.Interactable interactable,
                 ChestInventory chestInventory,
+                CharacterInfo characterInfo,
                 LootingContext lootingContext,
                 IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher
             )
         {
             this.interactable = interactable;
             this.chestInventory = chestInventory;
+            this.characterInfo = characterInfo;
             this.lootingContext = lootingContext;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
         }
@@ -47,7 +51,7 @@ namespace Container.Chest
 
         private void OnInteracted(LifetimeScope _)
         {
-            lootingContext.SetTarget(chestInventory);
+            lootingContext.SetTarget(chestInventory, characterInfo);
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Looting));
         }
 

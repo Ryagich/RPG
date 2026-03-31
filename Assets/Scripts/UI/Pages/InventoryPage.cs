@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using Character;
+using System.Collections.Generic;
 using Inventory;
 using Inventory.Grid;
 using Inventory.Inventories;
@@ -12,6 +14,9 @@ using VContainer;
 using VContainer.Unity;
 using UnityEngine.InputSystem;
 using Inventory.Item;
+using Localization;
+using UI.UIElements;
+using CharacterInfo = Character.CharacterInfo;
 
 namespace UI.Pages
 {
@@ -24,6 +29,7 @@ namespace UI.Pages
         
         private readonly UIConfig uiConfig;
         private readonly PlayerInventory playerInventory;
+        private readonly CharacterInfo characterInfo;
         private readonly Canvas canvas;
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
@@ -49,12 +55,14 @@ namespace UI.Pages
                 UIConfig uiConfig,
                 Canvas canvas,
                 PlayerInventory playerInventory,
+                CharacterInfo characterInfo,
                 IObjectResolver resolver
             )
         {
             this.uiConfig = uiConfig;
             this.canvas = canvas;
             this.playerInventory = playerInventory;
+            this.characterInfo = characterInfo;
             this.resolver = resolver;
 
             canvasRect = canvas.GetComponent<RectTransform>();
@@ -73,6 +81,7 @@ namespace UI.Pages
             var infoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
             inventoryView = resolver.Instantiate(uiConfig.InventoryView, rightRect);
             inventoryScrollRect = inventoryView.GetComponent<ScrollRect>();
+            FillInfoAboutPlayer(infoAboutPlayer, characterInfo);
             
             DrawTiles();
 
@@ -85,6 +94,18 @@ namespace UI.Pages
                            .AddTo(redrawDisposables);
 
             ReDraw();
+        }
+        
+        private static void FillInfoAboutPlayer(InfoAboutPlayer infoAboutPlayer, CharacterInfo currentCharacterInfo)
+        {
+            if (infoAboutPlayer == null || currentCharacterInfo == null)
+            {
+                return;
+            }
+
+            infoAboutPlayer.Photo.sprite = currentCharacterInfo.Photo;
+            infoAboutPlayer.Name.text = currentCharacterInfo.Name.GetLocalizedStringCached();
+            infoAboutPlayer.Group.text = currentCharacterInfo.Fraction.GetLocalizedStringCached();
         }
 
         public void Tick()

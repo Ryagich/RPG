@@ -29,6 +29,14 @@ MonoBehaviour:
 '
     m_Metadata:
       m_Items: []
+  - m_Id: 7558277448843264
+    m_Key: Chest_Box_Name_Test
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7558344167636992
+    m_Key: Cashe
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

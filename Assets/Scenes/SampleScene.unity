@@ -1544,7 +1544,7 @@ Transform:
   m_GameObject: {fileID: 1834779870}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.36, y: -1.33, z: 2.66}
+  m_LocalPosition: {x: -5.3, y: -1.25, z: 2.5}
   m_LocalScale: {x: 2, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2286,7 +2286,7 @@ Transform:
   m_GameObject: {fileID: 8143119502095670715}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.5, y: -1.33, z: 2.66}
+  m_LocalPosition: {x: -2.5, y: -1.25, z: 2.5}
   m_LocalScale: {x: 2, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2414,6 +2414,7 @@ MonoBehaviour:
     TypeName: Container.Game.GameLifetimeScope
   autoRun: 1
   autoInjectGameObjects: []
+  characterInfo: {fileID: 11400000, guid: 43718f9d5b35b6b4e9b9cef541377a63, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
