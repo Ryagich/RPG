@@ -376,8 +376,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Dialogue.DialogueContainer
   <DialogueScroll>k__BackingField: {fileID: 1203983388658396431}
+  <DialogueContent>k__BackingField: {fileID: 5436273732111128364}
   <AnswerScroll>k__BackingField: {fileID: 6747388266266181366}
-  <TradeButton>k__BackingField: {fileID: 0}
+  <AnswerContent>k__BackingField: {fileID: 7054950124037100683}
+  <TradeButton>k__BackingField: {fileID: 7026609611190172331}
 --- !u!1 &3101560981389783341
 GameObject:
   m_ObjectHideFlags: 0
