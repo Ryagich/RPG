@@ -26,5 +26,6 @@ namespace UI.Configs
         [field: SerializeField] public ScrollRect SellInventory { get; private set; }
         [field: SerializeField] public ScrollRect InventoryInTrading { get; private set; }
         [field: SerializeField] public SellInfo SellInfo { get; private set; }
+        [field: SerializeField] public Button TradingExitButton { get; private set; }
     }
 }
