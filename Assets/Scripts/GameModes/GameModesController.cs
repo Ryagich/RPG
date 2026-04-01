@@ -62,5 +62,7 @@ namespace GameModes
         Game,
         Inventory,
         Looting,
+        Dialogue,
+        Trade,
     }
 }

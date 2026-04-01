@@ -1,4 +1,5 @@
-﻿using GameModes;
+﻿using Dialogue;
+using GameModes;
 using Input;
 using MessagePipe;
 using Messages;
@@ -40,6 +41,7 @@ namespace Container.Game
                                               playerScope = CreateChildFromPrefab(PlayerPrefab, _ => { });
                                           });
             builder.Register<LootingContext>(Lifetime.Singleton).AsSelf();
+            builder.Register<DialogueContext>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<GameModesController>().AsSelf();
         }
     }

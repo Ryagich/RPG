@@ -1423,6 +1423,7 @@ GameObject:
   - component: {fileID: 1834779874}
   - component: {fileID: 1834779873}
   - component: {fileID: 1834779872}
+  - component: {fileID: 1834779877}
   m_Layer: 0
   m_Name: Dialogue Test
   m_TagString: Untagged
@@ -1552,6 +1553,23 @@ Transform:
   - {fileID: 1846629550}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1834779877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1834779870}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a832506945245bab588f5de527135b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Container.DialogueLifetimeScope
+  parentReference:
+    TypeName: Container.Game.GameLifetimeScope
+  autoRun: 1
+  autoInjectGameObjects: []
+  characterInfo: {fileID: 11400000, guid: 43718f9d5b35b6b4e9b9cef541377a63, type: 2}
 --- !u!1 &1846629549
 GameObject:
   m_ObjectHideFlags: 0

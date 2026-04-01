@@ -1,4 +1,5 @@
-﻿using MessagePipe;
+﻿using GameModes;
+using MessagePipe;
 using Messages;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -15,6 +16,7 @@ namespace Input
         private readonly IPublisher<InteractableInputMessage> interactableInputPublisher;
         private readonly IPublisher<MouseDown> mouseDown;
         private readonly IPublisher<MouseUp> mouseUp;
+        private readonly GameModesController gameModesController;
 
         private InputHandler
             (
@@ -23,7 +25,8 @@ namespace Input
                 IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
                 IPublisher<InteractableInputMessage> interactableInputPublisher,
                 IPublisher<MouseDown> mouseDown,
-                IPublisher<MouseUp> mouseUp
+                IPublisher<MouseUp> mouseUp,
+                GameModesController gameModesController
             )
         {
             this.inputConfig = inputConfig;
@@ -32,6 +35,7 @@ namespace Input
             this.interactableInputPublisher = interactableInputPublisher;
             this.mouseDown = mouseDown;
             this.mouseUp = mouseUp;
+            this.gameModesController = gameModesController;
         }
 
         public void Start()
@@ -55,8 +59,14 @@ namespace Input
         }
         
         private void OpenInventory(InputAction.CallbackContext context)
-        {   
-            changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameModes.GameMode.Inventory));
+        {
+            if (gameModesController.GameMode == GameMode.Trade)
+            {
+                changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Dialogue));
+                return;
+            }
+
+            changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Inventory));
         }
 
         private void MouseDown(InputAction.CallbackContext context)

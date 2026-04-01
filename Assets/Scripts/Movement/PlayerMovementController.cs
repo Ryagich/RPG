@@ -46,7 +46,7 @@ namespace Movement
                 playerMovement.ChangeState(true);
                 cameraMotor.ChangeGameplayTarget(transform);
             }
-            else if (msg.GameMode is GameMode.Inventory)
+            else
             {
                 playerMovement.ChangeState(false);
             }

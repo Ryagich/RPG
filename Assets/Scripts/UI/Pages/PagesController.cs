@@ -12,6 +12,8 @@ namespace UI.Pages
         private readonly MainPage mainPage;
         private readonly InventoryPage inventoryPage;
         private readonly LootingPage lootingPage;
+        private readonly DialoguePage dialoguePage;
+        private readonly TradePage tradePage;
 
         private BasePage currentPage;
         
@@ -20,12 +22,16 @@ namespace UI.Pages
                 MainPage mainPage,
                 InventoryPage inventoryPage,
                 LootingPage lootingPage,
+                DialoguePage dialoguePage,
+                TradePage tradePage,
                 ISubscriber<GameModeChangedMessage> gameModeChangeSubscriber
             )
         {
             this.mainPage = mainPage;
             this.inventoryPage = inventoryPage;
             this.lootingPage = lootingPage;
+            this.dialoguePage = dialoguePage;
+            this.tradePage = tradePage;
 
             gameModeChangeSubscriber.Subscribe(OnGameModeChanged);
         }
@@ -50,6 +56,12 @@ namespace UI.Pages
                 case GameMode.Looting:
                     currentPage = lootingPage;
                     break;
+                case GameMode.Dialogue:
+                    currentPage = dialoguePage;
+                    break;
+                case GameMode.Trade:
+                    currentPage = tradePage;
+                    break;
                 default:
                     currentPage = mainPage;
                     break;
@@ -72,5 +84,7 @@ namespace UI.Pages
         MainGame,
         Inventory,
         Looting,
+        Dialogue,
+        Trade,
     }
 }
