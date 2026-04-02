@@ -8,13 +8,11 @@ using TMPro;
 using UI.Configs;
 using UniRx;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
 using Inventory.Item;
 using UI.Inventory;
-using UI.UIElements;
 
 namespace UI.Pages
 {
@@ -154,42 +152,7 @@ namespace UI.Pages
         public bool TryCaptureGrabOffset(Vector2 screenPoint)
         {
             var eventCamera = GetEventCamera();
-
-            for (var i = itemRects.Count - 1; i >= 0; i--)
-            {
-                var itemRect = itemRects[i];
-                if (!itemRect || !RectTransformUtility.RectangleContainsScreenPoint(itemRect, screenPoint, eventCamera))
-                {
-                    continue;
-                }
-
-                if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(itemRect, screenPoint, eventCamera, out var localPoint))
-                {
-                    continue;
-                }
-
-                handGrabOffset = localPoint;
-                return true;
-            }
-
-            for (var i = itemGrabRects.Count - 1; i >= 0; i--)
-            {
-                var itemGrabRect = itemGrabRects[i];
-                if (!itemGrabRect || !RectTransformUtility.RectangleContainsScreenPoint(itemGrabRect, screenPoint, eventCamera))
-                {
-                    continue;
-                }
-
-                if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(itemGrabRect, screenPoint, eventCamera, out var localPoint))
-                {
-                    continue;
-                }
-
-                handGrabOffset = localPoint;
-                return true;
-            }
-
-            return false;
+            return PageUiUtilities.TryCaptureGrabOffset(itemRects, itemGrabRects, screenPoint, eventCamera, out handGrabOffset);
         }
 
         public void ResetGrabOffset()
@@ -245,8 +208,7 @@ namespace UI.Pages
 
         public bool IsInTargetSection(Vector2 screenPoint)
         {
-            var eventCamera = GetEventCamera();
-            return leftRect && RectTransformUtility.RectangleContainsScreenPoint(leftRect, screenPoint, eventCamera);
+            return leftRect && RectTransformUtility.RectangleContainsScreenPoint(leftRect, screenPoint, GetEventCamera());
         }
 
         public IInventory GetTargetInventory()
@@ -260,57 +222,19 @@ namespace UI.Pages
             {
                 return;
             }
-
             playerInventoryScrollRect.enabled = playerInventory.HandSlot.Value?.ItemConfig == null;
         }
 
         private void DrawHandSlot()
         {
-            if (handSlotRect)
-            {
-                Object.Destroy(handSlotRect.gameObject);
-                handSlotRect = null;
-            }
-
-            var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
-            if (handItemConfig == null)
-            {
-                return;
-            }
-
-            var handItemObject = new GameObject($"Hand Item [{handItemConfig.Id}]", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            handSlotRect = handItemObject.GetComponent<RectTransform>();
-            handSlotRect.SetParent(canvasRect, false);
-            handSlotRect.anchorMin = new Vector2(0.5f, 0.5f);
-            handSlotRect.anchorMax = new Vector2(0.5f, 0.5f);
-            handSlotRect.pivot = new Vector2(0.5f, 0.5f);
-            handSlotRect.sizeDelta = handItemConfig.SizeInInventory;
-
-            var handItemImage = handItemObject.GetComponent<Image>();
-            handItemImage.sprite = handItemConfig.Icon;
-            handItemImage.preserveAspect = true;
-            handItemImage.raycastTarget = false;
-
-            UpdateHandSlotPosition();
+            handSlotRect = PageUiUtilities.DrawHandSlot(handSlotRect, canvasRect, playerInventory.HandSlot.Value?.ItemConfig, UpdateHandSlotPosition);
         }
 
         private void UpdateHandSlotPosition()
         {
-            var pointer = Pointer.current;
-            if (pointer == null)
-            {
-                return;
-            }
-
-            var pointerPosition = pointer.position.ReadValue();
             var dragParentRect = handSlotRect.parent as RectTransform;
-            if (dragParentRect == null)
-            {
-                return;
-            }
-
             var eventCamera = GetEventCamera();
-            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(dragParentRect, pointerPosition, eventCamera, out var localPoint))
+            if (!PageUiUtilities.TryGetPointerPositionLocalToRect(dragParentRect, eventCamera, out var pointerPosition, out var localPoint))
             {
                 return;
             }
@@ -541,29 +465,7 @@ namespace UI.Pages
 
         private void DrawSlotItem(SlotView slotView, SlotModel slotModel)
         {
-            if (!slotView)
-            {
-                return;
-            }
-
-            var slotRect = slotView.GetComponent<RectTransform>();
-            if (!slotRect)
-            {
-                return;
-            }
-
-            PageUiUtilities.ClearChildren(slotRect);
-            if (slotModel?.ItemConfig == null)
-            {
-                return;
-            }
-
-            var itemImageRect = PageUiUtilities.CreateItemImage(slotRect, slotModel.ItemConfig, "Slot Item");
-            itemImageRect.anchorMin = new Vector2(0.5f, 0.5f);
-            itemImageRect.anchorMax = new Vector2(0.5f, 0.5f);
-            itemImageRect.anchoredPosition = Vector2.zero;
-            itemRects.Add(itemImageRect);
-            itemGrabRects.Add(itemImageRect);
+            PageUiUtilities.DrawSlotItem(slotView, slotModel, itemRects, itemGrabRects);
         }
 
         private void DrawItems(IInventory inventory, Inventory.InventoryView inventoryView)

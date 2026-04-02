@@ -139,6 +139,7 @@ namespace Inventory
             
             ThrowItem(itemConfig);
         }
+        
         private bool TryAddToHoveredSlot(ItemConfig itemConfig)
         {
             var interactionPage = GetCurrentInteractionPage();

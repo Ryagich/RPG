@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Inventory.Item;
 using Inventory.Inventories;
 using Inventory.Slot;
 using Localization;
 using UI.UIElements;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace UI.Pages
 {
@@ -73,13 +76,15 @@ namespace UI.Pages
             return itemImageRect;
         }
 
-        public static bool TryGetSlotUnderPointer(
-            SlotView slotView,
-            SlotModel slotModel,
-            Vector2 screenPoint,
-            ItemType? requiredType,
-            Camera eventCamera,
-            out SlotModel hoveredSlotModel)
+        public static bool TryGetSlotUnderPointer
+            (
+                SlotView slotView,
+                SlotModel slotModel,
+                Vector2 screenPoint,
+                ItemType? requiredType,
+                Camera eventCamera,
+                out SlotModel hoveredSlotModel
+            )
         {
             hoveredSlotModel = null;
             if (!slotView)
@@ -130,6 +135,131 @@ namespace UI.Pages
             }
 
             return slotRect;
+        }
+        
+        public static bool TryCaptureGrabOffset
+            (
+                IReadOnlyList<RectTransform> itemRects,
+                IReadOnlyList<RectTransform> itemGrabRects,
+                Vector2 screenPoint,
+                Camera eventCamera,
+                out Vector2 handGrabOffset
+            )
+        {
+            handGrabOffset = Vector2.zero;
+            for (var i = itemRects.Count - 1; i >= 0; i--)
+            {
+                if (TryCaptureOffsetOnRect(itemRects[i], screenPoint, eventCamera, out handGrabOffset))
+                {
+                    return true;
+                }
+            }
+
+            for (var i = itemGrabRects.Count - 1; i >= 0; i--)
+            {
+                if (TryCaptureOffsetOnRect(itemGrabRects[i], screenPoint, eventCamera, out handGrabOffset))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static RectTransform DrawHandSlot
+            (
+                RectTransform existingHandSlotRect,
+                RectTransform canvasRect,
+                ItemConfig handItemConfig,
+                Action updateHandSlotPosition
+            )
+        {
+            if (existingHandSlotRect)
+            {
+                Object.Destroy(existingHandSlotRect.gameObject);
+            }
+
+            if (handItemConfig == null)
+            {
+                return null;
+            }
+
+            var handItemObject = new GameObject($"Hand Item [{handItemConfig.Id}]", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            var handSlotRect = handItemObject.GetComponent<RectTransform>();
+            handSlotRect.SetParent(canvasRect, false);
+            handSlotRect.anchorMin = new Vector2(0.5f, 0.5f);
+            handSlotRect.anchorMax = new Vector2(0.5f, 0.5f);
+            handSlotRect.pivot = new Vector2(0.5f, 0.5f);
+            handSlotRect.sizeDelta = handItemConfig.SizeInInventory;
+
+            var handItemImage = handItemObject.GetComponent<Image>();
+            handItemImage.sprite = handItemConfig.Icon;
+            handItemImage.preserveAspect = true;
+            handItemImage.raycastTarget = false;
+
+            updateHandSlotPosition?.Invoke();
+            return handSlotRect;
+        }
+
+        public static bool TryGetPointerPositionLocalToRect
+            (
+                RectTransform targetRect,
+                Camera eventCamera,
+                out Vector2 pointerPosition,
+                out Vector2 localPoint
+            )
+        {
+            pointerPosition = Vector2.zero;
+            localPoint = Vector2.zero;
+            var pointer = Pointer.current;
+            if (pointer == null || targetRect == null)
+            {
+                return false;
+            }
+
+            pointerPosition = pointer.position.ReadValue();
+            return RectTransformUtility.ScreenPointToLocalPointInRectangle(targetRect, pointerPosition, eventCamera, out localPoint);
+        }
+
+        public static void DrawSlotItem
+            (
+                SlotView slotView,
+                SlotModel slotModel,
+                ICollection<RectTransform> itemRects,
+                ICollection<RectTransform> itemGrabRects
+            )
+        {
+            if (!slotView)
+            {
+                return;
+            }
+
+            var slotRect = slotView.GetComponent<RectTransform>();
+            if (!slotRect)
+            {
+                return;
+            }
+
+            ClearChildren(slotRect);
+            if (slotModel?.ItemConfig == null)
+            {
+                return;
+            }
+
+            var itemImageRect = CreateItemImage(slotRect, slotModel.ItemConfig, "Slot Item");
+            itemImageRect.anchorMin = new Vector2(0.5f, 0.5f);
+            itemImageRect.anchorMax = new Vector2(0.5f, 0.5f);
+            itemImageRect.anchoredPosition = Vector2.zero;
+            itemRects.Add(itemImageRect);
+            itemGrabRects.Add(itemImageRect);
+        }
+
+        private static bool TryCaptureOffsetOnRect(RectTransform rect, Vector2 screenPoint, Camera eventCamera, out Vector2 handGrabOffset)
+        {
+            handGrabOffset = Vector2.zero;
+            return rect
+                   && RectTransformUtility.RectangleContainsScreenPoint(rect, screenPoint, eventCamera)
+                   && RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, screenPoint, eventCamera, out handGrabOffset);
         }
     }
 }
