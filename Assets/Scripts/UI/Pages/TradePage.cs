@@ -99,6 +99,7 @@ namespace UI.Pages
             DrawTiles(playerInventory, playerInventoryView);
             DrawInventory(playerInventory, playerInventoryView);
             DrawInventory(targetInventory, targetInventoryView);
+            DrawSlotItems();
 
             playerInventory.Items.ObserveCountChanged().Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
             targetInventory.Items.ObserveCountChanged().Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
@@ -143,7 +144,50 @@ namespace UI.Pages
             EnsurePlayerTilesMatchInventorySize();
             DrawInventory(playerInventory, playerInventoryView);
             DrawInventory(dialogueContext.CurrentTargetInventory, targetInventoryView);
+            DrawSlotItems();
         }
+        
+        private void DrawSlotItems()
+        {
+            DrawSlotItem(centerSection.HeadSlot, playerInventory.HelmSlot);
+            DrawSlotItem(centerSection.BodySlot, playerInventory.BodySlot);
+            DrawSlotItem(centerSection.BackpackSlot, playerInventory.BackpackSlot);
+        }
+
+        private static void DrawSlotItem(SlotView slotView, SlotModel slotModel)
+        {
+            if (!slotView)
+            {
+                return;
+            }
+
+            var slotRect = slotView.GetComponent<RectTransform>();
+            if (!slotRect)
+            {
+                return;
+            }
+
+            ClearChildren(slotRect);
+            if (slotModel?.ItemConfig == null)
+            {
+                return;
+            }
+
+            var itemImageObject = new GameObject($"Slot Item [{slotModel.ItemConfig.Id}]", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            var itemImageRect = itemImageObject.GetComponent<RectTransform>();
+            itemImageRect.SetParent(slotRect, false);
+            itemImageRect.anchorMin = new Vector2(0.5f, 0.5f);
+            itemImageRect.anchorMax = new Vector2(0.5f, 0.5f);
+            itemImageRect.pivot = new Vector2(0.5f, 0.5f);
+            itemImageRect.anchoredPosition = Vector2.zero;
+            itemImageRect.sizeDelta = slotModel.ItemConfig.SizeInInventory;
+
+            var itemImage = itemImageObject.GetComponent<Image>();
+            itemImage.sprite = slotModel.ItemConfig.Icon;
+            itemImage.preserveAspect = true;
+            itemImage.raycastTarget = false;
+        }
+        
         private void DrawTiles(PlayerInventory inventory, InventoryView inventoryView)
         {
             if (inventory == null || inventoryView == null)
