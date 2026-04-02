@@ -3,7 +3,6 @@ using Dialogue;
 using GameModes;
 using Inventory.Inventories;
 using Inventory.Slot;
-using Localization;
 using MessagePipe;
 using Messages;
 using UI.Configs;
@@ -88,13 +87,13 @@ namespace UI.Pages
             resolver.Instantiate(uiConfig.InfoAboutInventory, leftRect);
             resolver.Instantiate(uiConfig.SellInfo, leftRect);
             targetInventoryView = resolver.Instantiate(uiConfig.InventoryInTrading, leftRect).GetComponent<InventoryView>();
-            FillInfoAboutPlayer(leftInfoAboutPlayer, dialogueContext.CurrentTargetCharacterInfo);
+            PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, dialogueContext.CurrentTargetCharacterInfo);
 
             var rightInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
             resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
             resolver.Instantiate(uiConfig.SellInfo, rightRect);
             playerInventoryView = resolver.Instantiate(uiConfig.InventoryInTrading, rightRect);
-            FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo);
+            PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo);
 
             DrawTiles(playerInventory, playerInventoryView);
             DrawInventory(playerInventory, playerInventoryView);
@@ -106,18 +105,6 @@ namespace UI.Pages
 
             tradingExitButton = resolver.Instantiate(uiConfig.TradingExitButton, centerSection.transform);
             tradingExitButton.onClick.AddListener(ReturnToDialogue);
-        }
-
-        private static void FillInfoAboutPlayer(InfoAboutPlayer infoAboutPlayer, Character.CharacterInfo currentCharacterInfo)
-        {
-            if (infoAboutPlayer == null || currentCharacterInfo == null)
-            {
-                return;
-            }
-
-            infoAboutPlayer.Photo.sprite = currentCharacterInfo.Photo;
-            infoAboutPlayer.Name.text = currentCharacterInfo.Name.GetLocalizedStringCached();
-            infoAboutPlayer.Group.text = currentCharacterInfo.Fraction.GetLocalizedStringCached();
         }
 
         public override void Hide()
@@ -166,26 +153,16 @@ namespace UI.Pages
             {
                 return;
             }
-
-            ClearChildren(slotRect);
+            PageUiUtilities.ClearChildren(slotRect);
             if (slotModel?.ItemConfig == null)
             {
                 return;
             }
 
-            var itemImageObject = new GameObject($"Slot Item [{slotModel.ItemConfig.Id}]", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            var itemImageRect = itemImageObject.GetComponent<RectTransform>();
-            itemImageRect.SetParent(slotRect, false);
+            var itemImageRect = PageUiUtilities.CreateItemImage(slotRect, slotModel.ItemConfig, "Slot Item");
             itemImageRect.anchorMin = new Vector2(0.5f, 0.5f);
             itemImageRect.anchorMax = new Vector2(0.5f, 0.5f);
-            itemImageRect.pivot = new Vector2(0.5f, 0.5f);
             itemImageRect.anchoredPosition = Vector2.zero;
-            itemImageRect.sizeDelta = slotModel.ItemConfig.SizeInInventory;
-
-            var itemImage = itemImageObject.GetComponent<Image>();
-            itemImage.sprite = slotModel.ItemConfig.Icon;
-            itemImage.preserveAspect = true;
-            itemImage.raycastTarget = false;
         }
         
         private void DrawTiles(PlayerInventory inventory, InventoryView inventoryView)
@@ -194,8 +171,7 @@ namespace UI.Pages
             {
                 return;
             }
-
-            ClearChildren(inventoryView.ContentForTiles);
+            PageUiUtilities.ClearChildren(inventoryView.ContentForTiles);
             var gridWidth = inventory.Tiles.tiles.GetLength(0);
             var gridHeight = inventory.Tiles.tiles.GetLength(1);
 
@@ -233,7 +209,7 @@ namespace UI.Pages
                 return;
             }
 
-            ClearChildren(inventoryView.ContentForItems);
+            PageUiUtilities.ClearChildren(inventoryView.ContentForItems);
             DrawItems(inventory, inventoryView);
         }
 
@@ -247,44 +223,13 @@ namespace UI.Pages
 
             foreach (var item in inventory.Items)
             {
-                var itemImageObject = new GameObject($"Item [{item.ItemConfig.Id}]", typeof(RectTransform),
-                                                     typeof(CanvasRenderer), typeof(Image));
-                var itemImageRect = itemImageObject.GetComponent<RectTransform>();
-                itemImageRect.SetParent(inventoryView.ContentForItems, false);
-                itemImageRect.anchorMin = new Vector2(0, 1);
-                itemImageRect.anchorMax = new Vector2(0, 1);
-                itemImageRect.pivot = new Vector2(0.5f, 0.5f);
-                itemImageRect.sizeDelta = item.ItemConfig.SizeInInventory;
+                var itemImageRect = PageUiUtilities.CreateItemImage(inventoryView.ContentForItems, item.ItemConfig, "Item");
 
                 var itemCenterPosition = item.Position.GetColumn(3);
-                itemImageRect.anchoredPosition = new Vector2(
-                                                       gridLayoutGroup.padding.left
-                                                     + (itemCenterPosition.x + 0.5f) * gridLayoutGroup.cellSize.x
-                                                     + itemCenterPosition.x * gridLayoutGroup.spacing.x,
-                                                       -(gridLayoutGroup.padding.top
-                                                       + (itemCenterPosition.y + 0.5f) * gridLayoutGroup.cellSize.y
-                                                       + itemCenterPosition.y * gridLayoutGroup.spacing.y));
-
-                var itemImage = itemImageObject.GetComponent<Image>();
-                itemImage.sprite = item.ItemConfig.Icon;
-                itemImage.preserveAspect = true;
-                itemImage.raycastTarget = false;
+                itemImageRect.anchoredPosition = PageUiUtilities.GetItemAnchoredPosition(gridLayoutGroup, itemCenterPosition);
             }
         }
-
-        private static void ClearChildren(Transform parent)
-        {
-            var children = new List<GameObject>();
-            foreach (Transform child in parent)
-            {
-                children.Add(child.gameObject);
-            }
-
-            foreach (var child in children)
-            {
-                Object.Destroy(child);
-            }
-        }
+        
         private void ReturnToDialogue()
         {
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Dialogue));

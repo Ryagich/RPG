@@ -1,7 +1,4 @@
 ﻿using System.Collections.Generic;
-using Character;
-using System.Collections.Generic;
-using Inventory;
 using Inventory.Grid;
 using Inventory.Inventories;
 using Inventory.Slot;
@@ -14,7 +11,6 @@ using VContainer;
 using VContainer.Unity;
 using UnityEngine.InputSystem;
 using Inventory.Item;
-using Localization;
 using UI.UIElements;
 using CharacterInfo = Character.CharacterInfo;
 
@@ -81,7 +77,7 @@ namespace UI.Pages
             var infoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
             inventoryView = resolver.Instantiate(uiConfig.InventoryView, rightRect);
             inventoryScrollRect = inventoryView.GetComponent<ScrollRect>();
-            FillInfoAboutPlayer(infoAboutPlayer, characterInfo);
+            PageUiUtilities.FillInfoAboutPlayer(infoAboutPlayer, characterInfo);
             
             DrawTiles();
 
@@ -94,18 +90,6 @@ namespace UI.Pages
                            .AddTo(redrawDisposables);
 
             ReDraw();
-        }
-        
-        private static void FillInfoAboutPlayer(InfoAboutPlayer infoAboutPlayer, CharacterInfo currentCharacterInfo)
-        {
-            if (infoAboutPlayer == null || currentCharacterInfo == null)
-            {
-                return;
-            }
-
-            infoAboutPlayer.Photo.sprite = currentCharacterInfo.Photo;
-            infoAboutPlayer.Name.text = currentCharacterInfo.Name.GetLocalizedStringCached();
-            infoAboutPlayer.Group.text = currentCharacterInfo.Fraction.GetLocalizedStringCached();
         }
 
         public void Tick()
@@ -131,7 +115,7 @@ namespace UI.Pages
             UpdateInventoryScrollState();
             itemRects.Clear();
             itemGrabRects.Clear();
-            ClearChildren(inventoryView.ContentForItems);
+            PageUiUtilities.ClearChildren(inventoryView.ContentForItems);
             DrawItems(inventoryView);
             DrawSlotItems();
             DrawHandSlot();
@@ -346,27 +330,18 @@ namespace UI.Pages
                 return;
             }
 
-            ClearChildren(slotRect);
+            PageUiUtilities.ClearChildren(slotRect);
             if (slotModel?.ItemConfig == null)
             {
                 return;
             }
 
-            var itemImageObject = new GameObject($"Slot Item [{slotModel.ItemConfig.Id}]", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            var itemImageRect = itemImageObject.GetComponent<RectTransform>();
-            itemImageRect.SetParent(slotRect, false);
+            var itemImageRect = PageUiUtilities.CreateItemImage(slotRect, slotModel.ItemConfig, "Slot Item");
             itemImageRect.anchorMin = new Vector2(0.5f, 0.5f);
             itemImageRect.anchorMax = new Vector2(0.5f, 0.5f);
-            itemImageRect.pivot = new Vector2(0.5f, 0.5f);
             itemImageRect.anchoredPosition = Vector2.zero;
-            itemImageRect.sizeDelta = slotModel.ItemConfig.SizeInInventory;
             itemRects.Add(itemImageRect);
             itemGrabRects.Add(itemImageRect);
-
-            var itemImage = itemImageObject.GetComponent<Image>();
-            itemImage.sprite = slotModel.ItemConfig.Icon;
-            itemImage.preserveAspect = true;
-            itemImage.raycastTarget = false;
         }
 
         private bool TryGetSnappedPositionInSlot(Vector2 screenPoint, Camera eventCamera, RectTransform dragParentRect, out Vector2 snappedPosition)
@@ -383,7 +358,7 @@ namespace UI.Pages
                 return false;
             }
 
-            if (!TryGetSlotRect(slotModel, out var slotRect))
+            if (!PageUiUtilities.TryGetSlotRect(slotsViewContainer, playerInventory, slotModel, out var slotRect))
             {
                 return false;
             }
@@ -393,52 +368,10 @@ namespace UI.Pages
             return RectTransformUtility.ScreenPointToLocalPointInRectangle(dragParentRect, slotScreenPosition, eventCamera, out snappedPosition);
         }
 
-        private bool TryGetSlotRect(SlotModel slotModel, out RectTransform slotRect)
-        {
-            slotRect = null;
-            if (slotModel == playerInventory.HelmSlot && slotsViewContainer.HeadSlot)
-            {
-                slotRect = slotsViewContainer.HeadSlot.GetComponent<RectTransform>();
-            }
-            else if (slotModel == playerInventory.BodySlot && slotsViewContainer.BodySlot)
-            {
-                slotRect = slotsViewContainer.BodySlot.GetComponent<RectTransform>();
-            }
-            else if (slotModel == playerInventory.BackpackSlot && slotsViewContainer.BackpackSlot)
-            {
-                slotRect = slotsViewContainer.BackpackSlot.GetComponent<RectTransform>();
-            }
-
-            return slotRect;
-        }
-
         private bool TryGetSlotUnderPointer(SlotView slotView, SlotModel slotModel, Vector2 screenPoint, ItemType? requiredType, out SlotModel hoveredSlotModel)
         {
-            hoveredSlotModel = null;
-            if (!slotView)
-            {
-                return false;
-            }
-
-            var slotRect = slotView.GetComponent<RectTransform>();
-            if (!slotRect)
-            {
-                return false;
-            }
-
-            if (requiredType.HasValue && slotModel.ItemType != requiredType.Value)
-            {
-                return false;
-            }
-
             var eventCamera = GetEventCamera();
-            if (!RectTransformUtility.RectangleContainsScreenPoint(slotRect, screenPoint, eventCamera))
-            {
-                return false;
-            }
-
-            hoveredSlotModel = slotModel;
-            return true;
+            return PageUiUtilities.TryGetSlotUnderPointer(slotView, slotModel, screenPoint, requiredType, eventCamera, out hoveredSlotModel);
         }
 
         private bool HaveSlotsChanged()
@@ -468,8 +401,7 @@ namespace UI.Pages
             {
                 return false;
             }
-
-            var itemGrabSize = GetItemGrabSize(gridLayoutGroup, handItemConfig.Size);
+            var itemGrabSize = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, handItemConfig.Size);
             var stepX = gridLayoutGroup.cellSize.x + gridLayoutGroup.spacing.x;
             var stepY = gridLayoutGroup.cellSize.y + gridLayoutGroup.spacing.y;
             if (stepX <= 0 || stepY <= 0)
@@ -572,20 +504,6 @@ namespace UI.Pages
             cursorCell = new Vector2Int(Mathf.FloorToInt(xInCells), Mathf.FloorToInt(yInCells));
             return true;
         }
-
-        private static void ClearChildren(Transform parent)
-        {
-            var children = new List<GameObject>();
-            foreach (Transform child in parent)
-            {
-                children.Add(child.gameObject);
-            }
-
-            foreach (var child in children)
-            {
-                Object.Destroy(child);
-            }
-        }
         
         private static Vector2 GetItemGrabSize(GridLayoutGroup gridLayoutGroup, Vector2Int itemSize)
         {
@@ -604,14 +522,7 @@ namespace UI.Pages
 
             foreach (var item in playerInventory.Items)
             {
-                var itemImageObject = new GameObject($"Item [{item.ItemConfig.Id}]", typeof(RectTransform),
-                                                     typeof(CanvasRenderer), typeof(Image));
-                var itemImageRect = itemImageObject.GetComponent<RectTransform>();
-                itemImageRect.SetParent(inventory.ContentForItems, false);
-                itemImageRect.anchorMin = new Vector2(0, 1);
-                itemImageRect.anchorMax = new Vector2(0, 1);
-                itemImageRect.pivot = new Vector2(0.5f, 0.5f);
-                itemImageRect.sizeDelta = item.ItemConfig.SizeInInventory;
+                var itemImageRect = PageUiUtilities.CreateItemImage(inventory.ContentForItems, item.ItemConfig, "Item");
                 itemRects.Add(itemImageRect);
                 
                 var itemGrabRectObject = new GameObject($"Item Grab [{item.ItemConfig.Id}]", typeof(RectTransform));
@@ -620,25 +531,14 @@ namespace UI.Pages
                 itemGrabRect.anchorMin = new Vector2(0, 1);
                 itemGrabRect.anchorMax = new Vector2(0, 1);
                 itemGrabRect.pivot = new Vector2(0.5f, 0.5f);
-                itemGrabRect.sizeDelta = GetItemGrabSize(gridLayoutGroup, item.ItemConfig.Size);
+                itemGrabRect.sizeDelta = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, item.ItemConfig.Size);
                 itemGrabRects.Add(itemGrabRect);
                 
                 var itemCenterPosition = item.Position.GetColumn(3);
-                var itemAnchoredPosition = new Vector2(
-                                                       gridLayoutGroup.padding.left
-                                                     + (itemCenterPosition.x + 0.5f) * gridLayoutGroup.cellSize.x
-                                                     + itemCenterPosition.x * gridLayoutGroup.spacing.x,
-                                                       -(gridLayoutGroup.padding.top
-                                                       + (itemCenterPosition.y + 0.5f) * gridLayoutGroup.cellSize.y
-                                                       + itemCenterPosition.y * gridLayoutGroup.spacing.y));
+                var itemAnchoredPosition = PageUiUtilities.GetItemAnchoredPosition(gridLayoutGroup, itemCenterPosition);
 
                 itemImageRect.anchoredPosition = itemAnchoredPosition;
                 itemGrabRect.anchoredPosition = itemAnchoredPosition;
-
-                var itemImage = itemImageObject.GetComponent<Image>();
-                itemImage.sprite = item.ItemConfig.Icon;
-                itemImage.preserveAspect = true;
-                itemImage.raycastTarget = false;
             }
         }
         
@@ -649,7 +549,7 @@ namespace UI.Pages
                 return;
             }
 
-            ClearChildren(inventoryView.ContentForTiles);
+            PageUiUtilities.ClearChildren(inventoryView.ContentForTiles);
             var gridWidth = playerInventory.Tiles.tiles.GetLength(0);
             var gridHeight = playerInventory.Tiles.tiles.GetLength(1);
 
