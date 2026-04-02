@@ -35,14 +35,14 @@ namespace UI.Pages
         private RectTransform rightRect = null!;
         private RectTransform leftRect = null!;
         private SlotsViewContainer slotsViewContainer = null!;
-        private Inventory.InventoryView playerInventoryView = null!;
-        private Inventory.InventoryView targetInventoryView = null!;
+        private InventoryView playerInventoryView = null!;
+        private InventoryView targetInventoryView = null!;
         private RectTransform handSlotRect = null!;
         private readonly CompositeDisposable redrawDisposables = new();
         private ScrollRect playerInventoryScrollRect = null!;
         private readonly List<RectTransform> itemRects = new();
         private readonly List<RectTransform> itemGrabRects = new();
-        private readonly Dictionary<IInventory, Inventory.InventoryView> inventoryViews = new();
+        private readonly Dictionary<IInventory, InventoryView> inventoryViews = new();
         private readonly Dictionary<IInventory, Vector2Int> lastGridSizes = new();
         private Vector2 handGrabOffset;
 
@@ -168,7 +168,7 @@ namespace UI.Pages
                 return false;
             }
 
-            var handItemType = playerInventory.HandSlot.Value?.ItemConfig?.ItemType;
+            var handItemType = playerInventory.HandSlot.Value?.ItemConfig.ItemType;
             if (TryGetSlotUnderPointer(slotsViewContainer.HeadSlot, playerInventory.HelmSlot, screenPoint, handItemType, out slotModel))
             {
                 return true;
@@ -472,7 +472,7 @@ namespace UI.Pages
             PageUiUtilities.DrawSlotItem(slotView, slotModel, itemRects, itemGrabRects);
         }
 
-        private void DrawItems(IInventory inventory, Inventory.InventoryView inventoryView)
+        private void DrawItems(IInventory inventory, InventoryView inventoryView)
         {
             var gridLayoutGroup = inventoryView.ContentForTiles.GetComponent<GridLayoutGroup>();
             if (gridLayoutGroup == null)

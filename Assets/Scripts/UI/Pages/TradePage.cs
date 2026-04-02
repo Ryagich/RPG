@@ -7,7 +7,6 @@ using MessagePipe;
 using Messages;
 using UI.Configs;
 using UI.Inventory;
-using UI.UIElements;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -38,7 +37,7 @@ namespace UI.Pages
         private InventoryView targetInventoryView;
         private readonly CompositeDisposable redrawDisposables = new();
         private Button tradingExitButton;
-        private Vector2Int lastPlayerGridSize = new(-1, -1);
+        private readonly Dictionary<IInventory, Vector2Int> lastGridSizes = new();
 
         public TradePage
             (
@@ -96,6 +95,7 @@ namespace UI.Pages
             PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo);
 
             DrawTiles(playerInventory, playerInventoryView);
+            DrawTiles(targetInventory, targetInventoryView);
             DrawInventory(playerInventory, playerInventoryView);
             DrawInventory(targetInventory, targetInventoryView);
             DrawSlotItems();
@@ -128,7 +128,7 @@ namespace UI.Pages
         
         private void ReDraw()
         {
-            EnsurePlayerTilesMatchInventorySize();
+            EnsureTilesMatchInventorySize();
             DrawInventory(playerInventory, playerInventoryView);
             DrawInventory(dialogueContext.CurrentTargetInventory, targetInventoryView);
             DrawSlotItems();
@@ -165,7 +165,7 @@ namespace UI.Pages
             itemImageRect.anchoredPosition = Vector2.zero;
         }
         
-        private void DrawTiles(PlayerInventory inventory, InventoryView inventoryView)
+        private void DrawTiles(IInventory inventory, InventoryView inventoryView)
         {
             if (inventory == null || inventoryView == null)
             {
@@ -182,24 +182,30 @@ namespace UI.Pages
                 tile.Initialize(inventory, inventory.Tiles.GetTile(x, y));
                 tile.GetComponentInChildren<TMP_Text>().text = $"{x}:{y}";
             }
-
-            lastPlayerGridSize = new Vector2Int(gridWidth, gridHeight);
+            
+            lastGridSizes[inventory] = new Vector2Int(gridWidth, gridHeight);
         }
 
-        private void EnsurePlayerTilesMatchInventorySize()
+        private void EnsureTilesMatchInventorySize()
         {
-            if (playerInventoryView == null)
+            EnsureTilesMatchInventorySize(playerInventory, playerInventoryView);
+            EnsureTilesMatchInventorySize(dialogueContext.CurrentTargetInventory, targetInventoryView);
+        }
+
+        private void EnsureTilesMatchInventorySize(IInventory inventory, InventoryView inventoryView)
+        {
+            if (inventory == null || inventoryView == null)
             {
                 return;
             }
 
-            var currentSize = new Vector2Int(playerInventory.Tiles.tiles.GetLength(0), playerInventory.Tiles.tiles.GetLength(1));
-            if (currentSize == lastPlayerGridSize)
+            var currentSize = new Vector2Int(inventory.Tiles.tiles.GetLength(0), inventory.Tiles.tiles.GetLength(1));
+            if (lastGridSizes.TryGetValue(inventory, out var lastGridSize) && currentSize == lastGridSize)
             {
                 return;
             }
 
-            DrawTiles(playerInventory, playerInventoryView);
+            DrawTiles(inventory, inventoryView);
         }
         
         private void DrawInventory(IInventory inventory, InventoryView inventoryView)
