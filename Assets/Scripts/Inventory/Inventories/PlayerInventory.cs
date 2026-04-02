@@ -9,14 +9,14 @@ using UnityEngine;
 namespace Inventory.Inventories
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class PlayerInventory : IInventory
+    public class PlayerInventory : ITiledInventory
     {
         private readonly InventoryConfig inventoryConfig;
         
         public ReactiveCollection<ItemInInventory> Items { get; private set; } = new();
         public ReactiveProperty<SlotModel> HandSlot { get; } = new(new SlotModel(ItemType.None, null));
 
-        public Tiles Tiles;
+        public Tiles Tiles { get; private set; }
         
         public SlotModel HelmSlot = new(ItemType.Helm);
         public SlotModel BodySlot = new(ItemType.Body);

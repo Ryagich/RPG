@@ -4,16 +4,15 @@ using UniRx;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using Inventory.Grid;
 
 namespace Inventory.Inventories
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class ChestInventory : IInventory
+    public class ChestInventory : ITiledInventory
     {
         public ReactiveCollection<ItemInInventory> Items { get; } = new();
 
-        public Tiles Tiles = new(7, 2);
+        public Tiles Tiles { get; } = new(7, 2);
 
         public bool CanAdd(ItemConfig config, Tile tile)
         {

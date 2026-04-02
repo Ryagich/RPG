@@ -550,12 +550,7 @@ namespace UI.Pages
 
         private static Tiles GetTiles(IInventory inventory)
         {
-            return inventory switch
-            {
-                PlayerInventory player => player.Tiles,
-                ChestInventory chest => chest.Tiles,
-                _ => null,
-            };
+            return (inventory as ITiledInventory)?.Tiles;
         }
 
         private Camera GetEventCamera() => canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;

@@ -167,19 +167,19 @@ namespace UI.Pages
         
         private void DrawTiles(IInventory inventory, InventoryView inventoryView)
         {
-            if (inventory == null || inventoryView == null)
+            if (inventory is not ITiledInventory tiledInventory || inventoryView == null)
             {
                 return;
             }
             PageUiUtilities.ClearChildren(inventoryView.ContentForTiles);
-            var gridWidth = inventory.Tiles.tiles.GetLength(0);
-            var gridHeight = inventory.Tiles.tiles.GetLength(1);
+            var gridWidth = tiledInventory.Tiles.tiles.GetLength(0);
+            var gridHeight = tiledInventory.Tiles.tiles.GetLength(1);
 
             for (var y = 0; y < gridHeight; y++)
             for (var x = 0; x < gridWidth; x++)
             {
                 var tile = resolver.Instantiate(uiConfig.Tile, inventoryView.ContentForTiles);
-                tile.Initialize(inventory, inventory.Tiles.GetTile(x, y));
+                tile.Initialize(inventory, tiledInventory.Tiles.GetTile(x, y));
                 tile.GetComponentInChildren<TMP_Text>().text = $"{x}:{y}";
             }
             
@@ -194,12 +194,12 @@ namespace UI.Pages
 
         private void EnsureTilesMatchInventorySize(IInventory inventory, InventoryView inventoryView)
         {
-            if (inventory == null || inventoryView == null)
+            if (inventory is not ITiledInventory tiledInventory || inventoryView == null)
             {
                 return;
             }
-
-            var currentSize = new Vector2Int(inventory.Tiles.tiles.GetLength(0), inventory.Tiles.tiles.GetLength(1));
+            var currentSize = new Vector2Int(tiledInventory.Tiles.tiles.GetLength(0), tiledInventory.Tiles.tiles.GetLength(1));
+           
             if (lastGridSizes.TryGetValue(inventory, out var lastGridSize) && currentSize == lastGridSize)
             {
                 return;
