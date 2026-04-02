@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Inventory.Item;
 using Inventory.Inventories;
 using Inventory.Slot;
@@ -170,8 +169,7 @@ namespace UI.Pages
             (
                 RectTransform existingHandSlotRect,
                 RectTransform canvasRect,
-                ItemConfig handItemConfig,
-                Action updateHandSlotPosition
+                ItemConfig handItemConfig
             )
         {
             if (existingHandSlotRect)
@@ -197,7 +195,6 @@ namespace UI.Pages
             handItemImage.preserveAspect = true;
             handItemImage.raycastTarget = false;
 
-            updateHandSlotPosition?.Invoke();
             return handSlotRect;
         }
 

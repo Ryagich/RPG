@@ -227,7 +227,11 @@ namespace UI.Pages
 
         private void DrawHandSlot()
         {
-            handSlotRect = PageUiUtilities.DrawHandSlot(handSlotRect, canvasRect, playerInventory.HandSlot.Value?.ItemConfig, UpdateHandSlotPosition);
+            handSlotRect = PageUiUtilities.DrawHandSlot(handSlotRect, canvasRect, playerInventory.HandSlot.Value?.ItemConfig);
+            if (handSlotRect)
+            {
+                UpdateHandSlotPosition();
+            }
         }
 
         private void UpdateHandSlotPosition()

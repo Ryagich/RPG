@@ -150,7 +150,11 @@ namespace UI.Pages
         private void DrawHandSlot()
         {
             var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
-            handSlotRect = PageUiUtilities.DrawHandSlot(handSlotRect, canvasRect, handItemConfig, UpdateHandSlotPosition);
+            handSlotRect = PageUiUtilities.DrawHandSlot(handSlotRect, canvasRect, handItemConfig);
+            if (handSlotRect)
+            {
+                UpdateHandSlotPosition();
+            }
         }
 
         private void UpdateHandSlotPosition()
