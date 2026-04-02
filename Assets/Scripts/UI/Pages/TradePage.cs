@@ -14,6 +14,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
+using TMPro;
 
 namespace UI.Pages
 {
@@ -38,6 +39,7 @@ namespace UI.Pages
         private InventoryView targetInventoryView;
         private readonly CompositeDisposable redrawDisposables = new();
         private Button tradingExitButton;
+        private Vector2Int lastPlayerGridSize = new(-1, -1);
 
         public TradePage
             (
@@ -91,9 +93,10 @@ namespace UI.Pages
             var rightInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
             resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
             resolver.Instantiate(uiConfig.SellInfo, rightRect);
-            playerInventoryView = resolver.Instantiate(uiConfig.InventoryInTrading, rightRect).GetComponent<InventoryView>();
+            playerInventoryView = resolver.Instantiate(uiConfig.InventoryInTrading, rightRect);
             FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo);
 
+            DrawTiles(playerInventory, playerInventoryView);
             DrawInventory(playerInventory, playerInventoryView);
             DrawInventory(targetInventory, targetInventoryView);
 
@@ -137,10 +140,48 @@ namespace UI.Pages
         
         private void ReDraw()
         {
+            EnsurePlayerTilesMatchInventorySize();
             DrawInventory(playerInventory, playerInventoryView);
             DrawInventory(dialogueContext.CurrentTargetInventory, targetInventoryView);
         }
+        private void DrawTiles(PlayerInventory inventory, InventoryView inventoryView)
+        {
+            if (inventory == null || inventoryView == null)
+            {
+                return;
+            }
 
+            ClearChildren(inventoryView.ContentForTiles);
+            var gridWidth = inventory.Tiles.tiles.GetLength(0);
+            var gridHeight = inventory.Tiles.tiles.GetLength(1);
+
+            for (var y = 0; y < gridHeight; y++)
+            for (var x = 0; x < gridWidth; x++)
+            {
+                var tile = resolver.Instantiate(uiConfig.Tile, inventoryView.ContentForTiles);
+                tile.Initialize(inventory, inventory.Tiles.GetTile(x, y));
+                tile.GetComponentInChildren<TMP_Text>().text = $"{x}:{y}";
+            }
+
+            lastPlayerGridSize = new Vector2Int(gridWidth, gridHeight);
+        }
+
+        private void EnsurePlayerTilesMatchInventorySize()
+        {
+            if (playerInventoryView == null)
+            {
+                return;
+            }
+
+            var currentSize = new Vector2Int(playerInventory.Tiles.tiles.GetLength(0), playerInventory.Tiles.tiles.GetLength(1));
+            if (currentSize == lastPlayerGridSize)
+            {
+                return;
+            }
+
+            DrawTiles(playerInventory, playerInventoryView);
+        }
+        
         private void DrawInventory(IInventory inventory, InventoryView inventoryView)
         {
             if (inventory == null || inventoryView == null)
