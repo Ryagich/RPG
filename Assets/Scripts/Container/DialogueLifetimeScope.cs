@@ -1,5 +1,6 @@
 ﻿using Container.Dialogue;
 using Interactable;
+using Inventory.Inventories;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -17,6 +18,7 @@ namespace Container
 
             builder.RegisterInstance(interactable);
             builder.RegisterInstance(characterInfo).AsSelf();
+            builder.RegisterEntryPoint<ChestInventory>().As<IInventory>().AsSelf();
             builder.RegisterEntryPoint<DialogueInteractableLogic>().AsSelf();
         }
     }

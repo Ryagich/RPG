@@ -1,11 +1,15 @@
-﻿using Dialogue;
+﻿using System.Collections.Generic;
+using Dialogue;
 using GameModes;
+using Inventory.Inventories;
 using Inventory.Slot;
 using Localization;
 using MessagePipe;
 using Messages;
 using UI.Configs;
+using UI.Inventory;
 using UI.UIElements;
+using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
@@ -19,6 +23,7 @@ namespace UI.Pages
         public override PageType Type { get; } = PageType.Trade;
 
         private readonly UIConfig uiConfig;
+        private readonly PlayerInventory playerInventory;
         private readonly Character.CharacterInfo playerCharacterInfo;
         private readonly DialogueContext dialogueContext;
         private readonly RectTransform canvasRect;
@@ -29,11 +34,15 @@ namespace UI.Pages
         private RectTransform leftRect;
         private RectTransform rightRect;
         private SlotsViewContainer centerSection;
+        private InventoryView playerInventoryView;
+        private InventoryView targetInventoryView;
+        private readonly CompositeDisposable redrawDisposables = new();
         private Button tradingExitButton;
 
         public TradePage
             (
                 UIConfig uiConfig,
+                PlayerInventory playerInventory,
                 Character.CharacterInfo playerCharacterInfo,
                 DialogueContext dialogueContext,
                 Canvas canvas,
@@ -42,6 +51,7 @@ namespace UI.Pages
             )
         {
             this.uiConfig = uiConfig;
+            this.playerInventory = playerInventory;
             this.playerCharacterInfo = playerCharacterInfo;
             this.dialogueContext = dialogueContext;
             this.resolver = resolver;
@@ -57,6 +67,13 @@ namespace UI.Pages
                 changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Game));
                 return;
             }
+            
+            var targetInventory = dialogueContext.CurrentTargetInventory;
+            if (targetInventory == null)
+            {
+                changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Dialogue));
+                return;
+            }
 
             contentRect = resolver.Instantiate(uiConfig.ContentPref, canvasRect);
             contentRect.name = $"{uiConfig.ContentPref.name} | {Type}";
@@ -68,14 +85,20 @@ namespace UI.Pages
             var leftInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, leftRect);
             resolver.Instantiate(uiConfig.InfoAboutInventory, leftRect);
             resolver.Instantiate(uiConfig.SellInfo, leftRect);
-            resolver.Instantiate(uiConfig.SellInventory, leftRect);
+            targetInventoryView = resolver.Instantiate(uiConfig.InventoryInTrading, leftRect).GetComponent<InventoryView>();
             FillInfoAboutPlayer(leftInfoAboutPlayer, dialogueContext.CurrentTargetCharacterInfo);
 
             var rightInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
             resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
             resolver.Instantiate(uiConfig.SellInfo, rightRect);
-            resolver.Instantiate(uiConfig.SellInventory, rightRect);
+            playerInventoryView = resolver.Instantiate(uiConfig.InventoryInTrading, rightRect).GetComponent<InventoryView>();
             FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo);
+
+            DrawInventory(playerInventory, playerInventoryView);
+            DrawInventory(targetInventory, targetInventoryView);
+
+            playerInventory.Items.ObserveCountChanged().Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
+            targetInventory.Items.ObserveCountChanged().Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
 
             tradingExitButton = resolver.Instantiate(uiConfig.TradingExitButton, centerSection.transform);
             tradingExitButton.onClick.AddListener(ReturnToDialogue);
@@ -95,6 +118,8 @@ namespace UI.Pages
 
         public override void Hide()
         {
+            redrawDisposables.Clear();
+
             if (tradingExitButton)
             {
                 tradingExitButton.onClick.RemoveListener(ReturnToDialogue);
@@ -105,8 +130,76 @@ namespace UI.Pages
             {
                 Object.Destroy(contentRect.gameObject);
             }
+
+            playerInventoryView = null;
+            targetInventoryView = null;
+        }
+        
+        private void ReDraw()
+        {
+            DrawInventory(playerInventory, playerInventoryView);
+            DrawInventory(dialogueContext.CurrentTargetInventory, targetInventoryView);
         }
 
+        private void DrawInventory(IInventory inventory, InventoryView inventoryView)
+        {
+            if (inventory == null || inventoryView == null)
+            {
+                return;
+            }
+
+            ClearChildren(inventoryView.ContentForItems);
+            DrawItems(inventory, inventoryView);
+        }
+
+        private static void DrawItems(IInventory inventory, InventoryView inventoryView)
+        {
+            var gridLayoutGroup = inventoryView.ContentForTiles.GetComponent<GridLayoutGroup>();
+            if (gridLayoutGroup == null)
+            {
+                return;
+            }
+
+            foreach (var item in inventory.Items)
+            {
+                var itemImageObject = new GameObject($"Item [{item.ItemConfig.Id}]", typeof(RectTransform),
+                                                     typeof(CanvasRenderer), typeof(Image));
+                var itemImageRect = itemImageObject.GetComponent<RectTransform>();
+                itemImageRect.SetParent(inventoryView.ContentForItems, false);
+                itemImageRect.anchorMin = new Vector2(0, 1);
+                itemImageRect.anchorMax = new Vector2(0, 1);
+                itemImageRect.pivot = new Vector2(0.5f, 0.5f);
+                itemImageRect.sizeDelta = item.ItemConfig.SizeInInventory;
+
+                var itemCenterPosition = item.Position.GetColumn(3);
+                itemImageRect.anchoredPosition = new Vector2(
+                                                       gridLayoutGroup.padding.left
+                                                     + (itemCenterPosition.x + 0.5f) * gridLayoutGroup.cellSize.x
+                                                     + itemCenterPosition.x * gridLayoutGroup.spacing.x,
+                                                       -(gridLayoutGroup.padding.top
+                                                       + (itemCenterPosition.y + 0.5f) * gridLayoutGroup.cellSize.y
+                                                       + itemCenterPosition.y * gridLayoutGroup.spacing.y));
+
+                var itemImage = itemImageObject.GetComponent<Image>();
+                itemImage.sprite = item.ItemConfig.Icon;
+                itemImage.preserveAspect = true;
+                itemImage.raycastTarget = false;
+            }
+        }
+
+        private static void ClearChildren(Transform parent)
+        {
+            var children = new List<GameObject>();
+            foreach (Transform child in parent)
+            {
+                children.Add(child.gameObject);
+            }
+
+            foreach (var child in children)
+            {
+                Object.Destroy(child);
+            }
+        }
         private void ReturnToDialogue()
         {
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Dialogue));

@@ -2,6 +2,7 @@
 using Character;
 using Dialogue;
 using GameModes;
+using Inventory.Inventories;
 using MessagePipe;
 using Messages;
 using VContainer.Unity;
@@ -13,6 +14,7 @@ namespace Container.Dialogue
     {
         private readonly Interactable.Interactable interactable;
         private readonly CharacterInfo characterInfo;
+        private readonly IInventory inventory;
         private readonly DialogueContext dialogueContext;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
 
@@ -20,12 +22,14 @@ namespace Container.Dialogue
             (
                 Interactable.Interactable interactable,
                 CharacterInfo characterInfo,
+                IInventory inventory,
                 DialogueContext dialogueContext,
                 IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher
             )
         {
             this.interactable = interactable;
             this.characterInfo = characterInfo;
+            this.inventory = inventory;
             this.dialogueContext = dialogueContext;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
         }
@@ -46,7 +50,7 @@ namespace Container.Dialogue
 
         private void OnInteracted(LifetimeScope _)
         {
-            dialogueContext.SetTarget(interactable, characterInfo);
+            dialogueContext.SetTarget(interactable, characterInfo, inventory);
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Dialogue));
         }
 
