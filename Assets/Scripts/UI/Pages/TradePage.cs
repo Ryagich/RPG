@@ -502,12 +502,107 @@ namespace UI.Pages
         {
             var dragParentRect = handSlotRect.parent as RectTransform;
             var eventCamera = GetEventCamera();
-            if (!PageUiUtilities.TryGetPointerPositionLocalToRect(dragParentRect, eventCamera, out _, out var localPoint))
+            if (!PageUiUtilities.TryGetPointerPositionLocalToRect(dragParentRect, eventCamera, out var pointerPosition, out var localPoint))
             {
+                return;
+            }
+            
+            if (TryGetSnappedHandPosition(pointerPosition, eventCamera, dragParentRect, out var snappedPosition))
+            {
+                handSlotRect.anchoredPosition = snappedPosition;
                 return;
             }
 
             handSlotRect.anchoredPosition = localPoint - handGrabOffset;
+        }
+        
+        private bool TryGetSnappedHandPosition(Vector2 screenPoint, Camera eventCamera, RectTransform dragParentRect, out Vector2 snappedPosition)
+        {
+            snappedPosition = Vector2.zero;
+            if (TryGetSnappedPositionInSlot(screenPoint, eventCamera, dragParentRect, out var slotSnappedPosition))
+            {
+                snappedPosition = slotSnappedPosition;
+                return true;
+            }
+
+            if (!InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out _)
+             || !TryGetSnappedPositionInInventoryGridLocal(screenPoint, hoveredInventory, out var snappedLocalPosition))
+            {
+                return false;
+            }
+
+            if (!inventoryViews.TryGetValue(hoveredInventory, out var hoveredView))
+            {
+                return false;
+            }
+
+            var snappedWorldPosition = hoveredView.ContentForTiles.TransformPoint(snappedLocalPosition);
+            var snappedScreenPosition = RectTransformUtility.WorldToScreenPoint(eventCamera, snappedWorldPosition);
+            return RectTransformUtility.ScreenPointToLocalPointInRectangle(dragParentRect, snappedScreenPosition, eventCamera, out snappedPosition);
+        }
+
+        private bool TryGetSnappedPositionInSlot(Vector2 screenPoint, Camera eventCamera, RectTransform dragParentRect, out Vector2 snappedPosition)
+        {
+            snappedPosition = Vector2.zero;
+            if (!TryGetHoveredSlot(screenPoint, out var slotModel) || slotModel == null)
+            {
+                return false;
+            }
+
+            var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
+            if (handItemConfig == null || slotModel.ItemType != handItemConfig.ItemType)
+            {
+                return false;
+            }
+
+            if (!PageUiUtilities.TryGetSlotRect(centerSection, playerInventory, slotModel, out var slotRect))
+            {
+                return false;
+            }
+
+            var slotWorldPosition = slotRect.TransformPoint(slotRect.rect.center);
+            var slotScreenPosition = RectTransformUtility.WorldToScreenPoint(eventCamera, slotWorldPosition);
+            return RectTransformUtility.ScreenPointToLocalPointInRectangle(dragParentRect, slotScreenPosition, eventCamera, out snappedPosition);
+        }
+
+        private bool TryGetSnappedPositionInInventoryGridLocal(Vector2 screenPoint, IInventory inventory, out Vector3 snappedLocalPosition)
+        {
+            snappedLocalPosition = Vector3.zero;
+            if (!TryGetPlacementCell(screenPoint, inventory, out var placementCell) || !inventoryViews.TryGetValue(inventory, out var view))
+            {
+                return false;
+            }
+
+            var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
+            var gridLayoutGroup = view.ContentForTiles.GetComponent<GridLayoutGroup>();
+            var tiles = (inventory as ITiledInventory)?.Tiles;
+            if (handItemConfig == null || gridLayoutGroup == null || tiles == null)
+            {
+                return false;
+            }
+
+            var gridWidth = tiles.tiles.GetLength(0);
+            var gridHeight = tiles.tiles.GetLength(1);
+            var isFullyInsideGrid =
+                placementCell.x >= 0
+                && placementCell.y >= 0
+                && placementCell.x + handItemConfig.Size.x <= gridWidth
+                && placementCell.y + handItemConfig.Size.y <= gridHeight;
+            if (!isFullyInsideGrid)
+            {
+                return false;
+            }
+
+            var snappedAnchoredPosition = new Vector2(
+                gridLayoutGroup.padding.left
+                + (placementCell.x + handItemConfig.Size.x * 0.5f) * gridLayoutGroup.cellSize.x
+                + (placementCell.x + (handItemConfig.Size.x - 1) * 0.5f) * gridLayoutGroup.spacing.x,
+                -(gridLayoutGroup.padding.top
+                  + (placementCell.y + handItemConfig.Size.y * 0.5f) * gridLayoutGroup.cellSize.y
+                  + (placementCell.y + (handItemConfig.Size.y - 1) * 0.5f) * gridLayoutGroup.spacing.y));
+
+            snappedLocalPosition = new Vector3(snappedAnchoredPosition.x, snappedAnchoredPosition.y, 0f);
+            return true;
         }
         
         private bool HaveGridChanged()
