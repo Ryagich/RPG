@@ -168,7 +168,7 @@ namespace UI.Pages
                 return false;
             }
 
-            var handItemType = playerInventory.HandSlot.Value?.ItemConfig.ItemType;
+            var handItemType = playerInventory.HandSlot.Value?.ItemConfig?.ItemType;
             if (TryGetSlotUnderPointer(slotsViewContainer.HeadSlot, playerInventory.HelmSlot, screenPoint, handItemType, out slotModel))
             {
                 return true;
