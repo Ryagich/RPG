@@ -78,6 +78,7 @@ namespace Inventory
 
                 playerInventory.HandSlot.Value = new SlotModel(slotItemConfig.ItemType, slotItemConfig);
                 handSourceSlot = slotModel;
+                TradePage.Current?.SetDragSource(handSourceInventory, handSourceSlot);
                 return;
             }
 
@@ -90,6 +91,7 @@ namespace Inventory
             playerInventory.HandSlot.Value = new SlotModel(itemInInventory.ItemConfig.ItemType, itemInInventory.ItemConfig);
             handSourceInventory = hoveredInventory;
             handSourcePosition = itemInInventory.Position;
+            TradePage.Current?.SetDragSource(handSourceInventory, handSourceSlot);
         }
 
         private void OnMouseUp(MouseUp _)
@@ -100,8 +102,9 @@ namespace Inventory
             }
             var itemConfig = playerInventory.HandSlot.Value.ItemConfig;
 
-            if (gameModesController.GameMode == GameMode.Trade && HandleTradeMouseUp(itemConfig))
+            if (gameModesController.GameMode == GameMode.Trade)
             {
+                HandleTradeMouseUp(itemConfig);
                 return;
             }
 
@@ -271,6 +274,7 @@ namespace Inventory
             handSourceInventory = null;
             handSourceSlot = null;
             handSourcePosition = Matrix4x4.identity;
+            TradePage.Current?.ClearDragSource();
             GetCurrentInteractionPage()?.ResetGrabOffset();
             ProcessDelayedBackpackResize();
         }
@@ -369,7 +373,61 @@ namespace Inventory
                 return true;
             }
 
-            return false;
+            if (TryReturnToHandSource(itemConfig))
+            {
+                tradePage.ConsumeSellOriginIfAny(itemConfig, handSourceInventory);
+                ClearHand();
+                return true;
+            }
+
+            var sourceIsPlayer = tradePage.CanMoveToPlayerSlot(handSourceInventory, handSourceSlot);
+            var sourceInventory = sourceIsPlayer ? playerInventory : tradePage.GetTargetInventory();
+            if (sourceInventory != null && sourceInventory.TryAdd(itemConfig))
+            {
+                tradePage.ConsumeSellOriginIfAny(itemConfig, handSourceInventory);
+                ClearHand();
+                return true;
+            }
+
+            if (tradePage.TryAddToSourceSellInventory(itemConfig, handSourceInventory, handSourceSlot, handSourcePosition))
+            {
+                ClearHand();
+                return true;
+            }
+
+            return true;
+        }
+
+        private bool TryReturnToHandSource(ItemConfig itemConfig)
+        {
+            if (handSourceSlot != null && playerInventory.TryPlaceInSlot(handSourceSlot.ItemType, itemConfig, out var replacedItemConfig))
+            {
+                if (replacedItemConfig == null)
+                {
+                    return true;
+                }
+
+                return playerInventory.TryAdd(replacedItemConfig);
+            }
+
+            if (handSourceInventory == null)
+            {
+                return false;
+            }
+
+            if (handSourceInventory is ITiledInventory tiledInventory)
+            {
+                var center = handSourcePosition.GetColumn(3);
+                var startPosition = new Vector2Int(
+                    Mathf.RoundToInt(center.x - (itemConfig.Size.x - 1) * 0.5f),
+                    Mathf.RoundToInt(center.y - (itemConfig.Size.y - 1) * 0.5f));
+                if (tiledInventory.Tiles.TryGetTile(startPosition.x, startPosition.y, out var tile) && handSourceInventory.TryAdd(itemConfig, tile))
+                {
+                    return true;
+                }
+            }
+
+            return handSourceInventory.TryAdd(itemConfig);
         }
 
         private void ProcessDelayedBackpackResize()

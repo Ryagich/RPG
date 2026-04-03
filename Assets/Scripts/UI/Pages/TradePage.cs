@@ -77,6 +77,8 @@ namespace UI.Pages
         private readonly Dictionary<ItemConfig, Queue<SellItemOrigin>> targetSellOrigins = new();
         private TradeSellInventory playerSellInventory;
         private TradeSellInventory targetSellInventory;
+        private IInventory dragSourceInventory;
+        private SlotModel dragSourceSlot;
         private Vector2 handGrabOffset;
         private ItemConfig lastHelmItemConfig;
         private ItemConfig lastBodyItemConfig;
@@ -239,6 +241,8 @@ namespace UI.Pages
             handSlotRect = null;
             playerSellInventory = null;
             targetSellInventory = null;
+            dragSourceInventory = null;
+            dragSourceSlot = null;
             Current = null;
         }
         
@@ -310,6 +314,37 @@ namespace UI.Pages
         public bool IsSellInventory(IInventory inventory)
         {
             return inventory == playerSellInventory || inventory == targetSellInventory;
+        }
+
+        public void SetDragSource(IInventory sourceInventory, SlotModel sourceSlot)
+        {
+            dragSourceInventory = sourceInventory;
+            dragSourceSlot = sourceSlot;
+        }
+
+        public void ClearDragSource()
+        {
+            dragSourceInventory = null;
+            dragSourceSlot = null;
+        }
+
+        public bool TryAddToSourceSellInventory(ItemConfig itemConfig, IInventory sourceInventory, SlotModel sourceSlot, Matrix4x4 sourcePosition)
+        {
+            var sourceSide = ResolveSourceSide(sourceInventory, sourceSlot);
+            var destinationSellInventory = sourceSide switch
+                                           {
+                                               TradeSide.Player => playerSellInventory,
+                                               TradeSide.Target => targetSellInventory,
+                                               _ => null
+                                           };
+
+            if (itemConfig == null || destinationSellInventory == null || !destinationSellInventory.TryAdd(itemConfig))
+            {
+                return false;
+            }
+
+            RegisterMoveIntoSell(itemConfig, destinationSellInventory, sourceInventory, sourceSlot, sourcePosition);
+            return true;
         }
 
         public IInventory GetTargetInventory()
@@ -535,6 +570,11 @@ namespace UI.Pages
                 return false;
             }
 
+            if (!CanMoveToInventory(dragSourceInventory, dragSourceSlot, hoveredInventory))
+            {
+                return false;
+            }
+
             if (!inventoryViews.TryGetValue(hoveredInventory, out var hoveredView))
             {
                 return false;
@@ -554,7 +594,9 @@ namespace UI.Pages
             }
 
             var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
-            if (handItemConfig == null || slotModel.ItemType != handItemConfig.ItemType)
+            if (handItemConfig == null
+             || slotModel.ItemType != handItemConfig.ItemType
+             || !CanMoveToPlayerSlot(dragSourceInventory, dragSourceSlot))
             {
                 return false;
             }
