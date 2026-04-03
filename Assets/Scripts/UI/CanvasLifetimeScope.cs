@@ -15,8 +15,8 @@ namespace UI
 
             builder.Register<MainPage>(Lifetime.Singleton);
             builder.Register<DialoguePage>(Lifetime.Singleton);
-            builder.Register<TradePage>(Lifetime.Singleton);
             
+            builder.RegisterEntryPoint<TradePage>().AsSelf();
             builder.RegisterEntryPoint<InventoryPage>().AsSelf();
             builder.RegisterEntryPoint<LootingPage>().AsSelf();
             builder.RegisterEntryPoint<PagesController>();

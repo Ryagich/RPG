@@ -26,6 +26,9 @@ namespace Inventory
         private readonly GameModesController gameModesController;
         private bool backpackResizePendingAfterHandAction;
         private ItemConfig backpackTakenFromSlot;
+        private IInventory handSourceInventory;
+        private SlotModel handSourceSlot;
+        private Matrix4x4 handSourcePosition;
 
         public InventoryHandController
             (
@@ -57,6 +60,10 @@ namespace Inventory
                 return;
             }
 
+            handSourceInventory = null;
+            handSourceSlot = null;
+            handSourcePosition = Matrix4x4.identity;
+
             var interactionPage = GetCurrentInteractionPage();
             var pointer = Pointer.current;
             if (interactionPage != null && pointer != null
@@ -70,6 +77,7 @@ namespace Inventory
                 }
 
                 playerInventory.HandSlot.Value = new SlotModel(slotItemConfig.ItemType, slotItemConfig);
+                handSourceSlot = slotModel;
                 return;
             }
 
@@ -80,6 +88,8 @@ namespace Inventory
             }
 
             playerInventory.HandSlot.Value = new SlotModel(itemInInventory.ItemConfig.ItemType, itemInInventory.ItemConfig);
+            handSourceInventory = hoveredInventory;
+            handSourcePosition = itemInInventory.Position;
         }
 
         private void OnMouseUp(MouseUp _)
@@ -89,6 +99,11 @@ namespace Inventory
                 return;
             }
             var itemConfig = playerInventory.HandSlot.Value.ItemConfig;
+
+            if (gameModesController.GameMode == GameMode.Trade && HandleTradeMouseUp(itemConfig))
+            {
+                return;
+            }
 
             if (TryAddToHoveredSlot(itemConfig))
             {
@@ -253,6 +268,9 @@ namespace Inventory
         private void ClearHand()
         {
             playerInventory.HandSlot.Value = new SlotModel(ItemType.None, null);
+            handSourceInventory = null;
+            handSourceSlot = null;
+            handSourcePosition = Matrix4x4.identity;
             GetCurrentInteractionPage()?.ResetGrabOffset();
             ProcessDelayedBackpackResize();
         }
@@ -277,12 +295,12 @@ namespace Inventory
         
         private static IInventoryInteractionPage GetCurrentInteractionPage()
         {
-            return LootingPage.CurrentInteractionPage ?? InventoryPage.CurrentInteractionPage;
+            return TradePage.CurrentInteractionPage ?? LootingPage.CurrentInteractionPage ?? InventoryPage.CurrentInteractionPage;
         }
 
         private static bool IsInventoryInteractionMode(GameMode mode)
         {
-            return mode == GameMode.Inventory || mode == GameMode.Looting;
+            return mode == GameMode.Inventory || mode == GameMode.Looting || mode == GameMode.Trade;
         }
         
         private void ThrowItem(ItemConfig itemConfig)
@@ -298,6 +316,60 @@ namespace Inventory
             {
                 SpawnItemInWorld(droppedItem);
             }
+        }
+        
+        private bool HandleTradeMouseUp(ItemConfig itemConfig)
+        {
+            var tradePage = TradePage.Current;
+            var pointer = Pointer.current;
+            if (tradePage == null || pointer == null)
+            {
+                return false;
+            }
+
+            if (tradePage.CanMoveToPlayerSlot(handSourceInventory, handSourceSlot) && TryAddToHoveredSlot(itemConfig))
+            {
+                tradePage.ConsumeSellOriginIfAny(itemConfig, handSourceInventory);
+                ClearHand();
+                return true;
+            }
+
+            if (InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out _)
+             && tradePage.CanMoveToInventory(handSourceInventory, handSourceSlot, hoveredInventory)
+             && TryAddToHoveredTile(itemConfig))
+            {
+                if (tradePage.IsSellInventory(hoveredInventory))
+                {
+                    tradePage.RegisterMoveIntoSell(itemConfig, hoveredInventory, handSourceInventory, handSourceSlot, handSourcePosition);
+                }
+                else
+                {
+                    tradePage.ConsumeSellOriginIfAny(itemConfig, handSourceInventory);
+                }
+
+                ClearHand();
+                return true;
+            }
+
+            if (tradePage.IsInPlayerSections(pointer.position.ReadValue())
+             && tradePage.CanMoveToInventory(handSourceInventory, handSourceSlot, playerInventory)
+             && playerInventory.TryAdd(itemConfig))
+            {
+                tradePage.ConsumeSellOriginIfAny(itemConfig, handSourceInventory);
+                ClearHand();
+                return true;
+            }
+
+            if (tradePage.IsInTargetSection(pointer.position.ReadValue())
+             && tradePage.CanMoveToInventory(handSourceInventory, handSourceSlot, tradePage.GetTargetInventory())
+             && tradePage.GetTargetInventory().TryAdd(itemConfig))
+            {
+                tradePage.ConsumeSellOriginIfAny(itemConfig, handSourceInventory);
+                ClearHand();
+                return true;
+            }
+
+            return false;
         }
 
         private void ProcessDelayedBackpackResize()
