@@ -168,6 +168,7 @@ namespace UI.Pages
                 return false;
             }
 
+            // ReSharper disable once Unity.NoNullPropagation
             var handItemType = playerInventory.HandSlot.Value?.ItemConfig?.ItemType;
             if (TryGetSlotUnderPointer(slotsViewContainer.HeadSlot, playerInventory.HelmSlot, screenPoint, handItemType, out slotModel))
             {
@@ -445,8 +446,9 @@ namespace UI.Pages
             }
 
             var rect = gridRect.rect;
-            var xFromLeft = localPoint.x + rect.width * gridRect.pivot.x;
-            var yFromTop = rect.height * (1f - gridRect.pivot.y) - localPoint.y;
+            var pivot = gridRect.pivot;
+            var xFromLeft = localPoint.x + rect.width * pivot.x;
+            var yFromTop = rect.height * (1f - pivot.y) - localPoint.y;
             var stepX = gridLayoutGroup.cellSize.x + gridLayoutGroup.spacing.x;
             var stepY = gridLayoutGroup.cellSize.y + gridLayoutGroup.spacing.y;
             if (stepX <= 0 || stepY <= 0)

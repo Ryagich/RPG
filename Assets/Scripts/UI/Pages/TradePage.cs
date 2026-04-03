@@ -8,7 +8,6 @@ using Inventory.Item;
 using Inventory.Slot;
 using MessagePipe;
 using Messages;
-using UI;
 using UI.Configs;
 using UI.Inventory;
 using UniRx;
@@ -163,11 +162,13 @@ namespace UI.Pages
             targetSellInventory.Items.ObserveCountChanged().Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
             playerInventory.HandSlot.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
             
+            // ReSharper disable once Unity.NoNullPropagation
             if (rightSellInfo?.TradeButton)
             {
                 rightSellInfo.TradeButton.onClick.AddListener(CompletePlayerSell);
             }
 
+            // ReSharper disable once Unity.NoNullPropagation
             if (leftSellInfo?.TradeButton)
             {
                 leftSellInfo.TradeButton.onClick.AddListener(CompleteTargetSell);
@@ -203,11 +204,13 @@ namespace UI.Pages
             playerSellOrigins.Clear();
             targetSellOrigins.Clear();
             
+            // ReSharper disable once Unity.NoNullPropagation
             if (rightSellInfo?.TradeButton)
             {
                 rightSellInfo.TradeButton.onClick.RemoveListener(CompletePlayerSell);
             }
 
+            // ReSharper disable once Unity.NoNullPropagation
             if (leftSellInfo?.TradeButton)
             {
                 leftSellInfo.TradeButton.onClick.RemoveListener(CompleteTargetSell);
@@ -258,6 +261,7 @@ namespace UI.Pages
                 return false;
             }
 
+            // ReSharper disable once Unity.NoNullPropagation
             var handItemType = playerInventory.HandSlot.Value?.ItemConfig?.ItemType;
             var eventCamera = GetEventCamera();
 
@@ -680,8 +684,9 @@ namespace UI.Pages
             }
 
             var rect = gridRect.rect;
-            var xFromLeft = localPoint.x + rect.width * gridRect.pivot.x;
-            var yFromTop = rect.height * (1f - gridRect.pivot.y) - localPoint.y;
+            var pivot = gridRect.pivot;
+            var xFromLeft = localPoint.x + rect.width * pivot.x;
+            var yFromTop = rect.height * (1f - pivot.y) - localPoint.y;
             var stepX = gridLayoutGroup.cellSize.x + gridLayoutGroup.spacing.x;
             var stepY = gridLayoutGroup.cellSize.y + gridLayoutGroup.spacing.y;
             if (stepX <= 0 || stepY <= 0)
