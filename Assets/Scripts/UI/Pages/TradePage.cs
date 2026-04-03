@@ -71,6 +71,7 @@ namespace UI.Pages
         private readonly CompositeDisposable redrawDisposables = new();
         private readonly Dictionary<IInventory, InventoryView> inventoryViews = new();
         private readonly Dictionary<IInventory, Vector2Int> lastGridSizes = new();
+        private readonly List<ScrollRect> inventoryScrollRects = new();
         private readonly List<RectTransform> itemRects = new();
         private readonly List<RectTransform> itemGrabRects = new();
         private readonly Dictionary<ItemConfig, Queue<SellItemOrigin>> playerSellOrigins = new();
@@ -149,6 +150,7 @@ namespace UI.Pages
             inventoryViews[targetInventory] = targetInventoryView;
             inventoryViews[playerSellInventory] = playerSellInventoryView;
             inventoryViews[targetSellInventory] = targetSellInventoryView;
+            CacheInventoryScrollRects();
 
             foreach (var inventory in inventoryViews.Keys.ToArray())
             {
@@ -197,6 +199,7 @@ namespace UI.Pages
             itemGrabRects.Clear();
             inventoryViews.Clear();
             lastGridSizes.Clear();
+            inventoryScrollRects.Clear();
             playerSellOrigins.Clear();
             targetSellOrigins.Clear();
             
@@ -377,6 +380,7 @@ namespace UI.Pages
             }
 
             EnsureTilesMatchInventorySize();
+            UpdateInventoryScrollState();
             itemRects.Clear();
             itemGrabRects.Clear();
 
@@ -414,6 +418,39 @@ namespace UI.Pages
             }
             
             lastGridSizes[inventory] = new Vector2Int(gridWidth, gridHeight);
+        }
+
+        private void CacheInventoryScrollRects()
+        {
+            inventoryScrollRects.Clear();
+
+            foreach (var inventoryView in inventoryViews.Values)
+            {
+                if (!inventoryView)
+                {
+                    continue;
+                }
+
+                var scrollRect = inventoryView.GetComponent<ScrollRect>() ?? inventoryView.GetComponentInParent<ScrollRect>();
+                if (scrollRect && !inventoryScrollRects.Contains(scrollRect))
+                {
+                    inventoryScrollRects.Add(scrollRect);
+                }
+            }
+        }
+
+        private void UpdateInventoryScrollState()
+        {
+            var isDraggingItem = playerInventory.HandSlot.Value?.ItemConfig != null;
+            foreach (var scrollRect in inventoryScrollRects)
+            {
+                if (!scrollRect)
+                {
+                    continue;
+                }
+
+                scrollRect.enabled = !isDraggingItem;
+            }
         }
 
         private void DrawItems(IInventory inventory, InventoryView inventoryView)
