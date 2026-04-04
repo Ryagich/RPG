@@ -16,6 +16,8 @@ using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
 using TMPro;
+using Localization;
+using UI.UIElements;
 
 namespace UI.Pages
 {
@@ -48,6 +50,7 @@ namespace UI.Pages
         }
         
         private readonly UIConfig uiConfig;
+        private readonly LocalizationConfig localizationConfig;
         private readonly PlayerInventory playerInventory;
         private readonly Character.CharacterInfo playerCharacterInfo;
         private readonly DialogueContext dialogueContext;
@@ -59,6 +62,8 @@ namespace UI.Pages
         private RectTransform contentRect = null!;
         private RectTransform leftRect = null!;
         private RectTransform rightRect = null!;
+        private InfoAboutInventory leftInfoAboutInventory = null!;
+        private InfoAboutInventory rightInfoAboutInventory = null!;
         private SlotsViewContainer centerSection = null!;
         private InventoryView playerInventoryView = null!;
         private InventoryView targetInventoryView = null!;
@@ -87,6 +92,7 @@ namespace UI.Pages
         public TradePage
             (
                 UIConfig uiConfig,
+                LocalizationConfig localizationConfig,
                 PlayerInventory playerInventory,
                 Character.CharacterInfo playerCharacterInfo,
                 DialogueContext dialogueContext,
@@ -96,6 +102,7 @@ namespace UI.Pages
             )
         {
             this.uiConfig = uiConfig;
+            this.localizationConfig = localizationConfig;
             this.playerInventory = playerInventory;
             this.playerCharacterInfo = playerCharacterInfo;
             this.dialogueContext = dialogueContext;
@@ -135,14 +142,14 @@ namespace UI.Pages
             rightRect = resolver.Instantiate(uiConfig.RightSection, contentRect);
 
             var leftInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, leftRect);
-            resolver.Instantiate(uiConfig.InfoAboutInventory, leftRect);
+            leftInfoAboutInventory = leftInfoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, leftRect);
             leftSellInfo = resolver.Instantiate(uiConfig.SellInfo, leftRect);
             targetSellInventoryView = resolver.Instantiate(uiConfig.SellInventory, leftRect).GetComponent<InventoryView>();
             targetInventoryView = resolver.Instantiate(uiConfig.InventoryInTrading, leftRect).GetComponent<InventoryView>();
             PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, dialogueContext.CurrentTargetCharacterInfo);
 
             var rightInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
-            resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
+            rightInfoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
             rightSellInfo = resolver.Instantiate(uiConfig.SellInfo, rightRect);
             playerSellInventoryView = resolver.Instantiate(uiConfig.SellInventory, rightRect).GetComponent<InventoryView>();
             playerInventoryView = resolver.Instantiate(uiConfig.InventoryInTrading, rightRect).GetComponent<InventoryView>();
@@ -233,6 +240,8 @@ namespace UI.Pages
             contentRect = null;
             leftRect = null;
             rightRect = null;
+            leftInfoAboutInventory = null;
+            rightInfoAboutInventory = null;
             centerSection = null;
             playerInventoryView = null;
             targetInventoryView = null;
@@ -437,8 +446,23 @@ namespace UI.Pages
 
             DrawSlotItems();
             DrawHandSlot();
+            UpdateInventoryInfo();
             UpdateSellInfo();
             CacheSlotItems();
+        }
+        
+        private void UpdateInventoryInfo()
+        {
+            var targetInventory = dialogueContext.CurrentTargetInventory;
+
+            var playerWeight = PageUiUtilities.GetItemsWeight(playerInventory)
+                             + PageUiUtilities.GetSlotsWeight(playerInventory.HelmSlot, playerInventory.BodySlot, playerInventory.BackpackSlot)
+                             + PageUiUtilities.GetItemsWeight(playerSellInventory);
+            PageUiUtilities.FillInfoAboutInventory(rightInfoAboutInventory, localizationConfig, playerWeight, playerInventory.MaxWeight);
+
+            var targetWeight = PageUiUtilities.GetItemsWeight(targetInventory)
+                             + PageUiUtilities.GetItemsWeight(targetSellInventory);
+            PageUiUtilities.FillInfoAboutInventory(leftInfoAboutInventory, localizationConfig, targetWeight, targetInventory?.MaxWeight);
         }
 
         private void UpdateSellInfo()
@@ -447,16 +471,15 @@ namespace UI.Pages
             UpdateSellInfoText(leftSellInfo, targetSellInventory);
         }
 
-        private static void UpdateSellInfoText(SellInfo sellInfo, IInventory sellInventory)
+        private void UpdateSellInfoText(SellInfo sellInfo, IInventory sellInventory)
         {
             if (!sellInfo.InfoText || sellInventory == null)
             {
                 return;
             }
 
-            var totalPrice = sellInventory.Items.Sum(item => item.ItemConfig.Price);
             var totalWeight = sellInventory.Items.Sum(item => item.ItemConfig.Weight);
-            sellInfo.InfoText.text = $"<color=#FFFFFF>{totalPrice}</color> <color=#808080>({totalWeight:F1} кг)</color>";
+            PageUiUtilities.FillSellInventoryWeightText(sellInfo.InfoText, localizationConfig, totalWeight);
         }
         
         private void DrawTiles(IInventory inventory)

@@ -12,7 +12,9 @@ using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
 using Inventory.Item;
+using Localization;
 using UI.Inventory;
+using UI.UIElements;
 
 namespace UI.Pages
 {
@@ -24,6 +26,7 @@ namespace UI.Pages
         public static IInventoryInteractionPage CurrentInteractionPage => Current;
 
         private readonly UIConfig uiConfig;
+        private readonly LocalizationConfig localizationConfig;
         private readonly PlayerInventory playerInventory;
         private readonly Character.CharacterInfo playerCharacterInfo;
         private readonly LootingContext lootingContext;
@@ -34,6 +37,8 @@ namespace UI.Pages
         private RectTransform contentRect = null!;
         private RectTransform rightRect = null!;
         private RectTransform leftRect = null!;
+        private InfoAboutInventory rightInfoAboutInventory = null!;
+        private InfoAboutInventory leftInfoAboutInventory = null!;
         private SlotsViewContainer slotsViewContainer = null!;
         private InventoryView playerInventoryView = null!;
         private InventoryView targetInventoryView = null!;
@@ -50,15 +55,19 @@ namespace UI.Pages
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastBackpackItemConfig;
 
-        public LootingPage(
-            UIConfig uiConfig,
-            Canvas canvas,
-            PlayerInventory playerInventory,
-            Character.CharacterInfo playerCharacterInfo,
-            LootingContext lootingContext,
-            IObjectResolver resolver)
+        public LootingPage
+            (
+                UIConfig uiConfig,
+                LocalizationConfig localizationConfig,
+                Canvas canvas,
+                PlayerInventory playerInventory,
+                Character.CharacterInfo playerCharacterInfo,
+                LootingContext lootingContext,
+                IObjectResolver resolver
+            )
         {
             this.uiConfig = uiConfig;
+            this.localizationConfig = localizationConfig;
             this.canvas = canvas;
             this.playerInventory = playerInventory;
             this.playerCharacterInfo = playerCharacterInfo;
@@ -85,12 +94,12 @@ namespace UI.Pages
             rightRect = resolver.Instantiate(uiConfig.RightSection, contentRect);
             
             var rightInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
-            resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
+            rightInfoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
             playerInventoryView = resolver.Instantiate(uiConfig.InventoryView, rightRect);
             PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo);
 
             var leftInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, leftRect);
-            resolver.Instantiate(uiConfig.InfoAboutInventory, leftRect);
+            leftInfoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, leftRect);
             targetInventoryView = resolver.Instantiate(uiConfig.InventoryView, leftRect);
             PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, lootingContext.CurrentTargetCharacterInfo);
             
@@ -146,7 +155,19 @@ namespace UI.Pages
 
             DrawSlotItems();
             DrawHandSlot();
+            UpdateInventoryInfo();
             CacheSlotItems();
+        }
+
+        private void UpdateInventoryInfo()
+        {
+            var playerWeight = PageUiUtilities.GetItemsWeight(playerInventory)
+                             + PageUiUtilities.GetSlotsWeight(playerInventory.HelmSlot, playerInventory.BodySlot, playerInventory.BackpackSlot);
+            PageUiUtilities.FillInfoAboutInventory(rightInfoAboutInventory, localizationConfig, playerWeight, playerInventory.MaxWeight);
+
+            var targetInventory = lootingContext.CurrentTargetInventory;
+            var targetWeight = PageUiUtilities.GetItemsWeight(targetInventory);
+            PageUiUtilities.FillInfoAboutInventory(leftInfoAboutInventory, localizationConfig, targetWeight, targetInventory?.MaxWeight);
         }
 
         public bool TryCaptureGrabOffset(Vector2 screenPoint)
@@ -603,6 +624,8 @@ namespace UI.Pages
             contentRect = null;
             rightRect = null;
             leftRect = null;
+            rightInfoAboutInventory = null;
+            leftInfoAboutInventory = null;
             slotsViewContainer = null;
             playerInventoryView = null;
             targetInventoryView = null;

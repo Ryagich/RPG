@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using Inventory.Item;
 using Inventory.Inventories;
 using Inventory.Slot;
 using Localization;
+using TMPro;
 using UI.UIElements;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -45,7 +47,78 @@ namespace UI.Pages
                 itemSize.x * gridLayoutGroup.cellSize.x + (itemSize.x - 1) * gridLayoutGroup.spacing.x,
                 itemSize.y * gridLayoutGroup.cellSize.y + (itemSize.y - 1) * gridLayoutGroup.spacing.y);
         }
+        
+        public static void FillInfoAboutInventory(InfoAboutInventory infoAboutInventory, LocalizationConfig localizationConfig, float currentWeight, float? maxWeight)
+        {
+            if (infoAboutInventory == null || infoAboutInventory.Weight == null || localizationConfig == null)
+            {
+                return;
+            }
 
+            var currentWeightText = currentWeight.ToString("F1", CultureInfo.InvariantCulture);
+            var currentWeightLabel = localizationConfig.InventoryCurrentWeight.GetLocalizedStringCached();
+            var kgLabel = localizationConfig.kg.GetLocalizedStringCached();
+            var maxLabel = localizationConfig.max.GetLocalizedStringCached();
+            var maxText = maxWeight.HasValue && maxWeight.Value >= 0f
+                ? $"{maxLabel} {maxWeight.Value.ToString("F1", CultureInfo.InvariantCulture)} {kgLabel}"
+                : $"{maxLabel} ...";
+
+            infoAboutInventory.Weight.text =
+                $"<color=#808080>{currentWeightLabel}</color> " +
+                $"<color=#FFFFFF>{currentWeightText}</color> " +
+                $"<color=#FFFFFF>{kgLabel}</color> " +
+                $"<color=#808080>({maxText})</color>";
+        }
+
+        public static void FillSellInventoryWeightText(TMP_Text infoText, LocalizationConfig localizationConfig, float currentWeight)
+        {
+            if (infoText == null || localizationConfig == null)
+            {
+                return;
+            }
+
+            var currentWeightText = currentWeight.ToString("F1", CultureInfo.InvariantCulture);
+            var currentWeightLabel = localizationConfig.InventoryCurrentWeight.GetLocalizedStringCached();
+            var kgLabel = localizationConfig.kg.GetLocalizedStringCached();
+            infoText.text =
+                $"<color=#808080>{currentWeightLabel}</color> " +
+                $"<color=#FFFFFF>{currentWeightText}</color> " +
+                $"<color=#FFFFFF>{kgLabel}</color>";
+        }
+
+        public static float GetItemsWeight(IInventory inventory)
+        {
+            if (inventory == null)
+            {
+                return 0f;
+            }
+
+            var weight = 0f;
+            foreach (var item in inventory.Items)
+            {
+                if (item?.ItemConfig != null)
+                {
+                    weight += item.ItemConfig.Weight;
+                }
+            }
+
+            return weight;
+        }
+
+        public static float GetSlotsWeight(params SlotModel[] slots)
+        {
+            var weight = 0f;
+            foreach (var slot in slots)
+            {
+                if (slot?.ItemConfig != null)
+                {
+                    weight += slot.ItemConfig.Weight;
+                }
+            }
+
+            return weight;
+        }
+        
         public static Vector2 GetItemAnchoredPosition(GridLayoutGroup gridLayoutGroup, Vector3 itemCenterPosition)
         {
             return new Vector2(

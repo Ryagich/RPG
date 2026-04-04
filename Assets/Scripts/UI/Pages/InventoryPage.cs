@@ -11,6 +11,7 @@ using VContainer;
 using VContainer.Unity;
 using Inventory.Item;
 using Localization;
+using UI.UIElements;
 using CharacterInfo = Character.CharacterInfo;
 
 namespace UI.Pages
@@ -32,6 +33,7 @@ namespace UI.Pages
 
         private RectTransform contentRect = null!;
         private RectTransform rightRect = null!;
+        private InfoAboutInventory infoAboutInventory = null!;
         private SlotsViewContainer slotsViewContainer = null!;
         private Inventory.InventoryView inventoryView = null!;
         private RectTransform handSlotRect = null!;
@@ -76,7 +78,7 @@ namespace UI.Pages
             slotsViewContainer = resolver.Instantiate(uiConfig.CenterSection, contentRect);
             
             var infoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
-            var infoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
+            infoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
             inventoryView = resolver.Instantiate(uiConfig.InventoryView, rightRect);
             inventoryScrollRect = inventoryView.GetComponent<ScrollRect>();
             PageUiUtilities.FillInfoAboutPlayer(infoAboutPlayer, characterInfo);
@@ -121,7 +123,15 @@ namespace UI.Pages
             DrawItems(inventoryView);
             DrawSlotItems();
             DrawHandSlot();
+            UpdateInventoryInfo();
             CacheSlotItems();
+        }
+
+        private void UpdateInventoryInfo()
+        {
+            var currentWeight = PageUiUtilities.GetItemsWeight(playerInventory)
+                              + PageUiUtilities.GetSlotsWeight(playerInventory.HelmSlot, playerInventory.BodySlot, playerInventory.BackpackSlot);
+            PageUiUtilities.FillInfoAboutInventory(infoAboutInventory, localizationConfig, currentWeight, playerInventory.MaxWeight);
         }
         
         public bool TryCaptureGrabOffset(Vector2 screenPoint)
@@ -508,6 +518,7 @@ namespace UI.Pages
 
             contentRect = null;
             rightRect = null;
+            infoAboutInventory = null;
             slotsViewContainer = null;
             inventoryView = null;
             inventoryScrollRect = null;

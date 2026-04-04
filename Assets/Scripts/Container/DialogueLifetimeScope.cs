@@ -1,5 +1,6 @@
 ﻿using Container.Dialogue;
 using Interactable;
+using Inventory;
 using Inventory.Inventories;
 using UnityEngine;
 using VContainer;
@@ -10,6 +11,7 @@ namespace Container
     public class DialogueLifetimeScope : LifetimeScope
     {
         [SerializeField] private Character.CharacterInfo characterInfo;
+        [SerializeField] private InventoryConfig inventoryConfig;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -18,6 +20,10 @@ namespace Container
 
             builder.RegisterInstance(interactable);
             builder.RegisterInstance(characterInfo).AsSelf();
+            if (inventoryConfig != null)
+            {
+                builder.RegisterInstance(inventoryConfig).AsSelf();
+            }
             builder.RegisterEntryPoint<ChestInventory>().As<IInventory>().AsSelf();
             builder.RegisterEntryPoint<DialogueInteractableLogic>().AsSelf();
         }

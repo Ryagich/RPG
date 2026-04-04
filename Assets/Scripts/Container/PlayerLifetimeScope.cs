@@ -14,6 +14,7 @@ namespace Container
     {
         [SerializeField] private CanvasLifetimeScope canvasLifetimeScope;
         [SerializeField] private Character.CharacterInfo characterInfo;
+        [SerializeField] private InventoryConfig inventoryConfig;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -23,7 +24,11 @@ namespace Container
             builder.RegisterInstance("Player").Keyed("Scope ID"); 
             
             builder.RegisterInstance(characterInfo).AsSelf();
-                
+            if (inventoryConfig != null)
+            {
+                builder.RegisterInstance(inventoryConfig).AsSelf();
+            }
+            
             var founder = gameObject.AddComponent<InteractableFounder>();
             builder.RegisterComponent(founder).AsSelf();
             
@@ -43,4 +48,4 @@ namespace Container
             builder.RegisterEntryPoint<InventoryHandController>().AsSelf();
         }
     }
-}   
+}
