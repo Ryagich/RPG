@@ -77,10 +77,10 @@ namespace Inventory
                     backpackTakenFromSlot = slotItemConfig;
                 }
 
-                playerInventory.HandSlot.Value = new SlotModel(slotItemConfig.ItemType, slotItemConfig);
                 handSourceInventory = playerInventory;
                 handSourceSlot = slotModel;
                 playerInventory.HandSourceInventory.Value = handSourceInventory;
+                playerInventory.HandSlot.Value = new SlotModel(slotItemConfig.ItemType, slotItemConfig);
                 TradePage.Current?.SetDragSource(handSourceInventory, handSourceSlot);
                 return;
             }
@@ -91,10 +91,10 @@ namespace Inventory
                 return;
             }
 
-            playerInventory.HandSlot.Value = new SlotModel(itemInInventory.ItemConfig.ItemType, itemInInventory.ItemConfig);
             handSourceInventory = hoveredInventory;
             handSourcePosition = itemInInventory.Position;
             playerInventory.HandSourceInventory.Value = handSourceInventory;
+            playerInventory.HandSlot.Value = new SlotModel(itemInInventory.ItemConfig.ItemType, itemInInventory.ItemConfig);
             TradePage.Current?.SetDragSource(handSourceInventory, handSourceSlot);
         }
 

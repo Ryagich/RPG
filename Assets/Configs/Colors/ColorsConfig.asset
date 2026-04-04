@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed11c05ec91f41c48eb6f71ae0661a7c, type: 3}
   m_Name: ColorsConfig
   m_EditorClassIdentifier: Assembly-CSharp::Colors.ColorsConfig
-  <WhiteHex>k__BackingField: '#FFFFFF'
-  <GrayHex>k__BackingField: '#808080'
+  <White>k__BackingField: {r: 0.93710685, g: 0.93710685, b: 0.93710685, a: 1}
+  <Gray>k__BackingField: {r: 0.7610062, g: 0.710751, b: 0.710751, a: 1}
