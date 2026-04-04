@@ -10,9 +10,18 @@ namespace Inventory.Inventories
     // ReSharper disable once ClassNeverInstantiated.Global
     public class ChestInventory : ITiledInventory
     {
+        private readonly InventoryConfig inventoryConfig;
         public ReactiveCollection<ItemInInventory> Items { get; } = new();
+        public float MaxWeight { get; set; }
 
         public Tiles Tiles { get; } = new(7, 2);
+
+        public ChestInventory(InventoryConfig inventoryConfig)
+        {
+            this.inventoryConfig = inventoryConfig;
+            MaxWeight = inventoryConfig.DefaultMaxWeight;
+        }
+        
 
         public bool CanAdd(ItemConfig config, Tile tile)
         {

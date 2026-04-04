@@ -37,6 +37,18 @@ MonoBehaviour:
     m_Key: Cashe
     m_Metadata:
       m_Items: []
+  - m_Id: 9087536256499712
+    m_Key: Inventory_Current_Weight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9087809272135680
+    m_Key: Kg
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9088031205343232
+    m_Key: max
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

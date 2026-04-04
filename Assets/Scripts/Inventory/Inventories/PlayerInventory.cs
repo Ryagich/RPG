@@ -17,6 +17,7 @@ namespace Inventory.Inventories
         public ReactiveProperty<SlotModel> HandSlot { get; } = new(new SlotModel(ItemType.None, null));
 
         public Tiles Tiles { get; private set; }
+        public float MaxWeight { get; set; }
         
         public SlotModel HelmSlot = new(ItemType.Helm);
         public SlotModel BodySlot = new(ItemType.Body);
@@ -26,6 +27,7 @@ namespace Inventory.Inventories
         {
             this.inventoryConfig = inventoryConfig;
             var inventorySize = GetCurrentInventorySize();
+            MaxWeight = inventoryConfig.DefaultMaxWeight;
             Tiles = new Tiles(inventorySize.x, inventorySize.y);
         }
         

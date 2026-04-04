@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
 using Inventory.Item;
+using Localization;
 using CharacterInfo = Character.CharacterInfo;
 
 namespace UI.Pages
@@ -22,6 +23,7 @@ namespace UI.Pages
         public static IInventoryInteractionPage CurrentInteractionPage => Current;
         
         private readonly UIConfig uiConfig;
+        private readonly LocalizationConfig localizationConfig;
         private readonly PlayerInventory playerInventory;
         private readonly CharacterInfo characterInfo;
         private readonly Canvas canvas;
@@ -47,6 +49,7 @@ namespace UI.Pages
         public InventoryPage
             (
                 UIConfig uiConfig,
+                LocalizationConfig localizationConfig,
                 Canvas canvas,
                 PlayerInventory playerInventory,
                 CharacterInfo characterInfo,
@@ -54,6 +57,7 @@ namespace UI.Pages
             )
         {
             this.uiConfig = uiConfig;
+            this.localizationConfig = localizationConfig;
             this.canvas = canvas;
             this.playerInventory = playerInventory;
             this.characterInfo = characterInfo;

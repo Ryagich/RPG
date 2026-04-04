@@ -38,6 +38,18 @@ MonoBehaviour:
     m_Localized: Cashe
     m_Metadata:
       m_Items: []
+  - m_Id: 9087536256499712
+    m_Localized: Current Weight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9087809272135680
+    m_Localized: kg
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9088031205343232
+    m_Localized: max
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

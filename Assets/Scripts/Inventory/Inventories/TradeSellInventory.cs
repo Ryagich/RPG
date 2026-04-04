@@ -14,6 +14,7 @@ namespace Inventory.Inventories
         private const int RequiredFreeRows = 4;
 
         public ReactiveCollection<ItemInInventory> Items { get; } = new();
+        public float MaxWeight { get; set; }
         public Tiles Tiles { get; private set; } = new(GridWidth, DefaultRows);
 
         public bool CanAdd(ItemConfig config, Tile tile)

@@ -8,6 +8,7 @@ namespace Inventory.Inventories
     public interface IInventory
     {
         public ReactiveCollection<ItemInInventory> Items { get;}
+        public float MaxWeight { get; set; }
         public bool CanAdd(ItemConfig config, Tile tile);
         public bool TryAdd(ItemConfig config);
         public bool TryAdd(ItemConfig config, Tile tile);
