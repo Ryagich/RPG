@@ -130,7 +130,10 @@ namespace UI.Pages
         private void UpdateInventoryInfo()
         {
             var currentWeight = PageUiUtilities.GetItemsWeight(playerInventory)
-                              + PageUiUtilities.GetSlotsWeight(playerInventory.HelmSlot, playerInventory.BodySlot, playerInventory.BackpackSlot);
+                              + PageUiUtilities.GetSlotsWeight(playerInventory.HelmSlot, 
+                                                               playerInventory.BodySlot, 
+                                                               playerInventory.BackpackSlot, 
+                                                               playerInventory.HandSlot.Value);
             PageUiUtilities.FillInfoAboutInventory(infoAboutInventory, localizationConfig, currentWeight, playerInventory.MaxWeight);
         }
         
