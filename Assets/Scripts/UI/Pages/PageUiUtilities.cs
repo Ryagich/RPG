@@ -64,11 +64,14 @@ namespace UI.Pages
                 ? $"{maxLabel} {maxWeight.Value.ToString("F1", CultureInfo.InvariantCulture)} {kgLabel}"
                 : $"{maxLabel} ...";
 
+            var grayColor = ColorUtility.ToHtmlStringRGB(colorsConfig.Gray);
+            var whiteColor = ColorUtility.ToHtmlStringRGB(colorsConfig.White);
+            
             infoAboutInventory.Weight.text =
-                $"<color={colorsConfig.GrayHex}>{currentWeightLabel}</color> " +
-                $"<color={colorsConfig.WhiteHex}>{currentWeightText}</color> " +
-                $"<color={colorsConfig.WhiteHex}>{kgLabel}</color> " +
-                $"<color={colorsConfig.GrayHex}>({maxText})</color>";
+                $"<color=#{grayColor}>{currentWeightLabel}</color> " +
+                $"<color=#{whiteColor}>{currentWeightText}</color> " +
+                $"<color=#{whiteColor}>{kgLabel}</color> " +
+                $"<color=#{grayColor}>({maxText})</color>";
         }
 
         public static void FillSellInventoryWeightText(TMP_Text infoText, LocalizationConfig localizationConfig, ColorsConfig colorsConfig, float currentWeight)
@@ -81,10 +84,13 @@ namespace UI.Pages
             var currentWeightText = currentWeight.ToString("F1", CultureInfo.InvariantCulture);
             var currentWeightLabel = localizationConfig.InventoryCurrentWeight.GetLocalizedStringCached();
             var kgLabel = localizationConfig.kg.GetLocalizedStringCached();
+            var grayColor = ColorUtility.ToHtmlStringRGB(colorsConfig.Gray);
+            var whiteColor = ColorUtility.ToHtmlStringRGB(colorsConfig.White);
+
             infoText.text =
-                $"<color={colorsConfig.GrayHex}>{currentWeightLabel}</color> " +
-                $"<color={colorsConfig.WhiteHex}>{currentWeightText}</color> " +
-                $"<color={colorsConfig.WhiteHex}>{kgLabel}</color>";
+                $"<color=#{grayColor}>{currentWeightLabel}</color> " +
+                $"<color=#{whiteColor}>{currentWeightText}</color> " +
+                $"<color=#{whiteColor}>{kgLabel}</color>";
         }
 
         public static float GetItemsWeight(IInventory inventory)

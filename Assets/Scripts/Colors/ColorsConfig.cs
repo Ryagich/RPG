@@ -5,7 +5,7 @@ namespace Colors
     [CreateAssetMenu(fileName = "ColorsConfig", menuName = "configs/Colors/ColorsConfig")]
     public class ColorsConfig : ScriptableObject
     {
-        [field: SerializeField] public string WhiteHex { get; private set; } = "#FFFFFF";
-        [field: SerializeField] public string GrayHex { get; private set; } = "#808080";
+        [field: SerializeField] public Color White { get; private set; } = Color.white;
+        [field: SerializeField] public Color Gray { get; private set; } = Color.gray;
     }
 }
