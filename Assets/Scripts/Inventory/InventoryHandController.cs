@@ -63,6 +63,7 @@ namespace Inventory
             handSourceInventory = null;
             handSourceSlot = null;
             handSourcePosition = Matrix4x4.identity;
+            playerInventory.HandSourceInventory.Value = null;
 
             var interactionPage = GetCurrentInteractionPage();
             var pointer = Pointer.current;
@@ -77,7 +78,9 @@ namespace Inventory
                 }
 
                 playerInventory.HandSlot.Value = new SlotModel(slotItemConfig.ItemType, slotItemConfig);
+                handSourceInventory = playerInventory;
                 handSourceSlot = slotModel;
+                playerInventory.HandSourceInventory.Value = handSourceInventory;
                 TradePage.Current?.SetDragSource(handSourceInventory, handSourceSlot);
                 return;
             }
@@ -91,6 +94,7 @@ namespace Inventory
             playerInventory.HandSlot.Value = new SlotModel(itemInInventory.ItemConfig.ItemType, itemInInventory.ItemConfig);
             handSourceInventory = hoveredInventory;
             handSourcePosition = itemInInventory.Position;
+            playerInventory.HandSourceInventory.Value = handSourceInventory;
             TradePage.Current?.SetDragSource(handSourceInventory, handSourceSlot);
         }
 
@@ -274,6 +278,7 @@ namespace Inventory
             handSourceInventory = null;
             handSourceSlot = null;
             handSourcePosition = Matrix4x4.identity;
+            playerInventory.HandSourceInventory.Value = null;
             TradePage.Current?.ClearDragSource();
             GetCurrentInteractionPage()?.ResetGrabOffset();
             ProcessDelayedBackpackResize();

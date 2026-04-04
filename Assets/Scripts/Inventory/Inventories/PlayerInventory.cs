@@ -15,6 +15,7 @@ namespace Inventory.Inventories
         
         public ReactiveCollection<ItemInInventory> Items { get; private set; } = new();
         public ReactiveProperty<SlotModel> HandSlot { get; } = new(new SlotModel(ItemType.None, null));
+        public ReactiveProperty<IInventory> HandSourceInventory { get; } = new(null);
 
         public Tiles Tiles { get; private set; }
         public float MaxWeight { get; set; }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Colors;
 using Inventory.Grid;
 using Inventory.Inventories;
 using Inventory.Slot;
@@ -25,6 +26,7 @@ namespace UI.Pages
         
         private readonly UIConfig uiConfig;
         private readonly LocalizationConfig localizationConfig;
+        private readonly ColorsConfig colorsConfig;
         private readonly PlayerInventory playerInventory;
         private readonly CharacterInfo characterInfo;
         private readonly Canvas canvas;
@@ -52,6 +54,7 @@ namespace UI.Pages
             (
                 UIConfig uiConfig,
                 LocalizationConfig localizationConfig,
+                ColorsConfig colorsConfig,
                 Canvas canvas,
                 PlayerInventory playerInventory,
                 CharacterInfo characterInfo,
@@ -60,6 +63,7 @@ namespace UI.Pages
         {
             this.uiConfig = uiConfig;
             this.localizationConfig = localizationConfig;
+            this.colorsConfig = colorsConfig;
             this.canvas = canvas;
             this.playerInventory = playerInventory;
             this.characterInfo = characterInfo;
@@ -134,7 +138,7 @@ namespace UI.Pages
                                                                playerInventory.BodySlot, 
                                                                playerInventory.BackpackSlot, 
                                                                playerInventory.HandSlot.Value);
-            PageUiUtilities.FillInfoAboutInventory(infoAboutInventory, localizationConfig, currentWeight, playerInventory.MaxWeight);
+            PageUiUtilities.FillInfoAboutInventory(infoAboutInventory, localizationConfig, colorsConfig, currentWeight, playerInventory.MaxWeight);
         }
         
         public bool TryCaptureGrabOffset(Vector2 screenPoint)

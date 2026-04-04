@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
+using Colors;
 using Inventory.Item;
 using Inventory.Inventories;
 using Inventory.Slot;
@@ -48,9 +49,9 @@ namespace UI.Pages
                 itemSize.y * gridLayoutGroup.cellSize.y + (itemSize.y - 1) * gridLayoutGroup.spacing.y);
         }
         
-        public static void FillInfoAboutInventory(InfoAboutInventory infoAboutInventory, LocalizationConfig localizationConfig, float currentWeight, float? maxWeight)
+        public static void FillInfoAboutInventory(InfoAboutInventory infoAboutInventory, LocalizationConfig localizationConfig, ColorsConfig colorsConfig, float currentWeight, float? maxWeight)
         {
-            if (infoAboutInventory == null || infoAboutInventory.Weight == null || localizationConfig == null)
+            if (infoAboutInventory == null || infoAboutInventory.Weight == null || localizationConfig == null || colorsConfig == null)
             {
                 return;
             }
@@ -64,15 +65,15 @@ namespace UI.Pages
                 : $"{maxLabel} ...";
 
             infoAboutInventory.Weight.text =
-                $"<color=#808080>{currentWeightLabel}</color> " +
-                $"<color=#FFFFFF>{currentWeightText}</color> " +
-                $"<color=#FFFFFF>{kgLabel}</color> " +
-                $"<color=#808080>({maxText})</color>";
+                $"<color={colorsConfig.GrayHex}>{currentWeightLabel}</color> " +
+                $"<color={colorsConfig.WhiteHex}>{currentWeightText}</color> " +
+                $"<color={colorsConfig.WhiteHex}>{kgLabel}</color> " +
+                $"<color={colorsConfig.GrayHex}>({maxText})</color>";
         }
 
-        public static void FillSellInventoryWeightText(TMP_Text infoText, LocalizationConfig localizationConfig, float currentWeight)
+        public static void FillSellInventoryWeightText(TMP_Text infoText, LocalizationConfig localizationConfig, ColorsConfig colorsConfig, float currentWeight)
         {
-            if (infoText == null || localizationConfig == null)
+            if (infoText == null || localizationConfig == null || colorsConfig == null)
             {
                 return;
             }
@@ -81,9 +82,9 @@ namespace UI.Pages
             var currentWeightLabel = localizationConfig.InventoryCurrentWeight.GetLocalizedStringCached();
             var kgLabel = localizationConfig.kg.GetLocalizedStringCached();
             infoText.text =
-                $"<color=#808080>{currentWeightLabel}</color> " +
-                $"<color=#FFFFFF>{currentWeightText}</color> " +
-                $"<color=#FFFFFF>{kgLabel}</color>";
+                $"<color={colorsConfig.GrayHex}>{currentWeightLabel}</color> " +
+                $"<color={colorsConfig.WhiteHex}>{currentWeightText}</color> " +
+                $"<color={colorsConfig.WhiteHex}>{kgLabel}</color>";
         }
 
         public static float GetItemsWeight(IInventory inventory)

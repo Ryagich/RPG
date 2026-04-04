@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Colors;
 using Inventory.Grid;
 using Inventory.Inventories;
 using Inventory.Looting;
@@ -27,6 +28,7 @@ namespace UI.Pages
 
         private readonly UIConfig uiConfig;
         private readonly LocalizationConfig localizationConfig;
+        private readonly ColorsConfig colorsConfig;
         private readonly PlayerInventory playerInventory;
         private readonly Character.CharacterInfo playerCharacterInfo;
         private readonly LootingContext lootingContext;
@@ -59,6 +61,7 @@ namespace UI.Pages
             (
                 UIConfig uiConfig,
                 LocalizationConfig localizationConfig,
+                ColorsConfig colorsConfig,
                 Canvas canvas,
                 PlayerInventory playerInventory,
                 Character.CharacterInfo playerCharacterInfo,
@@ -68,6 +71,7 @@ namespace UI.Pages
         {
             this.uiConfig = uiConfig;
             this.localizationConfig = localizationConfig;
+            this.colorsConfig = colorsConfig;
             this.canvas = canvas;
             this.playerInventory = playerInventory;
             this.playerCharacterInfo = playerCharacterInfo;
@@ -163,11 +167,23 @@ namespace UI.Pages
         {
             var playerWeight = PageUiUtilities.GetItemsWeight(playerInventory)
                              + PageUiUtilities.GetSlotsWeight(playerInventory.HelmSlot, playerInventory.BodySlot, playerInventory.BackpackSlot);
-            PageUiUtilities.FillInfoAboutInventory(rightInfoAboutInventory, localizationConfig, playerWeight, playerInventory.MaxWeight);
+            var handWeight = playerInventory.HandSlot.Value?.ItemConfig?.Weight ?? 0f;
+            var handSourceInventory = playerInventory.HandSourceInventory.Value;
+            if (handWeight > 0f && handSourceInventory == playerInventory)
+            {
+                playerWeight += handWeight;
+            }
 
+            PageUiUtilities.FillInfoAboutInventory(rightInfoAboutInventory, localizationConfig, colorsConfig, playerWeight, playerInventory.MaxWeight);
+            
             var targetInventory = lootingContext.CurrentTargetInventory;
             var targetWeight = PageUiUtilities.GetItemsWeight(targetInventory);
-            PageUiUtilities.FillInfoAboutInventory(leftInfoAboutInventory, localizationConfig, targetWeight, targetInventory?.MaxWeight);
+            if (handWeight > 0f && handSourceInventory == targetInventory)
+            {
+                targetWeight += handWeight;
+            }
+
+            PageUiUtilities.FillInfoAboutInventory(leftInfoAboutInventory, localizationConfig, colorsConfig, targetWeight, targetInventory?.MaxWeight);
         }
 
         public bool TryCaptureGrabOffset(Vector2 screenPoint)

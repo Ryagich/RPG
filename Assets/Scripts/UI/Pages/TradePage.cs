@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Colors;
 using Dialogue;
 using GameModes;
 using Inventory.Grid;
@@ -51,6 +52,7 @@ namespace UI.Pages
         
         private readonly UIConfig uiConfig;
         private readonly LocalizationConfig localizationConfig;
+        private readonly ColorsConfig colorsConfig;
         private readonly PlayerInventory playerInventory;
         private readonly Character.CharacterInfo playerCharacterInfo;
         private readonly DialogueContext dialogueContext;
@@ -93,6 +95,7 @@ namespace UI.Pages
             (
                 UIConfig uiConfig,
                 LocalizationConfig localizationConfig,
+                ColorsConfig colorsConfig,
                 PlayerInventory playerInventory,
                 Character.CharacterInfo playerCharacterInfo,
                 DialogueContext dialogueContext,
@@ -103,6 +106,7 @@ namespace UI.Pages
         {
             this.uiConfig = uiConfig;
             this.localizationConfig = localizationConfig;
+            this.colorsConfig = colorsConfig;
             this.playerInventory = playerInventory;
             this.playerCharacterInfo = playerCharacterInfo;
             this.dialogueContext = dialogueContext;
@@ -454,15 +458,27 @@ namespace UI.Pages
         private void UpdateInventoryInfo()
         {
             var targetInventory = dialogueContext.CurrentTargetInventory;
+            var handWeight = playerInventory.HandSlot.Value?.ItemConfig?.Weight ?? 0f;
+            var handSourceInventory = playerInventory.HandSourceInventory.Value;
 
             var playerWeight = PageUiUtilities.GetItemsWeight(playerInventory)
                              + PageUiUtilities.GetSlotsWeight(playerInventory.HelmSlot, playerInventory.BodySlot, playerInventory.BackpackSlot)
                              + PageUiUtilities.GetItemsWeight(playerSellInventory);
-            PageUiUtilities.FillInfoAboutInventory(rightInfoAboutInventory, localizationConfig, playerWeight, playerInventory.MaxWeight);
+            if (handWeight > 0f && (handSourceInventory == playerInventory || handSourceInventory == playerSellInventory))
+            {
+                playerWeight += handWeight;
+            }
+
+            PageUiUtilities.FillInfoAboutInventory(rightInfoAboutInventory, localizationConfig, colorsConfig, playerWeight, playerInventory.MaxWeight);
 
             var targetWeight = PageUiUtilities.GetItemsWeight(targetInventory)
                              + PageUiUtilities.GetItemsWeight(targetSellInventory);
-            PageUiUtilities.FillInfoAboutInventory(leftInfoAboutInventory, localizationConfig, targetWeight, targetInventory?.MaxWeight);
+            if (handWeight > 0f && (handSourceInventory == targetInventory || handSourceInventory == targetSellInventory))
+            {
+                targetWeight += handWeight;
+            }
+
+            PageUiUtilities.FillInfoAboutInventory(leftInfoAboutInventory, localizationConfig, colorsConfig, targetWeight, targetInventory?.MaxWeight);
         }
 
         private void UpdateSellInfo()
@@ -479,7 +495,13 @@ namespace UI.Pages
             }
 
             var totalWeight = sellInventory.Items.Sum(item => item.ItemConfig.Weight);
-            PageUiUtilities.FillSellInventoryWeightText(sellInfo.InfoText, localizationConfig, totalWeight);
+            var handWeight = playerInventory.HandSlot.Value?.ItemConfig?.Weight ?? 0f;
+            if (handWeight > 0f && playerInventory.HandSourceInventory.Value == sellInventory)
+            {
+                totalWeight += handWeight;
+            }
+
+            PageUiUtilities.FillSellInventoryWeightText(sellInfo.InfoText, localizationConfig, colorsConfig, totalWeight);
         }
         
         private void DrawTiles(IInventory inventory)
