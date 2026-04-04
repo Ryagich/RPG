@@ -84,14 +84,16 @@ namespace UI.Pages
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastBackpackItemConfig;
         
-        public TradePage(
-            UIConfig uiConfig,
-            PlayerInventory playerInventory,
-            Character.CharacterInfo playerCharacterInfo,
-            DialogueContext dialogueContext,
-            Canvas canvas,
-            IObjectResolver resolver,
-            IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher)
+        public TradePage
+            (
+                UIConfig uiConfig,
+                PlayerInventory playerInventory,
+                Character.CharacterInfo playerCharacterInfo,
+                DialogueContext dialogueContext,
+                Canvas canvas,
+                IObjectResolver resolver,
+                IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher
+            )
         {
             this.uiConfig = uiConfig;
             this.playerInventory = playerInventory;
@@ -435,7 +437,26 @@ namespace UI.Pages
 
             DrawSlotItems();
             DrawHandSlot();
+            UpdateSellInfo();
             CacheSlotItems();
+        }
+
+        private void UpdateSellInfo()
+        {
+            UpdateSellInfoText(rightSellInfo, playerSellInventory);
+            UpdateSellInfoText(leftSellInfo, targetSellInventory);
+        }
+
+        private static void UpdateSellInfoText(SellInfo sellInfo, IInventory sellInventory)
+        {
+            if (!sellInfo.InfoText || sellInventory == null)
+            {
+                return;
+            }
+
+            var totalPrice = sellInventory.Items.Sum(item => item.ItemConfig.Price);
+            var totalWeight = sellInventory.Items.Sum(item => item.ItemConfig.Weight);
+            sellInfo.InfoText.text = $"<color=#FFFFFF>{totalPrice}</color> <color=#808080>({totalWeight:F1} кг)</color>";
         }
         
         private void DrawTiles(IInventory inventory)
