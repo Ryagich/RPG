@@ -2,6 +2,7 @@
 using Interactable;
 using Inventory;
 using Inventory.Inventories;
+using Money;
 using Movement;
 using UI;
 using UnityEngine;
@@ -45,6 +46,7 @@ namespace Container
             builder.RegisterEntryPoint<ItemHolderInteractableLogic>().AsSelf();
             
             builder.RegisterEntryPoint<PlayerInventory>().As<IInventory>().AsSelf();
+            builder.Register(_ => new MoneyStorage(112), Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<InventoryHandController>().AsSelf();
         }
     }

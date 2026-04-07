@@ -19,6 +19,7 @@ using VContainer.Unity;
 using TMPro;
 using Localization;
 using UI.UIElements;
+using Money;
 
 namespace UI.Pages
 {
@@ -54,6 +55,7 @@ namespace UI.Pages
         private readonly LocalizationConfig localizationConfig;
         private readonly ColorsConfig colorsConfig;
         private readonly PlayerInventory playerInventory;
+        private readonly MoneyStorage playerMoneyStorage;
         private readonly Character.CharacterInfo playerCharacterInfo;
         private readonly DialogueContext dialogueContext;
         private readonly Canvas canvas;
@@ -64,6 +66,8 @@ namespace UI.Pages
         private RectTransform contentRect = null!;
         private RectTransform leftRect = null!;
         private RectTransform rightRect = null!;
+        private InfoAboutPlayer leftInfoAboutPlayer = null!;
+        private InfoAboutPlayer rightInfoAboutPlayer = null!;
         private InfoAboutInventory leftInfoAboutInventory = null!;
         private InfoAboutInventory rightInfoAboutInventory = null!;
         private SlotsViewContainer centerSection = null!;
@@ -97,6 +101,7 @@ namespace UI.Pages
                 LocalizationConfig localizationConfig,
                 ColorsConfig colorsConfig,
                 PlayerInventory playerInventory,
+                MoneyStorage playerMoneyStorage,
                 Character.CharacterInfo playerCharacterInfo,
                 DialogueContext dialogueContext,
                 Canvas canvas,
@@ -108,6 +113,7 @@ namespace UI.Pages
             this.localizationConfig = localizationConfig;
             this.colorsConfig = colorsConfig;
             this.playerInventory = playerInventory;
+            this.playerMoneyStorage = playerMoneyStorage;
             this.playerCharacterInfo = playerCharacterInfo;
             this.dialogueContext = dialogueContext;
             this.canvas = canvas;
@@ -145,19 +151,19 @@ namespace UI.Pages
             centerSection = resolver.Instantiate(uiConfig.CenterSection, contentRect);
             rightRect = resolver.Instantiate(uiConfig.RightSection, contentRect);
 
-            var leftInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, leftRect);
-            leftInfoAboutInventory = leftInfoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, leftRect);
+            leftInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, leftRect);
+            leftInfoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, leftRect);
             leftSellInfo = resolver.Instantiate(uiConfig.SellInfo, leftRect);
             targetSellInventoryView = resolver.Instantiate(uiConfig.SellInventory, leftRect).GetComponent<InventoryView>();
             targetInventoryView = resolver.Instantiate(uiConfig.InventoryInTrading, leftRect).GetComponent<InventoryView>();
-            PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, dialogueContext.CurrentTargetCharacterInfo);
+            PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, dialogueContext.CurrentTargetCharacterInfo, dialogueContext.CurrentTargetMoneyStorage);
 
-            var rightInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
+            rightInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
             rightInfoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
             rightSellInfo = resolver.Instantiate(uiConfig.SellInfo, rightRect);
             playerSellInventoryView = resolver.Instantiate(uiConfig.SellInventory, rightRect).GetComponent<InventoryView>();
             playerInventoryView = resolver.Instantiate(uiConfig.InventoryInTrading, rightRect).GetComponent<InventoryView>();
-            PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo);
+            PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo, playerMoneyStorage);
 
             inventoryViews.Clear();
             inventoryViews[playerInventory] = playerInventoryView;
@@ -244,6 +250,8 @@ namespace UI.Pages
             contentRect = null;
             leftRect = null;
             rightRect = null;
+            leftInfoAboutPlayer = null;
+            rightInfoAboutPlayer = null;
             leftInfoAboutInventory = null;
             rightInfoAboutInventory = null;
             centerSection = null;
@@ -452,6 +460,7 @@ namespace UI.Pages
             DrawHandSlot();
             UpdateInventoryInfo();
             UpdateSellInfo();
+            UpdatePlayersInfo();
             CacheSlotItems();
         }
         
@@ -485,6 +494,7 @@ namespace UI.Pages
         {
             UpdateSellInfoText(rightSellInfo, playerSellInventory);
             UpdateSellInfoText(leftSellInfo, targetSellInventory);
+            UpdateTradeButtonsState();
         }
 
         private void UpdateSellInfoText(SellInfo sellInfo, IInventory sellInventory)
@@ -502,6 +512,30 @@ namespace UI.Pages
             }
 
             PageUiUtilities.FillSellInventoryWeightText(sellInfo.InfoText, localizationConfig, colorsConfig, totalWeight);
+        }
+        
+        private void UpdatePlayersInfo()
+        {
+            PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo, playerMoneyStorage);
+            PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, dialogueContext.CurrentTargetCharacterInfo, dialogueContext.CurrentTargetMoneyStorage);
+        }
+
+        private void UpdateTradeButtonsState()
+        {
+            var playerSellPrice = CalculateItemsPrice(playerSellInventory);
+            var targetSellPrice = CalculateItemsPrice(targetSellInventory);
+            var targetCanBuy = dialogueContext.CurrentTargetMoneyStorage?.CanSpend(playerSellPrice) ?? false;
+            var playerCanBuy = playerMoneyStorage.CanSpend(targetSellPrice);
+
+            if (rightSellInfo?.TradeButton)
+            {
+                rightSellInfo.TradeButton.interactable = targetCanBuy;
+            }
+
+            if (leftSellInfo?.TradeButton)
+            {
+                leftSellInfo.TradeButton.interactable = playerCanBuy;
+            }
         }
         
         private void DrawTiles(IInventory inventory)
@@ -931,17 +965,34 @@ namespace UI.Pages
 
         private void CompletePlayerSell()
         {
-            TransferSellInventory(playerSellInventory, dialogueContext.CurrentTargetInventory, playerSellOrigins);
+            TransferSellInventory(
+                                  playerSellInventory,
+                                  dialogueContext.CurrentTargetInventory,
+                                  playerSellOrigins,
+                                  playerMoneyStorage,
+                                  dialogueContext.CurrentTargetMoneyStorage);
         }
 
         private void CompleteTargetSell()
         {
-            TransferSellInventory(targetSellInventory, playerInventory, targetSellOrigins);
+            TransferSellInventory(
+                                  targetSellInventory,
+                                  playerInventory,
+                                  targetSellOrigins,
+                                  dialogueContext.CurrentTargetMoneyStorage,
+                                  playerMoneyStorage);
         }
 
-        private static void TransferSellInventory(TradeSellInventory sourceSellInventory, IInventory destinationInventory, Dictionary<ItemConfig, Queue<SellItemOrigin>> origins)
+        private static void TransferSellInventory
+            (
+                TradeSellInventory sourceSellInventory,
+                IInventory destinationInventory,
+                Dictionary<ItemConfig, Queue<SellItemOrigin>> origins,
+                MoneyStorage sellerMoneyStorage,
+                MoneyStorage buyerMoneyStorage
+            )
         {
-            if (sourceSellInventory == null || destinationInventory == null)
+            if (sourceSellInventory == null || destinationInventory == null || sellerMoneyStorage == null || buyerMoneyStorage == null)
             {
                 return;
             }
@@ -949,12 +1000,14 @@ namespace UI.Pages
             var items = sourceSellInventory.Items.Select(item => item.ItemConfig).ToList();
             foreach (var itemConfig in items)
             {
-                if (!destinationInventory.TryAdd(itemConfig))
+                if (!buyerMoneyStorage.CanSpend(itemConfig.Price) || !destinationInventory.TryAdd(itemConfig))
                 {
                     continue;
                 }
 
                 TryTakeOne(sourceSellInventory, itemConfig);
+                buyerMoneyStorage.TrySpend(itemConfig.Price);
+                sellerMoneyStorage.Add(itemConfig.Price);
                 if (origins.TryGetValue(itemConfig, out var queue) && queue.Count > 0)
                 {
                     queue.Dequeue();
@@ -964,6 +1017,25 @@ namespace UI.Pages
                     }
                 }
             }
+        }
+        
+        private static int CalculateItemsPrice(IInventory inventory)
+        {
+            if (inventory == null)
+            {
+                return 0;
+            }
+
+            var totalPrice = 0;
+            foreach (var item in inventory.Items)
+            {
+                if (item?.ItemConfig != null)
+                {
+                    totalPrice += item.ItemConfig.Price;
+                }
+            }
+
+            return totalPrice;
         }
         
         private void ReturnToDialogue()

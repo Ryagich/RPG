@@ -12,6 +12,7 @@ using VContainer;
 using VContainer.Unity;
 using Inventory.Item;
 using Localization;
+using Money;
 using UI.UIElements;
 using CharacterInfo = Character.CharacterInfo;
 
@@ -28,6 +29,7 @@ namespace UI.Pages
         private readonly LocalizationConfig localizationConfig;
         private readonly ColorsConfig colorsConfig;
         private readonly PlayerInventory playerInventory;
+        private readonly MoneyStorage playerMoneyStorage;
         private readonly CharacterInfo characterInfo;
         private readonly Canvas canvas;
         private readonly RectTransform canvasRect;
@@ -35,6 +37,7 @@ namespace UI.Pages
 
         private RectTransform contentRect = null!;
         private RectTransform rightRect = null!;
+        private InfoAboutPlayer infoAboutPlayer = null!;
         private InfoAboutInventory infoAboutInventory = null!;
         private SlotsViewContainer slotsViewContainer = null!;
         private Inventory.InventoryView inventoryView = null!;
@@ -57,6 +60,7 @@ namespace UI.Pages
                 ColorsConfig colorsConfig,
                 Canvas canvas,
                 PlayerInventory playerInventory,
+                MoneyStorage playerMoneyStorage,
                 CharacterInfo characterInfo,
                 IObjectResolver resolver
             )
@@ -66,6 +70,7 @@ namespace UI.Pages
             this.colorsConfig = colorsConfig;
             this.canvas = canvas;
             this.playerInventory = playerInventory;
+            this.playerMoneyStorage = playerMoneyStorage;
             this.characterInfo = characterInfo;
             this.resolver = resolver;
 
@@ -81,11 +86,11 @@ namespace UI.Pages
             rightRect = resolver.Instantiate(uiConfig.RightSection, contentRect);
             slotsViewContainer = resolver.Instantiate(uiConfig.CenterSection, contentRect);
             
-            var infoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
+            infoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
             infoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
             inventoryView = resolver.Instantiate(uiConfig.InventoryView, rightRect);
             inventoryScrollRect = inventoryView.GetComponent<ScrollRect>();
-            PageUiUtilities.FillInfoAboutPlayer(infoAboutPlayer, characterInfo);
+            PageUiUtilities.FillInfoAboutPlayer(infoAboutPlayer, characterInfo, playerMoneyStorage);
             
             DrawTiles();
 
@@ -128,7 +133,13 @@ namespace UI.Pages
             DrawSlotItems();
             DrawHandSlot();
             UpdateInventoryInfo();
+            UpdatePlayerInfo();
             CacheSlotItems();
+        }
+
+        private void UpdatePlayerInfo()
+        {
+            PageUiUtilities.FillInfoAboutPlayer(infoAboutPlayer, characterInfo, playerMoneyStorage);
         }
 
         private void UpdateInventoryInfo()
@@ -525,6 +536,7 @@ namespace UI.Pages
 
             contentRect = null;
             rightRect = null;
+            infoAboutPlayer = null;
             infoAboutInventory = null;
             slotsViewContainer = null;
             inventoryView = null;

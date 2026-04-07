@@ -2,6 +2,7 @@
 using Interactable;
 using Inventory;
 using Inventory.Inventories;
+using Money;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -24,6 +25,8 @@ namespace Container
             {
                 builder.RegisterInstance(inventoryConfig).AsSelf();
             }
+            
+            builder.Register(_ => new MoneyStorage(100), Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<ChestInventory>().As<IInventory>().AsSelf();
             builder.RegisterEntryPoint<DialogueInteractableLogic>().AsSelf();
         }

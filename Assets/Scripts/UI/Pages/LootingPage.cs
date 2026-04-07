@@ -14,6 +14,7 @@ using VContainer;
 using VContainer.Unity;
 using Inventory.Item;
 using Localization;
+using Money;
 using UI.Inventory;
 using UI.UIElements;
 
@@ -30,6 +31,7 @@ namespace UI.Pages
         private readonly LocalizationConfig localizationConfig;
         private readonly ColorsConfig colorsConfig;
         private readonly PlayerInventory playerInventory;
+        private readonly MoneyStorage playerMoneyStorage;
         private readonly Character.CharacterInfo playerCharacterInfo;
         private readonly LootingContext lootingContext;
         private readonly Canvas canvas;
@@ -39,6 +41,8 @@ namespace UI.Pages
         private RectTransform contentRect = null!;
         private RectTransform rightRect = null!;
         private RectTransform leftRect = null!;
+        private InfoAboutPlayer rightInfoAboutPlayer = null!;
+        private InfoAboutPlayer leftInfoAboutPlayer = null!;
         private InfoAboutInventory rightInfoAboutInventory = null!;
         private InfoAboutInventory leftInfoAboutInventory = null!;
         private SlotsViewContainer slotsViewContainer = null!;
@@ -64,6 +68,7 @@ namespace UI.Pages
                 ColorsConfig colorsConfig,
                 Canvas canvas,
                 PlayerInventory playerInventory,
+                MoneyStorage playerMoneyStorage,
                 Character.CharacterInfo playerCharacterInfo,
                 LootingContext lootingContext,
                 IObjectResolver resolver
@@ -75,6 +80,7 @@ namespace UI.Pages
             this.canvas = canvas;
             this.playerInventory = playerInventory;
             this.playerCharacterInfo = playerCharacterInfo;
+            this.playerMoneyStorage = playerMoneyStorage;
             this.lootingContext = lootingContext;
             this.resolver = resolver;
 
@@ -97,15 +103,15 @@ namespace UI.Pages
             slotsViewContainer = resolver.Instantiate(uiConfig.CenterSection, contentRect);
             rightRect = resolver.Instantiate(uiConfig.RightSection, contentRect);
             
-            var rightInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
+            rightInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
             rightInfoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
             playerInventoryView = resolver.Instantiate(uiConfig.InventoryView, rightRect);
-            PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo);
+            PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo, playerMoneyStorage);
 
-            var leftInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, leftRect);
+            leftInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, leftRect);
             leftInfoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, leftRect);
             targetInventoryView = resolver.Instantiate(uiConfig.InventoryView, leftRect);
-            PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, lootingContext.CurrentTargetCharacterInfo);
+            PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, lootingContext.CurrentTargetCharacterInfo, lootingContext.CurrentTargetMoneyStorage);
             
             inventoryViews.Clear();
             inventoryViews[playerInventory] = playerInventoryView;
@@ -160,9 +166,16 @@ namespace UI.Pages
             DrawSlotItems();
             DrawHandSlot();
             UpdateInventoryInfo();
+            UpdatePlayersInfo();
             CacheSlotItems();
         }
 
+        private void UpdatePlayersInfo()
+        {
+            PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo, playerMoneyStorage);
+            PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, lootingContext.CurrentTargetCharacterInfo, lootingContext.CurrentTargetMoneyStorage);
+        }
+        
         private void UpdateInventoryInfo()
         {
             var playerWeight = PageUiUtilities.GetItemsWeight(playerInventory)
@@ -640,6 +653,8 @@ namespace UI.Pages
             contentRect = null;
             rightRect = null;
             leftRect = null;
+            rightInfoAboutPlayer = null;
+            leftInfoAboutPlayer = null;
             rightInfoAboutInventory = null;
             leftInfoAboutInventory = null;
             slotsViewContainer = null;

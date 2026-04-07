@@ -11,12 +11,13 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
+using Money;
 
 namespace UI.Pages
 {
     internal static class PageUiUtilities
     {
-        public static void FillInfoAboutPlayer(InfoAboutPlayer infoAboutPlayer, Character.CharacterInfo currentCharacterInfo)
+        public static void FillInfoAboutPlayer(InfoAboutPlayer infoAboutPlayer, Character.CharacterInfo currentCharacterInfo, MoneyStorage moneyStorage)
         {
             if (infoAboutPlayer == null || currentCharacterInfo == null)
             {
@@ -26,6 +27,12 @@ namespace UI.Pages
             infoAboutPlayer.Photo.sprite = currentCharacterInfo.Photo;
             infoAboutPlayer.Name.text = currentCharacterInfo.Name.GetLocalizedStringCached();
             infoAboutPlayer.Group.text = currentCharacterInfo.Fraction.GetLocalizedStringCached();
+            if (infoAboutPlayer.Money != null)
+            {
+                infoAboutPlayer.Money.text = moneyStorage == null
+                                                 ? "---"
+                                                 : $"{moneyStorage.CurrentMoney.Value} RU";
+            }
         }
 
         public static void ClearChildren(Transform parent)
