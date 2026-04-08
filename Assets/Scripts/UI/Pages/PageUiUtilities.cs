@@ -81,23 +81,25 @@ namespace UI.Pages
                 $"<color=#{grayColor}>({maxText})</color>";
         }
 
-        public static void FillSellInventoryWeightText(TMP_Text infoText, LocalizationConfig localizationConfig, ColorsConfig colorsConfig, float currentWeight)
+        public static void FillSellInventoryInfoText(TMP_Text infoText, LocalizationConfig localizationConfig, ColorsConfig colorsConfig, int totalPrice, float totalWeight)
         {
             if (infoText == null || localizationConfig == null || colorsConfig == null)
             {
                 return;
             }
 
-            var currentWeightText = currentWeight.ToString("F1", CultureInfo.InvariantCulture);
-            var currentWeightLabel = localizationConfig.InventoryCurrentWeight.GetLocalizedStringCached();
+            var currentWeightText = totalWeight.ToString("F1", CultureInfo.InvariantCulture);
+
             var kgLabel = localizationConfig.kg.GetLocalizedStringCached();
             var grayColor = ColorUtility.ToHtmlStringRGB(colorsConfig.Gray);
             var whiteColor = ColorUtility.ToHtmlStringRGB(colorsConfig.White);
 
-            infoText.text =
-                $"<color=#{grayColor}>{currentWeightLabel}</color> " +
+            infoText.text = totalPrice is 0 ? "" :
+                $"<color=#{whiteColor}>{totalPrice} RU</color> " +
+                $"<color=#{grayColor}>(</color>" +
                 $"<color=#{whiteColor}>{currentWeightText}</color> " +
-                $"<color=#{whiteColor}>{kgLabel}</color>";
+                $"<color=#{whiteColor}>{kgLabel}</color>" +
+                $"<color=#{grayColor}>)</color>";
         }
 
         public static float GetItemsWeight(IInventory inventory)

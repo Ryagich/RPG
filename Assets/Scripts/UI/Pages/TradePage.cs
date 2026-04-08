@@ -505,13 +505,17 @@ namespace UI.Pages
             }
 
             var totalWeight = sellInventory.Items.Sum(item => item.ItemConfig.Weight);
+            var totalPrice = CalculateItemsPrice(sellInventory);
             var handWeight = playerInventory.HandSlot.Value?.ItemConfig?.Weight ?? 0f;
-            if (handWeight > 0f && playerInventory.HandSourceInventory.Value == sellInventory)
+            var handPrice = playerInventory.HandSlot.Value?.ItemConfig?.Price ?? 0;
+            if (playerInventory.HandSourceInventory.Value == sellInventory)
             {
-                totalWeight += handWeight;
+                totalWeight += handWeight > 0f ? handWeight : 0f;
+                totalPrice += handPrice > 0 ? handPrice : 0;
             }
 
-            PageUiUtilities.FillSellInventoryWeightText(sellInfo.InfoText, localizationConfig, colorsConfig, totalWeight);
+            PageUiUtilities.FillSellInventoryInfoText(sellInfo.InfoText, localizationConfig, colorsConfig, totalPrice, totalWeight);
+            
         }
         
         private void UpdatePlayersInfo()
