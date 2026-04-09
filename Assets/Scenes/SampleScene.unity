@@ -1570,6 +1570,7 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects: []
   characterInfo: {fileID: 11400000, guid: 43718f9d5b35b6b4e9b9cef541377a63, type: 2}
+  inventoryConfig: {fileID: 0}
 --- !u!1 &1846629549
 GameObject:
   m_ObjectHideFlags: 0
@@ -2433,6 +2434,7 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects: []
   characterInfo: {fileID: 11400000, guid: 43718f9d5b35b6b4e9b9cef541377a63, type: 2}
+  inventoryConfig: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
