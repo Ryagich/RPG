@@ -68,9 +68,21 @@ namespace Interactable
                              .Where(i => i.CanInteractable)
                              .OrderBy(i => Vector3.Distance(transform.position, i.transform.position))
                              .FirstOrDefault();
-            if (closestItem && inventory.TryAdd(closestItem.Config))
+            if (!closestItem)
+            {
+                return;
+            }
+
+            var remainder = inventory.TryAdd(closestItem.GetItemStack());
+            if (remainder == null)
             {
                 Object.Destroy(closestItem.gameObject);
+                return;
+            }
+
+            if (remainder.Count != closestItem.Count)
+            {
+                closestItem.SetCount(remainder.Count);
             }
         }
 

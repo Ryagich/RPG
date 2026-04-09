@@ -121,8 +121,8 @@ namespace UI.Pages
             DrawTiles(playerInventory);
             DrawTiles(targetInventory);
 
-            playerInventory.Items.ObserveCountChanged().Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
-            targetInventory.Items.ObserveCountChanged().Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
+            playerInventory.Changed.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
+            targetInventory.Changed.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
             playerInventory.HandSlot.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
 
             ReDraw();
@@ -180,7 +180,7 @@ namespace UI.Pages
         {
             var playerWeight = PageUiUtilities.GetItemsWeight(playerInventory)
                              + PageUiUtilities.GetSlotsWeight(playerInventory.HelmSlot, playerInventory.BodySlot, playerInventory.BackpackSlot);
-            var handWeight = playerInventory.HandSlot.Value?.ItemConfig?.Weight ?? 0f;
+            var handWeight = playerInventory.HandSlot.Value?.ItemStack?.TotalWeight ?? 0f;
             var handSourceInventory = playerInventory.HandSourceInventory.Value;
             if (handWeight > 0f && handSourceInventory == playerInventory)
             {
@@ -269,7 +269,7 @@ namespace UI.Pages
 
         private void UpdateInventoryScrollState()
         {
-            var isDraggingItem = playerInventory.HandSlot.Value?.ItemConfig != null;
+            var isDraggingItem = playerInventory.HandSlot.Value?.ItemStack != null;
             foreach (var scrollRect in inventoryScrollRects)
             {
                 if (!scrollRect)
@@ -302,11 +302,34 @@ namespace UI.Pages
 
         private void DrawHandSlot()
         {
-            handSlotRect = PageUiUtilities.DrawHandSlot(handSlotRect, canvasRect, playerInventory.HandSlot.Value?.ItemConfig);
+            var handItemStack = playerInventory.HandSlot.Value?.ItemStack;
+            handSlotRect = PageUiUtilities.DrawHandSlot(handSlotRect, canvasRect, handItemStack, GetHandStackAnchorAreaSize(handItemStack));
             if (handSlotRect)
             {
                 UpdateHandSlotPosition();
             }
+        }
+
+        private Vector2? GetHandStackAnchorAreaSize(ItemStack handItemStack)
+        {
+            if (handItemStack?.ItemConfig == null)
+            {
+                return null;
+            }
+
+            var sourceInventory = playerInventory.HandSourceInventory.Value;
+            if (sourceInventory != null
+             && inventoryViews.TryGetValue(sourceInventory, out var sourceView)
+             && sourceView != null)
+            {
+                var sourceGridLayout = sourceView.ContentForTiles.GetComponent<GridLayoutGroup>();
+                if (sourceGridLayout != null)
+                {
+                    return PageUiUtilities.GetItemGrabSize(sourceGridLayout, handItemStack.ItemConfig.Size);
+                }
+            }
+
+            return null;
         }
 
         private void UpdateHandSlotPosition()
@@ -558,7 +581,8 @@ namespace UI.Pages
 
             foreach (var item in inventory.Items)
             {
-                var itemImageRect = PageUiUtilities.CreateItemImage(inventoryView.ContentForItems, item.ItemConfig, "Item");
+                var itemGrabSize = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, item.ItemConfig.Size);
+                var itemImageRect = PageUiUtilities.CreateItemImage(inventoryView.ContentForItems, item.ItemStack, "Item", itemGrabSize);
                 itemRects.Add(itemImageRect);
 
                 var itemGrabRectObject = new GameObject($"Item Grab [{item.ItemConfig.Id}]", typeof(RectTransform));
@@ -567,7 +591,7 @@ namespace UI.Pages
                 itemGrabRect.anchorMin = new Vector2(0, 1);
                 itemGrabRect.anchorMax = new Vector2(0, 1);
                 itemGrabRect.pivot = new Vector2(0.5f, 0.5f);
-                itemGrabRect.sizeDelta = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, item.ItemConfig.Size);
+                itemGrabRect.sizeDelta = itemGrabSize;
                 itemGrabRects.Add(itemGrabRect);
 
                 var itemCenterPosition = item.Position.GetColumn(3);

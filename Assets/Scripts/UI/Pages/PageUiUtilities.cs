@@ -112,9 +112,9 @@ namespace UI.Pages
             var weight = 0f;
             foreach (var item in inventory.Items)
             {
-                if (item?.ItemConfig != null)
+                if (item?.ItemStack != null)
                 {
-                    weight += item.ItemConfig.Weight;
+                    weight += item.ItemStack.TotalWeight;
                 }
             }
 
@@ -126,9 +126,9 @@ namespace UI.Pages
             var weight = 0f;
             foreach (var slot in slots)
             {
-                if (slot?.ItemConfig != null)
+                if (slot?.ItemStack != null)
                 {
-                    weight += slot.ItemConfig.Weight;
+                    weight += slot.ItemStack.TotalWeight;
                 }
             }
 
@@ -146,8 +146,9 @@ namespace UI.Pages
                   + itemCenterPosition.y * gridLayoutGroup.spacing.y));
         }
 
-        public static RectTransform CreateItemImage(Transform parent, ItemConfig itemConfig, string namePrefix)
+        public static RectTransform CreateItemImage(Transform parent, ItemStack itemStack, string namePrefix, Vector2? stackAnchorAreaSize = null)
         {
+            var itemConfig = itemStack.ItemConfig;
             var itemImageObject = new GameObject($"{namePrefix} [{itemConfig.Id}]", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             var itemImageRect = itemImageObject.GetComponent<RectTransform>();
             itemImageRect.SetParent(parent, false);
@@ -160,6 +161,11 @@ namespace UI.Pages
             itemImage.sprite = itemConfig.Icon;
             itemImage.preserveAspect = true;
             itemImage.raycastTarget = false;
+
+            if (itemStack.Count > 1)
+            {
+                CreateStackCountLabel(itemImageRect, itemStack.Count, stackAnchorAreaSize ?? itemImageRect.sizeDelta);
+            }
 
             return itemImageRect;
         }
@@ -258,7 +264,8 @@ namespace UI.Pages
             (
                 RectTransform existingHandSlotRect,
                 RectTransform canvasRect,
-                ItemConfig handItemConfig
+                ItemStack handItemStack,
+                Vector2? stackAnchorAreaSize = null
             )
         {
             if (existingHandSlotRect)
@@ -266,11 +273,12 @@ namespace UI.Pages
                 Object.Destroy(existingHandSlotRect.gameObject);
             }
 
-            if (handItemConfig == null)
+            if (handItemStack?.ItemConfig == null)
             {
                 return null;
             }
 
+            var handItemConfig = handItemStack.ItemConfig;
             var handItemObject = new GameObject($"Hand Item [{handItemConfig.Id}]", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             var handSlotRect = handItemObject.GetComponent<RectTransform>();
             handSlotRect.SetParent(canvasRect, false);
@@ -283,6 +291,11 @@ namespace UI.Pages
             handItemImage.sprite = handItemConfig.Icon;
             handItemImage.preserveAspect = true;
             handItemImage.raycastTarget = false;
+
+            if (handItemStack.Count > 1)
+            {
+                CreateStackCountLabel(handSlotRect, handItemStack.Count, stackAnchorAreaSize ?? handSlotRect.sizeDelta);
+            }
 
             return handSlotRect;
         }
@@ -327,17 +340,38 @@ namespace UI.Pages
             }
 
             ClearChildren(slotRect);
-            if (slotModel?.ItemConfig == null)
+            if (slotModel?.ItemStack == null)
             {
                 return;
             }
 
-            var itemImageRect = CreateItemImage(slotRect, slotModel.ItemConfig, "Slot Item");
+            var itemImageRect = CreateItemImage(slotRect, slotModel.ItemStack, "Slot Item");
             itemImageRect.anchorMin = new Vector2(0.5f, 0.5f);
             itemImageRect.anchorMax = new Vector2(0.5f, 0.5f);
             itemImageRect.anchoredPosition = Vector2.zero;
             itemRects.Add(itemImageRect);
             itemGrabRects.Add(itemImageRect);
+        }
+
+        private static void CreateStackCountLabel(RectTransform parent, int count, Vector2 anchorAreaSize)
+        {
+            var labelObject = new GameObject("Stack Count", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+            var labelRect = labelObject.GetComponent<RectTransform>();
+            labelRect.SetParent(parent, false);
+            labelRect.anchorMin = new Vector2(0.5f, 0.5f);
+            labelRect.anchorMax = new Vector2(0.5f, 0.5f);
+            labelRect.pivot = new Vector2(1f, 0f);
+            labelRect.anchoredPosition = new Vector2(anchorAreaSize.x * 0.5f - 6f, -anchorAreaSize.y * 0.5f + 6f);
+            labelRect.sizeDelta = new Vector2(72f, 30f);
+
+            var label = labelObject.GetComponent<TextMeshProUGUI>();
+            label.text = count.ToString(CultureInfo.InvariantCulture);
+            label.alignment = TextAlignmentOptions.BottomRight;
+            label.fontSize = 24;
+            label.color = Color.white;
+            label.raycastTarget = false;
+            label.enableWordWrapping = false;
+            label.overflowMode = TextOverflowModes.Overflow;
         }
 
         private static bool TryCaptureOffsetOnRect(RectTransform rect, Vector2 screenPoint, Camera eventCamera, out Vector2 handGrabOffset)

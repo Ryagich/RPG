@@ -94,8 +94,7 @@ namespace UI.Pages
             
             DrawTiles();
 
-            playerInventory.Items
-                           .ObserveCountChanged()
+            playerInventory.Changed
                            .Subscribe(_ => ReDraw())
                            .AddTo(redrawDisposables);
             playerInventory.HandSlot
@@ -176,17 +175,30 @@ namespace UI.Pages
                 return;
             }
 
-            inventoryScrollRect.enabled = playerInventory.HandSlot.Value?.ItemConfig == null;
+            inventoryScrollRect.enabled = playerInventory.HandSlot.Value?.ItemStack == null;
         }
 
         private void DrawHandSlot()
         {
-            var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
-            handSlotRect = PageUiUtilities.DrawHandSlot(handSlotRect, canvasRect, handItemConfig);
+            var handItemStack = playerInventory.HandSlot.Value?.ItemStack;
+            handSlotRect = PageUiUtilities.DrawHandSlot(handSlotRect, canvasRect, handItemStack, GetHandStackAnchorAreaSize(handItemStack));
             if (handSlotRect)
             {
                 UpdateHandSlotPosition();
             }
+        }
+
+        private Vector2? GetHandStackAnchorAreaSize(ItemStack handItemStack)
+        {
+            if (handItemStack?.ItemConfig == null || inventoryView == null)
+            {
+                return null;
+            }
+
+            var gridLayoutGroup = inventoryView.ContentForTiles.GetComponent<GridLayoutGroup>();
+            return gridLayoutGroup == null
+                ? null
+                : PageUiUtilities.GetItemGrabSize(gridLayoutGroup, handItemStack.ItemConfig.Size);
         }
 
         private void UpdateHandSlotPosition()
@@ -463,7 +475,8 @@ namespace UI.Pages
 
             foreach (var item in playerInventory.Items)
             {
-                var itemImageRect = PageUiUtilities.CreateItemImage(inventory.ContentForItems, item.ItemConfig, "Item");
+                var itemGrabSize = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, item.ItemConfig.Size);
+                var itemImageRect = PageUiUtilities.CreateItemImage(inventory.ContentForItems, item.ItemStack, "Item", itemGrabSize);
                 itemRects.Add(itemImageRect);
                 
                 var itemGrabRectObject = new GameObject($"Item Grab [{item.ItemConfig.Id}]", typeof(RectTransform));
@@ -472,7 +485,7 @@ namespace UI.Pages
                 itemGrabRect.anchorMin = new Vector2(0, 1);
                 itemGrabRect.anchorMax = new Vector2(0, 1);
                 itemGrabRect.pivot = new Vector2(0.5f, 0.5f);
-                itemGrabRect.sizeDelta = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, item.ItemConfig.Size);
+                itemGrabRect.sizeDelta = itemGrabSize;
                 itemGrabRects.Add(itemGrabRect);
                 
                 var itemCenterPosition = item.Position.GetColumn(3);

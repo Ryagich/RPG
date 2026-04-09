@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using GameModes;
 using Inventory.Inventories;
 using Inventory.Item;
@@ -25,20 +25,18 @@ namespace Inventory
         private readonly Transform playerTransform;
         private readonly GameModesController gameModesController;
         private bool backpackResizePendingAfterHandAction;
-        private ItemConfig backpackTakenFromSlot;
+        private ItemStack backpackTakenFromSlot;
         private IInventory handSourceInventory;
         private SlotModel handSourceSlot;
         private Matrix4x4 handSourcePosition;
 
-        public InventoryHandController
-            (
-                PlayerInventory playerInventory,
-                Transform playerTransform,
-                GameModesController gameModesController,
-                ISubscriber<MouseDown> mouseDownSubscriber,
-                ISubscriber<MouseUp> mouseUpSubscriber,
-                ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber
-            )
+        public InventoryHandController(
+            PlayerInventory playerInventory,
+            Transform playerTransform,
+            GameModesController gameModesController,
+            ISubscriber<MouseDown> mouseDownSubscriber,
+            ISubscriber<MouseUp> mouseUpSubscriber,
+            ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
         {
             this.playerInventory = playerInventory;
             this.playerTransform = playerTransform;
@@ -67,20 +65,21 @@ namespace Inventory
 
             var interactionPage = GetCurrentInteractionPage();
             var pointer = Pointer.current;
-            if (interactionPage != null && pointer != null
-                                        && interactionPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel)
-                                        && playerInventory.TryTakeFromSlot(slotModel.ItemType, out var slotItemConfig))
+            if (interactionPage != null
+             && pointer != null
+             && interactionPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel)
+             && playerInventory.TryTakeFromSlot(slotModel.ItemType, out var slotItemStack))
             {
                 if (slotModel.ItemType == ItemType.Backpack)
                 {
                     backpackResizePendingAfterHandAction = true;
-                    backpackTakenFromSlot = slotItemConfig;
+                    backpackTakenFromSlot = slotItemStack;
                 }
 
                 handSourceInventory = playerInventory;
                 handSourceSlot = slotModel;
                 playerInventory.HandSourceInventory.Value = handSourceInventory;
-                playerInventory.HandSlot.Value = new SlotModel(slotItemConfig.ItemType, slotItemConfig);
+                playerInventory.HandSlot.Value = new SlotModel(slotItemStack.ItemConfig.ItemType, SlotStackLimitType.SingleItem, slotItemStack);
                 TradePage.Current?.SetDragSource(handSourceInventory, handSourceSlot);
                 return;
             }
@@ -94,7 +93,7 @@ namespace Inventory
             handSourceInventory = hoveredInventory;
             handSourcePosition = itemInInventory.Position;
             playerInventory.HandSourceInventory.Value = handSourceInventory;
-            playerInventory.HandSlot.Value = new SlotModel(itemInInventory.ItemConfig.ItemType, itemInInventory.ItemConfig);
+            playerInventory.HandSlot.Value = new SlotModel(itemInInventory.ItemConfig.ItemType, SlotStackLimitType.SingleItem, itemInInventory.ItemStack);
             TradePage.Current?.SetDragSource(handSourceInventory, handSourceSlot);
         }
 
@@ -104,83 +103,68 @@ namespace Inventory
             {
                 return;
             }
-            var itemConfig = playerInventory.HandSlot.Value.ItemConfig;
 
+            var itemStack = playerInventory.HandSlot.Value.ItemStack;
             if (gameModesController.GameMode == GameMode.Trade)
             {
-                HandleTradeMouseUp(itemConfig);
+                HandleTradeMouseUp(itemStack);
                 return;
             }
 
-            if (TryAddToHoveredSlot(itemConfig))
+            if (TryAddToHoveredSlot(itemStack))
             {
-                ClearHand();
                 return;
             }
 
-            if (TryAddToHoveredTile(itemConfig))
+            if (TryAddToHoveredTile(itemStack))
             {
-                ClearHand();
                 return;
             }
-            
-            if (IsPointerOverSlot() && playerInventory.TryAdd(itemConfig))
+
+            if (IsPointerOverSlot() && TryStoreOrDrop(itemStack, playerInventory.TryAdd(itemStack)))
             {
-                ClearHand();
                 return;
             }
-            
-            if (IsPointerOverInventory() && (playerInventory.TryAddToGrid(itemConfig) || playerInventory.TryAdd(itemConfig)))
+
+            if (IsPointerOverInventory() && TryStoreOrDrop(itemStack, playerInventory.TryAddToGrid(itemStack)))
             {
-                ClearHand();
                 return;
             }
-            
+
             var interactionPage = GetCurrentInteractionPage();
             var pointer = Pointer.current;
             if (interactionPage != null
              && pointer != null
              && interactionPage.IsInPlayerSections(pointer.position.ReadValue())
-             && playerInventory.TryAdd(itemConfig))
+             && TryStoreOrDrop(itemStack, playerInventory.TryAdd(itemStack)))
             {
-                ClearHand();
                 return;
             }
-            
+
             if (LootingPage.Current != null
              && pointer != null
              && LootingPage.Current.IsInTargetSection(pointer.position.ReadValue()))
             {
                 var targetInventory = LootingPage.Current.GetTargetInventory();
-                if (targetInventory != null && targetInventory.TryAdd(itemConfig))
+                if (targetInventory != null && TryStoreOrDrop(itemStack, targetInventory.TryAdd(itemStack)))
                 {
-                    ClearHand();
                     return;
                 }
             }
-            
-            ThrowItem(itemConfig);
+
+            ThrowItem(itemStack);
         }
-        
-        private bool TryAddToHoveredSlot(ItemConfig itemConfig)
+
+        private bool TryAddToHoveredSlot(ItemStack itemStack)
         {
             var interactionPage = GetCurrentInteractionPage();
             var pointer = Pointer.current;
-            if (interactionPage == null || pointer == null
-                                        || !interactionPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel)
-                                        || !playerInventory.TryPlaceInSlot(slotModel.ItemType, itemConfig, out var replacedItemConfig))
+            if (interactionPage == null
+             || pointer == null
+             || !interactionPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel)
+             || !playerInventory.TryPlaceInSlot(slotModel.ItemType, itemStack, out var remainderStack, out var replacedStack))
             {
                 return false;
-            }
-
-            if (replacedItemConfig == null)
-            {
-                if (slotModel.ItemType == ItemType.Backpack)
-                {
-                    RebuildInventoryAndThrowOverflowItems();
-                }
-
-                return true;
             }
 
             if (slotModel.ItemType == ItemType.Backpack)
@@ -188,14 +172,28 @@ namespace Inventory
                 RebuildInventoryAndThrowOverflowItems();
             }
 
-            if (playerInventory.TryAddToGrid(replacedItemConfig))
+            if (replacedStack != null)
             {
-                return true;
+                var replacedRemainder = playerInventory.TryAdd(replacedStack);
+                if (replacedRemainder != null)
+                {
+                    SpawnItemInWorld(replacedRemainder);
+                }
             }
 
-            ThrowItem(replacedItemConfig);
+            if (remainderStack != null)
+            {
+                var remainderAfterInventory = playerInventory.TryAdd(remainderStack);
+                if (remainderAfterInventory != null)
+                {
+                    SpawnItemInWorld(remainderAfterInventory);
+                }
+            }
+
+            ClearHand();
             return true;
         }
+
         private static bool IsPointerOverInventory()
         {
             return IsPointerOver<InventoryView>();
@@ -214,9 +212,9 @@ namespace Inventory
             }
 
             var pointerEventData = new PointerEventData(EventSystem.current)
-                                   {
-                                       position = Pointer.current.position.ReadValue()
-                                   };
+            {
+                position = Pointer.current.position.ReadValue()
+            };
             var raycastResults = new List<RaycastResult>();
             EventSystem.current.RaycastAll(pointerEventData, raycastResults);
 
@@ -230,24 +228,24 @@ namespace Inventory
 
             return false;
         }
-        
+
         private void OnGameModeChanged(GameModeChangedMessage msg)
         {
             if (IsInventoryInteractionMode(msg.GameMode) || !HasItemInHand())
             {
                 return;
             }
-            var itemConfig = playerInventory.HandSlot.Value.ItemConfig;
 
-            if (playerInventory.TryAdd(itemConfig))
+            var itemStack = playerInventory.HandSlot.Value.ItemStack;
+            if (TryStoreOrDrop(itemStack, playerInventory.TryAdd(itemStack)))
             {
-                ClearHand();
                 return;
             }
-            ThrowItem(itemConfig);
+
+            ThrowItem(itemStack);
         }
 
-        private bool TryAddToHoveredTile(ItemConfig itemConfig)
+        private bool TryAddToHoveredTile(ItemStack itemStack)
         {
             if (!InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out _))
             {
@@ -266,15 +264,15 @@ namespace Inventory
                 return false;
             }
 
-            return hoveredInventory.TryAdd(itemConfig, placementTile);
+            var remainder = hoveredInventory.TryAdd(itemStack, placementTile);
+            return TryStoreOrDrop(itemStack, remainder, hoveredInventory);
         }
 
+        private bool HasItemInHand() => playerInventory.HandSlot.Value?.ItemStack != null;
 
-        private bool HasItemInHand() => playerInventory.HandSlot.Value?.ItemConfig != null;
-       
         private void ClearHand()
         {
-            playerInventory.HandSlot.Value = new SlotModel(ItemType.None, null);
+            playerInventory.HandSlot.Value = new SlotModel(ItemType.None, SlotStackLimitType.SingleItem, null);
             handSourceInventory = null;
             handSourceSlot = null;
             handSourcePosition = Matrix4x4.identity;
@@ -298,10 +296,10 @@ namespace Inventory
             {
                 return;
             }
-            
+
             interactionPage.ResetGrabOffset();
         }
-        
+
         private static IInventoryInteractionPage GetCurrentInteractionPage()
         {
             return TradePage.CurrentInteractionPage ?? LootingPage.CurrentInteractionPage ?? InventoryPage.CurrentInteractionPage;
@@ -311,10 +309,10 @@ namespace Inventory
         {
             return mode == GameMode.Inventory || mode == GameMode.Looting || mode == GameMode.Trade;
         }
-        
-        private void ThrowItem(ItemConfig itemConfig)
+
+        private void ThrowItem(ItemStack itemStack)
         {
-            SpawnItemInWorld(itemConfig);
+            SpawnItemInWorld(itemStack);
             ClearHand();
         }
 
@@ -326,8 +324,8 @@ namespace Inventory
                 SpawnItemInWorld(droppedItem);
             }
         }
-        
-        private bool HandleTradeMouseUp(ItemConfig itemConfig)
+
+        private bool HandleTradeMouseUp(ItemStack itemStack)
         {
             var tradePage = TradePage.Current;
             var pointer = Pointer.current;
@@ -336,65 +334,63 @@ namespace Inventory
                 return false;
             }
 
-            if (tradePage.CanMoveToPlayerSlot(handSourceInventory, handSourceSlot) && TryAddToHoveredSlot(itemConfig))
+            if (tradePage.CanMoveToPlayerSlot(handSourceInventory, handSourceSlot) && TryAddToHoveredSlot(itemStack))
             {
-                tradePage.ConsumeSellOriginIfAny(itemConfig, handSourceInventory);
-                ClearHand();
+                tradePage.ConsumeSellOriginIfAny(itemStack, handSourceInventory);
                 return true;
             }
 
             if (InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out _)
-             && tradePage.CanMoveToInventory(handSourceInventory, handSourceSlot, hoveredInventory)
-             && TryAddToHoveredTile(itemConfig))
+             && tradePage.CanMoveToInventory(handSourceInventory, handSourceSlot, hoveredInventory))
             {
-                if (tradePage.IsSellInventory(hoveredInventory))
+                var previousCount = itemStack.Count;
+                if (TryAddToHoveredTile(itemStack))
                 {
-                    tradePage.RegisterMoveIntoSell(itemConfig, hoveredInventory, handSourceInventory, handSourceSlot, handSourcePosition);
-                }
-                else
-                {
-                    tradePage.ConsumeSellOriginIfAny(itemConfig, handSourceInventory);
-                }
+                    if (tradePage.IsSellInventory(hoveredInventory))
+                    {
+                        tradePage.RegisterMoveIntoSell(itemStack.ItemConfig, previousCount, hoveredInventory, handSourceInventory, handSourceSlot, handSourcePosition);
+                    }
+                    else
+                    {
+                        tradePage.ConsumeSellOriginIfAny(new ItemStack(itemStack.ItemConfig, previousCount), handSourceInventory);
+                    }
 
-                ClearHand();
-                return true;
+                    return true;
+                }
             }
 
             if (tradePage.IsInPlayerSections(pointer.position.ReadValue())
              && tradePage.CanMoveToInventory(handSourceInventory, handSourceSlot, playerInventory)
-             && playerInventory.TryAdd(itemConfig))
+             && TryStoreOrDrop(itemStack, playerInventory.TryAdd(itemStack)))
             {
-                tradePage.ConsumeSellOriginIfAny(itemConfig, handSourceInventory);
-                ClearHand();
+                tradePage.ConsumeSellOriginIfAny(itemStack, handSourceInventory);
                 return true;
             }
 
             if (tradePage.IsInTargetSection(pointer.position.ReadValue())
              && tradePage.CanMoveToInventory(handSourceInventory, handSourceSlot, tradePage.GetTargetInventory())
-             && tradePage.GetTargetInventory().TryAdd(itemConfig))
+             && TryStoreOrDrop(itemStack, tradePage.GetTargetInventory().TryAdd(itemStack), tradePage.GetTargetInventory()))
             {
-                tradePage.ConsumeSellOriginIfAny(itemConfig, handSourceInventory);
-                ClearHand();
+                tradePage.ConsumeSellOriginIfAny(itemStack, handSourceInventory);
                 return true;
             }
 
-            if (TryReturnToHandSource(itemConfig))
+            if (TryReturnToHandSource(itemStack))
             {
-                tradePage.ConsumeSellOriginIfAny(itemConfig, handSourceInventory);
+                tradePage.ConsumeSellOriginIfAny(itemStack, handSourceInventory);
                 ClearHand();
                 return true;
             }
 
             var sourceIsPlayer = tradePage.CanMoveToPlayerSlot(handSourceInventory, handSourceSlot);
             var sourceInventory = sourceIsPlayer ? playerInventory : tradePage.GetTargetInventory();
-            if (sourceInventory != null && sourceInventory.TryAdd(itemConfig))
+            if (sourceInventory != null && TryStoreOrDrop(itemStack, sourceInventory.TryAdd(itemStack), sourceInventory))
             {
-                tradePage.ConsumeSellOriginIfAny(itemConfig, handSourceInventory);
-                ClearHand();
+                tradePage.ConsumeSellOriginIfAny(itemStack, handSourceInventory);
                 return true;
             }
 
-            if (tradePage.TryAddToSourceSellInventory(itemConfig, handSourceInventory, handSourceSlot, handSourcePosition))
+            if (tradePage.TryAddToSourceSellInventory(itemStack, handSourceInventory, handSourceSlot, handSourcePosition))
             {
                 ClearHand();
                 return true;
@@ -403,16 +399,25 @@ namespace Inventory
             return true;
         }
 
-        private bool TryReturnToHandSource(ItemConfig itemConfig)
+        private bool TryReturnToHandSource(ItemStack itemStack)
         {
-            if (handSourceSlot != null && playerInventory.TryPlaceInSlot(handSourceSlot.ItemType, itemConfig, out var replacedItemConfig))
+            if (handSourceSlot != null && playerInventory.TryPlaceInSlot(handSourceSlot.ItemType, itemStack, out var remainderStack, out var replacedStack))
             {
-                if (replacedItemConfig == null)
+                if (replacedStack != null)
                 {
-                    return true;
+                    var replacedRemainder = playerInventory.TryAdd(replacedStack);
+                    if (replacedRemainder != null)
+                    {
+                        return false;
+                    }
                 }
 
-                return playerInventory.TryAdd(replacedItemConfig);
+                if (remainderStack != null)
+                {
+                    return playerInventory.TryAdd(remainderStack) == null;
+                }
+
+                return true;
             }
 
             if (handSourceInventory == null)
@@ -420,19 +425,24 @@ namespace Inventory
                 return false;
             }
 
+            ItemStack remainder = itemStack;
             if (handSourceInventory is ITiledInventory tiledInventory)
             {
                 var center = handSourcePosition.GetColumn(3);
                 var startPosition = new Vector2Int(
-                    Mathf.RoundToInt(center.x - (itemConfig.Size.x - 1) * 0.5f),
-                    Mathf.RoundToInt(center.y - (itemConfig.Size.y - 1) * 0.5f));
-                if (tiledInventory.Tiles.TryGetTile(startPosition.x, startPosition.y, out var tile) && handSourceInventory.TryAdd(itemConfig, tile))
+                    Mathf.RoundToInt(center.x - (itemStack.ItemConfig.Size.x - 1) * 0.5f),
+                    Mathf.RoundToInt(center.y - (itemStack.ItemConfig.Size.y - 1) * 0.5f));
+                if (tiledInventory.Tiles.TryGetTile(startPosition.x, startPosition.y, out var tile))
                 {
-                    return true;
+                    remainder = handSourceInventory.TryAdd(itemStack, tile);
+                    if (remainder == null)
+                    {
+                        return true;
+                    }
                 }
             }
 
-            return handSourceInventory.TryAdd(itemConfig);
+            return handSourceInventory.TryAdd(remainder) == null;
         }
 
         private void ProcessDelayedBackpackResize()
@@ -443,7 +453,7 @@ namespace Inventory
             }
 
             backpackResizePendingAfterHandAction = false;
-            var currentBackpack = playerInventory.BackpackSlot.ItemConfig;
+            var currentBackpack = playerInventory.BackpackSlot.ItemStack;
             if (currentBackpack == backpackTakenFromSlot)
             {
                 backpackTakenFromSlot = null;
@@ -454,10 +464,39 @@ namespace Inventory
             RebuildInventoryAndThrowOverflowItems();
         }
 
-        private void SpawnItemInWorld(ItemConfig itemConfig)
+        private bool TryStoreOrDrop(ItemStack originalStack, ItemStack remainder, IInventory preferredInventory = null)
         {
+            if (remainder == null)
+            {
+                ClearHand();
+                return true;
+            }
+
+            if (originalStack == null || remainder.Count == originalStack.Count)
+            {
+                return false;
+            }
+
+            var overflow = preferredInventory != null ? preferredInventory.TryAdd(remainder) : remainder;
+            if (overflow != null)
+            {
+                SpawnItemInWorld(overflow);
+            }
+
+            ClearHand();
+            return true;
+        }
+
+        private void SpawnItemInWorld(ItemStack itemStack)
+        {
+            if (itemStack?.ItemConfig?.HandPrefab == null)
+            {
+                return;
+            }
+
             var spawnPosition = playerTransform.position + playerTransform.forward * ThrowForwardOffset + Vector3.up * ThrowUpOffset;
-            var itemHolder = Object.Instantiate(itemConfig.HandPrefab, spawnPosition, Quaternion.identity);
+            var itemHolder = Object.Instantiate(itemStack.ItemConfig.HandPrefab, spawnPosition, Quaternion.identity);
+            itemHolder.SetCount(itemStack.Count);
             itemHolder.CanInteractable = true;
 
             if (itemHolder.TryGetComponent<Rigidbody>(out var rigidbody))

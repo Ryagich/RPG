@@ -42,12 +42,14 @@ namespace UI.Pages
             public readonly IInventory SourceInventory;
             public readonly SlotModel SourceSlot;
             public readonly Matrix4x4 SourcePosition;
+            public readonly int Count;
 
-            public SellItemOrigin(IInventory sourceInventory, SlotModel sourceSlot, Matrix4x4 sourcePosition)
+            public SellItemOrigin(IInventory sourceInventory, SlotModel sourceSlot, Matrix4x4 sourcePosition, int count)
             {
                 SourceInventory = sourceInventory;
                 SourceSlot = sourceSlot;
                 SourcePosition = sourcePosition;
+                Count = count;
             }
         }
         
@@ -177,11 +179,13 @@ namespace UI.Pages
                 DrawTiles(inventory);
             }
 
-            playerInventory.Items.ObserveCountChanged().Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
-            targetInventory.Items.ObserveCountChanged().Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
-            playerSellInventory.Items.ObserveCountChanged().Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
-            targetSellInventory.Items.ObserveCountChanged().Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
+            playerInventory.Changed.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
+            targetInventory.Changed.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
+            playerSellInventory.Changed.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
+            targetSellInventory.Changed.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
             playerInventory.HandSlot.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
+            playerMoneyStorage.CurrentMoney.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
+            dialogueContext.CurrentTargetMoneyStorage?.CurrentMoney.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
             
             // ReSharper disable once Unity.NoNullPropagation
             if (rightSellInfo?.TradeButton)
@@ -351,7 +355,7 @@ namespace UI.Pages
             dragSourceSlot = null;
         }
 
-        public bool TryAddToSourceSellInventory(ItemConfig itemConfig, IInventory sourceInventory, SlotModel sourceSlot, Matrix4x4 sourcePosition)
+        public bool TryAddToSourceSellInventory(ItemStack itemStack, IInventory sourceInventory, SlotModel sourceSlot, Matrix4x4 sourcePosition)
         {
             var sourceSide = ResolveSourceSide(sourceInventory, sourceSlot);
             var destinationSellInventory = sourceSide switch
@@ -361,12 +365,12 @@ namespace UI.Pages
                                                _ => null
                                            };
 
-            if (itemConfig == null || destinationSellInventory == null || !destinationSellInventory.TryAdd(itemConfig))
+            if (itemStack == null || destinationSellInventory == null || destinationSellInventory.TryAdd(itemStack) != null)
             {
                 return false;
             }
 
-            RegisterMoveIntoSell(itemConfig, destinationSellInventory, sourceInventory, sourceSlot, sourcePosition);
+            RegisterMoveIntoSell(itemStack.ItemConfig, itemStack.Count, destinationSellInventory, sourceInventory, sourceSlot, sourcePosition);
             return true;
         }
 
@@ -392,9 +396,9 @@ namespace UI.Pages
             return ResolveSourceSide(fromInventory, fromSlot) == TradeSide.Player;
         }
 
-        public void RegisterMoveIntoSell(ItemConfig itemConfig, IInventory destinationInventory, IInventory sourceInventory, SlotModel sourceSlot, Matrix4x4 sourcePosition)
+        public void RegisterMoveIntoSell(ItemConfig itemConfig, int count, IInventory destinationInventory, IInventory sourceInventory, SlotModel sourceSlot, Matrix4x4 sourcePosition)
         {
-            if (itemConfig == null || !IsSellInventory(destinationInventory))
+            if (itemConfig == null || count <= 0 || !IsSellInventory(destinationInventory))
             {
                 return;
             }
@@ -411,26 +415,41 @@ namespace UI.Pages
                 queue[itemConfig] = origins;
             }
 
-            origins.Enqueue(new SellItemOrigin(sourceInventory, sourceSlot, sourcePosition));
+            origins.Enqueue(new SellItemOrigin(sourceInventory, sourceSlot, sourcePosition, count));
         }
 
-        public void ConsumeSellOriginIfAny(ItemConfig itemConfig, IInventory sourceInventory)
+        public void ConsumeSellOriginIfAny(ItemStack itemStack, IInventory sourceInventory)
         {
-            if (itemConfig == null || !IsSellInventory(sourceInventory))
+            if (itemStack?.ItemConfig == null || !IsSellInventory(sourceInventory))
             {
                 return;
             }
 
             var dictionary = GetOriginDictionary(sourceInventory);
-            if (!dictionary.TryGetValue(itemConfig, out var queue) || queue.Count == 0)
+            if (!dictionary.TryGetValue(itemStack.ItemConfig, out var queue) || queue.Count == 0)
             {
                 return;
             }
 
-            queue.Dequeue();
+            var remaining = itemStack.Count;
+            while (remaining > 0 && queue.Count > 0)
+            {
+                var origin = queue.Peek();
+                if (origin.Count <= remaining)
+                {
+                    remaining -= origin.Count;
+                    queue.Dequeue();
+                    continue;
+                }
+
+                queue.Dequeue();
+                queue.Enqueue(new SellItemOrigin(origin.SourceInventory, origin.SourceSlot, origin.SourcePosition, origin.Count - remaining));
+                remaining = 0;
+            }
+
             if (queue.Count == 0)
             {
-                dictionary.Remove(itemConfig);
+                dictionary.Remove(itemStack.ItemConfig);
             }
         }
 
@@ -467,7 +486,7 @@ namespace UI.Pages
         private void UpdateInventoryInfo()
         {
             var targetInventory = dialogueContext.CurrentTargetInventory;
-            var handWeight = playerInventory.HandSlot.Value?.ItemConfig?.Weight ?? 0f;
+            var handWeight = playerInventory.HandSlot.Value?.ItemStack?.TotalWeight ?? 0f;
             var handSourceInventory = playerInventory.HandSourceInventory.Value;
 
             var playerWeight = PageUiUtilities.GetItemsWeight(playerInventory)
@@ -504,10 +523,10 @@ namespace UI.Pages
                 return;
             }
 
-            var totalWeight = sellInventory.Items.Sum(item => item.ItemConfig.Weight);
+            var totalWeight = sellInventory.Items.Sum(item => item.ItemStack.TotalWeight);
             var totalPrice = CalculateItemsPrice(sellInventory);
-            var handWeight = playerInventory.HandSlot.Value?.ItemConfig?.Weight ?? 0f;
-            var handPrice = playerInventory.HandSlot.Value?.ItemConfig?.Price ?? 0;
+            var handWeight = playerInventory.HandSlot.Value?.ItemStack?.TotalWeight ?? 0f;
+            var handPrice = playerInventory.HandSlot.Value?.ItemStack?.TotalPrice ?? 0;
             if (playerInventory.HandSourceInventory.Value == sellInventory)
             {
                 totalWeight += handWeight > 0f ? handWeight : 0f;
@@ -584,7 +603,7 @@ namespace UI.Pages
 
         private void UpdateInventoryScrollState()
         {
-            var isDraggingItem = playerInventory.HandSlot.Value?.ItemConfig != null;
+            var isDraggingItem = playerInventory.HandSlot.Value?.ItemStack != null;
             foreach (var scrollRect in inventoryScrollRects)
             {
                 if (!scrollRect)
@@ -606,7 +625,8 @@ namespace UI.Pages
 
             foreach (var item in inventory.Items)
             {
-                var itemImageRect = PageUiUtilities.CreateItemImage(inventoryView.ContentForItems, item.ItemConfig, "Item");
+                var itemGrabSize = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, item.ItemConfig.Size);
+                var itemImageRect = PageUiUtilities.CreateItemImage(inventoryView.ContentForItems, item.ItemStack, "Item", itemGrabSize);
                 itemRects.Add(itemImageRect);
 
                 var itemGrabRectObject = new GameObject($"Item Grab [{item.ItemConfig.Id}]", typeof(RectTransform));
@@ -615,7 +635,7 @@ namespace UI.Pages
                 itemGrabRect.anchorMin = new Vector2(0, 1);
                 itemGrabRect.anchorMax = new Vector2(0, 1);
                 itemGrabRect.pivot = new Vector2(0.5f, 0.5f);
-                itemGrabRect.sizeDelta = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, item.ItemConfig.Size);
+                itemGrabRect.sizeDelta = itemGrabSize;
                 itemGrabRects.Add(itemGrabRect);
 
                 var itemCenterPosition = item.Position.GetColumn(3);
@@ -634,11 +654,34 @@ namespace UI.Pages
 
         private void DrawHandSlot()
         {
-            handSlotRect = PageUiUtilities.DrawHandSlot(handSlotRect, canvasRect, playerInventory.HandSlot.Value?.ItemConfig);
+            var handItemStack = playerInventory.HandSlot.Value?.ItemStack;
+            handSlotRect = PageUiUtilities.DrawHandSlot(handSlotRect, canvasRect, handItemStack, GetHandStackAnchorAreaSize(handItemStack));
             if (handSlotRect)
             {
                 UpdateHandSlotPosition();
             }
+        }
+
+        private Vector2? GetHandStackAnchorAreaSize(ItemStack handItemStack)
+        {
+            if (handItemStack?.ItemConfig == null)
+            {
+                return null;
+            }
+
+            var sourceInventory = playerInventory.HandSourceInventory.Value;
+            if (sourceInventory != null
+             && inventoryViews.TryGetValue(sourceInventory, out var sourceView)
+             && sourceView != null)
+            {
+                var sourceGridLayout = sourceView.ContentForTiles.GetComponent<GridLayoutGroup>();
+                if (sourceGridLayout != null)
+                {
+                    return PageUiUtilities.GetItemGrabSize(sourceGridLayout, handItemStack.ItemConfig.Size);
+                }
+            }
+
+            return null;
         }
 
         private void UpdateHandSlotPosition()
@@ -897,74 +940,77 @@ namespace UI.Pages
                 return;
             }
 
-            var itemsToReturn = sellInventory.Items.Select(item => item.ItemConfig).ToList();
-            foreach (var itemConfig in itemsToReturn)
+            var itemsToReturn = sellInventory.Items.ToList();
+            foreach (var item in itemsToReturn)
             {
-                if (!TryTakeOne(sellInventory, itemConfig))
+                sellInventory.Remove(item);
+                if (!TryReturnToOrigin(item.ItemStack, origins) && defaultInventory != null)
                 {
-                    continue;
-                }
-
-                if (!TryReturnToOrigin(itemConfig, origins) && (defaultInventory == null || !defaultInventory.TryAdd(itemConfig)))
-                {
-                    // ignore
+                    defaultInventory.TryAdd(item.ItemStack);
                 }
             }
 
             origins.Clear();
         }
 
-        private static bool TryReturnToOrigin(ItemConfig itemConfig, Dictionary<ItemConfig, Queue<SellItemOrigin>> origins)
+        private static bool TryReturnToOrigin(ItemStack itemStack, Dictionary<ItemConfig, Queue<SellItemOrigin>> origins)
         {
-            if (!origins.TryGetValue(itemConfig, out var queue) || queue.Count == 0)
+            if (itemStack?.ItemConfig == null || !origins.TryGetValue(itemStack.ItemConfig, out var queue) || queue.Count == 0)
             {
                 return false;
             }
 
-            var origin = queue.Dequeue();
+            var remaining = itemStack.Count;
+            while (remaining > 0 && queue.Count > 0)
+            {
+                var origin = queue.Dequeue();
+                var countToReturn = Mathf.Min(remaining, origin.Count);
+                var returnStack = new ItemStack(itemStack.ItemConfig, countToReturn);
+                remaining -= countToReturn;
+
+                if (origin.SourceSlot != null)
+                {
+                    if (origin.SourceSlot.ItemStack == null)
+                    {
+                        origin.SourceSlot.ItemStack = returnStack;
+                    }
+                    else
+                    {
+                        origin.SourceInventory?.TryAdd(returnStack);
+                    }
+                }
+                else if (origin.SourceInventory is ITiledInventory tiledInventory)
+                {
+                    var center = origin.SourcePosition.GetColumn(3);
+                    var startPosition = new Vector2Int(
+                        Mathf.RoundToInt(center.x - (itemStack.ItemConfig.Size.x - 1) * 0.5f),
+                        Mathf.RoundToInt(center.y - (itemStack.ItemConfig.Size.y - 1) * 0.5f));
+                    if (tiledInventory.Tiles.TryGetTile(startPosition.x, startPosition.y, out var tile))
+                    {
+                        var remainder = origin.SourceInventory.TryAdd(returnStack, tile);
+                        if (remainder != null)
+                        {
+                            origin.SourceInventory.TryAdd(remainder);
+                        }
+                    }
+                }
+                else
+                {
+                    origin.SourceInventory?.TryAdd(returnStack);
+                }
+
+                if (origin.Count > countToReturn)
+                {
+                    queue.Enqueue(new SellItemOrigin(origin.SourceInventory, origin.SourceSlot, origin.SourcePosition, origin.Count - countToReturn));
+                }
+            }
+
             if (queue.Count == 0)
             {
-                origins.Remove(itemConfig);
+                origins.Remove(itemStack.ItemConfig);
             }
 
-            if (origin.SourceSlot != null)
-            {
-                if (origin.SourceSlot.ItemConfig == null)
-                {
-                    origin.SourceSlot.ItemConfig = itemConfig;
-                    return true;
-                }
-
-                return origin.SourceInventory != null && origin.SourceInventory.TryAdd(itemConfig);
-            }
-
-            if (origin.SourceInventory == null)
-            {
-                return false;
-            }
-
-            if (origin.SourceInventory is ITiledInventory tiledInventory)
-            {
-                var center = origin.SourcePosition.GetColumn(3);
-                var startPosition = new Vector2Int(Mathf.RoundToInt(center.x - (itemConfig.Size.x - 1) * 0.5f), Mathf.RoundToInt(center.y - (itemConfig.Size.y - 1) * 0.5f));
-                if (tiledInventory.Tiles.TryGetTile(startPosition.x, startPosition.y, out var tile) && origin.SourceInventory.TryAdd(itemConfig, tile))
-                {
-                    return true;
-                }
-            }
-
-            return origin.SourceInventory.TryAdd(itemConfig);
-        }
-
-        private static bool TryTakeOne(IInventory inventory, ItemConfig itemConfig)
-        {
-            var item = inventory.Items.FirstOrDefault(current => current.ItemConfig == itemConfig);
-            if (item == null || item.Tiles == null || item.Tiles.Count == 0)
-            {
-                return false;
-            }
-
-            return inventory.TryGet(item.Tiles[0], out _);
+            return remaining == 0;
         }
 
         private void CompletePlayerSell()
@@ -1001,23 +1047,63 @@ namespace UI.Pages
                 return;
             }
 
-            var items = sourceSellInventory.Items.Select(item => item.ItemConfig).ToList();
-            foreach (var itemConfig in items)
+            var items = sourceSellInventory.Items.ToList();
+            foreach (var item in items)
             {
-                if (!buyerMoneyStorage.CanSpend(itemConfig.Price) || !destinationInventory.TryAdd(itemConfig))
+                var stackToSell = item.ItemStack.Clone();
+                var maxAffordableCount = stackToSell.ItemConfig.Price > 0
+                    ? buyerMoneyStorage.CurrentMoney.Value / stackToSell.ItemConfig.Price
+                    : stackToSell.Count;
+                if (maxAffordableCount <= 0)
                 {
                     continue;
                 }
 
-                TryTakeOne(sourceSellInventory, itemConfig);
-                buyerMoneyStorage.TrySpend(itemConfig.Price);
-                sellerMoneyStorage.Add(itemConfig.Price);
-                if (origins.TryGetValue(itemConfig, out var queue) && queue.Count > 0)
+                if (maxAffordableCount < stackToSell.Count)
                 {
-                    queue.Dequeue();
+                    stackToSell.Count = maxAffordableCount;
+                }
+
+                var remainder = destinationInventory.TryAdd(stackToSell);
+                var soldCount = stackToSell.Count - (remainder?.Count ?? 0);
+                if (soldCount <= 0)
+                {
+                    continue;
+                }
+
+                if (soldCount >= item.Count)
+                {
+                    sourceSellInventory.Remove(item);
+                }
+                else
+                {
+                    item.ItemStack.Count -= soldCount;
+                }
+
+                var soldPrice = item.ItemConfig.Price * soldCount;
+                buyerMoneyStorage.TrySpend(soldPrice);
+                sellerMoneyStorage.Add(soldPrice);
+
+                if (origins.TryGetValue(item.ItemConfig, out var queue) && queue.Count > 0)
+                {
+                    var remainingOriginCount = soldCount;
+                    while (remainingOriginCount > 0 && queue.Count > 0)
+                    {
+                        var origin = queue.Dequeue();
+                        if (origin.Count > remainingOriginCount)
+                        {
+                            queue.Enqueue(new SellItemOrigin(origin.SourceInventory, origin.SourceSlot, origin.SourcePosition, origin.Count - remainingOriginCount));
+                            remainingOriginCount = 0;
+                        }
+                        else
+                        {
+                            remainingOriginCount -= origin.Count;
+                        }
+                    }
+
                     if (queue.Count == 0)
                     {
-                        origins.Remove(itemConfig);
+                        origins.Remove(item.ItemConfig);
                     }
                 }
             }
@@ -1035,7 +1121,7 @@ namespace UI.Pages
             {
                 if (item?.ItemConfig != null)
                 {
-                    totalPrice += item.ItemConfig.Price;
+                    totalPrice += item.ItemStack.TotalPrice;
                 }
             }
 

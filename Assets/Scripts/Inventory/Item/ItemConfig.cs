@@ -10,6 +10,7 @@ namespace Inventory.Item
         [field: SerializeField] public ItemType ItemType { get; private set; }
         [field: SerializeField, Min(1)] public int Price { get; private set; } = 1;
         [field: SerializeField, Min(0f)] public float Weight { get; private set; } = 2.1f;
+        [field: SerializeField, Min(1)] public int MaxStack { get; private set; } = 1;
         [field: SerializeField] public Sprite Icon { get; private set; }
         [field: SerializeField] public LocalizedString Name { get; private set; }
         [field: SerializeField] public ItemHolder HandPrefab { get; private set; }
