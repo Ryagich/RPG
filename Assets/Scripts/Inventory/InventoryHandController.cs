@@ -29,6 +29,7 @@ namespace Inventory
         private IInventory handSourceInventory;
         private SlotModel handSourceSlot;
         private Matrix4x4 handSourcePosition;
+        private MouseButtonType? activeHandButton;
 
         public InventoryHandController(
             PlayerInventory playerInventory,
@@ -49,7 +50,7 @@ namespace Inventory
 
         public void Start() { }
 
-        private void OnMouseDown(MouseDown _)
+        private void OnMouseDown(MouseDown message)
         {
             CaptureGrabOffset();
 
@@ -61,6 +62,7 @@ namespace Inventory
             handSourceInventory = null;
             handSourceSlot = null;
             handSourcePosition = Matrix4x4.identity;
+            activeHandButton = null;
             playerInventory.HandSourceInventory.Value = null;
 
             var interactionPage = GetCurrentInteractionPage();
@@ -68,7 +70,7 @@ namespace Inventory
             if (interactionPage != null
              && pointer != null
              && interactionPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel)
-             && playerInventory.TryTakeFromSlot(slotModel.ItemType, out var slotItemStack))
+             && TryTakeFromHoveredSlot(slotModel, message.Button, out var slotItemStack))
             {
                 if (slotModel.ItemType == ItemType.Backpack)
                 {
@@ -80,12 +82,12 @@ namespace Inventory
                 handSourceSlot = slotModel;
                 playerInventory.HandSourceInventory.Value = handSourceInventory;
                 playerInventory.HandSlot.Value = new SlotModel(slotItemStack.ItemConfig.ItemType, SlotStackLimitType.SingleItem, slotItemStack);
+                activeHandButton = message.Button;
                 TradePage.Current?.SetDragSource(handSourceInventory, handSourceSlot);
                 return;
             }
 
-            if (!InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out var hoveredTile)
-             || !hoveredInventory.TryGet(hoveredTile, out var itemInInventory))
+            if (!TryTakeFromHoveredTile(message.Button, out var hoveredInventory, out var itemInInventory, out var itemStack))
             {
                 return;
             }
@@ -93,13 +95,16 @@ namespace Inventory
             handSourceInventory = hoveredInventory;
             handSourcePosition = itemInInventory.Position;
             playerInventory.HandSourceInventory.Value = handSourceInventory;
-            playerInventory.HandSlot.Value = new SlotModel(itemInInventory.ItemConfig.ItemType, SlotStackLimitType.SingleItem, itemInInventory.ItemStack);
+            playerInventory.HandSlot.Value = new SlotModel(itemInInventory.ItemConfig.ItemType, SlotStackLimitType.SingleItem, itemStack);
+            activeHandButton = message.Button;
             TradePage.Current?.SetDragSource(handSourceInventory, handSourceSlot);
         }
 
-        private void OnMouseUp(MouseUp _)
+        private void OnMouseUp(MouseUp message)
         {
-            if (!IsInventoryInteractionMode(gameModesController.GameMode) || !HasItemInHand())
+            if (!IsInventoryInteractionMode(gameModesController.GameMode)
+             || !HasItemInHand()
+             || activeHandButton != message.Button)
             {
                 return;
             }
@@ -276,10 +281,69 @@ namespace Inventory
             handSourceInventory = null;
             handSourceSlot = null;
             handSourcePosition = Matrix4x4.identity;
+            activeHandButton = null;
             playerInventory.HandSourceInventory.Value = null;
             TradePage.Current?.ClearDragSource();
             GetCurrentInteractionPage()?.ResetGrabOffset();
             ProcessDelayedBackpackResize();
+        }
+
+        private bool TryTakeFromHoveredSlot(SlotModel slotModel, MouseButtonType button, out ItemStack itemStack)
+        {
+            itemStack = null;
+            if (slotModel == null)
+            {
+                return false;
+            }
+
+            if (button == MouseButtonType.Left)
+            {
+                return playerInventory.TryTakeFromSlot(slotModel.ItemType, out itemStack);
+            }
+
+            var currentStack = slotModel.ItemStack;
+            if (currentStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            var countToTake = Mathf.Max(1, (currentStack.Count + 1) / 2);
+            return playerInventory.TryTakeFromSlot(slotModel.ItemType, countToTake, out itemStack);
+        }
+
+        private static bool TryTakeFromHoveredTile(
+            MouseButtonType button,
+            out IInventory hoveredInventory,
+            out ItemInInventory itemInInventory,
+            out ItemStack itemStack)
+        {
+            hoveredInventory = null;
+            itemInInventory = null;
+            itemStack = null;
+            if (!InventoryTilePointerHandler.TryGetHovered(out hoveredInventory, out var hoveredTile)
+             || !hoveredInventory.TryGet(hoveredTile, out itemInInventory))
+            {
+                hoveredInventory = null;
+                itemInInventory = null;
+                return false;
+            }
+
+            if (button == MouseButtonType.Left || itemInInventory.Count <= 1)
+            {
+                itemStack = itemInInventory.ItemStack;
+                return true;
+            }
+
+            var totalCount = itemInInventory.Count;
+            var countToTake = (totalCount + 1) / 2;
+            var remainderCount = totalCount - countToTake;
+            itemStack = new ItemStack(itemInInventory.ItemConfig, countToTake);
+            if (remainderCount > 0)
+            {
+                hoveredInventory.Add(new ItemStack(itemInInventory.ItemConfig, remainderCount), itemInInventory.Position);
+            }
+
+            return true;
         }
 
         private static void CaptureGrabOffset()

@@ -44,8 +44,10 @@ namespace Input
             inputConfig.Movement.action.canceled += OnMove;
             inputConfig.Interactable.action.started += Interactable;
             inputConfig.Inventory.action.started += OpenInventory;
-            inputConfig.LeftClick.action.started += MouseDown;
-            inputConfig.LeftClick.action.canceled += MouseUp;
+            inputConfig.LeftClick.action.started += LeftMouseDown;
+            inputConfig.LeftClick.action.canceled += LeftMouseUp;
+            inputConfig.RightClick.action.started += RightMouseDown;
+            inputConfig.RightClick.action.canceled += RightMouseUp;
         }
         
         private void OnMove(InputAction.CallbackContext context)
@@ -69,14 +71,24 @@ namespace Input
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Inventory));
         }
 
-        private void MouseDown(InputAction.CallbackContext context)
+        private void LeftMouseDown(InputAction.CallbackContext context)
         {
-            mouseDown.Publish(new());
+            mouseDown.Publish(new(MouseButtonType.Left));
         }
 
-        private void MouseUp(InputAction.CallbackContext context)
+        private void LeftMouseUp(InputAction.CallbackContext context)
         {
-            mouseUp.Publish(new());
+            mouseUp.Publish(new(MouseButtonType.Left));
+        }
+
+        private void RightMouseDown(InputAction.CallbackContext context)
+        {
+            mouseDown.Publish(new(MouseButtonType.Right));
+        }
+
+        private void RightMouseUp(InputAction.CallbackContext context)
+        {
+            mouseUp.Publish(new(MouseButtonType.Right));
         }
     }
 }

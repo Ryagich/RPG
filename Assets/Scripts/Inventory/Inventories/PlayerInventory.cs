@@ -137,6 +137,29 @@ namespace Inventory.Inventories
             return true;
         }
 
+        public bool TryTakeFromSlot(ItemType slotType, int count, out ItemStack itemStack)
+        {
+            itemStack = null;
+            if (count <= 0 || !TryGetSlot(slotType, out var slot) || slot.ItemStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            var takenCount = Mathf.Min(count, slot.ItemStack.Count);
+            itemStack = new ItemStack(slot.ItemStack.ItemConfig, takenCount);
+            if (takenCount >= slot.ItemStack.Count)
+            {
+                slot.ItemStack = null;
+            }
+            else
+            {
+                slot.ItemStack.Count -= takenCount;
+            }
+
+            NotifyChanged();
+            return true;
+        }
+
         public bool TryPlaceInSlot(ItemType slotType, ItemStack newItemStack, out ItemStack remainderStack, out ItemStack replacedStack)
         {
             remainderStack = null;
