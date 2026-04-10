@@ -1,9 +1,13 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Dialogs.Graph.Model;
 using UnityEditor;
+using UnityEditor.Localization;
 using UnityEngine;
+using UnityEngine.Localization.Tables;
 
 namespace Dialogs.Graph.Editor
 {
@@ -478,7 +482,7 @@ namespace Dialogs.Graph.Editor
 
             foreach (DialogNode node in currentGraph.Nodes)
             {
-                if (node.Phrase == null || node.Phrase == sourcePhraseForSelection)
+                if (node.Phrase == null)
                 {
                     continue;
                 }
@@ -547,6 +551,11 @@ namespace Dialogs.Graph.Editor
 
         private void DrawNodeWindow(DialogNode node)
         {
+            if (TryHandleTargetPhraseSelection(node))
+            {
+                return;
+            }
+
             EditorGUI.BeginDisabledGroup(isSelectingTargetPhrase);
 
             Rect removeButtonRect = new Rect(298f, 5f, 16f, 16f);
@@ -584,7 +593,7 @@ namespace Dialogs.Graph.Editor
             if (node.Phrase == null)
             {
                 EditorGUILayout.HelpBox("No phrase assigned.", MessageType.Warning);
-                GUI.DragWindow();
+                GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
                 EditorGUI.EndDisabledGroup();
                 return;
             }
@@ -605,7 +614,32 @@ namespace Dialogs.Graph.Editor
             }
 
             EditorGUI.EndDisabledGroup();
-            GUI.DragWindow();
+            GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+        }
+
+        private bool TryHandleTargetPhraseSelection(DialogNode node)
+        {
+            if (!isSelectingTargetPhrase || pendingAnswer == null)
+            {
+                return false;
+            }
+
+            if (node.Phrase == null)
+            {
+                return false;
+            }
+
+            if (Event.current.type != EventType.MouseDown || Event.current.button != 0)
+            {
+                return false;
+            }
+
+            pendingAnswer.SetNextPhrase(node.Phrase);
+            MarkDirty(sourcePhraseForSelection);
+            CancelTargetSelection(false);
+            Event.current.Use();
+            GUIUtility.ExitGUI();
+            return true;
         }
 
         private void DrawPhraseEditor(DialogPhrase phrase)
@@ -613,8 +647,8 @@ namespace Dialogs.Graph.Editor
             SerializedObject phraseObject = new SerializedObject(phrase);
             phraseObject.Update();
 
-            SerializedProperty textProperty = FindAutoProperty(phraseObject, "Text");
-            SerializedProperty answersProperty = FindAutoProperty(phraseObject, "Answers");
+            SerializedProperty textProperty = phraseObject.FindProperty("text");
+            SerializedProperty answersProperty = phraseObject.FindProperty("answers");
 
             if (answersProperty == null)
             {
@@ -622,11 +656,9 @@ namespace Dialogs.Graph.Editor
                 return;
             }
 
-            EditorGUI.BeginChangeCheck();
-
             if (textProperty != null)
             {
-                EditorGUILayout.PropertyField(textProperty, new GUIContent("Phrase"));
+                DrawLocalizedStringSelector(textProperty, "Phrase");
             }
 
             EditorGUILayout.Space(4f);
@@ -638,8 +670,8 @@ namespace Dialogs.Graph.Editor
             for (int i = 0; i < answersProperty.arraySize; i++)
             {
                 SerializedProperty answerProperty = answersProperty.GetArrayElementAtIndex(i);
-                SerializedProperty answerTextProperty = FindAutoProperty(answerProperty, "Text");
-                SerializedProperty nextPhraseProperty = FindAutoProperty(answerProperty, "NextPhrase");
+                SerializedProperty answerTextProperty = answerProperty.FindPropertyRelative("text");
+                SerializedProperty nextPhraseProperty = answerProperty.FindPropertyRelative("nextPhrase");
 
                 bool missingLink = nextPhraseProperty.objectReferenceValue == null;
                 bool targetOutsideGraph = nextPhraseProperty.objectReferenceValue != null &&
@@ -691,12 +723,12 @@ namespace Dialogs.Graph.Editor
 
                 if (answerTextProperty != null)
                 {
-                    EditorGUILayout.PropertyField(answerTextProperty, new GUIContent("Text"));
+                    DrawLocalizedStringSelector(answerTextProperty, "Text");
                 }
 
                 if (nextPhraseProperty != null)
                 {
-                    EditorGUILayout.PropertyField(nextPhraseProperty, new GUIContent("Next Phrase"));
+                    EditorGUILayout.PropertyField(nextPhraseProperty, new GUIContent("Next Phrase"), true);
                 }
 
                 if (missingLink)
@@ -722,15 +754,324 @@ namespace Dialogs.Graph.Editor
                 answersProperty.DeleteArrayElementAtIndex(removeAnswerIndex);
             }
 
-            if (EditorGUI.EndChangeCheck())
+            if (phraseObject.hasModifiedProperties)
             {
                 phraseObject.ApplyModifiedProperties();
                 MarkDirty(phrase);
             }
-            else
+        }
+
+        private static void DrawLocalizedStringSelector(SerializedProperty localizedStringProperty, string label)
+        {
+            if (localizedStringProperty == null)
             {
-                phraseObject.ApplyModifiedPropertiesWithoutUndo();
+                return;
             }
+
+            SerializedProperty tableReferenceProperty = localizedStringProperty.FindPropertyRelative("m_TableReference");
+            SerializedProperty entryReferenceProperty = localizedStringProperty.FindPropertyRelative("m_TableEntryReference");
+            if (tableReferenceProperty == null || entryReferenceProperty == null)
+            {
+                EditorGUILayout.PropertyField(localizedStringProperty, new GUIContent(label), true);
+                return;
+            }
+
+            SerializedProperty tableCollectionNameProperty = tableReferenceProperty.FindPropertyRelative("m_TableCollectionName");
+            SerializedProperty keyIdProperty = entryReferenceProperty.FindPropertyRelative("m_KeyId");
+            SerializedProperty keyProperty = entryReferenceProperty.FindPropertyRelative("m_Key");
+            if (tableCollectionNameProperty == null || keyIdProperty == null || keyProperty == null)
+            {
+                EditorGUILayout.PropertyField(localizedStringProperty, new GUIContent(label), true);
+                return;
+            }
+
+            if (TryDrawLocalizedStringSearchPicker(localizedStringProperty, label))
+            {
+                return;
+            }
+
+            var collections = LocalizationEditorSettings.GetStringTableCollections();
+            string currentTableValue = tableCollectionNameProperty.stringValue;
+            int selectedCollectionIndex = GetSelectedCollectionIndex(collections, currentTableValue);
+
+            string[] collectionOptions = new string[collections.Count + 1];
+            collectionOptions[0] = "<None>";
+            for (int i = 0; i < collections.Count; i++)
+            {
+                collectionOptions[i + 1] = collections[i].TableCollectionName;
+            }
+
+            EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+
+            int newCollectionIndex = EditorGUILayout.Popup("Table", selectedCollectionIndex, collectionOptions);
+            if (newCollectionIndex != selectedCollectionIndex)
+            {
+                ApplyCollectionSelection(tableCollectionNameProperty, keyIdProperty, keyProperty, collections, newCollectionIndex);
+                selectedCollectionIndex = newCollectionIndex;
+            }
+
+            if (selectedCollectionIndex <= 0)
+            {
+                EditorGUILayout.HelpBox("Select a localization table.", MessageType.None);
+                return;
+            }
+
+            StringTableCollection selectedCollection = collections[selectedCollectionIndex - 1];
+            IReadOnlyList<SharedTableData.SharedTableEntry> entries = selectedCollection.SharedData.Entries
+                .OrderBy(entry => entry.Key, StringComparer.Ordinal)
+                .ToList();
+
+            string[] entryOptions = new string[entries.Count + 1];
+            entryOptions[0] = "<None>";
+            for (int i = 0; i < entries.Count; i++)
+            {
+                entryOptions[i + 1] = entries[i].Key;
+            }
+
+            int selectedEntryIndex = GetSelectedEntryIndex(entries, keyIdProperty.longValue, keyProperty.stringValue);
+            int newEntryIndex = EditorGUILayout.Popup("Entry", selectedEntryIndex, entryOptions);
+            if (newEntryIndex != selectedEntryIndex)
+            {
+                ApplyEntrySelection(keyIdProperty, keyProperty, entries, newEntryIndex);
+            }
+        }
+
+        private static int GetSelectedCollectionIndex(System.Collections.ObjectModel.ReadOnlyCollection<StringTableCollection> collections, string serializedTableReference)
+        {
+            if (string.IsNullOrEmpty(serializedTableReference))
+            {
+                return 0;
+            }
+
+            for (int i = 0; i < collections.Count; i++)
+            {
+                StringTableCollection collection = collections[i];
+                string guidReference = $"GUID:{collection.SharedData.TableCollectionNameGuid:N}";
+                if (string.Equals(serializedTableReference, guidReference, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(serializedTableReference, collection.TableCollectionName, StringComparison.Ordinal))
+                {
+                    return i + 1;
+                }
+            }
+
+            return 0;
+        }
+
+        private static int GetSelectedEntryIndex(IReadOnlyList<SharedTableData.SharedTableEntry> entries, long keyId, string keyName)
+        {
+            if (keyId != 0)
+            {
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    if (entries[i].Id == keyId)
+                    {
+                        return i + 1;
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(keyName))
+            {
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    if (string.Equals(entries[i].Key, keyName, StringComparison.Ordinal))
+                    {
+                        return i + 1;
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+        private static void ApplyCollectionSelection(
+            SerializedProperty tableCollectionNameProperty,
+            SerializedProperty keyIdProperty,
+            SerializedProperty keyProperty,
+            System.Collections.ObjectModel.ReadOnlyCollection<StringTableCollection> collections,
+            int selectedCollectionIndex)
+        {
+            if (selectedCollectionIndex <= 0)
+            {
+                tableCollectionNameProperty.stringValue = string.Empty;
+                keyIdProperty.longValue = 0;
+                keyProperty.stringValue = string.Empty;
+                return;
+            }
+
+            StringTableCollection collection = collections[selectedCollectionIndex - 1];
+            tableCollectionNameProperty.stringValue = $"GUID:{collection.SharedData.TableCollectionNameGuid:N}";
+            keyIdProperty.longValue = 0;
+            keyProperty.stringValue = string.Empty;
+        }
+
+        private static void ApplyEntrySelection(
+            SerializedProperty keyIdProperty,
+            SerializedProperty keyProperty,
+            IReadOnlyList<SharedTableData.SharedTableEntry> entries,
+            int selectedEntryIndex)
+        {
+            if (selectedEntryIndex <= 0)
+            {
+                keyIdProperty.longValue = 0;
+                keyProperty.stringValue = string.Empty;
+                return;
+            }
+
+            SharedTableData.SharedTableEntry entry = entries[selectedEntryIndex - 1];
+            keyIdProperty.longValue = entry.Id;
+            keyProperty.stringValue = string.Empty;
+        }
+
+        private static bool TryDrawLocalizedStringSearchPicker(SerializedProperty localizedStringProperty, string label)
+        {
+            #if ENABLE_SEARCH
+            if (!CanUseLocalizedStringSearchPicker())
+            {
+                return false;
+            }
+
+            SerializedProperty tableProperty = localizedStringProperty.FindPropertyRelative("m_TableReference");
+            SerializedProperty entryProperty = localizedStringProperty.FindPropertyRelative("m_TableEntryReference");
+            if (tableProperty == null || entryProperty == null)
+            {
+                return false;
+            }
+
+            string currentSelectionLabel = GetLocalizedStringSelectionLabel(tableProperty, entryProperty);
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.PrefixLabel(label);
+
+            if (GUILayout.Button(currentSelectionLabel, EditorStyles.popup))
+            {
+                if (TryOpenLocalizedStringSearchPicker(tableProperty, entryProperty))
+                {
+                    GUIUtility.ExitGUI();
+                }
+            }
+
+            EditorGUILayout.EndHorizontal();
+            return true;
+            #else
+            return false;
+            #endif
+        }
+
+        private static bool CanUseLocalizedStringSearchPicker()
+        {
+            #if ENABLE_SEARCH
+            Assembly localizationAssembly = typeof(LocalizationEditorSettings).Assembly;
+            Type pickerTypeDefinition = localizationAssembly.GetType("UnityEditor.Localization.UI.LocalizedReferencePicker`1");
+            if (pickerTypeDefinition == null)
+            {
+                return false;
+            }
+
+            return CreateStringTableSearchContext(localizationAssembly) != null;
+            #else
+            return false;
+            #endif
+        }
+
+        private static string GetLocalizedStringSelectionLabel(SerializedProperty tableProperty, SerializedProperty entryProperty)
+        {
+            SerializedProperty tableCollectionNameProperty = tableProperty.FindPropertyRelative("m_TableCollectionName");
+            SerializedProperty keyIdProperty = entryProperty.FindPropertyRelative("m_KeyId");
+            SerializedProperty keyProperty = entryProperty.FindPropertyRelative("m_Key");
+
+            string tableLabel = "<None>";
+            string entryLabel = "<None>";
+
+            if (tableCollectionNameProperty != null && !string.IsNullOrEmpty(tableCollectionNameProperty.stringValue))
+            {
+                string serializedTableReference = tableCollectionNameProperty.stringValue;
+                foreach (StringTableCollection collection in LocalizationEditorSettings.GetStringTableCollections())
+                {
+                    string guidReference = $"GUID:{collection.SharedData.TableCollectionNameGuid:N}";
+                    if (string.Equals(serializedTableReference, guidReference, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(serializedTableReference, collection.TableCollectionName, StringComparison.Ordinal))
+                    {
+                        tableLabel = collection.TableCollectionName;
+
+                        if (keyIdProperty != null && keyIdProperty.longValue != 0)
+                        {
+                            SharedTableData.SharedTableEntry entry = collection.SharedData.GetEntry(keyIdProperty.longValue);
+                            if (entry != null)
+                            {
+                                entryLabel = entry.Key;
+                            }
+                        }
+                        else if (keyProperty != null && !string.IsNullOrEmpty(keyProperty.stringValue))
+                        {
+                            entryLabel = keyProperty.stringValue;
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            return $"{tableLabel}/{entryLabel}";
+        }
+
+        private static bool TryOpenLocalizedStringSearchPicker(SerializedProperty tableProperty, SerializedProperty entryProperty)
+        {
+            #if ENABLE_SEARCH
+            Assembly localizationAssembly = typeof(LocalizationEditorSettings).Assembly;
+            Type pickerTypeDefinition = localizationAssembly.GetType("UnityEditor.Localization.UI.LocalizedReferencePicker`1");
+            if (pickerTypeDefinition == null)
+            {
+                return false;
+            }
+
+            Type pickerType = pickerTypeDefinition.MakeGenericType(typeof(StringTableCollection));
+            object context = CreateStringTableSearchContext(localizationAssembly);
+            if (context == null)
+            {
+                return false;
+            }
+
+            object picker = Activator.CreateInstance(pickerType, context, "string table entry", tableProperty, entryProperty);
+            MethodInfo showMethod = pickerType.GetMethod("Show", BindingFlags.Instance | BindingFlags.Public);
+            if (showMethod == null)
+            {
+                return false;
+            }
+
+            showMethod.Invoke(picker, null);
+            return true;
+            #else
+            return false;
+            #endif
+        }
+
+        private static object CreateStringTableSearchContext(Assembly localizationAssembly)
+        {
+            #if ENABLE_SEARCH
+            #if UNITY_2022_3_OR_NEWER
+            return UnityEditor.Search.SearchService.CreateContext(
+                "st",
+                "st:",
+                UnityEditor.Search.SearchFlags.UseSessionSettings);
+            #else
+            Type providerType = localizationAssembly.GetType("UnityEditor.Localization.Search.StringTableSearchProvider");
+            if (providerType == null)
+            {
+                return null;
+            }
+
+            var provider = Activator.CreateInstance(providerType) as UnityEditor.Search.SearchProvider;
+            if (provider == null)
+            {
+                return null;
+            }
+
+            return UnityEditor.Search.SearchService.CreateContext(provider, "st:");
+            #endif
+            #else
+            return null;
+            #endif
         }
 
         private void DeleteNode(DialogNode node)
@@ -891,17 +1232,7 @@ namespace Dialogs.Graph.Editor
             }
         }
 
-        private static SerializedProperty FindAutoProperty(SerializedObject serializedObject, string propertyName)
-        {
-            return serializedObject.FindProperty($"<{propertyName}>k__BackingField");
-        }
-
-        private static SerializedProperty FindAutoProperty(SerializedProperty parentProperty, string propertyName)
-        {
-            return parentProperty.FindPropertyRelative($"<{propertyName}>k__BackingField");
-        }
-
-        private static void MarkDirty(Object target)
+        private static void MarkDirty(UnityEngine.Object target)
         {
             if (target == null)
             {
@@ -909,7 +1240,6 @@ namespace Dialogs.Graph.Editor
             }
 
             EditorUtility.SetDirty(target);
-            AssetDatabase.SaveAssets();
         }
 
         private void DrawBackgroundGrid(Rect rect)

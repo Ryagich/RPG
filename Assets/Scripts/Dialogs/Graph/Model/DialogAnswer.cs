@@ -6,12 +6,15 @@ namespace Dialogs.Graph.Model
     [System.Serializable]
     public class DialogAnswer
     {
-        [field: SerializeField] public LocalizedString Text { get; private set; } = new();
-        [field: SerializeField] public DialogPhrase NextPhrase { get; private set; }
+        [SerializeField] private LocalizedString text = new();
+        [SerializeField] private DialogPhrase nextPhrase;
+
+        public LocalizedString Text => text;
+        public DialogPhrase NextPhrase => nextPhrase;
 
         public void SetNextPhrase(DialogPhrase nextPhrase)
         {
-            NextPhrase = nextPhrase;
+            this.nextPhrase = nextPhrase;
         }
     }
 }
