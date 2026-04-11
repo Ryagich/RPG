@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.Model.DialogPhrase
   text:
     m_TableReference:
-      m_TableCollectionName: 
+      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
-      m_KeyId: 0
+      m_KeyId: 9088031205343232
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
@@ -26,12 +26,22 @@ MonoBehaviour:
       m_TableReference:
         m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
       m_TableEntryReference:
+        m_KeyId: 7558277448843264
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 11400000, guid: c8b82235868ff2f42a9f3394fea927d5, type: 2}
+  - text:
+      m_TableReference:
+        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+      m_TableEntryReference:
         m_KeyId: 9087536256499712
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    nextPhrase: {fileID: 11400000}
+    nextPhrase: {fileID: 11400000, guid: d1391538ef0dc9545af146f3d202d9ea, type: 2}
   - text:
       m_TableReference:
         m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482

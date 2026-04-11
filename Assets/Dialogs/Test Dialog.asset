@@ -10,11 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f017ef0dab3961d4d9cc460c84f52c76, type: 3}
-  m_Name: DialogGraph
+  m_Name: Test Dialog
   m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.DialogGraph
   Nodes:
-  - Position: {x: 547.6452, y: 350.79852}
+  - Position: {x: 1001.1675, y: 439.2075}
     Phrase: {fileID: 11400000, guid: d1391538ef0dc9545af146f3d202d9ea, type: 2}
-  - Position: {x: 920.7684, y: 419.5731}
+  - Position: {x: 1409.5217, y: 462.6266}
     Phrase: {fileID: 11400000, guid: 0b27e148cfe1383478b196a431665b30, type: 2}
+  - Position: {x: 1820.3953, y: 321.30426}
+    Phrase: {fileID: 11400000, guid: c8b82235868ff2f42a9f3394fea927d5, type: 2}
   <EntryPhrase>k__BackingField: {fileID: 11400000, guid: d1391538ef0dc9545af146f3d202d9ea, type: 2}

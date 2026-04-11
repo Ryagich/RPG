@@ -19,6 +19,7 @@ namespace Dialogs.Graph.Editor
         private const float WorkspaceHeight = 10000f;
         private const float ZoomMin = 0.25f;
         private const float ZoomMax = 2f;
+        private const float OverlayPanelWidth = 320f;
 
         private DialogGraph currentGraph;
         private Vector2 scrollPos;
@@ -28,6 +29,7 @@ namespace Dialogs.Graph.Editor
         private readonly Dictionary<DialogNode, Rect> nodeRects = new();
 
         private bool isSelectingTargetPhrase;
+        private bool isControlsPanelExpanded = true;
         private DialogAnswer pendingAnswer;
         private DialogPhrase sourcePhraseForSelection;
 
@@ -48,89 +50,131 @@ namespace Dialogs.Graph.Editor
 
         private void OnGUI()
         {
-            DrawMenuButtons();
-
             if (currentGraph == null)
             {
-                EditorGUILayout.HelpBox("Create or load a dialog graph.", MessageType.Info);
+                DrawEmptyState();
+                DrawControlsOverlay();
                 return;
             }
 
-            if (currentGraph.EntryPhrase == null)
-            {
-                EditorGUILayout.HelpBox(
-                    "Entry phrase is not selected. The dialog will not work without it.",
-                    MessageType.Warning);
-            }
-
             DrawGraphArea();
+            DrawControlsOverlay();
         }
 
-        private void DrawMenuButtons()
+        private void DrawEmptyState()
         {
-            const float panelWidth = 320f;
-            const float buttonHeight = 28f;
-            const float spacing = 6f;
-            const float x = 10f;
-            float y = 10f;
+            Rect contentRect = new Rect(12f, 12f, position.width - 24f, 52f);
+            GUI.Box(contentRect, GUIContent.none, EditorStyles.helpBox);
+            EditorGUI.LabelField(
+                new Rect(contentRect.x + 10f, contentRect.y + 10f, contentRect.width - 20f, 32f),
+                "Create or load a dialog graph.");
+        }
 
-            EditorGUI.LabelField(new Rect(x, y, panelWidth, 18f), "Dialogs Folder Path:");
+        private void DrawControlsOverlay()
+        {
+            const float toggleButtonWidth = 24f;
+            const float toggleButtonHeight = 64f;
+            const float spacing = 6f;
+            const float padding = 10f;
+            const float collapsedToggleLeftOffset = 6f;
+
+            float panelHeight = Mathf.Max(120f, position.height);
+            float panelY = position.height - panelHeight;
+            float panelX = 0f;
+            Rect panelRect = new Rect(panelX, panelY, OverlayPanelWidth, panelHeight);
+
+            float toggleX = isControlsPanelExpanded
+                ? panelRect.xMax - toggleButtonWidth * 0.5f
+                : collapsedToggleLeftOffset;
+            float toggleY = panelRect.y + panelRect.height * 0.5f - toggleButtonHeight * 0.5f;
+            Rect toggleRect = new Rect(toggleX, toggleY, toggleButtonWidth, toggleButtonHeight);
+
+            if (!isControlsPanelExpanded)
+            {
+                if (GUI.Button(toggleRect, ">"))
+                {
+                    isControlsPanelExpanded = true;
+                }
+
+                return;
+            }
+
+            const float buttonHeight = 28f;
+            float y = padding;
+
+            EditorGUI.DrawRect(panelRect, new Color(0.18f, 0.18f, 0.18f, 1f));
+            GUI.Box(panelRect, GUIContent.none, EditorStyles.helpBox);
+            GUILayout.BeginArea(panelRect, GUIContent.none, EditorStyles.helpBox);
+            float contentWidth = OverlayPanelWidth - padding * 2f;
+
+            EditorGUI.LabelField(new Rect(padding, padding, contentWidth, 18f), "Dialogs Folder Path:");
             y += 18f;
 
-            dialogsFolderPath = EditorGUI.TextField(new Rect(x, y, panelWidth - 170f, 20f), dialogsFolderPath);
-            if (GUI.Button(new Rect(x + panelWidth - 165f, y, 75f, 20f), "Pick"))
+            dialogsFolderPath = EditorGUI.TextField(new Rect(padding, y, contentWidth - 160f, 20f), dialogsFolderPath);
+            if (GUI.Button(new Rect(padding + contentWidth - 155f, y, 70f, 20f), "Pick"))
             {
                 PickFolder("Select folder for Dialogs", ref dialogsFolderPath, DialogsPathKey);
             }
 
-            if (GUI.Button(new Rect(x + panelWidth - 85f, y, 75f, 20f), "Save"))
+            if (GUI.Button(new Rect(padding + contentWidth - 80f, y, 70f, 20f), "Save"))
             {
                 EditorPrefs.SetString(DialogsPathKey, dialogsFolderPath);
             }
 
             y += 28f;
 
-            EditorGUI.LabelField(new Rect(x, y, panelWidth, 18f), "Phrases Folder Path:");
+            EditorGUI.LabelField(new Rect(padding, y, contentWidth, 18f), "Phrases Folder Path:");
             y += 18f;
 
-            phrasesFolderPath = EditorGUI.TextField(new Rect(x, y, panelWidth - 170f, 20f), phrasesFolderPath);
-            if (GUI.Button(new Rect(x + panelWidth - 165f, y, 75f, 20f), "Pick"))
+            phrasesFolderPath = EditorGUI.TextField(new Rect(padding, y, contentWidth - 160f, 20f), phrasesFolderPath);
+            if (GUI.Button(new Rect(padding + contentWidth - 155f, y, 70f, 20f), "Pick"))
             {
                 PickFolder("Select folder for Dialog Phrases", ref phrasesFolderPath, PhrasesPathKey);
             }
 
-            if (GUI.Button(new Rect(x + panelWidth - 85f, y, 75f, 20f), "Save"))
+            if (GUI.Button(new Rect(padding + contentWidth - 80f, y, 70f, 20f), "Save"))
             {
                 EditorPrefs.SetString(PhrasesPathKey, phrasesFolderPath);
             }
 
             y += 36f;
 
-            if (GUI.Button(new Rect(x, y, panelWidth, buttonHeight), "New Dialog"))
+            if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "New Dialog"))
             {
                 CreateNewGraph();
             }
 
             y += buttonHeight + spacing;
 
-            if (GUI.Button(new Rect(x, y, panelWidth, buttonHeight), "Load Dialog"))
+            if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "Load Dialog"))
             {
                 LoadGraph();
             }
 
             y += buttonHeight + spacing;
 
-            if (GUI.Button(new Rect(x, y, panelWidth, buttonHeight), "New Phrase"))
+            EditorGUI.BeginDisabledGroup(currentGraph == null);
+            if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "New Phrase"))
             {
                 CreateNewPhrase();
             }
+            EditorGUI.EndDisabledGroup();
 
             y += buttonHeight + spacing;
 
             if (currentGraph != null)
             {
+                if (currentGraph.EntryPhrase == null)
+                {
+                    EditorGUI.HelpBox(
+                        new Rect(padding, y, contentWidth, 40f),
+                        "Entry phrase is not selected. The dialog will not work without it.",
+                        MessageType.Warning);
+                    y += 46f;
+                }
+
                 EditorGUI.BeginDisabledGroup(currentGraph.EntryPhrase == null);
-                if (GUI.Button(new Rect(x, y, panelWidth, buttonHeight), "Ping Entry Phrase"))
+                if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "Ping Entry Phrase"))
                 {
                     EditorGUIUtility.PingObject(currentGraph.EntryPhrase);
                     Selection.activeObject = currentGraph.EntryPhrase;
@@ -144,12 +188,19 @@ namespace Dialogs.Graph.Editor
             {
                 Color previousColor = GUI.backgroundColor;
                 GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
-                if (GUI.Button(new Rect(x, y, panelWidth, buttonHeight), "Cancel Selection"))
+                if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "Cancel Selection"))
                 {
                     CancelTargetSelection();
                 }
 
                 GUI.backgroundColor = previousColor;
+            }
+
+            GUILayout.EndArea();
+
+            if (GUI.Button(toggleRect, "<"))
+            {
+                isControlsPanelExpanded = false;
             }
         }
 
@@ -452,23 +503,513 @@ namespace Dialogs.Graph.Editor
                         startPos = new Vector2(sourceRect.xMax - 12f, sourceRect.center.y);
                     }
 
-                    Vector2 endPos = new Vector2(targetRect.x + 10f, targetRect.y + 14f);
-                    Vector2 startTangent = startPos + Vector2.right * 50f;
-                    Vector2 endTangent = endPos + Vector2.left * 50f;
-
                     Handles.color = new Color(0.9f, 0.8f, 0.2f, 0.95f);
-                    Handles.DrawBezier(startPos, endPos, startTangent, endTangent, Handles.color, null, 2f);
-
-                    Vector2 direction = (endPos - startPos).normalized;
-                    Vector2 perpendicular = new Vector2(-direction.y, direction.x);
-                    Vector2 arrowTip = endPos;
-                    Vector2 arrowBase1 = endPos - direction * 10f + perpendicular * 4f;
-                    Vector2 arrowBase2 = endPos - direction * 10f - perpendicular * 4f;
-                    Handles.DrawAAConvexPolygon(arrowTip, arrowBase1, arrowBase2);
+                    Vector2[] routePoints = BuildConnectionRoute(startPos, sourceRect, targetRect, nodeRects.Values);
+                    DrawSmoothedConnection(routePoints);
+                    DrawConnectionArrow(routePoints);
                 }
             }
 
             Handles.EndGUI();
+        }
+
+        private static Vector2[] BuildConnectionRoute(Vector2 startPos, Rect sourceRect, Rect targetRect, IEnumerable<Rect> allNodeRects)
+        {
+            const float clearance = 28f;
+
+            ConnectionPort startPort = GetSourcePort(startPos, sourceRect, targetRect, clearance);
+            ConnectionPort endPort = GetTargetPort(sourceRect, targetRect, clearance);
+
+            List<Rect> obstacles = allNodeRects
+                .Select(rect => ExpandRect(rect, clearance))
+                .ToList();
+
+            List<Vector2> routedPoints = FindOrthogonalPath(startPort.OuterPoint, endPort.OuterPoint, obstacles);
+            if (routedPoints == null || routedPoints.Count == 0)
+            {
+                return SimplifyRoute(new[]
+                {
+                    startPos,
+                    startPort.OuterPoint,
+                    endPort.OuterPoint,
+                    endPort.EdgePoint
+                });
+            }
+
+            var fullRoute = new List<Vector2>(routedPoints.Count + 3) { startPos };
+            if (!ApproximatelyEqual(startPos, startPort.OuterPoint))
+            {
+                fullRoute.Add(startPort.OuterPoint);
+            }
+
+            for (int i = 1; i < routedPoints.Count; i++)
+            {
+                fullRoute.Add(routedPoints[i]);
+            }
+
+            if (!ApproximatelyEqual(fullRoute[fullRoute.Count - 1], endPort.OuterPoint))
+            {
+                fullRoute.Add(endPort.OuterPoint);
+            }
+
+            if (!ApproximatelyEqual(endPort.OuterPoint, endPort.EdgePoint))
+            {
+                fullRoute.Add(endPort.EdgePoint);
+            }
+
+            return SimplifyRoute(fullRoute);
+        }
+
+        private static void DrawConnectionArrow(IReadOnlyList<Vector2> routePoints)
+        {
+            if (routePoints == null || routePoints.Count < 2)
+            {
+                return;
+            }
+
+            Vector2 arrowTip = routePoints[routePoints.Count - 1];
+            Vector2 previousPoint = routePoints[routePoints.Count - 2];
+            Vector2 direction = (arrowTip - previousPoint).normalized;
+            if (direction.sqrMagnitude < Mathf.Epsilon)
+            {
+                return;
+            }
+
+            Vector2 perpendicular = new Vector2(-direction.y, direction.x);
+            Vector2 arrowBase1 = arrowTip - direction * 10f + perpendicular * 4f;
+            Vector2 arrowBase2 = arrowTip - direction * 10f - perpendicular * 4f;
+            Handles.DrawAAConvexPolygon(arrowTip, arrowBase1, arrowBase2);
+        }
+
+        private static void DrawSmoothedConnection(IReadOnlyList<Vector2> routePoints)
+        {
+            if (routePoints == null || routePoints.Count < 2)
+            {
+                return;
+            }
+
+            const float lineWidth = 2f;
+            const float cornerRadius = 22f;
+
+            if (routePoints.Count == 2)
+            {
+                Handles.DrawAAPolyLine(lineWidth, routePoints.Select(point => (Vector3)point).ToArray());
+                return;
+            }
+
+            Vector2 currentStart = routePoints[0];
+
+            for (int i = 1; i < routePoints.Count - 1; i++)
+            {
+                Vector2 corner = routePoints[i];
+                Vector2 previous = routePoints[i - 1];
+                Vector2 next = routePoints[i + 1];
+
+                Vector2 incomingDirection = (corner - previous).normalized;
+                Vector2 outgoingDirection = (next - corner).normalized;
+
+                float incomingLength = Vector2.Distance(previous, corner);
+                float outgoingLength = Vector2.Distance(corner, next);
+                float radius = Mathf.Min(cornerRadius, incomingLength * 0.5f, outgoingLength * 0.5f);
+
+                if (radius <= 0.01f || ApproximatelyEqual(incomingDirection, outgoingDirection))
+                {
+                    Handles.DrawAAPolyLine(lineWidth, new Vector3[] { currentStart, corner });
+                    currentStart = corner;
+                    continue;
+                }
+
+                Vector2 curveStart = corner - incomingDirection * radius;
+                Vector2 curveEnd = corner + outgoingDirection * radius;
+
+                Handles.DrawAAPolyLine(lineWidth, new Vector3[] { currentStart, curveStart });
+
+                Handles.DrawBezier(
+                    curveStart,
+                    curveEnd,
+                    curveStart + incomingDirection * radius,
+                    curveEnd - outgoingDirection * radius,
+                    Handles.color,
+                    null,
+                    lineWidth);
+
+                currentStart = curveEnd;
+            }
+
+            Handles.DrawAAPolyLine(lineWidth, new Vector3[] { currentStart, routePoints[routePoints.Count - 1] });
+        }
+
+        private static List<Vector2> FindOrthogonalPath(Vector2 startPoint, Vector2 endPoint, IReadOnlyList<Rect> obstacles)
+        {
+            var xCoords = new List<float>();
+            var yCoords = new List<float>();
+
+            AddUniqueCoordinate(xCoords, startPoint.x);
+            AddUniqueCoordinate(xCoords, endPoint.x);
+            AddUniqueCoordinate(yCoords, startPoint.y);
+            AddUniqueCoordinate(yCoords, endPoint.y);
+
+            foreach (Rect obstacle in obstacles)
+            {
+                AddUniqueCoordinate(xCoords, obstacle.xMin);
+                AddUniqueCoordinate(xCoords, obstacle.xMax);
+                AddUniqueCoordinate(yCoords, obstacle.yMin);
+                AddUniqueCoordinate(yCoords, obstacle.yMax);
+            }
+
+            var points = new List<Vector2>();
+            var pointIndex = new Dictionary<string, int>();
+
+            foreach (float x in xCoords)
+            {
+                foreach (float y in yCoords)
+                {
+                    Vector2 point = new Vector2(x, y);
+                    if (IsPointInsideAnyRect(point, obstacles))
+                    {
+                        continue;
+                    }
+
+                    pointIndex[GetPointKey(point)] = points.Count;
+                    points.Add(point);
+                }
+            }
+
+            if (!TryGetPointIndex(pointIndex, startPoint, out int startIndex))
+            {
+                return null;
+            }
+
+            int endIndex = TryGetPointIndex(pointIndex, endPoint, out int resolvedEndIndex)
+                ? resolvedEndIndex
+                : -1;
+
+            var adjacency = new List<int>[points.Count];
+            for (int i = 0; i < adjacency.Length; i++)
+            {
+                adjacency[i] = new List<int>();
+            }
+
+            foreach (float y in yCoords)
+            {
+                List<int> row = points
+                    .Select((point, index) => new { point, index })
+                    .Where(item => Mathf.Approximately(item.point.y, y))
+                    .OrderBy(item => item.point.x)
+                    .Select(item => item.index)
+                    .ToList();
+
+                ConnectAdjacentPoints(row, points, adjacency, obstacles);
+            }
+
+            foreach (float x in xCoords)
+            {
+                List<int> column = points
+                    .Select((point, index) => new { point, index })
+                    .Where(item => Mathf.Approximately(item.point.x, x))
+                    .OrderBy(item => item.point.y)
+                    .Select(item => item.index)
+                    .ToList();
+
+                ConnectAdjacentPoints(column, points, adjacency, obstacles);
+            }
+
+            return FindShortestPath(points, adjacency, startIndex, endIndex, endPoint);
+        }
+
+        private static List<Vector2> FindShortestPath(
+            IReadOnlyList<Vector2> points,
+            IReadOnlyList<int>[] adjacency,
+            int startIndex,
+            int endIndex,
+            Vector2 targetPoint)
+        {
+            float[] distances = Enumerable.Repeat(float.PositiveInfinity, points.Count).ToArray();
+            int[] previous = Enumerable.Repeat(-1, points.Count).ToArray();
+            bool[] visited = new bool[points.Count];
+
+            distances[startIndex] = 0f;
+            int bestReachableIndex = startIndex;
+            float bestReachableDistanceToEnd = Vector2.Distance(points[startIndex], targetPoint);
+
+            while (true)
+            {
+                int current = -1;
+                float bestDistance = float.PositiveInfinity;
+                float bestHeuristic = float.PositiveInfinity;
+
+                for (int i = 0; i < points.Count; i++)
+                {
+                    if (visited[i] || float.IsPositiveInfinity(distances[i]))
+                    {
+                        continue;
+                    }
+
+                    float heuristic = distances[i] + Vector2.Distance(points[i], targetPoint);
+                    if (heuristic < bestHeuristic || Mathf.Approximately(heuristic, bestHeuristic) && distances[i] < bestDistance)
+                    {
+                        current = i;
+                        bestDistance = distances[i];
+                        bestHeuristic = heuristic;
+                    }
+                }
+
+                if (current == -1)
+                {
+                    return ReconstructPath(points, previous, bestReachableIndex);
+                }
+
+                if (endIndex >= 0 && current == endIndex)
+                {
+                    return ReconstructPath(points, previous, endIndex);
+                }
+
+                visited[current] = true;
+                float currentDistanceToEnd = Vector2.Distance(points[current], targetPoint);
+                if (currentDistanceToEnd + 0.01f < bestReachableDistanceToEnd ||
+                    Mathf.Approximately(currentDistanceToEnd, bestReachableDistanceToEnd) && distances[current] < distances[bestReachableIndex])
+                {
+                    bestReachableDistanceToEnd = currentDistanceToEnd;
+                    bestReachableIndex = current;
+                }
+
+                foreach (int neighbor in adjacency[current])
+                {
+                    if (visited[neighbor])
+                    {
+                        continue;
+                    }
+
+                    float candidateDistance = distances[current] + Vector2.Distance(points[current], points[neighbor]);
+                    if (candidateDistance + 0.01f < distances[neighbor])
+                    {
+                        distances[neighbor] = candidateDistance;
+                        previous[neighbor] = current;
+                    }
+                }
+            }
+
+        }
+
+        private static List<Vector2> ReconstructPath(IReadOnlyList<Vector2> points, IReadOnlyList<int> previous, int endIndex)
+        {
+            var path = new List<Vector2>();
+            for (int node = endIndex; node != -1; node = previous[node])
+            {
+                path.Add(points[node]);
+            }
+
+            path.Reverse();
+            return path;
+        }
+
+        private static void ConnectAdjacentPoints(
+            IReadOnlyList<int> indices,
+            IReadOnlyList<Vector2> points,
+            IList<int>[] adjacency,
+            IReadOnlyList<Rect> obstacles)
+        {
+            for (int i = 0; i < indices.Count - 1; i++)
+            {
+                int a = indices[i];
+                int b = indices[i + 1];
+                if (!IsOrthogonalSegmentBlocked(points[a], points[b], obstacles))
+                {
+                    adjacency[a].Add(b);
+                    adjacency[b].Add(a);
+                }
+            }
+        }
+
+        private static ConnectionPort GetSourcePort(Vector2 startPos, Rect sourceRect, Rect targetRect, float clearance)
+        {
+            bool preferHorizontal = Mathf.Abs(targetRect.center.x - sourceRect.center.x) >= Mathf.Abs(targetRect.center.y - sourceRect.center.y);
+            if (preferHorizontal)
+            {
+                if (targetRect.center.x >= sourceRect.center.x)
+                {
+                    return new ConnectionPort(
+                        new Vector2(sourceRect.xMax, startPos.y),
+                        new Vector2(sourceRect.xMax + clearance, startPos.y));
+                }
+
+                return new ConnectionPort(
+                    new Vector2(sourceRect.xMin, startPos.y),
+                    new Vector2(sourceRect.xMin - clearance, startPos.y));
+            }
+
+            if (targetRect.center.y >= sourceRect.center.y)
+            {
+                return new ConnectionPort(
+                    new Vector2(startPos.x, sourceRect.yMax),
+                    new Vector2(startPos.x, sourceRect.yMax + clearance));
+            }
+
+            return new ConnectionPort(
+                new Vector2(startPos.x, sourceRect.yMin),
+                new Vector2(startPos.x, sourceRect.yMin - clearance));
+        }
+
+        private static ConnectionPort GetTargetPort(Rect sourceRect, Rect targetRect, float clearance)
+        {
+            Vector2 sourceCenter = sourceRect.center;
+            ConnectionPort[] candidatePorts =
+            {
+                new(
+                    new Vector2(targetRect.xMin, targetRect.center.y),
+                    new Vector2(targetRect.xMin - clearance, targetRect.center.y)),
+                new(
+                    new Vector2(targetRect.xMax, targetRect.center.y),
+                    new Vector2(targetRect.xMax + clearance, targetRect.center.y)),
+                new(
+                    new Vector2(targetRect.center.x, targetRect.yMin),
+                    new Vector2(targetRect.center.x, targetRect.yMin - clearance)),
+                new(
+                    new Vector2(targetRect.center.x, targetRect.yMax),
+                    new Vector2(targetRect.center.x, targetRect.yMax + clearance))
+            };
+
+            ConnectionPort bestPort = candidatePorts[0];
+            float bestDistance = Vector2.SqrMagnitude(sourceCenter - bestPort.EdgePoint);
+
+            for (int i = 1; i < candidatePorts.Length; i++)
+            {
+                float distance = Vector2.SqrMagnitude(sourceCenter - candidatePorts[i].EdgePoint);
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    bestPort = candidatePorts[i];
+                }
+            }
+
+            return bestPort;
+        }
+
+        private static Rect ExpandRect(Rect rect, float margin)
+        {
+            return Rect.MinMaxRect(rect.xMin - margin, rect.yMin - margin, rect.xMax + margin, rect.yMax + margin);
+        }
+
+        private static bool IsPointInsideAnyRect(Vector2 point, IReadOnlyList<Rect> rects)
+        {
+            const float epsilon = 0.01f;
+            foreach (Rect rect in rects)
+            {
+                if (point.x > rect.xMin + epsilon && point.x < rect.xMax - epsilon &&
+                    point.y > rect.yMin + epsilon && point.y < rect.yMax - epsilon)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsOrthogonalSegmentBlocked(Vector2 start, Vector2 end, IReadOnlyList<Rect> rects)
+        {
+            const float epsilon = 0.01f;
+            if (!Mathf.Approximately(start.x, end.x) && !Mathf.Approximately(start.y, end.y))
+            {
+                return true;
+            }
+
+            foreach (Rect rect in rects)
+            {
+                if (Mathf.Approximately(start.y, end.y))
+                {
+                    float y = start.y;
+                    float minX = Mathf.Min(start.x, end.x);
+                    float maxX = Mathf.Max(start.x, end.x);
+                    bool overlapsY = y > rect.yMin + epsilon && y < rect.yMax - epsilon;
+                    bool overlapsX = maxX > rect.xMin + epsilon && minX < rect.xMax - epsilon;
+                    if (overlapsY && overlapsX)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    float x = start.x;
+                    float minY = Mathf.Min(start.y, end.y);
+                    float maxY = Mathf.Max(start.y, end.y);
+                    bool overlapsX = x > rect.xMin + epsilon && x < rect.xMax - epsilon;
+                    bool overlapsY = maxY > rect.yMin + epsilon && minY < rect.yMax - epsilon;
+                    if (overlapsX && overlapsY)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static void AddUniqueCoordinate(List<float> coordinates, float value)
+        {
+            if (coordinates.All(existing => !Mathf.Approximately(existing, value)))
+            {
+                coordinates.Add(value);
+            }
+        }
+
+        private static bool TryGetPointIndex(IReadOnlyDictionary<string, int> pointIndex, Vector2 point, out int index)
+        {
+            return pointIndex.TryGetValue(GetPointKey(point), out index);
+        }
+
+        private static string GetPointKey(Vector2 point)
+        {
+            return $"{point.x:F3}|{point.y:F3}";
+        }
+
+        private static Vector2[] SimplifyRoute(IEnumerable<Vector2> points)
+        {
+            var simplified = new List<Vector2>();
+
+            foreach (Vector2 point in points)
+            {
+                if (simplified.Count == 0 || !ApproximatelyEqual(simplified[simplified.Count - 1], point))
+                {
+                    simplified.Add(point);
+                }
+            }
+
+            int index = 1;
+            while (index < simplified.Count - 1)
+            {
+                Vector2 previous = simplified[index - 1];
+                Vector2 current = simplified[index];
+                Vector2 next = simplified[index + 1];
+
+                bool sameX = Mathf.Approximately(previous.x, current.x) && Mathf.Approximately(current.x, next.x);
+                bool sameY = Mathf.Approximately(previous.y, current.y) && Mathf.Approximately(current.y, next.y);
+                if (sameX || sameY)
+                {
+                    simplified.RemoveAt(index);
+                    continue;
+                }
+
+                index++;
+            }
+
+            return simplified.ToArray();
+        }
+
+        private static bool ApproximatelyEqual(Vector2 a, Vector2 b)
+        {
+            return Mathf.Approximately(a.x, b.x) && Mathf.Approximately(a.y, b.y);
+        }
+
+        private readonly struct ConnectionPort
+        {
+            public ConnectionPort(Vector2 edgePoint, Vector2 outerPoint)
+            {
+                EdgePoint = edgePoint;
+                OuterPoint = outerPoint;
+            }
+
+            public Vector2 EdgePoint { get; }
+            public Vector2 OuterPoint { get; }
         }
 
         private void DrawTargetSelectionOverlay()
