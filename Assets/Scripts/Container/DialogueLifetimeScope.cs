@@ -1,4 +1,5 @@
-﻿using Container.Dialogue;
+using Container.Dialogue;
+using Dialogs.Graph;
 using Interactable;
 using Inventory;
 using Inventory.Inventories;
@@ -12,6 +13,7 @@ namespace Container
     public class DialogueLifetimeScope : LifetimeScope
     {
         [SerializeField] private Character.CharacterInfo characterInfo;
+        [SerializeField] private DialogGraph dialog;
         [SerializeField] private InventoryConfig inventoryConfig;
 
         protected override void Configure(IContainerBuilder builder)
@@ -21,11 +23,16 @@ namespace Container
 
             builder.RegisterInstance(interactable);
             builder.RegisterInstance(characterInfo).AsSelf();
+            if (dialog != null)
+            {
+                builder.RegisterInstance(dialog).AsSelf();
+            }
+
             if (inventoryConfig != null)
             {
                 builder.RegisterInstance(inventoryConfig).AsSelf();
             }
-            
+
             builder.Register(_ => new MoneyStorage(100), Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<ChestInventory>().As<IInventory>().AsSelf();
             builder.RegisterEntryPoint<DialogueInteractableLogic>().AsSelf();

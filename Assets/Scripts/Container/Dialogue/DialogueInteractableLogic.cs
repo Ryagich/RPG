@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using Character;
 using Dialogue;
+using Dialogs.Graph;
 using GameModes;
 using Inventory.Inventories;
 using MessagePipe;
@@ -15,6 +16,7 @@ namespace Container.Dialogue
     {
         private readonly Interactable.Interactable interactable;
         private readonly CharacterInfo characterInfo;
+        private readonly DialogGraph dialog;
         private readonly IInventory inventory;
         private readonly MoneyStorage moneyStorage;
         private readonly DialogueContext dialogueContext;
@@ -27,11 +29,13 @@ namespace Container.Dialogue
                 IInventory inventory,
                 MoneyStorage moneyStorage,
                 DialogueContext dialogueContext,
-                IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher
+                IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
+                DialogGraph dialog = null
             )
         {
             this.interactable = interactable;
             this.characterInfo = characterInfo;
+            this.dialog = dialog;
             this.inventory = inventory;
             this.moneyStorage = moneyStorage;
             this.dialogueContext = dialogueContext;
@@ -54,7 +58,7 @@ namespace Container.Dialogue
 
         private void OnInteracted(LifetimeScope _)
         {
-            dialogueContext.SetTarget(interactable, characterInfo, inventory, moneyStorage);
+            dialogueContext.SetTarget(interactable, characterInfo, dialog, inventory, moneyStorage);
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Dialogue));
         }
 

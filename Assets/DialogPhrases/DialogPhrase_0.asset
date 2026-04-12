@@ -31,7 +31,7 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    nextPhrase: {fileID: 11400000, guid: c8b82235868ff2f42a9f3394fea927d5, type: 2}
+    nextPhrase: {fileID: 11400000, guid: 0b27e148cfe1383478b196a431665b30, type: 2}
   references:
     version: 2
     RefIds: []

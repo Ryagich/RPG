@@ -26,3 +26,5 @@ MonoBehaviour:
   <InventoryInTrading>k__BackingField: {fileID: 6562754561215371127, guid: b5978c7d4b7212f4c974cbb202bd2c1e, type: 3}
   <SellInfo>k__BackingField: {fileID: 7629633191945355716, guid: 4dc3948d66fe4624e9444f5cac2c114e, type: 3}
   <TradingExitButton>k__BackingField: {fileID: 3968994649836962996, guid: 3431d33295d69b24db5a87dc3e45b173, type: 3}
+  <PhraseContainer>k__BackingField: {fileID: 7268662685362097931, guid: 63f693976e6120b41879e5991ada72fc, type: 3}
+  <AnswerButton>k__BackingField: {fileID: 3726367618566451424, guid: 98a86b5b3b25c664c8280d544e79c35e, type: 3}

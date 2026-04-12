@@ -27,5 +27,9 @@ namespace UI.Configs
         [field: SerializeField] public InventoryView InventoryInTrading { get; private set; }
         [field: SerializeField] public SellInfo SellInfo { get; private set; }
         [field: SerializeField] public Button TradingExitButton { get; private set; }
+        
+        // Dialog
+        [field: SerializeField] public PhraseContainer PhraseContainer { get; private set; }
+        [field: SerializeField] public Button AnswerButton { get; private set; }
     }
 }

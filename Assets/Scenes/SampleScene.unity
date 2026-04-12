@@ -1684,6 +1684,7 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects: []
   characterInfo: {fileID: 11400000, guid: 43718f9d5b35b6b4e9b9cef541377a63, type: 2}
+  dialog: {fileID: 11400000, guid: 88d2c07937d080b4ba52468317585259, type: 2}
   inventoryConfig: {fileID: 0}
 --- !u!1 &1846629549
 GameObject:
