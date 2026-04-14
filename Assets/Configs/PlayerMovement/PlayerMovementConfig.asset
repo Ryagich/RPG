@@ -15,4 +15,5 @@ MonoBehaviour:
   <ForwardSpeed>k__BackingField: 5
   <BackwardSpeed>k__BackingField: 2
   <StrafeSpeed>k__BackingField: 3.5
+  <SpeedChangeRate>k__BackingField: 6
   <RotationSpeed>k__BackingField: 720

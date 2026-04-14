@@ -24,30 +24,28 @@ namespace Movement
 
         private readonly Camera cam;
         private readonly Animator animator;
+        private readonly PlayerMovement playerMovement;
         private readonly Transform visualTransform;
-        private readonly ISubscriber<PlayerMoveMessage> playerMoveSubscriber;
         private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
 
-        private Vector2 movementInput;
         private int currentState = -1;
         private bool isGameplayActive = true;
 
         private PlayerAnimationController(
             Camera cam,
             Animator animator,
-            ISubscriber<PlayerMoveMessage> playerMoveSubscriber,
+            PlayerMovement playerMovement,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
         {
             this.cam = cam;
             this.animator = animator;
+            this.playerMovement = playerMovement;
             visualTransform = animator.transform;
-            this.playerMoveSubscriber = playerMoveSubscriber;
             this.gameModeChangedSubscriber = gameModeChangedSubscriber;
         }
 
         public void Start()
         {
-            playerMoveSubscriber.Subscribe(OnMove);
             gameModeChangedSubscriber.Subscribe(OnGameModeChanged);
             ChangeState(IdleState);
         }
@@ -58,6 +56,8 @@ namespace Movement
             {
                 return;
             }
+
+            var movementInput = playerMovement.CurrentVelocity;
 
             if (!isGameplayActive || movementInput.sqrMagnitude <= InputThreshold)
             {
@@ -72,18 +72,12 @@ namespace Movement
             ChangeState(GetStateId(localMoveDirection));
         }
 
-        private void OnMove(PlayerMoveMessage msg)
-        {
-            movementInput = msg.Direction;
-        }
-
         private void OnGameModeChanged(GameModeChangedMessage msg)
         {
             isGameplayActive = msg.GameMode is GameMode.Game;
 
             if (!isGameplayActive)
             {
-                movementInput = Vector2.zero;
                 ChangeState(IdleState);
             }
         }

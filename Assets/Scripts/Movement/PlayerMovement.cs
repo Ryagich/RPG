@@ -18,7 +18,8 @@ namespace Movement
         private readonly CharacterController controller;
         private readonly PlayerMovementConfig playerMovementConfig;
 
-        private Vector2 velocity;
+        private Vector2 targetVelocity;
+        private Vector2 currentVelocity;
         private bool canMove = true;
 
         [SuppressMessage("ReSharper", "ParameterHidesMember")]
@@ -45,19 +46,25 @@ namespace Movement
         {
             if (!canMove)
             {
+                currentVelocity = Vector2.zero;
                 return;
             }
 
             RotateTowardsCursor();
 
-            if (velocity.sqrMagnitude <= InputThreshold)
+            currentVelocity = Vector2.MoveTowards(
+                currentVelocity,
+                targetVelocity,
+                playerMovementConfig.SpeedChangeRate * Time.deltaTime);
+
+            if (currentVelocity.sqrMagnitude <= InputThreshold)
             {
                 return;
             }
 
             var moveDirection = Quaternion.Euler(0, cam.transform.rotation.eulerAngles.y, 0) *
-                                new Vector3(velocity.x, 0, velocity.y);
-            var inputMagnitude = Mathf.Clamp01(velocity.magnitude);
+                                new Vector3(currentVelocity.x, 0, currentVelocity.y);
+            var inputMagnitude = Mathf.Clamp01(currentVelocity.magnitude);
             var moveSpeed = CalculateMoveSpeed(moveDirection) * inputMagnitude;
 
             controller.Move(moveDirection.normalized * (moveSpeed * Time.deltaTime));
@@ -66,11 +73,19 @@ namespace Movement
         public void ChangeState(bool newState)
         {
             canMove = newState;
+
+            if (!newState)
+            {
+                targetVelocity = Vector2.zero;
+                currentVelocity = Vector2.zero;
+            }
         }
+
+        public Vector2 CurrentVelocity => currentVelocity;
 
         private void OnMove(PlayerMoveMessage msg)
         {
-            velocity = msg.Direction;
+            targetVelocity = msg.Direction;
         }
 
         private float CalculateMoveSpeed(Vector3 worldMoveDirection)
