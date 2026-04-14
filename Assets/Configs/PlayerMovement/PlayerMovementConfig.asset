@@ -12,4 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f439477981b4e12ae25d477fe38147d, type: 3}
   m_Name: PlayerMovementConfig
   m_EditorClassIdentifier: Assembly-CSharp::Movement.PlayerMovementConfig
-  <Speed>k__BackingField: 5
+  <ForwardSpeed>k__BackingField: 5
+  <BackwardSpeed>k__BackingField: 2
+  <StrafeSpeed>k__BackingField: 3.5
+  <RotationSpeed>k__BackingField: 720
