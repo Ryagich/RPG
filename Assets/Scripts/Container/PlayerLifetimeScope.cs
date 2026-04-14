@@ -20,6 +20,7 @@ namespace Container
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterComponentInHierarchy<CharacterController>().AsSelf();
+            builder.RegisterComponentInHierarchy<Animator>().AsSelf();
             
             builder.RegisterInstance(transform);
             builder.RegisterInstance("Player").Keyed("Scope ID"); 
@@ -42,6 +43,7 @@ namespace Container
             builder.RegisterEntryPoint<PlayerGravity>().AsSelf();
             builder.RegisterEntryPoint<PlayerMovementController>().AsSelf();
             builder.RegisterEntryPoint<PlayerMovement>().AsSelf();
+            builder.RegisterEntryPoint<PlayerAnimationController>().AsSelf();
             builder.RegisterEntryPoint<PlayerInteractableLogic>().AsSelf();
             builder.RegisterEntryPoint<ItemHolderInteractableLogic>().AsSelf();
             

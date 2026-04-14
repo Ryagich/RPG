@@ -14,6 +14,7 @@ namespace Movement
 
         private readonly Camera cam;
         private readonly Transform playerTransform;
+        private readonly Transform visualTransform;
         private readonly CharacterController controller;
         private readonly PlayerMovementConfig playerMovementConfig;
 
@@ -26,6 +27,7 @@ namespace Movement
                 PlayerMovementConfig playerMovementConfig,
                 Camera cam,
                 Transform playerTransform,
+                Animator animator,
                 CharacterController controller,
                 ISubscriber<PlayerMoveMessage> playerMoveSubscriber
             )
@@ -33,6 +35,7 @@ namespace Movement
             this.playerMovementConfig = playerMovementConfig;
             this.cam = cam;
             this.playerTransform = playerTransform;
+            visualTransform = animator.transform;
             this.controller = controller;   
 
             playerMoveSubscriber.Subscribe(OnMove);
@@ -72,7 +75,7 @@ namespace Movement
 
         private float CalculateMoveSpeed(Vector3 worldMoveDirection)
         {
-            var localMoveDirection = playerTransform.InverseTransformDirection(worldMoveDirection.normalized);
+            var localMoveDirection = visualTransform.InverseTransformDirection(worldMoveDirection.normalized);
             var horizontalSpeed = Mathf.Abs(localMoveDirection.x) > InputThreshold ? playerMovementConfig.StrafeSpeed : 0f;
             var verticalSpeed = 0f;
 
@@ -120,8 +123,8 @@ namespace Movement
             }
 
             var targetRotation = Quaternion.LookRotation(lookDirection.normalized, Vector3.up);
-            playerTransform.rotation = Quaternion.RotateTowards(
-                playerTransform.rotation,
+            visualTransform.rotation = Quaternion.RotateTowards(
+                visualTransform.rotation,
                 targetRotation,
                 playerMovementConfig.RotationSpeed * Time.deltaTime);
         }
