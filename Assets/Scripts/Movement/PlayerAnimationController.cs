@@ -11,17 +11,16 @@ namespace Movement
     {
         private const float InputThreshold = 0.001f;
         private const float DirectionThreshold = 0.35f;
-        private const float TransitionDuration = 0.1f;
-        private const string BaseLayerName = "Base Layer";
-        private const string IdleState = "Base Simple Male Idle";
-        private const string WalkForwardState = "WalkForward";
-        private const string WalkForwardLeftState = "WalkForwardLeft";
-        private const string WalkForwardRightState = "WalkForwardRight";
-        private const string WalkLeftState = "WalkLeft";
-        private const string WalkRightState = "WalkRight";
-        private const string WalkBackwardState = "WalkBackward";
-        private const string WalkBackwardLeftState = "WalkBackwardLeft";
-        private const string WalkBackwardRightState = "WalkBackwardRight";
+        private const string LocomotionStateParameter = "LocomotionState";
+        private const int IdleState = 0;
+        private const int WalkForwardState = 1;
+        private const int WalkForwardLeftState = 2;
+        private const int WalkForwardRightState = 3;
+        private const int WalkLeftState = 4;
+        private const int WalkRightState = 5;
+        private const int WalkBackwardState = 6;
+        private const int WalkBackwardLeftState = 7;
+        private const int WalkBackwardRightState = 8;
 
         private readonly Camera cam;
         private readonly Animator animator;
@@ -30,7 +29,7 @@ namespace Movement
         private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
 
         private Vector2 movementInput;
-        private string currentState = string.Empty;
+        private int currentState = -1;
         private bool isGameplayActive = true;
 
         private PlayerAnimationController(
@@ -70,7 +69,7 @@ namespace Movement
                                 new Vector3(movementInput.x, 0f, movementInput.y);
             var localMoveDirection = visualTransform.InverseTransformDirection(moveDirection.normalized);
 
-            ChangeState(GetStateName(localMoveDirection));
+            ChangeState(GetStateId(localMoveDirection));
         }
 
         private void OnMove(PlayerMoveMessage msg)
@@ -89,7 +88,7 @@ namespace Movement
             }
         }
 
-        private string GetStateName(Vector3 localMoveDirection)
+        private int GetStateId(Vector3 localMoveDirection)
         {
             var hasHorizontal = Mathf.Abs(localMoveDirection.x) > DirectionThreshold;
             var hasForward = localMoveDirection.z > DirectionThreshold;
@@ -123,15 +122,15 @@ namespace Movement
             return IdleState;
         }
 
-        private void ChangeState(string stateName)
+        private void ChangeState(int stateId)
         {
-            if (currentState == stateName)
+            if (currentState == stateId)
             {
                 return;
             }
 
-            currentState = stateName;
-            animator.CrossFadeInFixedTime($"{BaseLayerName}.{stateName}", TransitionDuration);
+            currentState = stateId;
+            animator.SetInteger(LocomotionStateParameter, stateId);
         }
     }
 }
