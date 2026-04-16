@@ -159,10 +159,13 @@ namespace Movement
             }
 
             var targetRotation = Quaternion.LookRotation(lookDirection.normalized, Vector3.up);
+            var rotationSpeed = isRunning
+                ? playerMovementConfig.RunRotationSpeed
+                : playerMovementConfig.WalkRotationSpeed;
             visualTransform.rotation = Quaternion.RotateTowards(
                 visualTransform.rotation,
                 targetRotation,
-                playerMovementConfig.RotationSpeed * Time.deltaTime);
+                rotationSpeed * Time.deltaTime);
         }
     }
 }
