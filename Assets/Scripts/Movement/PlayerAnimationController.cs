@@ -21,6 +21,14 @@ namespace Movement
         private const int WalkBackwardState = 6;
         private const int WalkBackwardLeftState = 7;
         private const int WalkBackwardRightState = 8;
+        private const int RunForwardState = 9;
+        private const int RunForwardLeftState = 10;
+        private const int RunForwardRightState = 11;
+        private const int RunLeftState = 12;
+        private const int RunRightState = 13;
+        private const int RunBackwardState = 14;
+        private const int RunBackwardLeftState = 15;
+        private const int RunBackwardRightState = 16;
 
         private readonly Camera cam;
         private readonly Animator animator;
@@ -92,25 +100,31 @@ namespace Movement
             {
                 if (hasHorizontal)
                 {
-                    return localMoveDirection.x < 0f ? WalkForwardLeftState : WalkForwardRightState;
+                    return playerMovement.IsRunning
+                        ? (localMoveDirection.x < 0f ? RunForwardLeftState : RunForwardRightState)
+                        : (localMoveDirection.x < 0f ? WalkForwardLeftState : WalkForwardRightState);
                 }
 
-                return WalkForwardState;
+                return playerMovement.IsRunning ? RunForwardState : WalkForwardState;
             }
 
             if (hasBackward)
             {
                 if (hasHorizontal)
                 {
-                    return localMoveDirection.x < 0f ? WalkBackwardLeftState : WalkBackwardRightState;
+                    return playerMovement.IsRunning
+                        ? (localMoveDirection.x < 0f ? RunBackwardLeftState : RunBackwardRightState)
+                        : (localMoveDirection.x < 0f ? WalkBackwardLeftState : WalkBackwardRightState);
                 }
 
-                return WalkBackwardState;
+                return playerMovement.IsRunning ? RunBackwardState : WalkBackwardState;
             }
 
             if (hasHorizontal)
             {
-                return localMoveDirection.x < 0f ? WalkLeftState : WalkRightState;
+                return playerMovement.IsRunning
+                    ? (localMoveDirection.x < 0f ? RunLeftState : RunRightState)
+                    : (localMoveDirection.x < 0f ? WalkLeftState : WalkRightState);
             }
 
             return IdleState;

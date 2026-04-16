@@ -11,5 +11,6 @@ namespace Input
         [field: SerializeField] public InputActionReference Inventory { get; private set; }
         [field: SerializeField] public InputActionReference LeftClick { get; private set; }
         [field: SerializeField] public InputActionReference RightClick { get; private set; }
+        [field: SerializeField] public InputActionReference Run { get; private set; }
     }
 }

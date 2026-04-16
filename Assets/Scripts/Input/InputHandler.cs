@@ -18,6 +18,9 @@ namespace Input
         private readonly IPublisher<MouseUp> mouseUp;
         private readonly GameModesController gameModesController;
 
+        private Vector2 currentMoveDirection;
+        private bool isRunPressed;
+
         private InputHandler
             (
                 InputConfig inputConfig,
@@ -42,6 +45,8 @@ namespace Input
         {
             inputConfig.Movement.action.performed += OnMove;
             inputConfig.Movement.action.canceled += OnMove;
+            inputConfig.Run.action.performed += OnRun;
+            inputConfig.Run.action.canceled += OnRun;
             inputConfig.Interactable.action.started += Interactable;
             inputConfig.Inventory.action.started += OpenInventory;
             inputConfig.LeftClick.action.started += LeftMouseDown;
@@ -52,7 +57,19 @@ namespace Input
         
         private void OnMove(InputAction.CallbackContext context)
         {
-            playerMovePublisher.Publish(new PlayerMoveMessage(context.ReadValue<Vector2>()));
+            currentMoveDirection = context.ReadValue<Vector2>();
+            PublishPlayerMove();
+        }
+
+        private void OnRun(InputAction.CallbackContext context)
+        {
+            isRunPressed = context.ReadValueAsButton();
+            PublishPlayerMove();
+        }
+
+        private void PublishPlayerMove()
+        {
+            playerMovePublisher.Publish(new PlayerMoveMessage(currentMoveDirection, isRunPressed));
         }
         
         private void Interactable(InputAction.CallbackContext context)

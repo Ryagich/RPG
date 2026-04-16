@@ -21,6 +21,8 @@ namespace Movement
         private Vector2 targetVelocity;
         private Vector2 currentVelocity;
         private bool canMove = true;
+        private bool isRunning;
+        private float currentSpeedChangeRate;
 
         [SuppressMessage("ReSharper", "ParameterHidesMember")]
         private PlayerMovement
@@ -37,7 +39,8 @@ namespace Movement
             this.cam = cam;
             this.playerTransform = playerTransform;
             visualTransform = animator.transform;
-            this.controller = controller;   
+            this.controller = controller;
+            currentSpeedChangeRate = playerMovementConfig.WalkSpeedChangeRate;
 
             playerMoveSubscriber.Subscribe(OnMove);
         }
@@ -52,10 +55,18 @@ namespace Movement
 
             RotateTowardsCursor();
 
+            var targetSpeedChangeRate = isRunning
+                ? playerMovementConfig.RunSpeedChangeRate
+                : playerMovementConfig.WalkSpeedChangeRate;
+            currentSpeedChangeRate = Mathf.MoveTowards(
+                currentSpeedChangeRate,
+                targetSpeedChangeRate,
+                playerMovementConfig.SpeedChangeRateBlendSpeed * Time.deltaTime);
+
             currentVelocity = Vector2.MoveTowards(
                 currentVelocity,
                 targetVelocity,
-                playerMovementConfig.SpeedChangeRate * Time.deltaTime);
+                currentSpeedChangeRate * Time.deltaTime);
 
             if (currentVelocity.sqrMagnitude <= InputThreshold)
             {
@@ -78,29 +89,39 @@ namespace Movement
             {
                 targetVelocity = Vector2.zero;
                 currentVelocity = Vector2.zero;
+                currentSpeedChangeRate = playerMovementConfig.WalkSpeedChangeRate;
             }
         }
 
         public Vector2 CurrentVelocity => currentVelocity;
+        public bool IsRunning => isRunning;
 
         private void OnMove(PlayerMoveMessage msg)
         {
             targetVelocity = msg.Direction;
+            isRunning = msg.IsRunning;
         }
 
         private float CalculateMoveSpeed(Vector3 worldMoveDirection)
         {
             var localMoveDirection = visualTransform.InverseTransformDirection(worldMoveDirection.normalized);
-            var horizontalSpeed = Mathf.Abs(localMoveDirection.x) > InputThreshold ? playerMovementConfig.StrafeSpeed : 0f;
+            var hasHorizontalInput = Mathf.Abs(localMoveDirection.x) > InputThreshold;
+            var horizontalSpeed = hasHorizontalInput
+                ? (isRunning ? playerMovementConfig.RunStrafeSpeed : playerMovementConfig.StrafeSpeed)
+                : 0f;
             var verticalSpeed = 0f;
 
             if (localMoveDirection.z > InputThreshold)
             {
-                verticalSpeed = playerMovementConfig.ForwardSpeed;
+                verticalSpeed = isRunning
+                    ? playerMovementConfig.RunForwardSpeed
+                    : playerMovementConfig.ForwardSpeed;
             }
             else if (localMoveDirection.z < -InputThreshold)
             {
-                verticalSpeed = playerMovementConfig.BackwardSpeed;
+                verticalSpeed = isRunning
+                    ? playerMovementConfig.RunBackwardSpeed
+                    : playerMovementConfig.BackwardSpeed;
             }
 
             if (horizontalSpeed > 0f && verticalSpeed > 0f)
