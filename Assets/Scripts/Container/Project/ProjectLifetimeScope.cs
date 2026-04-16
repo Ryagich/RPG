@@ -6,6 +6,7 @@ using Interactable;
 using Inventory;
 using Localization;
 using Movement;
+using UI;
 using UI.Configs;
 using UnityEngine;
 using VContainer;
@@ -20,6 +21,7 @@ namespace Container.Project
         [field: SerializeField] public PlayerMovementConfig PlayerMovementConfig { get; private set; }
         [field: SerializeField] public GravityConfig GravityConfig { get; private set; }
         [field: SerializeField] public UIConfig UIConfig { get; private set; }
+        [field: SerializeField] public StatsConfig StatsConfig { get; private set; }
         [field: SerializeField] public LocalizationConfig LocalizationConfig { get; private set; }
         [field: SerializeField] public InteractableConfig InteractableConfig { get; private set; }
         [field: SerializeField] public InventoryConfig InventoryConfig { get; private set; }
@@ -33,6 +35,7 @@ namespace Container.Project
             builder.RegisterInstance(PlayerMovementConfig).AsSelf();
             builder.RegisterInstance(GravityConfig).AsSelf();
             builder.RegisterInstance(UIConfig).AsSelf();
+            builder.RegisterInstance(StatsConfig).AsSelf();
             builder.RegisterInstance(LocalizationConfig).AsSelf();
             builder.RegisterInstance(InteractableConfig).AsSelf();
             builder.RegisterInstance(InventoryConfig).AsSelf();

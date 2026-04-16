@@ -13,6 +13,7 @@ using VContainer.Unity;
 using Inventory.Item;
 using Localization;
 using Money;
+using Stats;
 using UI.UIElements;
 using CharacterInfo = Character.CharacterInfo;
 
@@ -26,6 +27,9 @@ namespace UI.Pages
         public static IInventoryInteractionPage CurrentInteractionPage => Current;
         
         private readonly UIConfig uiConfig;
+        private readonly StatsConfig statsConfig;
+        private readonly StatsController statsController;
+        private readonly StatFiller hpFiller;
         private readonly LocalizationConfig localizationConfig;
         private readonly ColorsConfig colorsConfig;
         private readonly PlayerInventory playerInventory;
@@ -36,6 +40,7 @@ namespace UI.Pages
         private readonly IObjectResolver resolver;
 
         private RectTransform contentRect = null!;
+        private StatsHolder statsHolder = null!;
         private RectTransform rightRect = null!;
         private InfoAboutPlayer infoAboutPlayer = null!;
         private InfoAboutInventory infoAboutInventory = null!;
@@ -47,6 +52,7 @@ namespace UI.Pages
         private readonly List<RectTransform> itemRects = new();
         private readonly List<RectTransform> itemGrabRects = new();
         private Vector2 handGrabOffset;
+        private BeatingHeart beatingHeart;
 
         private ItemConfig lastHelmItemConfig;
         private ItemConfig lastBodyItemConfig;
@@ -56,6 +62,9 @@ namespace UI.Pages
         public InventoryPage
             (
                 UIConfig uiConfig,
+                StatsConfig statsConfig,
+                StatsController statsController,
+                StatFiller hpFiller,
                 LocalizationConfig localizationConfig,
                 ColorsConfig colorsConfig,
                 Canvas canvas,
@@ -66,6 +75,9 @@ namespace UI.Pages
             )
         {
             this.uiConfig = uiConfig;
+            this.statsConfig = statsConfig;
+            this.statsController = statsController;
+            this.hpFiller = hpFiller;
             this.localizationConfig = localizationConfig;
             this.colorsConfig = colorsConfig;
             this.canvas = canvas;
@@ -82,6 +94,8 @@ namespace UI.Pages
             Current = this;
             contentRect = resolver.Instantiate(uiConfig.ContentPref, canvasRect);
             contentRect.name = $"{uiConfig.ContentPref.name} | {Type}";
+            statsHolder = resolver.Instantiate(uiConfig.StatsHolder, contentRect);
+            statsHolder.name = $"{uiConfig.StatsHolder.name} | {Type}";
 
             rightRect = resolver.Instantiate(uiConfig.RightSection, contentRect);
             slotsViewContainer = resolver.Instantiate(uiConfig.CenterSection, contentRect);
@@ -100,6 +114,11 @@ namespace UI.Pages
             playerInventory.HandSlot
                            .Subscribe(_ => ReDraw())
                            .AddTo(redrawDisposables);
+
+            hpFiller.Current
+                    .Subscribe(current => ApplyHpFill(GetNormalizedHp(current)))
+                    .AddTo(redrawDisposables);
+            beatingHeart = new BeatingHeart(statsConfig, statsController.Hp, hpFiller, statsHolder.HPHolder);
 
             ReDraw();
         }
@@ -533,6 +552,9 @@ namespace UI.Pages
         
         public override void Hide()
         {
+            beatingHeart?.Dispose();
+            beatingHeart = null;
+
             redrawDisposables.Clear();
             itemRects.Clear();
             itemGrabRects.Clear();
@@ -548,6 +570,7 @@ namespace UI.Pages
             }
 
             contentRect = null;
+            statsHolder = null;
             rightRect = null;
             infoAboutPlayer = null;
             infoAboutInventory = null;
@@ -556,6 +579,22 @@ namespace UI.Pages
             inventoryScrollRect = null;
             handSlotRect = null;
             Current = null;
+        }
+
+        private void ApplyHpFill(float normalizedValue)
+        {
+            if (statsHolder?.HPHolder?.Fill == null)
+            {
+                return;
+            }
+
+            statsHolder.HPHolder.Fill.fillAmount = normalizedValue;
+        }
+
+        private float GetNormalizedHp(float current)
+        {
+            var maxHp = statsController.Hp.Max;
+            return Mathf.Approximately(maxHp, 0f) ? 0f : current / maxHp;
         }
     }
 }

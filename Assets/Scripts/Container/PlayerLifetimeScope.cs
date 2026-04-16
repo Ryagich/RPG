@@ -4,6 +4,7 @@ using Inventory;
 using Inventory.Inventories;
 using Money;
 using Movement;
+using Stats;
 using UI;
 using UnityEngine;
 using VContainer;
@@ -46,7 +47,9 @@ namespace Container
             builder.RegisterEntryPoint<PlayerAnimationController>().AsSelf();
             builder.RegisterEntryPoint<PlayerInteractableLogic>().AsSelf();
             builder.RegisterEntryPoint<ItemHolderInteractableLogic>().AsSelf();
-            
+            builder.Register<StatsController>(Lifetime.Singleton).AsSelf();
+            builder.Register<StatFiller>(Lifetime.Singleton).AsSelf();
+              
             builder.RegisterEntryPoint<PlayerInventory>().As<IInventory>().AsSelf();
             builder.Register(_ => new MoneyStorage(112), Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<InventoryHandController>().AsSelf();

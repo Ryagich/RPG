@@ -15,3 +15,5 @@ MonoBehaviour:
   <InteractiveLayers>k__BackingField:
     serializedVersion: 2
     m_Bits: 64
+  <TimeBetweenInteractions>k__BackingField: 0.1
+  <AutomaticTimeBetweenInteractions>k__BackingField: 0.5

@@ -1,5 +1,6 @@
 ﻿using Dialogue;
 using Inventory.Slot;
+using Stats;
 using TMPro;
 using UI.Inventory;
 using UI.UIElements;
@@ -31,5 +32,8 @@ namespace UI.Configs
         // Dialog
         [field: SerializeField] public PhraseContainer PhraseContainer { get; private set; }
         [field: SerializeField] public Button AnswerButton { get; private set; }
+        
+        // Game
+        [field: SerializeField] public StatsHolder StatsHolder { get; private set; }
     }
 }
