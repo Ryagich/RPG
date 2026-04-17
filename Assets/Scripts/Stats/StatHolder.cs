@@ -7,5 +7,6 @@ namespace Stats
     {
         [field: SerializeField] public Image Icon { get; private set; }
         [field: SerializeField] public Image Fill { get; private set; }
+        [field: SerializeField] public Image ChangedFill { get; private set; }
     }
 }

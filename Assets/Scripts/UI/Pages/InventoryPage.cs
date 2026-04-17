@@ -22,6 +22,13 @@ namespace UI.Pages
     // ReSharper disable once ClassNeverInstantiated.Global
     public class InventoryPage : BasePage, ITickable, IInventoryInteractionPage
     {
+        private enum HpFillMode
+        {
+            Synced,
+            FillAnimated,
+            ChangedFillAnimated
+        }
+
         public override PageType Type { get; } = PageType.Inventory;
         public static InventoryPage Current { get; private set; }
         public static IInventoryInteractionPage CurrentInteractionPage => Current;
@@ -58,6 +65,8 @@ namespace UI.Pages
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastBackpackItemConfig;
         private Vector2Int lastGridSize = new(-1, -1);
+        private float lastHpTarget;
+        private HpFillMode hpFillMode;
         
         public InventoryPage
             (
@@ -115,9 +124,17 @@ namespace UI.Pages
                            .Subscribe(_ => ReDraw())
                            .AddTo(redrawDisposables);
 
+            lastHpTarget = statsController.Hp.Value.Value;
+            hpFillMode = HpFillMode.Synced;
+
             hpFiller.Current
-                    .Subscribe(current => ApplyHpFill(GetNormalizedHp(current)))
+                    .Subscribe(_ => RefreshHpFill())
                     .AddTo(redrawDisposables);
+            statsController.Hp.Value
+                           .Subscribe(OnHpTargetChanged)
+                           .AddTo(redrawDisposables);
+
+            RefreshHpFill();
             beatingHeart = new BeatingHeart(statsConfig, statsController.Hp, hpFiller, statsHolder.HPHolder);
 
             ReDraw();
@@ -581,20 +598,108 @@ namespace UI.Pages
             Current = null;
         }
 
-        private void ApplyHpFill(float normalizedValue)
+        private void RefreshHpFill()
         {
-            if (statsHolder?.HPHolder?.Fill == null)
+            var hpHolder = statsHolder?.HPHolder;
+            if (hpHolder == null || hpHolder.Fill == null || hpHolder.ChangedFill == null)
             {
                 return;
             }
 
-            statsHolder.HPHolder.Fill.fillAmount = normalizedValue;
+            var normalizedCurrent = GetNormalizedHp(hpFiller.Current.Value);
+            var normalizedTarget = GetNormalizedHp(statsController.Hp.Value.Value);
+
+            switch (ResolveHpFillDirection())
+            {
+                case HpFillMode.FillAnimated:
+                    hpHolder.Fill.fillAmount = normalizedCurrent;
+                    hpHolder.ChangedFill.fillAmount = normalizedTarget;
+                    break;
+                case HpFillMode.ChangedFillAnimated:
+                    hpHolder.Fill.fillAmount = normalizedTarget;
+                    hpHolder.ChangedFill.fillAmount = normalizedCurrent;
+                    break;
+                default:
+                    hpHolder.Fill.fillAmount = normalizedTarget;
+                    hpHolder.ChangedFill.fillAmount = normalizedTarget;
+                    break;
+            }
         }
 
         private float GetNormalizedHp(float current)
         {
             var maxHp = statsController.Hp.Max;
             return Mathf.Approximately(maxHp, 0f) ? 0f : current / maxHp;
+        }
+
+        private void OnHpTargetChanged(float newTarget)
+        {
+            SelectHpFillMode(newTarget);
+            lastHpTarget = newTarget;
+            RefreshHpFill();
+        }
+
+        private HpFillMode ResolveHpFillDirection()
+        {
+            if (!Mathf.Approximately(hpFiller.Current.Value, statsController.Hp.Value.Value))
+            {
+                return hpFillMode;
+            }
+
+            return HpFillMode.Synced;
+        }
+
+        private void SelectHpFillMode(float newTarget)
+        {
+            var hpHolder = statsHolder?.HPHolder;
+            if (hpHolder == null || hpHolder.Fill == null || hpHolder.ChangedFill == null)
+            {
+                return;
+            }
+
+            var target = GetNormalizedHp(newTarget);
+            var fill = hpHolder.Fill.fillAmount;
+            var changedFill = hpHolder.ChangedFill.fillAmount;
+
+            var shouldAnimateFill = target > fill;
+            var shouldAnimateChangedFill = target < changedFill;
+
+            var nextMode = hpFillMode;
+            if (shouldAnimateFill && shouldAnimateChangedFill)
+            {
+                nextMode = hpFillMode == HpFillMode.Synced
+                    ? newTarget >= lastHpTarget
+                        ? HpFillMode.FillAnimated
+                        : HpFillMode.ChangedFillAnimated
+                    : hpFillMode;
+            }
+            else if (shouldAnimateFill)
+            {
+                nextMode = HpFillMode.FillAnimated;
+            }
+            else if (shouldAnimateChangedFill)
+            {
+                nextMode = HpFillMode.ChangedFillAnimated;
+            }
+            else
+            {
+                nextMode = HpFillMode.Synced;
+            }
+
+            RebaseAnimatedFill(nextMode, fill, changedFill, target);
+            hpFillMode = nextMode;
+        }
+
+        private void RebaseAnimatedFill(HpFillMode nextMode, float fill, float changedFill, float target)
+        {
+            var currentVisual = nextMode switch
+            {
+                HpFillMode.FillAnimated => fill,
+                HpFillMode.ChangedFillAnimated => changedFill,
+                _ => target
+            };
+
+            hpFiller.Current.Value = currentVisual * statsController.Hp.Max;
         }
     }
 }

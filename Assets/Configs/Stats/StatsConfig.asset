@@ -17,9 +17,9 @@ MonoBehaviour:
     <Min>k__BackingField: 0
     <Value>k__BackingField:
       value: 100
-  <FillSpeed>k__BackingField: 0.5
-  <FllLerpSpeed>k__BackingField: 0.1
-  <OffsetBarSize>k__BackingField: 3
+  <FillSpeed>k__BackingField: 0.01
+  <FllLerpSpeed>k__BackingField: 0.01
+  <OffsetBarSize>k__BackingField: 1
   <MinHeartbeat>k__BackingField: 80
   <MaxHeartbeat>k__BackingField: 190
   <Sharpness>k__BackingField: 3
