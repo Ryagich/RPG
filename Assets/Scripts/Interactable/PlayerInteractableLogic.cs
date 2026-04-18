@@ -67,7 +67,6 @@ namespace Interactable
 
         private void Remove(InteractableEndMessage msg)
         {
-            Debug.Log($"Interactable Remove");
             Interactables.Remove(msg.Interactable);
             msg.Interactable.Destroyed -= OnDestroyed;
             msg.Interactable.EndInteract(scope);

@@ -48,8 +48,9 @@ namespace Container
             builder.RegisterEntryPoint<PlayerInteractableLogic>().AsSelf();
             builder.RegisterEntryPoint<ItemHolderInteractableLogic>().AsSelf();
             builder.Register<StatsController>(Lifetime.Singleton).AsSelf();
-            builder.Register<StatFiller>(Lifetime.Singleton).AsSelf();
-              
+            builder.Register<StatFillers>(Lifetime.Singleton).AsSelf();
+            builder.RegisterEntryPoint<StatsPeriodicChanger>().AsSelf();
+               
             builder.RegisterEntryPoint<PlayerInventory>().As<IInventory>().AsSelf();
             builder.Register(_ => new MoneyStorage(112), Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<InventoryHandController>().AsSelf();

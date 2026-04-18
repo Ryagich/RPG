@@ -6,9 +6,10 @@ using VContainer.Unity;
 namespace Interactable
 {
     [RequireComponent(typeof(Interactable))]
-    public class HealInteractable : MonoBehaviour
+    public class StatModifierInteractable : MonoBehaviour
     {
-        [SerializeField] private float healPerInteraction = 10f;
+        [SerializeField] private StatType statType = StatType.Hp;
+        [SerializeField] private float valuePerInteraction = 10f;
 
         private Interactable interactable;
 
@@ -31,11 +32,6 @@ namespace Interactable
             }
         }
 
-        private void OnValidate()
-        {
-            healPerInteraction = Mathf.Max(0f, healPerInteraction);
-        }
-
         private void OnInteracted(LifetimeScope playerScope)
         {
             if (playerScope == null || !playerScope.Container.TryResolve<StatsController>(out var statsController))
@@ -43,7 +39,7 @@ namespace Interactable
                 return;
             }
 
-            statsController.Hp.AddValue(healPerInteraction);
+            statsController.AddValue(statType, valuePerInteraction);
         }
     }
 }

@@ -22,6 +22,8 @@ namespace UI.Pages
     // ReSharper disable once ClassNeverInstantiated.Global
     public class InventoryPage : BasePage, ITickable, IInventoryInteractionPage
     {
+        private static readonly StatType[] AdditionalStatTypes = { StatType.Water, StatType.Food, StatType.Chill };
+
         private enum HpFillMode
         {
             Synced,
@@ -36,6 +38,7 @@ namespace UI.Pages
         private readonly UIConfig uiConfig;
         private readonly StatsConfig statsConfig;
         private readonly StatsController statsController;
+        private readonly StatFillers statFillers;
         private readonly StatFiller hpFiller;
         private readonly LocalizationConfig localizationConfig;
         private readonly ColorsConfig colorsConfig;
@@ -73,7 +76,7 @@ namespace UI.Pages
                 UIConfig uiConfig,
                 StatsConfig statsConfig,
                 StatsController statsController,
-                StatFiller hpFiller,
+                StatFillers statFillers,
                 LocalizationConfig localizationConfig,
                 ColorsConfig colorsConfig,
                 Canvas canvas,
@@ -86,7 +89,8 @@ namespace UI.Pages
             this.uiConfig = uiConfig;
             this.statsConfig = statsConfig;
             this.statsController = statsController;
-            this.hpFiller = hpFiller;
+            this.statFillers = statFillers;
+            hpFiller = statFillers.Get(StatType.Hp);
             this.localizationConfig = localizationConfig;
             this.colorsConfig = colorsConfig;
             this.canvas = canvas;
@@ -134,7 +138,20 @@ namespace UI.Pages
                            .Subscribe(OnHpTargetChanged)
                            .AddTo(redrawDisposables);
 
+            foreach (var statType in AdditionalStatTypes)
+            {
+                var currentStatType = statType;
+                var filler = statFillers.Get(currentStatType);
+                filler.Current
+                      .Subscribe(_ => RefreshStatFill(currentStatType))
+                      .AddTo(redrawDisposables);
+                statsController.GetStat(currentStatType).Value
+                               .Subscribe(_ => RefreshStatFill(currentStatType))
+                               .AddTo(redrawDisposables);
+            }
+
             RefreshHpFill();
+            RefreshAdditionalStatFills();
             beatingHeart = new BeatingHeart(statsConfig, statsController.Hp, hpFiller, statsHolder.HPHolder);
 
             ReDraw();
@@ -614,22 +631,92 @@ namespace UI.Pages
                 case HpFillMode.FillAnimated:
                     hpHolder.Fill.fillAmount = normalizedCurrent;
                     hpHolder.ChangedFill.fillAmount = normalizedTarget;
+                    hpHolder.ChangedFill.color = statsConfig.HpRecoveryColor;
                     break;
                 case HpFillMode.ChangedFillAnimated:
                     hpHolder.Fill.fillAmount = normalizedTarget;
                     hpHolder.ChangedFill.fillAmount = normalizedCurrent;
+                    hpHolder.ChangedFill.color = statsConfig.HpDecreaseColor;
                     break;
                 default:
                     hpHolder.Fill.fillAmount = normalizedTarget;
                     hpHolder.ChangedFill.fillAmount = normalizedTarget;
+                    hpHolder.ChangedFill.color = statsConfig.HpFullColor;
                     break;
             }
+
+            ApplyCriticalColor(hpHolder, statsController.Hp, normalizedTarget);
+        }
+
+        private void RefreshAdditionalStatFills()
+        {
+            foreach (var statType in AdditionalStatTypes)
+            {
+                RefreshStatFill(statType);
+            }
+        }
+
+        private void RefreshStatFill(StatType statType)
+        {
+            var statHolder = statsHolder?.GetHolder(statType);
+            if (statHolder == null || statHolder.Fill == null || statHolder.ChangedFill == null)
+            {
+                return;
+            }
+
+            var stat = statsController.GetStat(statType);
+            var filler = statFillers.Get(statType);
+            var normalizedCurrent = GetNormalizedStat(stat, filler.Current.Value);
+            var normalizedTarget = GetNormalizedStat(stat, stat.Value.Value);
+
+            if (normalizedTarget > normalizedCurrent)
+            {
+                statHolder.Fill.fillAmount = normalizedCurrent;
+                statHolder.ChangedFill.fillAmount = normalizedTarget;
+                statHolder.ChangedFill.color = statsConfig.HpRecoveryColor;
+                ApplyCriticalColor(statHolder, stat, normalizedTarget);
+                return;
+            }
+
+            if (normalizedTarget < normalizedCurrent)
+            {
+                statHolder.Fill.fillAmount = normalizedTarget;
+                statHolder.ChangedFill.fillAmount = normalizedCurrent;
+                statHolder.ChangedFill.color = statsConfig.HpDecreaseColor;
+                ApplyCriticalColor(statHolder, stat, normalizedTarget);
+                return;
+            }
+
+            statHolder.Fill.fillAmount = normalizedTarget;
+            statHolder.ChangedFill.fillAmount = normalizedTarget;
+            statHolder.ChangedFill.color = statsConfig.HpFullColor;
+            ApplyCriticalColor(statHolder, stat, normalizedTarget);
         }
 
         private float GetNormalizedHp(float current)
         {
             var maxHp = statsController.Hp.Max;
             return Mathf.Approximately(maxHp, 0f) ? 0f : current / maxHp;
+        }
+
+        private static float GetNormalizedStat(Stat stat, float current)
+        {
+            return Mathf.Approximately(stat.Max, 0f) ? 0f : current / stat.Max;
+        }
+
+        private void ApplyCriticalColor(StatHolder statHolder, Stat stat, float normalizedTarget)
+        {
+            var safeThreshold = Mathf.Clamp01(stat.MinSafePercent);
+            var fillColor = normalizedTarget >= safeThreshold
+                ? statsConfig.HpFullColor
+                : Color.Lerp(statsConfig.HpDecreaseColor, statsConfig.HpFullColor, safeThreshold <= 0f ? 0f : normalizedTarget / safeThreshold);
+
+            statHolder.Fill.color = fillColor;
+
+            if (statHolder.Icon != null)
+            {
+                statHolder.Icon.color = fillColor;
+            }
         }
 
         private void OnHpTargetChanged(float newTarget)

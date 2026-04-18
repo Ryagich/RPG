@@ -52,4 +52,14 @@ namespace Messages
             Button = button;
         }
     }
+
+    public readonly struct ShowStatsInputMessage
+    {
+        public readonly bool IsPressed;
+
+        public ShowStatsInputMessage(bool isPressed)
+        {
+            IsPressed = isPressed;
+        }
+    }
 }

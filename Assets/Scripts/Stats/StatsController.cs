@@ -1,16 +1,90 @@
+using System;
+using System.Collections.Generic;
+using UniRx;
 using UI;
-using UnityEngine;
 
 namespace Stats
 {
+    public enum StatChangeSource
+    {
+        Manual,
+        Periodic
+    }
+
+    public readonly struct StatChangeInfo
+    {
+        public readonly StatType StatType;
+        public readonly float PreviousValue;
+        public readonly float CurrentValue;
+        public readonly StatChangeSource Source;
+
+        public StatChangeInfo(StatType statType, float previousValue, float currentValue, StatChangeSource source)
+        {
+            StatType = statType;
+            PreviousValue = previousValue;
+            CurrentValue = currentValue;
+            Source = source;
+        }
+    }
+
     public class StatsController
     {
-        public Stat Hp { get; }
+        private readonly Dictionary<StatType, Stat> statsByType;
+        private readonly Subject<StatChangeInfo> changed = new();
+
+        public Stat Hp => GetStat(StatType.Hp);
+        public IObservable<StatChangeInfo> Changed => changed;
 
         public StatsController(StatsConfig statsConfig)
         {
-            Debug.Log($"StatsController");
-            Hp = new Stat(statsConfig.HpStat);
+            statsByType = new Dictionary<StatType, Stat>
+            {
+                [StatType.Hp] = new PeriodicStat(statsConfig.GetPeriodicStatConfig(StatType.Hp)),
+                [StatType.Water] = new AdditionalPeriodicStat(statsConfig.GetAdditionalPeriodicStatConfig(StatType.Water)),
+                [StatType.Food] = new AdditionalPeriodicStat(statsConfig.GetAdditionalPeriodicStatConfig(StatType.Food)),
+                [StatType.Chill] = new AdditionalPeriodicStat(statsConfig.GetAdditionalPeriodicStatConfig(StatType.Chill))
+            };
+        }
+
+        public Stat GetStat(StatType statType)
+        {
+            if (!statsByType.TryGetValue(statType, out var stat))
+            {
+                throw new ArgumentOutOfRangeException(nameof(statType), statType, null);
+            }
+
+            return stat;
+        }
+
+        public bool TryGetStat(StatType statType, out Stat stat)
+        {
+            return statsByType.TryGetValue(statType, out stat);
+        }
+
+        public void AddValue(StatType statType, float value, StatChangeSource source = StatChangeSource.Manual)
+        {
+            var stat = GetStat(statType);
+            var previousValue = stat.Value.Value;
+            stat.AddValue(value);
+            PublishIfChanged(statType, previousValue, stat.Value.Value, source);
+        }
+
+        public void ChangeValue(StatType statType, float value, StatChangeSource source = StatChangeSource.Manual)
+        {
+            var stat = GetStat(statType);
+            var previousValue = stat.Value.Value;
+            stat.ChangeValue(value);
+            PublishIfChanged(statType, previousValue, stat.Value.Value, source);
+        }
+
+        private void PublishIfChanged(StatType statType, float previousValue, float currentValue, StatChangeSource source)
+        {
+            if (Math.Abs(previousValue - currentValue) <= float.Epsilon)
+            {
+                return;
+            }
+
+            changed.OnNext(new StatChangeInfo(statType, previousValue, currentValue, source));
         }
     }
 }

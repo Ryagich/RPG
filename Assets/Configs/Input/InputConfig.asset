@@ -18,3 +18,4 @@ MonoBehaviour:
   <LeftClick>k__BackingField: {fileID: 5637978892861409632, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
   <RightClick>k__BackingField: {fileID: 6652609453448676580, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
   <Run>k__BackingField: {fileID: 5141890984082140844, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <ShowStats>k__BackingField: {fileID: 0}

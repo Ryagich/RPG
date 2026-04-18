@@ -6,6 +6,7 @@ namespace Stats
 {
     public class StatFiller : System.IDisposable
     {
+        public StatType StatType { get; }
         public ReactiveProperty<float> Current { get; private set; } = new();
         public float NormalizedCurrent => Mathf.Approximately(stat.Max, 0f) ? 0f : Current.Value / stat.Max;
 
@@ -15,10 +16,11 @@ namespace Stats
 
         private float target;
 
-        public StatFiller(StatsConfig config, StatsController statsController)
+        public StatFiller(StatType statType, StatsConfig config, StatsController statsController)
         {
+            StatType = statType;
             this.config = config;
-            stat = statsController.Hp;
+            stat = statsController.GetStat(statType);
 
             Current.Value = stat.Value.Value;
             target = Current.Value;

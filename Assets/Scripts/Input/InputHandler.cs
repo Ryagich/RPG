@@ -1,6 +1,7 @@
-﻿using GameModes;
+using GameModes;
 using MessagePipe;
 using Messages;
+using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using VContainer.Unity;
@@ -16,6 +17,7 @@ namespace Input
         private readonly IPublisher<InteractableInputMessage> interactableInputPublisher;
         private readonly IPublisher<MouseDown> mouseDown;
         private readonly IPublisher<MouseUp> mouseUp;
+        private readonly IPublisher<ShowStatsInputMessage> showStatsInputPublisher;
         private readonly GameModesController gameModesController;
 
         private Vector2 currentMoveDirection;
@@ -29,6 +31,7 @@ namespace Input
                 IPublisher<InteractableInputMessage> interactableInputPublisher,
                 IPublisher<MouseDown> mouseDown,
                 IPublisher<MouseUp> mouseUp,
+                IPublisher<ShowStatsInputMessage> showStatsInputPublisher,
                 GameModesController gameModesController
             )
         {
@@ -38,6 +41,7 @@ namespace Input
             this.interactableInputPublisher = interactableInputPublisher;
             this.mouseDown = mouseDown;
             this.mouseUp = mouseUp;
+            this.showStatsInputPublisher = showStatsInputPublisher;
             this.gameModesController = gameModesController;
         }
 
@@ -53,6 +57,16 @@ namespace Input
             inputConfig.LeftClick.action.canceled += LeftMouseUp;
             inputConfig.RightClick.action.started += RightMouseDown;
             inputConfig.RightClick.action.canceled += RightMouseUp;
+
+            if (inputConfig.ShowStats != null && inputConfig.ShowStats.action != null)
+            {
+                inputConfig.ShowStats.action.started += ShowStatsPressed;
+                inputConfig.ShowStats.action.canceled += ShowStatsReleased;
+            }
+            else
+            {
+                Observable.EveryUpdate().Subscribe(_ => PollShowStatsFallback());
+            }
         }
         
         private void OnMove(InputAction.CallbackContext context)
@@ -106,6 +120,35 @@ namespace Input
         private void RightMouseUp(InputAction.CallbackContext context)
         {
             mouseUp.Publish(new(MouseButtonType.Right));
+        }
+
+        private void ShowStatsPressed(InputAction.CallbackContext context)
+        {
+            showStatsInputPublisher.Publish(new ShowStatsInputMessage(true));
+        }
+
+        private void ShowStatsReleased(InputAction.CallbackContext context)
+        {
+            showStatsInputPublisher.Publish(new ShowStatsInputMessage(false));
+        }
+
+        private void PollShowStatsFallback()
+        {
+            var keyboard = Keyboard.current;
+            if (keyboard == null)
+            {
+                return;
+            }
+
+            if (keyboard.tabKey.wasPressedThisFrame)
+            {
+                showStatsInputPublisher.Publish(new ShowStatsInputMessage(true));
+            }
+
+            if (keyboard.tabKey.wasReleasedThisFrame)
+            {
+                showStatsInputPublisher.Publish(new ShowStatsInputMessage(false));
+            }
         }
     }
 }

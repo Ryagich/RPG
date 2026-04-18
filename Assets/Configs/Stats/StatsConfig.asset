@@ -15,11 +15,42 @@ MonoBehaviour:
   <HpStat>k__BackingField:
     <Max>k__BackingField: 100
     <Min>k__BackingField: 0
+    <MinSafePercent>k__BackingField: 0.15
     <Value>k__BackingField:
       value: 100
+    <PeriodicChange>k__BackingField: 0.01
+  <WaterStat>k__BackingField:
+    <Max>k__BackingField: 100
+    <Min>k__BackingField: 0
+    <MinSafePercent>k__BackingField: 0.15
+    <Value>k__BackingField:
+      value: 100
+    <PeriodicChange>k__BackingField: -0.1
+    <PeriodicHpDamageWhenEmpty>k__BackingField: 0.1
+  <FoodStat>k__BackingField:
+    <Max>k__BackingField: 100
+    <Min>k__BackingField: 0
+    <MinSafePercent>k__BackingField: 0.15
+    <Value>k__BackingField:
+      value: 100
+    <PeriodicChange>k__BackingField: -0.1
+    <PeriodicHpDamageWhenEmpty>k__BackingField: 0.1
+  <ChillStat>k__BackingField:
+    <Max>k__BackingField: 100
+    <Min>k__BackingField: 0
+    <MinSafePercent>k__BackingField: 0.15
+    <Value>k__BackingField:
+      value: 100
+    <PeriodicChange>k__BackingField: -0.1
+    <PeriodicHpDamageWhenEmpty>k__BackingField: 0.1
+  <PeriodicChangeIntervalSeconds>k__BackingField: 0.1
+  <HpRegenResumeDelayAfterDamageSeconds>k__BackingField: 2
   <FillSpeed>k__BackingField: 0.01
-  <FllLerpSpeed>k__BackingField: 0.01
+  <FllLerpSpeed>k__BackingField: 0.035
   <OffsetBarSize>k__BackingField: 1
+  <FadeOutTime>k__BackingField: 3
+  <ShowTime>k__BackingField: 3
+  <AlphaRestoreTime>k__BackingField: 1.25
   <MinHeartbeat>k__BackingField: 80
   <MaxHeartbeat>k__BackingField: 190
   <Sharpness>k__BackingField: 3
