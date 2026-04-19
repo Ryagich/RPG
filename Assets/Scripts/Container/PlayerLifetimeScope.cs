@@ -50,6 +50,8 @@ namespace Container
             builder.Register<StatsController>(Lifetime.Singleton).AsSelf();
             builder.Register<StatFillers>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<StatsPeriodicChanger>().AsSelf();
+            builder.RegisterEntryPoint<StaminaPeriodicChanger>().AsSelf();
+            builder.RegisterEntryPoint<StaminaMovementChanger>().AsSelf();
                
             builder.RegisterEntryPoint<PlayerInventory>().As<IInventory>().AsSelf();
             builder.Register(_ => new MoneyStorage(112), Lifetime.Scoped).AsSelf();

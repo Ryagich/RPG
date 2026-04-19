@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Interactable;
+using Inventory.Inventories;
 using MessagePipe;
 using Messages;
 using Stats;
@@ -15,8 +16,8 @@ namespace UI.Pages
     // ReSharper disable once ClassNeverInstantiated.Global
     public class MainPage : BasePage
     {
-        private static readonly StatType[] AdditionalStatTypes = { StatType.Water, StatType.Food, StatType.Chill };
-        private static readonly StatType[] AllStatTypes = { StatType.Hp, StatType.Water, StatType.Food, StatType.Chill };
+        private static readonly StatType[] AdditionalStatTypes = { StatType.Water, StatType.Food, StatType.Chill, StatType.Stamina };
+        private static readonly StatType[] AllStatTypes = { StatType.Hp, StatType.Water, StatType.Food, StatType.Chill, StatType.Stamina };
 
         private enum HpFillMode
         {
@@ -51,8 +52,10 @@ namespace UI.Pages
         private readonly StatsController statsController;
         private readonly StatFillers statFillers;
         private readonly StatFiller hpFiller;
+        private readonly global::Inventory.InventoryConfig inventoryConfig;
         private readonly PlayerInteractableLogic playerInteractableLogic;
         private readonly ItemHolderInteractableLogic itemHolderInteractableLogic;
+        private readonly PlayerInventory playerInventory;
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
         private readonly CompositeDisposable drawDisposables = new();
@@ -80,6 +83,8 @@ namespace UI.Pages
                 StatsConfig statsConfig,
                 StatsController statsController,
                 StatFillers statFillers,
+                global::Inventory.InventoryConfig inventoryConfig,
+                PlayerInventory playerInventory,
                 Canvas canvas,
                 PlayerInteractableLogic playerInteractableLogic,
                 ItemHolderInteractableLogic itemHolderInteractableLogic,
@@ -92,6 +97,8 @@ namespace UI.Pages
             this.statsConfig = statsConfig;
             this.statsController = statsController;
             this.statFillers = statFillers;
+            this.inventoryConfig = inventoryConfig;
+            this.playerInventory = playerInventory;
             hpFiller = statFillers.Get(StatType.Hp);
             this.playerInteractableLogic = playerInteractableLogic;
             this.itemHolderInteractableLogic = itemHolderInteractableLogic;
@@ -155,9 +162,13 @@ namespace UI.Pages
             Observable.EveryUpdate()
                       .Subscribe(_ => TickVisibility())
                       .AddTo(drawDisposables);
+            playerInventory.CurrentWeightReactive
+                           .Subscribe(UpdateWeightIndicator)
+                           .AddTo(drawDisposables);
 
             RefreshHpFill();
             RefreshAdditionalStatFills();
+            UpdateWeightIndicator(playerInventory.CurrentWeight);
 
             foreach (var statType in AllStatTypes)
             {
@@ -665,6 +676,32 @@ namespace UI.Pages
             {
                 ApplyVisualAlpha(statType);
             }
+        }
+
+        private void UpdateWeightIndicator(float currentWeight)
+        {
+            var indicator = statsHolder?.WeightIndicator;
+            if (indicator == null)
+            {
+                return;
+            }
+
+            var currentPercent = playerInventory.CurrentWeightPercent;
+            if (currentPercent >= inventoryConfig.WeightBlocksMovementPercent)
+            {
+                indicator.enabled = true;
+                indicator.color = statsConfig.HpDecreaseColor;
+                return;
+            }
+
+            if (currentPercent > inventoryConfig.WeightAffectsMovementPercent)
+            {
+                indicator.enabled = true;
+                indicator.color = statsConfig.Warning;
+                return;
+            }
+
+            indicator.enabled = false;
         }
 
         private void ApplyVisualAlpha(StatType statType)

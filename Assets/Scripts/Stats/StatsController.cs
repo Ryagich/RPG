@@ -39,10 +39,11 @@ namespace Stats
         {
             statsByType = new Dictionary<StatType, Stat>
             {
-                [StatType.Hp] = new PeriodicStat(statsConfig.GetPeriodicStatConfig(StatType.Hp)),
+                [StatType.Hp] = new Hp(statsConfig.HpStat),
                 [StatType.Water] = new AdditionalPeriodicStat(statsConfig.GetAdditionalPeriodicStatConfig(StatType.Water)),
                 [StatType.Food] = new AdditionalPeriodicStat(statsConfig.GetAdditionalPeriodicStatConfig(StatType.Food)),
-                [StatType.Chill] = new AdditionalPeriodicStat(statsConfig.GetAdditionalPeriodicStatConfig(StatType.Chill))
+                [StatType.Chill] = new AdditionalPeriodicStat(statsConfig.GetAdditionalPeriodicStatConfig(StatType.Chill)),
+                [StatType.Stamina] = new Stamina(statsConfig.StaminaStat)
             };
         }
 

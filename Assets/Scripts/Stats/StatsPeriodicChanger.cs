@@ -67,7 +67,7 @@ namespace Stats
 
         private void ApplyHpPeriodicChange()
         {
-            var hpStat = GetPeriodicStat(StatType.Hp);
+            var hpStat = (Hp)statsController.GetStat(StatType.Hp);
             if (Mathf.Approximately(hpStat.PeriodicChange, 0f))
             {
                 return;
@@ -149,7 +149,7 @@ namespace Stats
 
             hpRegenBlockedRemainingTime = Mathf.Max(
                 hpRegenBlockedRemainingTime,
-                statsConfig.HpRegenResumeDelayAfterDamageSeconds);
+                ((Hp)statsController.GetStat(StatType.Hp)).RegenResumeDelayAfterDamageSeconds);
         }
 
         public void Dispose()

@@ -22,7 +22,7 @@ namespace UI.Pages
     // ReSharper disable once ClassNeverInstantiated.Global
     public class InventoryPage : BasePage, ITickable, IInventoryInteractionPage
     {
-        private static readonly StatType[] AdditionalStatTypes = { StatType.Water, StatType.Food, StatType.Chill };
+        private static readonly StatType[] AdditionalStatTypes = { StatType.Water, StatType.Food, StatType.Chill, StatType.Stamina };
 
         private enum HpFillMode
         {
@@ -40,6 +40,7 @@ namespace UI.Pages
         private readonly StatsController statsController;
         private readonly StatFillers statFillers;
         private readonly StatFiller hpFiller;
+        private readonly global::Inventory.InventoryConfig inventoryConfig;
         private readonly LocalizationConfig localizationConfig;
         private readonly ColorsConfig colorsConfig;
         private readonly PlayerInventory playerInventory;
@@ -77,6 +78,7 @@ namespace UI.Pages
                 StatsConfig statsConfig,
                 StatsController statsController,
                 StatFillers statFillers,
+                global::Inventory.InventoryConfig inventoryConfig,
                 LocalizationConfig localizationConfig,
                 ColorsConfig colorsConfig,
                 Canvas canvas,
@@ -90,6 +92,7 @@ namespace UI.Pages
             this.statsConfig = statsConfig;
             this.statsController = statsController;
             this.statFillers = statFillers;
+            this.inventoryConfig = inventoryConfig;
             hpFiller = statFillers.Get(StatType.Hp);
             this.localizationConfig = localizationConfig;
             this.colorsConfig = colorsConfig;
@@ -149,9 +152,13 @@ namespace UI.Pages
                                .Subscribe(_ => RefreshStatFill(currentStatType))
                                .AddTo(redrawDisposables);
             }
+            playerInventory.CurrentWeightReactive
+                           .Subscribe(UpdateWeightIndicator)
+                           .AddTo(redrawDisposables);
 
             RefreshHpFill();
             RefreshAdditionalStatFills();
+            UpdateWeightIndicator(playerInventory.CurrentWeight);
             beatingHeart = new BeatingHeart(statsConfig, statsController.Hp, hpFiller, statsHolder.HPHolder);
 
             ReDraw();
@@ -787,6 +794,33 @@ namespace UI.Pages
             };
 
             hpFiller.Current.Value = currentVisual * statsController.Hp.Max;
+        }
+
+        private void UpdateWeightIndicator(float currentWeight)
+        {
+            var indicator = statsHolder?.WeightIndicator;
+            if (indicator == null)
+            {
+                return;
+            }
+
+            var currentPercent = playerInventory.CurrentWeightPercent;
+
+            if (currentPercent >= inventoryConfig.WeightBlocksMovementPercent)
+            {
+                indicator.enabled = true;
+                indicator.color = statsConfig.HpDecreaseColor;
+                return;
+            }
+
+            if (currentPercent > inventoryConfig.WeightAffectsMovementPercent)
+            {
+                indicator.enabled = true;
+                indicator.color = statsConfig.Warning;
+                return;
+            }
+
+            indicator.enabled = false;
         }
     }
 }

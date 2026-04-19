@@ -13,3 +13,6 @@ MonoBehaviour:
   m_Name: InventoryConfig
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.InventoryConfig
   <Size>k__BackingField: {x: 7, y: 2}
+  <DefaultMaxWeight>k__BackingField: 20
+  <WeightAffectsMovementPercent>k__BackingField: 0.8
+  <WeightBlocksMovementPercent>k__BackingField: 1.1

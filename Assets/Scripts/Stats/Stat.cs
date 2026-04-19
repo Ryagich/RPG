@@ -9,14 +9,16 @@ namespace Stats
     {
         [field: SerializeField] public float Max { get; private set; }
         [field: SerializeField] public float Min { get; private set; }
-        [field: SerializeField, Range(0f, 1f)] public float MinSafePercent { get; private set; } = 0.15f;
         [field: SerializeField] public FloatReactiveProperty Value { get; private set; }
+        [field: SerializeField, Range(0f, 1f)] public float MinSafePercent { get; private set; } = 0.15f;
 
-        public Stat(
-            float max,
-            float min,
-            float value,
-            float minSafePercent = 0.15f)
+        public Stat
+            (
+                float max,
+                float min,
+                float value,
+                float minSafePercent = 0.15f
+            )
         {
             Max = max;
             Min = min;

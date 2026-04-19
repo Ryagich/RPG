@@ -15,7 +15,8 @@ namespace Stats
                 [StatType.Hp] = new StatFiller(StatType.Hp, statsConfig, statsController),
                 [StatType.Water] = new StatFiller(StatType.Water, statsConfig, statsController),
                 [StatType.Food] = new StatFiller(StatType.Food, statsConfig, statsController),
-                [StatType.Chill] = new StatFiller(StatType.Chill, statsConfig, statsController)
+                [StatType.Chill] = new StatFiller(StatType.Chill, statsConfig, statsController),
+                [StatType.Stamina] = new StatFiller(StatType.Stamina, statsConfig, statsController)
             };
         }
 

@@ -15,39 +15,72 @@ MonoBehaviour:
   <HpStat>k__BackingField:
     <Max>k__BackingField: 100
     <Min>k__BackingField: 0
-    <MinSafePercent>k__BackingField: 0.15
     <Value>k__BackingField:
       value: 100
+    <MinSafePercent>k__BackingField: 0.15
     <PeriodicChange>k__BackingField: 0.01
+    <RegenResumeDelayAfterDamageSeconds>k__BackingField: 2
   <WaterStat>k__BackingField:
     <Max>k__BackingField: 100
     <Min>k__BackingField: 0
-    <MinSafePercent>k__BackingField: 0.15
     <Value>k__BackingField:
       value: 100
+    <MinSafePercent>k__BackingField: 0.15
     <PeriodicChange>k__BackingField: -0.1
     <PeriodicHpDamageWhenEmpty>k__BackingField: 0.1
   <FoodStat>k__BackingField:
     <Max>k__BackingField: 100
     <Min>k__BackingField: 0
-    <MinSafePercent>k__BackingField: 0.15
     <Value>k__BackingField:
       value: 100
+    <MinSafePercent>k__BackingField: 0.15
     <PeriodicChange>k__BackingField: -0.1
     <PeriodicHpDamageWhenEmpty>k__BackingField: 0.1
   <ChillStat>k__BackingField:
     <Max>k__BackingField: 100
     <Min>k__BackingField: 0
-    <MinSafePercent>k__BackingField: 0.15
     <Value>k__BackingField:
       value: 100
+    <MinSafePercent>k__BackingField: 0.15
     <PeriodicChange>k__BackingField: -0.1
     <PeriodicHpDamageWhenEmpty>k__BackingField: 0.1
+  <StaminaStat>k__BackingField:
+    <Max>k__BackingField: 100
+    <Min>k__BackingField: 0
+    <Value>k__BackingField:
+      value: 100
+    <MinSafePercent>k__BackingField: 0.05
+    <PeriodicChange>k__BackingField: 0.45
+    <WeightDrainMultiplierCurve>k__BackingField:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0.32467356
+        outSlope: 0.32467356
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.11398839
+      - serializedVersion: 3
+        time: 1
+        value: 0.165
+        inSlope: 0.4463881
+        outSlope: 0.4463881
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.1461221
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    <RunDrainMultiplier>k__BackingField: 1.1
+    <MovingRecoveryPeriodicChange>k__BackingField: 0.1
+    <RegenResumeDelayAfterEmptySeconds>k__BackingField: 0.5
   <PeriodicChangeIntervalSeconds>k__BackingField: 0.1
-  <HpRegenResumeDelayAfterDamageSeconds>k__BackingField: 2
   <FillSpeed>k__BackingField: 0.01
   <FllLerpSpeed>k__BackingField: 0.035
-  <OffsetBarSize>k__BackingField: 1
   <FadeOutTime>k__BackingField: 3
   <ShowTime>k__BackingField: 3
   <AlphaRestoreTime>k__BackingField: 1.25
@@ -59,5 +92,3 @@ MonoBehaviour:
   <HpFullColor>k__BackingField: {r: 1, g: 1, b: 1, a: 1}
   <HpRecoveryColor>k__BackingField: {r: 0, g: 1, b: 0, a: 1}
   <HpDecreaseColor>k__BackingField: {r: 1, g: 0, b: 0, a: 1}
-  <HpTakenAwayColor>k__BackingField: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  <HpEmptyColor>k__BackingField: {r: 0, g: 0, b: 0, a: 1}

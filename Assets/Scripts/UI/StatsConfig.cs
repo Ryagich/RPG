@@ -7,14 +7,14 @@ namespace UI
     public class StatsConfig : ScriptableObject
     {
         [Header("Stats Settings")] 
-        [field: SerializeField] public PeriodicStat HpStat { get; private set; }
+        [field: SerializeField] public Hp HpStat { get; private set; }
         [field: SerializeField] public AdditionalPeriodicStat WaterStat { get; private set; }
         [field: SerializeField] public AdditionalPeriodicStat FoodStat { get; private set; }
         [field: SerializeField] public AdditionalPeriodicStat ChillStat { get; private set; }
+        [field: SerializeField] public Stamina StaminaStat { get; private set; }
 
         [field: Space, Header("Periodic Change")]
         [field: SerializeField, Min(.0f)] public float PeriodicChangeIntervalSeconds { get; private set; } = 1f;
-        [field: SerializeField, Min(.0f)] public float HpRegenResumeDelayAfterDamageSeconds { get; private set; } = 1f;
 
         public Stat GetStatConfig(StatType statType)
         {
@@ -24,6 +24,7 @@ namespace UI
                 StatType.Water => WaterStat,
                 StatType.Food => FoodStat,
                 StatType.Chill => ChillStat,
+                StatType.Stamina => StaminaStat,
                 _ => throw new System.ArgumentOutOfRangeException(nameof(statType), statType, null)
             };
         }
@@ -36,6 +37,7 @@ namespace UI
                 StatType.Water => WaterStat,
                 StatType.Food => FoodStat,
                 StatType.Chill => ChillStat,
+                StatType.Stamina => StaminaStat,
                 _ => throw new System.ArgumentOutOfRangeException(nameof(statType), statType, null)
             };
         }
@@ -54,7 +56,6 @@ namespace UI
         [field: Space, Header("Bar")]
         [field: SerializeField, Min(0)] public float FillSpeed  { get; private set; } = .5f;
         [field: SerializeField, Min(0)] public float FllLerpSpeed { get; private set; } = .1f;
-        [field: SerializeField, Min(0)] public float OffsetBarSize { get; private set; } = 3.0f;
 
         [field: Space, Header("Visibility")]
         [field: SerializeField, Min(0f)] public float FadeOutTime { get; private set; } = 1f;
@@ -72,7 +73,6 @@ namespace UI
         [field: SerializeField] public Color HpFullColor { get; private set; } = Color.white;
         [field: SerializeField] public Color HpRecoveryColor { get; private set; } = Color.green;
         [field: SerializeField] public Color HpDecreaseColor { get; private set; } = Color.red;
-        [field: SerializeField] public Color HpTakenAwayColor { get; private set; } = Color.yellow;
-        [field: SerializeField] public Color HpEmptyColor { get; private set; } = Color.black;
+        [field: SerializeField] public Color Warning { get; private set; } = Color.yellow;
     }
 }

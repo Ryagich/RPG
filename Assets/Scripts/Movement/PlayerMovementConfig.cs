@@ -28,5 +28,9 @@ namespace Movement
         [field: SerializeField] public float WalkSpeedChangeRate { get; private set; } = 5f;
         [field: SerializeField] public float RunSpeedChangeRate { get; private set; } = 7f;
         [field: SerializeField] public float SpeedChangeRateBlendSpeed { get; private set; } = 6f;
+
+        [field: Space]
+        [field: Header("Weight")]
+        [field: SerializeField, Min(0f)] public float WeightSpeedPenaltyMultiplier { get; private set; } = 3f;
     }
 }

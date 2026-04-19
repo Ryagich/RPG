@@ -19,8 +19,11 @@ namespace Inventory.Inventories
         public IObservable<Unit> Changed => changedSubject;
         public ReactiveProperty<SlotModel> HandSlot { get; } = new(new SlotModel(ItemType.None, SlotStackLimitType.SingleItem, null));
         public ReactiveProperty<IInventory> HandSourceInventory { get; } = new(null);
+        public IReadOnlyReactiveProperty<float> CurrentWeightReactive { get; }
         public Tiles Tiles { get; private set; }
         public float MaxWeight { get; set; }
+        public float CurrentWeight => GetItemsWeight() + GetSlotWeight(HelmSlot) + GetSlotWeight(BodySlot) + GetSlotWeight(BackpackSlot) + GetSlotWeight(HandSlot.Value);
+        public float CurrentWeightPercent => MaxWeight > 0f ? CurrentWeight / MaxWeight : 0f;
 
         public SlotModel HelmSlot = new(ItemType.Helm, SlotStackLimitType.SingleItem);
         public SlotModel BodySlot = new(ItemType.Body, SlotStackLimitType.SingleItem);
@@ -32,6 +35,34 @@ namespace Inventory.Inventories
             var inventorySize = GetCurrentInventorySize();
             MaxWeight = inventoryConfig.DefaultMaxWeight;
             Tiles = new Tiles(inventorySize.x, inventorySize.y);
+            CurrentWeightReactive = Observable.Merge(
+                    changedSubject.Select(_ => CurrentWeight),
+                    HandSlot.Select(_ => CurrentWeight))
+                .StartWith(CurrentWeight)
+                .DistinctUntilChanged()
+                .ToReadOnlyReactiveProperty(CurrentWeight);
+        }
+
+        public bool IsWeightMovementBlocked()
+        {
+            return CurrentWeightPercent >= inventoryConfig.WeightBlocksMovementPercent;
+        }
+
+        public float GetMovementSlowdownNormalizedWeight()
+        {
+            var startPercent = Mathf.Clamp01(inventoryConfig.WeightAffectsMovementPercent);
+            var currentPercent = Mathf.Clamp01(CurrentWeightPercent);
+            if (currentPercent <= startPercent)
+            {
+                return 0f;
+            }
+
+            if (startPercent >= 1f)
+            {
+                return currentPercent >= 1f ? 1f : 0f;
+            }
+
+            return Mathf.InverseLerp(startPercent, 1f, currentPercent);
         }
 
         public bool CanAdd(ItemConfig config, Tile tile)
@@ -626,6 +657,25 @@ namespace Inventory.Inventories
         private static ItemStack CloneIfValid(ItemStack itemStack)
         {
             return itemStack?.ItemConfig == null || itemStack.Count <= 0 ? null : itemStack.Clone();
+        }
+
+        private float GetItemsWeight()
+        {
+            var totalWeight = 0f;
+            foreach (var item in Items)
+            {
+                if (item?.ItemStack != null)
+                {
+                    totalWeight += item.ItemStack.TotalWeight;
+                }
+            }
+
+            return totalWeight;
+        }
+
+        private static float GetSlotWeight(SlotModel slot)
+        {
+            return slot?.ItemStack?.TotalWeight ?? 0f;
         }
 
         private void NotifyChanged()
