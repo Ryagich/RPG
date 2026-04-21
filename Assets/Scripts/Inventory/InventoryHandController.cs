@@ -69,6 +69,13 @@ namespace Inventory
             var pointer = Pointer.current;
             if (interactionPage != null
              && pointer != null
+             && interactionPage.TryHandleMouseDown(message.Button, pointer.position.ReadValue()))
+            {
+                return;
+            }
+
+            if (interactionPage != null
+             && pointer != null
              && interactionPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel)
              && TryTakeFromHoveredSlot(slotModel, message.Button, out var slotItemStack))
             {
@@ -568,6 +575,45 @@ namespace Inventory
                 var throwDirection = (playerTransform.forward + Vector3.up * 0.35f).normalized;
                 rigidbody.AddForce(throwDirection * ThrowForce, ForceMode.Impulse);
             }
+        }
+
+        public void Drop(ItemStack itemStack)
+        {
+            SpawnItemInWorld(itemStack);
+        }
+
+        public bool TryUseFromInventory(ItemStack itemStack)
+        {
+            if (itemStack?.ItemConfig == null
+             || !playerInventory.TryPlaceInSlot(itemStack.ItemConfig.ItemType, itemStack, out var remainderStack, out var replacedStack))
+            {
+                return false;
+            }
+
+            if (itemStack.ItemConfig.ItemType == ItemType.Backpack)
+            {
+                RebuildInventoryAndThrowOverflowItems();
+            }
+
+            if (replacedStack != null)
+            {
+                var replacedRemainder = playerInventory.TryAdd(replacedStack);
+                if (replacedRemainder != null)
+                {
+                    SpawnItemInWorld(replacedRemainder);
+                }
+            }
+
+            if (remainderStack != null)
+            {
+                var remainderAfterInventory = playerInventory.TryAdd(remainderStack);
+                if (remainderAfterInventory != null)
+                {
+                    SpawnItemInWorld(remainderAfterInventory);
+                }
+            }
+
+            return true;
         }
     }
 }

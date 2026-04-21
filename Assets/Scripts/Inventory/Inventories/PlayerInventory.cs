@@ -154,6 +154,46 @@ namespace Inventory.Inventories
             return remainingStack.Count > 0 ? remainingStack : null;
         }
 
+        public bool CanMoveSlotItemToGrid(ItemType slotType)
+        {
+            if (!TryGetSlot(slotType, out var slot) || slot.ItemStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            var targetSize = slotType == ItemType.Backpack
+                ? inventoryConfig.Size
+                : new Vector2Int(Tiles.tiles.GetLength(0), Tiles.tiles.GetLength(1));
+            return TryBuildGridWithAdditionalItem(targetSize, slot.ItemStack, out _, out _);
+        }
+
+        public bool TryMoveSlotItemToGrid(ItemType slotType)
+        {
+            if (!TryGetSlot(slotType, out var slot) || slot.ItemStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            var targetSize = slotType == ItemType.Backpack
+                ? inventoryConfig.Size
+                : new Vector2Int(Tiles.tiles.GetLength(0), Tiles.tiles.GetLength(1));
+            if (!TryBuildGridWithAdditionalItem(targetSize, slot.ItemStack, out var rebuiltTiles, out var rebuiltItems))
+            {
+                return false;
+            }
+
+            slot.ItemStack = null;
+            Tiles = rebuiltTiles;
+            Items.Clear();
+            foreach (var item in rebuiltItems)
+            {
+                Items.Add(item);
+            }
+
+            NotifyChanged();
+            return true;
+        }
+
         public bool TryTakeFromSlot(ItemType slotType, out ItemStack itemStack)
         {
             itemStack = null;
@@ -608,6 +648,53 @@ namespace Inventory.Inventories
             }
 
             return false;
+        }
+
+        private bool TryBuildGridWithAdditionalItem(
+            Vector2Int targetSize,
+            ItemStack additionalItemStack,
+            out Tiles rebuiltTiles,
+            out List<ItemInInventory> rebuiltItems)
+        {
+            rebuiltTiles = null;
+            rebuiltItems = null;
+
+            var extraItemStack = CloneIfValid(additionalItemStack);
+            if (extraItemStack == null || targetSize.x <= 0 || targetSize.y <= 0)
+            {
+                return false;
+            }
+
+            var transferEntries = CollectItemsInTileOrder(Tiles);
+            transferEntries.Add(new TransferEntry(extraItemStack, new Vector2Int(-1, -1)));
+
+            rebuiltTiles = new Tiles(targetSize.x, targetSize.y);
+            rebuiltItems = new List<ItemInInventory>(transferEntries.Count);
+            var notPlacedEntries = new List<TransferEntry>();
+
+            foreach (var entry in transferEntries)
+            {
+                if (TryAddAtPosition(rebuiltTiles, rebuiltItems, entry.ItemStack, entry.PreferredPosition))
+                {
+                    continue;
+                }
+
+                notPlacedEntries.Add(entry);
+            }
+
+            foreach (var entry in notPlacedEntries)
+            {
+                if (TryAddToFirstFreePosition(rebuiltTiles, rebuiltItems, entry.ItemStack))
+                {
+                    continue;
+                }
+
+                rebuiltTiles = null;
+                rebuiltItems = null;
+                return false;
+            }
+
+            return true;
         }
 
         private static void AddItemToCollections(ICollection<ItemInInventory> targetItems, ItemStack itemStack, List<Tile> itemTiles)

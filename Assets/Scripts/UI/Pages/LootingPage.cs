@@ -14,6 +14,7 @@ using VContainer;
 using VContainer.Unity;
 using Inventory.Item;
 using Localization;
+using Messages;
 using Money;
 using UI.Inventory;
 using UI.UIElements;
@@ -23,6 +24,11 @@ namespace UI.Pages
     // ReSharper disable once ClassNeverInstantiated.Global
     public class LootingPage : BasePage, ITickable, IInventoryInteractionPage
     {
+        public bool TryHandleMouseDown(MouseButtonType button, Vector2 screenPoint)
+        {
+            return false;
+        }
+
         public override PageType Type { get; } = PageType.Looting;
         public static LootingPage Current { get; private set; }
         public static IInventoryInteractionPage CurrentInteractionPage => Current;

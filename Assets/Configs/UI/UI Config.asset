@@ -29,3 +29,5 @@ MonoBehaviour:
   <PhraseContainer>k__BackingField: {fileID: 7268662685362097931, guid: 63f693976e6120b41879e5991ada72fc, type: 3}
   <AnswerButton>k__BackingField: {fileID: 3726367618566451424, guid: 98a86b5b3b25c664c8280d544e79c35e, type: 3}
   <StatsHolder>k__BackingField: {fileID: 7495129228834389673, guid: ab9f6ea1b64d2cf48b6efc688c9e249f, type: 3}
+  <PopupRect>k__BackingField: {fileID: 2905255636178868728, guid: 12b0999af4e93bf418857b096b6cc62b, type: 3}
+  <PopupButton>k__BackingField: {fileID: 5973226020501958766, guid: 531b3f64fd18a2348aeac7908e34e078, type: 3}

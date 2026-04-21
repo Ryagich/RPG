@@ -26,6 +26,11 @@ namespace UI.Pages
     // ReSharper disable once ClassNeverInstantiated.Global
     public class TradePage : BasePage, ITickable, IInventoryInteractionPage
     {
+        public bool TryHandleMouseDown(MouseButtonType button, Vector2 screenPoint)
+        {
+            return false;
+        }
+
         public override PageType Type { get; } = PageType.Trade;
         public static TradePage Current { get; private set; }
         public static IInventoryInteractionPage CurrentInteractionPage => Current;

@@ -35,5 +35,9 @@ namespace UI.Configs
         
         // Game
         [field: SerializeField] public StatsHolder StatsHolder { get; private set; }
+        
+        // Popups
+        [field: SerializeField] public RectTransform PopupRect { get; private set; }
+        [field: SerializeField] public Button PopupButton { get; private set; }
     }
 }
