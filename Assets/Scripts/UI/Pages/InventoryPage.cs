@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Colors;
 using System;
+using System.Globalization;
 using Inventory;
 using Inventory.Grid;
 using Inventory.Inventories;
@@ -705,11 +706,58 @@ namespace UI.Pages
             popupRect = resolver.Instantiate(uiConfig.PopupRect, popupParentRect);
             popupRect.name = $"{uiConfig.PopupRect.name} | Inventory Popup";
 
+            var itemConfig = GetPopupItemConfig(target);
+            var itemStack = GetPopupItemStack(target);
+            if (itemConfig == null)
+            {
+                ClosePopup();
+                return false;
+            }
+
+            CreatePopupItemName(itemConfig);
+            CreatePopupWeight(itemStack);
             CreatePopupButtons(target);
 
             RecalculatePopupSize();
             UpdatePopupPosition(screenPoint);
             return true;
+        }
+
+        private static ItemConfig GetPopupItemConfig(PopupTarget target)
+        {
+            return target?.SlotModel?.ItemStack?.ItemConfig
+                   ?? target?.InventoryItem?.ItemStack?.ItemConfig;
+        }
+
+        private static ItemStack GetPopupItemStack(PopupTarget target)
+        {
+            return target?.SlotModel?.ItemStack
+                   ?? target?.InventoryItem?.ItemStack;
+        }
+
+        private void CreatePopupItemName(ItemConfig itemConfig)
+        {
+            if (popupRect == null || uiConfig.PopupItemName == null)
+            {
+                return;
+            }
+
+            var itemName = resolver.Instantiate(uiConfig.PopupItemName, popupRect);
+            itemName.name = $"{uiConfig.PopupItemName.name} | {itemConfig.name}";
+            itemName.text = itemConfig.Name.GetLocalizedStringCached();
+            itemName.transform.SetAsFirstSibling();
+        }
+
+        private void CreatePopupWeight(ItemStack itemStack)
+        {
+            if (popupRect == null || uiConfig.PopupWeight == null || itemStack?.ItemConfig == null)
+            {
+                return;
+            }
+
+            var popupWeight = resolver.Instantiate(uiConfig.PopupWeight, popupRect);
+            popupWeight.name = $"{uiConfig.PopupWeight.name} | Weight";
+            popupWeight.text = $"{itemStack.TotalWeight.ToString("F1", CultureInfo.InvariantCulture)} {localizationConfig.kg.GetLocalizedStringCached()}";
         }
 
         private void CreatePopupButtons(PopupTarget target)

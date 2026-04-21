@@ -38,6 +38,8 @@ namespace UI.Configs
         
         // Popups
         [field: SerializeField] public RectTransform PopupRect { get; private set; }
+        [field: SerializeField] public TMP_Text PopupItemName { get; private set; }
+        [field: SerializeField] public TMP_Text PopupWeight { get; private set; }
         [field: SerializeField] public Button PopupButton { get; private set; }
     }
 }

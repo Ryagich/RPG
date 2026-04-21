@@ -15,7 +15,8 @@ MonoBehaviour:
   <Id>k__BackingField: Backpack Item Config ID Test 2
   <ItemType>k__BackingField: 2
   <Price>k__BackingField: 31
-  <Weight>k__BackingField: 2.1
+  <Weight>k__BackingField: 2.2
+  <MaxStack>k__BackingField: 1
   <Icon>k__BackingField: {fileID: 21300000, guid: 0e70a51d6457fc74fb818accdc6d567a, type: 3}
   <Name>k__BackingField:
     m_TableReference:

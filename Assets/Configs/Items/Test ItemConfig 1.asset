@@ -15,6 +15,8 @@ MonoBehaviour:
   <Id>k__BackingField: Test 1 Item Config ID
   <ItemType>k__BackingField: 4
   <Price>k__BackingField: 1
+  <Weight>k__BackingField: 2.4
+  <MaxStack>k__BackingField: 1
   <Icon>k__BackingField: {fileID: 21300000, guid: 919c26403d4491942b8573871036d991, type: 3}
   <Name>k__BackingField:
     m_TableReference:
