@@ -3,7 +3,7 @@
     public enum ItemType
     {
         None,
-        Consumable,
+        Usable,
         Backpack,
         Weapon,
         Body,

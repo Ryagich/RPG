@@ -43,7 +43,11 @@ namespace Stats
                 [StatType.Water] = new AdditionalPeriodicStat(statsConfig.GetAdditionalPeriodicStatConfig(StatType.Water)),
                 [StatType.Food] = new AdditionalPeriodicStat(statsConfig.GetAdditionalPeriodicStatConfig(StatType.Food)),
                 [StatType.Chill] = new AdditionalPeriodicStat(statsConfig.GetAdditionalPeriodicStatConfig(StatType.Chill)),
-                [StatType.Stamina] = new Stamina(statsConfig.StaminaStat)
+                [StatType.Stamina] = new Stamina(statsConfig.StaminaStat),
+                [StatType.PhysicalDefense] = new (statsConfig.PhysicalDefenseStat),
+                [StatType.TemperatureDefense] = new (statsConfig.TemperatureDefenseStat),
+                [StatType.PsiDefense] = new (statsConfig.PsiDefenseStat),
+                [StatType.MagicDefense] = new (statsConfig.MagicDefenseStat)
             };
         }
 

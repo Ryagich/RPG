@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Inventory.Slot;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Stats
@@ -11,7 +12,11 @@ namespace Stats
         [field: SerializeField] public StatHolder ChillHolder { get; private set; }
         [field: SerializeField] public StatHolder StaminaHolder { get; private set; }
         [field: SerializeField] public Image WeightIndicator { get; private set; }
-
+        
+        [field: SerializeField] public SlotView FastSlot1 { get; private set; }
+        [field: SerializeField] public SlotView FastSlot2 { get; private set; }
+        [field: SerializeField] public SlotView FastSlot3 { get; private set; }
+        [field: SerializeField] public SlotView FastSlot4 { get; private set; }
         public StatHolder GetHolder(StatType statType)
         {
             return statType switch

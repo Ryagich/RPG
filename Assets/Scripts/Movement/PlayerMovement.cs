@@ -137,7 +137,7 @@ namespace Movement
 
         private bool CanRunByStamina()
         {
-            var staminaStat = statsController.GetStat(StatType.Stamina);
+            var staminaStat = (SafeStat)statsController.GetStat(StatType.Stamina);
             if (Mathf.Approximately(staminaStat.Max, 0f))
             {
                 return false;

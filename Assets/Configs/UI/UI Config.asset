@@ -33,3 +33,6 @@ MonoBehaviour:
   <PopupItemName>k__BackingField: {fileID: 7165394721513020807, guid: dc99eac617168734c9d2eae12b8110f0, type: 3}
   <PopupWeight>k__BackingField: {fileID: 7165394721513020807, guid: b83d8c88f2c06bf4aaee7f7febeb7d7a, type: 3}
   <PopupButton>k__BackingField: {fileID: 5973226020501958766, guid: 531b3f64fd18a2348aeac7908e34e078, type: 3}
+  <PopupHoverOpenDelaySeconds>k__BackingField: 0.5
+  <StatHolderForUsable>k__BackingField: {fileID: 399078897855448634, guid: caf2d203c25f3db4490227f8142110d8, type: 3}
+  <StatHolderForClothes>k__BackingField: {fileID: 2865423226321459443, guid: 13d2ade88fa596d439c5c8f4722ebd93, type: 3}

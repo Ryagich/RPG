@@ -27,6 +27,7 @@ namespace Container.Game
             builder.RegisterMessageBroker<MouseDown>(options);
             builder.RegisterMessageBroker<MouseUp>(options);
             builder.RegisterMessageBroker<ShowStatsInputMessage>(options);
+            builder.RegisterMessageBroker<FastSlotInputMessage>(options);
             builder.RegisterMessageBroker<ChangeGameModeRequest>(options);
             builder.RegisterMessageBroker<GameModeChangedMessage>(options);
             builder.RegisterMessageBroker<InteractableMessage>(options);

@@ -45,12 +45,13 @@ MonoBehaviour:
     <PeriodicChange>k__BackingField: -0.1
     <PeriodicHpDamageWhenEmpty>k__BackingField: 0.1
   <StaminaStat>k__BackingField:
-    <Max>k__BackingField: 100
+    <Max>k__BackingField: 300
     <Min>k__BackingField: 0
     <Value>k__BackingField:
       value: 100
     <MinSafePercent>k__BackingField: 0.05
     <PeriodicChange>k__BackingField: 0.45
+    <MovingRecoveryPeriodicChange>k__BackingField: 0.2
     <WeightDrainMultiplierCurve>k__BackingField:
       serializedVersion: 2
       m_Curve:
@@ -76,8 +77,27 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
     <RunDrainMultiplier>k__BackingField: 1.1
-    <MovingRecoveryPeriodicChange>k__BackingField: 0.1
     <RegenResumeDelayAfterEmptySeconds>k__BackingField: 0.5
+  <PhysicalDefenseStat>k__BackingField:
+    <Max>k__BackingField: 100
+    <Min>k__BackingField: 0
+    <Value>k__BackingField:
+      value: 10
+  <TemperatureDefenseStat>k__BackingField:
+    <Max>k__BackingField: 100
+    <Min>k__BackingField: 0
+    <Value>k__BackingField:
+      value: 5
+  <PsiDefenseStat>k__BackingField:
+    <Max>k__BackingField: 100
+    <Min>k__BackingField: 0
+    <Value>k__BackingField:
+      value: 5
+  <MagicDefenseStat>k__BackingField:
+    <Max>k__BackingField: 100
+    <Min>k__BackingField: 0
+    <Value>k__BackingField:
+      value: 5
   <PeriodicChangeIntervalSeconds>k__BackingField: 0.1
   <FillSpeed>k__BackingField: 0.01
   <FllLerpSpeed>k__BackingField: 0.035
@@ -92,3 +112,4 @@ MonoBehaviour:
   <HpFullColor>k__BackingField: {r: 1, g: 1, b: 1, a: 1}
   <HpRecoveryColor>k__BackingField: {r: 0, g: 1, b: 0, a: 1}
   <HpDecreaseColor>k__BackingField: {r: 1, g: 0, b: 0, a: 1}
+  <Warning>k__BackingField: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}

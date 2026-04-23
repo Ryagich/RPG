@@ -58,3 +58,4 @@ MonoBehaviour:
   <InteractableConfig>k__BackingField: {fileID: 11400000, guid: f195d5bf3de756241b499edc07dd19bb, type: 2}
   <InventoryConfig>k__BackingField: {fileID: 11400000, guid: c944c7194d92c2a4b809de1b4768183a, type: 2}
   <ColorsConfig>k__BackingField: {fileID: 11400000, guid: 063c0d25c66a34b4a8329a35699fa5b2, type: 2}
+  <StatIconsConfig>k__BackingField: {fileID: 11400000, guid: 50f9a09c9214a8b4581f8c2cfbaa1810, type: 2}

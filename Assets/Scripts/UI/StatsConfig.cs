@@ -12,6 +12,10 @@ namespace UI
         [field: SerializeField] public AdditionalPeriodicStat FoodStat { get; private set; }
         [field: SerializeField] public AdditionalPeriodicStat ChillStat { get; private set; }
         [field: SerializeField] public Stamina StaminaStat { get; private set; }
+        [field: SerializeField] public Stat PhysicalDefenseStat { get; private set; } = CreateDefaultStat();
+        [field: SerializeField] public Stat TemperatureDefenseStat { get; private set; } = CreateDefaultStat();
+        [field: SerializeField] public Stat PsiDefenseStat { get; private set; } = CreateDefaultStat();
+        [field: SerializeField] public Stat MagicDefenseStat { get; private set; } = CreateDefaultStat();
 
         [field: Space, Header("Periodic Change")]
         [field: SerializeField, Min(.0f)] public float PeriodicChangeIntervalSeconds { get; private set; } = 1f;
@@ -25,6 +29,10 @@ namespace UI
                 StatType.Food => FoodStat,
                 StatType.Chill => ChillStat,
                 StatType.Stamina => StaminaStat,
+                StatType.PhysicalDefense => PhysicalDefenseStat ??= CreateDefaultStat(),
+                StatType.TemperatureDefense => TemperatureDefenseStat ??= CreateDefaultStat(),
+                StatType.PsiDefense => PsiDefenseStat ??= CreateDefaultStat(),
+                StatType.MagicDefense => MagicDefenseStat ??= CreateDefaultStat(),
                 _ => throw new System.ArgumentOutOfRangeException(nameof(statType), statType, null)
             };
         }
@@ -74,5 +82,10 @@ namespace UI
         [field: SerializeField] public Color HpRecoveryColor { get; private set; } = Color.green;
         [field: SerializeField] public Color HpDecreaseColor { get; private set; } = Color.red;
         [field: SerializeField] public Color Warning { get; private set; } = Color.yellow;
+
+        private static Stat CreateDefaultStat()
+        {
+            return new Stat(100f, 0f, 100f);
+        }
     }
 }

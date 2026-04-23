@@ -25,7 +25,7 @@ namespace Inventory.Inventories
 
         public bool CanAdd(ItemConfig config, Tile tile)
         {
-            return config != null && tile != null && TryGetAvailableTiles(config, tile, out _);
+            return config != null && tile != null && TryGetAvailableTiles(new ItemStack(config), tile, out _);
         }
 
         public bool TryAdd(ItemConfig config)
@@ -42,10 +42,10 @@ namespace Inventory.Inventories
             }
 
             var changed = FillExistingStacks(remainingStack);
-            while (remainingStack.Count > 0 && TryFindFreeItemTiles(remainingStack.ItemConfig.Size, out var itemTiles))
+            while (remainingStack.Count > 0 && TryFindFreeItemTiles(remainingStack.Size, out var itemTiles))
             {
                 var countToPlace = Mathf.Min(remainingStack.Count, remainingStack.MaxStack);
-                AddItem(new ItemStack(remainingStack.ItemConfig, countToPlace), itemTiles);
+                AddItem(new ItemStack(remainingStack.ItemConfig, countToPlace, remainingStack.IsRotated), itemTiles);
                 remainingStack.Count -= countToPlace;
                 changed = true;
             }
@@ -87,13 +87,13 @@ namespace Inventory.Inventories
                 return remainingStack.Count > 0 ? remainingStack : null;
             }
 
-            if (!TryGetAvailableTiles(remainingStack.ItemConfig, tile, out var itemTiles))
+            if (!TryGetAvailableTiles(remainingStack, tile, out var itemTiles))
             {
                 return remainingStack;
             }
 
             var countToPlace = Mathf.Min(remainingStack.Count, remainingStack.MaxStack);
-            AddItem(new ItemStack(remainingStack.ItemConfig, countToPlace), itemTiles);
+            AddItem(new ItemStack(remainingStack.ItemConfig, countToPlace, remainingStack.IsRotated), itemTiles);
             remainingStack.Count -= countToPlace;
             NotifyChanged();
             return remainingStack.Count > 0 ? remainingStack : null;
@@ -113,8 +113,8 @@ namespace Inventory.Inventories
 
             var itemCenterPosition = position.GetColumn(3);
             var startPosition = new Vector2Int(
-                Mathf.RoundToInt(itemCenterPosition.x - (itemStack.ItemConfig.Size.x - 1) * 0.5f),
-                Mathf.RoundToInt(itemCenterPosition.y - (itemStack.ItemConfig.Size.y - 1) * 0.5f));
+                Mathf.RoundToInt(itemCenterPosition.x - (itemStack.Size.x - 1) * 0.5f),
+                Mathf.RoundToInt(itemCenterPosition.y - (itemStack.Size.y - 1) * 0.5f));
             if (Tiles.TryGetTile(startPosition.x, startPosition.y, out var tile))
             {
                 var remainder = TryAdd(itemStack, tile);
@@ -162,16 +162,16 @@ namespace Inventory.Inventories
             NotifyChanged();
         }
 
-        private bool TryGetAvailableTiles(ItemConfig config, Tile tile, out List<Tile> itemTiles)
+        private bool TryGetAvailableTiles(ItemStack itemStack, Tile tile, out List<Tile> itemTiles)
         {
             itemTiles = null;
-            if (config == null || tile == null)
+            if (itemStack?.ItemConfig == null || tile == null)
             {
                 return false;
             }
 
-            var availableTiles = Tiles.GetTilesAround(tile.Index, config.Size);
-            if (availableTiles.Count != config.Size.x * config.Size.y || availableTiles.Any(currentTile => !currentTile.IsFree))
+            var availableTiles = Tiles.GetTilesAround(tile.Index, itemStack.Size);
+            if (availableTiles.Count != itemStack.Size.x * itemStack.Size.y || availableTiles.Any(currentTile => !currentTile.IsFree))
             {
                 return false;
             }

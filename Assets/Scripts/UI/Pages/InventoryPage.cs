@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Colors;
 using System;
-using System.Globalization;
 using Inventory;
 using Inventory.Grid;
 using Inventory.Inventories;
@@ -21,6 +20,7 @@ using Stats;
 using UI.UIElements;
 using CharacterInfo = Character.CharacterInfo;
 using Object = UnityEngine.Object;
+using UnityEngine.InputSystem;
 
 namespace UI.Pages
 {
@@ -43,6 +43,13 @@ namespace UI.Pages
             ChangedFillAnimated
         }
 
+        private enum PopupOpenMode
+        {
+            None,
+            Hover,
+            RightClick
+        }
+
         public override PageType Type { get; } = PageType.Inventory;
         public static InventoryPage Current { get; private set; }
         public static IInventoryInteractionPage CurrentInteractionPage => Current;
@@ -55,6 +62,7 @@ namespace UI.Pages
         private readonly global::Inventory.InventoryConfig inventoryConfig;
         private readonly LocalizationConfig localizationConfig;
         private readonly ColorsConfig colorsConfig;
+        private readonly StatIconsConfig statIconsConfig;
         private readonly PlayerInventory playerInventory;
         private readonly InventoryHandController inventoryHandController;
         private readonly MoneyStorage playerMoneyStorage;
@@ -80,10 +88,17 @@ namespace UI.Pages
         private BeatingHeart beatingHeart;
         private RectTransform popupRect;
         private RectTransform popupParentRect;
+        private PopupTarget hoverPopupTarget;
+        private float hoverPopupElapsed;
+        private PopupOpenMode popupOpenMode;
 
         private ItemConfig lastHelmItemConfig;
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastBackpackItemConfig;
+        private ItemConfig lastFastSlot1ItemConfig;
+        private ItemConfig lastFastSlot2ItemConfig;
+        private ItemConfig lastFastSlot3ItemConfig;
+        private ItemConfig lastFastSlot4ItemConfig;
         private Vector2Int lastGridSize = new(-1, -1);
         private float lastHpTarget;
         private HpFillMode hpFillMode;
@@ -97,6 +112,7 @@ namespace UI.Pages
                 global::Inventory.InventoryConfig inventoryConfig,
                 LocalizationConfig localizationConfig,
                 ColorsConfig colorsConfig,
+                StatIconsConfig statIconsConfig,
                 Canvas canvas,
                 PlayerInventory playerInventory,
                 InventoryHandController inventoryHandController,
@@ -113,6 +129,7 @@ namespace UI.Pages
             hpFiller = statFillers.Get(StatType.Hp);
             this.localizationConfig = localizationConfig;
             this.colorsConfig = colorsConfig;
+            this.statIconsConfig = statIconsConfig;
             this.canvas = canvas;
             this.playerInventory = playerInventory;
             this.inventoryHandController = inventoryHandController;
@@ -134,6 +151,7 @@ namespace UI.Pages
 
             rightRect = resolver.Instantiate(uiConfig.RightSection, contentRect);
             slotsViewContainer = resolver.Instantiate(uiConfig.CenterSection, contentRect);
+            PageUiUtilities.FillSlotsViewContainerStats(slotsViewContainer, statsController);
             
             infoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
             infoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
@@ -159,6 +177,9 @@ namespace UI.Pages
             statsController.Hp.Value
                            .Subscribe(OnHpTargetChanged)
                            .AddTo(redrawDisposables);
+            statsController.Changed
+                           .Subscribe(_ => PageUiUtilities.FillSlotsViewContainerStats(slotsViewContainer, statsController))
+                           .AddTo(redrawDisposables);
 
             foreach (var statType in AdditionalStatTypes)
             {
@@ -178,6 +199,7 @@ namespace UI.Pages
             RefreshHpFill();
             RefreshAdditionalStatFills();
             UpdateWeightIndicator(playerInventory.CurrentWeight);
+            DrawStatsHolderFastSlots();
             beatingHeart = new BeatingHeart(statsConfig, statsController.Hp, hpFiller, statsHolder.HPHolder);
 
             ReDraw();
@@ -189,6 +211,9 @@ namespace UI.Pages
             {
                 UpdateHandSlotPosition();
             }
+
+            HandleHoverPopup();
+
             if (HaveSlotsChanged())
             {
                 ReDraw();
@@ -203,6 +228,7 @@ namespace UI.Pages
             }
 
             ClosePopup();
+            ResetHoverPopupState();
             EnsureTilesMatchInventorySize();
             UpdateInventoryScrollState();
             itemRects.Clear();
@@ -214,6 +240,8 @@ namespace UI.Pages
             DrawHandSlot();
             UpdateInventoryInfo();
             UpdatePlayerInfo();
+            DrawStatsHolderFastSlots();
+            PageUiUtilities.FillSlotsViewContainerStats(slotsViewContainer, statsController);
             CacheSlotItems();
         }
 
@@ -232,10 +260,17 @@ namespace UI.Pages
             PageUiUtilities.FillInfoAboutInventory(infoAboutInventory, localizationConfig, colorsConfig, currentWeight, playerInventory.MaxWeight);
         }
         
-        public bool TryCaptureGrabOffset(Vector2 screenPoint)
+        public bool TryCaptureGrabOffset(Vector2 screenPoint, out Vector2 handGrabOffset)
         {
             var eventCamera = GetEventCamera();
-            return PageUiUtilities.TryCaptureGrabOffset(itemRects, itemGrabRects, screenPoint, eventCamera, out handGrabOffset);
+            var captured = PageUiUtilities.TryCaptureGrabOffset(itemRects, itemGrabRects, screenPoint, eventCamera, out handGrabOffset);
+            this.handGrabOffset = handGrabOffset;
+            return captured;
+        }
+
+        public void SetGrabOffset(Vector2 handGrabOffset)
+        {
+            this.handGrabOffset = handGrabOffset;
         }
 
         public bool TryHandleMouseDown(MouseButtonType button, Vector2 screenPoint)
@@ -248,7 +283,8 @@ namespace UI.Pages
             if (button == MouseButtonType.Right)
             {
                 ClosePopup();
-                TryOpenPopup(screenPoint);
+                ResetHoverPopupState();
+                TryOpenPopup(screenPoint, PopupOpenMode.RightClick);
                 return true;
             }
 
@@ -257,12 +293,21 @@ namespace UI.Pages
                 return false;
             }
 
-            if (RectTransformUtility.RectangleContainsScreenPoint(popupRect, screenPoint, GetEventCamera()))
+            if (popupOpenMode == PopupOpenMode.RightClick
+             && RectTransformUtility.RectangleContainsScreenPoint(popupRect, screenPoint, GetEventCamera()))
             {
                 return true;
             }
 
+            if (popupOpenMode == PopupOpenMode.Hover)
+            {
+                ClosePopup();
+                ResetHoverPopupState();
+                return false;
+            }
+
             ClosePopup();
+            ResetHoverPopupState();
             return false;
         }
         
@@ -307,7 +352,7 @@ namespace UI.Pages
             var gridLayoutGroup = inventoryView.ContentForTiles.GetComponent<GridLayoutGroup>();
             return gridLayoutGroup == null
                 ? null
-                : PageUiUtilities.GetItemGrabSize(gridLayoutGroup, handItemStack.ItemConfig.Size);
+                : PageUiUtilities.GetItemGrabSize(gridLayoutGroup, handItemStack.Size);
         }
 
         private void UpdateHandSlotPosition()
@@ -376,6 +421,26 @@ namespace UI.Pages
 
             return TryGetSlotUnderPointer(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot, screenPoint, handItemType, out slotModel);
         }
+
+        public bool TryGetHoveredFastSlot(Vector2 screenPoint, out FastSlotModel fastSlotModel)
+        {
+            fastSlotModel = null;
+            if (!slotsViewContainer || playerInventory.HandSlot.Value?.ItemConfig?.ItemType != ItemType.Usable)
+            {
+                return false;
+            }
+
+            var eventCamera = GetEventCamera();
+            return PageUiUtilities.TryGetFastSlotUnderPointer(slotsViewContainer.FastSlot1, playerInventory.FastSlot1, screenPoint, eventCamera, out fastSlotModel)
+                   || PageUiUtilities.TryGetFastSlotUnderPointer(slotsViewContainer.FastSlot2, playerInventory.FastSlot2, screenPoint, eventCamera, out fastSlotModel)
+                   || PageUiUtilities.TryGetFastSlotUnderPointer(slotsViewContainer.FastSlot3, playerInventory.FastSlot3, screenPoint, eventCamera, out fastSlotModel)
+                   || PageUiUtilities.TryGetFastSlotUnderPointer(slotsViewContainer.FastSlot4, playerInventory.FastSlot4, screenPoint, eventCamera, out fastSlotModel);
+        }
+
+        public bool TryGetFastSlotRect(FastSlotModel fastSlotModel, out RectTransform slotRect)
+        {
+            return PageUiUtilities.TryGetFastSlotRect(slotsViewContainer, playerInventory, fastSlotModel, out slotRect);
+        }
         
         public bool IsInPlayerSections(Vector2 screenPoint)
         {
@@ -399,6 +464,10 @@ namespace UI.Pages
             DrawSlotItem(slotsViewContainer.HeadSlot, playerInventory.HelmSlot);
             DrawSlotItem(slotsViewContainer.BodySlot, playerInventory.BodySlot);
             DrawSlotItem(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot);
+            DrawFastSlotItem(slotsViewContainer.FastSlot1, playerInventory.FastSlot1);
+            DrawFastSlotItem(slotsViewContainer.FastSlot2, playerInventory.FastSlot2);
+            DrawFastSlotItem(slotsViewContainer.FastSlot3, playerInventory.FastSlot3);
+            DrawFastSlotItem(slotsViewContainer.FastSlot4, playerInventory.FastSlot4);
         }
 
         private void DrawSlotItem(SlotView slotView, SlotModel slotModel)
@@ -422,9 +491,35 @@ namespace UI.Pages
             });
         }
 
+        private void DrawFastSlotItem(SlotView slotView, FastSlotModel fastSlotModel)
+        {
+            PageUiUtilities.DrawFastSlotItem(slotView, fastSlotModel, playerInventory.HasAnyInventoryItem(fastSlotModel?.ItemConfig));
+        }
+
+        private void DrawStatsHolderFastSlots()
+        {
+            if (statsHolder == null)
+            {
+                return;
+            }
+
+            PageUiUtilities.DrawFastSlotItem(statsHolder.FastSlot1, playerInventory.FastSlot1, playerInventory.HasAnyInventoryItem(playerInventory.FastSlot1.ItemConfig));
+            PageUiUtilities.DrawFastSlotItem(statsHolder.FastSlot2, playerInventory.FastSlot2, playerInventory.HasAnyInventoryItem(playerInventory.FastSlot2.ItemConfig));
+            PageUiUtilities.DrawFastSlotItem(statsHolder.FastSlot3, playerInventory.FastSlot3, playerInventory.HasAnyInventoryItem(playerInventory.FastSlot3.ItemConfig));
+            PageUiUtilities.DrawFastSlotItem(statsHolder.FastSlot4, playerInventory.FastSlot4, playerInventory.HasAnyInventoryItem(playerInventory.FastSlot4.ItemConfig));
+        }
+
         private bool TryGetSnappedPositionInSlot(Vector2 screenPoint, Camera eventCamera, RectTransform dragParentRect, out Vector2 snappedPosition)
         {
             snappedPosition = Vector2.zero;
+            if (TryGetHoveredFastSlot(screenPoint, out var fastSlotModel)
+             && TryGetFastSlotRect(fastSlotModel, out var fastSlotRect))
+            {
+                var fastSlotWorldPosition = fastSlotRect.TransformPoint(fastSlotRect.rect.center);
+                var fastSlotScreenPosition = RectTransformUtility.WorldToScreenPoint(eventCamera, fastSlotWorldPosition);
+                return RectTransformUtility.ScreenPointToLocalPointInRectangle(dragParentRect, fastSlotScreenPosition, eventCamera, out snappedPosition);
+            }
+
             if (!TryGetHoveredSlot(screenPoint, out var slotModel) || slotModel == null)
             {
                 return false;
@@ -456,7 +551,11 @@ namespace UI.Pages
         {
             return lastHelmItemConfig != playerInventory.HelmSlot.ItemConfig
                 || lastBodyItemConfig != playerInventory.BodySlot.ItemConfig
-                || lastBackpackItemConfig != playerInventory.BackpackSlot.ItemConfig;
+                || lastBackpackItemConfig != playerInventory.BackpackSlot.ItemConfig
+                || lastFastSlot1ItemConfig != playerInventory.FastSlot1.ItemConfig
+                || lastFastSlot2ItemConfig != playerInventory.FastSlot2.ItemConfig
+                || lastFastSlot3ItemConfig != playerInventory.FastSlot3.ItemConfig
+                || lastFastSlot4ItemConfig != playerInventory.FastSlot4.ItemConfig;
         }
 
         private void CacheSlotItems()
@@ -464,6 +563,10 @@ namespace UI.Pages
             lastHelmItemConfig = playerInventory.HelmSlot.ItemConfig;
             lastBodyItemConfig = playerInventory.BodySlot.ItemConfig;
             lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;
+            lastFastSlot1ItemConfig = playerInventory.FastSlot1.ItemConfig;
+            lastFastSlot2ItemConfig = playerInventory.FastSlot2.ItemConfig;
+            lastFastSlot3ItemConfig = playerInventory.FastSlot3.ItemConfig;
+            lastFastSlot4ItemConfig = playerInventory.FastSlot4.ItemConfig;
         }
         
         private bool TryGetPlacementCell(Vector2 screenPoint, out Vector2Int placementCell)
@@ -474,12 +577,12 @@ namespace UI.Pages
                 return false;
             }
 
-            var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
-            if (handItemConfig == null)
+            var handItemStack = playerInventory.HandSlot.Value?.ItemStack;
+            if (handItemStack?.ItemConfig == null)
             {
                 return false;
             }
-            var itemGrabSize = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, handItemConfig.Size);
+            var itemGrabSize = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, handItemStack.Size);
             var stepX = gridLayoutGroup.cellSize.x + gridLayoutGroup.spacing.x;
             var stepY = gridLayoutGroup.cellSize.y + gridLayoutGroup.spacing.y;
             if (stepX <= 0 || stepY <= 0)
@@ -489,8 +592,8 @@ namespace UI.Pages
 
             var grabFromLeft = handGrabOffset.x + itemGrabSize.x * 0.5f;
             var grabFromTop = itemGrabSize.y * 0.5f - handGrabOffset.y;
-            var grabOffsetX = Mathf.Clamp(Mathf.FloorToInt(grabFromLeft / stepX), 0, handItemConfig.Size.x - 1);
-            var grabOffsetY = Mathf.Clamp(Mathf.FloorToInt(grabFromTop / stepY), 0, handItemConfig.Size.y - 1);
+            var grabOffsetX = Mathf.Clamp(Mathf.FloorToInt(grabFromLeft / stepX), 0, handItemStack.Size.x - 1);
+            var grabOffsetY = Mathf.Clamp(Mathf.FloorToInt(grabFromTop / stepY), 0, handItemStack.Size.y - 1);
 
             placementCell = new Vector2Int(cursorCell.x - grabOffsetX, cursorCell.y - grabOffsetY);
             return true;
@@ -504,9 +607,9 @@ namespace UI.Pages
                 return false;
             }
 
-            var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
+            var handItemStack = playerInventory.HandSlot.Value?.ItemStack;
             var gridLayoutGroup = inventoryView.ContentForTiles.GetComponent<GridLayoutGroup>();
-            if (handItemConfig == null || gridLayoutGroup == null)
+            if (handItemStack?.ItemConfig == null || gridLayoutGroup == null)
             {
                 return false;
             }
@@ -516,8 +619,8 @@ namespace UI.Pages
             var isFullyInsideGrid =
                 placementCell.x >= 0
              && placementCell.y >= 0
-             && placementCell.x + handItemConfig.Size.x <= gridWidth
-             && placementCell.y + handItemConfig.Size.y <= gridHeight;
+             && placementCell.x + handItemStack.Size.x <= gridWidth
+             && placementCell.y + handItemStack.Size.y <= gridHeight;
             if (!isFullyInsideGrid)
             {
                 return false;
@@ -525,11 +628,11 @@ namespace UI.Pages
             
             var snappedAnchoredPosition = new Vector2(
                 gridLayoutGroup.padding.left
-                + (placementCell.x + handItemConfig.Size.x * 0.5f) * gridLayoutGroup.cellSize.x
-                + (placementCell.x + (handItemConfig.Size.x - 1) * 0.5f) * gridLayoutGroup.spacing.x,
+                + (placementCell.x + handItemStack.Size.x * 0.5f) * gridLayoutGroup.cellSize.x
+                + (placementCell.x + (handItemStack.Size.x - 1) * 0.5f) * gridLayoutGroup.spacing.x,
                 -(gridLayoutGroup.padding.top
-                + (placementCell.y + handItemConfig.Size.y * 0.5f) * gridLayoutGroup.cellSize.y
-                + (placementCell.y + (handItemConfig.Size.y - 1) * 0.5f) * gridLayoutGroup.spacing.y));
+                + (placementCell.y + handItemStack.Size.y * 0.5f) * gridLayoutGroup.cellSize.y
+                + (placementCell.y + (handItemStack.Size.y - 1) * 0.5f) * gridLayoutGroup.spacing.y));
 
             snappedLocalPosition = new Vector3(snappedAnchoredPosition.x, snappedAnchoredPosition.y, 0f);
             return true;
@@ -600,7 +703,7 @@ namespace UI.Pages
 
             foreach (var item in playerInventory.Items)
             {
-                var itemGrabSize = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, item.ItemConfig.Size);
+                var itemGrabSize = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, item.ItemStack.Size);
                 var itemImageRect = PageUiUtilities.CreateItemImage(inventory.ContentForItems, item.ItemStack, "Item", itemGrabSize);
                 itemRects.Add(itemImageRect);
                 popupTargets.Add(new PopupTarget
@@ -671,6 +774,7 @@ namespace UI.Pages
             itemGrabRects.Clear();
             popupTargets.Clear();
             ClosePopup();
+            ResetHoverPopupState();
             
             if (contentRect)
             {
@@ -696,15 +800,91 @@ namespace UI.Pages
             Current = null;
         }
 
-        private bool TryOpenPopup(Vector2 screenPoint)
+        private void HandleHoverPopup()
         {
-            if (!TryGetPopupTarget(screenPoint, out var target) || popupParentRect == null)
+            if (Current != this || contentRect == null)
+            {
+                return;
+            }
+
+            if (playerInventory.HandSlot.Value?.ItemStack != null || Pointer.current == null)
+            {
+                ResetHoverPopupState();
+                if (popupOpenMode == PopupOpenMode.Hover)
+                {
+                    ClosePopup();
+                }
+
+                return;
+            }
+
+            var screenPoint = Pointer.current.position.ReadValue();
+            if (!TryGetPopupTarget(screenPoint, out var target))
+            {
+                ResetHoverPopupState();
+                if (popupOpenMode == PopupOpenMode.Hover)
+                {
+                    ClosePopup();
+                }
+
+                return;
+            }
+
+            var targetChanged = !IsSamePopupTarget(hoverPopupTarget, target);
+            if (targetChanged)
+            {
+                hoverPopupTarget = target;
+            }
+
+            hoverPopupElapsed += Time.deltaTime;
+
+            if (popupOpenMode == PopupOpenMode.Hover)
+            {
+                if (targetChanged)
+                {
+                    ClosePopup();
+                    TryOpenPopup(target, screenPoint, PopupOpenMode.Hover);
+                    return;
+                }
+
+                PageUiUtilities.UpdatePopupPosition(popupRect, popupParentRect, GetEventCamera(), screenPoint);
+                return;
+            }
+
+            if (popupOpenMode == PopupOpenMode.RightClick)
+            {
+                return;
+            }
+
+            if (hoverPopupElapsed < uiConfig.PopupHoverOpenDelaySeconds)
+            {
+                return;
+            }
+
+            TryOpenPopup(target, screenPoint, PopupOpenMode.Hover);
+        }
+
+        private void ResetHoverPopupState()
+        {
+            hoverPopupTarget = null;
+            hoverPopupElapsed = 0f;
+        }
+
+        private bool TryOpenPopup(Vector2 screenPoint, PopupOpenMode openMode)
+        {
+            return TryGetPopupTarget(screenPoint, out var target) && TryOpenPopup(target, screenPoint, openMode);
+        }
+
+        private bool TryOpenPopup(PopupTarget target, Vector2 screenPoint, PopupOpenMode openMode)
+        {
+            if (target == null || popupParentRect == null)
             {
                 return false;
             }
 
             popupRect = resolver.Instantiate(uiConfig.PopupRect, popupParentRect);
             popupRect.name = $"{uiConfig.PopupRect.name} | Inventory Popup";
+            PageUiUtilities.SetPopupRaycastState(popupRect, openMode == PopupOpenMode.RightClick);
 
             var itemConfig = GetPopupItemConfig(target);
             var itemStack = GetPopupItemStack(target);
@@ -714,13 +894,48 @@ namespace UI.Pages
                 return false;
             }
 
-            CreatePopupItemName(itemConfig);
-            CreatePopupWeight(itemStack);
-            CreatePopupButtons(target);
+            if (openMode == PopupOpenMode.Hover)
+            {
+                PageUiUtilities.FillInventoryHoverPopup(
+                    popupRect,
+                    uiConfig,
+                    localizationConfig,
+                    statIconsConfig,
+                    statsController,
+                    playerInventory,
+                    resolver,
+                    itemConfig,
+                    itemStack,
+                    target?.SlotModel?.ItemConfig == itemConfig,
+                    statsConfig.HpFullColor,
+                    statsConfig.HpRecoveryColor,
+                    statsConfig.HpDecreaseColor);
+            }
+            else if (openMode == PopupOpenMode.RightClick)
+            {
+                CreatePopupButtons(target);
+            }
 
-            RecalculatePopupSize();
-            UpdatePopupPosition(screenPoint);
+            PageUiUtilities.RecalculatePopupSize(popupRect);
+            PageUiUtilities.UpdatePopupPosition(popupRect, popupParentRect, GetEventCamera(), screenPoint);
+            popupOpenMode = openMode;
             return true;
+        }
+
+        private static bool IsSamePopupTarget(PopupTarget first, PopupTarget second)
+        {
+            if (ReferenceEquals(first, second))
+            {
+                return true;
+            }
+
+            if (first == null || second == null)
+            {
+                return false;
+            }
+
+            return ReferenceEquals(first.InventoryItem, second.InventoryItem)
+                && ReferenceEquals(first.SlotModel, second.SlotModel);
         }
 
         private static ItemConfig GetPopupItemConfig(PopupTarget target)
@@ -733,31 +948,6 @@ namespace UI.Pages
         {
             return target?.SlotModel?.ItemStack
                    ?? target?.InventoryItem?.ItemStack;
-        }
-
-        private void CreatePopupItemName(ItemConfig itemConfig)
-        {
-            if (popupRect == null || uiConfig.PopupItemName == null)
-            {
-                return;
-            }
-
-            var itemName = resolver.Instantiate(uiConfig.PopupItemName, popupRect);
-            itemName.name = $"{uiConfig.PopupItemName.name} | {itemConfig.name}";
-            itemName.text = itemConfig.Name.GetLocalizedStringCached();
-            itemName.transform.SetAsFirstSibling();
-        }
-
-        private void CreatePopupWeight(ItemStack itemStack)
-        {
-            if (popupRect == null || uiConfig.PopupWeight == null || itemStack?.ItemConfig == null)
-            {
-                return;
-            }
-
-            var popupWeight = resolver.Instantiate(uiConfig.PopupWeight, popupRect);
-            popupWeight.name = $"{uiConfig.PopupWeight.name} | Weight";
-            popupWeight.text = $"{itemStack.TotalWeight.ToString("F1", CultureInfo.InvariantCulture)} {localizationConfig.kg.GetLocalizedStringCached()}";
         }
 
         private void CreatePopupButtons(PopupTarget target)
@@ -806,82 +996,13 @@ namespace UI.Pages
         private void ExecutePopupAction(Action action)
         {
             ClosePopup();
+            ResetHoverPopupState();
             action?.Invoke();
         }
 
         private void CreatePopupButton(string label, UnityEngine.Events.UnityAction onClick)
         {
-            var button = resolver.Instantiate(uiConfig.PopupButton, popupRect);
-            button.name = $"{uiConfig.PopupButton.name} | {label}";
-            button.onClick.RemoveAllListeners();
-            button.onClick.AddListener(onClick);
-
-            var text = button.GetComponentInChildren<TMP_Text>(true);
-            if (text != null)
-            {
-                text.text = label;
-            }
-        }
-
-        private void RecalculatePopupSize()
-        {
-            if (popupRect == null)
-            {
-                return;
-            }
-
-            LayoutRebuilder.ForceRebuildLayoutImmediate(popupRect);
-            var layoutGroup = popupRect.GetComponent<VerticalLayoutGroup>();
-            var width = 0f;
-            var height = 0f;
-            var childCount = 0;
-
-            for (var i = 0; i < popupRect.childCount; i++)
-            {
-                if (popupRect.GetChild(i) is not RectTransform child || !child.gameObject.activeSelf)
-                {
-                    continue;
-                }
-
-                LayoutRebuilder.ForceRebuildLayoutImmediate(child);
-                var childWidth = Mathf.Max(LayoutUtility.GetPreferredWidth(child), child.rect.width);
-                var childHeight = Mathf.Max(LayoutUtility.GetPreferredHeight(child), child.rect.height);
-                width = Mathf.Max(width, childWidth);
-                height += childHeight;
-                childCount++;
-            }
-
-            if (layoutGroup != null)
-            {
-                width += layoutGroup.padding.left + layoutGroup.padding.right;
-                height += layoutGroup.padding.top + layoutGroup.padding.bottom + layoutGroup.spacing * Mathf.Max(0, childCount - 1);
-            }
-
-            popupRect.sizeDelta = new Vector2(width, height);
-            LayoutRebuilder.ForceRebuildLayoutImmediate(popupRect);
-        }
-
-        private void UpdatePopupPosition(Vector2 screenPoint)
-        {
-            if (popupRect == null || popupParentRect == null)
-            {
-                return;
-            }
-
-            var eventCamera = GetEventCamera();
-            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(popupParentRect, screenPoint, eventCamera, out var localPoint))
-            {
-                return;
-            }
-
-            var parentRect = popupParentRect.rect;
-            var anchoredPosition = new Vector2(
-                localPoint.x + parentRect.width * popupParentRect.pivot.x,
-                localPoint.y - parentRect.height * (1f - popupParentRect.pivot.y));
-
-            anchoredPosition.x = Mathf.Clamp(anchoredPosition.x, 0f, Mathf.Max(0f, parentRect.width - popupRect.rect.width));
-            anchoredPosition.y = Mathf.Clamp(anchoredPosition.y, -Mathf.Max(0f, parentRect.height - popupRect.rect.height), 0f);
-            popupRect.anchoredPosition = anchoredPosition;
+            PageUiUtilities.CreatePopupButton(popupRect, uiConfig, resolver, label, onClick);
         }
 
         private bool TryGetPopupTarget(Vector2 screenPoint, out PopupTarget target)
@@ -972,6 +1093,12 @@ namespace UI.Pages
                 return;
             }
 
+            if (itemInInventory.ItemStack.ItemConfig.ItemType == ItemType.Usable)
+            {
+                UseUsableInventoryItem(itemInInventory);
+                return;
+            }
+
             var itemStack = itemInInventory.ItemStack.Clone();
             var originalPosition = itemInInventory.Position;
             playerInventory.Remove(itemInInventory);
@@ -979,6 +1106,33 @@ namespace UI.Pages
             if (!inventoryHandController.TryUseFromInventory(itemStack))
             {
                 playerInventory.Add(itemStack, originalPosition);
+            }
+        }
+
+        private void UseUsableInventoryItem(ItemInInventory itemInInventory)
+        {
+            var sourceStack = itemInInventory?.ItemStack;
+            if (sourceStack?.ItemConfig == null)
+            {
+                return;
+            }
+
+            var itemConfig = sourceStack.ItemConfig;
+            var isRotated = sourceStack.IsRotated;
+            var originalPosition = itemInInventory.Position;
+            var originalCount = sourceStack.Count;
+            var usedStack = new ItemStack(itemConfig, 1, isRotated);
+
+            playerInventory.Remove(itemInInventory);
+            if (!inventoryHandController.TryUseFromInventory(usedStack))
+            {
+                playerInventory.Add(new ItemStack(itemConfig, originalCount, isRotated), originalPosition);
+                return;
+            }
+
+            if (originalCount > 1)
+            {
+                playerInventory.Add(new ItemStack(itemConfig, originalCount - 1, isRotated), originalPosition);
             }
         }
 
@@ -1041,6 +1195,7 @@ namespace UI.Pages
             }
 
             var itemConfig = itemInInventory.ItemConfig;
+            var isRotated = itemInInventory.ItemStack.IsRotated;
             var originalPosition = itemInInventory.Position;
             var currentCount = itemInInventory.Count;
             var dropCount = Mathf.Clamp(count, 1, currentCount);
@@ -1049,10 +1204,10 @@ namespace UI.Pages
             playerInventory.Remove(itemInInventory);
             if (remainingCount > 0)
             {
-                playerInventory.Add(new ItemStack(itemConfig, remainingCount), originalPosition);
+                playerInventory.Add(new ItemStack(itemConfig, remainingCount, isRotated), originalPosition);
             }
 
-            inventoryHandController.Drop(new ItemStack(itemConfig, dropCount));
+            inventoryHandController.Drop(new ItemStack(itemConfig, dropCount, isRotated));
         }
 
         private void DropSlotItem(SlotModel slotModel, int count)
@@ -1082,11 +1237,13 @@ namespace UI.Pages
         {
             if (popupRect == null)
             {
+                popupOpenMode = PopupOpenMode.None;
                 return;
             }
 
             Object.Destroy(popupRect.gameObject);
             popupRect = null;
+            popupOpenMode = PopupOpenMode.None;
         }
 
         private void RefreshHpFill()
@@ -1180,7 +1337,9 @@ namespace UI.Pages
 
         private void ApplyCriticalColor(StatHolder statHolder, Stat stat, float normalizedTarget)
         {
-            var safeThreshold = Mathf.Clamp01(stat.MinSafePercent);
+            var safeThreshold = stat is SafeStat safeStat
+                ? Mathf.Clamp01(safeStat.MinSafePercent)
+                : 0f;
             var fillColor = normalizedTarget >= safeThreshold
                 ? statsConfig.HpFullColor
                 : Color.Lerp(statsConfig.HpDecreaseColor, statsConfig.HpFullColor, safeThreshold <= 0f ? 0f : normalizedTarget / safeThreshold);

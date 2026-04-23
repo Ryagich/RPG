@@ -1,4 +1,4 @@
-﻿using CameraScripts;
+using CameraScripts;
 using Interactable;
 using Inventory;
 using Inventory.Inventories;
@@ -22,24 +22,24 @@ namespace Container
         {
             builder.RegisterComponentInHierarchy<CharacterController>().AsSelf();
             builder.RegisterComponentInHierarchy<Animator>().AsSelf();
-            
+
             builder.RegisterInstance(transform);
-            builder.RegisterInstance("Player").Keyed("Scope ID"); 
-            
+            builder.RegisterInstance("Player").Keyed("Scope ID");
+
             builder.RegisterInstance(characterInfo).AsSelf();
             if (inventoryConfig != null)
             {
                 builder.RegisterInstance(inventoryConfig).AsSelf();
             }
-            
+
             var founder = gameObject.AddComponent<InteractableFounder>();
             builder.RegisterComponent(founder).AsSelf();
-            
+
             builder.RegisterBuildCallback(_ =>
                                           {
                                               CreateChildFromPrefab(canvasLifetimeScope);
                                           });
-            
+
             builder.RegisterEntryPoint<CameraMotor>().AsSelf();
             builder.RegisterEntryPoint<PlayerGravity>().AsSelf();
             builder.RegisterEntryPoint<PlayerMovementController>().AsSelf();
@@ -52,10 +52,12 @@ namespace Container
             builder.RegisterEntryPoint<StatsPeriodicChanger>().AsSelf();
             builder.RegisterEntryPoint<StaminaPeriodicChanger>().AsSelf();
             builder.RegisterEntryPoint<StaminaMovementChanger>().AsSelf();
-               
+            builder.RegisterEntryPoint<EquippedDefenseStatsChanger>().AsSelf();
+
             builder.RegisterEntryPoint<PlayerInventory>().As<IInventory>().AsSelf();
             builder.Register(_ => new MoneyStorage(112), Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<InventoryHandController>().AsSelf();
+            builder.RegisterEntryPoint<PlayerFastSlotsController>().AsSelf();
         }
     }
 }

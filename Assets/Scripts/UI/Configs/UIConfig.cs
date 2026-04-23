@@ -41,5 +41,8 @@ namespace UI.Configs
         [field: SerializeField] public TMP_Text PopupItemName { get; private set; }
         [field: SerializeField] public TMP_Text PopupWeight { get; private set; }
         [field: SerializeField] public Button PopupButton { get; private set; }
+        [field: SerializeField, Min(0f)] public float PopupHoverOpenDelaySeconds { get; private set; } = 0.5f;
+        [field: SerializeField] public StatHolderForUsable StatHolderForUsable { get; private set; }
+        [field: SerializeField] public StatHolder StatHolderForClothes { get; private set; }
     }
 }

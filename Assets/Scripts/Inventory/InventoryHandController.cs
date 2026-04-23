@@ -1,16 +1,19 @@
 using System.Collections.Generic;
+using System;
 using GameModes;
 using Inventory.Inventories;
 using Inventory.Item;
 using Inventory.Slot;
 using MessagePipe;
 using Messages;
+using Stats;
 using UI.Inventory;
 using UI.Pages;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using VContainer.Unity;
+using Object = UnityEngine.Object;
 
 namespace Inventory
 {
@@ -22,25 +25,36 @@ namespace Inventory
         private const float ThrowForce = 2.5f;
 
         private readonly PlayerInventory playerInventory;
+        private readonly EquippedDefenseStatsChanger equippedDefenseStatsChanger;
+        private readonly StatsController statsController;
         private readonly Transform playerTransform;
+        private readonly Transform lookTransform;
         private readonly GameModesController gameModesController;
         private bool backpackResizePendingAfterHandAction;
         private ItemStack backpackTakenFromSlot;
         private IInventory handSourceInventory;
         private SlotModel handSourceSlot;
         private Matrix4x4 handSourcePosition;
+        private Vector2 handGrabOffset;
         private MouseButtonType? activeHandButton;
+        private bool suppressNextRightMouseUp;
 
         public InventoryHandController(
             PlayerInventory playerInventory,
+            EquippedDefenseStatsChanger equippedDefenseStatsChanger,
+            StatsController statsController,
             Transform playerTransform,
+            Animator animator,
             GameModesController gameModesController,
             ISubscriber<MouseDown> mouseDownSubscriber,
             ISubscriber<MouseUp> mouseUpSubscriber,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
         {
             this.playerInventory = playerInventory;
+            this.equippedDefenseStatsChanger = equippedDefenseStatsChanger;
+            this.statsController = statsController;
             this.playerTransform = playerTransform;
+            lookTransform = animator != null ? animator.transform : playerTransform;
             this.gameModesController = gameModesController;
 
             mouseDownSubscriber.Subscribe(OnMouseDown);
@@ -52,12 +66,23 @@ namespace Inventory
 
         private void OnMouseDown(MouseDown message)
         {
-            CaptureGrabOffset();
-
-            if (!IsInventoryInteractionMode(gameModesController.GameMode) || HasItemInHand())
+            if (!IsInventoryInteractionMode(gameModesController.GameMode))
             {
                 return;
             }
+
+            if (HasItemInHand())
+            {
+                if (message.Button == MouseButtonType.Right && RotateItemInHand())
+                {
+                    suppressNextRightMouseUp = true;
+                    activeHandButton = null;
+                }
+
+                return;
+            }
+
+            CaptureGrabOffset();
 
             handSourceInventory = null;
             handSourceSlot = null;
@@ -85,6 +110,11 @@ namespace Inventory
                     backpackTakenFromSlot = slotItemStack;
                 }
 
+                if (slotModel.ItemType == ItemType.Body || slotModel.ItemType == ItemType.Helm)
+                {
+                    equippedDefenseStatsChanger.BeginDelayedRefresh();
+                }
+
                 handSourceInventory = playerInventory;
                 handSourceSlot = slotModel;
                 playerInventory.HandSourceInventory.Value = handSourceInventory;
@@ -109,9 +139,18 @@ namespace Inventory
 
         private void OnMouseUp(MouseUp message)
         {
+            if (message.Button == MouseButtonType.Right && suppressNextRightMouseUp)
+            {
+                suppressNextRightMouseUp = false;
+                if (activeHandButton != MouseButtonType.Right)
+                {
+                    return;
+                }
+            }
+
             if (!IsInventoryInteractionMode(gameModesController.GameMode)
              || !HasItemInHand()
-             || activeHandButton != message.Button)
+             || (activeHandButton.HasValue && activeHandButton != message.Button))
             {
                 return;
             }
@@ -124,6 +163,11 @@ namespace Inventory
             }
 
             if (TryAddToHoveredSlot(itemStack))
+            {
+                return;
+            }
+
+            if (TryAssignToHoveredFastSlot(itemStack))
             {
                 return;
             }
@@ -280,6 +324,35 @@ namespace Inventory
             return TryStoreOrDrop(itemStack, remainder, hoveredInventory);
         }
 
+        private bool TryAssignToHoveredFastSlot(ItemStack itemStack)
+        {
+            if (itemStack?.ItemConfig == null
+             || itemStack.ItemConfig.ItemType != ItemType.Usable
+             || !CanAssignFastSlotFromCurrentSource())
+            {
+                return false;
+            }
+
+            var interactionPage = GetCurrentInteractionPage();
+            var pointer = Pointer.current;
+            if (interactionPage == null
+             || pointer == null
+             || !interactionPage.TryGetHoveredFastSlot(pointer.position.ReadValue(), out var fastSlot)
+             || fastSlot == null)
+            {
+                return false;
+            }
+
+            if (playerInventory.TryAdd(itemStack) != null || !playerInventory.AssignFastSlot(fastSlot, itemStack.ItemConfig))
+            {
+                return false;
+            }
+
+            TradePage.Current?.ConsumeSellOriginIfAny(itemStack, handSourceInventory);
+            ClearHand();
+            return true;
+        }
+
         private bool HasItemInHand() => playerInventory.HandSlot.Value?.ItemStack != null;
 
         private void ClearHand()
@@ -288,10 +361,13 @@ namespace Inventory
             handSourceInventory = null;
             handSourceSlot = null;
             handSourcePosition = Matrix4x4.identity;
+            handGrabOffset = Vector2.zero;
             activeHandButton = null;
+            suppressNextRightMouseUp = false;
             playerInventory.HandSourceInventory.Value = null;
             TradePage.Current?.ClearDragSource();
             GetCurrentInteractionPage()?.ResetGrabOffset();
+            equippedDefenseStatsChanger.ApplyDelayedRefresh();
             ProcessDelayedBackpackResize();
         }
 
@@ -344,36 +420,54 @@ namespace Inventory
             var totalCount = itemInInventory.Count;
             var countToTake = (totalCount + 1) / 2;
             var remainderCount = totalCount - countToTake;
-            itemStack = new ItemStack(itemInInventory.ItemConfig, countToTake);
+            itemStack = new ItemStack(itemInInventory.ItemConfig, countToTake, itemInInventory.ItemStack.IsRotated);
             if (remainderCount > 0)
             {
-                hoveredInventory.Add(new ItemStack(itemInInventory.ItemConfig, remainderCount), itemInInventory.Position);
+                hoveredInventory.Add(new ItemStack(itemInInventory.ItemConfig, remainderCount, itemInInventory.ItemStack.IsRotated), itemInInventory.Position);
             }
 
             return true;
         }
 
-        private static void CaptureGrabOffset()
+        private void CaptureGrabOffset()
         {
             var pointer = Pointer.current;
             if (pointer == null)
             {
-                InventoryPage.Current?.ResetGrabOffset();
+                handGrabOffset = Vector2.zero;
+                GetCurrentInteractionPage()?.ResetGrabOffset();
                 return;
             }
 
             var interactionPage = GetCurrentInteractionPage();
-            if (interactionPage == null || interactionPage.TryCaptureGrabOffset(pointer.position.ReadValue()))
+            if (interactionPage == null)
+            {
+                handGrabOffset = Vector2.zero;
+                return;
+            }
+
+            if (interactionPage.TryCaptureGrabOffset(pointer.position.ReadValue(), out handGrabOffset))
             {
                 return;
             }
 
+            handGrabOffset = Vector2.zero;
             interactionPage.ResetGrabOffset();
         }
 
         private static IInventoryInteractionPage GetCurrentInteractionPage()
         {
             return TradePage.CurrentInteractionPage ?? LootingPage.CurrentInteractionPage ?? InventoryPage.CurrentInteractionPage;
+        }
+
+        private bool CanAssignFastSlotFromCurrentSource()
+        {
+            if (gameModesController.GameMode == GameMode.Trade && TradePage.Current != null)
+            {
+                return TradePage.Current.CanMoveToPlayerSlot(handSourceInventory, handSourceSlot);
+            }
+
+            return handSourceSlot != null || handSourceInventory == playerInventory;
         }
 
         private static bool IsInventoryInteractionMode(GameMode mode)
@@ -411,6 +505,11 @@ namespace Inventory
                 return true;
             }
 
+            if (TryAssignToHoveredFastSlot(itemStack))
+            {
+                return true;
+            }
+
             if (InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out _)
              && tradePage.CanMoveToInventory(handSourceInventory, handSourceSlot, hoveredInventory))
             {
@@ -419,11 +518,11 @@ namespace Inventory
                 {
                     if (tradePage.IsSellInventory(hoveredInventory))
                     {
-                        tradePage.RegisterMoveIntoSell(itemStack.ItemConfig, previousCount, hoveredInventory, handSourceInventory, handSourceSlot, handSourcePosition);
+                        tradePage.RegisterMoveIntoSell(itemStack, previousCount, hoveredInventory, handSourceInventory, handSourceSlot, handSourcePosition);
                     }
                     else
                     {
-                        tradePage.ConsumeSellOriginIfAny(new ItemStack(itemStack.ItemConfig, previousCount), handSourceInventory);
+                        tradePage.ConsumeSellOriginIfAny(new ItemStack(itemStack.ItemConfig, previousCount, itemStack.IsRotated), handSourceInventory);
                     }
 
                     return true;
@@ -501,8 +600,8 @@ namespace Inventory
             {
                 var center = handSourcePosition.GetColumn(3);
                 var startPosition = new Vector2Int(
-                    Mathf.RoundToInt(center.x - (itemStack.ItemConfig.Size.x - 1) * 0.5f),
-                    Mathf.RoundToInt(center.y - (itemStack.ItemConfig.Size.y - 1) * 0.5f));
+                    Mathf.RoundToInt(center.x - (itemStack.Size.x - 1) * 0.5f),
+                    Mathf.RoundToInt(center.y - (itemStack.Size.y - 1) * 0.5f));
                 if (tiledInventory.Tiles.TryGetTile(startPosition.x, startPosition.y, out var tile))
                 {
                     remainder = handSourceInventory.TryAdd(itemStack, tile);
@@ -565,16 +664,47 @@ namespace Inventory
                 return;
             }
 
-            var spawnPosition = playerTransform.position + playerTransform.forward * ThrowForwardOffset + Vector3.up * ThrowUpOffset;
+            var throwForward = GetThrowForward();
+            var spawnPosition = playerTransform.position + throwForward * ThrowForwardOffset + Vector3.up * ThrowUpOffset;
             var itemHolder = Object.Instantiate(itemStack.ItemConfig.HandPrefab, spawnPosition, Quaternion.identity);
             itemHolder.SetCount(itemStack.Count);
             itemHolder.CanInteractable = true;
 
             if (itemHolder.TryGetComponent<Rigidbody>(out var rigidbody))
             {
-                var throwDirection = (playerTransform.forward + Vector3.up * 0.35f).normalized;
+                var throwDirection = (throwForward + Vector3.up * 0.35f).normalized;
                 rigidbody.AddForce(throwDirection * ThrowForce, ForceMode.Impulse);
             }
+        }
+
+        private Vector3 GetThrowForward()
+        {
+            var forward = lookTransform != null ? lookTransform.forward : playerTransform.forward;
+            forward.y = 0f;
+
+            if (forward.sqrMagnitude <= 0.0001f)
+            {
+                forward = playerTransform.forward;
+                forward.y = 0f;
+            }
+
+            return forward.sqrMagnitude <= 0.0001f ? Vector3.forward : forward.normalized;
+        }
+
+        private bool RotateItemInHand()
+        {
+            var handSlot = playerInventory.HandSlot.Value;
+            var itemStack = handSlot?.ItemStack;
+            if (itemStack?.ItemConfig == null || !itemStack.CanRotate())
+            {
+                return false;
+            }
+
+            itemStack.Rotate90();
+            handGrabOffset = new Vector2(handGrabOffset.y, -handGrabOffset.x);
+            GetCurrentInteractionPage()?.SetGrabOffset(handGrabOffset);
+            playerInventory.HandSlot.Value = new SlotModel(handSlot.ItemType, handSlot.StackLimitType, itemStack);
+            return true;
         }
 
         public void Drop(ItemStack itemStack)
@@ -582,10 +712,20 @@ namespace Inventory
             SpawnItemInWorld(itemStack);
         }
 
-        public bool TryUseFromInventory(ItemStack itemStack)
+        public bool TryUseFromInventory(ItemStack itemStack, Func<ItemStack, ItemStack> tryStoreOverflow = null)
         {
-            if (itemStack?.ItemConfig == null
-             || !playerInventory.TryPlaceInSlot(itemStack.ItemConfig.ItemType, itemStack, out var remainderStack, out var replacedStack))
+            if (itemStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            if (itemStack.ItemConfig.ItemType == ItemType.Usable)
+            {
+                ApplyUsableItem(itemStack.ItemConfig);
+                return true;
+            }
+
+            if (!playerInventory.TryPlaceInSlot(itemStack.ItemConfig.ItemType, itemStack, out var remainderStack, out var replacedStack))
             {
                 return false;
             }
@@ -597,7 +737,7 @@ namespace Inventory
 
             if (replacedStack != null)
             {
-                var replacedRemainder = playerInventory.TryAdd(replacedStack);
+                var replacedRemainder = TryStoreOverflow(replacedStack, tryStoreOverflow);
                 if (replacedRemainder != null)
                 {
                     SpawnItemInWorld(replacedRemainder);
@@ -606,7 +746,7 @@ namespace Inventory
 
             if (remainderStack != null)
             {
-                var remainderAfterInventory = playerInventory.TryAdd(remainderStack);
+                var remainderAfterInventory = TryStoreOverflow(remainderStack, tryStoreOverflow);
                 if (remainderAfterInventory != null)
                 {
                     SpawnItemInWorld(remainderAfterInventory);
@@ -614,6 +754,26 @@ namespace Inventory
             }
 
             return true;
+        }
+
+        private ItemStack TryStoreOverflow(ItemStack itemStack, Func<ItemStack, ItemStack> tryStoreOverflow)
+        {
+            if (itemStack?.ItemConfig == null)
+            {
+                return null;
+            }
+
+            return tryStoreOverflow != null
+                ? tryStoreOverflow(itemStack)
+                : playerInventory.TryAdd(itemStack);
+        }
+
+        private void ApplyUsableItem(ItemConfig itemConfig)
+        {
+            statsController.AddValue(StatType.Hp, itemConfig.HpStat);
+            statsController.AddValue(StatType.Water, itemConfig.WaterStat);
+            statsController.AddValue(StatType.Food, itemConfig.FoodStat);
+            statsController.AddValue(StatType.Chill, itemConfig.ChillStat);
         }
     }
 }

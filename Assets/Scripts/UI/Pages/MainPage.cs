@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Interactable;
 using Inventory.Inventories;
+using Inventory.Slot;
 using MessagePipe;
 using Messages;
 using Stats;
@@ -60,6 +61,7 @@ namespace UI.Pages
         private readonly IObjectResolver resolver;
         private readonly CompositeDisposable drawDisposables = new();
         private readonly Dictionary<StatType, StatVisibilityState> statVisibilityStates = new();
+        private readonly Dictionary<FastSlotModel, StatVisibilityState> fastSlotVisibilityStates = new();
 
         public override PageType Type { get; } = PageType.MainGame;
 
@@ -89,7 +91,8 @@ namespace UI.Pages
                 PlayerInteractableLogic playerInteractableLogic,
                 ItemHolderInteractableLogic itemHolderInteractableLogic,
                 IObjectResolver resolver,
-                ISubscriber<ShowStatsInputMessage> showStatsInputSubscriber
+                ISubscriber<ShowStatsInputMessage> showStatsInputSubscriber,
+                ISubscriber<FastSlotInputMessage> fastSlotInputSubscriber
             )
         {
             this.resolver = resolver;
@@ -106,6 +109,7 @@ namespace UI.Pages
             canvasRect = canvas.GetComponent<RectTransform>();
 
             showStatsInputSubscriber.Subscribe(OnShowStatsInputChanged);
+            fastSlotInputSubscriber.Subscribe(OnFastSlotInput);
         }
 
         public override void Draw()
@@ -165,10 +169,14 @@ namespace UI.Pages
             playerInventory.CurrentWeightReactive
                            .Subscribe(UpdateWeightIndicator)
                            .AddTo(drawDisposables);
+            playerInventory.Changed
+                           .Subscribe(_ => DrawFastSlots())
+                           .AddTo(drawDisposables);
 
             RefreshHpFill();
             RefreshAdditionalStatFills();
             UpdateWeightIndicator(playerInventory.CurrentWeight);
+            DrawFastSlots();
 
             foreach (var statType in AllStatTypes)
             {
@@ -188,6 +196,7 @@ namespace UI.Pages
 
             drawDisposables.Clear();
             statVisibilityStates.Clear();
+            fastSlotVisibilityStates.Clear();
 
             interactableInterface?.Dispose();
             interactableInterface = null;
@@ -240,6 +249,25 @@ namespace UI.Pages
             {
                 RefreshStatFill(statType);
             }
+        }
+
+        private void DrawFastSlots()
+        {
+            if (statsHolder == null)
+            {
+                return;
+            }
+
+            DrawFastSlot(statsHolder.FastSlot1, playerInventory.FastSlot1);
+            DrawFastSlot(statsHolder.FastSlot2, playerInventory.FastSlot2);
+            DrawFastSlot(statsHolder.FastSlot3, playerInventory.FastSlot3);
+            DrawFastSlot(statsHolder.FastSlot4, playerInventory.FastSlot4);
+            ApplyFastSlotAlphas();
+        }
+
+        private void DrawFastSlot(SlotView slotView, FastSlotModel fastSlotModel)
+        {
+            PageUiUtilities.DrawFastSlotItem(slotView, fastSlotModel, playerInventory.HasAnyInventoryItem(fastSlotModel?.ItemConfig));
         }
 
         private void RefreshStatFill(StatType statType)
@@ -295,7 +323,9 @@ namespace UI.Pages
 
         private void ApplyCriticalColor(StatHolder statHolder, Stat stat, float normalizedTarget)
         {
-            var safeThreshold = Mathf.Clamp01(stat.MinSafePercent);
+            var safeThreshold = stat is SafeStat safeStat
+                ? Mathf.Clamp01(safeStat.MinSafePercent)
+                : 0f;
             var fillColor = normalizedTarget >= safeThreshold
                 ? statsConfig.HpFullColor
                 : Color.Lerp(statsConfig.HpDecreaseColor, statsConfig.HpFullColor, safeThreshold <= 0f ? 0f : normalizedTarget / safeThreshold);
@@ -397,6 +427,26 @@ namespace UI.Pages
             ApplyAllVisualAlphas();
         }
 
+        private void OnFastSlotInput(FastSlotInputMessage message)
+        {
+            if (statsHolder == null)
+            {
+                return;
+            }
+
+            if (!playerInventory.TryGetFastSlot(message.SlotIndex, out var fastSlot)
+             || fastSlot?.ItemConfig == null
+             || !playerInventory.HasAnyInventoryItem(fastSlot.ItemConfig))
+            {
+                SignalAllFastSlots();
+                ApplyFastSlotAlphas();
+                return;
+            }
+
+            SignalFastSlot(fastSlot);
+            ApplyFastSlotAlphas();
+        }
+
         private void OnStatChanged(StatChangeInfo changeInfo)
         {
             if (statsHolder == null || changeInfo.Source == StatChangeSource.Periodic)
@@ -428,6 +478,11 @@ namespace UI.Pages
                 UpdateStatVisibility(statVisibilityStates[statType], deltaTime);
             }
 
+            foreach (var state in fastSlotVisibilityStates.Values)
+            {
+                UpdateStatVisibility(state, deltaTime);
+            }
+
             ApplyAllVisualAlphas();
         }
 
@@ -437,6 +492,16 @@ namespace UI.Pages
             foreach (var statType in AllStatTypes)
             {
                 statVisibilityStates[statType] = new StatVisibilityState
+                {
+                    Alpha = 0f,
+                    Phase = VisibilityPhase.Hidden
+                };
+            }
+
+            fastSlotVisibilityStates.Clear();
+            foreach (var fastSlot in playerInventory.GetFastSlots())
+            {
+                fastSlotVisibilityStates[fastSlot] = new StatVisibilityState
                 {
                     Alpha = 0f,
                     Phase = VisibilityPhase.Hidden
@@ -676,6 +741,8 @@ namespace UI.Pages
             {
                 ApplyVisualAlpha(statType);
             }
+
+            ApplyFastSlotAlphas();
         }
 
         private void UpdateWeightIndicator(float currentWeight)
@@ -735,6 +802,59 @@ namespace UI.Pages
             image.color = image.color.WithA(Mathf.Clamp01(alpha));
         }
 
+        private void ApplyFastSlotAlphas()
+        {
+            if (statsHolder == null)
+            {
+                return;
+            }
+
+            ApplyFastSlotAlpha(statsHolder.FastSlot1, playerInventory.FastSlot1);
+            ApplyFastSlotAlpha(statsHolder.FastSlot2, playerInventory.FastSlot2);
+            ApplyFastSlotAlpha(statsHolder.FastSlot3, playerInventory.FastSlot3);
+            ApplyFastSlotAlpha(statsHolder.FastSlot4, playerInventory.FastSlot4);
+        }
+
+        private void ApplyFastSlotAlpha(SlotView slotView, FastSlotModel fastSlotModel)
+        {
+            if (slotView == null || fastSlotModel == null || !fastSlotVisibilityStates.TryGetValue(fastSlotModel, out var state))
+            {
+                return;
+            }
+
+            if (!slotView.TryGetComponent<CanvasGroup>(out var canvasGroup))
+            {
+                canvasGroup = slotView.gameObject.AddComponent<CanvasGroup>();
+            }
+
+            if (canvasGroup == null)
+            {
+                return;
+            }
+
+            canvasGroup.alpha = Mathf.Max(globalAlpha, state.Alpha);
+            canvasGroup.blocksRaycasts = false;
+            canvasGroup.interactable = false;
+        }
+
+        private void SignalAllFastSlots()
+        {
+            foreach (var state in fastSlotVisibilityStates.Values)
+            {
+                StartStatReleaseSequence(state, Mathf.Max(globalAlpha, state.Alpha));
+            }
+        }
+
+        private void SignalFastSlot(FastSlotModel fastSlotModel)
+        {
+            if (fastSlotModel == null || !fastSlotVisibilityStates.TryGetValue(fastSlotModel, out var state))
+            {
+                return;
+            }
+
+            StartStatReleaseSequence(state, Mathf.Max(globalAlpha, state.Alpha));
+        }
+
         private float GetEffectiveRegularAlpha(StatVisibilityState state)
         {
             return Mathf.Max(globalAlpha, state.Alpha);
@@ -747,13 +867,13 @@ namespace UI.Pages
 
         private static bool IsCritical(Stat stat)
         {
-            if (Mathf.Approximately(stat.Max, 0f))
+            if (stat is not SafeStat safeStat || Mathf.Approximately(stat.Max, 0f))
             {
                 return false;
             }
 
             var normalizedValue = stat.Value.Value / stat.Max;
-            return normalizedValue <= Mathf.Clamp01(stat.MinSafePercent);
+            return normalizedValue <= Mathf.Clamp01(safeStat.MinSafePercent);
         }
     }
 }

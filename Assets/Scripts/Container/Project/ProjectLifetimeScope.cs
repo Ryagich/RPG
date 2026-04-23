@@ -26,6 +26,7 @@ namespace Container.Project
         [field: SerializeField] public InteractableConfig InteractableConfig { get; private set; }
         [field: SerializeField] public InventoryConfig InventoryConfig { get; private set; }
         [field: SerializeField] public ColorsConfig ColorsConfig { get; private set; }
+        [field: SerializeField] public StatIconsConfig StatIconsConfig { get; private set; }
         
         protected override void Configure(IContainerBuilder builder)
         {
@@ -40,6 +41,7 @@ namespace Container.Project
             builder.RegisterInstance(InteractableConfig).AsSelf();
             builder.RegisterInstance(InventoryConfig).AsSelf();
             builder.RegisterInstance(ColorsConfig).AsSelf();
+            builder.RegisterInstance(StatIconsConfig).AsSelf();
 
             builder.RegisterEntryPoint<Bootloader>().AsSelf();
         }

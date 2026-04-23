@@ -1,7 +1,6 @@
 ﻿using System;
 using Character;
 using GameModes;
-using Interactable;
 using Inventory.Inventories;
 using Inventory.Looting;
 using MessagePipe;

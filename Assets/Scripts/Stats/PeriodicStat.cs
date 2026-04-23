@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Stats
 {
     [Serializable]
-    public class PeriodicStat : Stat
+    public class PeriodicStat : SafeStat
     {
         [field: SerializeField] public float PeriodicChange { get; private set; }
 

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5078812b14de41b391b28811fa9bca88, type: 3}
+  m_Name: Stat Icons Config
+  m_EditorClassIdentifier: Assembly-CSharp::UI.Configs.StatIconsConfig
+  <HpStat>k__BackingField: {fileID: 21300000, guid: ca5f8bde5d6b4ea4dab4b6f0212c924c, type: 3}
+  <WaterStat>k__BackingField: {fileID: 21300000, guid: 31db1834d00544f42adb848b7bd94ed8, type: 3}
+  <FoodStat>k__BackingField: {fileID: 21300000, guid: 2f06bab20678a9c4683c8a911477a5a7, type: 3}
+  <ChillStat>k__BackingField: {fileID: 21300000, guid: 1acf5f01675992f4f9cf3bb6848bbf3f, type: 3}
+  <StaminaStat>k__BackingField: {fileID: 21300000, guid: 3aa1888064961f14baa04560bae41352, type: 3}
+  <PhysicalDefenseStat>k__BackingField: {fileID: 21300000, guid: faad892b38ea694439d0609a7cc57619, type: 3}
+  <TemperatureDefenseStat>k__BackingField: {fileID: 21300000, guid: d5cfe9f73315a7c4ab6c7b5e711cd515, type: 3}
+  <PsiDefenseStat>k__BackingField: {fileID: 21300000, guid: 0ecee3c431cabd94399fbb15b3492051, type: 3}
+  <MagicDefenseStat>k__BackingField: {fileID: 21300000, guid: cfb14603a85868448a31bbbf262048a4, type: 3}
+  <StatHolder>k__BackingField: {fileID: 2865423226321459443, guid: caf2d203c25f3db4490227f8142110d8, type: 3}

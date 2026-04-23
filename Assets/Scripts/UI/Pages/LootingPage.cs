@@ -1,32 +1,46 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Colors;
+using Inventory;
 using Inventory.Grid;
 using Inventory.Inventories;
+using Inventory.Item;
 using Inventory.Looting;
 using Inventory.Slot;
-using TMPro;
-using UI.Configs;
-using UniRx;
-using UnityEngine;
-using UnityEngine.UI;
-using VContainer;
-using VContainer.Unity;
-using Inventory.Item;
 using Localization;
 using Messages;
 using Money;
+using Stats;
+using TMPro;
+using UI.Configs;
 using UI.Inventory;
 using UI.UIElements;
+using UniRx;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
+using VContainer;
+using VContainer.Unity;
 
 namespace UI.Pages
 {
     // ReSharper disable once ClassNeverInstantiated.Global
     public class LootingPage : BasePage, ITickable, IInventoryInteractionPage
     {
-        public bool TryHandleMouseDown(MouseButtonType button, Vector2 screenPoint)
+        private sealed class PopupTarget
         {
-            return false;
+            public RectTransform Rect;
+            public IInventory SourceInventory;
+            public ItemInInventory InventoryItem;
+            public SlotModel SlotModel;
+        }
+
+        private enum PopupOpenMode
+        {
+            None,
+            Hover,
+            RightClick
         }
 
         public override PageType Type { get; } = PageType.Looting;
@@ -36,10 +50,13 @@ namespace UI.Pages
         private readonly UIConfig uiConfig;
         private readonly LocalizationConfig localizationConfig;
         private readonly ColorsConfig colorsConfig;
+        private readonly StatIconsConfig statIconsConfig;
         private readonly PlayerInventory playerInventory;
+        private readonly InventoryHandController inventoryHandController;
         private readonly MoneyStorage playerMoneyStorage;
         private readonly Character.CharacterInfo playerCharacterInfo;
         private readonly LootingContext lootingContext;
+        private readonly StatsController statsController;
         private readonly Canvas canvas;
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
@@ -59,38 +76,90 @@ namespace UI.Pages
         private readonly List<ScrollRect> inventoryScrollRects = new();
         private readonly List<RectTransform> itemRects = new();
         private readonly List<RectTransform> itemGrabRects = new();
+        private readonly List<PopupTarget> popupTargets = new();
         private readonly Dictionary<IInventory, InventoryView> inventoryViews = new();
         private readonly Dictionary<IInventory, Vector2Int> lastGridSizes = new();
         private Vector2 handGrabOffset;
+        private RectTransform popupRect;
+        private RectTransform popupParentRect;
+        private PopupTarget hoverPopupTarget;
+        private float hoverPopupElapsed;
+        private PopupOpenMode popupOpenMode;
 
         private ItemConfig lastHelmItemConfig;
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastBackpackItemConfig;
+        private ItemConfig lastFastSlot1ItemConfig;
+        private ItemConfig lastFastSlot2ItemConfig;
+        private ItemConfig lastFastSlot3ItemConfig;
+        private ItemConfig lastFastSlot4ItemConfig;
 
-        public LootingPage
-            (
-                UIConfig uiConfig,
-                LocalizationConfig localizationConfig,
-                ColorsConfig colorsConfig,
-                Canvas canvas,
-                PlayerInventory playerInventory,
-                MoneyStorage playerMoneyStorage,
-                Character.CharacterInfo playerCharacterInfo,
-                LootingContext lootingContext,
-                IObjectResolver resolver
-            )
+        public LootingPage(
+            UIConfig uiConfig,
+            LocalizationConfig localizationConfig,
+            ColorsConfig colorsConfig,
+            StatIconsConfig statIconsConfig,
+            Canvas canvas,
+            PlayerInventory playerInventory,
+            InventoryHandController inventoryHandController,
+            MoneyStorage playerMoneyStorage,
+            Character.CharacterInfo playerCharacterInfo,
+            LootingContext lootingContext,
+            StatsController statsController,
+            IObjectResolver resolver)
         {
             this.uiConfig = uiConfig;
             this.localizationConfig = localizationConfig;
             this.colorsConfig = colorsConfig;
+            this.statIconsConfig = statIconsConfig;
             this.canvas = canvas;
             this.playerInventory = playerInventory;
+            this.inventoryHandController = inventoryHandController;
             this.playerCharacterInfo = playerCharacterInfo;
             this.playerMoneyStorage = playerMoneyStorage;
             this.lootingContext = lootingContext;
+            this.statsController = statsController;
             this.resolver = resolver;
 
             canvasRect = canvas.GetComponent<RectTransform>();
+        }
+
+        public bool TryHandleMouseDown(MouseButtonType button, Vector2 screenPoint)
+        {
+            if (Current != this || contentRect == null || playerInventory.HandSlot.Value?.ItemStack != null)
+            {
+                return false;
+            }
+
+            if (button == MouseButtonType.Right)
+            {
+                ClosePopup();
+                ResetHoverPopupState();
+                TryOpenPopup(screenPoint, PopupOpenMode.RightClick);
+                return true;
+            }
+
+            if (button != MouseButtonType.Left || popupRect == null)
+            {
+                return false;
+            }
+
+            if (popupOpenMode == PopupOpenMode.RightClick
+             && RectTransformUtility.RectangleContainsScreenPoint(popupRect, screenPoint, GetEventCamera()))
+            {
+                return true;
+            }
+
+            if (popupOpenMode == PopupOpenMode.Hover)
+            {
+                ClosePopup();
+                ResetHoverPopupState();
+                return false;
+            }
+
+            ClosePopup();
+            ResetHoverPopupState();
+            return false;
         }
 
         public override void Draw()
@@ -104,11 +173,13 @@ namespace UI.Pages
             Current = this;
             contentRect = resolver.Instantiate(uiConfig.ContentPref, canvasRect);
             contentRect.name = $"{uiConfig.ContentPref.name} | {Type}";
+            popupParentRect = contentRect;
 
             leftRect = resolver.Instantiate(uiConfig.LeftSection, contentRect);
             slotsViewContainer = resolver.Instantiate(uiConfig.CenterSection, contentRect);
+            PageUiUtilities.FillSlotsViewContainerStats(slotsViewContainer, statsController);
             rightRect = resolver.Instantiate(uiConfig.RightSection, contentRect);
-            
+
             rightInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
             rightInfoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
             playerInventoryView = resolver.Instantiate(uiConfig.InventoryView, rightRect);
@@ -118,7 +189,7 @@ namespace UI.Pages
             leftInfoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, leftRect);
             targetInventoryView = resolver.Instantiate(uiConfig.InventoryView, leftRect);
             PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, lootingContext.CurrentTargetCharacterInfo, lootingContext.CurrentTargetMoneyStorage);
-            
+
             inventoryViews.Clear();
             inventoryViews[playerInventory] = playerInventoryView;
             inventoryViews[targetInventory] = targetInventoryView;
@@ -130,16 +201,21 @@ namespace UI.Pages
             playerInventory.Changed.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
             targetInventory.Changed.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
             playerInventory.HandSlot.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
+            statsController.Changed
+                           .Subscribe(_ => PageUiUtilities.FillSlotsViewContainerStats(slotsViewContainer, statsController))
+                           .AddTo(redrawDisposables);
 
             ReDraw();
         }
-        
+
         public void Tick()
         {
             if (handSlotRect)
             {
                 UpdateHandSlotPosition();
             }
+
+            HandleHoverPopup();
 
             if (HaveSlotsChanged() || HaveGridChanged())
             {
@@ -154,10 +230,13 @@ namespace UI.Pages
                 return;
             }
 
+            ClosePopup();
+            ResetHoverPopupState();
             EnsureTilesMatchInventorySize();
             UpdateInventoryScrollState();
             itemRects.Clear();
             itemGrabRects.Clear();
+            popupTargets.Clear();
 
             foreach (var view in inventoryViews.Values)
             {
@@ -173,6 +252,7 @@ namespace UI.Pages
             DrawHandSlot();
             UpdateInventoryInfo();
             UpdatePlayersInfo();
+            PageUiUtilities.FillSlotsViewContainerStats(slotsViewContainer, statsController);
             CacheSlotItems();
         }
 
@@ -181,7 +261,7 @@ namespace UI.Pages
             PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo, playerMoneyStorage);
             PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, lootingContext.CurrentTargetCharacterInfo, lootingContext.CurrentTargetMoneyStorage);
         }
-        
+
         private void UpdateInventoryInfo()
         {
             var playerWeight = PageUiUtilities.GetItemsWeight(playerInventory)
@@ -194,7 +274,7 @@ namespace UI.Pages
             }
 
             PageUiUtilities.FillInfoAboutInventory(rightInfoAboutInventory, localizationConfig, colorsConfig, playerWeight, playerInventory.MaxWeight);
-            
+
             var targetInventory = lootingContext.CurrentTargetInventory;
             var targetWeight = PageUiUtilities.GetItemsWeight(targetInventory);
             if (handWeight > 0f && handSourceInventory == targetInventory)
@@ -205,10 +285,17 @@ namespace UI.Pages
             PageUiUtilities.FillInfoAboutInventory(leftInfoAboutInventory, localizationConfig, colorsConfig, targetWeight, targetInventory?.MaxWeight);
         }
 
-        public bool TryCaptureGrabOffset(Vector2 screenPoint)
+        public bool TryCaptureGrabOffset(Vector2 screenPoint, out Vector2 handGrabOffset)
         {
             var eventCamera = GetEventCamera();
-            return PageUiUtilities.TryCaptureGrabOffset(itemRects, itemGrabRects, screenPoint, eventCamera, out handGrabOffset);
+            var captured = PageUiUtilities.TryCaptureGrabOffset(itemRects, itemGrabRects, screenPoint, eventCamera, out handGrabOffset);
+            this.handGrabOffset = handGrabOffset;
+            return captured;
+        }
+
+        public void SetGrabOffset(Vector2 handGrabOffset)
+        {
+            this.handGrabOffset = handGrabOffset;
         }
 
         public void ResetGrabOffset()
@@ -224,7 +311,6 @@ namespace UI.Pages
                 return false;
             }
 
-            // ReSharper disable once Unity.NoNullPropagation
             var handItemType = playerInventory.HandSlot.Value?.ItemConfig?.ItemType;
             if (TryGetSlotUnderPointer(slotsViewContainer.HeadSlot, playerInventory.HelmSlot, screenPoint, handItemType, out slotModel))
             {
@@ -237,6 +323,28 @@ namespace UI.Pages
             }
 
             return TryGetSlotUnderPointer(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot, screenPoint, handItemType, out slotModel);
+        }
+
+        public bool TryGetHoveredFastSlot(Vector2 screenPoint, out FastSlotModel fastSlotModel)
+        {
+            fastSlotModel = null;
+            if (!slotsViewContainer
+             || playerInventory.HandSlot.Value?.ItemConfig?.ItemType != ItemType.Usable
+             || playerInventory.HandSourceInventory.Value != playerInventory)
+            {
+                return false;
+            }
+
+            var eventCamera = GetEventCamera();
+            return PageUiUtilities.TryGetFastSlotUnderPointer(slotsViewContainer.FastSlot1, playerInventory.FastSlot1, screenPoint, eventCamera, out fastSlotModel)
+                   || PageUiUtilities.TryGetFastSlotUnderPointer(slotsViewContainer.FastSlot2, playerInventory.FastSlot2, screenPoint, eventCamera, out fastSlotModel)
+                   || PageUiUtilities.TryGetFastSlotUnderPointer(slotsViewContainer.FastSlot3, playerInventory.FastSlot3, screenPoint, eventCamera, out fastSlotModel)
+                   || PageUiUtilities.TryGetFastSlotUnderPointer(slotsViewContainer.FastSlot4, playerInventory.FastSlot4, screenPoint, eventCamera, out fastSlotModel);
+        }
+
+        public bool TryGetFastSlotRect(FastSlotModel fastSlotModel, out RectTransform slotRect)
+        {
+            return PageUiUtilities.TryGetFastSlotRect(slotsViewContainer, playerInventory, fastSlotModel, out slotRect);
         }
 
         public bool TryGetPlacementTile(Vector2 screenPoint, IInventory inventory, out Tile tile)
@@ -331,7 +439,7 @@ namespace UI.Pages
                 var sourceGridLayout = sourceView.ContentForTiles.GetComponent<GridLayoutGroup>();
                 if (sourceGridLayout != null)
                 {
-                    return PageUiUtilities.GetItemGrabSize(sourceGridLayout, handItemStack.ItemConfig.Size);
+                    return PageUiUtilities.GetItemGrabSize(sourceGridLayout, handItemStack.Size);
                 }
             }
 
@@ -384,6 +492,14 @@ namespace UI.Pages
         private bool TryGetSnappedPositionInSlot(Vector2 screenPoint, Camera eventCamera, RectTransform dragParentRect, out Vector2 snappedPosition)
         {
             snappedPosition = Vector2.zero;
+            if (TryGetHoveredFastSlot(screenPoint, out var fastSlotModel)
+             && TryGetFastSlotRect(fastSlotModel, out var fastSlotRect))
+            {
+                var fastSlotWorldPosition = fastSlotRect.TransformPoint(fastSlotRect.rect.center);
+                var fastSlotScreenPosition = RectTransformUtility.WorldToScreenPoint(eventCamera, fastSlotWorldPosition);
+                return RectTransformUtility.ScreenPointToLocalPointInRectangle(dragParentRect, fastSlotScreenPosition, eventCamera, out snappedPosition);
+            }
+
             if (!TryGetHoveredSlot(screenPoint, out var slotModel) || slotModel == null)
             {
                 return false;
@@ -415,7 +531,11 @@ namespace UI.Pages
         {
             return lastHelmItemConfig != playerInventory.HelmSlot.ItemConfig
                    || lastBodyItemConfig != playerInventory.BodySlot.ItemConfig
-                   || lastBackpackItemConfig != playerInventory.BackpackSlot.ItemConfig;
+                   || lastBackpackItemConfig != playerInventory.BackpackSlot.ItemConfig
+                   || lastFastSlot1ItemConfig != playerInventory.FastSlot1.ItemConfig
+                   || lastFastSlot2ItemConfig != playerInventory.FastSlot2.ItemConfig
+                   || lastFastSlot3ItemConfig != playerInventory.FastSlot3.ItemConfig
+                   || lastFastSlot4ItemConfig != playerInventory.FastSlot4.ItemConfig;
         }
 
         private bool HaveGridChanged()
@@ -443,6 +563,10 @@ namespace UI.Pages
             lastHelmItemConfig = playerInventory.HelmSlot.ItemConfig;
             lastBodyItemConfig = playerInventory.BodySlot.ItemConfig;
             lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;
+            lastFastSlot1ItemConfig = playerInventory.FastSlot1.ItemConfig;
+            lastFastSlot2ItemConfig = playerInventory.FastSlot2.ItemConfig;
+            lastFastSlot3ItemConfig = playerInventory.FastSlot3.ItemConfig;
+            lastFastSlot4ItemConfig = playerInventory.FastSlot4.ItemConfig;
         }
 
         private bool TryGetPlacementCell(Vector2 screenPoint, IInventory inventory, out Vector2Int placementCell)
@@ -453,13 +577,13 @@ namespace UI.Pages
                 return false;
             }
 
-            var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
-            if (handItemConfig == null)
+            var handItemStack = playerInventory.HandSlot.Value?.ItemStack;
+            if (handItemStack?.ItemConfig == null)
             {
                 return false;
             }
 
-            var itemGrabSize = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, handItemConfig.Size);
+            var itemGrabSize = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, handItemStack.Size);
             var stepX = gridLayoutGroup.cellSize.x + gridLayoutGroup.spacing.x;
             var stepY = gridLayoutGroup.cellSize.y + gridLayoutGroup.spacing.y;
             if (stepX <= 0 || stepY <= 0)
@@ -469,8 +593,8 @@ namespace UI.Pages
 
             var grabFromLeft = handGrabOffset.x + itemGrabSize.x * 0.5f;
             var grabFromTop = itemGrabSize.y * 0.5f - handGrabOffset.y;
-            var grabOffsetX = Mathf.Clamp(Mathf.FloorToInt(grabFromLeft / stepX), 0, handItemConfig.Size.x - 1);
-            var grabOffsetY = Mathf.Clamp(Mathf.FloorToInt(grabFromTop / stepY), 0, handItemConfig.Size.y - 1);
+            var grabOffsetX = Mathf.Clamp(Mathf.FloorToInt(grabFromLeft / stepX), 0, handItemStack.Size.x - 1);
+            var grabOffsetY = Mathf.Clamp(Mathf.FloorToInt(grabFromTop / stepY), 0, handItemStack.Size.y - 1);
 
             placementCell = new Vector2Int(cursorCell.x - grabOffsetX, cursorCell.y - grabOffsetY);
             return true;
@@ -484,10 +608,10 @@ namespace UI.Pages
                 return false;
             }
 
-            var handItemConfig = playerInventory.HandSlot.Value?.ItemConfig;
+            var handItemStack = playerInventory.HandSlot.Value?.ItemStack;
             var gridLayoutGroup = view.ContentForTiles.GetComponent<GridLayoutGroup>();
             var tiles = GetTiles(inventory);
-            if (handItemConfig == null || gridLayoutGroup == null || tiles == null)
+            if (handItemStack?.ItemConfig == null || gridLayoutGroup == null || tiles == null)
             {
                 return false;
             }
@@ -497,8 +621,8 @@ namespace UI.Pages
             var isFullyInsideGrid =
                 placementCell.x >= 0
                 && placementCell.y >= 0
-                && placementCell.x + handItemConfig.Size.x <= gridWidth
-                && placementCell.y + handItemConfig.Size.y <= gridHeight;
+                && placementCell.x + handItemStack.Size.x <= gridWidth
+                && placementCell.y + handItemStack.Size.y <= gridHeight;
             if (!isFullyInsideGrid)
             {
                 return false;
@@ -506,11 +630,11 @@ namespace UI.Pages
 
             var snappedAnchoredPosition = new Vector2(
                 gridLayoutGroup.padding.left
-                + (placementCell.x + handItemConfig.Size.x * 0.5f) * gridLayoutGroup.cellSize.x
-                + (placementCell.x + (handItemConfig.Size.x - 1) * 0.5f) * gridLayoutGroup.spacing.x,
+                + (placementCell.x + handItemStack.Size.x * 0.5f) * gridLayoutGroup.cellSize.x
+                + (placementCell.x + (handItemStack.Size.x - 1) * 0.5f) * gridLayoutGroup.spacing.x,
                 -(gridLayoutGroup.padding.top
-                  + (placementCell.y + handItemConfig.Size.y * 0.5f) * gridLayoutGroup.cellSize.y
-                  + (placementCell.y + (handItemConfig.Size.y - 1) * 0.5f) * gridLayoutGroup.spacing.y));
+                  + (placementCell.y + handItemStack.Size.y * 0.5f) * gridLayoutGroup.cellSize.y
+                  + (placementCell.y + (handItemStack.Size.y - 1) * 0.5f) * gridLayoutGroup.spacing.y));
 
             snappedLocalPosition = new Vector3(snappedAnchoredPosition.x, snappedAnchoredPosition.y, 0f);
             return true;
@@ -570,11 +694,37 @@ namespace UI.Pages
             DrawSlotItem(slotsViewContainer.HeadSlot, playerInventory.HelmSlot);
             DrawSlotItem(slotsViewContainer.BodySlot, playerInventory.BodySlot);
             DrawSlotItem(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot);
+            DrawFastSlotItem(slotsViewContainer.FastSlot1, playerInventory.FastSlot1);
+            DrawFastSlotItem(slotsViewContainer.FastSlot2, playerInventory.FastSlot2);
+            DrawFastSlotItem(slotsViewContainer.FastSlot3, playerInventory.FastSlot3);
+            DrawFastSlotItem(slotsViewContainer.FastSlot4, playerInventory.FastSlot4);
         }
 
         private void DrawSlotItem(SlotView slotView, SlotModel slotModel)
         {
             PageUiUtilities.DrawSlotItem(slotView, slotModel, itemRects, itemGrabRects);
+            if (slotView == null || slotModel?.ItemStack?.ItemConfig == null)
+            {
+                return;
+            }
+
+            var slotRect = slotView.GetComponent<RectTransform>();
+            if (slotRect == null)
+            {
+                return;
+            }
+
+            popupTargets.Add(new PopupTarget
+            {
+                Rect = slotRect,
+                SourceInventory = playerInventory,
+                SlotModel = slotModel
+            });
+        }
+
+        private void DrawFastSlotItem(SlotView slotView, FastSlotModel fastSlotModel)
+        {
+            PageUiUtilities.DrawFastSlotItem(slotView, fastSlotModel, playerInventory.HasAnyInventoryItem(fastSlotModel?.ItemConfig));
         }
 
         private void DrawItems(IInventory inventory, InventoryView inventoryView)
@@ -587,9 +737,15 @@ namespace UI.Pages
 
             foreach (var item in inventory.Items)
             {
-                var itemGrabSize = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, item.ItemConfig.Size);
+                var itemGrabSize = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, item.ItemStack.Size);
                 var itemImageRect = PageUiUtilities.CreateItemImage(inventoryView.ContentForItems, item.ItemStack, "Item", itemGrabSize);
                 itemRects.Add(itemImageRect);
+                popupTargets.Add(new PopupTarget
+                {
+                    Rect = itemImageRect,
+                    SourceInventory = inventory,
+                    InventoryItem = item
+                });
 
                 var itemGrabRectObject = new GameObject($"Item Grab [{item.ItemConfig.Id}]", typeof(RectTransform));
                 var itemGrabRect = itemGrabRectObject.GetComponent<RectTransform>();
@@ -654,6 +810,576 @@ namespace UI.Pages
             }
         }
 
+        private void HandleHoverPopup()
+        {
+            if (Current != this || contentRect == null)
+            {
+                return;
+            }
+
+            if (playerInventory.HandSlot.Value?.ItemStack != null || Pointer.current == null)
+            {
+                ResetHoverPopupState();
+                if (popupOpenMode == PopupOpenMode.Hover)
+                {
+                    ClosePopup();
+                }
+
+                return;
+            }
+
+            var screenPoint = Pointer.current.position.ReadValue();
+            if (!TryGetPopupTarget(screenPoint, out var target))
+            {
+                ResetHoverPopupState();
+                if (popupOpenMode == PopupOpenMode.Hover)
+                {
+                    ClosePopup();
+                }
+
+                return;
+            }
+
+            var targetChanged = !IsSamePopupTarget(hoverPopupTarget, target);
+            if (targetChanged)
+            {
+                hoverPopupTarget = target;
+            }
+
+            hoverPopupElapsed += Time.deltaTime;
+
+            if (popupOpenMode == PopupOpenMode.Hover)
+            {
+                if (targetChanged)
+                {
+                    ClosePopup();
+                    TryOpenPopup(target, screenPoint, PopupOpenMode.Hover);
+                    return;
+                }
+
+                PageUiUtilities.UpdatePopupPosition(popupRect, popupParentRect, GetEventCamera(), screenPoint);
+                return;
+            }
+
+            if (popupOpenMode == PopupOpenMode.RightClick)
+            {
+                return;
+            }
+
+            if (hoverPopupElapsed < uiConfig.PopupHoverOpenDelaySeconds)
+            {
+                return;
+            }
+
+            TryOpenPopup(target, screenPoint, PopupOpenMode.Hover);
+        }
+
+        private void ResetHoverPopupState()
+        {
+            hoverPopupTarget = null;
+            hoverPopupElapsed = 0f;
+        }
+
+        private bool TryOpenPopup(Vector2 screenPoint, PopupOpenMode openMode)
+        {
+            return TryGetPopupTarget(screenPoint, out var target) && TryOpenPopup(target, screenPoint, openMode);
+        }
+
+        private bool TryOpenPopup(PopupTarget target, Vector2 screenPoint, PopupOpenMode openMode)
+        {
+            if (target == null || popupParentRect == null)
+            {
+                return false;
+            }
+
+            popupRect = resolver.Instantiate(uiConfig.PopupRect, popupParentRect);
+            popupRect.name = $"{uiConfig.PopupRect.name} | Looting Popup";
+            PageUiUtilities.SetPopupRaycastState(popupRect, openMode == PopupOpenMode.RightClick);
+
+            var itemConfig = GetPopupItemConfig(target);
+            var itemStack = GetPopupItemStack(target);
+            if (itemConfig == null)
+            {
+                ClosePopup();
+                return false;
+            }
+
+            if (openMode == PopupOpenMode.Hover)
+            {
+                PageUiUtilities.FillInventoryHoverPopup(
+                    popupRect,
+                    uiConfig,
+                    localizationConfig,
+                    statIconsConfig,
+                    statsController,
+                    playerInventory,
+                    resolver,
+                    itemConfig,
+                    itemStack,
+                    target?.SlotModel?.ItemConfig == itemConfig,
+                    Color.white,
+                    Color.green,
+                    Color.red);
+            }
+            else if (openMode == PopupOpenMode.RightClick)
+            {
+                CreatePopupButtons(target);
+            }
+
+            PageUiUtilities.RecalculatePopupSize(popupRect);
+            PageUiUtilities.UpdatePopupPosition(popupRect, popupParentRect, GetEventCamera(), screenPoint);
+            popupOpenMode = openMode;
+            return true;
+        }
+
+        private static bool IsSamePopupTarget(PopupTarget first, PopupTarget second)
+        {
+            if (ReferenceEquals(first, second))
+            {
+                return true;
+            }
+
+            if (first == null || second == null)
+            {
+                return false;
+            }
+
+            return ReferenceEquals(first.InventoryItem, second.InventoryItem)
+                && ReferenceEquals(first.SlotModel, second.SlotModel)
+                && ReferenceEquals(first.SourceInventory, second.SourceInventory);
+        }
+
+        private static ItemConfig GetPopupItemConfig(PopupTarget target)
+        {
+            return target?.SlotModel?.ItemStack?.ItemConfig
+                   ?? target?.InventoryItem?.ItemStack?.ItemConfig;
+        }
+
+        private static ItemStack GetPopupItemStack(PopupTarget target)
+        {
+            return target?.SlotModel?.ItemStack
+                   ?? target?.InventoryItem?.ItemStack;
+        }
+
+        private void CreatePopupButtons(PopupTarget target)
+        {
+            if (target?.SlotModel?.ItemStack?.ItemConfig != null)
+            {
+                CreateSlotPopupButtons(target.SlotModel);
+                return;
+            }
+
+            if (target?.InventoryItem?.ItemStack?.ItemConfig != null)
+            {
+                CreateInventoryPopupButtons(target);
+            }
+        }
+
+        private void CreateSlotPopupButtons(SlotModel slotModel)
+        {
+            if (slotModel?.ItemStack?.ItemConfig == null)
+            {
+                return;
+            }
+
+            CreatePopupButton("Move", () => ExecutePopupAction(() => MoveSlotItem(slotModel, slotModel.ItemStack?.Count ?? 0)), CanMoveSlotItem(slotModel));
+        }
+
+        private void CreateInventoryPopupButtons(PopupTarget target)
+        {
+            var itemStack = target.InventoryItem?.ItemStack;
+            var itemCount = itemStack?.Count ?? 0;
+            var moveHalfCount = GetDropHalfCount(itemCount);
+
+            CreatePopupButton("Use", () => ExecutePopupAction(() => UseTarget(target)), CanUseInventoryItem(itemStack?.ItemConfig));
+
+            if (moveHalfCount > 0)
+            {
+                CreatePopupButton("Move Half", () => ExecutePopupAction(() => MoveTarget(target, moveHalfCount)), CanMoveInventoryItem(target, moveHalfCount));
+            }
+
+            CreatePopupButton("Move", () => ExecutePopupAction(() => MoveTarget(target, itemCount)), CanMoveInventoryItem(target, itemCount));
+        }
+
+        private void ExecutePopupAction(Action action)
+        {
+            ClosePopup();
+            ResetHoverPopupState();
+            action?.Invoke();
+        }
+
+        private void CreatePopupButton(string label, UnityEngine.Events.UnityAction onClick, bool interactable = true)
+        {
+            PageUiUtilities.CreatePopupButton(popupRect, uiConfig, resolver, label, onClick, interactable);
+        }
+
+        private bool CanUseInventoryItem(ItemConfig itemConfig)
+        {
+            return itemConfig != null && itemConfig.ItemType is ItemType.Usable or ItemType.Helm or ItemType.Body or ItemType.Backpack;
+        }
+
+        private void UseTarget(PopupTarget target)
+        {
+            if (target?.InventoryItem?.ItemStack?.ItemConfig == null || target.SourceInventory == null)
+            {
+                return;
+            }
+
+            UseInventoryItem(target.SourceInventory, target.InventoryItem);
+        }
+
+        private void UseInventoryItem(IInventory sourceInventory, ItemInInventory itemInInventory)
+        {
+            if (sourceInventory == null || itemInInventory?.ItemStack?.ItemConfig == null)
+            {
+                return;
+            }
+
+            if (itemInInventory.ItemStack.ItemConfig.ItemType == ItemType.Usable)
+            {
+                UseUsableInventoryItem(sourceInventory, itemInInventory);
+                return;
+            }
+
+            TryUseEquippableInventoryItem(sourceInventory, itemInInventory);
+        }
+
+        private void UseUsableInventoryItem(IInventory sourceInventory, ItemInInventory itemInInventory)
+        {
+            var sourceStack = itemInInventory?.ItemStack;
+            if (sourceInventory == null || sourceStack?.ItemConfig == null)
+            {
+                return;
+            }
+
+            var itemConfig = sourceStack.ItemConfig;
+            var isRotated = sourceStack.IsRotated;
+            var originalPosition = itemInInventory.Position;
+            var originalCount = sourceStack.Count;
+            var usedStack = new ItemStack(itemConfig, 1, isRotated);
+
+            sourceInventory.Remove(itemInInventory);
+            if (!inventoryHandController.TryUseFromInventory(usedStack))
+            {
+                sourceInventory.Add(new ItemStack(itemConfig, originalCount, isRotated), originalPosition);
+                return;
+            }
+
+            if (originalCount > 1)
+            {
+                sourceInventory.Add(new ItemStack(itemConfig, originalCount - 1, isRotated), originalPosition);
+            }
+        }
+
+        private void TryUseEquippableInventoryItem(IInventory sourceInventory, ItemInInventory itemInInventory)
+        {
+            var itemStack = itemInInventory?.ItemStack?.Clone();
+            if (sourceInventory == null || itemStack?.ItemConfig == null)
+            {
+                return;
+            }
+
+            var originalPosition = itemInInventory.Position;
+            sourceInventory.Remove(itemInInventory);
+
+            if (!inventoryHandController.TryUseFromInventory(itemStack, TryStoreAcrossLootingInventories))
+            {
+                sourceInventory.Add(itemStack, originalPosition);
+            }
+        }
+
+        private ItemStack TryStoreAcrossLootingInventories(ItemStack itemStack)
+        {
+            if (itemStack?.ItemConfig == null)
+            {
+                return null;
+            }
+
+            var remainder = playerInventory.TryAdd(itemStack);
+            var targetInventory = lootingContext.CurrentTargetInventory;
+            return remainder != null && targetInventory != null
+                ? targetInventory.TryAdd(remainder)
+                : remainder;
+        }
+
+        private bool CanMoveSlotItem(SlotModel slotModel)
+        {
+            return slotModel?.ItemStack?.ItemConfig != null
+                   && CanInventoryAcceptAny(GetOtherInventory(playerInventory), slotModel.ItemStack);
+        }
+
+        private bool CanMoveInventoryItem(PopupTarget target, int count)
+        {
+            return count > 0
+                   && target?.InventoryItem?.ItemStack?.ItemConfig != null
+                   && CanInventoryAcceptAny(GetOtherInventory(target.SourceInventory), target.InventoryItem.ItemStack);
+        }
+
+        private IInventory GetOtherInventory(IInventory sourceInventory)
+        {
+            var targetInventory = lootingContext.CurrentTargetInventory;
+            if (sourceInventory == playerInventory)
+            {
+                return targetInventory;
+            }
+
+            return sourceInventory == targetInventory ? playerInventory : null;
+        }
+
+        private static int GetDropHalfCount(int totalCount)
+        {
+            return totalCount > 1 ? totalCount / 2 : 0;
+        }
+
+        private bool CanInventoryAcceptAny(IInventory inventory, ItemStack itemStack)
+        {
+            if (inventory == null || itemStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            return inventory switch
+            {
+                PlayerInventory playerDestination => CanPlayerInventoryAcceptAny(playerDestination, itemStack),
+                ITiledInventory tiledDestination => CanTiledInventoryAcceptAny(tiledDestination, itemStack),
+                _ => false
+            };
+        }
+
+        private static bool CanPlayerInventoryAcceptAny(PlayerInventory inventory, ItemStack itemStack)
+        {
+            if (inventory == null || itemStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            foreach (var slot in new[] { inventory.HelmSlot, inventory.BodySlot, inventory.BackpackSlot })
+            {
+                if (slot.ItemType != itemStack.ItemConfig.ItemType)
+                {
+                    continue;
+                }
+
+                if (slot.ItemStack == null)
+                {
+                    return true;
+                }
+
+                if (slot.ItemStack.CanStackWith(itemStack) && slot.ItemStack.Count < slot.GetMaxStack(itemStack.ItemConfig))
+                {
+                    return true;
+                }
+            }
+
+            foreach (var item in inventory.Items)
+            {
+                if (item?.ItemStack?.CanStackWith(itemStack) == true && !item.ItemStack.IsFull)
+                {
+                    return true;
+                }
+            }
+
+            foreach (var tile in inventory.Tiles.tiles)
+            {
+                if (CanPlaceAt(tile, inventory.Tiles, itemStack.Size))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool CanTiledInventoryAcceptAny(ITiledInventory inventory, ItemStack itemStack)
+        {
+            if (inventory == null || itemStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            foreach (var item in inventory.Items)
+            {
+                if (item?.ItemStack?.CanStackWith(itemStack) == true && !item.ItemStack.IsFull)
+                {
+                    return true;
+                }
+            }
+
+            foreach (var tile in inventory.Tiles.tiles)
+            {
+                if (CanPlaceAt(tile, inventory.Tiles, itemStack.Size))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool CanPlaceAt(Tile tile, Tiles tiles, Vector2Int size)
+        {
+            if (tile == null || tiles == null)
+            {
+                return false;
+            }
+
+            var itemTiles = tiles.GetTilesAround(tile.Index, size);
+            return itemTiles.Count == size.x * size.y && itemTiles.All(currentTile => currentTile.IsFree);
+        }
+
+        private void MoveTarget(PopupTarget target, int count)
+        {
+            if (count <= 0)
+            {
+                return;
+            }
+
+            if (target?.SlotModel?.ItemStack?.ItemConfig != null)
+            {
+                MoveSlotItem(target.SlotModel, count);
+                return;
+            }
+
+            if (target?.InventoryItem?.ItemStack?.ItemConfig != null)
+            {
+                MoveInventoryItem(target.SourceInventory, target.InventoryItem, count);
+            }
+        }
+
+        private void MoveSlotItem(SlotModel slotModel, int count)
+        {
+            var destinationInventory = GetOtherInventory(playerInventory);
+            if (destinationInventory == null
+             || slotModel?.ItemStack?.ItemConfig == null
+             || !playerInventory.TryTakeFromSlot(slotModel.ItemType, count, out var itemStack))
+            {
+                return;
+            }
+
+            var remainder = destinationInventory.TryAdd(itemStack);
+            if (remainder != null)
+            {
+                RestoreSlotItem(slotModel.ItemType, remainder);
+                return;
+            }
+
+            if (slotModel.ItemType == ItemType.Backpack)
+            {
+                var droppedItems = playerInventory.RebuildInventoryFromCurrentBackpack();
+                foreach (var droppedItem in droppedItems)
+                {
+                    inventoryHandController.Drop(droppedItem);
+                }
+            }
+        }
+
+        private void RestoreSlotItem(ItemType slotType, ItemStack itemStack)
+        {
+            if (itemStack?.ItemConfig == null)
+            {
+                return;
+            }
+
+            playerInventory.TryPlaceInSlot(slotType, itemStack, out var remainderStack, out var replacedStack);
+            if (replacedStack != null)
+            {
+                var replacedRemainder = playerInventory.TryAdd(replacedStack);
+                if (replacedRemainder != null)
+                {
+                    inventoryHandController.Drop(replacedRemainder);
+                }
+            }
+
+            if (remainderStack != null)
+            {
+                var remainderAfterInventory = playerInventory.TryAdd(remainderStack);
+                if (remainderAfterInventory != null)
+                {
+                    inventoryHandController.Drop(remainderAfterInventory);
+                }
+            }
+        }
+
+        private void MoveInventoryItem(IInventory sourceInventory, ItemInInventory itemInInventory, int count)
+        {
+            if (sourceInventory == null || itemInInventory?.ItemStack?.ItemConfig == null)
+            {
+                return;
+            }
+
+            var destinationInventory = GetOtherInventory(sourceInventory);
+            if (destinationInventory == null)
+            {
+                return;
+            }
+
+            var itemConfig = itemInInventory.ItemConfig;
+            var isRotated = itemInInventory.ItemStack.IsRotated;
+            var originalPosition = itemInInventory.Position;
+            var originalCount = itemInInventory.Count;
+            var moveCount = Mathf.Clamp(count, 1, originalCount);
+            var movingStack = new ItemStack(itemConfig, moveCount, isRotated);
+            var remainder = destinationInventory.TryAdd(movingStack);
+            var movedCount = moveCount - (remainder?.Count ?? 0);
+            if (movedCount <= 0)
+            {
+                return;
+            }
+
+            sourceInventory.Remove(itemInInventory);
+            var remainingSourceCount = originalCount - movedCount;
+            if (remainingSourceCount > 0)
+            {
+                sourceInventory.Add(new ItemStack(itemConfig, remainingSourceCount, isRotated), originalPosition);
+            }
+        }
+
+        private bool TryGetPopupTarget(Vector2 screenPoint, out PopupTarget target)
+        {
+            var eventCamera = GetEventCamera();
+            for (var i = popupTargets.Count - 1; i >= 0; i--)
+            {
+                var currentTarget = popupTargets[i];
+                if (currentTarget?.Rect == null)
+                {
+                    continue;
+                }
+
+                if (!RectTransformUtility.RectangleContainsScreenPoint(currentTarget.Rect, screenPoint, eventCamera))
+                {
+                    continue;
+                }
+
+                target = currentTarget;
+                return true;
+            }
+
+            if (TryGetGridPopupTarget(out target))
+            {
+                return true;
+            }
+
+            target = null;
+            return false;
+        }
+
+        private bool TryGetGridPopupTarget(out PopupTarget target)
+        {
+            target = null;
+            if (!InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out var hoveredTile)
+             || hoveredTile?.ItemInInventory?.ItemStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            target = new PopupTarget
+            {
+                SourceInventory = hoveredInventory,
+                InventoryItem = hoveredTile.ItemInInventory
+            };
+            return true;
+        }
+
         private static Tiles GetTiles(IInventory inventory)
         {
             return (inventory as ITiledInventory)?.Tiles;
@@ -661,23 +1387,39 @@ namespace UI.Pages
 
         private Camera GetEventCamera() => canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
 
+        private void ClosePopup()
+        {
+            if (popupRect == null)
+            {
+                popupOpenMode = PopupOpenMode.None;
+                return;
+            }
+
+            UnityEngine.Object.Destroy(popupRect.gameObject);
+            popupRect = null;
+            popupOpenMode = PopupOpenMode.None;
+        }
+
         public override void Hide()
         {
             redrawDisposables.Clear();
             itemRects.Clear();
             itemGrabRects.Clear();
+            popupTargets.Clear();
             inventoryViews.Clear();
             lastGridSizes.Clear();
             inventoryScrollRects.Clear();
+            ClosePopup();
+            ResetHoverPopupState();
 
             if (contentRect)
             {
-                Object.Destroy(contentRect.gameObject);
+                UnityEngine.Object.Destroy(contentRect.gameObject);
             }
 
             if (handSlotRect)
             {
-                Object.Destroy(handSlotRect.gameObject);
+                UnityEngine.Object.Destroy(handSlotRect.gameObject);
             }
 
             contentRect = null;
@@ -691,6 +1433,8 @@ namespace UI.Pages
             playerInventoryView = null;
             targetInventoryView = null;
             handSlotRect = null;
+            popupRect = null;
+            popupParentRect = null;
             Current = null;
         }
     }

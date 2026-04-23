@@ -2,8 +2,5 @@
 
 namespace Inventory.Slot
 {
-    public class SlotView : MonoBehaviour
-    {
-        
-    }
+    public class SlotView : MonoBehaviour { }
 }

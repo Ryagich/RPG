@@ -18,6 +18,7 @@ namespace Input
         private readonly IPublisher<MouseDown> mouseDown;
         private readonly IPublisher<MouseUp> mouseUp;
         private readonly IPublisher<ShowStatsInputMessage> showStatsInputPublisher;
+        private readonly IPublisher<FastSlotInputMessage> fastSlotInputPublisher;
         private readonly GameModesController gameModesController;
 
         private Vector2 currentMoveDirection;
@@ -32,6 +33,7 @@ namespace Input
                 IPublisher<MouseDown> mouseDown,
                 IPublisher<MouseUp> mouseUp,
                 IPublisher<ShowStatsInputMessage> showStatsInputPublisher,
+                IPublisher<FastSlotInputMessage> fastSlotInputPublisher,
                 GameModesController gameModesController
             )
         {
@@ -42,6 +44,7 @@ namespace Input
             this.mouseDown = mouseDown;
             this.mouseUp = mouseUp;
             this.showStatsInputPublisher = showStatsInputPublisher;
+            this.fastSlotInputPublisher = fastSlotInputPublisher;
             this.gameModesController = gameModesController;
         }
 
@@ -57,6 +60,10 @@ namespace Input
             inputConfig.LeftClick.action.canceled += LeftMouseUp;
             inputConfig.RightClick.action.started += RightMouseDown;
             inputConfig.RightClick.action.canceled += RightMouseUp;
+            SubscribeFastSlotAction("FastSlot1", 1);
+            SubscribeFastSlotAction("FastSlot2", 2);
+            SubscribeFastSlotAction("FastSlot3", 3);
+            SubscribeFastSlotAction("FastSlot4", 4);
 
             if (inputConfig.ShowStats != null && inputConfig.ShowStats.action != null)
             {
@@ -130,6 +137,18 @@ namespace Input
         private void ShowStatsReleased(InputAction.CallbackContext context)
         {
             showStatsInputPublisher.Publish(new ShowStatsInputMessage(false));
+        }
+
+        private void SubscribeFastSlotAction(string actionName, int slotIndex)
+        {
+            var actionMap = inputConfig.Movement?.action?.actionMap;
+            var action = actionMap?.FindAction(actionName, false);
+            if (action == null)
+            {
+                return;
+            }
+
+            action.started += _ => fastSlotInputPublisher.Publish(new FastSlotInputMessage(slotIndex));
         }
 
         private void PollShowStatsFallback()

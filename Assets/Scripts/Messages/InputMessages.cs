@@ -62,4 +62,14 @@ namespace Messages
             IsPressed = isPressed;
         }
     }
+
+    public readonly struct FastSlotInputMessage
+    {
+        public readonly int SlotIndex;
+
+        public FastSlotInputMessage(int slotIndex)
+        {
+            SlotIndex = slotIndex;
+        }
+    }
 }
