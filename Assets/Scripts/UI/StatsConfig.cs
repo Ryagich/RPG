@@ -76,6 +76,10 @@ namespace UI
         [field: SerializeField] public int Sharpness { get; private set; } = 3; 
         [field: SerializeField] public float HeartDefSize { get; private set; } = .9f;
         [field: SerializeField] public float HeartMaxSize { get; private set; } = 1f;
+        [field: SerializeField, Min(0f)] public float HeartbeatTempoMultiplier { get; private set; } = 1f;
+
+        [field: Space, Header("Blood Screen")]
+        [field: SerializeField, Min(0f)] public float BloodScreenAlphaMultiplier { get; private set; } = 1f;
         
         [field: Space, Header("Bars Colors")]
         [field: SerializeField] public Color HpFullColor { get; private set; } = Color.white;

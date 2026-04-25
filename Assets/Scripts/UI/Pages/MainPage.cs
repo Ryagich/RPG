@@ -8,6 +8,7 @@ using Stats;
 using UI.Configs;
 using UniRx;
 using UnityEngine;
+using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
 using Utils;
@@ -69,6 +70,9 @@ namespace UI.Pages
         private StatsHolder statsHolder;
         private InteractableInterface interactableInterface;
         private BeatingHeart beatingHeart;
+        private HeartbeatPulse heartbeatPulse;
+        private BloodScreenController bloodScreenController;
+        private Image bloodScreen;
         private float lastHpTarget;
         private HpFillMode hpFillMode;
         private float globalAlpha;
@@ -186,13 +190,22 @@ namespace UI.Pages
             BeginGlobalReleaseSequence();
             ApplyAllVisualAlphas();
 
-            beatingHeart = new BeatingHeart(statsConfig, statsController.Hp, hpFiller, statsHolder.HPHolder);
+            bloodScreen = PageUiUtilities.CreateBloodScreen(uiConfig, resolver, contentRect, Type);
+            heartbeatPulse = new HeartbeatPulse(statsConfig, statsController.Hp, hpFiller);
+            beatingHeart = new BeatingHeart(statsConfig, heartbeatPulse, statsHolder.HPHolder);
+            bloodScreenController = new BloodScreenController(statsConfig, statsController.Hp, hpFiller, heartbeatPulse, bloodScreen);
         }
 
         public override void Hide()
         {
+            bloodScreenController?.Dispose();
+            bloodScreenController = null;
+
             beatingHeart?.Dispose();
             beatingHeart = null;
+
+            heartbeatPulse?.Dispose();
+            heartbeatPulse = null;
 
             drawDisposables.Clear();
             statVisibilityStates.Clear();
@@ -202,6 +215,7 @@ namespace UI.Pages
             interactableInterface = null;
 
             statsHolder = null;
+            bloodScreen = null;
 
             if (contentRect)
             {

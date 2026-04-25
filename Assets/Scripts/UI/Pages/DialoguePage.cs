@@ -4,7 +4,9 @@ using GameModes;
 using Localization;
 using MessagePipe;
 using Messages;
+using Stats;
 using TMPro;
+using UI;
 using UI.Configs;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,6 +22,9 @@ namespace UI.Pages
         public override PageType Type { get; } = PageType.Dialogue;
 
         private readonly UIConfig uiConfig;
+        private readonly StatsConfig statsConfig;
+        private readonly StatsController statsController;
+        private readonly StatFiller hpFiller;
         private readonly DialogueContext dialogueContext;
         private readonly CharacterInfo playerCharacterInfo;
         private readonly RectTransform canvasRect;
@@ -28,9 +33,15 @@ namespace UI.Pages
 
         private RectTransform contentRect;
         private DialogueContainer dialogueContainer;
+        private Image bloodScreen;
+        private HeartbeatPulse heartbeatPulse;
+        private BloodScreenController bloodScreenController;
 
         public DialoguePage(
             UIConfig uiConfig,
+            StatsConfig statsConfig,
+            StatsController statsController,
+            StatFillers statFillers,
             DialogueContext dialogueContext,
             CharacterInfo playerCharacterInfo,
             Canvas canvas,
@@ -38,6 +49,9 @@ namespace UI.Pages
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher)
         {
             this.uiConfig = uiConfig;
+            this.statsConfig = statsConfig;
+            this.statsController = statsController;
+            hpFiller = statFillers.Get(StatType.Hp);
             this.dialogueContext = dialogueContext;
             this.playerCharacterInfo = playerCharacterInfo;
             this.resolver = resolver;
@@ -59,17 +73,28 @@ namespace UI.Pages
 
             dialogueContainer = resolver.Instantiate(uiConfig.DialogueContainer, contentRect);
             dialogueContainer.TradeButton.onClick.AddListener(OpenTradePage);
+            bloodScreen = PageUiUtilities.CreateBloodScreen(uiConfig, resolver, contentRect, Type);
+            heartbeatPulse = new HeartbeatPulse(statsConfig, statsController.Hp, hpFiller);
+            bloodScreenController = new BloodScreenController(statsConfig, statsController.Hp, hpFiller, heartbeatPulse, bloodScreen);
 
             OpenEntryPhrase();
         }
 
         public override void Hide()
         {
+            bloodScreenController?.Dispose();
+            bloodScreenController = null;
+
+            heartbeatPulse?.Dispose();
+            heartbeatPulse = null;
+
             if (dialogueContainer)
             {
                 dialogueContainer.TradeButton.onClick.RemoveListener(OpenTradePage);
                 dialogueContainer = null;
             }
+
+            bloodScreen = null;
 
             if (contentRect)
             {

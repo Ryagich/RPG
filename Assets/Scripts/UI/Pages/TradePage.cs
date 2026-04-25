@@ -104,6 +104,8 @@ namespace UI.Pages
         public static IInventoryInteractionPage CurrentInteractionPage => Current;
 
         private readonly UIConfig uiConfig;
+        private readonly StatsConfig statsConfig;
+        private readonly StatFiller hpFiller;
         private readonly LocalizationConfig localizationConfig;
         private readonly ColorsConfig colorsConfig;
         private readonly StatIconsConfig statIconsConfig;
@@ -144,6 +146,9 @@ namespace UI.Pages
         private readonly List<PopupTarget> popupTargets = new();
         private readonly Dictionary<SellItemKey, Queue<SellItemOrigin>> playerSellOrigins = new();
         private readonly Dictionary<SellItemKey, Queue<SellItemOrigin>> targetSellOrigins = new();
+        private HeartbeatPulse heartbeatPulse;
+        private BloodScreenController bloodScreenController;
+        private Image bloodScreen;
         private TradeSellInventory playerSellInventory;
         private TradeSellInventory targetSellInventory;
         private IInventory dragSourceInventory;
@@ -162,6 +167,8 @@ namespace UI.Pages
 
         public TradePage(
             UIConfig uiConfig,
+            StatsConfig statsConfig,
+            StatFillers statFillers,
             LocalizationConfig localizationConfig,
             ColorsConfig colorsConfig,
             StatIconsConfig statIconsConfig,
@@ -176,6 +183,8 @@ namespace UI.Pages
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher)
         {
             this.uiConfig = uiConfig;
+            this.statsConfig = statsConfig;
+            hpFiller = statFillers.Get(StatType.Hp);
             this.localizationConfig = localizationConfig;
             this.colorsConfig = colorsConfig;
             this.statIconsConfig = statIconsConfig;
@@ -247,6 +256,10 @@ namespace UI.Pages
             {
                 DrawTiles(inventory);
             }
+
+            bloodScreen = PageUiUtilities.CreateBloodScreen(uiConfig, resolver, contentRect, Type);
+            heartbeatPulse = new HeartbeatPulse(statsConfig, statsController.Hp, hpFiller);
+            bloodScreenController = new BloodScreenController(statsConfig, statsController.Hp, hpFiller, heartbeatPulse, bloodScreen);
 
             playerInventory.Changed.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
             targetInventory.Changed.Subscribe(_ => ReDraw()).AddTo(redrawDisposables);
@@ -329,6 +342,12 @@ namespace UI.Pages
 
         public override void Hide()
         {
+            bloodScreenController?.Dispose();
+            bloodScreenController = null;
+
+            heartbeatPulse?.Dispose();
+            heartbeatPulse = null;
+
             ReturnItemsFromSellInventories();
             redrawDisposables.Clear();
             itemRects.Clear();
@@ -370,6 +389,7 @@ namespace UI.Pages
             leftInfoAboutInventory = null;
             rightInfoAboutInventory = null;
             centerSection = null;
+            bloodScreen = null;
             playerInventoryView = null;
             targetInventoryView = null;
             playerSellInventoryView = null;

@@ -44,5 +44,6 @@ namespace UI.Configs
         [field: SerializeField, Min(0f)] public float PopupHoverOpenDelaySeconds { get; private set; } = 0.5f;
         [field: SerializeField] public StatHolderForUsable StatHolderForUsable { get; private set; }
         [field: SerializeField] public StatHolder StatHolderForClothes { get; private set; }
+        [field: SerializeField] public Image BloodScreen { get; private set; }
     }
 }

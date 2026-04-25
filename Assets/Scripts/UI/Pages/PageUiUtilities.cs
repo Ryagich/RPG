@@ -25,6 +25,23 @@ namespace UI.Pages
         private static readonly StatType[] UsablePopupStatTypes = { StatType.Hp, StatType.Water, StatType.Food, StatType.Chill };
         private static readonly StatType[] DefensePopupStatTypes = { StatType.PhysicalDefense, StatType.TemperatureDefense, StatType.PsiDefense, StatType.MagicDefense };
 
+        public static Image CreateBloodScreen(
+            UIConfig uiConfig,
+            IObjectResolver resolver,
+            RectTransform parent,
+            PageType pageType)
+        {
+            if (uiConfig == null || resolver == null || parent == null || uiConfig.BloodScreen == null)
+            {
+                return null;
+            }
+
+            var bloodScreen = resolver.Instantiate(uiConfig.BloodScreen, parent);
+            bloodScreen.name = $"{uiConfig.BloodScreen.name} | {pageType}";
+            bloodScreen.transform.SetAsLastSibling();
+            return bloodScreen;
+        }
+
         public static void FillSlotsViewContainerStats(SlotsViewContainer slotsViewContainer, StatsController statsController)
         {
             if (slotsViewContainer == null || statsController == null)

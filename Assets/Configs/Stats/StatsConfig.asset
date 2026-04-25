@@ -48,7 +48,7 @@ MonoBehaviour:
     <Max>k__BackingField: 300
     <Min>k__BackingField: 0
     <Value>k__BackingField:
-      value: 100
+      value: 300
     <MinSafePercent>k__BackingField: 0.05
     <PeriodicChange>k__BackingField: 0.45
     <MovingRecoveryPeriodicChange>k__BackingField: 0.2
@@ -109,6 +109,8 @@ MonoBehaviour:
   <Sharpness>k__BackingField: 3
   <HeartDefSize>k__BackingField: 0.9
   <HeartMaxSize>k__BackingField: 1
+  <HeartbeatTempoMultiplier>k__BackingField: 1
+  <BloodScreenAlphaMultiplier>k__BackingField: 1
   <HpFullColor>k__BackingField: {r: 1, g: 1, b: 1, a: 1}
   <HpRecoveryColor>k__BackingField: {r: 0, g: 1, b: 0, a: 1}
   <HpDecreaseColor>k__BackingField: {r: 1, g: 0, b: 0, a: 1}

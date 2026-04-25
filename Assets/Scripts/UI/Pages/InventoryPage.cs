@@ -86,6 +86,9 @@ namespace UI.Pages
         private readonly List<PopupTarget> popupTargets = new();
         private Vector2 handGrabOffset;
         private BeatingHeart beatingHeart;
+        private HeartbeatPulse heartbeatPulse;
+        private BloodScreenController bloodScreenController;
+        private Image bloodScreen;
         private RectTransform popupRect;
         private RectTransform popupParentRect;
         private PopupTarget hoverPopupTarget;
@@ -200,7 +203,10 @@ namespace UI.Pages
             RefreshAdditionalStatFills();
             UpdateWeightIndicator(playerInventory.CurrentWeight);
             DrawStatsHolderFastSlots();
-            beatingHeart = new BeatingHeart(statsConfig, statsController.Hp, hpFiller, statsHolder.HPHolder);
+            bloodScreen = PageUiUtilities.CreateBloodScreen(uiConfig, resolver, contentRect, Type);
+            heartbeatPulse = new HeartbeatPulse(statsConfig, statsController.Hp, hpFiller);
+            beatingHeart = new BeatingHeart(statsConfig, heartbeatPulse, statsHolder.HPHolder);
+            bloodScreenController = new BloodScreenController(statsConfig, statsController.Hp, hpFiller, heartbeatPulse, bloodScreen);
 
             ReDraw();
         }
@@ -766,8 +772,14 @@ namespace UI.Pages
         
         public override void Hide()
         {
+            bloodScreenController?.Dispose();
+            bloodScreenController = null;
+
             beatingHeart?.Dispose();
             beatingHeart = null;
+
+            heartbeatPulse?.Dispose();
+            heartbeatPulse = null;
 
             redrawDisposables.Clear();
             itemRects.Clear();
@@ -788,6 +800,7 @@ namespace UI.Pages
 
             contentRect = null;
             statsHolder = null;
+            bloodScreen = null;
             rightRect = null;
             infoAboutPlayer = null;
             infoAboutInventory = null;
