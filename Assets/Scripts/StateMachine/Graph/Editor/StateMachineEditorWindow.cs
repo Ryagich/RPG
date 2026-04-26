@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using StateMachine.Graph.Model;
@@ -9,31 +9,29 @@ namespace StateMachine.Graph.Editor
 {
     public class StateMachineEditorWindow : EditorWindow
     {
+        private const string StatesPathKey = "StateMachineEditor_StatesPath";
+        private const string TransitionsPathKey = "StateMachineEditor_TransitionsPath";
+        private const float WorkspaceWidth = 10000f;
+        private const float WorkspaceHeight = 10000f;
+        private const float ZoomMin = 0.25f;
+        private const float ZoomMax = 2f;
+        private const float OverlayPanelWidth = 320f;
+        private static readonly Vector2 NodeSize = new(320f, 220f);
+
         private StateMachineGraph currentGraph;
         private Vector2 scrollPos;
-
-        // === Ключи для сохранения путей ===
-        private const string STATE_PATH_KEY = "StateMachineEditor_StatesPath";
-        private const string TRANSITION_PATH_KEY = "StateMachineEditor_TransitionsPath";
-
-        // === Кэш путей ===
         private string statesFolderPath;
         private string transitionsFolderPath;
         private readonly Dictionary<Transition, Vector2> transitionAnchorPositions = new();
+        private readonly Dictionary<Node, Rect> nodeRects = new();
 
-        // === Режим выбора целевого узла ===
         private bool isSelectingTargetNode;
+        private bool isControlsPanelExpanded = true;
         private Transition pendingTransition;
         private Node sourceNodeForSelection;
 
-        // Для сохранения позиций окон
-        private readonly Dictionary<Node, Rect> nodeRects = new();
-
-        // === Навигация по графу ===
         private float zoom = 1f;
         private Vector2 panOffset = Vector2.zero;
-        private const float zoomMin = 0.25f;
-        private const float zoomMax = 2.0f;
 
         [MenuItem("Tools/State Machine Editor")]
         public static void Open()
@@ -43,200 +41,186 @@ namespace StateMachine.Graph.Editor
 
         private void OnEnable()
         {
-            // Загружаем пути из EditorPrefs при открытии окна
-            statesFolderPath = EditorPrefs.GetString(STATE_PATH_KEY, "Assets/States");
-            transitionsFolderPath = EditorPrefs.GetString(TRANSITION_PATH_KEY, "Assets/Transitions");
+            statesFolderPath = EditorPrefs.GetString(StatesPathKey, "Assets/States");
+            transitionsFolderPath = EditorPrefs.GetString(TransitionsPathKey, "Assets/Transitions");
         }
 
         private void OnGUI()
         {
-            DrawMenuButtons();
-
-            // Если граф не выбран, показываем сообщение
             if (currentGraph == null)
             {
-                EditorGUILayout.HelpBox("Выбери или создай граф состояния", MessageType.Info);
+                DrawEmptyState();
+                DrawControlsOverlay();
                 return;
             }
 
+            EnsureGraphNodes();
             DrawGraphArea();
+            DrawControlsOverlay();
         }
 
-        private void DrawMenuButtons()
+        private void DrawEmptyState()
         {
-            float panelWidth = 320f;
-            float buttonHeight = 28f;
-            float spacing = 6f;
-            float x = 10f;
-            float y = 10f;
+            Rect contentRect = new Rect(12f, 12f, position.width - 24f, 52f);
+            GUI.Box(contentRect, GUIContent.none, EditorStyles.helpBox);
+            EditorGUI.LabelField(
+                new Rect(contentRect.x + 10f, contentRect.y + 10f, contentRect.width - 20f, 32f),
+                "Create or load a state machine graph.");
+        }
 
-            // === STATES PATH ===
-            EditorGUI.LabelField(new Rect(x, y, panelWidth, 18f), "📁 States Folder Path:");
-            y += 18f;
+        private void DrawControlsOverlay()
+        {
+            const float toggleButtonWidth = 24f;
+            const float toggleButtonHeight = 64f;
+            const float spacing = 6f;
+            const float padding = 10f;
+            const float collapsedToggleLeftOffset = 6f;
 
-            statesFolderPath = EditorGUI.TextField(new Rect(x, y, panelWidth - 170, 20f), statesFolderPath);
+            float panelHeight = Mathf.Max(120f, position.height);
+            float panelY = position.height - panelHeight;
+            Rect panelRect = new Rect(0f, panelY, OverlayPanelWidth, panelHeight);
 
-            // Pick Folder
-            if (GUI.Button(new Rect(x + panelWidth - 165, y, 75, 20f), "📂 Pick"))
+            float toggleX = isControlsPanelExpanded
+                ? panelRect.xMax - toggleButtonWidth * 0.5f
+                : collapsedToggleLeftOffset;
+            float toggleY = panelRect.y + panelRect.height * 0.5f - toggleButtonHeight * 0.5f;
+            Rect toggleRect = new Rect(toggleX, toggleY, toggleButtonWidth, toggleButtonHeight);
+
+            if (!isControlsPanelExpanded)
             {
-                string selected = EditorUtility.OpenFolderPanel("Select folder for States", "Assets", "");
-                if (!string.IsNullOrEmpty(selected))
+                if (GUI.Button(toggleRect, ">"))
                 {
-                    if (selected.StartsWith(Application.dataPath))
-                    {
-                        statesFolderPath = "Assets" + selected.Substring(Application.dataPath.Length);
-                        EditorPrefs.SetString(STATE_PATH_KEY, statesFolderPath);
-                        Debug.Log($"✅ Saved States folder: {statesFolderPath}");
-                    }
-                    else
-                    {
-                        EditorUtility.DisplayDialog("Invalid Folder",
-                                                    "Please select a folder inside your Assets directory.", "OK");
-                    }
+                    isControlsPanelExpanded = true;
                 }
+
+                return;
             }
 
-            // Save manually
-            if (GUI.Button(new Rect(x + panelWidth - 85, y, 75, 20f), "💾 Save"))
+            const float buttonHeight = 28f;
+            float y = padding;
+
+            EditorGUI.DrawRect(panelRect, new Color(0.18f, 0.18f, 0.18f, 1f));
+            GUI.Box(panelRect, GUIContent.none, EditorStyles.helpBox);
+            GUILayout.BeginArea(panelRect, GUIContent.none, EditorStyles.helpBox);
+            float contentWidth = OverlayPanelWidth - padding * 2f;
+
+            EditorGUI.LabelField(new Rect(padding, padding, contentWidth, 18f), "States Folder Path:");
+            y += 18f;
+
+            statesFolderPath = EditorGUI.TextField(new Rect(padding, y, contentWidth - 160f, 20f), statesFolderPath);
+            if (GUI.Button(new Rect(padding + contentWidth - 155f, y, 70f, 20f), "Pick"))
             {
-                EditorPrefs.SetString(STATE_PATH_KEY, statesFolderPath);
-                Debug.Log($"✅ Saved States path: {statesFolderPath}");
+                PickFolder("Select folder for States", ref statesFolderPath, StatesPathKey);
+            }
+
+            if (GUI.Button(new Rect(padding + contentWidth - 80f, y, 70f, 20f), "Save"))
+            {
+                EditorPrefs.SetString(StatesPathKey, statesFolderPath);
             }
 
             y += 28f;
 
-            // === TRANSITIONS PATH ===
-            EditorGUI.LabelField(new Rect(x, y, panelWidth, 18f), "📁 Transitions Folder Path:");
+            EditorGUI.LabelField(new Rect(padding, y, contentWidth, 18f), "Transitions Folder Path:");
             y += 18f;
 
-            transitionsFolderPath = EditorGUI.TextField(new Rect(x, y, panelWidth - 170, 20f), transitionsFolderPath);
-
-            if (GUI.Button(new Rect(x + panelWidth - 165, y, 75, 20f), "📂 Pick"))
+            transitionsFolderPath = EditorGUI.TextField(new Rect(padding, y, contentWidth - 160f, 20f), transitionsFolderPath);
+            if (GUI.Button(new Rect(padding + contentWidth - 155f, y, 70f, 20f), "Pick"))
             {
-                string selected = EditorUtility.OpenFolderPanel("Select folder for Transitions", "Assets", "");
-                if (!string.IsNullOrEmpty(selected))
-                {
-                    if (selected.StartsWith(Application.dataPath))
-                    {
-                        transitionsFolderPath = "Assets" + selected.Substring(Application.dataPath.Length);
-                        EditorPrefs.SetString(TRANSITION_PATH_KEY, transitionsFolderPath);
-                        Debug.Log($"✅ Saved Transitions folder: {transitionsFolderPath}");
-                    }
-                    else
-                    {
-                        EditorUtility.DisplayDialog("Invalid Folder",
-                                                    "Please select a folder inside your Assets directory.", "OK");
-                    }
-                }
+                PickFolder("Select folder for Transitions", ref transitionsFolderPath, TransitionsPathKey);
             }
 
-            if (GUI.Button(new Rect(x + panelWidth - 85, y, 75, 20f), "💾 Save"))
+            if (GUI.Button(new Rect(padding + contentWidth - 80f, y, 70f, 20f), "Save"))
             {
-                EditorPrefs.SetString(TRANSITION_PATH_KEY, transitionsFolderPath);
-                Debug.Log($"✅ Saved Transitions path: {transitionsFolderPath}");
+                EditorPrefs.SetString(TransitionsPathKey, transitionsFolderPath);
             }
 
             y += 36f;
 
-            // === Основные кнопки ===
-            if (GUI.Button(new Rect(x, y, panelWidth, buttonHeight), "🧩 New Graph"))
+            if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "New Graph"))
+            {
                 CreateNewGraph();
+            }
+
             y += buttonHeight + spacing;
 
-            if (GUI.Button(new Rect(x, y, panelWidth, buttonHeight), "📥 Load Graph"))
+            if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "Load Graph"))
+            {
                 LoadGraph();
+            }
+
             y += buttonHeight + spacing;
 
-            if (GUI.Button(new Rect(x, y, panelWidth, buttonHeight), "🟢 New State"))
+            EditorGUI.BeginDisabledGroup(currentGraph == null);
+            if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "New State"))
+            {
                 CreateNewState();
+            }
+
+            EditorGUI.EndDisabledGroup();
             y += buttonHeight + spacing;
 
-            // === Cancel selection ===
+            if (currentGraph != null)
+            {
+                State startState = GetStartState();
+                if (startState == null)
+                {
+                    EditorGUI.HelpBox(
+                        new Rect(padding, y, contentWidth, 40f),
+                        "Start state is not defined. The state machine will not work without it.",
+                        MessageType.Warning);
+                    y += 46f;
+                }
+
+                EditorGUI.BeginDisabledGroup(startState == null);
+                if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "Ping Start State"))
+                {
+                    EditorGUIUtility.PingObject(startState);
+                    Selection.activeObject = startState;
+                }
+
+                EditorGUI.EndDisabledGroup();
+                y += buttonHeight + spacing;
+            }
+
             if (isSelectingTargetNode)
             {
+                Color previousColor = GUI.backgroundColor;
                 GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
-                if (GUI.Button(new Rect(x, y, panelWidth, buttonHeight), "❌ Cancel Selection"))
+                if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "Cancel Selection"))
                 {
-                    isSelectingTargetNode = false;
-                    pendingTransition = null;
-                    sourceNodeForSelection = null;
-                    Debug.Log("Node selection canceled.");
+                    CancelTargetSelection();
                 }
-                GUI.backgroundColor = Color.white;
+
+                GUI.backgroundColor = previousColor;
+            }
+
+            GUILayout.EndArea();
+
+            if (GUI.Button(toggleRect, "<"))
+            {
+                isControlsPanelExpanded = false;
             }
         }
 
-        private void CreateNewState()
+        private void PickFolder(string title, ref string folderPath, string prefsKey)
         {
-            if (currentGraph == null)
+            string selected = EditorUtility.OpenFolderPanel(title, "Assets", "");
+            if (string.IsNullOrEmpty(selected))
             {
-                EditorUtility.DisplayDialog("No Graph Selected",
-                                            "Please create or load a State Machine Graph first.", "OK");
                 return;
             }
 
-            // 🔹 Проверяем дубликаты State
-            var existingStates = new HashSet<State>();
-            foreach (var node in currentGraph.Nodes)
+            if (!selected.StartsWith(Application.dataPath))
             {
-                if (node.State != null)
-                    existingStates.Add(node.State);
-            }
-
-            // 🔹 Проверяем и создаём папку
-            if (string.IsNullOrEmpty(statesFolderPath))
-            {
-                EditorUtility.DisplayDialog("Path not set", "Please specify the folder for saving States.", "OK");
+                EditorUtility.DisplayDialog(
+                    "Invalid Folder",
+                    "Please select a folder inside your Assets directory.",
+                    "OK");
                 return;
             }
 
-            if (!Directory.Exists(statesFolderPath))
-            {
-                Directory.CreateDirectory(statesFolderPath);
-                Debug.Log($"📁 Created missing folder: {statesFolderPath}");
-            }
-
-            // 🔹 Генерируем путь
-            string fileName = $"NewState_{currentGraph.Nodes.Count}.asset";
-            string targetPath = Path.Combine(statesFolderPath, fileName);
-            targetPath = AssetDatabase.GenerateUniqueAssetPath(targetPath);
-
-            // 🔹 Создаём State
-            var state = CreateInstance<State>();
-            state.name = Path.GetFileNameWithoutExtension(targetPath);
-
-            AssetDatabase.CreateAsset(state, targetPath);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-
-            // 🔹 Проверяем дубликаты
-            if (existingStates.Contains(state))
-            {
-                EditorUtility.DisplayDialog("Duplicate State Detected",
-                                            $"State \"{state.name}\" is already used by another Node.", "OK");
-                AssetDatabase.DeleteAsset(targetPath);
-                return;
-            }
-
-            // 🔹 Добавляем Node
-            // 🔹 Центр экрана в мировых координатах графа
-            Vector2 screenCenter = new Vector2(position.width / 2f, position.height / 2f);
-            Vector2 graphCenter = (screenCenter - panOffset) / zoom;
-
-            // 🔹 Смещаем немного вверх, чтобы не перекрывалось меню
-            graphCenter.y += 100f;
-
-            var newNode = new Node(state)
-                          {
-                              Position = graphCenter - new Vector2(90, 30) // половина размера окна узла (180x60)
-                          };
-
-            currentGraph.Nodes.Add(newNode);
-            EditorUtility.SetDirty(currentGraph);
-
-            Debug.Log($"✅ Created new State asset at: {targetPath}");
-            EditorGUIUtility.PingObject(state);
-            Selection.activeObject = state;
+            folderPath = "Assets" + selected.Substring(Application.dataPath.Length);
+            EditorPrefs.SetString(prefsKey, folderPath);
         }
 
         private void CreateNewGraph()
@@ -247,592 +231,1510 @@ namespace StateMachine.Graph.Editor
 
         private void LoadGraph()
         {
-            var path = EditorUtility.OpenFilePanel("Load State Machine Graph", "Assets", "asset");
-            if (string.IsNullOrEmpty(path)) return;
+            string path = EditorUtility.OpenFilePanel("Load State Machine Graph", "Assets", "asset");
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
 
             path = "Assets" + path.Replace(Application.dataPath, "");
             currentGraph = AssetDatabase.LoadAssetAtPath<StateMachineGraph>(path);
+            if (currentGraph == null)
+            {
+                EditorUtility.DisplayDialog("Invalid Asset", "Selected asset is not a StateMachineGraph.", "OK");
+                return;
+            }
+
+            EnsureGraphNodes();
         }
-        
-        // Размер твоего холста должен совпадать с BeginClip
-        private const float WORKSPACE_W = 10000f;
-        private const float WORKSPACE_H = 10000f;
+
+        private void CreateNewState()
+        {
+            if (currentGraph == null)
+            {
+                EditorUtility.DisplayDialog(
+                    "No Graph Selected",
+                    "Please create or load a state machine graph first.",
+                    "OK");
+                return;
+            }
+
+            EnsureGraphNodes();
+
+            if (!EnsureFolderExists(statesFolderPath, "Please specify the folder for saving states."))
+            {
+                return;
+            }
+
+            string fileName = $"State_{currentGraph.Nodes.Count}.asset";
+            string targetPath = AssetDatabase.GenerateUniqueAssetPath(Path.Combine(statesFolderPath, fileName));
+
+            var state = CreateInstance<State>();
+            state.name = Path.GetFileNameWithoutExtension(targetPath);
+
+            AssetDatabase.CreateAsset(state, targetPath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            var newNode = new Node(state)
+            {
+                Position = GetCenteredNodePosition(NodeSize)
+            };
+
+            currentGraph.Nodes.Add(newNode);
+            MarkDirty(currentGraph);
+
+            EditorGUIUtility.PingObject(state);
+            Selection.activeObject = state;
+        }
+
+        private bool EnsureFolderExists(string folderPath, string emptyPathMessage)
+        {
+            if (string.IsNullOrWhiteSpace(folderPath))
+            {
+                EditorUtility.DisplayDialog("Path not set", emptyPathMessage, "OK");
+                return false;
+            }
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            return true;
+        }
+
+        private Vector2 GetCenteredNodePosition(Vector2 nodeSize)
+        {
+            Vector2 screenCenter = new Vector2(position.width / 2f, position.height / 2f);
+            Vector2 graphCenter = (screenCenter - panOffset) / zoom;
+            graphCenter.y += 120f;
+            return graphCenter - nodeSize * 0.5f;
+        }
+
         private void DrawGraphArea()
         {
+            CleanupGraph();
             transitionAnchorPositions.Clear();
             nodeRects.Clear();
 
-            Event e = Event.current;
-
-            // === Обработка масштабирования ===
-            if (e.type == EventType.ScrollWheel)
-            {
-                float zoomDelta = -e.delta.y * 0.05f;
-                float oldZoom = zoom;
-                zoom = Mathf.Clamp(zoom + zoomDelta, zoomMin, zoomMax);
-
-                // Зум вокруг центра окна
-                Vector2 windowCenter = new Vector2(position.width / 2f, position.height / 2f);
-                panOffset = (panOffset - windowCenter) * (zoom / oldZoom) + windowCenter;
-
-                // ❗ Не даём «выйти» за рабочую область
-                ClampPanToWorkspace(WORKSPACE_W, WORKSPACE_H);
-
-                e.Use();
-            }
-
-            // === Панорамирование при зажатой ПКМ ===
-            if (e.type == EventType.MouseDrag && e.button == 1)
-            {
-                panOffset += e.delta;
-
-                // ❗ Держим внутри рабочей области
-                ClampPanToWorkspace(WORKSPACE_W, WORKSPACE_H);
-
-                e.Use();
-                Repaint();
-            }
+            Event currentEvent = Event.current;
+            HandleZoom(currentEvent);
+            HandlePan(currentEvent);
 
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.ExpandHeight(true));
             GUI.EndClip();
             GUI.EndClip();
-            GUI.BeginClip(new Rect(Vector2.zero, new Vector2(WORKSPACE_W,WORKSPACE_H)));
-            GUI.BeginClip(new Rect(Vector2.zero, new Vector2(WORKSPACE_W,WORKSPACE_H)));
-            
-            // === Применяем трансформацию (панорамирование + масштабирование от центра) ===
+            GUI.BeginClip(new Rect(Vector2.zero, new Vector2(WorkspaceWidth, WorkspaceHeight)));
+            GUI.BeginClip(new Rect(Vector2.zero, new Vector2(WorkspaceWidth, WorkspaceHeight)));
+
             Matrix4x4 oldMatrix = GUI.matrix;
             GUI.matrix = Matrix4x4.TRS(panOffset, Quaternion.identity, Vector3.one * zoom);
 
-            Rect backgroundRect = new Rect(0, 0, 10000, 10000);
-            DrawBackgroundGrid(backgroundRect);
-            
+            DrawBackgroundGrid(new Rect(0f, 0f, WorkspaceWidth, WorkspaceHeight));
+
             EditorGUI.BeginDisabledGroup(isSelectingTargetNode);
             BeginWindows();
-            nodeRects.Clear();
 
-            // === 1. Отрисовка окон узлов ===
-            for (var i = 0; i < currentGraph.Nodes.Count; i++)
+            for (int i = 0; i < currentGraph.Nodes.Count; i++)
             {
-                var node = currentGraph.Nodes[i];
-                var rect = new Rect(node.Position, new Vector2(180, 60));
-                rect = GUILayout.Window(i, rect, _ => DrawNodeWindow(node),
-                                        node.State != null ? $"Node" : "Empty Node");
+                Node node = currentGraph.Nodes[i];
+                Rect rect = new Rect(node.Position, NodeSize);
+
+                Color previousColor = GUI.color;
+                GUI.color = GetNodeTint(node);
+                rect = GUILayout.Window(i, rect, _ => DrawNodeWindow(node), GetNodeTitle(node));
+                GUI.color = previousColor;
+
                 nodeRects[node] = rect;
                 node.Position = rect.position;
             }
 
             EndWindows();
-
-            // === 2. Точки входа ===
-            foreach (var node in currentGraph.Nodes)
-            {
-                if (node.State == null) continue;
-                var pointRect = new Rect(node.Position.x + 5, node.Position.y + 5, 15, 15);
-
-                var prevColor = GUI.backgroundColor;
-                GUI.backgroundColor = new Color(1f, 0.7f, 0.2f);
-
-                GUIStyle pointStyle = new GUIStyle(GUI.skin.button)
-                                      {
-                                          alignment = TextAnchor.MiddleCenter,
-                                          fontSize = 10,
-                                          fontStyle = FontStyle.Bold,
-                                          normal = { textColor = Color.white }
-                                      };
-
-                GUI.Box(pointRect, "●", pointStyle);
-                GUI.backgroundColor = prevColor;
-            }
-
             EditorGUI.EndDisabledGroup();
 
-            // === 3. Связи между узлами ===
+            DrawNodeMarkers();
+            DrawConnections();
+            DrawTargetSelectionOverlay();
+
+            GUI.matrix = oldMatrix;
+            EditorGUILayout.EndScrollView();
+        }
+
+        private void CleanupGraph()
+        {
+            if (currentGraph == null)
+            {
+                return;
+            }
+
+            EnsureGraphNodes();
+
+            bool graphChanged = false;
+
+            for (int i = currentGraph.Nodes.Count - 1; i >= 0; i--)
+            {
+                Node node = currentGraph.Nodes[i];
+                if (node == null)
+                {
+                    currentGraph.Nodes.RemoveAt(i);
+                    graphChanged = true;
+                    continue;
+                }
+
+                if (node.State == null || !AssetDatabase.Contains(node.State))
+                {
+                    currentGraph.Nodes.RemoveAt(i);
+                    graphChanged = true;
+                }
+            }
+
+            if (graphChanged)
+            {
+                MarkDirty(currentGraph);
+            }
+        }
+
+        private void HandleZoom(Event currentEvent)
+        {
+            if (currentEvent.type != EventType.ScrollWheel)
+            {
+                return;
+            }
+
+            float zoomDelta = -currentEvent.delta.y * 0.05f;
+            float oldZoom = zoom;
+            zoom = Mathf.Clamp(zoom + zoomDelta, ZoomMin, ZoomMax);
+
+            Vector2 windowCenter = new Vector2(position.width / 2f, position.height / 2f);
+            panOffset = (panOffset - windowCenter) * (zoom / oldZoom) + windowCenter;
+
+            ClampPanToWorkspace(WorkspaceWidth, WorkspaceHeight);
+            currentEvent.Use();
+        }
+
+        private void HandlePan(Event currentEvent)
+        {
+            if (currentEvent.type != EventType.MouseDrag || currentEvent.button != 1)
+            {
+                return;
+            }
+
+            panOffset += currentEvent.delta;
+            ClampPanToWorkspace(WorkspaceWidth, WorkspaceHeight);
+            currentEvent.Use();
+            Repaint();
+        }
+
+        private void DrawNodeMarkers()
+        {
+            foreach (Node node in currentGraph.Nodes)
+            {
+                if (node.State == null)
+                {
+                    continue;
+                }
+
+                Rect badgeRect = new Rect(node.Position.x + 6f, node.Position.y + 6f, 18f, 18f);
+                Color previous = GUI.backgroundColor;
+
+                if (IsStartNode(node))
+                {
+                    GUI.backgroundColor = new Color(0.2f, 0.7f, 0.25f);
+                    GUI.Box(badgeRect, "S");
+                }
+                else if (IsOrphanState(node.State))
+                {
+                    GUI.backgroundColor = new Color(1f, 0.6f, 0.15f);
+                    GUI.Box(badgeRect, "!");
+                }
+
+                GUI.backgroundColor = previous;
+            }
+        }
+
+        private void DrawConnections()
+        {
             Handles.BeginGUI();
 
-            foreach (var node in currentGraph.Nodes)
+            foreach (Node node in currentGraph.Nodes)
             {
-                if (node.State == null || node.State.Transitions == null)
+                State state = node.State;
+                if (state == null)
+                {
                     continue;
+                }
 
-                foreach (var transition in node.State.Transitions)
+                EnsureCollections(state);
+
+                foreach (Transition transition in state.Transitions)
                 {
                     if (transition == null || transition.TargetState == null)
+                    {
                         continue;
+                    }
 
-                    var targetNode = currentGraph.Nodes.FirstOrDefault(n => n.State == transition.TargetState);
+                    Node targetNode = currentGraph.Nodes.FirstOrDefault(n => n.State == transition.TargetState);
                     if (targetNode == null)
+                    {
                         continue;
+                    }
 
-                    if (!nodeRects.TryGetValue(node, out var sourceRect) ||
-                        !nodeRects.TryGetValue(targetNode, out var targetRect))
+                    if (!nodeRects.TryGetValue(node, out Rect sourceRect) ||
+                        !nodeRects.TryGetValue(targetNode, out Rect targetRect))
+                    {
                         continue;
+                    }
 
                     Vector2 startPos;
                     if (!transitionAnchorPositions.TryGetValue(transition, out startPos))
-                        startPos = new Vector2(sourceRect.xMax - 10, sourceRect.center.y);
-                    Vector2 endPos = new Vector2(targetRect.x + 10, targetRect.y + 12);
+                    {
+                        startPos = new Vector2(sourceRect.xMax - 12f, sourceRect.center.y);
+                    }
 
-                    Vector2 startTangent = startPos + Vector2.right * 50f;
-                    Vector2 endTangent = endPos + Vector2.left * 50f;
-
-                    bool isSelected = Selection.activeObject == transition;
-                    Handles.color = isSelected
-                                        ? new Color(0.3f, 0.9f, 1f, 1f)
-                                        : new Color(1f, 0.85f, 0.2f, 0.9f);
-
-                    Handles.DrawBezier(startPos, endPos, startTangent, endTangent, Handles.color, null, 2f);
-
-                    // Стрелка
-                    Vector2 dir = (endPos - startPos).normalized;
-                    Vector2 perp = new Vector2(-dir.y, dir.x);
-                    Vector2 arrowTip = endPos;
-                    Vector2 arrowBase1 = endPos - dir * 10f + perp * 4f;
-                    Vector2 arrowBase2 = endPos - dir * 10f - perp * 4f;
-                    Handles.DrawAAConvexPolygon(arrowTip, arrowBase1, arrowBase2);
+                    Handles.color = new Color(0.9f, 0.8f, 0.2f, 0.95f);
+                    Vector2[] routePoints = BuildConnectionRoute(startPos, sourceRect, targetRect, nodeRects.Values);
+                    DrawSmoothedConnection(routePoints);
+                    DrawConnectionArrow(routePoints);
                 }
             }
 
             Handles.EndGUI();
+        }
 
-            // === 4. Выбор целевого узла ===
-            if (isSelectingTargetNode && pendingTransition != null)
+        private static Vector2[] BuildConnectionRoute(Vector2 startPos, Rect sourceRect, Rect targetRect, IEnumerable<Rect> allNodeRects)
+        {
+            const float clearance = 28f;
+
+            ConnectionPort startPort = GetSourcePort(startPos, sourceRect, targetRect, clearance);
+            ConnectionPort endPort = GetTargetPort(sourceRect, targetRect, clearance);
+
+            List<Rect> obstacles = allNodeRects
+                .Select(rect => ExpandRect(rect, clearance))
+                .ToList();
+
+            List<Vector2> routedPoints = FindOrthogonalPath(startPort.OuterPoint, endPort.OuterPoint, obstacles);
+            if (routedPoints == null || routedPoints.Count == 0)
             {
-                Handles.BeginGUI();
-                Vector2 mousePos = Event.current.mousePosition;
-
-                foreach (var node in currentGraph.Nodes)
+                return SimplifyRoute(new[]
                 {
-                    if (node == sourceNodeForSelection) continue;
-                    if (node.State == null) continue;
-                    if (!nodeRects.TryGetValue(node, out var rect)) continue;
-
-                    bool isHovered = rect.Contains(mousePos);
-                    EditorGUI.DrawRect(rect, new Color(0f, 0.8f, 0.2f, isHovered ? 0.45f : 0.25f));
-
-                    var bigStyle = new GUIStyle(GUI.skin.label)
-                                   {
-                                       alignment = TextAnchor.MiddleCenter,
-                                       fontSize = 52,
-                                       fontStyle = FontStyle.Bold,
-                                       normal = { textColor = Color.white }
-                                   };
-                    GUI.Label(rect, "+", bigStyle);
-
-                    if ((Event.current.rawType == EventType.MouseDown || Event.current.rawType == EventType.MouseUp)
-                     && rect.Contains(Event.current.mousePosition))
-                    {
-                        pendingTransition.TargetState = node.State;
-                        EditorUtility.SetDirty(pendingTransition);
-                        AssetDatabase.SaveAssets();
-                        AssetDatabase.Refresh();
-
-                        Debug.Log($"✅ Transition now leads to State: {node.State.name}");
-
-                        isSelectingTargetNode = false;
-                        pendingTransition = null;
-                        sourceNodeForSelection = null;
-
-                        Event.current.Use();
-                        GUIUtility.ExitGUI();
-                        return;
-                    }
-
-                    if (isHovered)
-                    {
-                        Handles.color = new Color(1f, 1f, 1f, 0.85f);
-                        Handles.DrawSolidRectangleWithOutline(rect, Color.clear, Handles.color);
-                    }
-                }
-
-                Handles.EndGUI();
+                    startPos,
+                    startPort.OuterPoint,
+                    endPort.OuterPoint,
+                    endPort.EdgePoint
+                });
             }
 
-            // === Восстановление матрицы ===
-            GUI.matrix = oldMatrix;
-            EditorGUILayout.EndScrollView();
-        }
-        
-        /// <summary>
-        /// Держит панорамирование в пределах рабочей области с учётом зума.
-        /// Если вьюпорт больше контента — центрируем и блокируем ось.
-        /// </summary>
-        private void ClampPanToWorkspace(float workspaceW, float workspaceH)
-        {
-            float viewW = position.width;
-            float viewH = position.height;
-
-            // Пределы таковы, чтобы весь вьюпорт оставался внутри контента в мировых координатах
-            float minX = viewW - workspaceW * zoom; // максимально влево (контент упирается правым краем)
-            float maxX = 0f;                        // максимально вправо (контент упирается левым краем)
-            float minY = viewH - workspaceH * zoom; // максимально вверх
-            float maxY = 0f;                        // максимально вниз
-
-            // Если вьюпорт больше контента по оси — центрируем и блокируем ось
-            if (workspaceW * zoom <= viewW)
-                panOffset.x = Mathf.Round((viewW - workspaceW * zoom) * 0.5f);
-            else
-                panOffset.x = Mathf.Clamp(panOffset.x, minX, maxX);
-
-            if (workspaceH * zoom <= viewH)
-                panOffset.y = Mathf.Round((viewH - workspaceH * zoom) * 0.5f);
-            else
-                panOffset.y = Mathf.Clamp(panOffset.y, minY, maxY);
-        }
-        
-        private void DrawNodeWindow(Node node)
-        {
-            EditorGUI.BeginDisabledGroup(isSelectingTargetNode); // 🔸 Блокируем весь GUI внутри окна, если выбираем узел
-
-            // === Кнопка удаления Node ===
-            var removeButtonRect = new Rect(200, 5, 15, 15);
-            if (GUI.Button(removeButtonRect, "x"))
+            var fullRoute = new List<Vector2>(routedPoints.Count + 3) { startPos };
+            if (!ApproximatelyEqual(startPos, startPort.OuterPoint))
             {
-                bool shouldDeleteNode = true;
+                fullRoute.Add(startPort.OuterPoint);
+            }
 
-                if (node.State != null)
+            for (int i = 1; i < routedPoints.Count; i++)
+            {
+                fullRoute.Add(routedPoints[i]);
+            }
+
+            if (!ApproximatelyEqual(fullRoute[fullRoute.Count - 1], endPort.OuterPoint))
+            {
+                fullRoute.Add(endPort.OuterPoint);
+            }
+
+            if (!ApproximatelyEqual(endPort.OuterPoint, endPort.EdgePoint))
+            {
+                fullRoute.Add(endPort.EdgePoint);
+            }
+
+            return SimplifyRoute(fullRoute);
+        }
+
+        private static void DrawConnectionArrow(IReadOnlyList<Vector2> routePoints)
+        {
+            if (routePoints == null || routePoints.Count < 2)
+            {
+                return;
+            }
+
+            Vector2 arrowTip = routePoints[routePoints.Count - 1];
+            Vector2 previousPoint = routePoints[routePoints.Count - 2];
+            Vector2 direction = (arrowTip - previousPoint).normalized;
+            if (direction.sqrMagnitude < Mathf.Epsilon)
+            {
+                return;
+            }
+
+            Vector2 perpendicular = new Vector2(-direction.y, direction.x);
+            Vector2 arrowBase1 = arrowTip - direction * 10f + perpendicular * 4f;
+            Vector2 arrowBase2 = arrowTip - direction * 10f - perpendicular * 4f;
+            Handles.DrawAAConvexPolygon(arrowTip, arrowBase1, arrowBase2);
+        }
+
+        private static void DrawSmoothedConnection(IReadOnlyList<Vector2> routePoints)
+        {
+            if (routePoints == null || routePoints.Count < 2)
+            {
+                return;
+            }
+
+            const float lineWidth = 2f;
+            const float cornerRadius = 22f;
+
+            if (routePoints.Count == 2)
+            {
+                Handles.DrawAAPolyLine(lineWidth, routePoints.Select(point => (Vector3)point).ToArray());
+                return;
+            }
+
+            Vector2 currentStart = routePoints[0];
+
+            for (int i = 1; i < routePoints.Count - 1; i++)
+            {
+                Vector2 corner = routePoints[i];
+                Vector2 previous = routePoints[i - 1];
+                Vector2 next = routePoints[i + 1];
+
+                Vector2 incomingDirection = (corner - previous).normalized;
+                Vector2 outgoingDirection = (next - corner).normalized;
+
+                float incomingLength = Vector2.Distance(previous, corner);
+                float outgoingLength = Vector2.Distance(corner, next);
+                float radius = Mathf.Min(cornerRadius, incomingLength * 0.5f, outgoingLength * 0.5f);
+
+                if (radius <= 0.01f || ApproximatelyEqual(incomingDirection, outgoingDirection))
                 {
-                    string statePath = AssetDatabase.GetAssetPath(node.State);
+                    Handles.DrawAAPolyLine(lineWidth, new Vector3[] { currentStart, corner });
+                    currentStart = corner;
+                    continue;
+                }
 
-                    bool confirm = EditorUtility.DisplayDialog(
-                                                               "Delete State?",
-                                                               $"Do you want to delete the State \"{node.State.name}\" and all its Transitions from the project?",
-                                                               "Yes", "No");
+                Vector2 curveStart = corner - incomingDirection * radius;
+                Vector2 curveEnd = corner + outgoingDirection * radius;
 
-                    if (confirm)
+                Handles.DrawAAPolyLine(lineWidth, new Vector3[] { currentStart, curveStart });
+
+                Handles.DrawBezier(
+                    curveStart,
+                    curveEnd,
+                    curveStart + incomingDirection * radius,
+                    curveEnd - outgoingDirection * radius,
+                    Handles.color,
+                    null,
+                    lineWidth);
+
+                currentStart = curveEnd;
+            }
+
+            Handles.DrawAAPolyLine(lineWidth, new Vector3[] { currentStart, routePoints[routePoints.Count - 1] });
+        }
+
+        private static List<Vector2> FindOrthogonalPath(Vector2 startPoint, Vector2 endPoint, IReadOnlyList<Rect> obstacles)
+        {
+            var xCoords = new List<float>();
+            var yCoords = new List<float>();
+
+            AddUniqueCoordinate(xCoords, startPoint.x);
+            AddUniqueCoordinate(xCoords, endPoint.x);
+            AddUniqueCoordinate(yCoords, startPoint.y);
+            AddUniqueCoordinate(yCoords, endPoint.y);
+
+            foreach (Rect obstacle in obstacles)
+            {
+                AddUniqueCoordinate(xCoords, obstacle.xMin);
+                AddUniqueCoordinate(xCoords, obstacle.xMax);
+                AddUniqueCoordinate(yCoords, obstacle.yMin);
+                AddUniqueCoordinate(yCoords, obstacle.yMax);
+            }
+
+            var points = new List<Vector2>();
+            var pointIndex = new Dictionary<string, int>();
+
+            foreach (float x in xCoords)
+            {
+                foreach (float y in yCoords)
+                {
+                    Vector2 point = new Vector2(x, y);
+                    if (IsPointInsideAnyRect(point, obstacles))
                     {
-                        // --- 🗑 Удаляем все Transition из этого State ---
-                        if (node.State.Transitions != null && node.State.Transitions.Count > 0)
-                        {
-                            foreach (var transition in node.State.Transitions.ToList())
-                            {
-                                if (transition == null) continue;
-
-                                string transitionPath = AssetDatabase.GetAssetPath(transition);
-                                if (!string.IsNullOrEmpty(transitionPath))
-                                {
-                                    Debug.Log($"🗑 Deleted Transition asset: {transition.name}");
-                                    AssetDatabase.DeleteAsset(transitionPath);
-                                }
-                            }
-
-                            node.State.Transitions.Clear();
-                            EditorUtility.SetDirty(node.State);
-                        }
-
-                        // --- 🗑 Удаляем сам State ---
-                        if (!string.IsNullOrEmpty(statePath))
-                        {
-                            Debug.Log($"🗑 Deleted State asset: {node.State.name}");
-                            AssetDatabase.DeleteAsset(statePath);
-                        }
+                        continue;
                     }
-                    else
+
+                    pointIndex[GetPointKey(point)] = points.Count;
+                    points.Add(point);
+                }
+            }
+
+            if (!TryGetPointIndex(pointIndex, startPoint, out int startIndex))
+            {
+                return null;
+            }
+
+            int endIndex = TryGetPointIndex(pointIndex, endPoint, out int resolvedEndIndex)
+                ? resolvedEndIndex
+                : -1;
+
+            var adjacency = new List<int>[points.Count];
+            for (int i = 0; i < adjacency.Length; i++)
+            {
+                adjacency[i] = new List<int>();
+            }
+
+            foreach (float y in yCoords)
+            {
+                List<int> row = points
+                    .Select((point, index) => new { point, index })
+                    .Where(item => Mathf.Approximately(item.point.y, y))
+                    .OrderBy(item => item.point.x)
+                    .Select(item => item.index)
+                    .ToList();
+
+                ConnectAdjacentPoints(row, points, adjacency, obstacles);
+            }
+
+            foreach (float x in xCoords)
+            {
+                List<int> column = points
+                    .Select((point, index) => new { point, index })
+                    .Where(item => Mathf.Approximately(item.point.x, x))
+                    .OrderBy(item => item.point.y)
+                    .Select(item => item.index)
+                    .ToList();
+
+                ConnectAdjacentPoints(column, points, adjacency, obstacles);
+            }
+
+            return FindShortestPath(points, adjacency, startIndex, endIndex, endPoint);
+        }
+
+        private static List<Vector2> FindShortestPath(
+            IReadOnlyList<Vector2> points,
+            IReadOnlyList<int>[] adjacency,
+            int startIndex,
+            int endIndex,
+            Vector2 targetPoint)
+        {
+            float[] distances = Enumerable.Repeat(float.PositiveInfinity, points.Count).ToArray();
+            int[] previous = Enumerable.Repeat(-1, points.Count).ToArray();
+            bool[] visited = new bool[points.Count];
+
+            distances[startIndex] = 0f;
+            int bestReachableIndex = startIndex;
+            float bestReachableDistanceToEnd = Vector2.Distance(points[startIndex], targetPoint);
+
+            while (true)
+            {
+                int current = -1;
+                float bestDistance = float.PositiveInfinity;
+                float bestHeuristic = float.PositiveInfinity;
+
+                for (int i = 0; i < points.Count; i++)
+                {
+                    if (visited[i] || float.IsPositiveInfinity(distances[i]))
                     {
-                        shouldDeleteNode = false;
+                        continue;
+                    }
+
+                    float heuristic = distances[i] + Vector2.Distance(points[i], targetPoint);
+                    if (heuristic < bestHeuristic || Mathf.Approximately(heuristic, bestHeuristic) && distances[i] < bestDistance)
+                    {
+                        current = i;
+                        bestDistance = distances[i];
+                        bestHeuristic = heuristic;
                     }
                 }
 
-                // --- Удаляем Node из графа ---
-                if (shouldDeleteNode)
+                if (current == -1)
                 {
-                    currentGraph.Nodes.Remove(node);
-                    EditorUtility.SetDirty(currentGraph);
-                    AssetDatabase.SaveAssets();
-                    AssetDatabase.Refresh();
+                    return ReconstructPath(points, previous, bestReachableIndex);
+                }
+
+                if (endIndex >= 0 && current == endIndex)
+                {
+                    return ReconstructPath(points, previous, endIndex);
+                }
+
+                visited[current] = true;
+                float currentDistanceToEnd = Vector2.Distance(points[current], targetPoint);
+                if (currentDistanceToEnd + 0.01f < bestReachableDistanceToEnd ||
+                    Mathf.Approximately(currentDistanceToEnd, bestReachableDistanceToEnd) && distances[current] < distances[bestReachableIndex])
+                {
+                    bestReachableDistanceToEnd = currentDistanceToEnd;
+                    bestReachableIndex = current;
+                }
+
+                foreach (int neighbor in adjacency[current])
+                {
+                    if (visited[neighbor])
+                    {
+                        continue;
+                    }
+
+                    float candidateDistance = distances[current] + Vector2.Distance(points[current], points[neighbor]);
+                    if (candidateDistance + 0.01f < distances[neighbor])
+                    {
+                        distances[neighbor] = candidateDistance;
+                        previous[neighbor] = current;
+                    }
+                }
+            }
+        }
+
+        private static List<Vector2> ReconstructPath(IReadOnlyList<Vector2> points, IReadOnlyList<int> previous, int endIndex)
+        {
+            var path = new List<Vector2>();
+            for (int node = endIndex; node != -1; node = previous[node])
+            {
+                path.Add(points[node]);
+            }
+
+            path.Reverse();
+            return path;
+        }
+
+        private static void ConnectAdjacentPoints(
+            IReadOnlyList<int> indices,
+            IReadOnlyList<Vector2> points,
+            IList<int>[] adjacency,
+            IReadOnlyList<Rect> obstacles)
+        {
+            for (int i = 0; i < indices.Count - 1; i++)
+            {
+                int a = indices[i];
+                int b = indices[i + 1];
+                if (!IsOrthogonalSegmentBlocked(points[a], points[b], obstacles))
+                {
+                    adjacency[a].Add(b);
+                    adjacency[b].Add(a);
+                }
+            }
+        }
+
+        private static ConnectionPort GetSourcePort(Vector2 startPos, Rect sourceRect, Rect targetRect, float clearance)
+        {
+            bool preferHorizontal = Mathf.Abs(targetRect.center.x - sourceRect.center.x) >= Mathf.Abs(targetRect.center.y - sourceRect.center.y);
+            if (preferHorizontal)
+            {
+                if (targetRect.center.x >= sourceRect.center.x)
+                {
+                    return new ConnectionPort(
+                        new Vector2(sourceRect.xMax, startPos.y),
+                        new Vector2(sourceRect.xMax + clearance, startPos.y));
+                }
+
+                return new ConnectionPort(
+                    new Vector2(sourceRect.xMin, startPos.y),
+                    new Vector2(sourceRect.xMin - clearance, startPos.y));
+            }
+
+            if (targetRect.center.y >= sourceRect.center.y)
+            {
+                return new ConnectionPort(
+                    new Vector2(startPos.x, sourceRect.yMax),
+                    new Vector2(startPos.x, sourceRect.yMax + clearance));
+            }
+
+            return new ConnectionPort(
+                new Vector2(startPos.x, sourceRect.yMin),
+                new Vector2(startPos.x, sourceRect.yMin - clearance));
+        }
+
+        private static ConnectionPort GetTargetPort(Rect sourceRect, Rect targetRect, float clearance)
+        {
+            Vector2 sourceCenter = sourceRect.center;
+            ConnectionPort[] candidatePorts =
+            {
+                new(
+                    new Vector2(targetRect.xMin, targetRect.center.y),
+                    new Vector2(targetRect.xMin - clearance, targetRect.center.y)),
+                new(
+                    new Vector2(targetRect.xMax, targetRect.center.y),
+                    new Vector2(targetRect.xMax + clearance, targetRect.center.y)),
+                new(
+                    new Vector2(targetRect.center.x, targetRect.yMin),
+                    new Vector2(targetRect.center.x, targetRect.yMin - clearance)),
+                new(
+                    new Vector2(targetRect.center.x, targetRect.yMax),
+                    new Vector2(targetRect.center.x, targetRect.yMax + clearance))
+            };
+
+            ConnectionPort bestPort = candidatePorts[0];
+            float bestDistance = Vector2.SqrMagnitude(sourceCenter - bestPort.EdgePoint);
+
+            for (int i = 1; i < candidatePorts.Length; i++)
+            {
+                float distance = Vector2.SqrMagnitude(sourceCenter - candidatePorts[i].EdgePoint);
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    bestPort = candidatePorts[i];
+                }
+            }
+
+            return bestPort;
+        }
+
+        private static Rect ExpandRect(Rect rect, float margin)
+        {
+            return Rect.MinMaxRect(rect.xMin - margin, rect.yMin - margin, rect.xMax + margin, rect.yMax + margin);
+        }
+
+        private static bool IsPointInsideAnyRect(Vector2 point, IReadOnlyList<Rect> rects)
+        {
+            const float epsilon = 0.01f;
+            foreach (Rect rect in rects)
+            {
+                if (point.x > rect.xMin + epsilon && point.x < rect.xMax - epsilon &&
+                    point.y > rect.yMin + epsilon && point.y < rect.yMax - epsilon)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsOrthogonalSegmentBlocked(Vector2 start, Vector2 end, IReadOnlyList<Rect> rects)
+        {
+            const float epsilon = 0.01f;
+            if (!Mathf.Approximately(start.x, end.x) && !Mathf.Approximately(start.y, end.y))
+            {
+                return true;
+            }
+
+            foreach (Rect rect in rects)
+            {
+                if (Mathf.Approximately(start.y, end.y))
+                {
+                    float y = start.y;
+                    float minX = Mathf.Min(start.x, end.x);
+                    float maxX = Mathf.Max(start.x, end.x);
+                    bool overlapsY = y > rect.yMin + epsilon && y < rect.yMax - epsilon;
+                    bool overlapsX = maxX > rect.xMin + epsilon && minX < rect.xMax - epsilon;
+                    if (overlapsY && overlapsX)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    float x = start.x;
+                    float minY = Mathf.Min(start.y, end.y);
+                    float maxY = Mathf.Max(start.y, end.y);
+                    bool overlapsX = x > rect.xMin + epsilon && x < rect.xMax - epsilon;
+                    bool overlapsY = maxY > rect.yMin + epsilon && minY < rect.yMax - epsilon;
+                    if (overlapsX && overlapsY)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static void AddUniqueCoordinate(List<float> coordinates, float value)
+        {
+            if (coordinates.All(existing => !Mathf.Approximately(existing, value)))
+            {
+                coordinates.Add(value);
+            }
+        }
+
+        private static bool TryGetPointIndex(IReadOnlyDictionary<string, int> pointIndex, Vector2 point, out int index)
+        {
+            return pointIndex.TryGetValue(GetPointKey(point), out index);
+        }
+
+        private static string GetPointKey(Vector2 point)
+        {
+            return $"{point.x:F3}|{point.y:F3}";
+        }
+
+        private static Vector2[] SimplifyRoute(IEnumerable<Vector2> points)
+        {
+            var simplified = new List<Vector2>();
+
+            foreach (Vector2 point in points)
+            {
+                if (simplified.Count == 0 || !ApproximatelyEqual(simplified[simplified.Count - 1], point))
+                {
+                    simplified.Add(point);
+                }
+            }
+
+            int index = 1;
+            while (index < simplified.Count - 1)
+            {
+                Vector2 previous = simplified[index - 1];
+                Vector2 current = simplified[index];
+                Vector2 next = simplified[index + 1];
+
+                bool sameX = Mathf.Approximately(previous.x, current.x) && Mathf.Approximately(current.x, next.x);
+                bool sameY = Mathf.Approximately(previous.y, current.y) && Mathf.Approximately(current.y, next.y);
+                if (sameX || sameY)
+                {
+                    simplified.RemoveAt(index);
+                    continue;
+                }
+
+                index++;
+            }
+
+            return simplified.ToArray();
+        }
+
+        private static bool ApproximatelyEqual(Vector2 a, Vector2 b)
+        {
+            return Mathf.Approximately(a.x, b.x) && Mathf.Approximately(a.y, b.y);
+        }
+
+        private readonly struct ConnectionPort
+        {
+            public ConnectionPort(Vector2 edgePoint, Vector2 outerPoint)
+            {
+                EdgePoint = edgePoint;
+                OuterPoint = outerPoint;
+            }
+
+            public Vector2 EdgePoint { get; }
+            public Vector2 OuterPoint { get; }
+        }
+
+        private void DrawTargetSelectionOverlay()
+        {
+            if (!isSelectingTargetNode || pendingTransition == null)
+            {
+                return;
+            }
+
+            Handles.BeginGUI();
+
+            foreach (Node node in currentGraph.Nodes)
+            {
+                if (node == sourceNodeForSelection || node.State == null)
+                {
+                    continue;
+                }
+
+                if (!nodeRects.TryGetValue(node, out Rect rect))
+                {
+                    continue;
+                }
+
+                bool isHovered = rect.Contains(Event.current.mousePosition);
+                EditorGUI.DrawRect(rect, new Color(0f, 0.75f, 0.2f, isHovered ? 0.45f : 0.25f));
+
+                GUIStyle style = new GUIStyle(GUI.skin.label)
+                {
+                    alignment = TextAnchor.MiddleCenter,
+                    fontSize = 52,
+                    fontStyle = FontStyle.Bold,
+                    normal = { textColor = Color.white }
+                };
+
+                GUI.Label(rect, "+", style);
+
+                if ((Event.current.rawType == EventType.MouseDown || Event.current.rawType == EventType.MouseUp) &&
+                    rect.Contains(Event.current.mousePosition))
+                {
+                    pendingTransition.TargetState = node.State;
+                    MarkDirty(pendingTransition);
+                    CancelTargetSelection(false);
+                    Event.current.Use();
                     GUIUtility.ExitGUI();
                     return;
                 }
             }
 
-            // === Поле выбора State ===
+            Handles.EndGUI();
+        }
+
+        private void ClampPanToWorkspace(float workspaceWidth, float workspaceHeight)
+        {
+            float viewWidth = position.width;
+            float viewHeight = position.height;
+
+            float minX = viewWidth - workspaceWidth * zoom;
+            float maxX = 0f;
+            float minY = viewHeight - workspaceHeight * zoom;
+            float maxY = 0f;
+
+            if (workspaceWidth * zoom <= viewWidth)
+            {
+                panOffset.x = Mathf.Round((viewWidth - workspaceWidth * zoom) * 0.5f);
+            }
+            else
+            {
+                panOffset.x = Mathf.Clamp(panOffset.x, minX, maxX);
+            }
+
+            if (workspaceHeight * zoom <= viewHeight)
+            {
+                panOffset.y = Mathf.Round((viewHeight - workspaceHeight * zoom) * 0.5f);
+            }
+            else
+            {
+                panOffset.y = Mathf.Clamp(panOffset.y, minY, maxY);
+            }
+        }
+
+        private void DrawNodeWindow(Node node)
+        {
+            EditorGUI.BeginDisabledGroup(isSelectingTargetNode);
+
+            Rect removeButtonRect = new Rect(298f, 5f, 16f, 16f);
+            if (GUI.Button(removeButtonRect, "x"))
+            {
+                DeleteNode(node);
+                EditorGUI.EndDisabledGroup();
+                return;
+            }
+
             EditorGUI.BeginChangeCheck();
-            var newState =
-                (State)EditorGUILayout.ObjectField(node.State, typeof(State), false, GUILayout.ExpandWidth(true));
+            var newState = (State)EditorGUILayout.ObjectField(node.State, typeof(State), false);
             if (EditorGUI.EndChangeCheck())
             {
-                // Проверка на дубликаты State
-                if (currentGraph.Nodes.Exists(n => n != node && n.State == newState))
+                if (newState != null && currentGraph.Nodes.Exists(n => n != node && n.State == newState))
                 {
-                    EditorUtility.DisplayDialog("Duplicate State Detected",
-                                                $"State \"{newState.name}\" is already assigned to another Node.",
-                                                "OK");
+                    EditorUtility.DisplayDialog(
+                        "Duplicate State Detected",
+                        $"State \"{newState.name}\" is already assigned to another node.",
+                        "OK");
                 }
                 else
                 {
+                    ReplaceStateReferences(node.State, newState);
                     node.State = newState;
-                    EditorUtility.SetDirty(currentGraph);
+                    MarkDirty(currentGraph);
                 }
             }
 
             if (node.State == null)
             {
-                EditorGUILayout.HelpBox("No state assigned", MessageType.Warning);
-                GUI.DragWindow();
+                EditorGUILayout.HelpBox("No state assigned.", MessageType.Warning);
+                GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+                EditorGUI.EndDisabledGroup();
                 return;
             }
 
-            var state = node.State;
+            EnsureCollections(node.State);
+            DrawStateEditor(node.State, node);
 
-            // === BEHAVIOURS ===
-            EditorGUILayout.LabelField("Behaviours:", EditorStyles.miniBoldLabel);
-            int removeBehaviourIndex = -1;
-            if (state.Behaviours != null && state.Behaviours.Count > 0)
+            if (GUILayout.Button(IsStartNode(node) ? "Start State" : "Set As Start"))
             {
-                for (int i = 0; i < state.Behaviours.Count; i++)
-                {
-                    var behaviour = state.Behaviours[i];
-                    EditorGUILayout.BeginHorizontal();
-
-                    EditorGUI.BeginChangeCheck();
-                    var newBehaviour = (BaseBehaviour)EditorGUILayout.ObjectField(
-                         behaviour, typeof(BaseBehaviour), false, GUILayout.ExpandWidth(true));
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        state.Behaviours[i] = newBehaviour;
-                        EditorUtility.SetDirty(state);
-                    }
-
-                    if (GUILayout.Button("X", GUILayout.Width(20)))
-                        removeBehaviourIndex = i;
-
-                    EditorGUILayout.EndHorizontal();
-                }
-            }
-            else
-                EditorGUILayout.LabelField("— none —", EditorStyles.miniLabel);
-
-            if (GUILayout.Button("+ Add new Behaviour"))
-            {
-                // ReSharper disable once PossibleNullReferenceException
-                state.Behaviours.Add(null);
-                EditorUtility.SetDirty(state);
+                MoveNodeToFront(node);
             }
 
-            if (removeBehaviourIndex >= 0)
+            if (IsOrphanState(node.State))
             {
-                // ReSharper disable once PossibleNullReferenceException
-                state.Behaviours.RemoveAt(removeBehaviourIndex);
-                EditorUtility.SetDirty(state);
+                EditorGUILayout.HelpBox(
+                    "This state has no incoming transitions and is not the start state.",
+                    MessageType.Warning);
             }
 
-            EditorGUILayout.Space(5);
-
-            // === TRANSITIONS ===
-            DrawTransitionsSection(state, node);
-
-            EditorGUI.EndDisabledGroup(); // 🔸 Возвращаем нормальное состояние GUI
-            GUI.DragWindow();
+            EditorGUI.EndDisabledGroup();
+            GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
         }
 
-        private void DrawTransitionsSection(State state, Node ownerNode)
+        private void DrawStateEditor(State state, Node ownerNode)
         {
-            EditorGUILayout.LabelField("Transitions:", EditorStyles.miniBoldLabel);
-            int removeTransitionIndex = -1;
+            SerializedObject stateObject = new SerializedObject(state);
+            stateObject.Update();
 
-            // === 1. Очистка списка от уничтоженных ссылок ===
-            for (int i = state.Transitions.Count - 1; i >= 0; i--)
+            SerializedProperty nameProperty = stateObject.FindProperty("<Name>k__BackingField");
+            if (nameProperty != null)
             {
-                var tr = state.Transitions[i];
-                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                if (tr == null || ReferenceEquals(tr, null) || !AssetDatabase.Contains(tr))
-                {
-                    state.Transitions.RemoveAt(i);
-                    EditorUtility.SetDirty(state);
-                }
+                EditorGUILayout.PropertyField(nameProperty, new GUIContent("Name"), true);
             }
 
-            // === 2. Отрисовка переходов ===
-            for (int i = 0; i < state.Transitions.Count; i++)
+            if (stateObject.hasModifiedProperties)
             {
-                var transition = state.Transitions[i];
-                if (transition is null || !AssetDatabase.Contains(transition))
-                    continue;
+                stateObject.ApplyModifiedProperties();
+                MarkDirty(state);
+            }
 
+            EditorGUILayout.Space(4f);
+            EditorGUILayout.LabelField("Behaviours", EditorStyles.miniBoldLabel);
+            DrawBehavioursSection(state);
+
+            EditorGUILayout.Space(4f);
+            EditorGUILayout.LabelField("Transitions", EditorStyles.miniBoldLabel);
+            DrawTransitionsSection(state, ownerNode);
+        }
+
+        private void DrawBehavioursSection(State state)
+        {
+            EnsureCollections(state);
+
+            int removeBehaviourIndex = -1;
+
+            for (int i = 0; i < state.Behaviours.Count; i++)
+            {
                 EditorGUILayout.BeginHorizontal();
 
-                // === Поле выбора Transition с проверками ===
                 EditorGUI.BeginChangeCheck();
-                var newTransition = (Transition)EditorGUILayout.ObjectField(
-                                                                            transition, typeof(Transition), false,
-                                                                            GUILayout.ExpandWidth(true));
+                var newBehaviour = (BaseBehaviour)EditorGUILayout.ObjectField(
+                    state.Behaviours[i],
+                    typeof(BaseBehaviour),
+                    false,
+                    GUILayout.ExpandWidth(true));
                 if (EditorGUI.EndChangeCheck())
                 {
-                    // Проверка: нельзя выбрать Transition, который уже используется в другом State
-                    bool duplicateInOtherState = currentGraph.Nodes.Any(n =>
-                                                                            n.State != null &&
-                                                                            n.State.Transitions
-                                                                             .Contains(newTransition) &&
-                                                                            n.State != state);
-
-                    // Проверка: нельзя выбрать Transition, который уже есть в этом State
-                    bool duplicateInSameState = state.Transitions.Contains(newTransition) &&
-                                                state.Transitions[i] != newTransition;
-
-                    if (duplicateInOtherState)
-                    {
-                        EditorUtility.DisplayDialog("Duplicate Transition Detected",
-                                                    $"Transition \"{newTransition.name}\" is already used in another State.",
-                                                    "OK");
-                    }
-                    else if (duplicateInSameState)
-                    {
-                        EditorUtility.DisplayDialog("Duplicate Transition Detected",
-                                                    $"Transition \"{newTransition.name}\" already exists in this State.",
-                                                    "OK");
-                    }
-                    else
-                    {
-                        state.Transitions[i] = newTransition;
-                        EditorUtility.SetDirty(state);
-                    }
+                    state.Behaviours[i] = newBehaviour;
+                    MarkDirty(state);
                 }
 
-                // === Кнопка удаления Transition ===
-                if (GUILayout.Button("X", GUILayout.Width(20)))
-                    removeTransitionIndex = i;
-
-                // === Кнопка выбора целевого узла (●) ===
-                GUI.backgroundColor = new Color(1f, 0.7f, 0.2f);
-                bool pickPressed = GUILayout.Button("●", GUILayout.Width(20));
-                GUI.backgroundColor = Color.white;
-
-                // ✅ Запоминаем экранную позицию кнопки "●"
-                Rect localBtnRect = GUILayoutUtility.GetLastRect();
-                Vector2 localCenter = new Vector2(
-                                                  localBtnRect.x + localBtnRect.width * 0.5f,
-                                                  localBtnRect.y + localBtnRect.height * 0.5f);
-
-                if (nodeRects.TryGetValue(ownerNode, out var nodeRect))
+                if (GUILayout.Button("X", GUILayout.Width(22f)))
                 {
-                    Vector2 globalCenter = nodeRect.position + localCenter;
-                    transitionAnchorPositions[transition] = globalCenter;
-                }
-
-                // ✅ При нажатии — активируем режим выбора целевого узла
-                if (pickPressed)
-                {
-                    isSelectingTargetNode = true;
-                    pendingTransition = transition;
-                    sourceNodeForSelection = currentGraph.Nodes.Find(n => n.State == state);
-                    Debug.Log($".Select target node for transition from state: {state.name}");
+                    removeBehaviourIndex = i;
                 }
 
                 EditorGUILayout.EndHorizontal();
             }
 
-            if (state.Transitions.Count == 0)
-                EditorGUILayout.LabelField("— none —", EditorStyles.miniLabel);
-
-            EditorGUILayout.Space(2);
-
-            // === 3. Добавление нового Transition ===
-            if (GUILayout.Button("+ Add new Transition"))
+            if (state.Behaviours.Count == 0)
             {
-                if (string.IsNullOrEmpty(transitionsFolderPath))
-                {
-                    EditorUtility.DisplayDialog("Path not set",
-                                                "Please specify the folder for saving Transitions.", "OK");
-                    return;
-                }
-
-                if (!Directory.Exists(transitionsFolderPath))
-                {
-                    Directory.CreateDirectory(transitionsFolderPath);
-                    Debug.Log($"📁 Created missing folder: {transitionsFolderPath}");
-                }
-
-                string fileName = $"{state.name}_Transition_{state.Transitions.Count}.asset";
-                string targetPath = Path.Combine(transitionsFolderPath, fileName);
-                targetPath = AssetDatabase.GenerateUniqueAssetPath(targetPath);
-
-                // Проверяем, не существует ли Transition с тем же путём
-                var existingTransition = currentGraph.Nodes
-                                                     .SelectMany(n => n.State.Transitions ?? new List<Transition>())
-                                                     .FirstOrDefault(t => t != null &&
-                                                                          AssetDatabase.GetAssetPath(t) == targetPath);
-
-                if (existingTransition != null)
-                {
-                    EditorUtility.DisplayDialog("Duplicate Transition Detected",
-                                                $"Transition with same file path already exists: {existingTransition.name}",
-                                                "OK");
-                    return;
-                }
-
-                // Создаём Transition
-                var newTransition = CreateInstance<Transition>();
-                newTransition.name = Path.GetFileNameWithoutExtension(targetPath);
-
-                AssetDatabase.CreateAsset(newTransition, targetPath);
-                AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
-
-                state.Transitions.Add(newTransition);
-                EditorUtility.SetDirty(state);
-
-                Debug.Log($"✅ Created new Transition asset at: {targetPath}");
+                EditorGUILayout.LabelField("- none -", EditorStyles.miniLabel);
             }
 
-            // === 4. Удаление Transition ===
-            if (removeTransitionIndex >= 0 && removeTransitionIndex < state.Transitions.Count)
+            if (GUILayout.Button("+ Add Behaviour"))
             {
-                var removedTransition = state.Transitions[removeTransitionIndex];
-                state.Transitions.RemoveAt(removeTransitionIndex);
-                EditorUtility.SetDirty(state);
+                state.Behaviours.Add(null);
+                MarkDirty(state);
+            }
 
-                if (removedTransition is not null)
+            if (removeBehaviourIndex >= 0)
+            {
+                state.Behaviours.RemoveAt(removeBehaviourIndex);
+                MarkDirty(state);
+            }
+        }
+
+        private void DrawTransitionsSection(State state, Node ownerNode)
+        {
+            EnsureCollections(state);
+            CleanupMissingTransitions(state);
+
+            int removeTransitionIndex = -1;
+
+            for (int i = 0; i < state.Transitions.Count; i++)
+            {
+                Transition transition = state.Transitions[i];
+                if (transition == null || !AssetDatabase.Contains(transition))
                 {
-                    string path = AssetDatabase.GetAssetPath(removedTransition);
-                    if (!string.IsNullOrEmpty(path))
-                    {
-                        bool confirm = EditorUtility.DisplayDialog(
-                                                                   "Delete Transition?",
-                                                                   $".Delete Transition \"{removedTransition.name}\" from project?",
-                                                                   "Yes", "No");
+                    continue;
+                }
 
-                        if (confirm)
-                        {
-                            Debug.Log($"🗑 Deleted Transition asset: {removedTransition.name}");
-                            AssetDatabase.DeleteAsset(path);
-                        }
+                bool missingLink = transition.TargetState == null;
+                bool targetOutsideGraph = transition.TargetState != null && !ContainsState(transition.TargetState);
+
+                Color previousColor = GUI.color;
+                if (missingLink)
+                {
+                    GUI.color = new Color(1f, 0.75f, 0.75f);
+                }
+                else if (targetOutsideGraph)
+                {
+                    GUI.color = new Color(1f, 0.9f, 0.65f);
+                }
+
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                GUI.color = previousColor;
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField($"Transition {i + 1}", EditorStyles.miniBoldLabel);
+
+                if (GUILayout.Button("X", GUILayout.Width(22f)))
+                {
+                    removeTransitionIndex = i;
+                }
+
+                Color previousBackground = GUI.backgroundColor;
+                GUI.backgroundColor = missingLink ? new Color(1f, 0.4f, 0.4f) : new Color(1f, 0.7f, 0.2f);
+                bool pickPressed = GUILayout.Button("O", GUILayout.Width(22f));
+                GUI.backgroundColor = previousBackground;
+
+                Rect localButtonRect = GUILayoutUtility.GetLastRect();
+                if (nodeRects.TryGetValue(ownerNode, out Rect nodeRect))
+                {
+                    Vector2 localCenter = new Vector2(
+                        localButtonRect.x + localButtonRect.width * 0.5f,
+                        localButtonRect.y + localButtonRect.height * 0.5f);
+                    transitionAnchorPositions[transition] = nodeRect.position + localCenter;
+                }
+
+                if (pickPressed)
+                {
+                    isSelectingTargetNode = true;
+                    pendingTransition = transition;
+                    sourceNodeForSelection = ownerNode;
+                }
+
+                EditorGUILayout.EndHorizontal();
+
+                DrawTransitionAssetField(state, i);
+
+                transition = state.Transitions[i];
+                if (transition != null)
+                {
+                    DrawTransitionInspector(transition);
+
+                    if (transition.TargetState == null)
+                    {
+                        EditorGUILayout.HelpBox("Target state is not assigned for this transition.", MessageType.Error);
+                    }
+                    else if (!ContainsState(transition.TargetState))
+                    {
+                        EditorGUILayout.HelpBox("Target state is not added to the current graph.", MessageType.Warning);
                     }
                 }
 
-                AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
-                Selection.activeObject = null;
-                GUIUtility.ExitGUI();
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.Space(2f);
+            }
+
+            if (GUILayout.Button("+ Add Transition"))
+            {
+                CreateTransitionAsset(state);
+            }
+
+            if (removeTransitionIndex >= 0 && removeTransitionIndex < state.Transitions.Count)
+            {
+                RemoveTransition(state, removeTransitionIndex);
             }
         }
-        
+
+        private void DrawTransitionAssetField(State state, int index)
+        {
+            Transition transition = state.Transitions[index];
+
+            EditorGUI.BeginChangeCheck();
+            var newTransition = (Transition)EditorGUILayout.ObjectField("Asset", transition, typeof(Transition), false);
+            if (!EditorGUI.EndChangeCheck())
+            {
+                return;
+            }
+
+            if (newTransition == null)
+            {
+                state.Transitions[index] = null;
+                MarkDirty(state);
+                return;
+            }
+
+            bool duplicateInOtherState = currentGraph.Nodes.Any(node =>
+                node.State != null &&
+                node.State != state &&
+                node.State.Transitions != null &&
+                node.State.Transitions.Contains(newTransition));
+
+            bool duplicateInSameState = false;
+            for (int i = 0; i < state.Transitions.Count; i++)
+            {
+                if (i != index && state.Transitions[i] == newTransition)
+                {
+                    duplicateInSameState = true;
+                    break;
+                }
+            }
+
+            if (duplicateInOtherState)
+            {
+                EditorUtility.DisplayDialog(
+                    "Duplicate Transition Detected",
+                    $"Transition \"{newTransition.name}\" is already used in another state.",
+                    "OK");
+                return;
+            }
+
+            if (duplicateInSameState)
+            {
+                EditorUtility.DisplayDialog(
+                    "Duplicate Transition Detected",
+                    $"Transition \"{newTransition.name}\" already exists in this state.",
+                    "OK");
+                return;
+            }
+
+            state.Transitions[index] = newTransition;
+            MarkDirty(state);
+        }
+
+        private void DrawTransitionInspector(Transition transition)
+        {
+            SerializedObject transitionObject = new SerializedObject(transition);
+            transitionObject.Update();
+
+            SerializedProperty typeProperty = transitionObject.FindProperty("<Type>k__BackingField");
+            SerializedProperty conditionsProperty = transitionObject.FindProperty("<Conditions>k__BackingField");
+            SerializedProperty actionsProperty = transitionObject.FindProperty("<ActionOnTransitions>k__BackingField");
+            SerializedProperty targetStateProperty = transitionObject.FindProperty("TargetState");
+
+            if (typeProperty != null)
+            {
+                EditorGUILayout.PropertyField(typeProperty);
+            }
+
+            if (targetStateProperty != null)
+            {
+                EditorGUILayout.PropertyField(targetStateProperty);
+            }
+
+            if (conditionsProperty != null)
+            {
+                EditorGUILayout.PropertyField(conditionsProperty, true);
+            }
+
+            if (actionsProperty != null)
+            {
+                EditorGUILayout.PropertyField(actionsProperty, true);
+            }
+
+            if (transitionObject.hasModifiedProperties)
+            {
+                transitionObject.ApplyModifiedProperties();
+                MarkDirty(transition);
+            }
+        }
+
+        private void CleanupMissingTransitions(State state)
+        {
+            for (int i = state.Transitions.Count - 1; i >= 0; i--)
+            {
+                Transition transition = state.Transitions[i];
+                if (transition == null || !AssetDatabase.Contains(transition))
+                {
+                    state.Transitions.RemoveAt(i);
+                    MarkDirty(state);
+                }
+            }
+        }
+
+        private void CreateTransitionAsset(State state)
+        {
+            if (!EnsureFolderExists(transitionsFolderPath, "Please specify the folder for saving transitions."))
+            {
+                return;
+            }
+
+            string fileName = $"{state.name}_Transition_{state.Transitions.Count}.asset";
+            string targetPath = AssetDatabase.GenerateUniqueAssetPath(Path.Combine(transitionsFolderPath, fileName));
+
+            var newTransition = CreateInstance<Transition>();
+            newTransition.name = Path.GetFileNameWithoutExtension(targetPath);
+
+            AssetDatabase.CreateAsset(newTransition, targetPath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            state.Transitions.Add(newTransition);
+            MarkDirty(state);
+        }
+
+        private void RemoveTransition(State state, int removeTransitionIndex)
+        {
+            Transition removedTransition = state.Transitions[removeTransitionIndex];
+            state.Transitions.RemoveAt(removeTransitionIndex);
+            MarkDirty(state);
+
+            if (removedTransition != null)
+            {
+                string path = AssetDatabase.GetAssetPath(removedTransition);
+                if (!string.IsNullOrEmpty(path))
+                {
+                    bool confirm = EditorUtility.DisplayDialog(
+                        "Delete Transition?",
+                        $"Do you want to delete the transition \"{removedTransition.name}\" from the project?",
+                        "Yes",
+                        "No");
+
+                    if (confirm)
+                    {
+                        AssetDatabase.DeleteAsset(path);
+                    }
+                }
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Selection.activeObject = null;
+            GUIUtility.ExitGUI();
+        }
+
+        private void DeleteNode(Node node)
+        {
+            bool shouldDeleteStateAsset = node.State != null &&
+                                          EditorUtility.DisplayDialog(
+                                              "Delete State?",
+                                              $"Do you want to delete the state \"{node.State.name}\" from the project?",
+                                              "Yes",
+                                              "No");
+
+            if (node.State != null)
+            {
+                RemoveStateReferences(node.State);
+
+                if (shouldDeleteStateAsset)
+                {
+                    DeleteOwnedTransitions(node.State);
+
+                    string statePath = AssetDatabase.GetAssetPath(node.State);
+                    if (!string.IsNullOrEmpty(statePath))
+                    {
+                        AssetDatabase.DeleteAsset(statePath);
+                    }
+                }
+            }
+
+            currentGraph.Nodes.Remove(node);
+            MarkDirty(currentGraph);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            GUIUtility.ExitGUI();
+        }
+
+        private void RemoveStateReferences(State state)
+        {
+            foreach (Node otherNode in currentGraph.Nodes)
+            {
+                if (otherNode.State == null)
+                {
+                    continue;
+                }
+
+                EnsureCollections(otherNode.State);
+
+                foreach (Transition transition in otherNode.State.Transitions)
+                {
+                    if (transition != null && transition.TargetState == state)
+                    {
+                        transition.TargetState = null;
+                        MarkDirty(transition);
+                    }
+                }
+            }
+
+            if ((sourceNodeForSelection != null && sourceNodeForSelection.State == state) ||
+                (pendingTransition != null && pendingTransition.TargetState == state))
+            {
+                CancelTargetSelection();
+            }
+        }
+
+        private void ReplaceStateReferences(State oldState, State newState)
+        {
+            if (oldState == null || oldState == newState)
+            {
+                return;
+            }
+
+            foreach (Node node in currentGraph.Nodes)
+            {
+                if (node.State == null)
+                {
+                    continue;
+                }
+
+                EnsureCollections(node.State);
+
+                foreach (Transition transition in node.State.Transitions)
+                {
+                    if (transition != null && transition.TargetState == oldState)
+                    {
+                        transition.TargetState = newState;
+                        MarkDirty(transition);
+                    }
+                }
+            }
+        }
+
+        private void DeleteOwnedTransitions(State state)
+        {
+            EnsureCollections(state);
+
+            foreach (Transition transition in state.Transitions.ToList())
+            {
+                if (transition == null)
+                {
+                    continue;
+                }
+
+                string transitionPath = AssetDatabase.GetAssetPath(transition);
+                if (!string.IsNullOrEmpty(transitionPath))
+                {
+                    AssetDatabase.DeleteAsset(transitionPath);
+                }
+            }
+
+            state.Transitions.Clear();
+            MarkDirty(state);
+        }
+
+        private void EnsureGraphNodes()
+        {
+            if (currentGraph == null)
+            {
+                return;
+            }
+
+            if (currentGraph.Nodes == null)
+            {
+                currentGraph.Nodes = new List<Node>();
+                MarkDirty(currentGraph);
+            }
+        }
+
+        private State GetStartState()
+        {
+            return currentGraph != null &&
+                   currentGraph.Nodes.Count > 0 &&
+                   currentGraph.Nodes[0] != null
+                ? currentGraph.Nodes[0].State
+                : null;
+        }
+
+        private bool ContainsState(State state)
+        {
+            return currentGraph.Nodes.Any(node => node.State == state);
+        }
+
+        private bool IsStartNode(Node node)
+        {
+            return currentGraph != null &&
+                   currentGraph.Nodes.Count > 0 &&
+                   currentGraph.Nodes[0] == node &&
+                   node.State != null;
+        }
+
+        private bool IsOrphanState(State state)
+        {
+            if (state == null || GetStartState() == state)
+            {
+                return false;
+            }
+
+            return !currentGraph.Nodes
+                .Where(node => node.State != null)
+                .SelectMany(node => node.State.Transitions ?? new List<Transition>())
+                .Any(transition => transition != null && transition.TargetState == state);
+        }
+
+        private void MoveNodeToFront(Node node)
+        {
+            int index = currentGraph.Nodes.IndexOf(node);
+            if (index <= 0)
+            {
+                return;
+            }
+
+            currentGraph.Nodes.RemoveAt(index);
+            currentGraph.Nodes.Insert(0, node);
+            MarkDirty(currentGraph);
+        }
+
+        private Color GetNodeTint(Node node)
+        {
+            if (node.State == null)
+            {
+                return Color.white;
+            }
+
+            if (IsStartNode(node))
+            {
+                return new Color(0.82f, 1f, 0.82f);
+            }
+
+            if (IsOrphanState(node.State))
+            {
+                return new Color(1f, 0.92f, 0.72f);
+            }
+
+            return Color.white;
+        }
+
+        private string GetNodeTitle(Node node)
+        {
+            if (node.State == null)
+            {
+                return "State Node";
+            }
+
+            string prefix = IsStartNode(node) ? "[Start] " : string.Empty;
+            return prefix + node.State.name;
+        }
+
+        private void CancelTargetSelection(bool repaint = true)
+        {
+            isSelectingTargetNode = false;
+            pendingTransition = null;
+            sourceNodeForSelection = null;
+
+            if (repaint)
+            {
+                Repaint();
+            }
+        }
+
+        private static void EnsureCollections(State state)
+        {
+            if (state == null)
+            {
+                return;
+            }
+
+            if (state.Behaviours == null)
+            {
+                state.Behaviours = new List<BaseBehaviour>();
+            }
+
+            if (state.Transitions == null)
+            {
+                state.Transitions = new List<Transition>();
+            }
+        }
+
+        private static void MarkDirty(UnityEngine.Object target)
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            EditorUtility.SetDirty(target);
+        }
+
         private void DrawBackgroundGrid(Rect rect)
         {
-            // Цвета и параметры сетки
             Color minorColor = new Color(0.25f, 0.25f, 0.25f, 0.35f);
             Color majorColor = new Color(0.25f, 0.25f, 0.25f, 0.6f);
 
-            // Размеры сетки (меняются при увеличении)
-            float gridSpacing = 20f * zoom;     // шаг мелких линий
-            float majorStep = gridSpacing * 5f; // каждая 5-я линия толще
-
-            // Смещение сетки при панорамировании
+            float gridSpacing = 20f * zoom;
+            float majorStep = gridSpacing * 5f;
             Vector2 offset = new Vector2(panOffset.x % gridSpacing, panOffset.y % gridSpacing);
 
             Handles.BeginGUI();
 
-            // Мелкая сетка
             Handles.color = minorColor;
             for (float x = rect.xMin + offset.x; x < rect.xMax; x += gridSpacing)
-                Handles.DrawLine(new Vector3(x, rect.yMin, 0), new Vector3(x, rect.yMax, 0));
-            for (float y = rect.yMin + offset.y; y < rect.yMax; y += gridSpacing)
-                Handles.DrawLine(new Vector3(rect.xMin, y, 0), new Vector3(rect.xMax, y, 0));
+            {
+                Handles.DrawLine(new Vector3(x, rect.yMin, 0f), new Vector3(x, rect.yMax, 0f));
+            }
 
-            // Крупная сетка
+            for (float y = rect.yMin + offset.y; y < rect.yMax; y += gridSpacing)
+            {
+                Handles.DrawLine(new Vector3(rect.xMin, y, 0f), new Vector3(rect.xMax, y, 0f));
+            }
+
             Handles.color = majorColor;
             for (float x = rect.xMin + offset.x; x < rect.xMax; x += majorStep)
-                Handles.DrawLine(new Vector3(x, rect.yMin, 0), new Vector3(x, rect.yMax, 0));
+            {
+                Handles.DrawLine(new Vector3(x, rect.yMin, 0f), new Vector3(x, rect.yMax, 0f));
+            }
+
             for (float y = rect.yMin + offset.y; y < rect.yMax; y += majorStep)
-                Handles.DrawLine(new Vector3(rect.xMin, y, 0), new Vector3(rect.xMax, y, 0));
+            {
+                Handles.DrawLine(new Vector3(rect.xMin, y, 0f), new Vector3(rect.xMax, y, 0f));
+            }
 
             Handles.EndGUI();
         }
