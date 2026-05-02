@@ -4,7 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Dialogs.Graph.Model;
+using Quests.Editor;
+using Quests.Graph;
+using Quests.Graph.Model;
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UnityEditor.Localization;
 using UnityEngine;
 using UnityEngine.Localization.Tables;
@@ -13,13 +17,18 @@ namespace Dialogs.Graph.Editor
 {
     public class DialogEditorWindow : EditorWindow
     {
+        private const string PreferredPreviewLocale = "ru";
         private const string DialogsPathKey = "DialogEditor_DialogsPath";
         private const string PhrasesPathKey = "DialogEditor_PhrasesPath";
+        private const float DialogNodeWidth = 320f;
+        private const float LocalizedPreviewMinHeight = 48f;
+        private const float LocalizedPreviewWidth = 268f;
         private const float WorkspaceWidth = 10000f;
         private const float WorkspaceHeight = 10000f;
         private const float ZoomMin = 0.25f;
         private const float ZoomMax = 2f;
         private const float OverlayPanelWidth = 320f;
+        private const float AccentLineWidth = 1.5f;
 
         private DialogGraph currentGraph;
         private Vector2 scrollPos;
@@ -27,11 +36,27 @@ namespace Dialogs.Graph.Editor
         private string phrasesFolderPath;
         private readonly Dictionary<DialogAnswer, Vector2> answerAnchorPositions = new();
         private readonly Dictionary<DialogNode, Rect> nodeRects = new();
+        private readonly Dictionary<DialogPhrase, DialogNode> phraseToNodeLookup = new();
+        private readonly HashSet<DialogPhrase> orphanPhrases = new();
+        private readonly Dictionary<DialogPhrase, string> phraseDisplayNameCache = new();
+        private readonly Dictionary<string, bool> answerFoldoutStates = new();
+        private bool graphCachesDirty = true;
+        private bool graphStructureDirty = true;
+        private readonly Dictionary<DialogAnswer, CachedConnectionRoute> connectionRouteCache = new();
+        private int cachedConnectionLayoutHash;
+
+        private static System.Collections.ObjectModel.ReadOnlyCollection<StringTableCollection> cachedStringTableCollections;
+        private static string[] cachedStringTableOptions;
+        private static readonly Dictionary<string, CachedLocalizedEntryOptions> localizedEntryOptionsCache = new();
+        private static List<QuestGraph> cachedQuestGraphs;
+        private static List<QuestNodeData> cachedQuestSourceNodes;
+        private static List<QuestNodeData> cachedTerminalQuestNodes;
 
         private bool isSelectingTargetPhrase;
         private bool isControlsPanelExpanded = true;
         private DialogAnswer pendingAnswer;
         private DialogPhrase sourcePhraseForSelection;
+        private DialogNode activeConnectionNode;
 
         private float zoom = 1f;
         private Vector2 panOffset = Vector2.zero;
@@ -46,6 +71,12 @@ namespace Dialogs.Graph.Editor
         {
             dialogsFolderPath = EditorPrefs.GetString(DialogsPathKey, "Assets/Dialogs");
             phrasesFolderPath = EditorPrefs.GetString(PhrasesPathKey, "Assets/DialogPhrases");
+            EditorApplication.projectChanged += HandleProjectChanged;
+        }
+
+        private void OnDisable()
+        {
+            EditorApplication.projectChanged -= HandleProjectChanged;
         }
 
         private void OnGUI()
@@ -239,6 +270,7 @@ namespace Dialogs.Graph.Editor
             AssetDatabase.CreateAsset(currentGraph, targetPath);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+            InvalidateGraphStructure();
 
             EditorGUIUtility.PingObject(currentGraph);
             Selection.activeObject = currentGraph;
@@ -257,7 +289,10 @@ namespace Dialogs.Graph.Editor
             if (currentGraph == null)
             {
                 EditorUtility.DisplayDialog("Invalid Asset", "Selected asset is not a DialogGraph.", "OK");
+                return;
             }
+
+            InvalidateGraphStructure();
         }
 
         private void CreateNewPhrase()
@@ -288,11 +323,12 @@ namespace Dialogs.Graph.Editor
 
             var newNode = new DialogNode(phrase)
             {
-                Position = GetCenteredNodePosition(new Vector2(320f, 220f))
+                Position = GetCenteredNodePosition(new Vector2(DialogNodeWidth, 220f))
             };
 
             currentGraph.Nodes.Add(newNode);
             MarkDirty(currentGraph);
+            InvalidateGraphStructure();
 
             EditorGUIUtility.PingObject(phrase);
             Selection.activeObject = phrase;
@@ -324,11 +360,20 @@ namespace Dialogs.Graph.Editor
 
         private void DrawGraphArea()
         {
-            CleanupGraph();
+            Event currentEvent = Event.current;
+            if (graphStructureDirty)
+            {
+                CleanupGraph();
+                graphStructureDirty = false;
+            }
+
+            if (graphCachesDirty)
+            {
+                RebuildGraphCaches();
+            }
+
             answerAnchorPositions.Clear();
             nodeRects.Clear();
-
-            Event currentEvent = Event.current;
             HandleZoom(currentEvent);
             HandlePan(currentEvent);
 
@@ -341,15 +386,17 @@ namespace Dialogs.Graph.Editor
             Matrix4x4 oldMatrix = GUI.matrix;
             GUI.matrix = Matrix4x4.TRS(panOffset, Quaternion.identity, Vector3.one * zoom);
 
-            DrawBackgroundGrid(new Rect(0f, 0f, WorkspaceWidth, WorkspaceHeight));
+            if (currentEvent.type == EventType.Repaint)
+            {
+                DrawBackgroundGrid(new Rect(0f, 0f, WorkspaceWidth, WorkspaceHeight));
+            }
 
-            EditorGUI.BeginDisabledGroup(isSelectingTargetPhrase);
             BeginWindows();
 
             for (int i = 0; i < currentGraph.Nodes.Count; i++)
             {
                 DialogNode node = currentGraph.Nodes[i];
-                Rect rect = new Rect(node.Position, new Vector2(320f, 220f));
+                Rect rect = new Rect(node.Position, new Vector2(DialogNodeWidth, 220f));
 
                 Color previousColor = GUI.color;
                 GUI.color = GetNodeTint(node);
@@ -361,10 +408,14 @@ namespace Dialogs.Graph.Editor
             }
 
             EndWindows();
-            EditorGUI.EndDisabledGroup();
+            HandleConnectionHighlightSelection(currentEvent);
 
-            DrawNodeMarkers();
-            DrawConnections();
+            if (currentEvent.type == EventType.Repaint)
+            {
+                DrawNodeMarkers();
+                DrawConnections();
+            }
+
             DrawTargetSelectionOverlay();
 
             GUI.matrix = oldMatrix;
@@ -405,7 +456,96 @@ namespace Dialogs.Graph.Editor
             if (graphChanged)
             {
                 MarkDirty(currentGraph);
+                InvalidateGraphCaches();
             }
+        }
+
+        private void RebuildGraphCaches()
+        {
+            if (!graphCachesDirty)
+            {
+                return;
+            }
+
+            phraseToNodeLookup.Clear();
+            orphanPhrases.Clear();
+
+            if (currentGraph == null || currentGraph.Nodes == null)
+            {
+                return;
+            }
+
+            var reachablePhrases = new HashSet<DialogPhrase>();
+            foreach (DialogNode node in currentGraph.Nodes)
+            {
+                if (node?.Phrase == null)
+                {
+                    continue;
+                }
+
+                phraseToNodeLookup[node.Phrase] = node;
+                foreach (DialogAnswer answer in node.Phrase.Answers)
+                {
+                    if (answer?.NextPhrase != null)
+                    {
+                        reachablePhrases.Add(answer.NextPhrase);
+                    }
+                }
+            }
+
+            foreach (DialogNode node in currentGraph.Nodes)
+            {
+                if (node?.Phrase == null || currentGraph.IsEntryPhrase(node.Phrase) || node.Phrase.IsQuestPhrase)
+                {
+                    continue;
+                }
+
+                if (!reachablePhrases.Contains(node.Phrase))
+                {
+                    orphanPhrases.Add(node.Phrase);
+                }
+            }
+
+            graphCachesDirty = false;
+            InvalidateConnectionRouteCache();
+        }
+
+        private void InvalidateGraphCaches()
+        {
+            phraseToNodeLookup.Clear();
+            orphanPhrases.Clear();
+            phraseDisplayNameCache.Clear();
+            graphCachesDirty = true;
+            InvalidateConnectionRouteCache();
+        }
+
+        private void InvalidateGraphStructure()
+        {
+            graphStructureDirty = true;
+            InvalidateGraphCaches();
+        }
+
+        private void InvalidateConnectionRouteCache()
+        {
+            connectionRouteCache.Clear();
+            cachedConnectionLayoutHash = 0;
+        }
+
+        private static void InvalidateStaticEditorCaches()
+        {
+            cachedStringTableCollections = null;
+            cachedStringTableOptions = null;
+            localizedEntryOptionsCache.Clear();
+            cachedQuestGraphs = null;
+            cachedQuestSourceNodes = null;
+            cachedTerminalQuestNodes = null;
+        }
+
+        private void HandleProjectChanged()
+        {
+            InvalidateGraphStructure();
+            InvalidateStaticEditorCaches();
+            Repaint();
         }
 
         private void HandleZoom(Event currentEvent)
@@ -441,14 +581,15 @@ namespace Dialogs.Graph.Editor
 
         private void DrawNodeMarkers()
         {
-            foreach (DialogNode node in currentGraph.Nodes)
+            foreach (KeyValuePair<DialogNode, Rect> pair in nodeRects)
             {
+                DialogNode node = pair.Key;
                 if (node.Phrase == null)
                 {
                     continue;
                 }
 
-                Rect badgeRect = new Rect(node.Position.x + 6f, node.Position.y + 6f, 18f, 18f);
+                Rect badgeRect = new Rect(pair.Value.x + 6f, pair.Value.y + 6f, 18f, 18f);
                 Color previous = GUI.backgroundColor;
 
                 if (currentGraph.IsEntryPhrase(node.Phrase))
@@ -470,8 +611,9 @@ namespace Dialogs.Graph.Editor
         {
             Handles.BeginGUI();
 
-            foreach (DialogNode node in currentGraph.Nodes)
+            foreach (KeyValuePair<DialogNode, Rect> pair in nodeRects)
             {
+                DialogNode node = pair.Key;
                 DialogPhrase phrase = node.Phrase;
                 if (phrase == null)
                 {
@@ -503,82 +645,515 @@ namespace Dialogs.Graph.Editor
                         startPos = new Vector2(sourceRect.xMax - 12f, sourceRect.center.y);
                     }
 
-                    Handles.color = new Color(0.9f, 0.8f, 0.2f, 0.95f);
-                    Vector2[] routePoints = BuildConnectionRoute(startPos, sourceRect, targetRect, nodeRects.Values);
-                    DrawSmoothedConnection(routePoints);
-                    DrawConnectionArrow(routePoints);
+                    Handles.color = GetConnectionColor(node, targetNode);
+                    Vector2 endPos = GetNearestSideCenter(targetRect, startPos);
+                    (Vector2 startTangent, Vector2 endTangent) = ResolveConnectionTangents(
+                        startPos,
+                        endPos,
+                        sourceRect,
+                        targetRect,
+                        nodeRects
+                            .Where(item => item.Key != node && item.Key != targetNode)
+                            .Select(item => ExpandRect(item.Value, 8f))
+                            .ToList());
+
+                    Handles.DrawBezier(startPos, endPos, startTangent, endTangent, Handles.color, null, 3f);
+                    DrawConnectionArrow(endPos, endPos - endTangent);
                 }
             }
 
             Handles.EndGUI();
         }
 
-        private static Vector2[] BuildConnectionRoute(Vector2 startPos, Rect sourceRect, Rect targetRect, IEnumerable<Rect> allNodeRects)
+        private void HandleConnectionHighlightSelection(Event currentEvent)
         {
-            const float clearance = 28f;
+            if (isSelectingTargetPhrase ||
+                currentEvent.rawType != EventType.MouseDown ||
+                currentEvent.button != 0)
+            {
+                return;
+            }
+
+            Vector2 graphMousePosition = GetGraphMousePosition(currentEvent.mousePosition);
+            bool clickedNode = nodeRects.Any(pair => pair.Value.Contains(graphMousePosition));
+            if (!clickedNode && activeConnectionNode != null)
+            {
+                activeConnectionNode = null;
+                Repaint();
+            }
+        }
+
+        private Color GetConnectionColor(DialogNode sourceNode, DialogNode targetNode)
+        {
+            if (activeConnectionNode == null)
+            {
+                return new Color(0.9f, 0.8f, 0.2f, 0.95f);
+            }
+
+            if (sourceNode == activeConnectionNode)
+            {
+                return new Color(1f, 1f, 1f, 0.98f);
+            }
+
+            if (targetNode == activeConnectionNode)
+            {
+                return new Color(1f, 0.28f, 0.28f, 0.98f);
+            }
+
+            return new Color(0.9f, 0.8f, 0.2f, 0.95f);
+        }
+
+        private int ComputeConnectionLayoutHash()
+        {
+            unchecked
+            {
+                int hash = 17;
+                foreach (KeyValuePair<DialogNode, Rect> pair in nodeRects.OrderBy(item => item.Key.Phrase != null ? item.Key.Phrase.GetInstanceID() : 0))
+                {
+                    Rect rect = pair.Value;
+                    hash = hash * 31 + Mathf.RoundToInt(rect.x * 10f);
+                    hash = hash * 31 + Mathf.RoundToInt(rect.y * 10f);
+                    hash = hash * 31 + Mathf.RoundToInt(rect.width * 10f);
+                    hash = hash * 31 + Mathf.RoundToInt(rect.height * 10f);
+                }
+
+                return hash;
+            }
+        }
+
+        private Vector2[] GetOrBuildConnectionRoute(
+            DialogAnswer answer,
+            Vector2 startPos,
+            Rect sourceRect,
+            Rect targetRect,
+            IReadOnlyList<Rect> expandedNodeRects)
+        {
+            if (answer != null &&
+                connectionRouteCache.TryGetValue(answer, out CachedConnectionRoute cachedRoute) &&
+                cachedRoute.LayoutHash == cachedConnectionLayoutHash &&
+                ApproximatelyEqual(cachedRoute.StartPos, startPos) &&
+                RectApproximatelyEqual(cachedRoute.SourceRect, sourceRect) &&
+                RectApproximatelyEqual(cachedRoute.TargetRect, targetRect))
+            {
+                return cachedRoute.RoutePoints;
+            }
+
+            Vector2[] routePoints = BuildConnectionRoute(startPos, sourceRect, targetRect, expandedNodeRects);
+            if (answer != null)
+            {
+                connectionRouteCache[answer] = new CachedConnectionRoute(
+                    cachedConnectionLayoutHash,
+                    startPos,
+                    sourceRect,
+                    targetRect,
+                    routePoints);
+            }
+
+            return routePoints;
+        }
+
+        private static Vector2[] BuildConnectionRoute(Vector2 startPos, Rect sourceRect, Rect targetRect, IReadOnlyList<Rect> expandedNodeRects)
+        {
+            const float clearance = 24f;
 
             ConnectionPort startPort = GetSourcePort(startPos, sourceRect, targetRect, clearance);
             ConnectionPort endPort = GetTargetPort(sourceRect, targetRect, clearance);
 
-            List<Rect> obstacles = allNodeRects
-                .Select(rect => ExpandRect(rect, clearance))
-                .ToList();
-
-            List<Vector2> routedPoints = FindOrthogonalPath(startPort.OuterPoint, endPort.OuterPoint, obstacles);
-            if (routedPoints == null || routedPoints.Count == 0)
+            return SimplifyRoute(new[]
             {
-                return SimplifyRoute(new[]
-                {
-                    startPos,
-                    startPort.OuterPoint,
-                    endPort.OuterPoint,
-                    endPort.EdgePoint
-                });
-            }
-
-            var fullRoute = new List<Vector2>(routedPoints.Count + 3) { startPos };
-            if (!ApproximatelyEqual(startPos, startPort.OuterPoint))
-            {
-                fullRoute.Add(startPort.OuterPoint);
-            }
-
-            for (int i = 1; i < routedPoints.Count; i++)
-            {
-                fullRoute.Add(routedPoints[i]);
-            }
-
-            if (!ApproximatelyEqual(fullRoute[fullRoute.Count - 1], endPort.OuterPoint))
-            {
-                fullRoute.Add(endPort.OuterPoint);
-            }
-
-            if (!ApproximatelyEqual(endPort.OuterPoint, endPort.EdgePoint))
-            {
-                fullRoute.Add(endPort.EdgePoint);
-            }
-
-            return SimplifyRoute(fullRoute);
+                startPos,
+                startPort.OuterPoint,
+                endPort.OuterPoint,
+                endPort.EdgePoint
+            });
         }
 
-        private static void DrawConnectionArrow(IReadOnlyList<Vector2> routePoints)
+        private static Vector2[] BuildSoftDetourRoute(
+            Vector2 startPos,
+            ConnectionPort startPort,
+            ConnectionPort endPort,
+            IReadOnlyList<Rect> obstacles)
         {
-            if (routePoints == null || routePoints.Count < 2)
+            const float detourPadding = 18f;
+
+            List<Rect> blockingRects = obstacles
+                .Where(rect => DoesStraightSegmentIntersectRect(startPort.OuterPoint, endPort.OuterPoint, rect))
+                .ToList();
+
+            if (blockingRects.Count == 0)
             {
-                return;
+                return null;
             }
 
-            Vector2 arrowTip = routePoints[routePoints.Count - 1];
-            Vector2 previousPoint = routePoints[routePoints.Count - 2];
-            Vector2 direction = (arrowTip - previousPoint).normalized;
-            if (direction.sqrMagnitude < Mathf.Epsilon)
+            float minX = blockingRects.Min(rect => rect.xMin) - detourPadding;
+            float maxX = blockingRects.Max(rect => rect.xMax) + detourPadding;
+            float minY = blockingRects.Min(rect => rect.yMin) - detourPadding;
+            float maxY = blockingRects.Max(rect => rect.yMax) + detourPadding;
+            float startX = startPort.OuterPoint.x;
+            float endX = endPort.OuterPoint.x;
+            float startY = startPort.OuterPoint.y;
+            float endY = endPort.OuterPoint.y;
+
+            var candidates = new List<Vector2[]>
             {
-                return;
+                BuildCandidateRoute(
+                    startPos,
+                    startPort,
+                    endPort,
+                    new Vector2(Mathf.Lerp(startX, endX, 0.3f), minY),
+                    new Vector2(Mathf.Lerp(startX, endX, 0.7f), minY),
+                    obstacles),
+                BuildCandidateRoute(
+                    startPos,
+                    startPort,
+                    endPort,
+                    new Vector2(Mathf.Lerp(startX, endX, 0.3f), maxY),
+                    new Vector2(Mathf.Lerp(startX, endX, 0.7f), maxY),
+                    obstacles),
+                BuildCandidateRoute(
+                    startPos,
+                    startPort,
+                    endPort,
+                    new Vector2(minX, Mathf.Lerp(startY, endY, 0.3f)),
+                    new Vector2(minX, Mathf.Lerp(startY, endY, 0.7f)),
+                    obstacles),
+                BuildCandidateRoute(
+                    startPos,
+                    startPort,
+                    endPort,
+                    new Vector2(maxX, Mathf.Lerp(startY, endY, 0.3f)),
+                    new Vector2(maxX, Mathf.Lerp(startY, endY, 0.7f)),
+                    obstacles)
+            };
+
+            return candidates
+                .Where(route => route != null)
+                .OrderBy(ScoreConnectionRoute)
+                .FirstOrDefault();
+        }
+
+        private static Vector2[] BuildCandidateRoute(
+            Vector2 startPos,
+            ConnectionPort startPort,
+            ConnectionPort endPort,
+            Vector2 viaA,
+            Vector2 viaB,
+            IReadOnlyList<Rect> obstacles)
+        {
+            Vector2[] route = SimplifyRoute(new[]
+            {
+                startPos,
+                startPort.OuterPoint,
+                viaA,
+                viaB,
+                endPort.OuterPoint,
+                endPort.EdgePoint
+            });
+
+            for (int i = 1; i < route.Length - 2; i++)
+            {
+                if (IsStraightSegmentBlocked(route[i], route[i + 1], obstacles))
+                {
+                    return null;
+                }
             }
 
-            Vector2 perpendicular = new Vector2(-direction.y, direction.x);
-            Vector2 arrowBase1 = arrowTip - direction * 10f + perpendicular * 4f;
-            Vector2 arrowBase2 = arrowTip - direction * 10f - perpendicular * 4f;
-            Handles.DrawAAConvexPolygon(arrowTip, arrowBase1, arrowBase2);
+            return route;
+        }
+
+        private static float ScoreConnectionRoute(IReadOnlyList<Vector2> route)
+        {
+            if (route == null || route.Count < 2)
+            {
+                return float.PositiveInfinity;
+            }
+
+            float length = 0f;
+            for (int i = 0; i < route.Count - 1; i++)
+            {
+                length += Vector2.Distance(route[i], route[i + 1]);
+            }
+
+            float turnPenalty = Mathf.Max(0, route.Count - 4) * 18f;
+            return length + turnPenalty;
+        }
+
+        private static void DrawConnectionArrow(Vector2 tipPosition, Vector2 direction)
+        {
+            Vector2 normalizedDirection = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.right;
+            Vector2 right = new Vector2(-normalizedDirection.y, normalizedDirection.x);
+            Vector2 arrowBase = tipPosition - normalizedDirection * 14f;
+            Vector3[] arrow =
+            {
+                tipPosition,
+                arrowBase + right * 6f,
+                arrowBase - right * 6f
+            };
+            Handles.DrawAAConvexPolygon(arrow);
+        }
+
+        private static (Vector2 StartTangent, Vector2 EndTangent) ResolveConnectionTangents(
+            Vector2 startPos,
+            Vector2 endPos,
+            Rect sourceRect,
+            Rect targetRect,
+            IReadOnlyList<Rect> obstacles)
+        {
+            Vector2 endDirection = GetConnectionDirectionForRectPoint(targetRect, endPos);
+            Vector2 defaultStartTangent = startPos + Vector2.right * 60f;
+            Vector2 defaultEndTangent = endPos + endDirection * 60f;
+
+            if (!IsBezierBlocked(startPos, defaultStartTangent, defaultEndTangent, endPos, obstacles))
+            {
+                return (defaultStartTangent, defaultEndTangent);
+            }
+
+            List<Rect> blockingRects = obstacles
+                .Where(rect =>
+                    DoesBezierIntersectRect(startPos, defaultStartTangent, defaultEndTangent, endPos, rect) ||
+                    DoesStraightSegmentIntersectRect(startPos, endPos, rect))
+                .ToList();
+
+            if (blockingRects.Count == 0)
+            {
+                return (defaultStartTangent, defaultEndTangent);
+            }
+
+            float routeDistance = Vector2.Distance(startPos, endPos);
+            float extendedMarginA = Mathf.Max(140f, routeDistance * 0.25f);
+            float extendedMarginB = Mathf.Max(220f, routeDistance * 0.45f);
+            float minX = blockingRects.Min(rect => rect.xMin) - 36f;
+            float maxX = blockingRects.Max(rect => rect.xMax) + 36f;
+            float minY = blockingRects.Min(rect => rect.yMin) - 36f;
+            float maxY = blockingRects.Max(rect => rect.yMax) + 36f;
+            float middleX = Mathf.Lerp(startPos.x, endPos.x, 0.5f);
+            float middleY = Mathf.Lerp(startPos.y, endPos.y, 0.5f);
+            var laneXs = new List<float> { minX, maxX };
+            var laneYs = new List<float> { minY, maxY };
+            float[] laneMargins = { 28f, 52f, 80f, 112f, extendedMarginA, extendedMarginB };
+
+            foreach (Rect rect in blockingRects)
+            {
+                foreach (float margin in laneMargins)
+                {
+                    AddApproximatelyUnique(laneXs, rect.xMin - margin);
+                    AddApproximatelyUnique(laneXs, rect.xMax + margin);
+                    AddApproximatelyUnique(laneYs, rect.yMin - margin);
+                    AddApproximatelyUnique(laneYs, rect.yMax + margin);
+                }
+            }
+
+            AddApproximatelyUnique(laneXs, minX - extendedMarginA);
+            AddApproximatelyUnique(laneXs, maxX + extendedMarginA);
+            AddApproximatelyUnique(laneXs, minX - extendedMarginB);
+            AddApproximatelyUnique(laneXs, maxX + extendedMarginB);
+            AddApproximatelyUnique(laneYs, minY - extendedMarginA);
+            AddApproximatelyUnique(laneYs, maxY + extendedMarginA);
+            AddApproximatelyUnique(laneYs, minY - extendedMarginB);
+            AddApproximatelyUnique(laneYs, maxY + extendedMarginB);
+
+            var candidates = new List<(Vector2 StartTangent, Vector2 EndTangent)>();
+            float nearStartX = Mathf.Lerp(startPos.x, endPos.x, 0.12f);
+            float farEndX = Mathf.Lerp(startPos.x, endPos.x, 0.88f);
+            float nearStartY = Mathf.Lerp(startPos.y, endPos.y, 0.12f);
+            float farEndY = Mathf.Lerp(startPos.y, endPos.y, 0.88f);
+
+            foreach (float laneY in laneYs)
+            {
+                AddBezierCandidate(candidates, new Vector2(Mathf.Lerp(startPos.x, endPos.x, 0.30f), laneY), new Vector2(Mathf.Lerp(startPos.x, endPos.x, 0.70f), laneY));
+                AddBezierCandidate(candidates, new Vector2(middleX, laneY), new Vector2(middleX, laneY));
+                AddBezierCandidate(candidates, new Vector2(Mathf.Lerp(startPos.x, endPos.x, 0.20f), laneY), new Vector2(Mathf.Lerp(startPos.x, endPos.x, 0.80f), laneY));
+                AddBezierCandidate(candidates, new Vector2(nearStartX, laneY), new Vector2(farEndX, laneY));
+            }
+
+            foreach (float laneX in laneXs)
+            {
+                AddBezierCandidate(candidates, new Vector2(laneX, Mathf.Lerp(startPos.y, endPos.y, 0.30f)), new Vector2(laneX, Mathf.Lerp(startPos.y, endPos.y, 0.70f)));
+                AddBezierCandidate(candidates, new Vector2(laneX, middleY), new Vector2(laneX, middleY));
+                AddBezierCandidate(candidates, new Vector2(laneX, Mathf.Lerp(startPos.y, endPos.y, 0.20f)), new Vector2(laneX, Mathf.Lerp(startPos.y, endPos.y, 0.80f)));
+                AddBezierCandidate(candidates, new Vector2(laneX, nearStartY), new Vector2(laneX, farEndY));
+            }
+
+            (Vector2 StartTangent, Vector2 EndTangent) bestCandidate = (defaultStartTangent, defaultEndTangent);
+            int bestIntersectionCount = CountBezierIntersections(startPos, defaultStartTangent, defaultEndTangent, endPos, obstacles);
+            float bestScore = ScoreBezierCandidate(startPos, defaultStartTangent, defaultEndTangent, endPos);
+
+            foreach ((Vector2 StartTangent, Vector2 EndTangent) candidate in candidates)
+            {
+                int intersectionCount = CountBezierIntersections(startPos, candidate.StartTangent, candidate.EndTangent, endPos, obstacles);
+                float candidateScore = ScoreBezierCandidate(startPos, candidate.StartTangent, candidate.EndTangent, endPos);
+                if (intersectionCount < bestIntersectionCount ||
+                    intersectionCount == bestIntersectionCount && candidateScore < bestScore)
+                {
+                    bestIntersectionCount = intersectionCount;
+                    bestScore = candidateScore;
+                    bestCandidate = candidate;
+                }
+            }
+
+            return bestCandidate;
+        }
+
+        private static float ScoreBezierCandidate(Vector2 startPos, Vector2 startTangent, Vector2 endTangent, Vector2 endPos)
+        {
+            return Vector2.Distance(startPos, startTangent) +
+                   Vector2.Distance(startTangent, endTangent) +
+                   Vector2.Distance(endTangent, endPos);
+        }
+
+        private static void AddBezierCandidate(
+            ICollection<(Vector2 StartTangent, Vector2 EndTangent)> candidates,
+            Vector2 startTangent,
+            Vector2 endTangent)
+        {
+            foreach ((Vector2 StartTangent, Vector2 EndTangent) existing in candidates)
+            {
+                if (ApproximatelyEqual(existing.StartTangent, startTangent) &&
+                    ApproximatelyEqual(existing.EndTangent, endTangent))
+                {
+                    return;
+                }
+            }
+
+            candidates.Add((startTangent, endTangent));
+        }
+
+        private static void AddApproximatelyUnique(ICollection<float> values, float value)
+        {
+            foreach (float existing in values)
+            {
+                if (Mathf.Abs(existing - value) < 0.5f)
+                {
+                    return;
+                }
+            }
+
+            values.Add(value);
+        }
+
+        private static bool IsBezierBlocked(
+            Vector2 startPos,
+            Vector2 startTangent,
+            Vector2 endTangent,
+            Vector2 endPos,
+            IReadOnlyList<Rect> obstacles)
+        {
+            return CountBezierIntersections(startPos, startTangent, endTangent, endPos, obstacles) > 0;
+        }
+
+        private static int CountBezierIntersections(
+            Vector2 startPos,
+            Vector2 startTangent,
+            Vector2 endTangent,
+            Vector2 endPos,
+            IReadOnlyList<Rect> obstacles)
+        {
+            int intersections = 0;
+            foreach (Rect obstacle in obstacles)
+            {
+                if (DoesBezierIntersectRect(startPos, startTangent, endTangent, endPos, obstacle))
+                {
+                    intersections++;
+                }
+            }
+
+            return intersections;
+        }
+
+        private static bool DoesBezierIntersectRect(
+            Vector2 startPos,
+            Vector2 startTangent,
+            Vector2 endTangent,
+            Vector2 endPos,
+            Rect rect)
+        {
+            const int samples = 40;
+            const float inset = 0.5f;
+
+            Rect innerRect = Rect.MinMaxRect(
+                rect.xMin + inset,
+                rect.yMin + inset,
+                rect.xMax - inset,
+                rect.yMax - inset);
+
+            Vector2 previousPoint = startPos;
+            for (int i = 1; i < samples; i++)
+            {
+                float t = i / (float)samples;
+                Vector2 point = EvaluateBezierPoint(startPos, startTangent, endTangent, endPos, t);
+                if (innerRect.Contains(point) || DoesStraightSegmentIntersectRect(previousPoint, point, innerRect))
+                {
+                    return true;
+                }
+
+                previousPoint = point;
+            }
+
+            return DoesStraightSegmentIntersectRect(previousPoint, endPos, innerRect);
+        }
+
+        private static Vector2 EvaluateBezierPoint(
+            Vector2 startPos,
+            Vector2 startTangent,
+            Vector2 endTangent,
+            Vector2 endPos,
+            float t)
+        {
+            float oneMinusT = 1f - t;
+            return oneMinusT * oneMinusT * oneMinusT * startPos +
+                   3f * oneMinusT * oneMinusT * t * startTangent +
+                   3f * oneMinusT * t * t * endTangent +
+                   t * t * t * endPos;
+        }
+
+        private static Vector2 GetNearestSideCenter(Rect rect, Vector2 point)
+        {
+            float leftDistance = Mathf.Abs(point.x - rect.xMin);
+            float rightDistance = Mathf.Abs(point.x - rect.xMax);
+            float topDistance = Mathf.Abs(point.y - rect.yMin);
+            float bottomDistance = Mathf.Abs(point.y - rect.yMax);
+
+            float minHorizontal = Mathf.Min(leftDistance, rightDistance);
+            float minVertical = Mathf.Min(topDistance, bottomDistance);
+
+            if (minHorizontal < minVertical)
+            {
+                return leftDistance <= rightDistance
+                    ? new Vector2(rect.xMin, rect.center.y)
+                    : new Vector2(rect.xMax, rect.center.y);
+            }
+
+            return topDistance <= bottomDistance
+                ? new Vector2(rect.center.x, rect.yMin)
+                : new Vector2(rect.center.x, rect.yMax);
+        }
+
+        private static Vector2 GetConnectionDirectionForRectPoint(Rect rect, Vector2 point)
+        {
+            const float epsilon = 0.01f;
+
+            if (Mathf.Abs(point.x - rect.xMin) < epsilon)
+            {
+                return Vector2.left;
+            }
+
+            if (Mathf.Abs(point.x - rect.xMax) < epsilon)
+            {
+                return Vector2.right;
+            }
+
+            if (Mathf.Abs(point.y - rect.yMin) < epsilon)
+            {
+                return Vector2.up;
+            }
+
+            if (Mathf.Abs(point.y - rect.yMax) < epsilon)
+            {
+                return Vector2.down;
+            }
+
+            Vector2 fallback = point - rect.center;
+            return fallback.sqrMagnitude > 0.001f ? fallback.normalized : Vector2.left;
         }
 
         private static void DrawSmoothedConnection(IReadOnlyList<Vector2> routePoints)
@@ -944,6 +1519,42 @@ namespace Dialogs.Graph.Editor
             return false;
         }
 
+        private static bool IsStraightSegmentBlocked(Vector2 start, Vector2 end, IReadOnlyList<Rect> rects)
+        {
+            foreach (Rect rect in rects)
+            {
+                if (DoesStraightSegmentIntersectRect(start, end, rect))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool DoesStraightSegmentIntersectRect(Vector2 start, Vector2 end, Rect rect)
+        {
+            const int samples = 24;
+            const float inset = 0.5f;
+
+            Rect innerRect = Rect.MinMaxRect(
+                rect.xMin + inset,
+                rect.yMin + inset,
+                rect.xMax - inset,
+                rect.yMax - inset);
+
+            for (int i = 1; i < samples; i++)
+            {
+                Vector2 point = Vector2.Lerp(start, end, i / (float)samples);
+                if (innerRect.Contains(point))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static void AddUniqueCoordinate(List<float> coordinates, float value)
         {
             if (coordinates.All(existing => !Mathf.Approximately(existing, value)))
@@ -1000,6 +1611,216 @@ namespace Dialogs.Graph.Editor
             return Mathf.Approximately(a.x, b.x) && Mathf.Approximately(a.y, b.y);
         }
 
+        private static bool RectApproximatelyEqual(Rect a, Rect b)
+        {
+            return Mathf.Approximately(a.x, b.x) &&
+                   Mathf.Approximately(a.y, b.y) &&
+                   Mathf.Approximately(a.width, b.width) &&
+                   Mathf.Approximately(a.height, b.height);
+        }
+
+        private readonly struct CachedLocalizedEntryOptions
+        {
+            public static CachedLocalizedEntryOptions Empty { get; } =
+                new(Array.Empty<SharedTableData.SharedTableEntry>(), new[] { "<None>" });
+
+            public CachedLocalizedEntryOptions(IReadOnlyList<SharedTableData.SharedTableEntry> entries, string[] options)
+            {
+                Entries = entries;
+                Options = options;
+            }
+
+            public IReadOnlyList<SharedTableData.SharedTableEntry> Entries { get; }
+            public string[] Options { get; }
+        }
+
+        private sealed class LocalizedEntrySelectorWindow : EditorWindow
+        {
+            [Serializable]
+            internal struct EntryOption
+            {
+                public long Id;
+                public string Key;
+            }
+
+            private static LocalizedEntrySelectorWindow activeWindow;
+
+            [SerializeField] private UnityEngine.Object targetObject;
+            [SerializeField] private string keyIdPropertyPath;
+            [SerializeField] private string keyPropertyPath;
+            [SerializeField] private List<EntryOption> entries = new();
+            [SerializeField] private int selectedIndex;
+            private Vector2 scrollPosition;
+            private string searchText = string.Empty;
+            private bool focusSearchField = true;
+            [NonSerialized] private SearchField searchField;
+
+            private void Initialize(
+                UnityEngine.Object targetObject,
+                string keyIdPropertyPath,
+                string keyPropertyPath,
+                IReadOnlyList<SharedTableData.SharedTableEntry> entries,
+                int selectedIndex)
+            {
+                this.targetObject = targetObject;
+                this.keyIdPropertyPath = keyIdPropertyPath;
+                this.keyPropertyPath = keyPropertyPath;
+                this.entries = entries != null
+                    ? entries.Select(entry => new EntryOption { Id = entry.Id, Key = entry.Key }).ToList()
+                    : new List<EntryOption>();
+                this.selectedIndex = selectedIndex;
+                focusSearchField = true;
+                searchText = string.Empty;
+                scrollPosition = Vector2.zero;
+                EnsureSearchField();
+            }
+
+            private Vector2 InitialSize
+            {
+                get
+                {
+                    float height = Mathf.Clamp(110f + Mathf.Min(entries.Count, 8) * 22f, 180f, 420f);
+                    return new Vector2(360f, height);
+                }
+            }
+
+            private void OnEnable()
+            {
+                EnsureSearchField();
+            }
+
+            private void OnGUI()
+            {
+                EnsureSearchField();
+
+                if (focusSearchField)
+                {
+                    searchField.SetFocus();
+                    focusSearchField = false;
+                }
+
+                EditorGUILayout.LabelField("Select Entry", EditorStyles.boldLabel);
+                searchText = searchField.OnGUI(EditorGUILayout.GetControlRect(), searchText);
+                EditorGUILayout.Space(4f);
+
+                if (GUILayout.Button("<None>", selectedIndex < 0 ? EditorStyles.miniButtonMid : EditorStyles.miniButton))
+                {
+                    ApplyEntrySelectionToObject(targetObject, keyIdPropertyPath, keyPropertyPath, entries, 0);
+                    Close();
+                    GUIUtility.ExitGUI();
+                }
+
+                EditorGUILayout.Space(4f);
+                scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
+
+                bool hasVisibleEntries = false;
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    EntryOption entry = entries[i];
+                    if (!MatchesSearch(entry, searchText))
+                    {
+                        continue;
+                    }
+
+                    hasVisibleEntries = true;
+                    GUIStyle style = i == selectedIndex ? EditorStyles.miniButtonMid : EditorStyles.miniButton;
+                    if (GUILayout.Button(entry.Key, style))
+                    {
+                        ApplyEntrySelectionToObject(targetObject, keyIdPropertyPath, keyPropertyPath, entries, i + 1);
+                        Close();
+                        GUIUtility.ExitGUI();
+                    }
+                }
+
+                if (!hasVisibleEntries)
+                {
+                    EditorGUILayout.HelpBox("No entries found.", MessageType.Info);
+                }
+
+                EditorGUILayout.EndScrollView();
+            }
+
+            public static void Show(
+                Rect activatorRect,
+                UnityEngine.Object targetObject,
+                string keyIdPropertyPath,
+                string keyPropertyPath,
+                IReadOnlyList<SharedTableData.SharedTableEntry> entries,
+                int selectedIndex)
+            {
+                activeWindow?.Close();
+
+                var window = CreateInstance<LocalizedEntrySelectorWindow>();
+                window.Initialize(targetObject, keyIdPropertyPath, keyPropertyPath, entries, selectedIndex);
+                window.titleContent = new GUIContent("Select Entry");
+                window.minSize = new Vector2(320f, 180f);
+
+                Vector2 initialSize = window.InitialSize;
+                Rect anchorRect = GetCursorRect(activatorRect);
+                window.position = new Rect(anchorRect.x, anchorRect.y, initialSize.x, initialSize.y);
+                window.Show();
+                window.Focus();
+
+                activeWindow = window;
+            }
+
+            private void OnDestroy()
+            {
+                if (activeWindow == this)
+                {
+                    activeWindow = null;
+                }
+            }
+
+            private void EnsureSearchField()
+            {
+                searchField ??= new SearchField();
+            }
+
+            private static bool MatchesSearch(EntryOption entry, string searchText)
+            {
+                if (string.IsNullOrWhiteSpace(searchText))
+                {
+                    return true;
+                }
+
+                return entry.Key?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+
+            private static Rect GetCursorRect(Rect fallbackRect)
+            {
+                Vector2 screenPoint;
+                if (Event.current != null)
+                {
+                    screenPoint = GUIUtility.GUIToScreenPoint(Event.current.mousePosition);
+                }
+                else
+                {
+                    screenPoint = GUIUtility.GUIToScreenPoint(new Vector2(fallbackRect.xMax, fallbackRect.yMax));
+                }
+
+                return new Rect(screenPoint.x + 12f, screenPoint.y + 12f, 1f, 1f);
+            }
+        }
+
+        private readonly struct CachedConnectionRoute
+        {
+            public CachedConnectionRoute(int layoutHash, Vector2 startPos, Rect sourceRect, Rect targetRect, Vector2[] routePoints)
+            {
+                LayoutHash = layoutHash;
+                StartPos = startPos;
+                SourceRect = sourceRect;
+                TargetRect = targetRect;
+                RoutePoints = routePoints;
+            }
+
+            public int LayoutHash { get; }
+            public Vector2 StartPos { get; }
+            public Rect SourceRect { get; }
+            public Rect TargetRect { get; }
+            public Vector2[] RoutePoints { get; }
+        }
+
         private readonly struct ConnectionPort
         {
             public ConnectionPort(Vector2 edgePoint, Vector2 outerPoint)
@@ -1020,6 +1841,7 @@ namespace Dialogs.Graph.Editor
             }
 
             Handles.BeginGUI();
+            Vector2 graphMousePosition = GetGraphMousePosition(Event.current.mousePosition);
 
             foreach (DialogNode node in currentGraph.Nodes)
             {
@@ -1033,7 +1855,7 @@ namespace Dialogs.Graph.Editor
                     continue;
                 }
 
-                bool isHovered = rect.Contains(Event.current.mousePosition);
+                bool isHovered = rect.Contains(graphMousePosition);
                 EditorGUI.DrawRect(rect, new Color(0f, 0.75f, 0.2f, isHovered ? 0.45f : 0.25f));
 
                 GUIStyle style = new GUIStyle(GUI.skin.label)
@@ -1047,10 +1869,11 @@ namespace Dialogs.Graph.Editor
                 GUI.Label(rect, "+", style);
 
                 if ((Event.current.rawType == EventType.MouseDown || Event.current.rawType == EventType.MouseUp) &&
-                    rect.Contains(Event.current.mousePosition))
+                    rect.Contains(graphMousePosition))
                 {
                     pendingAnswer.SetNextPhrase(node.Phrase);
                     MarkDirty(sourcePhraseForSelection);
+                    InvalidateGraphCaches();
                     CancelTargetSelection(false);
                     Event.current.Use();
                     GUIUtility.ExitGUI();
@@ -1059,6 +1882,13 @@ namespace Dialogs.Graph.Editor
             }
 
             Handles.EndGUI();
+        }
+
+        private Vector2 GetGraphMousePosition(Vector2 mousePosition)
+        {
+            return new Vector2(
+                (mousePosition.x - panOffset.x) / zoom,
+                (mousePosition.y - panOffset.y) / zoom);
         }
 
         private void ClampPanToWorkspace(float workspaceWidth, float workspaceHeight)
@@ -1097,6 +1927,15 @@ namespace Dialogs.Graph.Editor
                 return;
             }
 
+            if (!isSelectingTargetPhrase &&
+                Event.current.rawType == EventType.MouseDown &&
+                Event.current.button == 0 &&
+                activeConnectionNode != node)
+            {
+                activeConnectionNode = node;
+                Repaint();
+            }
+
             EditorGUI.BeginDisabledGroup(isSelectingTargetPhrase);
 
             Rect removeButtonRect = new Rect(298f, 5f, 16f, 16f);
@@ -1125,9 +1964,12 @@ namespace Dialogs.Graph.Editor
                         currentGraph.SetEntryPhrase(newPhrase);
                     }
 
+                    InvalidatePhraseDisplayName(node.Phrase);
+                    InvalidatePhraseDisplayName(newPhrase);
                     ReplacePhraseReferences(node.Phrase, newPhrase);
                     node.Phrase = newPhrase;
                     MarkDirty(currentGraph);
+                    InvalidateGraphStructure();
                 }
             }
 
@@ -1145,6 +1987,14 @@ namespace Dialogs.Graph.Editor
             {
                 currentGraph.SetEntryPhrase(node.Phrase);
                 MarkDirty(currentGraph);
+                InvalidateGraphCaches();
+            }
+
+            if (node.Phrase.IsQuestPhrase)
+            {
+                EditorGUILayout.HelpBox(
+                    "Quest phrase appears as an answer on the start phrase and does not require incoming links.",
+                    MessageType.Info);
             }
 
             if (IsOrphanPhrase(node.Phrase))
@@ -1177,6 +2027,7 @@ namespace Dialogs.Graph.Editor
 
             pendingAnswer.SetNextPhrase(node.Phrase);
             MarkDirty(sourcePhraseForSelection);
+            InvalidateGraphCaches();
             CancelTargetSelection(false);
             Event.current.Use();
             GUIUtility.ExitGUI();
@@ -1189,6 +2040,8 @@ namespace Dialogs.Graph.Editor
             phraseObject.Update();
 
             SerializedProperty textProperty = phraseObject.FindProperty("text");
+            SerializedProperty isQuestPhraseProperty = phraseObject.FindProperty("isQuestPhrase");
+            SerializedProperty questAnswerProperty = phraseObject.FindProperty("questAnswer");
             SerializedProperty answersProperty = phraseObject.FindProperty("answers");
 
             if (answersProperty == null)
@@ -1202,6 +2055,17 @@ namespace Dialogs.Graph.Editor
                 DrawLocalizedStringSelector(textProperty, "Phrase");
             }
 
+            if (isQuestPhraseProperty != null)
+            {
+                EditorGUILayout.Space(4f);
+                EditorGUILayout.PropertyField(isQuestPhraseProperty, new GUIContent("Quest Phrase"));
+
+                if (isQuestPhraseProperty.boolValue)
+                {
+                    DrawQuestPhraseSettings(questAnswerProperty);
+                }
+            }
+
             EditorGUILayout.Space(4f);
             EditorGUILayout.LabelField("Answers", EditorStyles.miniBoldLabel);
 
@@ -1213,26 +2077,43 @@ namespace Dialogs.Graph.Editor
                 SerializedProperty answerProperty = answersProperty.GetArrayElementAtIndex(i);
                 SerializedProperty answerTextProperty = answerProperty.FindPropertyRelative("text");
                 SerializedProperty nextPhraseProperty = answerProperty.FindPropertyRelative("nextPhrase");
+                SerializedProperty hasConditionsProperty = answerProperty.FindPropertyRelative("hasConditions");
+                SerializedProperty conditionsProperty = answerProperty.FindPropertyRelative("conditions");
+                DialogAnswer answer = i < phrase.Answers.Count ? phrase.Answers[i] : null;
+                DialogPhrase nextPhrase = answer?.NextPhrase;
 
-                bool missingLink = nextPhraseProperty.objectReferenceValue == null;
-                bool targetOutsideGraph = nextPhraseProperty.objectReferenceValue != null &&
-                                         !ContainsPhrase((DialogPhrase)nextPhraseProperty.objectReferenceValue);
+                bool missingLink = nextPhrase == null;
+                bool targetOutsideGraph = nextPhrase != null && !ContainsPhrase(nextPhrase);
+                bool hasConditions = hasConditionsProperty != null && hasConditionsProperty.boolValue;
+                int conditionCount = conditionsProperty?.arraySize ?? 0;
+                string foldoutKey = GetAnswerFoldoutKey(phrase, i);
+                bool isExpanded = GetAnswerFoldoutState(foldoutKey);
+                Color accentColor = GetAnswerAccentColor(missingLink, targetOutsideGraph, hasConditions);
+                string statusLabel = GetAnswerStatusLabel(missingLink, targetOutsideGraph, hasConditions, conditionCount);
 
-                Color previousColor = GUI.color;
-                if (missingLink)
+                EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+
+                Rect accentRect = GUILayoutUtility.GetRect(
+                    AccentLineWidth,
+                    AccentLineWidth,
+                    GUILayout.Width(AccentLineWidth),
+                    GUILayout.ExpandHeight(true));
+                if (Event.current.type == EventType.Repaint)
                 {
-                    GUI.color = new Color(1f, 0.75f, 0.75f);
-                }
-                else if (targetOutsideGraph)
-                {
-                    GUI.color = new Color(1f, 0.9f, 0.65f);
+                    EditorGUI.DrawRect(accentRect, accentColor);
                 }
 
-                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                GUI.color = previousColor;
-
+                EditorGUILayout.BeginVertical();
                 EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField($"Answer {i + 1}", EditorStyles.miniBoldLabel);
+                bool newExpanded = EditorGUILayout.Foldout(isExpanded, $"Answer {i + 1}", true);
+                if (newExpanded != isExpanded)
+                {
+                    SetAnswerFoldoutState(foldoutKey, newExpanded);
+                    isExpanded = newExpanded;
+                }
+
+                GUILayout.Label(statusLabel, EditorStyles.centeredGreyMiniLabel, GUILayout.Width(110f));
+                GUILayout.FlexibleSpace();
 
                 if (GUILayout.Button("X", GUILayout.Width(22f)))
                 {
@@ -1260,46 +2141,928 @@ namespace Dialogs.Graph.Editor
                     sourcePhraseForSelection = phrase;
                 }
 
-                EditorGUILayout.EndHorizontal();
+                if (isExpanded)
+                {
+                    EditorGUILayout.EndHorizontal();
+                    DrawAnswerDivider(new Color(1f, 1f, 1f, 0.12f));
+                    EditorGUILayout.Space(3f);
 
-                if (answerTextProperty != null)
-                {
-                    DrawLocalizedStringSelector(answerTextProperty, "Text");
-                }
+                    if (answerTextProperty != null)
+                    {
+                        DrawLocalizedStringSelector(answerTextProperty, "Text");
+                    }
 
-                if (nextPhraseProperty != null)
-                {
-                    EditorGUILayout.PropertyField(nextPhraseProperty, new GUIContent("Next Phrase"), true);
-                }
+                    if (hasConditionsProperty != null)
+                    {
+                        EditorGUILayout.PropertyField(hasConditionsProperty, new GUIContent("Condition"));
+                        if (hasConditionsProperty.boolValue && conditionsProperty != null)
+                        {
+                            DrawDialogAnswerConditions(conditionsProperty);
+                            DrawAnswerQuestLinksSummary(conditionsProperty);
+                        }
+                    }
 
-                if (missingLink)
-                {
-                    EditorGUILayout.HelpBox("Next phrase is not assigned for this answer.", MessageType.Error);
+                    if (nextPhraseProperty != null)
+                    {
+                        EditorGUILayout.PropertyField(nextPhraseProperty, new GUIContent("Next Phrase"), true);
+                    }
+
+                    if (missingLink)
+                    {
+                        EditorGUILayout.HelpBox("Next phrase is not assigned for this answer.", MessageType.Error);
+                    }
+                    else if (targetOutsideGraph)
+                    {
+                        EditorGUILayout.HelpBox("Target phrase is not added to the current dialog graph.", MessageType.Warning);
+                    }
                 }
-                else if (targetOutsideGraph)
+                else
                 {
-                    EditorGUILayout.HelpBox("Target phrase is not added to the current dialog graph.", MessageType.Warning);
+                    EditorGUILayout.EndHorizontal();
                 }
 
                 EditorGUILayout.EndVertical();
-                EditorGUILayout.Space(2f);
+                EditorGUILayout.EndHorizontal();
+
+                if (i < answersProperty.arraySize - 1)
+                {
+                    EditorGUILayout.Space(3f);
+                    DrawAnswerDivider(new Color(1f, 1f, 1f, 0.08f));
+                    EditorGUILayout.Space(5f);
+                }
+                else
+                {
+                    EditorGUILayout.Space(4f);
+                }
             }
 
             if (GUILayout.Button("+ Add Answer"))
             {
                 answersProperty.arraySize++;
+                ClearAnswerFoldoutStates(phrase);
             }
 
             if (removeAnswerIndex >= 0)
             {
                 answersProperty.DeleteArrayElementAtIndex(removeAnswerIndex);
+                ClearAnswerFoldoutStates(phrase);
             }
 
             if (phraseObject.hasModifiedProperties)
             {
                 phraseObject.ApplyModifiedProperties();
                 MarkDirty(phrase);
+                InvalidatePhraseDisplayName(phrase);
+                InvalidateGraphCaches();
             }
+        }
+
+        private void DrawQuestPhraseSettings(SerializedProperty questAnswerProperty)
+        {
+            if (questAnswerProperty == null)
+            {
+                EditorGUILayout.HelpBox("Quest answer property was not found.", MessageType.Error);
+                return;
+            }
+
+            SerializedProperty answerTextProperty = questAnswerProperty.FindPropertyRelative("text");
+            SerializedProperty hasConditionsProperty = questAnswerProperty.FindPropertyRelative("hasConditions");
+            SerializedProperty conditionsProperty = questAnswerProperty.FindPropertyRelative("conditions");
+
+            EditorGUILayout.Space(2f);
+            EditorGUILayout.LabelField("Quest Entry Answer", EditorStyles.miniBoldLabel);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField(
+                "This answer is shown on the start phrase automatically when its conditions are satisfied.",
+                EditorStyles.wordWrappedMiniLabel);
+            EditorGUILayout.Space(3f);
+
+            DrawAnswerDetails(
+                answerTextProperty,
+                hasConditionsProperty,
+                conditionsProperty,
+                "Answer Text");
+
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawAnswerDetails(
+            SerializedProperty answerTextProperty,
+            SerializedProperty hasConditionsProperty,
+            SerializedProperty conditionsProperty,
+            string textLabel)
+        {
+            if (answerTextProperty != null)
+            {
+                DrawLocalizedStringSelector(answerTextProperty, textLabel);
+            }
+
+            if (hasConditionsProperty == null)
+            {
+                return;
+            }
+
+            EditorGUILayout.PropertyField(hasConditionsProperty, new GUIContent("Condition"));
+            if (!hasConditionsProperty.boolValue || conditionsProperty == null)
+            {
+                return;
+            }
+
+            DrawDialogAnswerConditions(conditionsProperty);
+            DrawAnswerQuestLinksSummary(conditionsProperty);
+        }
+
+        private string GetAnswerFoldoutKey(DialogPhrase phrase, int answerIndex)
+        {
+            return $"{phrase.GetInstanceID()}:{answerIndex}";
+        }
+
+        private bool GetAnswerFoldoutState(string foldoutKey)
+        {
+            if (answerFoldoutStates.TryGetValue(foldoutKey, out bool isExpanded))
+            {
+                return isExpanded;
+            }
+
+            answerFoldoutStates[foldoutKey] = true;
+            return true;
+        }
+
+        private void SetAnswerFoldoutState(string foldoutKey, bool isExpanded)
+        {
+            answerFoldoutStates[foldoutKey] = isExpanded;
+        }
+
+        private void ClearAnswerFoldoutStates(DialogPhrase phrase)
+        {
+            if (phrase == null)
+            {
+                return;
+            }
+
+            string keyPrefix = $"{phrase.GetInstanceID()}:";
+            List<string> keysToRemove = answerFoldoutStates.Keys
+                .Where(key => key.StartsWith(keyPrefix, StringComparison.Ordinal))
+                .ToList();
+
+            foreach (string key in keysToRemove)
+            {
+                answerFoldoutStates.Remove(key);
+            }
+        }
+
+        private static Color GetAnswerAccentColor(bool missingLink, bool targetOutsideGraph, bool hasConditions)
+        {
+            if (missingLink)
+            {
+                return new Color(0.92f, 0.34f, 0.34f, 1f);
+            }
+
+            if (targetOutsideGraph)
+            {
+                return new Color(0.95f, 0.66f, 0.22f, 1f);
+            }
+
+            if (hasConditions)
+            {
+                return new Color(0.26f, 0.63f, 0.86f, 1f);
+            }
+
+            return new Color(0.38f, 0.78f, 0.42f, 1f);
+        }
+
+        private static string GetAnswerStatusLabel(bool missingLink, bool targetOutsideGraph, bool hasConditions, int conditionCount)
+        {
+            if (missingLink)
+            {
+                return "Missing Next";
+            }
+
+            if (targetOutsideGraph)
+            {
+                return "Outside Graph";
+            }
+
+            if (hasConditions)
+            {
+                return conditionCount > 0
+                    ? $"Conditions: {conditionCount}"
+                    : "Has Conditions";
+            }
+
+            return "Linked";
+        }
+
+        private static void DrawAnswerDivider(Color color)
+        {
+            Rect dividerRect = EditorGUILayout.GetControlRect(false, 1f);
+            EditorGUI.DrawRect(dividerRect, color);
+        }
+
+        private static Color GetConditionAccentColor(DialogAnswerConditionType conditionType)
+        {
+            return new Color(0.24f, 0.78f, 0.76f, 1f);
+        }
+
+        private static string GetConditionTitle(SerializedProperty typeProperty)
+        {
+            if (typeProperty == null || typeProperty.propertyType != SerializedPropertyType.Enum)
+            {
+                return "Condition";
+            }
+
+            string[] displayNames = typeProperty.enumDisplayNames;
+            int index = typeProperty.enumValueIndex;
+            if (displayNames == null || index < 0 || index >= displayNames.Length)
+            {
+                return "Condition";
+            }
+
+            return displayNames[index];
+        }
+
+        private void DrawDialogAnswerConditions(SerializedProperty conditionsProperty)
+        {
+            EditorGUILayout.Space(2f);
+            EditorGUILayout.LabelField("Conditions / Actions", EditorStyles.miniBoldLabel);
+
+            int removeIndex = -1;
+            for (int i = 0; i < conditionsProperty.arraySize; i++)
+            {
+                SerializedProperty conditionProperty = conditionsProperty.GetArrayElementAtIndex(i);
+                SerializedProperty typeProperty = conditionProperty.FindPropertyRelative("type");
+                SerializedProperty moneyAmountProperty = conditionProperty.FindPropertyRelative("moneyAmount");
+                SerializedProperty itemConfigProperty = conditionProperty.FindPropertyRelative("itemConfig");
+                SerializedProperty itemCountProperty = conditionProperty.FindPropertyRelative("itemCount");
+                SerializedProperty questGraphProperty = conditionProperty.FindPropertyRelative("questGraph");
+                SerializedProperty questSourceNodeProperty = conditionProperty.FindPropertyRelative("questSourceNode");
+                SerializedProperty questTransitionProperty = conditionProperty.FindPropertyRelative("questTransition");
+                SerializedProperty questNodeProperty = conditionProperty.FindPropertyRelative("questNode");
+                DialogAnswerConditionType conditionType = (DialogAnswerConditionType)typeProperty.enumValueIndex;
+                Color accentColor = GetConditionAccentColor(conditionType);
+                string conditionTitle = GetConditionTitle(typeProperty);
+
+                EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+                Rect accentRect = GUILayoutUtility.GetRect(
+                    AccentLineWidth,
+                    AccentLineWidth,
+                    GUILayout.Width(AccentLineWidth),
+                    GUILayout.ExpandHeight(true));
+                if (Event.current.type == EventType.Repaint)
+                {
+                    EditorGUI.DrawRect(accentRect, accentColor);
+                }
+
+                EditorGUILayout.BeginVertical();
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField($"Entry {i + 1}", EditorStyles.miniBoldLabel, GUILayout.Width(52f));
+                GUILayout.Label(conditionTitle, EditorStyles.centeredGreyMiniLabel);
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("X", GUILayout.Width(22f)))
+                {
+                    removeIndex = i;
+                }
+
+                EditorGUILayout.EndHorizontal();
+                DrawAnswerDivider(new Color(1f, 1f, 1f, 0.10f));
+                EditorGUILayout.Space(3f);
+
+                EditorGUILayout.PropertyField(typeProperty, new GUIContent("Type"));
+
+                switch (conditionType)
+                {
+                    case DialogAnswerConditionType.GiveMoney:
+                    case DialogAnswerConditionType.TakeMoney:
+                    case DialogAnswerConditionType.TakeMoneyMax:
+                        EditorGUILayout.PropertyField(moneyAmountProperty, new GUIContent("Money"));
+                        break;
+                    case DialogAnswerConditionType.TakeItemIfHas:
+                        EditorGUILayout.PropertyField(itemConfigProperty, new GUIContent("Item"));
+                        EditorGUILayout.PropertyField(itemCountProperty, new GUIContent("Count"));
+                        break;
+                    case DialogAnswerConditionType.CheckQuestStep:
+                    case DialogAnswerConditionType.DoQuestStep:
+                        DrawQuestTransitionSelector(
+                            conditionsProperty,
+                            i,
+                            questGraphProperty,
+                            questSourceNodeProperty,
+                            questTransitionProperty);
+                        break;
+                    case DialogAnswerConditionType.AddQuest:
+                        DrawQuestGraphSelector(conditionsProperty, i, questGraphProperty);
+                        QuestPreviewUtility.DrawQuestGraphPreview(questGraphProperty.objectReferenceValue as QuestGraph, "Quest");
+                        break;
+                    case DialogAnswerConditionType.DoQuestEnd:
+                        DrawTerminalQuestNodeSelector(conditionsProperty, i, questGraphProperty, questNodeProperty);
+                        break;
+                }
+
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.EndHorizontal();
+
+                if (i < conditionsProperty.arraySize - 1)
+                {
+                    EditorGUILayout.Space(2f);
+                    DrawAnswerDivider(new Color(1f, 1f, 1f, 0.06f));
+                    EditorGUILayout.Space(4f);
+                }
+                else
+                {
+                    EditorGUILayout.Space(2f);
+                }
+            }
+
+            if (removeIndex >= 0)
+            {
+                conditionsProperty.DeleteArrayElementAtIndex(removeIndex);
+            }
+
+            if (GUILayout.Button("+ Add Condition / Action"))
+            {
+                conditionsProperty.arraySize++;
+            }
+        }
+
+        private void DrawAnswerQuestLinksSummary(SerializedProperty conditionsProperty)
+        {
+            List<string> lines = new();
+            for (int i = 0; i < conditionsProperty.arraySize; i++)
+            {
+                string summary = GetQuestConditionSummary(conditionsProperty.GetArrayElementAtIndex(i));
+                if (!string.IsNullOrWhiteSpace(summary))
+                {
+                    lines.Add(summary);
+                }
+            }
+
+            if (lines.Count == 0)
+            {
+                return;
+            }
+
+            EditorGUILayout.Space(2f);
+            EditorGUILayout.LabelField("Quest Links", EditorStyles.miniBoldLabel);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            foreach (string line in lines)
+            {
+                EditorGUILayout.LabelField(line, EditorStyles.wordWrappedMiniLabel);
+            }
+
+            EditorGUILayout.EndVertical();
+        }
+
+        private string GetQuestConditionSummary(SerializedProperty conditionProperty)
+        {
+            SerializedProperty typeProperty = conditionProperty.FindPropertyRelative("type");
+            SerializedProperty questGraphProperty = conditionProperty.FindPropertyRelative("questGraph");
+            SerializedProperty questSourceNodeProperty = conditionProperty.FindPropertyRelative("questSourceNode");
+            SerializedProperty questTransitionProperty = conditionProperty.FindPropertyRelative("questTransition");
+            SerializedProperty questNodeProperty = conditionProperty.FindPropertyRelative("questNode");
+
+            DialogAnswerConditionType type = (DialogAnswerConditionType)typeProperty.enumValueIndex;
+            QuestGraph questGraph = questGraphProperty.objectReferenceValue as QuestGraph;
+            QuestNodeData questSourceNode = questSourceNodeProperty.objectReferenceValue as QuestNodeData;
+            QuestTransition transition = questTransitionProperty.objectReferenceValue as QuestTransition;
+            QuestNodeData questNode = questNodeProperty.objectReferenceValue as QuestNodeData;
+
+            return type switch
+            {
+                DialogAnswerConditionType.AddQuest when questGraph != null =>
+                    $"Add Quest -> {QuestPreviewUtility.GetQuestDisplayName(questGraph)}",
+                DialogAnswerConditionType.CheckQuestStep when questGraph != null && transition != null =>
+                    $"Check Transition -> {QuestPreviewUtility.GetQuestDisplayName(questGraph)}: {GetQuestTransitionLabel(questGraph, questSourceNode, transition)}",
+                DialogAnswerConditionType.DoQuestStep when questGraph != null && transition != null =>
+                    $"Execute Transition -> {QuestPreviewUtility.GetQuestDisplayName(questGraph)}: {GetQuestTransitionLabel(questGraph, questSourceNode, transition)}",
+                DialogAnswerConditionType.DoQuestEnd when questGraph != null && questNode != null =>
+                    $"Execute Final Node -> {QuestPreviewUtility.GetQuestDisplayName(questGraph)}: {QuestPreviewUtility.GetNodeDisplayName(questNode)}",
+                _ => null
+            };
+        }
+
+        private void DrawQuestGraphSelector(
+            SerializedProperty conditionsProperty,
+            int currentIndex,
+            SerializedProperty questGraphProperty,
+            string label = "Quest")
+        {
+            DrawRelatedQuestShortcuts(conditionsProperty, currentIndex, questGraphProperty);
+
+            List<QuestGraph> questGraphs = GetAllQuestGraphs();
+            if (questGraphs.Count == 0)
+            {
+                questGraphProperty.objectReferenceValue = null;
+                EditorGUILayout.HelpBox("No quest graphs were found.", MessageType.Warning);
+                return;
+            }
+
+            UnityEngine.Object targetObject = conditionsProperty.serializedObject.targetObject;
+            QuestGraph currentQuestGraph = questGraphProperty.objectReferenceValue as QuestGraph;
+            if (currentQuestGraph != null && !questGraphs.Contains(currentQuestGraph))
+            {
+                questGraphProperty.objectReferenceValue = null;
+                currentQuestGraph = null;
+            }
+
+            string buttonLabel = currentQuestGraph == null
+                ? $"Select {label}"
+                : QuestPreviewUtility.GetQuestDisplayName(currentQuestGraph);
+
+            Rect selectorRect = EditorGUILayout.GetControlRect();
+            if (GUI.Button(selectorRect, buttonLabel, EditorStyles.popup))
+            {
+                OpenQuestGraphSelector(
+                    selectorRect,
+                    targetObject,
+                    questGraphProperty.propertyPath,
+                    questGraphs,
+                    currentQuestGraph,
+                    label);
+            }
+        }
+
+        private void DrawRelatedQuestShortcuts(
+            SerializedProperty conditionsProperty,
+            int currentIndex,
+            SerializedProperty questGraphProperty)
+        {
+            List<QuestGraph> relatedGraphs = GetRelatedQuestGraphs(conditionsProperty, currentIndex);
+            if (relatedGraphs.Count == 0)
+            {
+                return;
+            }
+
+            EditorGUILayout.LabelField("Used In This Answer", EditorStyles.miniLabel);
+            EditorGUILayout.BeginHorizontal();
+            foreach (QuestGraph relatedGraph in relatedGraphs)
+            {
+                string label = QuestPreviewUtility.GetQuestDisplayName(relatedGraph);
+                if (GUILayout.Button(label, EditorStyles.miniButton))
+                {
+                    questGraphProperty.objectReferenceValue = relatedGraph;
+                    QuestPreviewPopup.ShowQuest(GUILayoutUtility.GetLastRect(), relatedGraph);
+                }
+            }
+
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private List<QuestGraph> GetRelatedQuestGraphs(SerializedProperty conditionsProperty, int currentIndex)
+        {
+            var graphs = new List<QuestGraph>();
+            for (int i = 0; i < conditionsProperty.arraySize; i++)
+            {
+                if (i == currentIndex)
+                {
+                    continue;
+                }
+
+                SerializedProperty graphProperty = conditionsProperty
+                    .GetArrayElementAtIndex(i)
+                    .FindPropertyRelative("questGraph");
+
+                QuestGraph questGraph = graphProperty?.objectReferenceValue as QuestGraph;
+                if (questGraph != null && !graphs.Contains(questGraph))
+                {
+                    graphs.Add(questGraph);
+                }
+            }
+
+            return graphs;
+        }
+
+        private void DrawQuestTransitionSelector(
+            SerializedProperty conditionsProperty,
+            int currentIndex,
+            SerializedProperty questGraphProperty,
+            SerializedProperty questSourceNodeProperty,
+            SerializedProperty questTransitionProperty)
+        {
+            List<QuestNodeData> sourceNodes = GetAllQuestSourceNodes();
+            if (sourceNodes.Count == 0)
+            {
+                questGraphProperty.objectReferenceValue = null;
+                questSourceNodeProperty.objectReferenceValue = null;
+                questTransitionProperty.objectReferenceValue = null;
+                EditorGUILayout.HelpBox("No quest nodes with transitions were found.", MessageType.Warning);
+                return;
+            }
+
+            UnityEngine.Object targetObject = conditionsProperty.serializedObject.targetObject;
+            QuestNodeData currentSourceNode = questSourceNodeProperty.objectReferenceValue as QuestNodeData;
+            if (currentSourceNode != null && !sourceNodes.Contains(currentSourceNode))
+            {
+                questSourceNodeProperty.objectReferenceValue = null;
+                currentSourceNode = null;
+            }
+
+            string sourceNodeLabel = currentSourceNode == null
+                ? "Select Source Node"
+                : GetQuestNodeOptionLabel(currentSourceNode);
+
+            Rect sourceNodeRect = EditorGUILayout.GetControlRect();
+            if (GUI.Button(sourceNodeRect, sourceNodeLabel, EditorStyles.popup))
+            {
+                OpenSourceNodeSelector(
+                    sourceNodeRect,
+                    targetObject,
+                    questGraphProperty.propertyPath,
+                    questSourceNodeProperty.propertyPath,
+                    questTransitionProperty.propertyPath,
+                    sourceNodes,
+                    currentSourceNode);
+            }
+
+            currentSourceNode = questSourceNodeProperty.objectReferenceValue as QuestNodeData;
+            if (currentSourceNode == null)
+            {
+                return;
+            }
+
+            QuestGraph questGraph = currentSourceNode.OwnerGraph;
+            questGraphProperty.objectReferenceValue = questGraph;
+            QuestPreviewUtility.DrawQuestNodePreview(currentSourceNode, "Source Node");
+
+            List<QuestTransition> transitions = currentSourceNode.Transitions?
+                .Where(transition => transition != null)
+                .ToList() ?? new List<QuestTransition>();
+
+            if (transitions.Count == 0)
+            {
+                questTransitionProperty.objectReferenceValue = null;
+                EditorGUILayout.HelpBox("This node has no transitions.", MessageType.Warning);
+                return;
+            }
+
+            QuestTransition currentTransition = questTransitionProperty.objectReferenceValue as QuestTransition;
+            if (currentTransition != null && !transitions.Contains(currentTransition))
+            {
+                questTransitionProperty.objectReferenceValue = null;
+                currentTransition = null;
+            }
+
+            string transitionLabel = currentTransition == null
+                ? "Select Transition"
+                : GetQuestTransitionLabel(questGraph, currentSourceNode, currentTransition);
+
+            Rect transitionRect = EditorGUILayout.GetControlRect();
+            if (GUI.Button(transitionRect, transitionLabel, EditorStyles.popup))
+            {
+                OpenTransitionSelector(
+                    transitionRect,
+                    targetObject,
+                    questTransitionProperty.propertyPath,
+                    questGraph,
+                    currentSourceNode,
+                    transitions,
+                    currentTransition);
+            }
+
+            QuestPreviewUtility.DrawQuestTransitionPreview(questGraph, questTransitionProperty.objectReferenceValue as QuestTransition, "Transition");
+        }
+
+        private void DrawTerminalQuestNodeSelector(
+            SerializedProperty conditionsProperty,
+            int currentIndex,
+            SerializedProperty questGraphProperty,
+            SerializedProperty questNodeProperty)
+        {
+            List<QuestNodeData> terminalNodes = GetAllTerminalQuestNodes();
+            if (terminalNodes.Count == 0)
+            {
+                questGraphProperty.objectReferenceValue = null;
+                questNodeProperty.objectReferenceValue = null;
+                EditorGUILayout.HelpBox("No terminal quest nodes were found.", MessageType.Warning);
+                return;
+            }
+
+            UnityEngine.Object targetObject = conditionsProperty.serializedObject.targetObject;
+            QuestNodeData currentNode = questNodeProperty.objectReferenceValue as QuestNodeData;
+            if (currentNode != null && !terminalNodes.Contains(currentNode))
+            {
+                questNodeProperty.objectReferenceValue = null;
+                currentNode = null;
+            }
+
+            string terminalNodeLabel = currentNode == null
+                ? "Select Terminal Node"
+                : GetQuestNodeOptionLabel(currentNode);
+
+            Rect terminalNodeRect = EditorGUILayout.GetControlRect();
+            if (GUI.Button(terminalNodeRect, terminalNodeLabel, EditorStyles.popup))
+            {
+                OpenTerminalNodeSelector(
+                    terminalNodeRect,
+                    targetObject,
+                    questGraphProperty.propertyPath,
+                    questNodeProperty.propertyPath,
+                    terminalNodes,
+                    currentNode);
+            }
+
+            QuestPreviewUtility.DrawQuestNodePreview(questNodeProperty.objectReferenceValue as QuestNodeData, "Quest Node");
+        }
+
+        private static QuestNodeData GetOwnerNodeDataForTransition(QuestGraph questGraph, QuestTransition transition)
+        {
+            if (questGraph == null || transition == null)
+            {
+                return null;
+            }
+
+            return questGraph.Nodes
+                .FirstOrDefault(node =>
+                    node?.NodeData != null &&
+                    node.NodeData.Transitions != null &&
+                    node.NodeData.Transitions.Contains(transition))
+                ?.NodeData;
+        }
+
+        private void OpenSourceNodeSelector(
+            Rect activatorRect,
+            UnityEngine.Object targetObject,
+            string questGraphPropertyPath,
+            string questSourceNodePropertyPath,
+            string questTransitionPropertyPath,
+            List<QuestNodeData> sourceNodes,
+            QuestNodeData currentSourceNode)
+        {
+            var entries = new List<QuestCardSelectorPopup.Entry>
+            {
+                new()
+                {
+                    Title = "<None>",
+                    Subtitle = "Clear source node selection",
+                    IsSelected = currentSourceNode == null,
+                    OnSelect = () =>
+                    {
+                        ApplySourceNodeSelection(targetObject, questGraphPropertyPath, questSourceNodePropertyPath, questTransitionPropertyPath, null);
+                    }
+                }
+            };
+
+            entries.AddRange(sourceNodes.Select(nodeData => new QuestCardSelectorPopup.Entry
+            {
+                Title = QuestPreviewUtility.GetNodeDisplayName(nodeData),
+                Subtitle = nodeData.OwnerGraph != null ? QuestPreviewUtility.GetQuestDisplayName(nodeData.OwnerGraph) : "Unknown Quest",
+                Sprite = nodeData.Icon,
+                IsSelected = nodeData == currentSourceNode,
+                OnSelect = () =>
+                {
+                    ApplySourceNodeSelection(targetObject, questGraphPropertyPath, questSourceNodePropertyPath, questTransitionPropertyPath, nodeData);
+                }
+            }));
+
+            QuestCardSelectorPopup.Show(activatorRect, "Select Source Node", entries);
+        }
+
+        private void OpenQuestGraphSelector(
+            Rect activatorRect,
+            UnityEngine.Object targetObject,
+            string questGraphPropertyPath,
+            List<QuestGraph> questGraphs,
+            QuestGraph currentQuestGraph,
+            string label)
+        {
+            var entries = new List<QuestCardSelectorPopup.Entry>
+            {
+                new()
+                {
+                    Title = "<None>",
+                    Subtitle = "Clear quest selection",
+                    IsSelected = currentQuestGraph == null,
+                    OnSelect = () =>
+                    {
+                        ApplyQuestGraphSelection(targetObject, questGraphPropertyPath, null);
+                    }
+                }
+            };
+
+            entries.AddRange(questGraphs.Select(questGraph => new QuestCardSelectorPopup.Entry
+            {
+                Title = QuestPreviewUtility.GetQuestDisplayName(questGraph),
+                Subtitle = QuestPreviewUtility.GetQuestDescription(questGraph),
+                Sprite = questGraph.GetEntryNode()?.Icon,
+                IsSelected = questGraph == currentQuestGraph,
+                OnSelect = () =>
+                {
+                    ApplyQuestGraphSelection(targetObject, questGraphPropertyPath, questGraph);
+                }
+            }));
+
+            QuestCardSelectorPopup.Show(activatorRect, $"Select {label}", entries);
+        }
+
+        private void OpenTransitionSelector(
+            Rect activatorRect,
+            UnityEngine.Object targetObject,
+            string questTransitionPropertyPath,
+            QuestGraph questGraph,
+            QuestNodeData sourceNodeData,
+            List<QuestTransition> transitions,
+            QuestTransition currentTransition)
+        {
+            var entries = new List<QuestCardSelectorPopup.Entry>
+            {
+                new()
+                {
+                    Title = "<None>",
+                    Subtitle = "Clear transition selection",
+                    IsSelected = currentTransition == null,
+                    OnSelect = () =>
+                    {
+                        ApplyTransitionSelection(targetObject, questTransitionPropertyPath, null);
+                    }
+                }
+            };
+
+            entries.AddRange(transitions.Select(transition => new QuestCardSelectorPopup.Entry
+            {
+                Title = GetQuestTransitionLabel(questGraph, sourceNodeData, transition),
+                Subtitle = sourceNodeData != null ? QuestPreviewUtility.GetNodeDisplayName(sourceNodeData) : string.Empty,
+                Sprite = transition.TargetNode != null ? transition.TargetNode.Icon : null,
+                IsSelected = transition == currentTransition,
+                OnSelect = () =>
+                {
+                    ApplyTransitionSelection(targetObject, questTransitionPropertyPath, transition);
+                }
+            }));
+
+            QuestCardSelectorPopup.Show(activatorRect, "Select Transition", entries);
+        }
+
+        private void OpenTerminalNodeSelector(
+            Rect activatorRect,
+            UnityEngine.Object targetObject,
+            string questGraphPropertyPath,
+            string questNodePropertyPath,
+            List<QuestNodeData> terminalNodes,
+            QuestNodeData currentNode)
+        {
+            var entries = new List<QuestCardSelectorPopup.Entry>
+            {
+                new()
+                {
+                    Title = "<None>",
+                    Subtitle = "Clear terminal node selection",
+                    IsSelected = currentNode == null,
+                    OnSelect = () =>
+                    {
+                        ApplyTerminalNodeSelection(targetObject, questGraphPropertyPath, questNodePropertyPath, null);
+                    }
+                }
+            };
+
+            entries.AddRange(terminalNodes.Select(nodeData => new QuestCardSelectorPopup.Entry
+            {
+                Title = QuestPreviewUtility.GetNodeDisplayName(nodeData),
+                Subtitle = nodeData.OwnerGraph != null ? QuestPreviewUtility.GetQuestDisplayName(nodeData.OwnerGraph) : "Unknown Quest",
+                Sprite = nodeData.Icon,
+                IsSelected = nodeData == currentNode,
+                OnSelect = () =>
+                {
+                    ApplyTerminalNodeSelection(targetObject, questGraphPropertyPath, questNodePropertyPath, nodeData);
+                }
+            }));
+
+            QuestCardSelectorPopup.Show(activatorRect, "Select Terminal Node", entries);
+        }
+
+        private void ApplySourceNodeSelection(
+            UnityEngine.Object targetObject,
+            string questGraphPropertyPath,
+            string questSourceNodePropertyPath,
+            string questTransitionPropertyPath,
+            QuestNodeData selectedNode)
+        {
+            SerializedObject serializedObject = new SerializedObject(targetObject);
+            SerializedProperty questGraphProperty = serializedObject.FindProperty(questGraphPropertyPath);
+            SerializedProperty questSourceNodeProperty = serializedObject.FindProperty(questSourceNodePropertyPath);
+            SerializedProperty questTransitionProperty = serializedObject.FindProperty(questTransitionPropertyPath);
+
+            questGraphProperty.objectReferenceValue = selectedNode != null ? selectedNode.OwnerGraph : null;
+            questSourceNodeProperty.objectReferenceValue = selectedNode;
+            questTransitionProperty.objectReferenceValue = null;
+
+            serializedObject.ApplyModifiedProperties();
+            MarkDirty(targetObject);
+            Repaint();
+        }
+
+        private void ApplyQuestGraphSelection(
+            UnityEngine.Object targetObject,
+            string questGraphPropertyPath,
+            QuestGraph selectedQuestGraph)
+        {
+            SerializedObject serializedObject = new SerializedObject(targetObject);
+            SerializedProperty questGraphProperty = serializedObject.FindProperty(questGraphPropertyPath);
+            questGraphProperty.objectReferenceValue = selectedQuestGraph;
+            serializedObject.ApplyModifiedProperties();
+            MarkDirty(targetObject);
+            Repaint();
+        }
+
+        private void ApplyTransitionSelection(
+            UnityEngine.Object targetObject,
+            string questTransitionPropertyPath,
+            QuestTransition transition)
+        {
+            SerializedObject serializedObject = new SerializedObject(targetObject);
+            SerializedProperty questTransitionProperty = serializedObject.FindProperty(questTransitionPropertyPath);
+            questTransitionProperty.objectReferenceValue = transition;
+            serializedObject.ApplyModifiedProperties();
+            MarkDirty(targetObject);
+            Repaint();
+        }
+
+        private void ApplyTerminalNodeSelection(
+            UnityEngine.Object targetObject,
+            string questGraphPropertyPath,
+            string questNodePropertyPath,
+            QuestNodeData selectedNode)
+        {
+            SerializedObject serializedObject = new SerializedObject(targetObject);
+            SerializedProperty questGraphProperty = serializedObject.FindProperty(questGraphPropertyPath);
+            SerializedProperty questNodeProperty = serializedObject.FindProperty(questNodePropertyPath);
+
+            questGraphProperty.objectReferenceValue = selectedNode != null ? selectedNode.OwnerGraph : null;
+            questNodeProperty.objectReferenceValue = selectedNode;
+
+            serializedObject.ApplyModifiedProperties();
+            MarkDirty(targetObject);
+            Repaint();
+        }
+
+        private static List<QuestNodeData> GetAllQuestSourceNodes()
+        {
+            cachedQuestSourceNodes ??= AssetDatabase.FindAssets("t:QuestNodeData")
+                .Select(AssetDatabase.GUIDToAssetPath)
+                .Select(AssetDatabase.LoadAssetAtPath<QuestNodeData>)
+                .Where(nodeData =>
+                    nodeData != null &&
+                    nodeData.OwnerGraph != null &&
+                    nodeData.Transitions != null &&
+                    nodeData.Transitions.Any(transition => transition != null))
+                .ToList();
+
+            return cachedQuestSourceNodes;
+        }
+
+        private static List<QuestGraph> GetAllQuestGraphs()
+        {
+            cachedQuestGraphs ??= AssetDatabase.FindAssets("t:QuestGraph")
+                .Select(AssetDatabase.GUIDToAssetPath)
+                .Select(AssetDatabase.LoadAssetAtPath<QuestGraph>)
+                .Where(questGraph => questGraph != null)
+                .ToList();
+
+            return cachedQuestGraphs;
+        }
+
+        private static List<QuestNodeData> GetAllTerminalQuestNodes()
+        {
+            cachedTerminalQuestNodes ??= AssetDatabase.FindAssets("t:QuestNodeData")
+                .Select(AssetDatabase.GUIDToAssetPath)
+                .Select(AssetDatabase.LoadAssetAtPath<QuestNodeData>)
+                .Where(nodeData =>
+                    nodeData != null &&
+                    nodeData.OwnerGraph != null &&
+                    nodeData.OwnerGraph.IsTerminalNode(nodeData))
+                .ToList();
+
+            return cachedTerminalQuestNodes;
+        }
+
+        private static string GetQuestNodeOptionLabel(QuestNodeData nodeData)
+        {
+            if (nodeData == null)
+            {
+                return "<None>";
+            }
+
+            string questName = nodeData.OwnerGraph != null
+                ? QuestPreviewUtility.GetQuestDisplayName(nodeData.OwnerGraph)
+                : "Unknown Quest";
+
+            return $"{questName} / {QuestPreviewUtility.GetNodeDisplayName(nodeData)}";
+        }
+
+        private static string GetQuestTransitionLabel(QuestGraph questGraph, QuestNodeData sourceNodeData, QuestTransition transition)
+        {
+            if (questGraph == null || transition == null)
+            {
+                return "<None>";
+            }
+
+            QuestNodeData ownerNodeData = sourceNodeData ?? GetOwnerNodeDataForTransition(questGraph, transition);
+
+            string sourceName = ownerNodeData != null
+                ? QuestPreviewUtility.GetNodeDisplayName(ownerNodeData)
+                : "Unknown";
+            string targetName = transition.TargetNode != null
+                ? QuestPreviewUtility.GetNodeDisplayName(transition.TargetNode)
+                : "Missing Target";
+            return $"{sourceName} -> {targetName}";
         }
 
         private static void DrawLocalizedStringSelector(SerializedProperty localizedStringProperty, string label)
@@ -1328,23 +3091,17 @@ namespace Dialogs.Graph.Editor
 
             if (TryDrawLocalizedStringSearchPicker(localizedStringProperty, label))
             {
+                DrawLocalizedStringPreview(localizedStringProperty);
                 return;
             }
 
-            var collections = LocalizationEditorSettings.GetStringTableCollections();
+            var collections = GetCachedStringTableCollections();
             string currentTableValue = tableCollectionNameProperty.stringValue;
             int selectedCollectionIndex = GetSelectedCollectionIndex(collections, currentTableValue);
 
-            string[] collectionOptions = new string[collections.Count + 1];
-            collectionOptions[0] = "<None>";
-            for (int i = 0; i < collections.Count; i++)
-            {
-                collectionOptions[i + 1] = collections[i].TableCollectionName;
-            }
-
             EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
 
-            int newCollectionIndex = EditorGUILayout.Popup("Table", selectedCollectionIndex, collectionOptions);
+            int newCollectionIndex = EditorGUILayout.Popup("Table", selectedCollectionIndex, GetCachedStringTableOptions());
             if (newCollectionIndex != selectedCollectionIndex)
             {
                 ApplyCollectionSelection(tableCollectionNameProperty, keyIdProperty, keyProperty, collections, newCollectionIndex);
@@ -1358,23 +3115,26 @@ namespace Dialogs.Graph.Editor
             }
 
             StringTableCollection selectedCollection = collections[selectedCollectionIndex - 1];
-            IReadOnlyList<SharedTableData.SharedTableEntry> entries = selectedCollection.SharedData.Entries
-                .OrderBy(entry => entry.Key, StringComparer.Ordinal)
-                .ToList();
+            CachedLocalizedEntryOptions entryOptions = GetCachedLocalizedEntryOptions(selectedCollection);
 
-            string[] entryOptions = new string[entries.Count + 1];
-            entryOptions[0] = "<None>";
-            for (int i = 0; i < entries.Count; i++)
+            int selectedEntryIndex = GetSelectedEntryIndex(entryOptions.Entries, keyIdProperty.longValue, keyProperty.stringValue);
+            string currentEntryLabel = selectedEntryIndex > 0 && selectedEntryIndex < entryOptions.Options.Length
+                ? entryOptions.Options[selectedEntryIndex]
+                : "<None>";
+
+            Rect entryRect = EditorGUILayout.GetControlRect();
+            if (EditorGUI.DropdownButton(entryRect, new GUIContent($"Entry: {currentEntryLabel}"), FocusType.Passive))
             {
-                entryOptions[i + 1] = entries[i].Key;
+                LocalizedEntrySelectorWindow.Show(
+                    entryRect,
+                    localizedStringProperty.serializedObject.targetObject,
+                    keyIdProperty.propertyPath,
+                    keyProperty.propertyPath,
+                    entryOptions.Entries,
+                    selectedEntryIndex > 0 ? selectedEntryIndex - 1 : -1);
             }
 
-            int selectedEntryIndex = GetSelectedEntryIndex(entries, keyIdProperty.longValue, keyProperty.stringValue);
-            int newEntryIndex = EditorGUILayout.Popup("Entry", selectedEntryIndex, entryOptions);
-            if (newEntryIndex != selectedEntryIndex)
-            {
-                ApplyEntrySelection(keyIdProperty, keyProperty, entries, newEntryIndex);
-            }
+            DrawLocalizedStringPreview(localizedStringProperty);
         }
 
         private static int GetSelectedCollectionIndex(System.Collections.ObjectModel.ReadOnlyCollection<StringTableCollection> collections, string serializedTableReference)
@@ -1396,6 +3156,188 @@ namespace Dialogs.Graph.Editor
             }
 
             return 0;
+        }
+
+        private static void DrawLocalizedStringPreview(SerializedProperty localizedStringProperty)
+        {
+            string previewText = GetLocalizedStringPreview(localizedStringProperty, PreferredPreviewLocale);
+            if (string.IsNullOrWhiteSpace(previewText))
+            {
+                return;
+            }
+
+            EditorGUILayout.LabelField("RU Preview", EditorStyles.miniBoldLabel);
+
+            GUIStyle previewStyle = new GUIStyle(EditorStyles.textArea)
+            {
+                wordWrap = true
+            };
+
+            float width = LocalizedPreviewWidth;
+            float height = Mathf.Max(LocalizedPreviewMinHeight, previewStyle.CalcHeight(new GUIContent(previewText), width));
+
+            EditorGUI.BeginDisabledGroup(true);
+            EditorGUILayout.TextArea(
+                previewText,
+                previewStyle,
+                GUILayout.MinHeight(LocalizedPreviewMinHeight),
+                GUILayout.Height(height));
+            EditorGUI.EndDisabledGroup();
+        }
+
+        private static string GetLocalizedStringPreview(SerializedProperty localizedStringProperty, string localeCode)
+        {
+            if (localizedStringProperty == null)
+            {
+                return string.Empty;
+            }
+
+            SerializedProperty tableReferenceProperty = localizedStringProperty.FindPropertyRelative("m_TableReference");
+            SerializedProperty entryReferenceProperty = localizedStringProperty.FindPropertyRelative("m_TableEntryReference");
+            SerializedProperty tableCollectionNameProperty = tableReferenceProperty?.FindPropertyRelative("m_TableCollectionName");
+            SerializedProperty keyIdProperty = entryReferenceProperty?.FindPropertyRelative("m_KeyId");
+            SerializedProperty keyProperty = entryReferenceProperty?.FindPropertyRelative("m_Key");
+
+            StringTableCollection collection = ResolveStringTableCollection(tableCollectionNameProperty?.stringValue);
+            if (collection == null)
+            {
+                return string.Empty;
+            }
+
+            SharedTableData.SharedTableEntry entry = ResolveSharedTableEntry(collection, keyIdProperty, keyProperty);
+            if (entry == null)
+            {
+                return string.Empty;
+            }
+
+            return GetLocalizedValue(collection, entry.Id, localeCode);
+        }
+
+        private static StringTableCollection ResolveStringTableCollection(string serializedTableReference)
+        {
+            if (string.IsNullOrWhiteSpace(serializedTableReference))
+            {
+                return null;
+            }
+
+            foreach (StringTableCollection collection in GetCachedStringTableCollections())
+            {
+                string guidReference = $"GUID:{collection.SharedData.TableCollectionNameGuid:N}";
+                if (string.Equals(serializedTableReference, guidReference, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(serializedTableReference, collection.TableCollectionName, StringComparison.Ordinal))
+                {
+                    return collection;
+                }
+            }
+
+            return null;
+        }
+
+        private static SharedTableData.SharedTableEntry ResolveSharedTableEntry(
+            StringTableCollection collection,
+            SerializedProperty keyIdProperty,
+            SerializedProperty keyProperty)
+        {
+            if (collection == null)
+            {
+                return null;
+            }
+
+            if (keyIdProperty != null && keyIdProperty.longValue != 0)
+            {
+                SharedTableData.SharedTableEntry entryById = collection.SharedData.GetEntry(keyIdProperty.longValue);
+                if (entryById != null)
+                {
+                    return entryById;
+                }
+            }
+
+            if (keyProperty != null && !string.IsNullOrWhiteSpace(keyProperty.stringValue))
+            {
+                return collection.SharedData.GetEntry(keyProperty.stringValue);
+            }
+
+            return null;
+        }
+
+        private static string GetLocalizedValue(StringTableCollection collection, long entryId, string localeCode)
+        {
+            if (collection == null || entryId == 0 || string.IsNullOrWhiteSpace(localeCode))
+            {
+                return string.Empty;
+            }
+
+            foreach (StringTable table in collection.StringTables)
+            {
+                if (table == null || table.LocaleIdentifier.Code != localeCode)
+                {
+                    continue;
+                }
+
+                StringTableEntry entry = table.GetEntry(entryId);
+                if (entry != null && !string.IsNullOrWhiteSpace(entry.LocalizedValue))
+                {
+                    return entry.LocalizedValue;
+                }
+            }
+
+            return string.Empty;
+        }
+
+        private static System.Collections.ObjectModel.ReadOnlyCollection<StringTableCollection> GetCachedStringTableCollections()
+        {
+            cachedStringTableCollections ??= LocalizationEditorSettings.GetStringTableCollections();
+            return cachedStringTableCollections;
+        }
+
+        private static string[] GetCachedStringTableOptions()
+        {
+            if (cachedStringTableOptions != null)
+            {
+                return cachedStringTableOptions;
+            }
+
+            var collections = GetCachedStringTableCollections();
+            cachedStringTableOptions = new string[collections.Count + 1];
+            cachedStringTableOptions[0] = "<None>";
+            for (int i = 0; i < collections.Count; i++)
+            {
+                cachedStringTableOptions[i + 1] = collections[i].TableCollectionName;
+            }
+
+            return cachedStringTableOptions;
+        }
+
+        private static CachedLocalizedEntryOptions GetCachedLocalizedEntryOptions(StringTableCollection collection)
+        {
+            if (collection == null)
+            {
+                return CachedLocalizedEntryOptions.Empty;
+            }
+
+            string cacheKey = collection.SharedData != null
+                ? collection.SharedData.TableCollectionNameGuid.ToString("N")
+                : collection.TableCollectionName;
+
+            if (localizedEntryOptionsCache.TryGetValue(cacheKey, out CachedLocalizedEntryOptions cachedOptions))
+            {
+                return cachedOptions;
+            }
+
+            IReadOnlyList<SharedTableData.SharedTableEntry> entries = collection.SharedData.Entries
+                .OrderBy(entry => entry.Key, StringComparer.Ordinal)
+                .ToList();
+
+            string[] options = new string[entries.Count + 1];
+            options[0] = "<None>";
+            for (int i = 0; i < entries.Count; i++)
+            {
+                options[i + 1] = entries[i].Key;
+            }
+
+            cachedOptions = new CachedLocalizedEntryOptions(entries, options);
+            localizedEntryOptionsCache[cacheKey] = cachedOptions;
+            return cachedOptions;
         }
 
         private static int GetSelectedEntryIndex(IReadOnlyList<SharedTableData.SharedTableEntry> entries, long keyId, string keyName)
@@ -1464,6 +3406,74 @@ namespace Dialogs.Graph.Editor
             keyProperty.stringValue = string.Empty;
         }
 
+        private static void ApplyEntrySelection(
+            SerializedProperty keyIdProperty,
+            SerializedProperty keyProperty,
+            IReadOnlyList<LocalizedEntrySelectorWindow.EntryOption> entries,
+            int selectedEntryIndex)
+        {
+            if (selectedEntryIndex <= 0)
+            {
+                keyIdProperty.longValue = 0;
+                keyProperty.stringValue = string.Empty;
+                return;
+            }
+
+            LocalizedEntrySelectorWindow.EntryOption entry = entries[selectedEntryIndex - 1];
+            keyIdProperty.longValue = entry.Id;
+            keyProperty.stringValue = string.Empty;
+        }
+
+        private static void ApplyEntrySelectionToObject(
+            UnityEngine.Object targetObject,
+            string keyIdPropertyPath,
+            string keyPropertyPath,
+            IReadOnlyList<SharedTableData.SharedTableEntry> entries,
+            int selectedEntryIndex)
+        {
+            if (targetObject == null)
+            {
+                return;
+            }
+
+            SerializedObject serializedObject = new SerializedObject(targetObject);
+            SerializedProperty keyIdProperty = serializedObject.FindProperty(keyIdPropertyPath);
+            SerializedProperty keyProperty = serializedObject.FindProperty(keyPropertyPath);
+            if (keyIdProperty == null || keyProperty == null)
+            {
+                return;
+            }
+
+            ApplyEntrySelection(keyIdProperty, keyProperty, entries, selectedEntryIndex);
+            serializedObject.ApplyModifiedProperties();
+            EditorUtility.SetDirty(targetObject);
+        }
+
+        private static void ApplyEntrySelectionToObject(
+            UnityEngine.Object targetObject,
+            string keyIdPropertyPath,
+            string keyPropertyPath,
+            IReadOnlyList<LocalizedEntrySelectorWindow.EntryOption> entries,
+            int selectedEntryIndex)
+        {
+            if (targetObject == null)
+            {
+                return;
+            }
+
+            SerializedObject serializedObject = new SerializedObject(targetObject);
+            SerializedProperty keyIdProperty = serializedObject.FindProperty(keyIdPropertyPath);
+            SerializedProperty keyProperty = serializedObject.FindProperty(keyPropertyPath);
+            if (keyIdProperty == null || keyProperty == null)
+            {
+                return;
+            }
+
+            ApplyEntrySelection(keyIdProperty, keyProperty, entries, selectedEntryIndex);
+            serializedObject.ApplyModifiedProperties();
+            EditorUtility.SetDirty(targetObject);
+        }
+
         private static bool TryDrawLocalizedStringSearchPicker(SerializedProperty localizedStringProperty, string label)
         {
             #if ENABLE_SEARCH
@@ -1527,7 +3537,7 @@ namespace Dialogs.Graph.Editor
             if (tableCollectionNameProperty != null && !string.IsNullOrEmpty(tableCollectionNameProperty.stringValue))
             {
                 string serializedTableReference = tableCollectionNameProperty.stringValue;
-                foreach (StringTableCollection collection in LocalizationEditorSettings.GetStringTableCollections())
+                foreach (StringTableCollection collection in GetCachedStringTableCollections())
                 {
                     string guidReference = $"GUID:{collection.SharedData.TableCollectionNameGuid:N}";
                     if (string.Equals(serializedTableReference, guidReference, StringComparison.OrdinalIgnoreCase) ||
@@ -1617,6 +3627,11 @@ namespace Dialogs.Graph.Editor
 
         private void DeleteNode(DialogNode node)
         {
+            if (activeConnectionNode == node)
+            {
+                activeConnectionNode = null;
+            }
+
             bool shouldDeletePhraseAsset = node.Phrase != null &&
                                            EditorUtility.DisplayDialog(
                                                "Delete Phrase?",
@@ -1640,6 +3655,8 @@ namespace Dialogs.Graph.Editor
 
             currentGraph.Nodes.Remove(node);
             MarkDirty(currentGraph);
+            InvalidatePhraseDisplayName(node.Phrase);
+            InvalidateGraphStructure();
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             GUIUtility.ExitGUI();
@@ -1672,6 +3689,7 @@ namespace Dialogs.Graph.Editor
                 if (phraseChanged)
                 {
                     MarkDirty(otherNode.Phrase);
+                    InvalidatePhraseDisplayName(otherNode.Phrase);
                 }
             }
 
@@ -1708,26 +3726,21 @@ namespace Dialogs.Graph.Editor
                 if (phraseChanged)
                 {
                     MarkDirty(node.Phrase);
+                    InvalidatePhraseDisplayName(node.Phrase);
                 }
             }
+
+            InvalidateGraphCaches();
         }
 
         private bool ContainsPhrase(DialogPhrase phrase)
         {
-            return currentGraph.Nodes.Any(node => node.Phrase == phrase);
+            return phrase != null && phraseToNodeLookup.ContainsKey(phrase);
         }
 
         private bool IsOrphanPhrase(DialogPhrase phrase)
         {
-            if (phrase == null || currentGraph.IsEntryPhrase(phrase))
-            {
-                return false;
-            }
-
-            return !currentGraph.Nodes
-                .Where(node => node.Phrase != null)
-                .SelectMany(node => node.Phrase.Answers)
-                .Any(answer => answer != null && answer.NextPhrase == phrase);
+            return phrase != null && orphanPhrases.Contains(phrase);
         }
 
         private Color GetNodeTint(DialogNode node)
@@ -1740,6 +3753,11 @@ namespace Dialogs.Graph.Editor
             if (currentGraph.IsEntryPhrase(node.Phrase))
             {
                 return new Color(0.82f, 1f, 0.82f);
+            }
+
+            if (node.Phrase.IsQuestPhrase)
+            {
+                return new Color(0.80f, 0.90f, 1f);
             }
 
             if (IsOrphanPhrase(node.Phrase))
@@ -1757,8 +3775,86 @@ namespace Dialogs.Graph.Editor
                 return "Phrase Node";
             }
 
-            string prefix = currentGraph.IsEntryPhrase(node.Phrase) ? "[Start] " : string.Empty;
-            return prefix + node.Phrase.name;
+            string prefix = string.Empty;
+            if (currentGraph.IsEntryPhrase(node.Phrase))
+            {
+                prefix += "[Start] ";
+            }
+
+            if (node.Phrase.IsQuestPhrase)
+            {
+                prefix += "[Quest] ";
+            }
+
+            return prefix + GetCachedPhraseDisplayName(node.Phrase);
+        }
+
+        private string GetCachedPhraseDisplayName(DialogPhrase phrase)
+        {
+            if (phrase == null)
+            {
+                return "Phrase Node";
+            }
+
+            if (!phraseDisplayNameCache.TryGetValue(phrase, out string displayName))
+            {
+                displayName = GetPhraseDisplayName(phrase);
+                phraseDisplayNameCache[phrase] = displayName;
+            }
+
+            return displayName;
+        }
+
+        private void InvalidatePhraseDisplayName(DialogPhrase phrase)
+        {
+            if (phrase != null)
+            {
+                phraseDisplayNameCache.Remove(phrase);
+            }
+        }
+
+        private string GetPhraseDisplayName(DialogPhrase phrase)
+        {
+            if (phrase == null)
+            {
+                return "Phrase Node";
+            }
+
+            if (phraseDisplayNameCache.TryGetValue(phrase, out string cachedDisplayName))
+            {
+                return cachedDisplayName;
+            }
+
+            SerializedObject phraseObject = new SerializedObject(phrase);
+            SerializedProperty textProperty = phraseObject.FindProperty("text");
+            SerializedProperty tableReferenceProperty = textProperty?.FindPropertyRelative("m_TableReference");
+            SerializedProperty tableCollectionNameProperty = tableReferenceProperty?.FindPropertyRelative("m_TableCollectionName");
+            SerializedProperty entryReferenceProperty = textProperty?.FindPropertyRelative("m_TableEntryReference");
+            SerializedProperty keyProperty = entryReferenceProperty?.FindPropertyRelative("m_Key");
+            SerializedProperty keyIdProperty = entryReferenceProperty?.FindPropertyRelative("m_KeyId");
+
+            if (tableCollectionNameProperty == null || string.IsNullOrWhiteSpace(tableCollectionNameProperty.stringValue))
+            {
+                return "\u041d\u0435\u0442 \u0441\u0442\u0440\u043e\u043a\u0438: " + phrase.name;
+            }
+
+            if ((keyProperty == null || string.IsNullOrWhiteSpace(keyProperty.stringValue)) &&
+                (keyIdProperty == null || keyIdProperty.longValue == 0))
+            {
+                return "\u041d\u0435\u0442 \u0441\u0442\u0440\u043e\u043a\u0438: " + phrase.name;
+            }
+
+            if (keyProperty != null && !string.IsNullOrWhiteSpace(keyProperty.stringValue))
+            {
+                return keyProperty.stringValue;
+            }
+
+            if (keyIdProperty != null && keyIdProperty.longValue != 0)
+            {
+                return $"Key {keyIdProperty.longValue}";
+            }
+
+            return $"Нет строки: {phrase.name}";
         }
 
         private void CancelTargetSelection(bool repaint = true)

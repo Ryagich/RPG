@@ -20,5 +20,24 @@ namespace Dialogs.Graph
         {
             return EntryPhrase == phrase;
         }
+
+        public IEnumerable<DialogPhrase> GetQuestPhrases()
+        {
+            if (Nodes == null)
+            {
+                yield break;
+            }
+
+            foreach (DialogNode node in Nodes)
+            {
+                DialogPhrase phrase = node?.Phrase;
+                if (phrase == null || !phrase.IsQuestPhrase || IsEntryPhrase(phrase))
+                {
+                    continue;
+                }
+
+                yield return phrase;
+            }
+        }
     }
 }

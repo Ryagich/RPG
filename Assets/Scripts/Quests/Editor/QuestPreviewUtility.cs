@@ -1,0 +1,269 @@
+using Quests.Graph;
+using Quests.Graph.Model;
+using UnityEditor;
+using UnityEditor.Localization;
+using UnityEngine;
+using UnityEngine.Localization.Tables;
+
+namespace Quests.Editor
+{
+    public static class QuestPreviewUtility
+    {
+        private const string PreferredPreviewLocale = "ru";
+
+        public static string GetNodeEditorTitle(QuestNodeData nodeData)
+        {
+            return nodeData == null
+                ? "Quest Node"
+                : nodeData.EditorTitle;
+        }
+
+        public static string GetNodeDisplayName(QuestNodeData nodeData)
+        {
+            if (nodeData == null)
+            {
+                return "Quest Node";
+            }
+
+            SerializedObject nodeObject = new SerializedObject(nodeData);
+            SerializedProperty localizedNameProperty = nodeObject.FindProperty("localizedName");
+            return GetLocalizedStringDisplayName(localizedNameProperty, nodeData.name);
+        }
+
+        public static string GetQuestDisplayName(QuestGraph questGraph)
+        {
+            if (questGraph == null)
+            {
+                return "Quest";
+            }
+
+            SerializedObject graphObject = new SerializedObject(questGraph);
+            SerializedProperty titleProperty = graphObject.FindProperty("title");
+            return GetLocalizedStringDisplayName(titleProperty, questGraph.name);
+        }
+
+        public static string GetQuestDescription(QuestGraph questGraph)
+        {
+            if (questGraph == null)
+            {
+                return string.Empty;
+            }
+
+            SerializedObject graphObject = new SerializedObject(questGraph);
+            SerializedProperty descriptionProperty = graphObject.FindProperty("description");
+            return GetLocalizedStringDisplayName(descriptionProperty, questGraph.name);
+        }
+
+        public static void DrawQuestGraphPreview(QuestGraph questGraph, string header = "Quest Preview")
+        {
+            if (questGraph == null)
+            {
+                return;
+            }
+
+            QuestNodeData entryNode = questGraph.GetEntryNode();
+            Sprite sprite = entryNode?.Icon;
+            string name = GetQuestDisplayName(questGraph);
+            string description = GetQuestDescription(questGraph);
+            DrawPreviewCard(header, sprite, name, description);
+        }
+
+        public static void DrawQuestNodePreview(QuestNodeData nodeData, string header = "Quest Node Preview")
+        {
+            if (nodeData == null)
+            {
+                return;
+            }
+
+            string title = GetNodeEditorTitle(nodeData);
+            string localizedName = GetNodeDisplayName(nodeData);
+            DrawPreviewCard(header, nodeData.Icon, title, localizedName);
+        }
+
+        public static void DrawQuestTransitionPreview(QuestGraph questGraph, QuestTransition transition, string header = "Transition Preview")
+        {
+            if (questGraph == null || transition == null)
+            {
+                return;
+            }
+
+            QuestNode ownerNode = questGraph.Nodes.Find(node =>
+                node?.NodeData != null &&
+                node.NodeData.Transitions != null &&
+                node.NodeData.Transitions.Contains(transition));
+
+            string sourceName = ownerNode?.NodeData != null
+                ? GetNodeEditorTitle(ownerNode.NodeData)
+                : "Unknown";
+            string targetName = transition.TargetNode != null
+                ? GetNodeEditorTitle(transition.TargetNode)
+                : "Missing Target";
+
+            DrawPreviewCard(header, transition.TargetNode?.Icon, $"{sourceName} -> {targetName}", string.Empty);
+        }
+
+        public static string GetLocalizedStringDisplayName(SerializedProperty localizedStringProperty, string fallbackName)
+        {
+            if (localizedStringProperty == null)
+            {
+                return $"No string: {fallbackName}";
+            }
+
+            SerializedProperty tableReferenceProperty = localizedStringProperty.FindPropertyRelative("m_TableReference");
+            SerializedProperty tableCollectionNameProperty = tableReferenceProperty?.FindPropertyRelative("m_TableCollectionName");
+            SerializedProperty entryReferenceProperty = localizedStringProperty.FindPropertyRelative("m_TableEntryReference");
+            SerializedProperty keyProperty = entryReferenceProperty?.FindPropertyRelative("m_Key");
+            SerializedProperty keyIdProperty = entryReferenceProperty?.FindPropertyRelative("m_KeyId");
+
+            StringTableCollection collection = ResolveCollection(tableCollectionNameProperty?.stringValue);
+            if (collection == null)
+            {
+                return GetFallbackEntryLabel(keyProperty, keyIdProperty, fallbackName);
+            }
+
+            SharedTableData.SharedTableEntry entry = ResolveEntry(collection, keyIdProperty, keyProperty);
+            if (entry == null)
+            {
+                return GetFallbackEntryLabel(keyProperty, keyIdProperty, fallbackName);
+            }
+
+            string localizedValue = GetLocalizedValue(collection, entry.Id, PreferredPreviewLocale);
+            if (!string.IsNullOrWhiteSpace(localizedValue))
+            {
+                return localizedValue;
+            }
+
+            if (!string.IsNullOrWhiteSpace(entry.Key))
+            {
+                return entry.Key;
+            }
+
+            return $"Key {entry.Id}";
+        }
+
+        private static string GetFallbackEntryLabel(SerializedProperty keyProperty, SerializedProperty keyIdProperty, string fallbackName)
+        {
+            if (keyProperty != null && !string.IsNullOrWhiteSpace(keyProperty.stringValue))
+            {
+                return keyProperty.stringValue;
+            }
+
+            if (keyIdProperty != null && keyIdProperty.longValue != 0)
+            {
+                return $"Key {keyIdProperty.longValue}";
+            }
+
+            return $"No string: {fallbackName}";
+        }
+
+        private static StringTableCollection ResolveCollection(string serializedTableReference)
+        {
+            if (string.IsNullOrWhiteSpace(serializedTableReference))
+            {
+                return null;
+            }
+
+            foreach (StringTableCollection collection in LocalizationEditorSettings.GetStringTableCollections())
+            {
+                string guidReference = $"GUID:{collection.SharedData.TableCollectionNameGuid:N}";
+                if (string.Equals(serializedTableReference, guidReference, System.StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(serializedTableReference, collection.TableCollectionName, System.StringComparison.Ordinal))
+                {
+                    return collection;
+                }
+            }
+
+            return null;
+        }
+
+        private static SharedTableData.SharedTableEntry ResolveEntry(
+            StringTableCollection collection,
+            SerializedProperty keyIdProperty,
+            SerializedProperty keyProperty)
+        {
+            if (collection == null)
+            {
+                return null;
+            }
+
+            if (keyIdProperty != null && keyIdProperty.longValue != 0)
+            {
+                SharedTableData.SharedTableEntry entryById = collection.SharedData.GetEntry(keyIdProperty.longValue);
+                if (entryById != null)
+                {
+                    return entryById;
+                }
+            }
+
+            if (keyProperty != null && !string.IsNullOrWhiteSpace(keyProperty.stringValue))
+            {
+                return collection.SharedData.GetEntry(keyProperty.stringValue);
+            }
+
+            return null;
+        }
+
+        private static string GetLocalizedValue(StringTableCollection collection, long entryId, string localeCode)
+        {
+            if (collection == null || entryId == 0 || string.IsNullOrWhiteSpace(localeCode))
+            {
+                return string.Empty;
+            }
+
+            foreach (StringTable table in collection.StringTables)
+            {
+                if (table == null || table.LocaleIdentifier.Code != localeCode)
+                {
+                    continue;
+                }
+
+                StringTableEntry entry = table.GetEntry(entryId);
+                if (entry != null && !string.IsNullOrWhiteSpace(entry.LocalizedValue))
+                {
+                    return entry.LocalizedValue;
+                }
+            }
+
+            return string.Empty;
+        }
+
+        private static void DrawPreviewCard(string header, Sprite sprite, string title, string description)
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField(header, EditorStyles.boldLabel);
+            EditorGUILayout.BeginHorizontal();
+            DrawSpritePreview(sprite, 64f);
+
+            EditorGUILayout.BeginVertical();
+            EditorGUILayout.LabelField(title, EditorStyles.wordWrappedLabel);
+            if (!string.IsNullOrWhiteSpace(description))
+            {
+                EditorGUILayout.Space(2f);
+                EditorGUILayout.LabelField(description, EditorStyles.wordWrappedMiniLabel);
+            }
+
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
+        }
+
+        private static void DrawSpritePreview(Sprite sprite, float size)
+        {
+            Rect rect = GUILayoutUtility.GetRect(size, size, GUILayout.Width(size), GUILayout.Height(size));
+            EditorGUI.DrawRect(rect, new Color(0.16f, 0.16f, 0.16f, 1f));
+
+            if (sprite == null || sprite.texture == null)
+            {
+                GUI.Label(rect, "No Sprite", EditorStyles.centeredGreyMiniLabel);
+                return;
+            }
+
+            Rect textureRect = sprite.textureRect;
+            textureRect.x /= sprite.texture.width;
+            textureRect.width /= sprite.texture.width;
+            textureRect.y /= sprite.texture.height;
+            textureRect.height /= sprite.texture.height;
+            GUI.DrawTextureWithTexCoords(rect, sprite.texture, textureRect, true);
+        }
+    }
+}

@@ -9,5 +9,12 @@ namespace Localization
         [field: SerializeField] public LocalizedString InventoryCurrentWeight { get; private set; }
         [field: SerializeField] public LocalizedString kg { get; private set; }
         [field: SerializeField] public LocalizedString max { get; private set; }
+        [field: SerializeField] public LocalizedString MoneyReceived { get; private set; }
+        [field: SerializeField] public LocalizedString MoneyLost { get; private set; }
+        [field: SerializeField] public LocalizedString ItemReceived { get; private set; }
+        [field: SerializeField] public LocalizedString ItemLost { get; private set; }
+        [field: SerializeField] public LocalizedString QuestUpdate { get; private set; }
+        [field: SerializeField] public LocalizedString QuestCompleted { get; private set; }
+        [field: SerializeField] public LocalizedString QuestFailed { get; private set; }
     }
 }

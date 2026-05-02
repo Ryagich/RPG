@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8790978157e23cc4186df7e90601f3fa, type: 3}
+  m_Name: QuestNode_1
+  m_EditorClassIdentifier: Assembly-CSharp::Quests.Graph.Model.QuestNodeData
+  editorTitle: "2 S | \u041D\u0430\u0439\u0442\u0438 \u0438\u043D\u0444\u0443"
+  localizedName:
+    m_TableReference:
+      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+    m_TableEntryReference:
+      m_KeyId: 18128977997840384
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  icon: {fileID: 21300000, guid: 6629d384315d5c44d8a3e755a5dee5d7, type: 3}
+  ownerGraph: {fileID: 11400000, guid: 6f598694dfbe31846b0044a84b5f1969, type: 2}
+  hasAvailabilityRequirements: 0
+  availabilityRequirements: []
+  hasCompletionResults: 0
+  completionResults: []
+  transitions:
+  - {fileID: 11400000, guid: 7d498794c0063c94da0dbe6deae64fc0, type: 2}
+  - {fileID: 11400000, guid: b3d9b48dc08693e4aa822fb3144c5613, type: 2}
+  - {fileID: 11400000, guid: 35b9a2a92a2e80347a66edfcfa316494, type: 2}
+  references:
+    version: 2
+    RefIds: []

@@ -28,6 +28,7 @@ MonoBehaviour:
   <TradingExitButton>k__BackingField: {fileID: 3968994649836962996, guid: 3431d33295d69b24db5a87dc3e45b173, type: 3}
   <PhraseContainer>k__BackingField: {fileID: 7268662685362097931, guid: 63f693976e6120b41879e5991ada72fc, type: 3}
   <AnswerButton>k__BackingField: {fileID: 3726367618566451424, guid: 98a86b5b3b25c664c8280d544e79c35e, type: 3}
+  <NotificationInDialog>k__BackingField: {fileID: 1522965911973430939, guid: a2683e0e9721343418c4299b215e1f06, type: 3}
   <StatsHolder>k__BackingField: {fileID: 7495129228834389673, guid: ab9f6ea1b64d2cf48b6efc688c9e249f, type: 3}
   <PopupRect>k__BackingField: {fileID: 2905255636178868728, guid: 12b0999af4e93bf418857b096b6cc62b, type: 3}
   <PopupItemName>k__BackingField: {fileID: 7165394721513020807, guid: dc99eac617168734c9d2eae12b8110f0, type: 3}
@@ -37,3 +38,6 @@ MonoBehaviour:
   <StatHolderForUsable>k__BackingField: {fileID: 399078897855448634, guid: caf2d203c25f3db4490227f8142110d8, type: 3}
   <StatHolderForClothes>k__BackingField: {fileID: 2865423226321459443, guid: 13d2ade88fa596d439c5c8f4722ebd93, type: 3}
   <BloodScreen>k__BackingField: {fileID: 6954517100673734187, guid: 1ef875ffe6f78654e93fd87d9b089594, type: 3}
+  <QuestionsScrollView>k__BackingField: {fileID: 707761718070598100, guid: c33aa409ea59827428a93a221e236f9b, type: 3}
+  <Title>k__BackingField: {fileID: 4063777794044691344, guid: b5ceb1f7ecd982640831c8109ca6910a, type: 3}
+  <QuestShortInfo>k__BackingField: {fileID: 4061160960222311978, guid: 761cbacecc5240c4fa9ce199d4fdee45, type: 3}

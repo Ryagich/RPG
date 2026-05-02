@@ -70,6 +70,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Map",
+                    "type": "Button",
+                    "id": "f6db1292-4c25-4d2a-963f-8ab038c48b48",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "FastSlot1",
                     "type": "Button",
                     "id": "b69f1ca0-f6f5-449e-894b-f84e0ea3eb1a",
@@ -225,6 +234,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "ShowStats",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "13bb0b09-58f9-4955-b8ea-e56644b9effd",
+                    "path": "<Keyboard>/m",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Map",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

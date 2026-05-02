@@ -49,6 +49,70 @@ MonoBehaviour:
     m_Key: max
     m_Metadata:
       m_Items: []
+  - m_Id: 17624159759876096
+    m_Key: Give_Money
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17627954149572608
+    m_Key: Take_Money
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17624415562088448
+    m_Key: Money_Received
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17629259110793216
+    m_Key: Lost_Money
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17645925039325184
+    m_Key: Item received
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17645963027136512
+    m_Key: Lost item
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17668075842420736
+    m_Key: New quest
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17668142347304960
+    m_Key: Quest update
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17668786382684160
+    m_Key: Quest Completed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17668870704971776
+    m_Key: Quest failed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18128977997840384
+    m_Key: Quest_1_Sceleton_1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18129230448803840
+    m_Key: Quest_1_Sceleton_2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18140639991676928
+    m_Key: Quest_1_Sceleton
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18378461193420800
+    m_Key: Quest_Dialog_1_Test
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18414656560545792
+    m_Key: Dialog Phrase For Skeleton Answer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18414722838937600
+    m_Key: Dialog Phrase For Skeleton Phrase
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

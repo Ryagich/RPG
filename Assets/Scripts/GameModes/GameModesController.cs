@@ -64,5 +64,6 @@ namespace GameModes
         Looting,
         Dialogue,
         Trade,
+        Map,
     }
 }

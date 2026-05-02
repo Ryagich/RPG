@@ -50,6 +50,74 @@ MonoBehaviour:
     m_Localized: max
     m_Metadata:
       m_Items: []
+  - m_Id: 17624159759876096
+    m_Localized: Give Money
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17624415562088448
+    m_Localized: Money received
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17627954149572608
+    m_Localized: Take Money
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17629259110793216
+    m_Localized: Lost money
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17645925039325184
+    m_Localized: Item received
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17645963027136512
+    m_Localized: Lost item
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17668075842420736
+    m_Localized: New quest
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17668142347304960
+    m_Localized: Quest update
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17668786382684160
+    m_Localized: Quest completed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17668870704971776
+    m_Localized: Quest failed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18128977997840384
+    m_Localized: Take More Info
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18129230448803840
+    m_Localized: Chose Side
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18140639991676928
+    m_Localized: Quest_1_Sceleton
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18378461193420800
+    m_Localized: Quest_Dialog_1_Test vQuest_Dialog_1_Test Quest_Dialog_1_Test Quest_Dialog_1_Test
+      Quest_Dialog_1_Test Quest_Dialog_1_Test Quest_Dialog_1_Test Quest_Dialog_1_Test
+      Quest_Dialog_1_Test Quest_Dialog_1_Test Quest_Dialog_1_Test Quest_Dialog_1_Test
+      Quest_Dialog_1_Test Quest_Dialog_1_Test Quest_Dialog_1_Test Quest_Dialog_1_Test
+      Quest_Dialog_1_Test
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18414656560545792
+    m_Localized: Dialog Phrase 1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18414722838937600
+    m_Localized: Dialog Phrase 2
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

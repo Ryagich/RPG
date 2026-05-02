@@ -16,12 +16,66 @@ MonoBehaviour:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
-      m_KeyId: 9088031205343232
+      m_KeyId: 18378461193420800
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
+  isQuestPhrase: 0
+  questAnswer:
+    text:
+      m_TableReference:
+        m_TableCollectionName: 
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 0}
+    hasConditions: 0
+    conditions: []
   answers:
+  - text:
+      m_TableReference:
+        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+      m_TableEntryReference:
+        m_KeyId: 18414656560545792
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 11400000, guid: adae921cf6dfba94dbc99b2b84d1d38c, type: 2}
+    hasConditions: 0
+    conditions: []
+  - text:
+      m_TableReference:
+        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+      m_TableEntryReference:
+        m_KeyId: 18414722838937600
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 11400000, guid: 2e3fa370789efce4a84f5470ecd6940b, type: 2}
+    hasConditions: 1
+    conditions:
+    - type: 4
+      moneyAmount: 0
+      itemConfig: {fileID: 0}
+      itemCount: 0
+      questGraph: {fileID: 11400000, guid: 6f598694dfbe31846b0044a84b5f1969, type: 2}
+      questSourceNode: {fileID: 11400000, guid: feb761fd1574c624ea3e778765bce850, type: 2}
+      questTransition: {fileID: 11400000, guid: 915f0f2afcb9f4f4ea1b8a30f88c294f, type: 2}
+      questNode: {fileID: 0}
+    - type: 6
+      moneyAmount: 0
+      itemConfig: {fileID: 0}
+      itemCount: 0
+      questGraph: {fileID: 11400000, guid: 6f598694dfbe31846b0044a84b5f1969, type: 2}
+      questSourceNode: {fileID: 11400000, guid: feb761fd1574c624ea3e778765bce850, type: 2}
+      questTransition: {fileID: 0}
+      questNode: {fileID: 0}
   - text:
       m_TableReference:
         m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
@@ -31,7 +85,17 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    nextPhrase: {fileID: 11400000, guid: 0b27e148cfe1383478b196a431665b30, type: 2}
+    nextPhrase: {fileID: 0}
+    hasConditions: 1
+    conditions:
+    - type: 5
+      moneyAmount: 0
+      itemConfig: {fileID: 0}
+      itemCount: 0
+      questGraph: {fileID: 11400000, guid: 6f598694dfbe31846b0044a84b5f1969, type: 2}
+      questSourceNode: {fileID: 0}
+      questTransition: {fileID: 11400000, guid: 915f0f2afcb9f4f4ea1b8a30f88c294f, type: 2}
+      questNode: {fileID: 0}
   references:
     version: 2
     RefIds: []

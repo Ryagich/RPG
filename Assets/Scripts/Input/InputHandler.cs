@@ -56,6 +56,7 @@ namespace Input
             inputConfig.Run.action.canceled += OnRun;
             inputConfig.Interactable.action.started += Interactable;
             inputConfig.Inventory.action.started += OpenInventory;
+            SubscribeMapAction("Map");
             inputConfig.LeftClick.action.started += LeftMouseDown;
             inputConfig.LeftClick.action.canceled += LeftMouseUp;
             inputConfig.RightClick.action.started += RightMouseDown;
@@ -106,7 +107,27 @@ namespace Input
                 return;
             }
 
+            if (gameModesController.GameMode == GameMode.Map)
+            {
+                changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Inventory));
+                return;
+            }
+
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Inventory));
+        }
+
+        private void OpenMap(InputAction.CallbackContext context)
+        {
+            switch (gameModesController.GameMode)
+            {
+                case GameMode.Game:
+                case GameMode.Inventory:
+                    changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Map));
+                    break;
+                case GameMode.Map:
+                    changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Game));
+                    break;
+            }
         }
 
         private void LeftMouseDown(InputAction.CallbackContext context)
@@ -149,6 +170,18 @@ namespace Input
             }
 
             action.started += _ => fastSlotInputPublisher.Publish(new FastSlotInputMessage(slotIndex));
+        }
+
+        private void SubscribeMapAction(string actionName)
+        {
+            var actionMap = inputConfig.Movement?.action?.actionMap;
+            var action = actionMap?.FindAction(actionName, false);
+            if (action == null)
+            {
+                return;
+            }
+
+            action.started += OpenMap;
         }
 
         private void PollShowStatsFallback()

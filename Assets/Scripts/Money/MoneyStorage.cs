@@ -29,6 +29,18 @@ namespace Money
             return true;
         }
 
+        public int SpendUpTo(int amount)
+        {
+            if (amount <= 0)
+            {
+                return 0;
+            }
+
+            int spentAmount = currentMoney.Value >= amount ? amount : currentMoney.Value;
+            currentMoney.Value -= spentAmount;
+            return spentAmount;
+        }
+
         public void Add(int amount)
         {
             if (amount <= 0)

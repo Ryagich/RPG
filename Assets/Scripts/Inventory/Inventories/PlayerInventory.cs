@@ -143,6 +143,81 @@ namespace Inventory.Inventories
             return totalCount;
         }
 
+        public bool HasItemCount(ItemConfig itemConfig, int count)
+        {
+            return count <= 0 || GetInventoryItemCount(itemConfig) >= count;
+        }
+
+        public bool TryConsumeItemCount(ItemConfig itemConfig, int count)
+        {
+            return count > 0 && ConsumeUpToItemCount(itemConfig, count) == count;
+        }
+
+        public int ConsumeUpToItemCount(ItemConfig itemConfig, int maxCount)
+        {
+            if (itemConfig == null || maxCount <= 0)
+            {
+                return 0;
+            }
+
+            var consumedCount = 0;
+            var remainingCount = maxCount;
+            var changed = false;
+
+            foreach (var item in Items.ToList())
+            {
+                if (remainingCount <= 0 || item?.ItemStack?.ItemConfig != itemConfig)
+                {
+                    continue;
+                }
+
+                var countToTake = Mathf.Min(remainingCount, item.ItemStack.Count);
+                item.ItemStack.Count -= countToTake;
+                remainingCount -= countToTake;
+                consumedCount += countToTake;
+                changed = true;
+
+                if (item.ItemStack.Count > 0)
+                {
+                    continue;
+                }
+
+                foreach (var tile in Tiles.tiles)
+                {
+                    if (tile.ItemInInventory == item)
+                    {
+                        tile.SetItem(null);
+                    }
+                }
+
+                Items.Remove(item);
+            }
+
+            var handSlot = HandSlot.Value;
+            if (remainingCount > 0 &&
+                HandSourceInventory.Value == this &&
+                handSlot?.ItemStack?.ItemConfig == itemConfig)
+            {
+                var countToTake = Mathf.Min(remainingCount, handSlot.ItemStack.Count);
+                handSlot.ItemStack.Count -= countToTake;
+                remainingCount -= countToTake;
+                consumedCount += countToTake;
+                changed = true;
+
+                if (handSlot.ItemStack.Count <= 0)
+                {
+                    HandSlot.Value = new SlotModel(handSlot.ItemType, handSlot.StackLimitType, null);
+                }
+            }
+
+            if (changed)
+            {
+                NotifyChanged();
+            }
+
+            return consumedCount;
+        }
+
         public bool TryFindFirstItem(ItemConfig itemConfig, out ItemInInventory itemInInventory)
         {
             itemInInventory = itemConfig == null

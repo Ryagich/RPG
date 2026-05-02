@@ -32,6 +32,7 @@ namespace UI.Configs
         // Dialog
         [field: SerializeField] public PhraseContainer PhraseContainer { get; private set; }
         [field: SerializeField] public Button AnswerButton { get; private set; }
+        [field: SerializeField] public NotificationInDialog NotificationInDialog { get; private set; }
         
         // Game
         [field: SerializeField] public StatsHolder StatsHolder { get; private set; }
@@ -45,5 +46,10 @@ namespace UI.Configs
         [field: SerializeField] public StatHolderForUsable StatHolderForUsable { get; private set; }
         [field: SerializeField] public StatHolder StatHolderForClothes { get; private set; }
         [field: SerializeField] public Image BloodScreen { get; private set; }
+
+        //Map
+        [field: SerializeField] public ScrollRect QuestionsScrollView { get; private set; }
+        [field: SerializeField] public Title Title { get; private set; }
+        [field: SerializeField] public QuestShortInfo QuestShortInfo { get; private set; }
     }
 }

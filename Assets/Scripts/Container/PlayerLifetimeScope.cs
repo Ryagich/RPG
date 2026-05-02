@@ -4,6 +4,7 @@ using Inventory;
 using Inventory.Inventories;
 using Money;
 using Movement;
+using Quests;
 using Stats;
 using UI;
 using UnityEngine;
@@ -56,6 +57,7 @@ namespace Container
 
             builder.RegisterEntryPoint<PlayerInventory>().As<IInventory>().AsSelf();
             builder.Register(_ => new MoneyStorage(112), Lifetime.Scoped).AsSelf();
+            builder.Register<QuestController>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<InventoryHandController>().AsSelf();
             builder.RegisterEntryPoint<PlayerFastSlotsController>().AsSelf();
         }

@@ -38,7 +38,20 @@ namespace Localization
 
         public static string GetLocalizedStringCached(this LocalizedString localizedString)
         {
-            return Cache[localizedString.TableEntryReference.KeyId];
+            if (localizedString == null)
+            {
+                return string.Empty;
+            }
+
+            long keyId = localizedString.TableEntryReference.KeyId;
+            if (keyId == 0)
+            {
+                return string.Empty;
+            }
+
+            return Cache.TryGetValue(keyId, out string localizedValue)
+                ? localizedValue
+                : string.Empty;
         }
     }
     

@@ -8,9 +8,13 @@ namespace Dialogs.Graph.Model
     public class DialogPhrase : ScriptableObject
     {
         [SerializeField] private LocalizedString text = new();
+        [SerializeField] private bool isQuestPhrase;
+        [SerializeField] private DialogAnswer questAnswer = new();
         [SerializeField] private List<DialogAnswer> answers = new();
 
         public LocalizedString Text => text;
+        public bool IsQuestPhrase => isQuestPhrase;
+        public DialogAnswer QuestAnswer => questAnswer;
         public List<DialogAnswer> Answers => answers;
     }
 }
