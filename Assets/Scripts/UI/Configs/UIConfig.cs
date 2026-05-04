@@ -53,6 +53,7 @@ namespace UI.Configs
         [field: SerializeField] public ScrollRect MapScroll { get; private set; }
         [field: SerializeField] public Title Title { get; private set; }
         [field: SerializeField] public QuestShortInfo QuestShortInfo { get; private set; }
+        [field: SerializeField] public RectTransform QuestPopup { get; private set; }
         [field: SerializeField] public CharacterIcon CharacterIcon { get; private set; }
         [field: SerializeField] public Image MapIcon { get; private set; }
     }

@@ -510,7 +510,16 @@ namespace UI.Pages
                 return;
             }
 
-            var canvasGroup = popupRect.GetComponent<CanvasGroup>() ?? popupRect.gameObject.AddComponent<CanvasGroup>();
+            if (!popupRect.TryGetComponent(out CanvasGroup canvasGroup))
+            {
+                canvasGroup = popupRect.gameObject.AddComponent<CanvasGroup>();
+            }
+
+            if (canvasGroup == null)
+            {
+                return;
+            }
+
             canvasGroup.blocksRaycasts = blocksRaycasts;
             canvasGroup.interactable = blocksRaycasts;
         }

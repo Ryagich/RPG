@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Quests;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -8,14 +9,14 @@ namespace UI.Map
 {
     public readonly struct MapQuestMarkerData
     {
-        public MapQuestMarkerData(Transform targetTransform, Sprite sprite)
+        public MapQuestMarkerData(Transform targetTransform, QuestProgress questProgress)
         {
             TargetTransform = targetTransform;
-            Sprite = sprite;
+            QuestProgress = questProgress;
         }
 
         public Transform TargetTransform { get; }
-        public Sprite Sprite { get; }
+        public QuestProgress QuestProgress { get; }
     }
 
     public class MapScrollController : MonoBehaviour
@@ -104,10 +105,35 @@ namespace UI.Map
 
                 questIconRect.anchorMin = new Vector2(0f, 1f);
                 questIconRect.anchorMax = new Vector2(0f, 1f);
-                questIcons.Add(new QuestIconBinding(questIconRect, marker.TargetTransform));
+                questIcons.Add(new QuestIconBinding(questIconRect, marker.TargetTransform, marker.QuestProgress));
             }
 
             UpdateQuestIcons();
+        }
+
+        public bool TryGetQuestMarkerAtScreenPoint(Vector2 screenPoint, out QuestProgress questProgress)
+        {
+            for (var i = questIcons.Count - 1; i >= 0; i--)
+            {
+                QuestIconBinding questIcon = questIcons[i];
+                if (questIcon.RectTransform == null ||
+                    questIcon.QuestProgress == null ||
+                    !questIcon.RectTransform.gameObject.activeInHierarchy)
+                {
+                    continue;
+                }
+
+                if (!RectTransformUtility.RectangleContainsScreenPoint(questIcon.RectTransform, screenPoint, eventCamera))
+                {
+                    continue;
+                }
+
+                questProgress = questIcon.QuestProgress;
+                return true;
+            }
+
+            questProgress = null;
+            return false;
         }
 
         private void Update()
@@ -614,14 +640,16 @@ namespace UI.Map
 
         private readonly struct QuestIconBinding
         {
-            public QuestIconBinding(RectTransform rectTransform, Transform targetTransform)
+            public QuestIconBinding(RectTransform rectTransform, Transform targetTransform, QuestProgress questProgress)
             {
                 RectTransform = rectTransform;
                 TargetTransform = targetTransform;
+                QuestProgress = questProgress;
             }
 
             public RectTransform RectTransform { get; }
             public Transform TargetTransform { get; }
+            public QuestProgress QuestProgress { get; }
         }
     }
 }

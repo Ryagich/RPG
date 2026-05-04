@@ -5,9 +5,11 @@ using MessagePipe;
 using Messages;
 using Quests;
 using Stats;
+using TMPro;
 using UI.Configs;
 using UI.Map;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
@@ -15,7 +17,7 @@ using Object = UnityEngine.Object;
 
 namespace UI.Pages
 {
-    public class MapPage : BasePage
+    public class MapPage : BasePage, ITickable
     {
         public override PageType Type { get; } = PageType.Map;
 
@@ -43,6 +45,9 @@ namespace UI.Pages
         private HeartbeatPulse heartbeatPulse;
         private BloodScreenController bloodScreenController;
         private bool isQuestScrollVisible = true;
+        private RectTransform popupRect;
+        private QuestProgress hoverPopupTarget;
+        private float hoverPopupElapsed;
 
         public MapPage(
             UIConfig uiConfig,
@@ -113,8 +118,16 @@ namespace UI.Pages
             FillQuestStates();
         }
 
+        public void Tick()
+        {
+            HandleQuestPopup();
+        }
+
         public override void Hide()
         {
+            ClosePopup();
+            ResetHoverPopupState();
+
             bloodScreenController?.Dispose();
             bloodScreenController = null;
 
@@ -139,6 +152,7 @@ namespace UI.Pages
             mapScroll = null;
             questionsScrollView = null;
             bloodScreen = null;
+            popupRect = null;
 
             if (contentRect)
             {
@@ -225,7 +239,7 @@ namespace UI.Pages
                 return;
             }
 
-            questMarkers.Add(new MapQuestMarkerData(mapTarget, questProgress.CurrentNode.Icon));
+            questMarkers.Add(new MapQuestMarkerData(mapTarget, questProgress));
         }
 
         private void FocusQuestTarget(QuestProgress questProgress)
@@ -242,6 +256,193 @@ namespace UI.Pages
             }
 
             mapScrollController.FocusOnTarget(mapTarget);
+        }
+
+        private void HandleQuestPopup()
+        {
+            if (contentRect == null || mapScrollController == null)
+            {
+                ResetHoverPopupState();
+                ClosePopup();
+                return;
+            }
+
+            Pointer pointer = Pointer.current;
+            if (pointer == null)
+            {
+                ResetHoverPopupState();
+                ClosePopup();
+                return;
+            }
+
+            Vector2 screenPoint = pointer.position.ReadValue();
+            if (!mapScrollController.TryGetQuestMarkerAtScreenPoint(screenPoint, out QuestProgress target))
+            {
+                ResetHoverPopupState();
+                ClosePopup();
+                return;
+            }
+
+            bool targetChanged = !IsSamePopupTarget(hoverPopupTarget, target);
+            if (targetChanged)
+            {
+                hoverPopupTarget = target;
+                hoverPopupElapsed = 0f;
+            }
+
+            hoverPopupElapsed += Time.deltaTime;
+
+            if (popupRect != null)
+            {
+                if (targetChanged)
+                {
+                    ClosePopup();
+                    TryOpenQuestPopup(target, screenPoint);
+                    return;
+                }
+
+                PageUiUtilities.UpdatePopupPosition(popupRect, contentRect, GetEventCamera(), screenPoint);
+                return;
+            }
+
+            if (hoverPopupElapsed < uiConfig.PopupHoverOpenDelaySeconds)
+            {
+                return;
+            }
+
+            TryOpenQuestPopup(target, screenPoint);
+        }
+
+        private void ResetHoverPopupState()
+        {
+            hoverPopupTarget = null;
+            hoverPopupElapsed = 0f;
+        }
+
+        private bool TryOpenQuestPopup(QuestProgress target, Vector2 screenPoint)
+        {
+            if (target == null || contentRect == null || uiConfig.QuestPopup == null)
+            {
+                return false;
+            }
+
+            popupRect = resolver.Instantiate(uiConfig.QuestPopup, contentRect);
+            popupRect.name = $"{uiConfig.QuestPopup.name} | Quest Popup";
+            PageUiUtilities.SetPopupRaycastState(popupRect, false);
+
+            FillQuestPopup(popupRect, target);
+            PageUiUtilities.RecalculatePopupSize(popupRect);
+            PageUiUtilities.UpdatePopupPosition(popupRect, contentRect, GetEventCamera(), screenPoint);
+            return true;
+        }
+
+        private void FillQuestPopup(RectTransform targetPopupRect, QuestProgress questProgress)
+        {
+            if (targetPopupRect == null || questProgress == null)
+            {
+                return;
+            }
+
+            TMP_Text titleText = null;
+            TMP_Text descriptionText = null;
+            Image iconImage = null;
+
+            TMP_Text[] texts = targetPopupRect.GetComponentsInChildren<TMP_Text>(true);
+            for (var i = 0; i < texts.Length; i++)
+            {
+                TMP_Text text = texts[i];
+                if (text == null)
+                {
+                    continue;
+                }
+
+                if (text.gameObject.name == "Text (TMP)")
+                {
+                    titleText = text;
+                }
+                else if (text.gameObject.name == "Text Description (TMP)")
+                {
+                    descriptionText = text;
+                }
+            }
+
+            Image[] images = targetPopupRect.GetComponentsInChildren<Image>(true);
+            for (var i = 0; i < images.Length; i++)
+            {
+                Image image = images[i];
+                if (image != null && image.transform != targetPopupRect && image.gameObject.name == "Image")
+                {
+                    iconImage = image;
+                    break;
+                }
+            }
+
+            if (titleText != null)
+            {
+                titleText.text = FormatQuestState(questProgress);
+            }
+
+            if (descriptionText != null)
+            {
+                descriptionText.text = GetQuestDescription(questProgress);
+            }
+
+            if (iconImage != null)
+            {
+                iconImage.sprite = questProgress.CurrentNode != null ? questProgress.CurrentNode.Icon : null;
+                iconImage.enabled = iconImage.sprite != null;
+            }
+
+            Canvas.ForceUpdateCanvases();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(targetPopupRect);
+
+            if (descriptionText != null && descriptionText.transform is RectTransform descriptionRect)
+            {
+                float descriptionWidth = descriptionRect.rect.width > 0f
+                    ? descriptionRect.rect.width
+                    : Mathf.Max(240f, targetPopupRect.rect.width - 32f);
+                descriptionRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, descriptionWidth);
+                Vector2 preferredDescription = descriptionText.GetPreferredValues(descriptionText.text, descriptionWidth, 0f);
+                descriptionRect.SetSizeWithCurrentAnchors(
+                    RectTransform.Axis.Vertical,
+                    Mathf.Max(preferredDescription.y, descriptionText.fontSize + 8f));
+            }
+
+            if (titleText != null && titleText.transform.parent is RectTransform titleContainerRect)
+            {
+                float preferredTitleHeight = titleText.GetPreferredValues(titleText.text, titleText.rectTransform.rect.width, 0f).y;
+                float minTitleHeight = 110f;
+                titleContainerRect.SetSizeWithCurrentAnchors(
+                    RectTransform.Axis.Vertical,
+                    Mathf.Max(minTitleHeight, preferredTitleHeight + 24f));
+            }
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(targetPopupRect);
+        }
+
+        private static bool IsSamePopupTarget(QuestProgress first, QuestProgress second)
+        {
+            return ReferenceEquals(first, second);
+        }
+
+        private Camera GetEventCamera()
+        {
+            return canvasRect != null
+                ? canvasRect.GetComponentInParent<Canvas>()?.renderMode == RenderMode.ScreenSpaceOverlay
+                    ? null
+                    : canvasRect.GetComponentInParent<Canvas>()?.worldCamera
+                : null;
+        }
+
+        private void ClosePopup()
+        {
+            if (popupRect == null)
+            {
+                return;
+            }
+
+            Object.Destroy(popupRect.gameObject);
+            popupRect = null;
         }
 
         private void RefreshQuestScrollContent()
@@ -344,6 +545,19 @@ namespace UI.Pages
             return string.IsNullOrWhiteSpace(localizedTitle)
                 ? questProgress.CurrentNode.EditorTitle
                 : localizedTitle;
+        }
+
+        private static string GetQuestDescription(QuestProgress questProgress)
+        {
+            if (questProgress?.QuestGraph == null)
+            {
+                return string.Empty;
+            }
+
+            string localizedDescription = questProgress.QuestGraph.Description.GetLocalizedStringCached();
+            return string.IsNullOrWhiteSpace(localizedDescription)
+                ? string.Empty
+                : localizedDescription.Trim();
         }
 
         private static string NormalizeSingleLine(string value)

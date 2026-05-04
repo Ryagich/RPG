@@ -44,3 +44,4 @@ MonoBehaviour:
   <MapIcon>k__BackingField: {fileID: 690087236037604892, guid: de9893f733b2e7142a24e5e9ff3cf666, type: 3}
   <Title>k__BackingField: {fileID: 4063777794044691344, guid: b5ceb1f7ecd982640831c8109ca6910a, type: 3}
   <QuestShortInfo>k__BackingField: {fileID: 4061160960222311978, guid: 761cbacecc5240c4fa9ce199d4fdee45, type: 3}
+  <QuestPopup>k__BackingField: {fileID: 7082239865615404425, guid: 2d084fc95e8845348962e2b23219af33, type: 3}
