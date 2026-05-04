@@ -403,7 +403,7 @@ namespace UI.Pages
                     case DialogAnswerConditionType.AddQuest:
                         if (questController.TryAddQuest(condition.QuestGraph))
                         {
-                            deferredNotifications.Add(CreateQuestNotification(QuestNotificationType.Update, condition.QuestGraph));
+                            deferredNotifications.Add(CreateQuestNotification(QuestNotificationType.New, condition.QuestGraph));
                         }
 
                         break;
@@ -472,6 +472,12 @@ namespace UI.Pages
                 notificationInDialog.Phrase.text = notification.Description;
             }
 
+            if (notificationInDialog.Icon != null)
+            {
+                notificationInDialog.Icon.sprite = notification.Icon;
+                notificationInDialog.Icon.enabled = notification.Icon != null;
+            }
+
             RefreshContentLayout(dialogueContainer.DialogueContent);
             ScrollToBottom(dialogueContainer.DialogueScroll);
         }
@@ -496,13 +502,16 @@ namespace UI.Pages
         {
             string title = notificationType switch
             {
+                QuestNotificationType.New => localizationConfig.QuestNew.GetLocalizedStringCached(),
+                QuestNotificationType.Update => localizationConfig.QuestUpdate.GetLocalizedStringCached(),
                 QuestNotificationType.Completed => localizationConfig.QuestCompleted.GetLocalizedStringCached(),
                 QuestNotificationType.Failed => localizationConfig.QuestFailed.GetLocalizedStringCached(),
-                _ => localizationConfig.QuestUpdate.GetLocalizedStringCached()
+                QuestNotificationType.Canceled => localizationConfig.QuestCanceled.GetLocalizedStringCached(),
+                _ => string.Empty
             };
 
             string questName = GetQuestDisplayName(questGraph);
-            return new DialogNotificationData(title, $"{title}: {questName}");
+            return new DialogNotificationData(title, $"{title}: {questName}", questController.GetQuestSprite(questGraph));
         }
 
         private static string GetQuestDisplayName(Quests.Graph.QuestGraph questGraph)
@@ -584,11 +593,13 @@ namespace UI.Pages
         {
             public readonly string Name;
             public readonly string Description;
+            public readonly Sprite Icon;
 
-            public DialogNotificationData(string name, string description)
+            public DialogNotificationData(string name, string description, Sprite icon = null)
             {
                 Name = name ?? string.Empty;
                 Description = description ?? string.Empty;
+                Icon = icon;
             }
         }
 
@@ -614,9 +625,11 @@ namespace UI.Pages
 
         private enum QuestNotificationType
         {
-            Update = 0,
-            Completed = 1,
-            Failed = 2
+            New = 0,
+            Update = 1,
+            Completed = 2,
+            Failed = 3,
+            Canceled = 4
         }
     }
 }

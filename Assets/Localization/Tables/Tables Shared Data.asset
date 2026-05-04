@@ -89,6 +89,10 @@ MonoBehaviour:
     m_Key: Quest failed
     m_Metadata:
       m_Items: []
+  - m_Id: 17668981234567890
+    m_Key: Quest canceled
+    m_Metadata:
+      m_Items: []
   - m_Id: 18128977997840384
     m_Key: Quest_1_Sceleton_1
     m_Metadata:

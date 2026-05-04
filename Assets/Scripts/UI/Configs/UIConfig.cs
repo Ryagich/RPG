@@ -2,6 +2,7 @@
 using Inventory.Slot;
 using Stats;
 using TMPro;
+using UI.Map;
 using UI.Inventory;
 using UI.UIElements;
 using UnityEngine;
@@ -49,7 +50,10 @@ namespace UI.Configs
 
         //Map
         [field: SerializeField] public ScrollRect QuestionsScrollView { get; private set; }
+        [field: SerializeField] public ScrollRect MapScroll { get; private set; }
         [field: SerializeField] public Title Title { get; private set; }
         [field: SerializeField] public QuestShortInfo QuestShortInfo { get; private set; }
+        [field: SerializeField] public CharacterIcon CharacterIcon { get; private set; }
+        [field: SerializeField] public Image MapIcon { get; private set; }
     }
 }

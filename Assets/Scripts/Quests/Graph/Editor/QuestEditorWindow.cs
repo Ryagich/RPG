@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Quests.Editor;
+using Quests.MapTargets;
 using Quests.Graph.Model;
 using UnityEditor.IMGUI.Controls;
 using UnityEditor;
@@ -1217,6 +1218,9 @@ namespace Quests.Graph.Editor
             SerializedProperty editorTitleProperty = nodeDataObject.FindProperty("editorTitle");
             SerializedProperty nameProperty = nodeDataObject.FindProperty("localizedName");
             SerializedProperty iconProperty = nodeDataObject.FindProperty("icon");
+            SerializedProperty mapTargetSourceProperty = nodeDataObject.FindProperty("mapTargetSource");
+            SerializedProperty sceneMapTargetIdProperty = nodeDataObject.FindProperty("sceneMapTargetId");
+            SerializedProperty scriptMapTargetKeyProperty = nodeDataObject.FindProperty("scriptMapTargetKey");
             SerializedProperty hasAvailabilityRequirementsProperty = nodeDataObject.FindProperty("hasAvailabilityRequirements");
             SerializedProperty availabilityRequirementsProperty = nodeDataObject.FindProperty("availabilityRequirements");
             SerializedProperty hasCompletionResultsProperty = nodeDataObject.FindProperty("hasCompletionResults");
@@ -1238,6 +1242,8 @@ namespace Quests.Graph.Editor
             {
                 EditorGUILayout.PropertyField(iconProperty, new GUIContent("Sprite"));
             }
+
+            DrawMapTargetSelector(nodeData, mapTargetSourceProperty, sceneMapTargetIdProperty, scriptMapTargetKeyProperty);
 
             if (IsStartNode(node) && hasAvailabilityRequirementsProperty != null && availabilityRequirementsProperty != null)
             {
@@ -1262,6 +1268,206 @@ namespace Quests.Graph.Editor
                 nodeDataObject.ApplyModifiedProperties();
                 MarkDirty(nodeData);
             }
+        }
+
+        private void DrawMapTargetSelector(
+            QuestNodeData nodeData,
+            SerializedProperty mapTargetSourceProperty,
+            SerializedProperty sceneMapTargetIdProperty,
+            SerializedProperty scriptMapTargetKeyProperty)
+        {
+            if (nodeData == null ||
+                mapTargetSourceProperty == null ||
+                sceneMapTargetIdProperty == null ||
+                scriptMapTargetKeyProperty == null)
+            {
+                return;
+            }
+
+            QuestGraph questGraph = nodeData.OwnerGraph != null ? nodeData.OwnerGraph : currentGraph;
+            List<QuestMapTarget> availableTargets = GetAvailableMapTargets(questGraph);
+            string[] options = BuildMapTargetOptions(availableTargets);
+            int selectedIndex = GetSelectedMapTargetIndex(
+                (QuestMapTargetSourceType)mapTargetSourceProperty.enumValueIndex,
+                sceneMapTargetIdProperty.stringValue,
+                availableTargets);
+
+            int newSelectedIndex = EditorGUILayout.Popup("Map Pointer", selectedIndex, options);
+            if (newSelectedIndex != selectedIndex)
+            {
+                ApplyMapTargetSelection(
+                    mapTargetSourceProperty,
+                    sceneMapTargetIdProperty,
+                    scriptMapTargetKeyProperty,
+                    availableTargets,
+                    newSelectedIndex);
+            }
+
+            QuestMapTargetSourceType sourceType = (QuestMapTargetSourceType)mapTargetSourceProperty.enumValueIndex;
+
+            if (sourceType == QuestMapTargetSourceType.ScriptTarget)
+            {
+                EditorGUILayout.PropertyField(scriptMapTargetKeyProperty, new GUIContent("Script Target Key"));
+                if (string.IsNullOrWhiteSpace(scriptMapTargetKeyProperty.stringValue))
+                {
+                    EditorGUILayout.HelpBox("Script target mode requires a non-empty key.", MessageType.Warning);
+                }
+            }
+            else if (sourceType == QuestMapTargetSourceType.SceneTarget)
+            {
+                QuestMapTarget selectedTarget = availableTargets.FirstOrDefault(target =>
+                    target != null &&
+                    target.TargetId == sceneMapTargetIdProperty.stringValue);
+
+                if (selectedTarget == null)
+                {
+                    EditorGUILayout.HelpBox(
+                        "Selected scene target is not available in the currently loaded scenes for this quest.",
+                        MessageType.Warning);
+                }
+                else
+                {
+                    EditorGUI.BeginDisabledGroup(true);
+                    EditorGUILayout.ObjectField("Scene Target", selectedTarget, typeof(QuestMapTarget), true);
+                    EditorGUI.EndDisabledGroup();
+                }
+            }
+
+            if (availableTargets.Count == 0)
+            {
+                EditorGUILayout.HelpBox(
+                    "No QuestMapTarget components are available for this quest in the loaded scenes.",
+                    MessageType.Info);
+            }
+        }
+
+        private static List<QuestMapTarget> GetAvailableMapTargets(QuestGraph questGraph)
+        {
+            if (questGraph == null)
+            {
+                return new List<QuestMapTarget>();
+            }
+
+            return Object.FindObjectsByType<QuestMapTarget>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+                .Where(target =>
+                    target != null &&
+                    target.QuestGraph == questGraph &&
+                    target.gameObject.scene.IsValid() &&
+                    target.gameObject.scene.isLoaded)
+                .OrderBy(BuildMapTargetLabel)
+                .ToList();
+        }
+
+        private static string[] BuildMapTargetOptions(IReadOnlyList<QuestMapTarget> availableTargets)
+        {
+            var options = new string[availableTargets.Count + 2];
+            options[0] = "<None>";
+            options[1] = "<Script Target>";
+
+            for (int i = 0; i < availableTargets.Count; i++)
+            {
+                options[i + 2] = BuildMapTargetLabel(availableTargets[i]);
+            }
+
+            return options;
+        }
+
+        private static int GetSelectedMapTargetIndex(
+            QuestMapTargetSourceType sourceType,
+            string sceneMapTargetId,
+            IReadOnlyList<QuestMapTarget> availableTargets)
+        {
+            if (sourceType == QuestMapTargetSourceType.ScriptTarget)
+            {
+                return 1;
+            }
+
+            if (sourceType == QuestMapTargetSourceType.SceneTarget)
+            {
+                for (int i = 0; i < availableTargets.Count; i++)
+                {
+                    if (availableTargets[i] != null && availableTargets[i].TargetId == sceneMapTargetId)
+                    {
+                        return i + 2;
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+        private static void ApplyMapTargetSelection(
+            SerializedProperty mapTargetSourceProperty,
+            SerializedProperty sceneMapTargetIdProperty,
+            SerializedProperty scriptMapTargetKeyProperty,
+            IReadOnlyList<QuestMapTarget> availableTargets,
+            int selectedIndex)
+        {
+            if (selectedIndex <= 0)
+            {
+                mapTargetSourceProperty.enumValueIndex = (int)QuestMapTargetSourceType.None;
+                sceneMapTargetIdProperty.stringValue = string.Empty;
+                scriptMapTargetKeyProperty.stringValue = string.Empty;
+                return;
+            }
+
+            if (selectedIndex == 1)
+            {
+                mapTargetSourceProperty.enumValueIndex = (int)QuestMapTargetSourceType.ScriptTarget;
+                sceneMapTargetIdProperty.stringValue = string.Empty;
+                return;
+            }
+
+            int targetIndex = selectedIndex - 2;
+            if (targetIndex < 0 || targetIndex >= availableTargets.Count || availableTargets[targetIndex] == null)
+            {
+                mapTargetSourceProperty.enumValueIndex = (int)QuestMapTargetSourceType.None;
+                sceneMapTargetIdProperty.stringValue = string.Empty;
+                scriptMapTargetKeyProperty.stringValue = string.Empty;
+                return;
+            }
+
+            mapTargetSourceProperty.enumValueIndex = (int)QuestMapTargetSourceType.SceneTarget;
+            sceneMapTargetIdProperty.stringValue = availableTargets[targetIndex].TargetId;
+            scriptMapTargetKeyProperty.stringValue = string.Empty;
+        }
+
+        private static string BuildMapTargetLabel(QuestMapTarget mapTarget)
+        {
+            if (mapTarget == null)
+            {
+                return "<Missing>";
+            }
+
+            Transform pointerTransform = mapTarget.TargetTransform;
+            string ownerPath = GetTransformPath(mapTarget.transform);
+            string pointerPath = pointerTransform != null ? GetTransformPath(pointerTransform) : ownerPath;
+
+            if (pointerPath == ownerPath)
+            {
+                return $"{mapTarget.gameObject.scene.name}: {ownerPath}";
+            }
+
+            return $"{mapTarget.gameObject.scene.name}: {ownerPath} -> {pointerPath}";
+        }
+
+        private static string GetTransformPath(Transform target)
+        {
+            if (target == null)
+            {
+                return "<Null>";
+            }
+
+            var pathParts = new List<string>();
+            Transform current = target;
+            while (current != null)
+            {
+                pathParts.Add(current.name);
+                current = current.parent;
+            }
+
+            pathParts.Reverse();
+            return string.Join("/", pathParts);
         }
 
         private string GetNodeTitle(QuestNode node)

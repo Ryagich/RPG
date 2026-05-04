@@ -53,6 +53,7 @@ MonoBehaviour:
   <PlayerMovementConfig>k__BackingField: {fileID: 11400000, guid: b1630b8c62dfa3545a9aa62c3b2310e1, type: 2}
   <GravityConfig>k__BackingField: {fileID: 11400000, guid: 585e9272bd2a2fd48b498ec705d82936, type: 2}
   <UIConfig>k__BackingField: {fileID: 11400000, guid: 9a8de918ae5a2374e9c6b6f80731575a, type: 2}
+  <MapConfig>k__BackingField: {fileID: 11400000, guid: a9fb77d7cddf4f5c8f3f74a2c9d886ad, type: 2}
   <StatsConfig>k__BackingField: {fileID: 11400000, guid: 1bd56eaa46a359a4f974395bfa35f427, type: 2}
   <LocalizationConfig>k__BackingField: {fileID: 11400000, guid: 218bbd0d351ca0241a663a64b9ff391e, type: 2}
   <InteractableConfig>k__BackingField: {fileID: 11400000, guid: f195d5bf3de756241b499edc07dd19bb, type: 2}

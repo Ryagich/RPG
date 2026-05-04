@@ -8,6 +8,7 @@ using Localization;
 using Movement;
 using UI;
 using UI.Configs;
+using UI.Map;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -27,6 +28,7 @@ namespace Container.Project
         [field: SerializeField] public InventoryConfig InventoryConfig { get; private set; }
         [field: SerializeField] public ColorsConfig ColorsConfig { get; private set; }
         [field: SerializeField] public StatIconsConfig StatIconsConfig { get; private set; }
+        [field: SerializeField] public MapConfig MapConfig { get; private set; }
         
         protected override void Configure(IContainerBuilder builder)
         {
@@ -42,6 +44,7 @@ namespace Container.Project
             builder.RegisterInstance(InventoryConfig).AsSelf();
             builder.RegisterInstance(ColorsConfig).AsSelf();
             builder.RegisterInstance(StatIconsConfig).AsSelf();
+            builder.RegisterInstance(MapConfig).AsSelf();
 
             builder.RegisterEntryPoint<Bootloader>().AsSelf();
         }

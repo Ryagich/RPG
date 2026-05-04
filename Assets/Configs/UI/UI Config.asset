@@ -39,5 +39,8 @@ MonoBehaviour:
   <StatHolderForClothes>k__BackingField: {fileID: 2865423226321459443, guid: 13d2ade88fa596d439c5c8f4722ebd93, type: 3}
   <BloodScreen>k__BackingField: {fileID: 6954517100673734187, guid: 1ef875ffe6f78654e93fd87d9b089594, type: 3}
   <QuestionsScrollView>k__BackingField: {fileID: 707761718070598100, guid: c33aa409ea59827428a93a221e236f9b, type: 3}
+  <MapScroll>k__BackingField: {fileID: 1530147576499778349, guid: 03edd212fc4830a4586415c21b2d8251, type: 3}
+  <CharacterIcon>k__BackingField: {fileID: 4805136065742791000, guid: e7249d5a33f8dea4e9676faf09c6bd55, type: 3}
+  <MapIcon>k__BackingField: {fileID: 690087236037604892, guid: de9893f733b2e7142a24e5e9ff3cf666, type: 3}
   <Title>k__BackingField: {fileID: 4063777794044691344, guid: b5ceb1f7ecd982640831c8109ca6910a, type: 3}
   <QuestShortInfo>k__BackingField: {fileID: 4061160960222311978, guid: 761cbacecc5240c4fa9ce199d4fdee45, type: 3}

@@ -90,6 +90,10 @@ MonoBehaviour:
     m_Localized: Quest failed
     m_Metadata:
       m_Items: []
+  - m_Id: 17668981234567890
+    m_Localized: Quest canceled
+    m_Metadata:
+      m_Items: []
   - m_Id: 18128977997840384
     m_Localized: Take More Info
     m_Metadata:
