@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Localization;
@@ -9,6 +10,10 @@ namespace Inventory.Item
     {
         private bool HasDefenseModifiers => ItemType == ItemType.Body || ItemType == ItemType.Helm;
         private bool HasUsableStats => ItemType == ItemType.Usable;
+        private bool HasEquippedVisuals => ItemType == ItemType.Backpack
+                                           || ItemType == ItemType.Body
+                                           || ItemType == ItemType.Helm
+                                           || ItemType == ItemType.Weapon;
 
         [field: SerializeField] public string Id { get; private set; } = "Item Config ID";
         [field: SerializeField, Min(1)] public int Price { get; private set; } = 1;
@@ -28,6 +33,7 @@ namespace Inventory.Item
         [SerializeField, ShowIf(nameof(HasUsableStats))] private float waterStat;
         [SerializeField, ShowIf(nameof(HasUsableStats))] private float foodStat;
         [SerializeField, ShowIf(nameof(HasUsableStats))] private float chillStat;
+        [SerializeField, ShowIf(nameof(HasEquippedVisuals))] private List<EquippedItemVisual> equippedVisuals = new();
 
         public float PhysicalDefense => physicalDefense;
         public float TemperatureDefense => temperatureDefense;
@@ -37,5 +43,6 @@ namespace Inventory.Item
         public float WaterStat => waterStat;
         public float FoodStat => foodStat;
         public float ChillStat => chillStat;
+        public IReadOnlyList<EquippedItemVisual> EquippedVisuals => equippedVisuals;
     }
 }

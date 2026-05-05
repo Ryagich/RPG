@@ -23,6 +23,7 @@ namespace Container
         {
             builder.RegisterComponentInHierarchy<CharacterController>().AsSelf();
             builder.RegisterComponentInHierarchy<Animator>().AsSelf();
+            builder.RegisterComponentInHierarchy<CharacterVisualRoot>().AsSelf();
 
             builder.RegisterInstance(transform);
             builder.RegisterInstance("Player").Keyed("Scope ID");
@@ -54,6 +55,7 @@ namespace Container
             builder.RegisterEntryPoint<StaminaPeriodicChanger>().AsSelf();
             builder.RegisterEntryPoint<StaminaMovementChanger>().AsSelf();
             builder.RegisterEntryPoint<EquippedDefenseStatsChanger>().AsSelf();
+            builder.RegisterEntryPoint<EquippedItemVisualController>().AsSelf();
 
             builder.RegisterEntryPoint<PlayerInventory>().As<IInventory>().AsSelf();
             builder.Register(_ => new MoneyStorage(112), Lifetime.Scoped).AsSelf();

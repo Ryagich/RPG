@@ -34,6 +34,35 @@ MonoBehaviour:
   temperatureDefense: 6
   psiDefense: 2
   magicDefense: 4
+  hpStat: 0
+  waterStat: 0
+  foodStat: 0
+  chillStat: 0
+  equippedVisuals:
+  - <BodyPart>k__BackingField: 8
+    <VisualName>k__BackingField: Chr_Torso_Male_15
+  - <BodyPart>k__BackingField: 13
+    <VisualName>k__BackingField: Chr_ShoulderAttachLeft_15
+  - <BodyPart>k__BackingField: 15
+    <VisualName>k__BackingField: Chr_ShoulderAttachRight_15
+  - <BodyPart>k__BackingField: 11
+    <VisualName>k__BackingField: Chr_Hips_Male_15
+  - <BodyPart>k__BackingField: 30
+    <VisualName>k__BackingField: Chr_LegRight_Male_15
+  - <BodyPart>k__BackingField: 31
+    <VisualName>k__BackingField: Chr_LegLeft_Male_15
+  - <BodyPart>k__BackingField: 16
+    <VisualName>k__BackingField: Chr_ArmUpperLeft_Male_15
+  - <BodyPart>k__BackingField: 17
+    <VisualName>k__BackingField: Chr_ArmUpperRight_Male_15
+  - <BodyPart>k__BackingField: 18
+    <VisualName>k__BackingField: Chr_ArmLowerLeft_Male_15
+  - <BodyPart>k__BackingField: 20
+    <VisualName>k__BackingField: Chr_ArmLowerRight_Male_15
+  - <BodyPart>k__BackingField: 22
+    <VisualName>k__BackingField: Chr_HandLeft_Male_15
+  - <BodyPart>k__BackingField: 23
+    <VisualName>k__BackingField: Chr_HandRight_Male_15
   references:
     version: 2
     RefIds: []
