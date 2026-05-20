@@ -10,25 +10,9 @@ namespace Movement
     public class PlayerAnimationController : IStartable, ITickable
     {
         private const float InputThreshold = 0.001f;
-        private const float DirectionThreshold = 0.35f;
-        private const string LocomotionStateParameter = "LocomotionState";
-        private const int IdleState = 0;
-        private const int WalkForwardState = 1;
-        private const int WalkForwardLeftState = 2;
-        private const int WalkForwardRightState = 3;
-        private const int WalkLeftState = 4;
-        private const int WalkRightState = 5;
-        private const int WalkBackwardState = 6;
-        private const int WalkBackwardLeftState = 7;
-        private const int WalkBackwardRightState = 8;
-        private const int RunForwardState = 9;
-        private const int RunForwardLeftState = 10;
-        private const int RunForwardRightState = 11;
-        private const int RunLeftState = 12;
-        private const int RunRightState = 13;
-        private const int RunBackwardState = 14;
-        private const int RunBackwardLeftState = 15;
-        private const int RunBackwardRightState = 16;
+        private const string DirectionXParameter = "DirectionX";
+        private const string DirectionYParameter = "DirectionY";
+        private const string IsRunParameter = "IsRun";
 
         private readonly Camera cam;
         private readonly Animator animator;
@@ -36,8 +20,11 @@ namespace Movement
         private readonly Transform visualTransform;
         private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
 
-        private int currentState = -1;
+        private float currentDirectionalX;
+        private float currentDirectionalY;
+        private bool currentIsRun;
         private bool isGameplayActive = true;
+        private bool isLocomotionLocked;
 
         private PlayerAnimationController(
             Camera cam,
@@ -55,7 +42,7 @@ namespace Movement
         public void Start()
         {
             gameModeChangedSubscriber.Subscribe(OnGameModeChanged);
-            ChangeState(IdleState);
+            ApplyLocomotionParameters(Vector2.zero, false, force: true);
         }
 
         public void Tick()
@@ -65,19 +52,27 @@ namespace Movement
                 return;
             }
 
+            if (isLocomotionLocked)
+            {
+                return;
+            }
+
             var movementInput = playerMovement.CurrentVelocity;
 
             if (!isGameplayActive || movementInput.sqrMagnitude <= InputThreshold)
             {
-                ChangeState(IdleState);
+                ApplyLocomotionParameters(Vector2.zero, false);
                 return;
             }
 
             var moveDirection = Quaternion.Euler(0f, cam.transform.rotation.eulerAngles.y, 0f) *
                                 new Vector3(movementInput.x, 0f, movementInput.y);
-            var localMoveDirection = visualTransform.InverseTransformDirection(moveDirection.normalized);
+            var localMoveDirection = visualTransform.InverseTransformDirection(moveDirection);
+            var directionalInput = new Vector2(
+                Mathf.Clamp(localMoveDirection.x, -1f, 1f),
+                Mathf.Clamp(localMoveDirection.z, -1f, 1f));
 
-            ChangeState(GetStateId(localMoveDirection));
+            ApplyLocomotionParameters(directionalInput, playerMovement.IsRunning);
         }
 
         private void OnGameModeChanged(GameModeChangedMessage msg)
@@ -86,59 +81,49 @@ namespace Movement
 
             if (!isGameplayActive)
             {
-                ChangeState(IdleState);
+                ApplyLocomotionParameters(Vector2.zero, false, force: true);
             }
         }
 
-        private int GetStateId(Vector3 localMoveDirection)
+        private void ApplyLocomotionParameters(Vector2 directionalInput, bool isRunning, bool force = false)
         {
-            var hasHorizontal = Mathf.Abs(localMoveDirection.x) > DirectionThreshold;
-            var hasForward = localMoveDirection.z > DirectionThreshold;
-            var hasBackward = localMoveDirection.z < -DirectionThreshold;
-
-            if (hasForward)
-            {
-                if (hasHorizontal)
-                {
-                    return playerMovement.IsRunning
-                        ? (localMoveDirection.x < 0f ? RunForwardLeftState : RunForwardRightState)
-                        : (localMoveDirection.x < 0f ? WalkForwardLeftState : WalkForwardRightState);
-                }
-
-                return playerMovement.IsRunning ? RunForwardState : WalkForwardState;
-            }
-
-            if (hasBackward)
-            {
-                if (hasHorizontal)
-                {
-                    return playerMovement.IsRunning
-                        ? (localMoveDirection.x < 0f ? RunBackwardLeftState : RunBackwardRightState)
-                        : (localMoveDirection.x < 0f ? WalkBackwardLeftState : WalkBackwardRightState);
-                }
-
-                return playerMovement.IsRunning ? RunBackwardState : WalkBackwardState;
-            }
-
-            if (hasHorizontal)
-            {
-                return playerMovement.IsRunning
-                    ? (localMoveDirection.x < 0f ? RunLeftState : RunRightState)
-                    : (localMoveDirection.x < 0f ? WalkLeftState : WalkRightState);
-            }
-
-            return IdleState;
-        }
-
-        private void ChangeState(int stateId)
-        {
-            if (currentState == stateId)
+            if (!force
+             && Mathf.Approximately(currentDirectionalX, directionalInput.x)
+             && Mathf.Approximately(currentDirectionalY, directionalInput.y)
+             && currentIsRun == isRunning)
             {
                 return;
             }
 
-            currentState = stateId;
-            animator.SetInteger(LocomotionStateParameter, stateId);
+            if (animator == null)
+            {
+                return;
+            }
+
+            currentDirectionalX = directionalInput.x;
+            currentDirectionalY = directionalInput.y;
+            currentIsRun = isRunning;
+
+            // Keep these as float parameters even though the current tree mostly uses -1/0/1.
+            // Future input may become analog (virtual stick / gamepad), and this preserves that path
+            // without forcing another Animator parameter migration later.
+            animator.SetFloat(DirectionXParameter, currentDirectionalX);
+            animator.SetFloat(DirectionYParameter, currentDirectionalY);
+            animator.SetBool(IsRunParameter, currentIsRun);
+        }
+
+        public void SetLocomotionLocked(bool isLocked)
+        {
+            isLocomotionLocked = isLocked;
+
+            if (isLocked)
+            {
+                ApplyLocomotionParameters(Vector2.zero, false, force: true);
+            }
+            else
+            {
+                ApplyLocomotionParameters(Vector2.zero, false, force: true);
+            }
         }
     }
 }

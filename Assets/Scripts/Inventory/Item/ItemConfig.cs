@@ -10,6 +10,7 @@ namespace Inventory.Item
     {
         private bool HasDefenseModifiers => ItemType == ItemType.Body || ItemType == ItemType.Helm;
         private bool HasUsableStats => ItemType == ItemType.Usable;
+        private bool HasWeaponPrefab => ItemType == ItemType.Weapon;
         private bool HasEquippedVisuals => ItemType == ItemType.Backpack
                                            || ItemType == ItemType.Body
                                            || ItemType == ItemType.Helm
@@ -25,6 +26,9 @@ namespace Inventory.Item
         [field: SerializeField] public Vector2Int Size { get; private set; } = new(1, 1);
         [field: SerializeField] public Vector2Int SizeInInventory { get; private set; } = new(50, 50);
         [field: SerializeField] public ItemType ItemType { get; private set; }
+        [SerializeField, ShowIf(nameof(HasWeaponPrefab))] private GameObject weaponInHandPrefab;
+        [SerializeField, ShowIf(nameof(HasWeaponPrefab))] private WeaponAttachmentTransformData rightHandWeaponAttachment = new();
+        [SerializeField, ShowIf(nameof(HasWeaponPrefab))] private WeaponAttachmentTransformData beltWeaponAttachment = new();
         [SerializeField, ShowIf(nameof(HasDefenseModifiers)), Min(0f)] private float physicalDefense;
         [SerializeField, ShowIf(nameof(HasDefenseModifiers)), Min(0f)] private float temperatureDefense;
         [SerializeField, ShowIf(nameof(HasDefenseModifiers)), Min(0f)] private float psiDefense;
@@ -43,6 +47,9 @@ namespace Inventory.Item
         public float WaterStat => waterStat;
         public float FoodStat => foodStat;
         public float ChillStat => chillStat;
+        public GameObject WeaponInHandPrefab => weaponInHandPrefab;
+        public WeaponAttachmentTransformData RightHandWeaponAttachment => rightHandWeaponAttachment;
+        public WeaponAttachmentTransformData BeltWeaponAttachment => beltWeaponAttachment;
         public IReadOnlyList<EquippedItemVisual> EquippedVisuals => equippedVisuals;
     }
 }

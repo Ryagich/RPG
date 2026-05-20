@@ -22,12 +22,20 @@ namespace Inventory.Inventories
         public IReadOnlyReactiveProperty<float> CurrentWeightReactive { get; }
         public Tiles Tiles { get; private set; }
         public float MaxWeight { get; set; }
-        public float CurrentWeight => GetItemsWeight() + GetSlotWeight(HelmSlot) + GetSlotWeight(BodySlot) + GetSlotWeight(BackpackSlot) + GetSlotWeight(HandSlot.Value);
+        public float CurrentWeight => GetItemsWeight()
+                                      + GetSlotWeight(HelmSlot)
+                                      + GetSlotWeight(BodySlot)
+                                      + GetSlotWeight(BackpackSlot)
+                                      + GetSlotWeight(LeftWeaponSlot)
+                                      + GetSlotWeight(RightWeaponSlot)
+                                      + GetSlotWeight(HandSlot.Value);
         public float CurrentWeightPercent => MaxWeight > 0f ? CurrentWeight / MaxWeight : 0f;
 
         public SlotModel HelmSlot = new(ItemType.Helm, SlotStackLimitType.SingleItem);
         public SlotModel BodySlot = new(ItemType.Body, SlotStackLimitType.SingleItem);
         public SlotModel BackpackSlot = new(ItemType.Backpack, SlotStackLimitType.SingleItem);
+        public SlotModel LeftWeaponSlot = new(ItemType.Weapon, SlotStackLimitType.SingleItem);
+        public SlotModel RightWeaponSlot = new(ItemType.Weapon, SlotStackLimitType.SingleItem);
         public FastSlotModel FastSlot1 { get; } = new(1, "FastSlot1", "F1");
         public FastSlotModel FastSlot2 { get; } = new(2, "FastSlot2", "F2");
         public FastSlotModel FastSlot3 { get; } = new(3, "FastSlot3", "F3");
@@ -307,12 +315,17 @@ namespace Inventory.Inventories
 
         public bool CanMoveSlotItemToGrid(ItemType slotType)
         {
-            if (!TryGetSlot(slotType, out var slot) || slot.ItemStack?.ItemConfig == null)
+            return TryGetOccupiedSlot(slotType, out var slot) && CanMoveSlotItemToGrid(slot);
+        }
+
+        public bool CanMoveSlotItemToGrid(SlotModel slot)
+        {
+            if (slot?.ItemStack?.ItemConfig == null)
             {
                 return false;
             }
 
-            var targetSize = slotType == ItemType.Backpack
+            var targetSize = slot == BackpackSlot
                 ? inventoryConfig.Size
                 : new Vector2Int(Tiles.tiles.GetLength(0), Tiles.tiles.GetLength(1));
             return TryBuildGridWithAdditionalItem(targetSize, slot.ItemStack, out _, out _);
@@ -320,12 +333,17 @@ namespace Inventory.Inventories
 
         public bool TryMoveSlotItemToGrid(ItemType slotType)
         {
-            if (!TryGetSlot(slotType, out var slot) || slot.ItemStack?.ItemConfig == null)
+            return TryGetOccupiedSlot(slotType, out var slot) && TryMoveSlotItemToGrid(slot);
+        }
+
+        public bool TryMoveSlotItemToGrid(SlotModel slot)
+        {
+            if (slot?.ItemStack?.ItemConfig == null)
             {
                 return false;
             }
 
-            var targetSize = slotType == ItemType.Backpack
+            var targetSize = slot == BackpackSlot
                 ? inventoryConfig.Size
                 : new Vector2Int(Tiles.tiles.GetLength(0), Tiles.tiles.GetLength(1));
             if (!TryBuildGridWithAdditionalItem(targetSize, slot.ItemStack, out var rebuiltTiles, out var rebuiltItems))
@@ -348,7 +366,13 @@ namespace Inventory.Inventories
         public bool TryTakeFromSlot(ItemType slotType, out ItemStack itemStack)
         {
             itemStack = null;
-            if (!TryGetSlot(slotType, out var slot) || slot.ItemStack == null)
+            return TryGetOccupiedSlot(slotType, out var slot) && TryTakeFromSlot(slot, out itemStack);
+        }
+
+        public bool TryTakeFromSlot(SlotModel slot, out ItemStack itemStack)
+        {
+            itemStack = null;
+            if (slot?.ItemStack == null)
             {
                 return false;
             }
@@ -362,7 +386,13 @@ namespace Inventory.Inventories
         public bool TryTakeFromSlot(ItemType slotType, int count, out ItemStack itemStack)
         {
             itemStack = null;
-            if (count <= 0 || !TryGetSlot(slotType, out var slot) || slot.ItemStack?.ItemConfig == null)
+            return TryGetOccupiedSlot(slotType, out var slot) && TryTakeFromSlot(slot, count, out itemStack);
+        }
+
+        public bool TryTakeFromSlot(SlotModel slot, int count, out ItemStack itemStack)
+        {
+            itemStack = null;
+            if (count <= 0 || slot?.ItemStack?.ItemConfig == null)
             {
                 return false;
             }
@@ -386,7 +416,19 @@ namespace Inventory.Inventories
         {
             remainderStack = null;
             replacedStack = null;
-            if (newItemStack == null || newItemStack.ItemConfig == null || !TryGetSlot(slotType, out var slot))
+            if (newItemStack == null || newItemStack.ItemConfig == null || !TryGetSlotForPlacement(slotType, newItemStack, out var slot))
+            {
+                return false;
+            }
+
+            return TryPlaceInSlot(slot, newItemStack, out remainderStack, out replacedStack);
+        }
+
+        public bool TryPlaceInSlot(SlotModel slot, ItemStack newItemStack, out ItemStack remainderStack, out ItemStack replacedStack)
+        {
+            remainderStack = null;
+            replacedStack = null;
+            if (newItemStack == null || newItemStack.ItemConfig == null || slot == null)
             {
                 return false;
             }
@@ -872,17 +914,63 @@ namespace Inventory.Inventories
             AddItemToCollections(Items, itemStack, itemTiles);
         }
 
-        private bool TryGetSlot(ItemType slotType, out SlotModel slot)
+        private bool TryGetOccupiedSlot(ItemType slotType, out SlotModel slot)
         {
-            slot = slotType switch
+            slot = null;
+            foreach (var currentSlot in GetSlots())
             {
-                ItemType.Helm => HelmSlot,
-                ItemType.Body => BodySlot,
-                ItemType.Backpack => BackpackSlot,
-                _ => null
-            };
+                if (currentSlot.ItemType == slotType && currentSlot.ItemStack?.ItemConfig != null)
+                {
+                    slot = currentSlot;
+                    return true;
+                }
+            }
 
-            return slot != null;
+            return false;
+        }
+
+        private bool TryGetSlotForPlacement(ItemType slotType, ItemStack itemStack, out SlotModel slot)
+        {
+            slot = null;
+            if (itemStack?.ItemConfig == null || itemStack.ItemConfig.ItemType != slotType)
+            {
+                return false;
+            }
+
+            foreach (var currentSlot in GetSlots())
+            {
+                if (currentSlot.ItemType != slotType)
+                {
+                    continue;
+                }
+
+                if (currentSlot.ItemStack?.CanStackWith(itemStack) == true
+                 && currentSlot.ItemStack.Count < currentSlot.GetMaxStack(itemStack.ItemConfig))
+                {
+                    slot = currentSlot;
+                    return true;
+                }
+            }
+
+            foreach (var currentSlot in GetSlots())
+            {
+                if (currentSlot.ItemType == slotType && currentSlot.ItemStack == null)
+                {
+                    slot = currentSlot;
+                    return true;
+                }
+            }
+
+            foreach (var currentSlot in GetSlots())
+            {
+                if (currentSlot.ItemType == slotType)
+                {
+                    slot = currentSlot;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private IEnumerable<SlotModel> GetSlots()
@@ -890,6 +978,8 @@ namespace Inventory.Inventories
             yield return HelmSlot;
             yield return BodySlot;
             yield return BackpackSlot;
+            yield return LeftWeaponSlot;
+            yield return RightWeaponSlot;
         }
 
         private static ItemStack CloneIfValid(ItemStack itemStack)

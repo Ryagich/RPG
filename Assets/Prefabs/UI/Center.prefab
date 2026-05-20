@@ -1133,8 +1133,9 @@ GameObject:
   - component: {fileID: 2900454865728788352}
   - component: {fileID: 441586978762328748}
   - component: {fileID: 6131778434297840523}
+  - component: {fileID: 2469219568206980424}
   m_Layer: 5
-  m_Name: Center (2)
+  m_Name: Left Weapon Slot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1197,6 +1198,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &2469219568206980424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3796134147928282858}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e382d45427194d619d3bd6930620a7f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Slot.SlotView
 --- !u!1 &4056335800246655152
 GameObject:
   m_ObjectHideFlags: 0
@@ -1846,6 +1859,8 @@ MonoBehaviour:
   <HeadSlot>k__BackingField: {fileID: 8684353192027484688}
   <BodySlot>k__BackingField: {fileID: 1969544400327612474}
   <BackpackSlot>k__BackingField: {fileID: 7739869028900483789}
+  <LeftWeaponSlot>k__BackingField: {fileID: 2469219568206980424}
+  <RightWeaponSlot>k__BackingField: {fileID: 2152762412406050847}
   <FastSlot1>k__BackingField: {fileID: 7725790136495111876}
   <FastSlot2>k__BackingField: {fileID: 992649282090752993}
   <FastSlot3>k__BackingField: {fileID: 8159310940672253344}
@@ -2382,8 +2397,9 @@ GameObject:
   - component: {fileID: 8082997227231787374}
   - component: {fileID: 1427234269685850403}
   - component: {fileID: 3729731817934663948}
+  - component: {fileID: 2152762412406050847}
   m_Layer: 5
-  m_Name: Center (1)
+  m_Name: Right Weapon Slot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2446,3 +2462,15 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &2152762412406050847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8912412261104930031}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e382d45427194d619d3bd6930620a7f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Slot.SlotView

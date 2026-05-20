@@ -20,6 +20,8 @@ namespace Inventory
         private ItemConfig lastHelmItemConfig;
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastBackpackItemConfig;
+        private ItemConfig lastLeftWeaponItemConfig;
+        private ItemConfig lastRightWeaponItemConfig;
 
         public EquippedItemVisualController(PlayerInventory playerInventory, CharacterVisualRoot characterVisualRoot)
         {
@@ -43,7 +45,9 @@ namespace Inventory
             if (!force
                 && lastHelmItemConfig == playerInventory.HelmSlot.ItemConfig
                 && lastBodyItemConfig == playerInventory.BodySlot.ItemConfig
-                && lastBackpackItemConfig == playerInventory.BackpackSlot.ItemConfig)
+                && lastBackpackItemConfig == playerInventory.BackpackSlot.ItemConfig
+                && lastLeftWeaponItemConfig == playerInventory.LeftWeaponSlot.ItemConfig
+                && lastRightWeaponItemConfig == playerInventory.RightWeaponSlot.ItemConfig)
             {
                 return;
             }
@@ -53,11 +57,15 @@ namespace Inventory
             ApplySlotVisuals(playerInventory.HelmSlot, "Helm");
             ApplySlotVisuals(playerInventory.BodySlot, "Body");
             ApplySlotVisuals(playerInventory.BackpackSlot, "Backpack");
+            ApplySlotVisuals(playerInventory.LeftWeaponSlot, "LeftWeapon");
+            ApplySlotVisuals(playerInventory.RightWeaponSlot, "RightWeapon");
 
             characterVisualRoot.ApplyVisuals(desiredVisualsByBodyPart);
             lastHelmItemConfig = playerInventory.HelmSlot.ItemConfig;
             lastBodyItemConfig = playerInventory.BodySlot.ItemConfig;
             lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;
+            lastLeftWeaponItemConfig = playerInventory.LeftWeaponSlot.ItemConfig;
+            lastRightWeaponItemConfig = playerInventory.RightWeaponSlot.ItemConfig;
         }
 
         private void ApplyDefaultVisuals()

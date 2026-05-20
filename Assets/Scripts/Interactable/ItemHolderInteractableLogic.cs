@@ -73,7 +73,14 @@ namespace Interactable
                 return;
             }
 
-            var remainder = inventory.TryAdd(closestItem.GetItemStack());
+            var itemStack = closestItem.GetItemStack();
+            var remainder = inventory.TryAdd(itemStack);
+            if (remainder != null && remainder.Count == itemStack.Count && itemStack.CanRotate())
+            {
+                remainder.Rotate90();
+                remainder = inventory.TryAdd(remainder);
+            }
+
             if (remainder == null)
             {
                 Object.Destroy(closestItem.gameObject);

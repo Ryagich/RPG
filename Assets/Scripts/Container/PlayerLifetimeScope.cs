@@ -24,6 +24,8 @@ namespace Container
             builder.RegisterComponentInHierarchy<CharacterController>().AsSelf();
             builder.RegisterComponentInHierarchy<Animator>().AsSelf();
             builder.RegisterComponentInHierarchy<CharacterVisualRoot>().AsSelf();
+            builder.RegisterComponentInHierarchy<PlayerWeaponHandAnchor>().AsSelf();
+            builder.RegisterComponentInHierarchy<PlayerWeaponAnimationEventReceiver>().AsSelf();
 
             builder.RegisterInstance(transform);
             builder.RegisterInstance("Player").Keyed("Scope ID");
@@ -62,6 +64,7 @@ namespace Container
             builder.Register<QuestController>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<InventoryHandController>().AsSelf();
             builder.RegisterEntryPoint<PlayerFastSlotsController>().AsSelf();
+            builder.RegisterEntryPoint<PlayerWeaponInHandController>().AsSelf();
         }
     }
 }

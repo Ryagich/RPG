@@ -19,6 +19,7 @@ namespace Input
         private readonly IPublisher<MouseUp> mouseUp;
         private readonly IPublisher<ShowStatsInputMessage> showStatsInputPublisher;
         private readonly IPublisher<FastSlotInputMessage> fastSlotInputPublisher;
+        private readonly IPublisher<WeaponSlotInputMessage> weaponSlotInputPublisher;
         private readonly GameModesController gameModesController;
 
         private Vector2 currentMoveDirection;
@@ -34,6 +35,7 @@ namespace Input
                 IPublisher<MouseUp> mouseUp,
                 IPublisher<ShowStatsInputMessage> showStatsInputPublisher,
                 IPublisher<FastSlotInputMessage> fastSlotInputPublisher,
+                IPublisher<WeaponSlotInputMessage> weaponSlotInputPublisher,
                 GameModesController gameModesController
             )
         {
@@ -45,6 +47,7 @@ namespace Input
             this.mouseUp = mouseUp;
             this.showStatsInputPublisher = showStatsInputPublisher;
             this.fastSlotInputPublisher = fastSlotInputPublisher;
+            this.weaponSlotInputPublisher = weaponSlotInputPublisher;
             this.gameModesController = gameModesController;
         }
 
@@ -75,6 +78,8 @@ namespace Input
             {
                 Observable.EveryUpdate().Subscribe(_ => PollShowStatsFallback());
             }
+
+            Observable.EveryUpdate().Subscribe(_ => PollWeaponSlotInputs());
         }
         
         private void OnMove(InputAction.CallbackContext context)
@@ -200,6 +205,25 @@ namespace Input
             if (keyboard.tabKey.wasReleasedThisFrame)
             {
                 showStatsInputPublisher.Publish(new ShowStatsInputMessage(false));
+            }
+        }
+
+        private void PollWeaponSlotInputs()
+        {
+            var keyboard = Keyboard.current;
+            if (keyboard == null)
+            {
+                return;
+            }
+
+            if (keyboard.digit1Key.wasPressedThisFrame)
+            {
+                weaponSlotInputPublisher.Publish(new WeaponSlotInputMessage(1));
+            }
+
+            if (keyboard.digit2Key.wasPressedThisFrame)
+            {
+                weaponSlotInputPublisher.Publish(new WeaponSlotInputMessage(2));
             }
         }
     }

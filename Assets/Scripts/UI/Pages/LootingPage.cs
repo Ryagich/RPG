@@ -94,6 +94,8 @@ namespace UI.Pages
         private ItemConfig lastHelmItemConfig;
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastBackpackItemConfig;
+        private ItemConfig lastLeftWeaponItemConfig;
+        private ItemConfig lastRightWeaponItemConfig;
         private ItemConfig lastFastSlot1ItemConfig;
         private ItemConfig lastFastSlot2ItemConfig;
         private ItemConfig lastFastSlot3ItemConfig;
@@ -277,7 +279,12 @@ namespace UI.Pages
         private void UpdateInventoryInfo()
         {
             var playerWeight = PageUiUtilities.GetItemsWeight(playerInventory)
-                             + PageUiUtilities.GetSlotsWeight(playerInventory.HelmSlot, playerInventory.BodySlot, playerInventory.BackpackSlot);
+                             + PageUiUtilities.GetSlotsWeight(
+                                 playerInventory.HelmSlot,
+                                 playerInventory.BodySlot,
+                                 playerInventory.BackpackSlot,
+                                 playerInventory.LeftWeaponSlot,
+                                 playerInventory.RightWeaponSlot);
             var handWeight = playerInventory.HandSlot.Value?.ItemStack?.TotalWeight ?? 0f;
             var handSourceInventory = playerInventory.HandSourceInventory.Value;
             if (handWeight > 0f && handSourceInventory == playerInventory)
@@ -334,7 +341,17 @@ namespace UI.Pages
                 return true;
             }
 
-            return TryGetSlotUnderPointer(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot, screenPoint, handItemType, out slotModel);
+            if (TryGetSlotUnderPointer(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot, screenPoint, handItemType, out slotModel))
+            {
+                return true;
+            }
+
+            if (TryGetSlotUnderPointer(slotsViewContainer.LeftWeaponSlot, playerInventory.LeftWeaponSlot, screenPoint, handItemType, out slotModel))
+            {
+                return true;
+            }
+
+            return TryGetSlotUnderPointer(slotsViewContainer.RightWeaponSlot, playerInventory.RightWeaponSlot, screenPoint, handItemType, out slotModel);
         }
 
         public bool TryGetHoveredFastSlot(Vector2 screenPoint, out FastSlotModel fastSlotModel)
@@ -544,6 +561,8 @@ namespace UI.Pages
             return lastHelmItemConfig != playerInventory.HelmSlot.ItemConfig
                    || lastBodyItemConfig != playerInventory.BodySlot.ItemConfig
                    || lastBackpackItemConfig != playerInventory.BackpackSlot.ItemConfig
+                   || lastLeftWeaponItemConfig != playerInventory.LeftWeaponSlot.ItemConfig
+                   || lastRightWeaponItemConfig != playerInventory.RightWeaponSlot.ItemConfig
                    || lastFastSlot1ItemConfig != playerInventory.FastSlot1.ItemConfig
                    || lastFastSlot2ItemConfig != playerInventory.FastSlot2.ItemConfig
                    || lastFastSlot3ItemConfig != playerInventory.FastSlot3.ItemConfig
@@ -575,6 +594,8 @@ namespace UI.Pages
             lastHelmItemConfig = playerInventory.HelmSlot.ItemConfig;
             lastBodyItemConfig = playerInventory.BodySlot.ItemConfig;
             lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;
+            lastLeftWeaponItemConfig = playerInventory.LeftWeaponSlot.ItemConfig;
+            lastRightWeaponItemConfig = playerInventory.RightWeaponSlot.ItemConfig;
             lastFastSlot1ItemConfig = playerInventory.FastSlot1.ItemConfig;
             lastFastSlot2ItemConfig = playerInventory.FastSlot2.ItemConfig;
             lastFastSlot3ItemConfig = playerInventory.FastSlot3.ItemConfig;
@@ -706,6 +727,8 @@ namespace UI.Pages
             DrawSlotItem(slotsViewContainer.HeadSlot, playerInventory.HelmSlot);
             DrawSlotItem(slotsViewContainer.BodySlot, playerInventory.BodySlot);
             DrawSlotItem(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot);
+            DrawSlotItem(slotsViewContainer.LeftWeaponSlot, playerInventory.LeftWeaponSlot);
+            DrawSlotItem(slotsViewContainer.RightWeaponSlot, playerInventory.RightWeaponSlot);
             DrawFastSlotItem(slotsViewContainer.FastSlot1, playerInventory.FastSlot1);
             DrawFastSlotItem(slotsViewContainer.FastSlot2, playerInventory.FastSlot2);
             DrawFastSlotItem(slotsViewContainer.FastSlot3, playerInventory.FastSlot3);
@@ -1027,7 +1050,7 @@ namespace UI.Pages
 
         private bool CanUseInventoryItem(ItemConfig itemConfig)
         {
-            return itemConfig != null && itemConfig.ItemType is ItemType.Usable or ItemType.Helm or ItemType.Body or ItemType.Backpack;
+            return itemConfig != null && itemConfig.ItemType is ItemType.Usable or ItemType.Helm or ItemType.Body or ItemType.Backpack or ItemType.Weapon;
         }
 
         private void UseTarget(PopupTarget target)
@@ -1165,7 +1188,7 @@ namespace UI.Pages
                 return false;
             }
 
-            foreach (var slot in new[] { inventory.HelmSlot, inventory.BodySlot, inventory.BackpackSlot })
+            foreach (var slot in new[] { inventory.HelmSlot, inventory.BodySlot, inventory.BackpackSlot, inventory.LeftWeaponSlot, inventory.RightWeaponSlot })
             {
                 if (slot.ItemType != itemStack.ItemConfig.ItemType)
                 {
@@ -1263,7 +1286,7 @@ namespace UI.Pages
             var destinationInventory = GetOtherInventory(playerInventory);
             if (destinationInventory == null
              || slotModel?.ItemStack?.ItemConfig == null
-             || !playerInventory.TryTakeFromSlot(slotModel.ItemType, count, out var itemStack))
+             || !playerInventory.TryTakeFromSlot(slotModel, count, out var itemStack))
             {
                 return;
             }
@@ -1271,7 +1294,7 @@ namespace UI.Pages
             var remainder = destinationInventory.TryAdd(itemStack);
             if (remainder != null)
             {
-                RestoreSlotItem(slotModel.ItemType, remainder);
+                RestoreSlotItem(slotModel, remainder);
                 return;
             }
 
@@ -1285,14 +1308,14 @@ namespace UI.Pages
             }
         }
 
-        private void RestoreSlotItem(ItemType slotType, ItemStack itemStack)
+        private void RestoreSlotItem(SlotModel slotModel, ItemStack itemStack)
         {
-            if (itemStack?.ItemConfig == null)
+            if (slotModel == null || itemStack?.ItemConfig == null)
             {
                 return;
             }
 
-            playerInventory.TryPlaceInSlot(slotType, itemStack, out var remainderStack, out var replacedStack);
+            playerInventory.TryPlaceInSlot(slotModel, itemStack, out var remainderStack, out var replacedStack);
             if (replacedStack != null)
             {
                 var replacedRemainder = playerInventory.TryAdd(replacedStack);

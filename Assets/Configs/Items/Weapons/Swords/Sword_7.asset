@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60723d5f93cc4ad190a060664630a272, type: 3}
+  m_Name: Sword_7
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
+  <Id>k__BackingField: Sword 7 Item Config ID
+  <Price>k__BackingField: 22
+  <Weight>k__BackingField: 1.2
+  <MaxStack>k__BackingField: 1
+  <Icon>k__BackingField: {fileID: 21300000, guid: 6cc8524e138554048a5bee6bd4d1c008, type: 3}
+  <Name>k__BackingField:
+    m_TableReference:
+      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+    m_TableEntryReference:
+      m_KeyId: 944427890884608
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  <HandPrefab>k__BackingField: {fileID: 5800248454700343163, guid: 31ea0ab59c8bf244eb2cdf9aab417658, type: 3}
+  <Size>k__BackingField: {x: 1, y: 7}
+  <SizeInInventory>k__BackingField: {x: 100, y: 1200}
+  <ItemType>k__BackingField: 3
+  weaponInHandPrefab: {fileID: 3734153422565419358, guid: 9809e114a20778d4489c63b075400a8a, type: 3}
+  rightHandWeaponAttachment:
+    localPosition: {x: 11.8, y: 2.7, z: 1.4}
+    localEulerAngles: {x: -185, y: 90, z: -85}
+    localScale: {x: 85, y: 85, z: 85}
+  beltWeaponAttachment:
+    localPosition: {x: -7.5, y: 9, z: 20}
+    localEulerAngles: {x: -160, y: 265, z: 0}
+    localScale: {x: 85, y: 85, z: 85}
+  physicalDefense: 11
+  temperatureDefense: 31
+  psiDefense: 21
+  magicDefense: 6
+  hpStat: 0
+  waterStat: 0
+  foodStat: 0
+  chillStat: 0
+  equippedVisuals: []
+  references:
+    version: 2
+    RefIds: []

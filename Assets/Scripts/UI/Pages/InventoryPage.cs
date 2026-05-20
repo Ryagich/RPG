@@ -98,6 +98,8 @@ namespace UI.Pages
         private ItemConfig lastHelmItemConfig;
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastBackpackItemConfig;
+        private ItemConfig lastLeftWeaponItemConfig;
+        private ItemConfig lastRightWeaponItemConfig;
         private ItemConfig lastFastSlot1ItemConfig;
         private ItemConfig lastFastSlot2ItemConfig;
         private ItemConfig lastFastSlot3ItemConfig;
@@ -262,6 +264,8 @@ namespace UI.Pages
                               + PageUiUtilities.GetSlotsWeight(playerInventory.HelmSlot, 
                                                                playerInventory.BodySlot, 
                                                                playerInventory.BackpackSlot, 
+                                                               playerInventory.LeftWeaponSlot,
+                                                               playerInventory.RightWeaponSlot,
                                                                playerInventory.HandSlot.Value);
             PageUiUtilities.FillInfoAboutInventory(infoAboutInventory, localizationConfig, colorsConfig, currentWeight, playerInventory.MaxWeight);
         }
@@ -425,7 +429,17 @@ namespace UI.Pages
                 return true;
             }
 
-            return TryGetSlotUnderPointer(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot, screenPoint, handItemType, out slotModel);
+            if (TryGetSlotUnderPointer(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot, screenPoint, handItemType, out slotModel))
+            {
+                return true;
+            }
+
+            if (TryGetSlotUnderPointer(slotsViewContainer.LeftWeaponSlot, playerInventory.LeftWeaponSlot, screenPoint, handItemType, out slotModel))
+            {
+                return true;
+            }
+
+            return TryGetSlotUnderPointer(slotsViewContainer.RightWeaponSlot, playerInventory.RightWeaponSlot, screenPoint, handItemType, out slotModel);
         }
 
         public bool TryGetHoveredFastSlot(Vector2 screenPoint, out FastSlotModel fastSlotModel)
@@ -470,6 +484,8 @@ namespace UI.Pages
             DrawSlotItem(slotsViewContainer.HeadSlot, playerInventory.HelmSlot);
             DrawSlotItem(slotsViewContainer.BodySlot, playerInventory.BodySlot);
             DrawSlotItem(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot);
+            DrawSlotItem(slotsViewContainer.LeftWeaponSlot, playerInventory.LeftWeaponSlot);
+            DrawSlotItem(slotsViewContainer.RightWeaponSlot, playerInventory.RightWeaponSlot);
             DrawFastSlotItem(slotsViewContainer.FastSlot1, playerInventory.FastSlot1);
             DrawFastSlotItem(slotsViewContainer.FastSlot2, playerInventory.FastSlot2);
             DrawFastSlotItem(slotsViewContainer.FastSlot3, playerInventory.FastSlot3);
@@ -558,6 +574,8 @@ namespace UI.Pages
             return lastHelmItemConfig != playerInventory.HelmSlot.ItemConfig
                 || lastBodyItemConfig != playerInventory.BodySlot.ItemConfig
                 || lastBackpackItemConfig != playerInventory.BackpackSlot.ItemConfig
+                || lastLeftWeaponItemConfig != playerInventory.LeftWeaponSlot.ItemConfig
+                || lastRightWeaponItemConfig != playerInventory.RightWeaponSlot.ItemConfig
                 || lastFastSlot1ItemConfig != playerInventory.FastSlot1.ItemConfig
                 || lastFastSlot2ItemConfig != playerInventory.FastSlot2.ItemConfig
                 || lastFastSlot3ItemConfig != playerInventory.FastSlot3.ItemConfig
@@ -569,6 +587,8 @@ namespace UI.Pages
             lastHelmItemConfig = playerInventory.HelmSlot.ItemConfig;
             lastBodyItemConfig = playerInventory.BodySlot.ItemConfig;
             lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;
+            lastLeftWeaponItemConfig = playerInventory.LeftWeaponSlot.ItemConfig;
+            lastRightWeaponItemConfig = playerInventory.RightWeaponSlot.ItemConfig;
             lastFastSlot1ItemConfig = playerInventory.FastSlot1.ItemConfig;
             lastFastSlot2ItemConfig = playerInventory.FastSlot2.ItemConfig;
             lastFastSlot3ItemConfig = playerInventory.FastSlot3.ItemConfig;
@@ -1072,7 +1092,7 @@ namespace UI.Pages
 
         private bool CanMoveSlotItemToInventory(SlotModel slotModel)
         {
-            return slotModel?.ItemStack?.ItemConfig != null && playerInventory.CanMoveSlotItemToGrid(slotModel.ItemType);
+            return slotModel?.ItemStack?.ItemConfig != null && playerInventory.CanMoveSlotItemToGrid(slotModel);
         }
 
         private void MoveSlotItemToInventory(SlotModel slotModel)
@@ -1082,7 +1102,7 @@ namespace UI.Pages
                 return;
             }
 
-            playerInventory.TryMoveSlotItemToGrid(slotModel.ItemType);
+            playerInventory.TryMoveSlotItemToGrid(slotModel);
         }
 
         private void UseTarget(PopupTarget target)
@@ -1151,7 +1171,7 @@ namespace UI.Pages
 
         private void UseSlotItem(SlotModel slotModel)
         {
-            if (slotModel?.ItemStack?.ItemConfig == null || !playerInventory.TryTakeFromSlot(slotModel.ItemType, out var itemStack))
+            if (slotModel?.ItemStack?.ItemConfig == null || !playerInventory.TryTakeFromSlot(slotModel, out var itemStack))
             {
                 return;
             }
@@ -1161,7 +1181,7 @@ namespace UI.Pages
                 return;
             }
 
-            playerInventory.TryPlaceInSlot(slotModel.ItemType, itemStack, out var remainderStack, out var replacedStack);
+            playerInventory.TryPlaceInSlot(slotModel, itemStack, out var remainderStack, out var replacedStack);
             if (replacedStack != null)
             {
                 var replacedRemainder = playerInventory.TryAdd(replacedStack);
@@ -1231,7 +1251,7 @@ namespace UI.Pages
             }
 
             var dropCount = Mathf.Clamp(count, 1, slotModel.ItemStack.Count);
-            if (playerInventory.TryTakeFromSlot(slotModel.ItemType, dropCount, out var itemStack))
+            if (playerInventory.TryTakeFromSlot(slotModel, dropCount, out var itemStack))
             {
                 if (slotModel.ItemType == ItemType.Backpack)
                 {

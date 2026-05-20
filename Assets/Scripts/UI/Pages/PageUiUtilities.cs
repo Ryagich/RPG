@@ -262,6 +262,14 @@ namespace UI.Pages
             {
                 slotRect = slotsViewContainer.BackpackSlot.GetComponent<RectTransform>();
             }
+            else if (slotModel == playerInventory.LeftWeaponSlot && slotsViewContainer.LeftWeaponSlot)
+            {
+                slotRect = slotsViewContainer.LeftWeaponSlot.GetComponent<RectTransform>();
+            }
+            else if (slotModel == playerInventory.RightWeaponSlot && slotsViewContainer.RightWeaponSlot)
+            {
+                slotRect = slotsViewContainer.RightWeaponSlot.GetComponent<RectTransform>();
+            }
 
             return slotRect;
         }

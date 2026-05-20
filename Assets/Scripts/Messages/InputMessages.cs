@@ -72,4 +72,14 @@ namespace Messages
             SlotIndex = slotIndex;
         }
     }
+
+    public readonly struct WeaponSlotInputMessage
+    {
+        public readonly int SlotIndex;
+
+        public WeaponSlotInputMessage(int slotIndex)
+        {
+            SlotIndex = slotIndex;
+        }
+    }
 }

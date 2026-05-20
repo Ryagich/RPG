@@ -218,7 +218,7 @@ namespace Inventory
             if (interactionPage == null
              || pointer == null
              || !interactionPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel)
-             || !playerInventory.TryPlaceInSlot(slotModel.ItemType, itemStack, out var remainderStack, out var replacedStack))
+             || !playerInventory.TryPlaceInSlot(slotModel, itemStack, out var remainderStack, out var replacedStack))
             {
                 return false;
             }
@@ -381,7 +381,7 @@ namespace Inventory
 
             if (button == MouseButtonType.Left)
             {
-                return playerInventory.TryTakeFromSlot(slotModel.ItemType, out itemStack);
+                return playerInventory.TryTakeFromSlot(slotModel, out itemStack);
             }
 
             var currentStack = slotModel.ItemStack;
@@ -391,7 +391,7 @@ namespace Inventory
             }
 
             var countToTake = Mathf.Max(1, (currentStack.Count + 1) / 2);
-            return playerInventory.TryTakeFromSlot(slotModel.ItemType, countToTake, out itemStack);
+            return playerInventory.TryTakeFromSlot(slotModel, countToTake, out itemStack);
         }
 
         private static bool TryTakeFromHoveredTile(
@@ -571,7 +571,7 @@ namespace Inventory
 
         private bool TryReturnToHandSource(ItemStack itemStack)
         {
-            if (handSourceSlot != null && playerInventory.TryPlaceInSlot(handSourceSlot.ItemType, itemStack, out var remainderStack, out var replacedStack))
+            if (handSourceSlot != null && playerInventory.TryPlaceInSlot(handSourceSlot, itemStack, out var remainderStack, out var replacedStack))
             {
                 if (replacedStack != null)
                 {
