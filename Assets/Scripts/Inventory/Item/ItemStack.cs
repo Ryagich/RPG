@@ -26,7 +26,9 @@ namespace Inventory.Item
 
         public bool CanStackWith(ItemStack other)
         {
-            return other != null && ItemConfig != null && ItemConfig == other.ItemConfig && IsRotated == other.IsRotated;
+            // Rotation affects only the grid footprint of the stack already placed in an inventory.
+            // It must not prevent merging counts for the same item type into an existing partial stack.
+            return other != null && ItemConfig != null && ItemConfig == other.ItemConfig;
         }
 
         public bool CanRotate()
