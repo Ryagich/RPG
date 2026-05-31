@@ -22,11 +22,14 @@ namespace Movement
         private readonly PlayerInventory playerInventory;
         private readonly StatsController statsController;
 
+        private Vector2 bufferedInputDirection;
         private Vector2 targetVelocity;
         private Vector2 currentVelocity;
         private bool canMove = true;
+        private bool bufferedRunPressed;
         private bool wantsToRun;
         private bool isRunning;
+        private bool isRunAllowed = true;
         private float currentSpeedChangeRate;
 
         [SuppressMessage("ReSharper", "ParameterHidesMember")]
@@ -102,18 +105,34 @@ namespace Movement
                 wantsToRun = false;
                 isRunning = false;
                 currentSpeedChangeRate = playerMovementConfig.WalkSpeedChangeRate;
+                return;
             }
+
+            ApplyBufferedInputState();
         }
 
         public Vector2 CurrentVelocity => currentVelocity;
         public bool IsRunning => isRunning;
         public bool IsMoving => canMove && currentVelocity.sqrMagnitude > InputThreshold;
 
+        public void SetRunAllowed(bool isAllowed)
+        {
+            isRunAllowed = isAllowed;
+            isRunning = canMove && wantsToRun && isRunAllowed && CanRunByStamina();
+        }
+
         private void OnMove(PlayerMoveMessage msg)
         {
-            wantsToRun = msg.IsRunning;
-            targetVelocity = CanMoveByStamina() ? msg.Direction : Vector2.zero;
-            isRunning = wantsToRun && CanRunByStamina();
+            bufferedInputDirection = msg.Direction;
+            bufferedRunPressed = msg.IsRunning;
+            ApplyBufferedInputState();
+        }
+
+        private void ApplyBufferedInputState()
+        {
+            wantsToRun = bufferedRunPressed;
+            targetVelocity = CanMoveByStamina() ? bufferedInputDirection : Vector2.zero;
+            isRunning = canMove && wantsToRun && isRunAllowed && CanRunByStamina();
         }
 
         private void ApplyStaminaRestrictions()
@@ -126,7 +145,7 @@ namespace Movement
                 return;
             }
 
-            isRunning = wantsToRun && CanRunByStamina();
+            isRunning = wantsToRun && isRunAllowed && CanRunByStamina();
         }
 
         private bool CanMoveByStamina()

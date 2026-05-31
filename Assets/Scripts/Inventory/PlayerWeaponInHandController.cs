@@ -12,32 +12,89 @@ using Object = UnityEngine.Object;
 
 namespace Inventory
 {
+    [DisallowMultipleComponent]
+    public sealed class PlayerAnimatorRootMotionRelay : MonoBehaviour
+    {
+        private Animator animator;
+        private PlayerWeaponInHandController weaponInHandController;
+
+        private void Awake()
+        {
+            animator = GetComponent<Animator>();
+        }
+
+        public void Bind(PlayerWeaponInHandController controller)
+        {
+            weaponInHandController = controller;
+
+            if (animator == null)
+            {
+                animator = GetComponent<Animator>();
+            }
+        }
+
+        private void OnAnimatorMove()
+        {
+            if (animator == null || weaponInHandController == null || !animator.applyRootMotion)
+            {
+                return;
+            }
+
+            weaponInHandController.ApplyAttackRootMotion(animator);
+        }
+    }
+
     public sealed class PlayerWeaponInHandController : IStartable, ITickable, IDisposable
     {
         private const string WeaponAnimationLayerName = "Weapon Layers";
+        private const string AttackLayerName = "Attack Full Body";
         private const string DrawWeaponStatePath = "Weapon Layers.DrawWeapon";
         private const string SheatheWeaponStatePath = "Weapon Layers.SheatheWeapon";
-        private const string HoldAttackWindUpStateName = "A_Attack_LightCombo01C_WindUp_Sword";
+        private const string EmptyIdleStateName = "Empty Idle";
+        private const string AttackStateName = "A_Attack_LightCombo01C_Sword";
+        private const string AttackComboAStateName = "A_Attack_LightCombo01A_Sword";
+        private const string AttackComboBHitStateName = "A_Attack_LightCombo01B_Hit_Sword";
+        private const string AttackWindUpStateName = "A_Attack_LightCombo01C_WindUp_Sword";
+        private const string AttackHitStateName = "A_Attack_LightCombo01C_Hit_Sword";
+        private const string AttackFollowThroughStateName = "A_Attack_LightCombo01C_FollowThrough_Sword";
+        private const string AttackComboAReturnToIdleStateName = "A_Attack_LightCombo01A_ReturnToIdle_Sword";
+        private const string AttackComboBReturnToIdleStateName = "A_Attack_LightCombo01B_ReturnToIdle_Sword";
+        private const string AttackRootMotionStateName = "A_Attack_LightCombo01C_RootMotion_Sword";
+        private const string AttackWindUpRootMotionStateName = "A_Attack_LightCombo01C_WindUp_RootMotion_Sword";
+        private const string AttackHitRootMotionStateName = "A_Attack_LightCombo01C_Hit_RootMotion_Sword";
+        private const string AttackFollowThroughRootMotionStateName = "A_Attack_LightCombo01C_FollowThrough_RootMotion_Sword";
+        private const string AttackComboCReturnToIdleRootMotionStateName = "A_Attack_LightCombo01C_ReturnToIdle_RootMotion_Sword";
         private const string DrawWeaponClipName = "A_Draw_Sword";
         private const string SheatheWeaponClipName = "A_Sheathe_Sword";
         private const float FallbackAttachmentBlendDuration = 0.08f;
-        private const float HoldAttackReadyFallbackNormalizedTime = 0.98f;
+        private const float RootMotionThreshold = 0.000001f;
         private const string BeginMoveWeaponToRightHandEventName = "BeginMoveWeaponToRightHand";
         private const string TakeWeaponInHandEventName = "TakeWeaponInHand";
         private const string BeginMoveWeaponToBeltEventName = "BeginMoveWeaponToBelt";
         private const string PutWeaponOnBeltEventName = "PutWeaponOnBelt";
         private const string DrawWeaponRequestedParameter = "MoveWeaponInHand";
         private const string SheatheWeaponRequestedParameter = "MoveWeaponInBelt";
-        private const string HoldAttackRequestedParameter = "HoldAttack";
         private const string AttackRequestedParameter = "Attack";
         private const string LeftClickLogPrefix = "[WeaponLmb]";
 
         private static readonly int DrawWeaponStateHash = Animator.StringToHash(DrawWeaponStatePath);
         private static readonly int SheatheWeaponStateHash = Animator.StringToHash(SheatheWeaponStatePath);
-        private static readonly int HoldAttackWindUpStateShortNameHash = Animator.StringToHash(HoldAttackWindUpStateName);
+        private static readonly int EmptyIdleStateShortNameHash = Animator.StringToHash(EmptyIdleStateName);
+        private static readonly int AttackStateShortNameHash = Animator.StringToHash(AttackStateName);
+        private static readonly int AttackComboAStateShortNameHash = Animator.StringToHash(AttackComboAStateName);
+        private static readonly int AttackComboBHitStateShortNameHash = Animator.StringToHash(AttackComboBHitStateName);
+        private static readonly int AttackWindUpStateShortNameHash = Animator.StringToHash(AttackWindUpStateName);
+        private static readonly int AttackHitStateShortNameHash = Animator.StringToHash(AttackHitStateName);
+        private static readonly int AttackFollowThroughStateShortNameHash = Animator.StringToHash(AttackFollowThroughStateName);
+        private static readonly int AttackComboAReturnToIdleStateShortNameHash = Animator.StringToHash(AttackComboAReturnToIdleStateName);
+        private static readonly int AttackComboBReturnToIdleStateShortNameHash = Animator.StringToHash(AttackComboBReturnToIdleStateName);
+        private static readonly int AttackRootMotionStateShortNameHash = Animator.StringToHash(AttackRootMotionStateName);
+        private static readonly int AttackWindUpRootMotionStateShortNameHash = Animator.StringToHash(AttackWindUpRootMotionStateName);
+        private static readonly int AttackHitRootMotionStateShortNameHash = Animator.StringToHash(AttackHitRootMotionStateName);
+        private static readonly int AttackFollowThroughRootMotionStateShortNameHash = Animator.StringToHash(AttackFollowThroughRootMotionStateName);
+        private static readonly int AttackComboCReturnToIdleRootMotionStateShortNameHash = Animator.StringToHash(AttackComboCReturnToIdleRootMotionStateName);
         private static readonly int DrawWeaponRequestedParameterHash = Animator.StringToHash(DrawWeaponRequestedParameter);
         private static readonly int SheatheWeaponRequestedParameterHash = Animator.StringToHash(SheatheWeaponRequestedParameter);
-        private static readonly int HoldAttackRequestedParameterHash = Animator.StringToHash(HoldAttackRequestedParameter);
         private static readonly int AttackRequestedParameterHash = Animator.StringToHash(AttackRequestedParameter);
 
         private enum WeaponDisplayMode
@@ -58,29 +115,29 @@ namespace Inventory
         private readonly PlayerWeaponHandAnchor handAnchor;
         private readonly PlayerWeaponAnimationEventReceiver animationEventReceiver;
         private readonly Animator animator;
+        private readonly CharacterController characterController;
         private readonly GameModesController gameModesController;
         private readonly PlayerMovement playerMovement;
         private readonly PlayerAnimationController playerAnimationController;
         private readonly CompositeDisposable disposables = new();
         private readonly SerialDisposable weaponAttachmentBlendDisposable = new();
         private readonly int weaponAnimationLayerIndex;
+        private readonly int attackLayerIndex;
+        private readonly PlayerAnimatorRootMotionRelay rootMotionRelay;
 
         private int selectedWeaponSlotIndex = 1;
         private bool isWeaponDrawn = true;
         private bool isWeaponAnimationInProgress;
         private bool hasPendingRefresh;
-        private bool isHoldAttackActive;
-        private bool isHoldAttackReady;
-        private bool isAttackReleaseQueued;
         private bool isHitAttackInProgress;
+        private bool hasAttachmentBlendStartedForCurrentAnimation;
+        private bool shouldPreservePoseForCurrentDraw;
         private GameObject currentWeaponInstance;
         private ItemConfig currentWeaponItemConfig;
         private ItemConfig lastObservedSelectedSlotItemConfig;
         private int currentRenderedSlotIndex;
         private WeaponDisplayMode currentDisplayMode;
-        private WeaponDisplayMode pendingAnimationTransferMode;
         private WeaponAnimationKind currentAnimationKind;
-        private Action pendingAnimationTransferAction;
         private string currentAnimationClipName;
 
         public PlayerWeaponInHandController(
@@ -88,6 +145,7 @@ namespace Inventory
             PlayerWeaponHandAnchor handAnchor,
             PlayerWeaponAnimationEventReceiver animationEventReceiver,
             Animator animator,
+            CharacterController characterController,
             GameModesController gameModesController,
             PlayerMovement playerMovement,
             PlayerAnimationController playerAnimationController,
@@ -100,14 +158,22 @@ namespace Inventory
             this.handAnchor = handAnchor;
             this.animationEventReceiver = animationEventReceiver;
             this.animator = animator;
+            this.characterController = characterController;
             this.gameModesController = gameModesController;
             this.playerMovement = playerMovement;
             this.playerAnimationController = playerAnimationController;
             weaponAnimationLayerIndex = animator != null
                 ? animator.GetLayerIndex(WeaponAnimationLayerName)
                 : -1;
+            attackLayerIndex = animator != null
+                ? animator.GetLayerIndex(AttackLayerName)
+                : -1;
+            rootMotionRelay = animator != null
+                ? animator.GetComponent<PlayerAnimatorRootMotionRelay>() ?? animator.gameObject.AddComponent<PlayerAnimatorRootMotionRelay>()
+                : null;
 
             animationEventReceiver?.Bind(this);
+            rootMotionRelay?.Bind(this);
 
             weaponSlotInputSubscriber.Subscribe(OnWeaponSlotInput).AddTo(disposables);
             mouseDownSubscriber.Subscribe(OnMouseDown).AddTo(disposables);
@@ -121,43 +187,38 @@ namespace Inventory
         {
             ResetAnimatorRequests();
             RefreshWeaponInHand();
+            UpdateRunningAvailability();
+            UpdateAttackRootMotionAvailability();
         }
 
         public void Dispose()
         {
             weaponAttachmentBlendDisposable.Dispose();
             DestroyCurrentWeaponInstance();
+            UpdateAttackRootMotionAvailability(forceDisable: true);
             disposables.Dispose();
         }
 
         public void Tick()
         {
-            if (!isHoldAttackActive
-             || isHoldAttackReady
-             || !isAttackReleaseQueued
-             || isHitAttackInProgress
-             || animator == null)
-            {
-                return;
-            }
-
-            if (!TryGetHoldAttackWindUpStateInfo(out var stateInfo, out var layerIndex))
-            {
-                return;
-            }
-
-            if (stateInfo.normalizedTime < HoldAttackReadyFallbackNormalizedTime)
-            {
-                return;
-            }
-
-            isHoldAttackReady = true;
-            LogLeftClick($"hold attack ready fallback by normalizedTime | layer={layerIndex} norm={stateInfo.normalizedTime:0.00}");
-            TriggerAttack();
+            UpdateAttackRootMotionAvailability();
         }
 
         public void BeginMoveWeaponToRightHandFromAnimationEvent()
         {
+            if (currentAnimationKind != WeaponAnimationKind.Draw || hasAttachmentBlendStartedForCurrentAnimation)
+            {
+                return;
+            }
+
+            hasAttachmentBlendStartedForCurrentAnimation = true;
+
+            if (shouldPreservePoseForCurrentDraw)
+            {
+                MoveCurrentWeaponToRightHandPreservingPose();
+                return;
+            }
+
             StartWeaponAttachmentBlend(
                 WeaponDisplayMode.RightHand,
                 BeginMoveWeaponToRightHandEventName,
@@ -166,51 +227,106 @@ namespace Inventory
 
         public void TakeWeaponInHandFromAnimationEvent()
         {
-            ApplyPendingAnimationTransfer(WeaponDisplayMode.RightHand);
+            if (currentAnimationKind != WeaponAnimationKind.Draw || currentWeaponItemConfig == null)
+            {
+                return;
+            }
+
+            FinalizeWeaponRender(
+                currentWeaponItemConfig,
+                currentRenderedSlotIndex,
+                WeaponDisplayMode.RightHand,
+                snapToAttachmentTransform: true);
             CompleteWeaponAnimationFromEvent(WeaponAnimationKind.Draw);
         }
 
         public void BeginMoveWeaponToBeltFromAnimationEvent()
         {
-            StartWeaponAttachmentBlend(
-                WeaponDisplayMode.Belt,
-                BeginMoveWeaponToBeltEventName,
-                PutWeaponOnBeltEventName);
-        }
-
-        public void PutWeaponOnBeltFromAnimationEvent()
-        {
-            ApplyPendingAnimationTransfer(WeaponDisplayMode.Belt);
-            CompleteWeaponAnimationFromEvent(WeaponAnimationKind.Sheathe);
-        }
-
-        public void HoldAttackReadyFromAnimationEvent()
-        {
-            if (!isHoldAttackActive)
+            if (currentAnimationKind != WeaponAnimationKind.Sheathe || hasAttachmentBlendStartedForCurrentAnimation)
             {
                 return;
             }
 
-            isHoldAttackReady = true;
-            LogLeftClick("hold attack ready event");
-            TryConsumeQueuedAttackRelease();
+            hasAttachmentBlendStartedForCurrentAnimation = true;
+
+            if (TryStartNextWeaponDuringSheathe())
+            {
+                return;
+            }
+
+            MoveCurrentWeaponToBeltPreservingPose();
+        }
+
+        public void PutWeaponOnBeltFromAnimationEvent()
+        {
+            if (currentAnimationKind != WeaponAnimationKind.Sheathe || currentWeaponItemConfig == null)
+            {
+                return;
+            }
+
+            FinalizeWeaponRender(
+                currentWeaponItemConfig,
+                currentRenderedSlotIndex,
+                WeaponDisplayMode.Belt,
+                snapToAttachmentTransform: false);
+
+            var selectedItemConfig = GetSelectedWeaponItemConfig();
+            if (selectedItemConfig == null)
+            {
+                RenderWeapon(null, 0, WeaponDisplayMode.None);
+                CompleteWeaponAnimationFromEvent(WeaponAnimationKind.Sheathe);
+                return;
+            }
+
+            if (currentRenderedSlotIndex != selectedWeaponSlotIndex
+             || currentWeaponItemConfig != selectedItemConfig)
+            {
+                RenderWeapon(selectedItemConfig, selectedWeaponSlotIndex, WeaponDisplayMode.Belt);
+            }
+
+            CompleteWeaponAnimationFromEvent(WeaponAnimationKind.Sheathe);
         }
 
         public void AttackStartedFromAnimationEvent()
         {
-            isHoldAttackActive = false;
-            isHoldAttackReady = false;
-            isAttackReleaseQueued = false;
+            // Animation Event: AttackStarted
+            // Use on attack clips when the combat action itself begins.
+            // This event is stronger than a pure movement lock: it marks attack-in-progress,
+            // enables attack root motion handling, and also removes player control.
             isHitAttackInProgress = true;
+            UpdateAttackRootMotionAvailability();
 
             playerMovement?.ChangeState(false);
             playerAnimationController?.SetLocomotionLocked(true);
             LogLeftClick("attack started event");
         }
 
+        public void LockMovementFromAnimationEvent()
+        {
+            // Animation Event: LockMovement
+            // Use on attack / return-to-idle clips when control should be taken away
+            // without changing the rest of the attack flow state.
+            playerMovement?.ChangeState(false);
+            playerAnimationController?.SetLocomotionLocked(true);
+        }
+
+        public void UnlockMovementFromAnimationEvent()
+        {
+            // Animation Event: UnlockMovement
+            // Use on attack / return-to-idle clips when control can be returned
+            // before the full attack flow has completely ended.
+            if (gameModesController.GameMode == GameMode.Game)
+            {
+                playerMovement?.ChangeState(true);
+            }
+
+            playerAnimationController?.SetLocomotionLocked(false);
+        }
+
         public void AttackFinishedFromAnimationEvent()
         {
             isHitAttackInProgress = false;
+            UpdateAttackRootMotionAvailability();
 
             if (gameModesController.GameMode == GameMode.Game)
             {
@@ -218,13 +334,45 @@ namespace Inventory
             }
 
             playerAnimationController?.SetLocomotionLocked(false);
+            UpdateRunningAvailability();
             LogLeftClick("attack finished event");
             RefreshWeaponInHand();
         }
 
+        public void ResetAttackRequestFromAnimationEvent()
+        {
+            // Animation Event: ResetAttackRequest
+            // Use on attack clips to clear the Animator Attack bool after the combo input window
+            // or after the transition point where the current attack should stop requesting itself.
+            SetAttackRequested(false);
+        }
+
+        public void ApplyAttackRootMotion(Animator sourceAnimator)
+        {
+            if (!ShouldConsumeAttackRootMotionThisFrame() || characterController == null || sourceAnimator == null)
+            {
+                return;
+            }
+
+            var localDelta = sourceAnimator.deltaPosition;
+            localDelta.y = 0f;
+
+            if (localDelta.sqrMagnitude <= RootMotionThreshold)
+            {
+                return;
+            }
+
+            var worldDelta = sourceAnimator.transform.parent != null
+                ? sourceAnimator.transform.parent.TransformVector(localDelta)
+                : localDelta;
+            worldDelta.y = 0f;
+
+            characterController.Move(worldDelta);
+        }
+
         private void OnWeaponSlotInput(WeaponSlotInputMessage message)
         {
-            if (message.SlotIndex is < 1 or > 2 || isHoldAttackActive || isHitAttackInProgress)
+            if (message.SlotIndex is < 1 or > 2 || isHitAttackInProgress)
             {
                 return;
             }
@@ -239,14 +387,23 @@ namespace Inventory
                 }
 
                 isWeaponDrawn = !isWeaponDrawn;
-                InterruptCurrentWeaponAnimationIfNeeded();
+                if (TryHandleWeaponSlotInputDuringAnimation())
+                {
+                    return;
+                }
+
                 RefreshWeaponInHand();
                 return;
             }
 
             selectedWeaponSlotIndex = message.SlotIndex;
             isWeaponDrawn = true;
-            InterruptCurrentWeaponAnimationIfNeeded();
+
+            if (TryHandleWeaponSlotInputDuringAnimation())
+            {
+                return;
+            }
+
             RefreshWeaponInHand();
         }
 
@@ -271,12 +428,6 @@ namespace Inventory
                 return;
             }
 
-            if (isHoldAttackActive)
-            {
-                LogLeftClick("ignored: hold attack already active");
-                return;
-            }
-
             if (isHitAttackInProgress)
             {
                 LogLeftClick("ignored: hit attack already in progress");
@@ -298,8 +449,14 @@ namespace Inventory
                 return;
             }
 
-            LogLeftClick("weapon in hand -> request HoldAttack", selectedItemConfig);
-            StartHoldAttack();
+            if (currentDisplayMode != WeaponDisplayMode.RightHand || currentWeaponItemConfig == null)
+            {
+                LogLeftClick("ignored: weapon not in hand", selectedItemConfig);
+                return;
+            }
+
+            LogLeftClick("weapon in hand -> request Attack", selectedItemConfig);
+            TriggerAttack();
         }
 
         private void OnMouseUp(MouseUp message)
@@ -308,24 +465,6 @@ namespace Inventory
             {
                 return;
             }
-
-            LogLeftClick("release received");
-
-            if (!isHoldAttackActive)
-            {
-                LogLeftClick("release ignored: no active HoldAttack");
-                return;
-            }
-
-            if (isHoldAttackReady)
-            {
-                LogLeftClick("hold ready on release -> request Attack");
-                TriggerAttack();
-                return;
-            }
-
-            isAttackReleaseQueued = true;
-            LogLeftClick("release queued until HoldAttackReady");
         }
 
         private void OnGameModeChanged(GameModeChangedMessage message)
@@ -348,7 +487,7 @@ namespace Inventory
             var selectedItemConfig = ResolveActiveWeaponSelection();
             var slotItemChanged = lastObservedSelectedSlotItemConfig != selectedItemConfig;
 
-            if (slotItemChanged && !isWeaponDrawn && selectedItemConfig != null)
+            if (slotItemChanged && selectedItemConfig != null && !isWeaponDrawn)
             {
                 isWeaponDrawn = true;
             }
@@ -364,21 +503,21 @@ namespace Inventory
             if (selectedItemConfig == null)
             {
                 CancelAttackFlow();
-                HandleNoSelectedWeapon();
+                HandleEmptySelectedSlot();
                 return;
             }
 
-            if (isWeaponDrawn)
+            if (!isWeaponDrawn)
             {
-                HandleDrawnWeapon(selectedItemConfig);
+                CancelAttackFlow();
+                HandleDesiredHolsteredWeapon(selectedItemConfig);
                 return;
             }
 
-            CancelAttackFlow();
-            HandleHolsteredWeapon(selectedItemConfig);
+            HandleDesiredWeaponInHand(selectedItemConfig);
         }
 
-        private void HandleNoSelectedWeapon()
+        private void HandleEmptySelectedSlot()
         {
             if (currentDisplayMode == WeaponDisplayMode.RightHand && currentWeaponItemConfig != null)
             {
@@ -389,18 +528,13 @@ namespace Inventory
             RenderWeapon(null, 0, WeaponDisplayMode.None);
         }
 
-        private void HandleDrawnWeapon(ItemConfig selectedItemConfig)
+        private void HandleDesiredWeaponInHand(ItemConfig selectedItemConfig)
         {
             if (currentDisplayMode == WeaponDisplayMode.RightHand)
             {
-                if (currentRenderedSlotIndex == selectedWeaponSlotIndex)
+                if (currentRenderedSlotIndex == selectedWeaponSlotIndex
+                 && currentWeaponItemConfig == selectedItemConfig)
                 {
-                    if (currentWeaponItemConfig == selectedItemConfig)
-                    {
-                        return;
-                    }
-
-                    RenderWeapon(selectedItemConfig, selectedWeaponSlotIndex, WeaponDisplayMode.RightHand);
                     return;
                 }
 
@@ -408,29 +542,19 @@ namespace Inventory
                 return;
             }
 
-            if (currentDisplayMode == WeaponDisplayMode.Belt
-             && currentRenderedSlotIndex == selectedWeaponSlotIndex
-             && currentWeaponItemConfig == selectedItemConfig)
+            if (currentDisplayMode != WeaponDisplayMode.Belt
+             || currentRenderedSlotIndex != selectedWeaponSlotIndex
+             || currentWeaponItemConfig != selectedItemConfig)
             {
-                StartDrawAnimation(selectedWeaponSlotIndex, selectedItemConfig);
-                return;
+                RenderWeapon(selectedItemConfig, selectedWeaponSlotIndex, WeaponDisplayMode.Belt);
             }
 
-            RenderWeapon(selectedItemConfig, selectedWeaponSlotIndex, WeaponDisplayMode.Belt);
             StartDrawAnimation(selectedWeaponSlotIndex, selectedItemConfig);
         }
 
-        private void HandleHolsteredWeapon(ItemConfig selectedItemConfig)
+        private void HandleDesiredHolsteredWeapon(ItemConfig selectedItemConfig)
         {
-            if (currentDisplayMode == WeaponDisplayMode.RightHand
-             && currentRenderedSlotIndex == selectedWeaponSlotIndex
-             && currentWeaponItemConfig == selectedItemConfig)
-            {
-                StartSheatheAnimation(selectedWeaponSlotIndex, selectedItemConfig);
-                return;
-            }
-
-            if (currentDisplayMode == WeaponDisplayMode.RightHand)
+            if (currentDisplayMode == WeaponDisplayMode.RightHand && currentWeaponItemConfig != null)
             {
                 StartSheatheAnimation(currentRenderedSlotIndex, currentWeaponItemConfig);
                 return;
@@ -446,38 +570,45 @@ namespace Inventory
             RenderWeapon(selectedItemConfig, selectedWeaponSlotIndex, WeaponDisplayMode.Belt);
         }
 
-        private void StartDrawAnimation(int slotIndex, ItemConfig itemConfig)
+        private void StartDrawAnimation(int slotIndex, ItemConfig itemConfig, bool preserveCurrentVisual = false)
         {
-            if (itemConfig == null || isHoldAttackActive || isHitAttackInProgress)
+            if (itemConfig == null || isHitAttackInProgress)
             {
                 return;
             }
 
-            if (currentDisplayMode != WeaponDisplayMode.Belt
-             || currentRenderedSlotIndex != slotIndex
-             || currentWeaponItemConfig != itemConfig)
+            var canPreserveCurrentVisual =
+                preserveCurrentVisual
+             && currentWeaponInstance != null
+             && currentWeaponItemConfig == itemConfig
+             && currentRenderedSlotIndex == slotIndex
+             && currentDisplayMode != WeaponDisplayMode.None;
+
+            if (!canPreserveCurrentVisual
+             && (currentDisplayMode != WeaponDisplayMode.Belt
+              || currentRenderedSlotIndex != slotIndex
+              || currentWeaponItemConfig != itemConfig))
             {
                 RenderWeapon(itemConfig, slotIndex, WeaponDisplayMode.Belt);
             }
 
-            pendingAnimationTransferMode = WeaponDisplayMode.RightHand;
-            pendingAnimationTransferAction = () =>
-            {
-                if (selectedWeaponSlotIndex == slotIndex
-                 && isWeaponDrawn
-                 && GetSelectedWeaponItemConfig() == itemConfig)
-                {
-                    FinalizeWeaponRender(itemConfig, slotIndex, WeaponDisplayMode.RightHand);
-                }
-            };
-
             isWeaponAnimationInProgress = true;
             hasPendingRefresh = false;
+            hasAttachmentBlendStartedForCurrentAnimation = false;
             currentAnimationKind = WeaponAnimationKind.Draw;
             currentAnimationClipName = DrawWeaponClipName;
+            UpdateRunningAvailability();
 
-            ResetAnimatorRequests();
-            animator?.SetTrigger(DrawWeaponRequestedParameterHash);
+            if (animator == null)
+            {
+                FinalizeWeaponRender(itemConfig, slotIndex, WeaponDisplayMode.RightHand, snapToAttachmentTransform: true);
+                CompleteWeaponAnimationFromEvent(WeaponAnimationKind.Draw);
+                return;
+            }
+
+            animator.ResetTrigger(DrawWeaponRequestedParameterHash);
+            animator.ResetTrigger(SheatheWeaponRequestedParameterHash);
+            animator.SetTrigger(DrawWeaponRequestedParameterHash);
         }
 
         private void StartSheatheAnimation(int slotIndex, ItemConfig itemConfig)
@@ -488,38 +619,28 @@ namespace Inventory
                 return;
             }
 
-            if (isHoldAttackActive || isHitAttackInProgress)
+            if (isHitAttackInProgress)
             {
                 return;
             }
-
-            pendingAnimationTransferMode = WeaponDisplayMode.Belt;
-            pendingAnimationTransferAction = () => FinalizeWeaponRender(itemConfig, slotIndex, WeaponDisplayMode.Belt);
 
             isWeaponAnimationInProgress = true;
             hasPendingRefresh = false;
+            hasAttachmentBlendStartedForCurrentAnimation = false;
             currentAnimationKind = WeaponAnimationKind.Sheathe;
             currentAnimationClipName = SheatheWeaponClipName;
+            UpdateRunningAvailability();
 
-            ResetAnimatorRequests();
-            animator?.SetTrigger(SheatheWeaponRequestedParameterHash);
-        }
-
-        private void StartHoldAttack()
-        {
             if (animator == null)
             {
-                LogLeftClick("HoldAttack skipped: animator missing");
+                FinalizeWeaponRender(itemConfig, slotIndex, WeaponDisplayMode.Belt, snapToAttachmentTransform: false);
+                PutWeaponOnBeltFromAnimationEvent();
                 return;
             }
 
-            isHoldAttackActive = true;
-            isHoldAttackReady = false;
-            isAttackReleaseQueued = false;
-
-            animator.ResetTrigger(HoldAttackRequestedParameterHash);
-            animator.SetTrigger(HoldAttackRequestedParameterHash);
-            LogLeftClick("HoldAttack trigger sent");
+            animator.ResetTrigger(SheatheWeaponRequestedParameterHash);
+            animator.ResetTrigger(DrawWeaponRequestedParameterHash);
+            animator.SetTrigger(SheatheWeaponRequestedParameterHash);
         }
 
         private void TriggerAttack()
@@ -530,40 +651,18 @@ namespace Inventory
                 return;
             }
 
-            isAttackReleaseQueued = false;
-            isHoldAttackActive = false;
-            isHoldAttackReady = false;
-
-            animator.ResetTrigger(AttackRequestedParameterHash);
-            animator.SetTrigger(AttackRequestedParameterHash);
-            LogLeftClick("Attack trigger sent");
-        }
-
-        private void TryConsumeQueuedAttackRelease()
-        {
-            if (!isAttackReleaseQueued || !isHoldAttackReady)
-            {
-                return;
-            }
-
-            TriggerAttack();
+            SetAttackRequested(true);
+            LogLeftClick("Attack bool set true");
         }
 
         private void CancelAttackFlow()
         {
-            var hadActiveAttackFlow =
-                isHoldAttackActive
-             || isHoldAttackReady
-             || isAttackReleaseQueued
-             || isHitAttackInProgress;
-
-            isHoldAttackActive = false;
-            isHoldAttackReady = false;
-            isAttackReleaseQueued = false;
+            var hadActiveAttackFlow = isHitAttackInProgress;
 
             if (isHitAttackInProgress)
             {
                 isHitAttackInProgress = false;
+                UpdateAttackRootMotionAvailability();
                 if (gameModesController.GameMode == GameMode.Game)
                 {
                     playerMovement?.ChangeState(true);
@@ -577,8 +676,7 @@ namespace Inventory
                 return;
             }
 
-            animator.ResetTrigger(HoldAttackRequestedParameterHash);
-            animator.ResetTrigger(AttackRequestedParameterHash);
+            SetAttackRequested(false);
 
             if (hadActiveAttackFlow)
             {
@@ -594,9 +692,12 @@ namespace Inventory
             }
 
             isWeaponAnimationInProgress = false;
+            hasAttachmentBlendStartedForCurrentAnimation = false;
+            shouldPreservePoseForCurrentDraw = false;
             currentAnimationKind = WeaponAnimationKind.None;
             currentAnimationClipName = null;
             ResetAnimatorRequests();
+            UpdateRunningAvailability();
 
             if (!hasPendingRefresh)
             {
@@ -607,33 +708,143 @@ namespace Inventory
             RefreshWeaponInHand();
         }
 
-        private void ApplyPendingAnimationTransfer(WeaponDisplayMode displayMode)
+        private bool TryHandleWeaponSlotInputDuringAnimation()
         {
-            if (pendingAnimationTransferMode != displayMode || pendingAnimationTransferAction == null)
+            if (!isWeaponAnimationInProgress)
+            {
+                return false;
+            }
+
+            var selectedItemConfig = GetSelectedWeaponItemConfig();
+
+            switch (currentAnimationKind)
+            {
+                case WeaponAnimationKind.Sheathe:
+                    if (!isWeaponDrawn || selectedItemConfig == null)
+                    {
+                        return true;
+                    }
+
+                    if (currentWeaponItemConfig == selectedItemConfig
+                     && currentRenderedSlotIndex == selectedWeaponSlotIndex)
+                    {
+                        StartDrawAnimation(selectedWeaponSlotIndex, selectedItemConfig, preserveCurrentVisual: true);
+                        return true;
+                    }
+
+                    if (TryStartNextWeaponDuringSheatheIfBeginEventPassed())
+                    {
+                        return true;
+                    }
+
+                    return true;
+
+                case WeaponAnimationKind.Draw:
+                    if (isWeaponDrawn
+                     && selectedItemConfig != null
+                     && currentWeaponItemConfig == selectedItemConfig
+                     && currentRenderedSlotIndex == selectedWeaponSlotIndex)
+                    {
+                        return true;
+                    }
+
+                    StartSheatheAnimation(currentRenderedSlotIndex, currentWeaponItemConfig);
+                    return true;
+
+                default:
+                    hasPendingRefresh = true;
+                    return true;
+            }
+        }
+
+        private bool TryStartNextWeaponDuringSheathe()
+        {
+            var selectedItemConfig = GetSelectedWeaponItemConfig();
+            if (!ShouldSwapWeaponOnBeginMoveToBeltEvent(selectedItemConfig))
+            {
+                return false;
+            }
+
+            weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
+            DestroyCurrentWeaponInstance();
+            currentWeaponItemConfig = null;
+            currentRenderedSlotIndex = 0;
+            currentDisplayMode = WeaponDisplayMode.None;
+
+            RenderWeapon(selectedItemConfig, selectedWeaponSlotIndex, WeaponDisplayMode.Belt);
+            shouldPreservePoseForCurrentDraw = true;
+            StartDrawAnimation(selectedWeaponSlotIndex, selectedItemConfig, preserveCurrentVisual: true);
+            return true;
+        }
+
+        private void MoveCurrentWeaponToBeltPreservingPose()
+        {
+            if (currentWeaponInstance == null || currentWeaponItemConfig == null)
             {
                 return;
             }
 
-            pendingAnimationTransferAction.Invoke();
-            pendingAnimationTransferMode = WeaponDisplayMode.None;
-            pendingAnimationTransferAction = null;
-        }
-
-        private void InterruptCurrentWeaponAnimationIfNeeded()
-        {
-            if (!isWeaponAnimationInProgress)
+            var targetParent = GetTargetParent(WeaponDisplayMode.Belt);
+            if (targetParent == null)
             {
                 return;
             }
 
             weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
-            pendingAnimationTransferMode = WeaponDisplayMode.None;
-            pendingAnimationTransferAction = null;
-            isWeaponAnimationInProgress = false;
-            hasPendingRefresh = false;
-            currentAnimationKind = WeaponAnimationKind.None;
-            currentAnimationClipName = null;
-            ResetAnimatorRequests();
+            currentWeaponInstance.transform.SetParent(targetParent, true);
+            currentDisplayMode = WeaponDisplayMode.Belt;
+            UpdateRunningAvailability();
+        }
+
+        private void MoveCurrentWeaponToRightHandPreservingPose()
+        {
+            if (currentWeaponInstance == null || currentWeaponItemConfig == null)
+            {
+                return;
+            }
+
+            var targetParent = GetTargetParent(WeaponDisplayMode.RightHand);
+            if (targetParent == null)
+            {
+                return;
+            }
+
+            weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
+            currentWeaponInstance.transform.SetParent(targetParent, true);
+            currentDisplayMode = WeaponDisplayMode.RightHand;
+            UpdateRunningAvailability();
+        }
+
+        private bool TryStartNextWeaponDuringSheatheIfBeginEventPassed()
+        {
+            if (!TryGetAnimationEventNormalizedTime(currentAnimationClipName, BeginMoveWeaponToBeltEventName, out var beginMoveNormalizedTime))
+            {
+                return false;
+            }
+
+            if (animator == null || weaponAnimationLayerIndex < 0)
+            {
+                return false;
+            }
+
+            var stateInfo = animator.GetCurrentAnimatorStateInfo(weaponAnimationLayerIndex);
+            if (stateInfo.fullPathHash != SheatheWeaponStateHash || stateInfo.normalizedTime < beginMoveNormalizedTime)
+            {
+                return false;
+            }
+
+            return TryStartNextWeaponDuringSheathe();
+        }
+
+        private bool ShouldSwapWeaponOnBeginMoveToBeltEvent(ItemConfig selectedItemConfig)
+        {
+            return currentAnimationKind == WeaponAnimationKind.Sheathe
+                && currentDisplayMode == WeaponDisplayMode.RightHand
+                && currentWeaponItemConfig != null
+                && isWeaponDrawn
+                && selectedItemConfig != null
+                && (currentRenderedSlotIndex != selectedWeaponSlotIndex
+                 || currentWeaponItemConfig != selectedItemConfig);
         }
 
         private ItemConfig GetSelectedWeaponItemConfig()
@@ -650,28 +861,7 @@ namespace Inventory
 
         private ItemConfig ResolveActiveWeaponSelection()
         {
-            var selectedItemConfig = GetSelectedWeaponItemConfig();
-            if (selectedItemConfig != null)
-            {
-                return selectedItemConfig;
-            }
-
-            var leftWeaponItemConfig = GetWeaponItemConfigForSlot(1);
-            var rightWeaponItemConfig = GetWeaponItemConfigForSlot(2);
-
-            if (leftWeaponItemConfig != null && rightWeaponItemConfig == null)
-            {
-                selectedWeaponSlotIndex = 1;
-                return leftWeaponItemConfig;
-            }
-
-            if (rightWeaponItemConfig != null && leftWeaponItemConfig == null)
-            {
-                selectedWeaponSlotIndex = 2;
-                return rightWeaponItemConfig;
-            }
-
-            return null;
+            return GetSelectedWeaponItemConfig();
         }
 
         private ItemConfig GetWeaponItemConfigForSlot(int slotIndex)
@@ -695,6 +885,7 @@ namespace Inventory
                 currentWeaponItemConfig = null;
                 currentRenderedSlotIndex = 0;
                 currentDisplayMode = WeaponDisplayMode.None;
+                UpdateRunningAvailability();
                 return;
             }
 
@@ -707,6 +898,7 @@ namespace Inventory
                 currentWeaponItemConfig = null;
                 currentRenderedSlotIndex = 0;
                 currentDisplayMode = WeaponDisplayMode.None;
+                UpdateRunningAvailability();
                 return;
             }
 
@@ -716,18 +908,33 @@ namespace Inventory
 
             currentWeaponInstance = Object.Instantiate(weaponPrefab, targetParent, false);
             currentWeaponInstance.name = $"{weaponPrefab.name} | {displayMode}";
-            ApplyAttachmentTransform(currentWeaponInstance.transform, itemConfig, displayMode);
+
+            if (displayMode == WeaponDisplayMode.RightHand)
+            {
+                ApplyAttachmentTransform(currentWeaponInstance.transform, itemConfig, displayMode);
+            }
+
+            UpdateRunningAvailability();
         }
 
-        private void FinalizeWeaponRender(ItemConfig itemConfig, int slotIndex, WeaponDisplayMode displayMode)
+        private void FinalizeWeaponRender(
+            ItemConfig itemConfig,
+            int slotIndex,
+            WeaponDisplayMode displayMode,
+            bool snapToAttachmentTransform)
         {
             var targetParent = GetTargetParent(displayMode);
             if (currentWeaponInstance != null
              && currentWeaponItemConfig == itemConfig
              && targetParent != null)
             {
-                currentWeaponInstance.transform.SetParent(targetParent, false);
-                ApplyAttachmentTransform(currentWeaponInstance.transform, itemConfig, displayMode);
+                currentWeaponInstance.transform.SetParent(targetParent, !snapToAttachmentTransform);
+
+                if (snapToAttachmentTransform)
+                {
+                    ApplyAttachmentTransform(currentWeaponInstance.transform, itemConfig, displayMode);
+                }
+
                 currentRenderedSlotIndex = slotIndex;
                 currentDisplayMode = displayMode;
                 return;
@@ -778,6 +985,11 @@ namespace Inventory
             weaponTransform.SetParent(targetParent, true);
             currentDisplayMode = targetMode;
 
+            if (targetMode == WeaponDisplayMode.Belt)
+            {
+                return;
+            }
+
             if (TryGetAnimationEventWindowNormalized(
                     currentAnimationClipName,
                     startEventName,
@@ -789,7 +1001,6 @@ namespace Inventory
                     weaponTransform,
                     attachment.LocalPosition,
                     Quaternion.Euler(attachment.LocalEulerAngles),
-                    attachment.LocalScale,
                     startNormalizedTime,
                     finishNormalizedTime);
                 return;
@@ -799,7 +1010,6 @@ namespace Inventory
                 weaponTransform,
                 attachment.LocalPosition,
                 Quaternion.Euler(attachment.LocalEulerAngles),
-                attachment.LocalScale,
                 FallbackAttachmentBlendDuration);
         }
 
@@ -807,7 +1017,6 @@ namespace Inventory
             Transform targetTransform,
             Vector3 targetLocalPosition,
             Quaternion targetLocalRotation,
-            Vector3 targetLocalScale,
             float duration)
         {
             weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
@@ -821,13 +1030,11 @@ namespace Inventory
             {
                 targetTransform.localPosition = targetLocalPosition;
                 targetTransform.localRotation = targetLocalRotation;
-                targetTransform.localScale = targetLocalScale;
                 return;
             }
 
             var startLocalPosition = targetTransform.localPosition;
             var startLocalRotation = targetTransform.localRotation;
-            var startLocalScale = targetTransform.localScale;
             var elapsed = 0f;
 
             weaponAttachmentBlendDisposable.Disposable = Observable.EveryUpdate()
@@ -845,7 +1052,6 @@ namespace Inventory
 
                     targetTransform.localPosition = Vector3.Lerp(startLocalPosition, targetLocalPosition, progress);
                     targetTransform.localRotation = Quaternion.Slerp(startLocalRotation, targetLocalRotation, progress);
-                    targetTransform.localScale = Vector3.Lerp(startLocalScale, targetLocalScale, progress);
 
                     if (progress < 1f)
                     {
@@ -860,7 +1066,6 @@ namespace Inventory
             Transform targetTransform,
             Vector3 targetLocalPosition,
             Quaternion targetLocalRotation,
-            Vector3 targetLocalScale,
             float startNormalizedTime,
             float finishNormalizedTime)
         {
@@ -873,7 +1078,6 @@ namespace Inventory
 
             var startLocalPosition = targetTransform.localPosition;
             var startLocalRotation = targetTransform.localRotation;
-            var startLocalScale = targetTransform.localScale;
             var targetStateHash = GetCurrentAnimationStateHash();
 
             weaponAttachmentBlendDisposable.Disposable = Observable.EveryUpdate()
@@ -896,7 +1100,6 @@ namespace Inventory
                     var progress = Mathf.InverseLerp(startNormalizedTime, finishNormalizedTime, stateInfo.normalizedTime);
                     targetTransform.localPosition = Vector3.Lerp(startLocalPosition, targetLocalPosition, progress);
                     targetTransform.localRotation = Quaternion.Slerp(startLocalRotation, targetLocalRotation, progress);
-                    targetTransform.localScale = Vector3.Lerp(startLocalScale, targetLocalScale, progress);
 
                     if (progress < 1f)
                     {
@@ -950,6 +1153,33 @@ namespace Inventory
             return true;
         }
 
+        private bool TryGetAnimationEventNormalizedTime(
+            string clipName,
+            string eventName,
+            out float normalizedTime)
+        {
+            var clip = GetAnimationClip(clipName);
+            if (clip == null || clip.length <= 0f)
+            {
+                normalizedTime = 0f;
+                return false;
+            }
+
+            foreach (var animationEvent in clip.events)
+            {
+                if (animationEvent.functionName != eventName)
+                {
+                    continue;
+                }
+
+                normalizedTime = animationEvent.time / clip.length;
+                return true;
+            }
+
+            normalizedTime = 0f;
+            return false;
+        }
+
         private int GetCurrentAnimationStateHash()
         {
             return currentAnimationKind switch
@@ -987,34 +1217,17 @@ namespace Inventory
 
             animator.ResetTrigger(DrawWeaponRequestedParameterHash);
             animator.ResetTrigger(SheatheWeaponRequestedParameterHash);
-            animator.ResetTrigger(HoldAttackRequestedParameterHash);
-            animator.ResetTrigger(AttackRequestedParameterHash);
+            SetAttackRequested(false);
         }
 
-        private bool TryGetHoldAttackWindUpStateInfo(out AnimatorStateInfo stateInfo, out int layerIndex)
+        private void SetAttackRequested(bool isRequested)
         {
-            stateInfo = default;
-            layerIndex = -1;
-
             if (animator == null)
             {
-                return false;
+                return;
             }
 
-            for (var index = 0; index < animator.layerCount; index++)
-            {
-                var currentStateInfo = animator.GetCurrentAnimatorStateInfo(index);
-                if (currentStateInfo.shortNameHash != HoldAttackWindUpStateShortNameHash)
-                {
-                    continue;
-                }
-
-                stateInfo = currentStateInfo;
-                layerIndex = index;
-                return true;
-            }
-
-            return false;
+            animator.SetBool(AttackRequestedParameterHash, isRequested);
         }
 
         private void LogLeftClick(string message, ItemConfig selectedItemConfig = null)
@@ -1027,11 +1240,55 @@ namespace Inventory
                 $"currentMode={currentDisplayMode} " +
                 $"currentItem={currentWeaponItemConfig?.name ?? "null"} " +
                 $"weaponAnimInProgress={isWeaponAnimationInProgress} " +
-                $"holdActive={isHoldAttackActive} " +
-                $"holdReady={isHoldAttackReady} " +
-                $"releaseQueued={isAttackReleaseQueued} " +
                 $"hitInProgress={isHitAttackInProgress} " +
                 $"gameMode={gameModesController.GameMode}");
+        }
+
+        private void UpdateRunningAvailability()
+        {
+            var shouldAllowRunning =
+                !IsAttackRootMotionStateActive()
+             && currentAnimationKind != WeaponAnimationKind.Draw
+             && (currentDisplayMode != WeaponDisplayMode.RightHand || currentWeaponItemConfig == null);
+
+            playerMovement?.SetRunAllowed(shouldAllowRunning);
+        }
+
+        private void UpdateAttackRootMotionAvailability(bool forceDisable = false)
+        {
+            if (animator == null)
+            {
+                return;
+            }
+
+            animator.applyRootMotion = !forceDisable && IsAttackRootMotionStateActive();
+        }
+
+        private bool ShouldConsumeAttackRootMotionThisFrame()
+        {
+            return animator != null && IsAttackRootMotionStateActive();
+        }
+
+        private bool IsAttackRootMotionStateActive()
+        {
+            if (animator == null || attackLayerIndex < 0)
+            {
+                return false;
+            }
+
+            if (IsAttackState(animator.GetCurrentAnimatorStateInfo(attackLayerIndex)))
+            {
+                return true;
+            }
+
+            return animator.IsInTransition(attackLayerIndex)
+                && IsAttackState(animator.GetNextAnimatorStateInfo(attackLayerIndex));
+        }
+
+        private static bool IsAttackState(AnimatorStateInfo stateInfo)
+        {
+            return stateInfo.shortNameHash != 0
+                && stateInfo.shortNameHash != EmptyIdleStateShortNameHash;
         }
 
         private static WeaponAttachmentTransformData GetAttachmentTransformData(ItemConfig itemConfig, WeaponDisplayMode displayMode)
@@ -1061,7 +1318,6 @@ namespace Inventory
 
             targetTransform.localPosition = attachment.LocalPosition;
             targetTransform.localRotation = Quaternion.Euler(attachment.LocalEulerAngles);
-            targetTransform.localScale = attachment.LocalScale;
         }
     }
 }
