@@ -1,10 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
+using CameraScripts;
 using Inventory.Inventories;
 using MessagePipe;
 using Messages;
 using Stats;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using VContainer.Unity;
 
 namespace Movement
@@ -14,7 +14,7 @@ namespace Movement
     {
         private const float InputThreshold = 0.001f;
 
-        private readonly Camera cam;
+        private readonly CameraMotor cameraMotor;
         private readonly Transform playerTransform;
         private readonly Transform visualTransform;
         private readonly CharacterController controller;
@@ -36,7 +36,7 @@ namespace Movement
         private PlayerMovement
             (
                 PlayerMovementConfig playerMovementConfig,
-                Camera cam,
+                CameraMotor cameraMotor,
                 Transform playerTransform,
                 Animator animator,
                 CharacterController controller,
@@ -46,7 +46,7 @@ namespace Movement
             )
         {
             this.playerMovementConfig = playerMovementConfig;
-            this.cam = cam;
+            this.cameraMotor = cameraMotor;
             this.playerTransform = playerTransform;
             visualTransform = animator.transform;
             this.controller = controller;
@@ -65,7 +65,6 @@ namespace Movement
                 return;
             }
 
-            RotateTowardsCursor();
             ApplyStaminaRestrictions();
 
             var targetSpeedChangeRate = isRunning
@@ -86,11 +85,12 @@ namespace Movement
                 return;
             }
 
-            var moveDirection = Quaternion.Euler(0, cam.transform.rotation.eulerAngles.y, 0) *
+            var moveDirection = cameraMotor.GetGameplayPlanarRotation() *
                                 new Vector3(currentVelocity.x, 0, currentVelocity.y);
             var inputMagnitude = Mathf.Clamp01(currentVelocity.magnitude);
             var moveSpeed = CalculateMoveSpeed(moveDirection) * inputMagnitude;
 
+            RotateTowardsMovement(moveDirection, currentVelocity);
             controller.Move(moveDirection.normalized * (moveSpeed * Time.deltaTime));
         }
 
@@ -204,33 +204,22 @@ namespace Movement
             return Mathf.Clamp01(1f - weightEffect * playerMovementConfig.WeightSpeedPenaltyMultiplier);
         }
 
-        private void RotateTowardsCursor()
+        private void RotateTowardsMovement(Vector3 worldMoveDirection, Vector2 movementInput)
         {
-            var pointer = Pointer.current;
-
-            if (pointer == null)
+            // Pure strafe should keep the current facing.
+            // This prevents A/D from turning the character and creating an unwanted camera orbit feel.
+            if (Mathf.Abs(movementInput.y) <= InputThreshold && Mathf.Abs(movementInput.x) > InputThreshold)
             {
                 return;
             }
 
-            var ray = cam.ScreenPointToRay(pointer.position.ReadValue());
-            var groundPlane = new Plane(Vector3.up, playerTransform.position);
-
-            if (!groundPlane.Raycast(ray, out var hitDistance))
+            worldMoveDirection.y = 0f;
+            if (worldMoveDirection.sqrMagnitude <= InputThreshold)
             {
                 return;
             }
 
-            var lookPoint = ray.GetPoint(hitDistance);
-            var lookDirection = lookPoint - playerTransform.position;
-            lookDirection.y = 0f;
-
-            if (lookDirection.sqrMagnitude <= InputThreshold)
-            {
-                return;
-            }
-
-            var targetRotation = Quaternion.LookRotation(lookDirection.normalized, Vector3.up);
+            var targetRotation = Quaternion.LookRotation(worldMoveDirection.normalized, Vector3.up);
             var rotationSpeed = isRunning
                 ? playerMovementConfig.RunRotationSpeed
                 : playerMovementConfig.WalkRotationSpeed;

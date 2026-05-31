@@ -5,8 +5,23 @@ namespace CameraScripts
     [CreateAssetMenu(fileName = "CameraConfig", menuName = "configs/Camera/CameraConfig")]
     public class CameraConfig : ScriptableObject
     {
-        [field: SerializeField] public Vector3 CameraPosition { get; private set; } = new(-3.5f, 8.0f, -3.5f);
-        [field: SerializeField] public Vector3 CameraRotation { get; private set; } = new(50.0f, 45.0f, .0f);
+        [field: Header("Non-Gameplay")]
         [field: SerializeField] public float Smoothing { get; private set; } = 4;
+
+        [field: Space]
+        [field: Header("Gameplay Follow")]
+        [field: SerializeField] public Vector3 PivotOffset { get; private set; } = new(0f, 1.6f, 0f);
+        [field: SerializeField, Min(0f)] public float Distance { get; private set; } = 4.5f;
+        [field: SerializeField] public float ShoulderOffset { get; private set; } = 0.45f;
+        [field: SerializeField, Min(0f)] public float PositionSharpness { get; private set; } = 10f;
+        [field: SerializeField, Min(0f)] public float RotationSharpness { get; private set; } = 12f;
+
+        [field: Space]
+        [field: Header("Gameplay Orbit")]
+        [field: SerializeField] public float DefaultPitch { get; private set; } = 12f;
+        [field: SerializeField] public float MinPitch { get; private set; } = -20f;
+        [field: SerializeField] public float MaxPitch { get; private set; } = 55f;
+        [field: SerializeField, Min(0f)] public float HorizontalSensitivity { get; private set; } = 0.15f;
+        [field: SerializeField, Min(0f)] public float VerticalSensitivity { get; private set; } = 0.12f;
     }
 }

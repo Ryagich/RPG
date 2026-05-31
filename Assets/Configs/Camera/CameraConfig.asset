@@ -12,6 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3ce5629b86143d983105e0b34c0edd6, type: 3}
   m_Name: CameraConfig
   m_EditorClassIdentifier: Assembly-CSharp::CameraScripts.CameraConfig
-  <CameraPosition>k__BackingField: {x: -1.5, y: 4, z: -1.5}
-  <CameraRotation>k__BackingField: {x: 40, y: 45, z: 0}
   <Smoothing>k__BackingField: 4
+  <PivotOffset>k__BackingField: {x: 0, y: 1.6, z: 0}
+  <Distance>k__BackingField: 4
+  <ShoulderOffset>k__BackingField: 0.45
+  <PositionSharpness>k__BackingField: 10
+  <RotationSharpness>k__BackingField: 12
+  <DefaultPitch>k__BackingField: 12
+  <MinPitch>k__BackingField: -20
+  <MaxPitch>k__BackingField: 55
+  <HorizontalSensitivity>k__BackingField: 0.15
+  <VerticalSensitivity>k__BackingField: 0.12

@@ -14,7 +14,7 @@ namespace Movement
         private const string DirectionYParameter = "DirectionY";
         private const string IsRunParameter = "IsRun";
 
-        private readonly Camera cam;
+        private readonly CameraMotor cameraMotor;
         private readonly Animator animator;
         private readonly PlayerMovement playerMovement;
         private readonly Transform visualTransform;
@@ -27,12 +27,12 @@ namespace Movement
         private bool isLocomotionLocked;
 
         private PlayerAnimationController(
-            Camera cam,
+            CameraMotor cameraMotor,
             Animator animator,
             PlayerMovement playerMovement,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
         {
-            this.cam = cam;
+            this.cameraMotor = cameraMotor;
             this.animator = animator;
             this.playerMovement = playerMovement;
             visualTransform = animator.transform;
@@ -65,7 +65,7 @@ namespace Movement
                 return;
             }
 
-            var moveDirection = Quaternion.Euler(0f, cam.transform.rotation.eulerAngles.y, 0f) *
+            var moveDirection = cameraMotor.GetGameplayPlanarRotation() *
                                 new Vector3(movementInput.x, 0f, movementInput.y);
             var localMoveDirection = visualTransform.InverseTransformDirection(moveDirection);
             var directionalInput = new Vector2(
