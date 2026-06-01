@@ -13,6 +13,7 @@ namespace CameraScripts
         private Transform target;
         private float yaw;
         private float pitch;
+        private bool hasOrbitSeed;
         private bool isInitialized;
         private bool lookInputEnabled = true;
 
@@ -52,6 +53,11 @@ namespace CameraScripts
 
         public void ChangeTarget(Transform t)
         {
+            if (target == t && hasOrbitSeed)
+            {
+                return;
+            }
+
             target = t;
             isInitialized = false;
         }
@@ -73,22 +79,27 @@ namespace CameraScripts
                 return;
             }
 
-            var forwardReference = facingTarget != null ? facingTarget.forward : target.forward;
-            forwardReference.y = 0f;
-            if (forwardReference.sqrMagnitude <= Mathf.Epsilon)
+            if (!hasOrbitSeed)
             {
-                forwardReference = Vector3.forward;
+                var forwardReference = facingTarget != null ? facingTarget.forward : target.forward;
+                forwardReference.y = 0f;
+                if (forwardReference.sqrMagnitude <= Mathf.Epsilon)
+                {
+                    forwardReference = Vector3.forward;
+                }
+
+                yaw = Quaternion.LookRotation(forwardReference.normalized, Vector3.up).eulerAngles.y;
+                pitch = Mathf.Clamp(config.DefaultPitch, config.MinPitch, config.MaxPitch);
+                hasOrbitSeed = true;
+
+                var pivotPosition = GetPivotPosition();
+                var desiredRotation = Quaternion.Euler(pitch, yaw, 0f);
+                var desiredPosition = pivotPosition + desiredRotation * new Vector3(config.ShoulderOffset, 0f, -config.Distance);
+                cameraTransform.position = desiredPosition;
+                cameraTransform.rotation = Quaternion.LookRotation((pivotPosition - desiredPosition).normalized, Vector3.up);
             }
 
-            yaw = Quaternion.LookRotation(forwardReference.normalized, Vector3.up).eulerAngles.y;
-            pitch = Mathf.Clamp(config.DefaultPitch, config.MinPitch, config.MaxPitch);
             isInitialized = true;
-
-            var pivotPosition = GetPivotPosition();
-            var desiredRotation = Quaternion.Euler(pitch, yaw, 0f);
-            var desiredPosition = pivotPosition + desiredRotation * new Vector3(config.ShoulderOffset, 0f, -config.Distance);
-            cameraTransform.position = desiredPosition;
-            cameraTransform.rotation = Quaternion.LookRotation((pivotPosition - desiredPosition).normalized, Vector3.up);
         }
 
         private Vector3 GetPivotPosition()

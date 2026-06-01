@@ -206,9 +206,10 @@ namespace Movement
 
         private void RotateTowardsMovement(Vector3 worldMoveDirection, Vector2 movementInput)
         {
-            // Pure strafe should keep the current facing.
-            // This prevents A/D from turning the character and creating an unwanted camera orbit feel.
-            if (Mathf.Abs(movementInput.y) <= InputThreshold && Mathf.Abs(movementInput.x) > InputThreshold)
+            // Only forward-driven movement should rotate the character.
+            // Strafe and backward input must preserve the current facing so the player can move
+            // sideways/backwards relative to the camera instead of turning into the movement vector.
+            if (movementInput.y <= InputThreshold)
             {
                 return;
             }
