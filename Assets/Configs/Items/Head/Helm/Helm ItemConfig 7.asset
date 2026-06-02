@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60723d5f93cc4ad190a060664630a272, type: 3}
+  m_Name: Helm ItemConfig 7
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
+  <Id>k__BackingField: Helm ItemConfig 7
+  <Price>k__BackingField: 1
+  <Weight>k__BackingField: 2.12
+  <MaxStack>k__BackingField: 1
+  <Icon>k__BackingField: {fileID: 21300000, guid: a31ca3ac5d39d344185d8a0fae086788, type: 3}
+  <Name>k__BackingField:
+    m_TableReference:
+      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+    m_TableEntryReference:
+      m_KeyId: 944427890884608
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  <HandPrefab>k__BackingField: {fileID: 2955689915528961654, guid: 760a91174a0d9674ba439dfb681ebc36, type: 3}
+  <Size>k__BackingField: {x: 2, y: 2}
+  <SizeInInventory>k__BackingField: {x: 200, y: 125}
+  <ItemType>k__BackingField: 5
+  weaponInHandPrefab: {fileID: 0}
+  rightHandWeaponAttachment:
+    localPosition: {x: 0, y: 0, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+  beltWeaponAttachment:
+    localPosition: {x: 0, y: 0, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+  physicalDefense: 11
+  temperatureDefense: 31
+  psiDefense: 21
+  magicDefense: 6
+  hpStat: 0
+  waterStat: 0
+  foodStat: 0
+  chillStat: 0
+  equippedVisuals:
+  - <BodyPart>k__BackingField: 1
+    <VisualName>k__BackingField: Chr_Head_No_Elements_Male_07
+  - <BodyPart>k__BackingField: 6
+    <VisualName>k__BackingField: 
+  - <BodyPart>k__BackingField: 5
+    <VisualName>k__BackingField: 
+  - <BodyPart>k__BackingField: 4
+    <VisualName>k__BackingField: 
+  references:
+    version: 2
+    RefIds: []

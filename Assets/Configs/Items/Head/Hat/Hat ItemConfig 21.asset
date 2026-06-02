@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60723d5f93cc4ad190a060664630a272, type: 3}
-  m_Name: Test ItemConfig 2
+  m_Name: Hat ItemConfig 21
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
-  <Id>k__BackingField: Test 2 Item Config ID
+  <Id>k__BackingField: Hat ItemConfig 21
   <Price>k__BackingField: 1
   <Weight>k__BackingField: 2.12
   <MaxStack>k__BackingField: 1
@@ -26,14 +26,30 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  <HandPrefab>k__BackingField: {fileID: 3658861523493099576, guid: 05d81e60101c41649ab6652126a90683, type: 3}
+  <HandPrefab>k__BackingField: {fileID: 8165182941257090558, guid: e2554b8da2e40c34c963a1af6cd1b588, type: 3}
   <Size>k__BackingField: {x: 2, y: 2}
   <SizeInInventory>k__BackingField: {x: 200, y: 125}
   <ItemType>k__BackingField: 5
+  weaponInHandPrefab: {fileID: 0}
+  rightHandWeaponAttachment:
+    localPosition: {x: 0, y: 0, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+  beltWeaponAttachment:
+    localPosition: {x: 0, y: 0, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
   physicalDefense: 11
   temperatureDefense: 31
   psiDefense: 21
   magicDefense: 6
+  hpStat: 0
+  waterStat: 0
+  foodStat: 0
+  chillStat: 0
+  equippedVisuals:
+  - <BodyPart>k__BackingField: 2
+    <VisualName>k__BackingField: Chr_HeadCoverings_No_Hair_10
+  - <BodyPart>k__BackingField: 4
+    <VisualName>k__BackingField: 
   references:
     version: 2
     RefIds: []
