@@ -254,6 +254,10 @@ namespace UI.Pages
             {
                 slotRect = slotsViewContainer.HeadSlot.GetComponent<RectTransform>();
             }
+            else if (slotModel == playerInventory.FaceSlot && slotsViewContainer.FaceSlot)
+            {
+                slotRect = slotsViewContainer.FaceSlot.GetComponent<RectTransform>();
+            }
             else if (slotModel == playerInventory.BodySlot && slotsViewContainer.BodySlot)
             {
                 slotRect = slotsViewContainer.BodySlot.GetComponent<RectTransform>();
@@ -272,6 +276,22 @@ namespace UI.Pages
             }
 
             return slotRect;
+        }
+
+        public static void SetSlotBlockedState(SlotView slotView, bool isBlocked)
+        {
+            if (!slotView)
+            {
+                return;
+            }
+
+            var image = slotView.GetComponent<Image>();
+            if (image == null)
+            {
+                return;
+            }
+
+            image.type = isBlocked ? Image.Type.Simple : Image.Type.Tiled;
         }
 
         public static bool TryGetFastSlotUnderPointer(

@@ -14,6 +14,7 @@ namespace Inventory.Inventories
     {
         private readonly InventoryConfig inventoryConfig;
         private readonly Subject<Unit> changedSubject = new();
+        private readonly List<ItemStack> pendingOverflowItems = new();
 
         public ReactiveCollection<ItemInInventory> Items { get; } = new();
         public IObservable<Unit> Changed => changedSubject;
@@ -24,14 +25,17 @@ namespace Inventory.Inventories
         public float MaxWeight { get; set; }
         public float CurrentWeight => GetItemsWeight()
                                       + GetSlotWeight(HelmSlot)
+                                      + GetSlotWeight(FaceSlot)
                                       + GetSlotWeight(BodySlot)
                                       + GetSlotWeight(BackpackSlot)
                                       + GetSlotWeight(LeftWeaponSlot)
                                       + GetSlotWeight(RightWeaponSlot)
                                       + GetSlotWeight(HandSlot.Value);
         public float CurrentWeightPercent => MaxWeight > 0f ? CurrentWeight / MaxWeight : 0f;
+        public bool IsFaceSlotBlocked => HelmSlot.ItemConfig != null && HelmSlot.ItemConfig.BlocksFaceSlot;
 
         public SlotModel HelmSlot = new(ItemType.Helm, SlotStackLimitType.SingleItem);
+        public SlotModel FaceSlot = new(ItemType.Face, SlotStackLimitType.SingleItem);
         public SlotModel BodySlot = new(ItemType.Body, SlotStackLimitType.SingleItem);
         public SlotModel BackpackSlot = new(ItemType.Backpack, SlotStackLimitType.SingleItem);
         public SlotModel LeftWeaponSlot = new(ItemType.Weapon, SlotStackLimitType.SingleItem);
@@ -154,6 +158,23 @@ namespace Inventory.Inventories
         public bool HasItemCount(ItemConfig itemConfig, int count)
         {
             return count <= 0 || GetInventoryItemCount(itemConfig) >= count;
+        }
+
+        public bool IsSlotBlocked(SlotModel slot)
+        {
+            return slot == FaceSlot && IsFaceSlotBlocked;
+        }
+
+        public IReadOnlyList<ItemStack> ConsumePendingOverflowItems()
+        {
+            if (pendingOverflowItems.Count == 0)
+            {
+                return System.Array.Empty<ItemStack>();
+            }
+
+            var result = pendingOverflowItems.ToArray();
+            pendingOverflowItems.Clear();
+            return result;
         }
 
         public bool TryConsumeItemCount(ItemConfig itemConfig, int count)
@@ -433,7 +454,7 @@ namespace Inventory.Inventories
                 return false;
             }
 
-            if (slot.ItemType != newItemStack.ItemConfig.ItemType)
+            if (!CanAcceptItemInSlot(slot, newItemStack))
             {
                 return false;
             }
@@ -441,12 +462,13 @@ namespace Inventory.Inventories
             if (slot.ItemStack == null)
             {
                 var emptySlotMaxStack = slot.GetMaxStack(newItemStack.ItemConfig);
-                slot.ItemStack = new ItemStack(newItemStack.ItemConfig, Mathf.Min(newItemStack.Count, emptySlotMaxStack));
+                slot.ItemStack = new ItemStack(newItemStack.ItemConfig, Mathf.Min(newItemStack.Count, emptySlotMaxStack), newItemStack.IsRotated);
                 if (newItemStack.Count > slot.ItemStack.Count)
                 {
                     remainderStack = new ItemStack(newItemStack.ItemConfig, newItemStack.Count - slot.ItemStack.Count, newItemStack.IsRotated);
                 }
 
+                HandleSlotItemChanged(slot);
                 NotifyChanged();
                 return true;
             }
@@ -475,12 +497,13 @@ namespace Inventory.Inventories
             replacedStack = slot.ItemStack;
             var slotMaxStack = slot.GetMaxStack(newItemStack.ItemConfig);
             var countToPlace = Mathf.Min(newItemStack.Count, slotMaxStack);
-            slot.ItemStack = new ItemStack(newItemStack.ItemConfig, countToPlace);
+            slot.ItemStack = new ItemStack(newItemStack.ItemConfig, countToPlace, newItemStack.IsRotated);
             if (newItemStack.Count > countToPlace)
             {
                 remainderStack = new ItemStack(newItemStack.ItemConfig, newItemStack.Count - countToPlace, newItemStack.IsRotated);
             }
 
+            HandleSlotItemChanged(slot);
             NotifyChanged();
             return true;
         }
@@ -723,17 +746,14 @@ namespace Inventory.Inventories
         {
             foreach (var slot in GetSlots())
             {
-                if (slot.ItemType != itemStack.ItemConfig.ItemType || slot.ItemStack != null)
+                if (!CanAcceptItemInSlot(slot, itemStack) || slot.ItemStack != null)
                 {
                     continue;
                 }
 
                 var countToPlace = Mathf.Min(itemStack.Count, slot.GetMaxStack(itemStack.ItemConfig));
-                slot.ItemStack = new ItemStack(itemStack.ItemConfig, countToPlace);
-                if (slot.ItemType == ItemType.Backpack)
-                {
-                    RebuildInventoryFromCurrentBackpack();
-                }
+                slot.ItemStack = new ItemStack(itemStack.ItemConfig, countToPlace, itemStack.IsRotated);
+                HandleSlotItemChanged(slot);
 
                 return itemStack.Count > countToPlace
                     ? new ItemStack(itemStack.ItemConfig, itemStack.Count - countToPlace, itemStack.IsRotated)
@@ -939,7 +959,7 @@ namespace Inventory.Inventories
 
             foreach (var currentSlot in GetSlots())
             {
-                if (currentSlot.ItemType != slotType)
+                if (currentSlot.ItemType != slotType || !CanAcceptItemInSlot(currentSlot, itemStack))
                 {
                     continue;
                 }
@@ -954,7 +974,7 @@ namespace Inventory.Inventories
 
             foreach (var currentSlot in GetSlots())
             {
-                if (currentSlot.ItemType == slotType && currentSlot.ItemStack == null)
+                if (currentSlot.ItemType == slotType && currentSlot.ItemStack == null && CanAcceptItemInSlot(currentSlot, itemStack))
                 {
                     slot = currentSlot;
                     return true;
@@ -963,7 +983,7 @@ namespace Inventory.Inventories
 
             foreach (var currentSlot in GetSlots())
             {
-                if (currentSlot.ItemType == slotType)
+                if (currentSlot.ItemType == slotType && CanAcceptItemInSlot(currentSlot, itemStack))
                 {
                     slot = currentSlot;
                     return true;
@@ -976,10 +996,49 @@ namespace Inventory.Inventories
         private IEnumerable<SlotModel> GetSlots()
         {
             yield return HelmSlot;
+            yield return FaceSlot;
             yield return BodySlot;
             yield return BackpackSlot;
             yield return LeftWeaponSlot;
             yield return RightWeaponSlot;
+        }
+
+        private bool CanAcceptItemInSlot(SlotModel slot, ItemStack itemStack)
+        {
+            return slot != null
+                   && itemStack?.ItemConfig != null
+                   && slot.ItemType == itemStack.ItemConfig.ItemType
+                   && !IsSlotBlocked(slot);
+        }
+
+        private void HandleSlotItemChanged(SlotModel slot)
+        {
+            if (slot == BackpackSlot)
+            {
+                RebuildInventoryFromCurrentBackpack();
+            }
+
+            if (slot == HelmSlot)
+            {
+                ResolveBlockedFaceSlotOverflow();
+            }
+        }
+
+        private void ResolveBlockedFaceSlotOverflow()
+        {
+            if (!IsFaceSlotBlocked || FaceSlot.ItemStack?.ItemConfig == null)
+            {
+                return;
+            }
+
+            var blockedFaceItem = FaceSlot.ItemStack;
+            FaceSlot.ItemStack = null;
+
+            var remainder = TryAdd(blockedFaceItem);
+            if (remainder != null)
+            {
+                pendingOverflowItems.Add(remainder);
+            }
         }
 
         private static ItemStack CloneIfValid(ItemStack itemStack)

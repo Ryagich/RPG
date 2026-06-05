@@ -9,11 +9,13 @@ namespace Inventory.Item
     public class ItemConfig : ScriptableObject
     {
         private bool HasDefenseModifiers => ItemType == ItemType.Body || ItemType == ItemType.Helm;
+        private bool HasFaceBlockingFlag => ItemType == ItemType.Helm;
         private bool HasUsableStats => ItemType == ItemType.Usable;
         private bool HasWeaponPrefab => ItemType == ItemType.Weapon;
         private bool HasEquippedVisuals => ItemType == ItemType.Backpack
                                            || ItemType == ItemType.Body
                                            || ItemType == ItemType.Helm
+                                           || ItemType == ItemType.Face
                                            || ItemType == ItemType.Weapon;
 
         [field: SerializeField] public string Id { get; private set; } = "Item Config ID";
@@ -33,6 +35,7 @@ namespace Inventory.Item
         [SerializeField, ShowIf(nameof(HasDefenseModifiers)), Min(0f)] private float temperatureDefense;
         [SerializeField, ShowIf(nameof(HasDefenseModifiers)), Min(0f)] private float psiDefense;
         [SerializeField, ShowIf(nameof(HasDefenseModifiers)), Min(0f)] private float magicDefense;
+        [SerializeField, ShowIf(nameof(HasFaceBlockingFlag))] private bool blocksFaceSlot = true;
         [SerializeField, ShowIf(nameof(HasUsableStats))] private float hpStat;
         [SerializeField, ShowIf(nameof(HasUsableStats))] private float waterStat;
         [SerializeField, ShowIf(nameof(HasUsableStats))] private float foodStat;
@@ -43,6 +46,7 @@ namespace Inventory.Item
         public float TemperatureDefense => temperatureDefense;
         public float PsiDefense => psiDefense;
         public float MagicDefense => magicDefense;
+        public bool BlocksFaceSlot => blocksFaceSlot;
         public float HpStat => hpStat;
         public float WaterStat => waterStat;
         public float FoodStat => foodStat;

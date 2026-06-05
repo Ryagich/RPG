@@ -160,6 +160,7 @@ namespace UI.Pages
                         new[]
                         {
                             new SnapshotSlot(playerInventory.HelmSlot.ItemType, playerInventory.HelmSlot.StackLimitType, playerInventory.HelmSlot.ItemStack),
+                            new SnapshotSlot(playerInventory.FaceSlot.ItemType, playerInventory.FaceSlot.StackLimitType, playerInventory.FaceSlot.ItemStack),
                             new SnapshotSlot(playerInventory.BodySlot.ItemType, playerInventory.BodySlot.StackLimitType, playerInventory.BodySlot.ItemStack),
                             new SnapshotSlot(playerInventory.BackpackSlot.ItemType, playerInventory.BackpackSlot.StackLimitType, playerInventory.BackpackSlot.ItemStack),
                             new SnapshotSlot(playerInventory.LeftWeaponSlot.ItemType, playerInventory.LeftWeaponSlot.StackLimitType, playerInventory.LeftWeaponSlot.ItemStack),
@@ -226,7 +227,10 @@ namespace UI.Pages
             {
                 foreach (var slot in slots)
                 {
-                    if (remainingStack.Count <= 0 || slot.ItemStack == null || !slot.ItemStack.CanStackWith(remainingStack))
+                    if (remainingStack.Count <= 0
+                     || slot.ItemStack == null
+                     || !CanAcceptInSlot(slot, remainingStack)
+                     || !slot.ItemStack.CanStackWith(remainingStack))
                     {
                         continue;
                     }
@@ -262,7 +266,7 @@ namespace UI.Pages
             {
                 foreach (var slot in slots)
                 {
-                    if (slot.ItemType != itemStack.ItemConfig.ItemType || slot.ItemStack != null)
+                    if (!CanAcceptInSlot(slot, itemStack) || slot.ItemStack != null)
                     {
                         continue;
                     }
@@ -278,12 +282,67 @@ namespace UI.Pages
                         return itemStack;
                     }
 
+                    if (!HandleSlotSideEffects(slot))
+                    {
+                        slot.ItemStack = null;
+                        return itemStack;
+                    }
+
                     return itemStack.Count > countToPlace
                         ? new ItemStack(itemStack.ItemConfig, itemStack.Count - countToPlace, itemStack.IsRotated)
                         : null;
                 }
 
                 return itemStack;
+            }
+
+            private bool CanAcceptInSlot(SnapshotSlot slot, ItemStack itemStack)
+            {
+                return slot != null
+                       && itemStack?.ItemConfig != null
+                       && slot.ItemType == itemStack.ItemConfig.ItemType
+                       && !(slot.ItemType == ItemType.Face && IsFaceSlotBlocked());
+            }
+
+            private bool HandleSlotSideEffects(SnapshotSlot slot)
+            {
+                return slot?.ItemType != ItemType.Helm || ResolveBlockedFaceSlotOverflow();
+            }
+
+            private bool ResolveBlockedFaceSlotOverflow()
+            {
+                if (!IsFaceSlotBlocked())
+                {
+                    return true;
+                }
+
+                var faceSlot = slots.FirstOrDefault(slot => slot.ItemType == ItemType.Face);
+                if (faceSlot?.ItemStack?.ItemConfig == null)
+                {
+                    return true;
+                }
+
+                var previousItems = items
+                    .Select(item => new SnapshotItem(item.ItemStack, item.OccupiedCells))
+                    .ToList();
+                var blockedFaceItem = faceSlot.ItemStack.Clone();
+                faceSlot.ItemStack = null;
+
+                if (TryAdd(blockedFaceItem) == null)
+                {
+                    return true;
+                }
+
+                faceSlot.ItemStack = blockedFaceItem;
+                items.Clear();
+                items.AddRange(previousItems);
+                return false;
+            }
+
+            private bool IsFaceSlotBlocked()
+            {
+                var helmSlot = slots.FirstOrDefault(slot => slot.ItemType == ItemType.Helm);
+                return helmSlot?.ItemStack?.ItemConfig != null && helmSlot.ItemStack.ItemConfig.BlocksFaceSlot;
             }
 
             private bool TryResizeGrid(Vector2Int newGridSize)
@@ -477,6 +536,7 @@ namespace UI.Pages
         private float hoverPopupElapsed;
         private PopupOpenMode popupOpenMode;
         private ItemConfig lastHelmItemConfig;
+        private ItemConfig lastFaceItemConfig;
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastBackpackItemConfig;
         private ItemConfig lastLeftWeaponItemConfig;
@@ -761,6 +821,12 @@ namespace UI.Pages
                 return true;
             }
 
+            if (!playerInventory.IsFaceSlotBlocked
+             && PageUiUtilities.TryGetSlotUnderPointer(centerSection.FaceSlot, playerInventory.FaceSlot, screenPoint, handItemType, eventCamera, out slotModel))
+            {
+                return true;
+            }
+
             if (PageUiUtilities.TryGetSlotUnderPointer(centerSection.BodySlot, playerInventory.BodySlot, screenPoint, handItemType, eventCamera, out slotModel))
             {
                 return true;
@@ -990,6 +1056,7 @@ namespace UI.Pages
             var playerWeight = PageUiUtilities.GetItemsWeight(playerInventory)
                              + PageUiUtilities.GetSlotsWeight(
                                  playerInventory.HelmSlot,
+                                 playerInventory.FaceSlot,
                                  playerInventory.BodySlot,
                                  playerInventory.BackpackSlot,
                                  playerInventory.LeftWeaponSlot,
@@ -1159,6 +1226,7 @@ namespace UI.Pages
         private void DrawSlotItems()
         {
             DrawSlotItem(centerSection.HeadSlot, playerInventory.HelmSlot);
+            DrawSlotItem(centerSection.FaceSlot, playerInventory.FaceSlot);
             DrawSlotItem(centerSection.BodySlot, playerInventory.BodySlot);
             DrawSlotItem(centerSection.BackpackSlot, playerInventory.BackpackSlot);
             DrawSlotItem(centerSection.LeftWeaponSlot, playerInventory.LeftWeaponSlot);
@@ -1171,6 +1239,7 @@ namespace UI.Pages
 
         private void DrawSlotItem(SlotView slotView, SlotModel slotModel)
         {
+            PageUiUtilities.SetSlotBlockedState(slotView, slotModel == playerInventory.FaceSlot && playerInventory.IsFaceSlotBlocked);
             PageUiUtilities.DrawSlotItem(slotView, slotModel, itemRects, itemGrabRects);
             if (slotView == null || slotModel?.ItemStack?.ItemConfig == null)
             {
@@ -1390,6 +1459,7 @@ namespace UI.Pages
         private bool HaveSlotsChanged()
         {
             return lastHelmItemConfig != playerInventory.HelmSlot.ItemConfig
+                   || lastFaceItemConfig != playerInventory.FaceSlot.ItemConfig
                    || lastBodyItemConfig != playerInventory.BodySlot.ItemConfig
                    || lastBackpackItemConfig != playerInventory.BackpackSlot.ItemConfig
                    || lastLeftWeaponItemConfig != playerInventory.LeftWeaponSlot.ItemConfig
@@ -1403,6 +1473,7 @@ namespace UI.Pages
         private void CacheSlotItems()
         {
             lastHelmItemConfig = playerInventory.HelmSlot.ItemConfig;
+            lastFaceItemConfig = playerInventory.FaceSlot.ItemConfig;
             lastBodyItemConfig = playerInventory.BodySlot.ItemConfig;
             lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;
             lastLeftWeaponItemConfig = playerInventory.LeftWeaponSlot.ItemConfig;

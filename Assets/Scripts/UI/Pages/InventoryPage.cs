@@ -96,6 +96,7 @@ namespace UI.Pages
         private PopupOpenMode popupOpenMode;
 
         private ItemConfig lastHelmItemConfig;
+        private ItemConfig lastFaceItemConfig;
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastBackpackItemConfig;
         private ItemConfig lastLeftWeaponItemConfig;
@@ -262,6 +263,7 @@ namespace UI.Pages
         {
             var currentWeight = PageUiUtilities.GetItemsWeight(playerInventory)
                               + PageUiUtilities.GetSlotsWeight(playerInventory.HelmSlot, 
+                                                               playerInventory.FaceSlot,
                                                                playerInventory.BodySlot, 
                                                                playerInventory.BackpackSlot, 
                                                                playerInventory.LeftWeaponSlot,
@@ -424,6 +426,12 @@ namespace UI.Pages
                 return true;
             }
 
+            if (!playerInventory.IsFaceSlotBlocked
+             && TryGetSlotUnderPointer(slotsViewContainer.FaceSlot, playerInventory.FaceSlot, screenPoint, handItemType, out slotModel))
+            {
+                return true;
+            }
+
             if (TryGetSlotUnderPointer(slotsViewContainer.BodySlot, playerInventory.BodySlot, screenPoint, handItemType, out slotModel))
             {
                 return true;
@@ -482,6 +490,7 @@ namespace UI.Pages
         private void DrawSlotItems()
         {
             DrawSlotItem(slotsViewContainer.HeadSlot, playerInventory.HelmSlot);
+            DrawSlotItem(slotsViewContainer.FaceSlot, playerInventory.FaceSlot);
             DrawSlotItem(slotsViewContainer.BodySlot, playerInventory.BodySlot);
             DrawSlotItem(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot);
             DrawSlotItem(slotsViewContainer.LeftWeaponSlot, playerInventory.LeftWeaponSlot);
@@ -494,6 +503,7 @@ namespace UI.Pages
 
         private void DrawSlotItem(SlotView slotView, SlotModel slotModel)
         {
+            PageUiUtilities.SetSlotBlockedState(slotView, slotModel == playerInventory.FaceSlot && playerInventory.IsFaceSlotBlocked);
             PageUiUtilities.DrawSlotItem(slotView, slotModel, itemRects, itemGrabRects);
             if (slotView == null || slotModel?.ItemStack?.ItemConfig == null)
             {
@@ -572,6 +582,7 @@ namespace UI.Pages
         private bool HaveSlotsChanged()
         {
             return lastHelmItemConfig != playerInventory.HelmSlot.ItemConfig
+                || lastFaceItemConfig != playerInventory.FaceSlot.ItemConfig
                 || lastBodyItemConfig != playerInventory.BodySlot.ItemConfig
                 || lastBackpackItemConfig != playerInventory.BackpackSlot.ItemConfig
                 || lastLeftWeaponItemConfig != playerInventory.LeftWeaponSlot.ItemConfig
@@ -585,6 +596,7 @@ namespace UI.Pages
         private void CacheSlotItems()
         {
             lastHelmItemConfig = playerInventory.HelmSlot.ItemConfig;
+            lastFaceItemConfig = playerInventory.FaceSlot.ItemConfig;
             lastBodyItemConfig = playerInventory.BodySlot.ItemConfig;
             lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;
             lastLeftWeaponItemConfig = playerInventory.LeftWeaponSlot.ItemConfig;

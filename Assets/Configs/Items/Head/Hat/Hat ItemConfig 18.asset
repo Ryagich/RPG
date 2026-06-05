@@ -16,7 +16,7 @@ MonoBehaviour:
   <Price>k__BackingField: 1
   <Weight>k__BackingField: 2.12
   <MaxStack>k__BackingField: 1
-  <Icon>k__BackingField: {fileID: 21300000, guid: a31ca3ac5d39d344185d8a0fae086788, type: 3}
+  <Icon>k__BackingField: {fileID: 21300000, guid: c46d072971652424e8000bcf9eca1010, type: 3}
   <Name>k__BackingField:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
@@ -41,6 +41,7 @@ MonoBehaviour:
   temperatureDefense: 31
   psiDefense: 21
   magicDefense: 6
+  blocksFaceSlot: 0
   hpStat: 0
   waterStat: 0
   foodStat: 0

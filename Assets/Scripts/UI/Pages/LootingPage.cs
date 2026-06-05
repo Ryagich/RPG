@@ -92,6 +92,7 @@ namespace UI.Pages
         private PopupOpenMode popupOpenMode;
 
         private ItemConfig lastHelmItemConfig;
+        private ItemConfig lastFaceItemConfig;
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastBackpackItemConfig;
         private ItemConfig lastLeftWeaponItemConfig;
@@ -281,6 +282,7 @@ namespace UI.Pages
             var playerWeight = PageUiUtilities.GetItemsWeight(playerInventory)
                              + PageUiUtilities.GetSlotsWeight(
                                  playerInventory.HelmSlot,
+                                 playerInventory.FaceSlot,
                                  playerInventory.BodySlot,
                                  playerInventory.BackpackSlot,
                                  playerInventory.LeftWeaponSlot,
@@ -332,6 +334,12 @@ namespace UI.Pages
 
             var handItemType = playerInventory.HandSlot.Value?.ItemConfig?.ItemType;
             if (TryGetSlotUnderPointer(slotsViewContainer.HeadSlot, playerInventory.HelmSlot, screenPoint, handItemType, out slotModel))
+            {
+                return true;
+            }
+
+            if (!playerInventory.IsFaceSlotBlocked
+             && TryGetSlotUnderPointer(slotsViewContainer.FaceSlot, playerInventory.FaceSlot, screenPoint, handItemType, out slotModel))
             {
                 return true;
             }
@@ -559,6 +567,7 @@ namespace UI.Pages
         private bool HaveSlotsChanged()
         {
             return lastHelmItemConfig != playerInventory.HelmSlot.ItemConfig
+                   || lastFaceItemConfig != playerInventory.FaceSlot.ItemConfig
                    || lastBodyItemConfig != playerInventory.BodySlot.ItemConfig
                    || lastBackpackItemConfig != playerInventory.BackpackSlot.ItemConfig
                    || lastLeftWeaponItemConfig != playerInventory.LeftWeaponSlot.ItemConfig
@@ -592,6 +601,7 @@ namespace UI.Pages
         private void CacheSlotItems()
         {
             lastHelmItemConfig = playerInventory.HelmSlot.ItemConfig;
+            lastFaceItemConfig = playerInventory.FaceSlot.ItemConfig;
             lastBodyItemConfig = playerInventory.BodySlot.ItemConfig;
             lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;
             lastLeftWeaponItemConfig = playerInventory.LeftWeaponSlot.ItemConfig;
@@ -725,6 +735,7 @@ namespace UI.Pages
         private void DrawSlotItems()
         {
             DrawSlotItem(slotsViewContainer.HeadSlot, playerInventory.HelmSlot);
+            DrawSlotItem(slotsViewContainer.FaceSlot, playerInventory.FaceSlot);
             DrawSlotItem(slotsViewContainer.BodySlot, playerInventory.BodySlot);
             DrawSlotItem(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot);
             DrawSlotItem(slotsViewContainer.LeftWeaponSlot, playerInventory.LeftWeaponSlot);
@@ -737,6 +748,7 @@ namespace UI.Pages
 
         private void DrawSlotItem(SlotView slotView, SlotModel slotModel)
         {
+            PageUiUtilities.SetSlotBlockedState(slotView, slotModel == playerInventory.FaceSlot && playerInventory.IsFaceSlotBlocked);
             PageUiUtilities.DrawSlotItem(slotView, slotModel, itemRects, itemGrabRects);
             if (slotView == null || slotModel?.ItemStack?.ItemConfig == null)
             {
@@ -1050,7 +1062,7 @@ namespace UI.Pages
 
         private bool CanUseInventoryItem(ItemConfig itemConfig)
         {
-            return itemConfig != null && itemConfig.ItemType is ItemType.Usable or ItemType.Helm or ItemType.Body or ItemType.Backpack or ItemType.Weapon;
+            return itemConfig != null && itemConfig.ItemType is ItemType.Usable or ItemType.Helm or ItemType.Face or ItemType.Body or ItemType.Backpack or ItemType.Weapon;
         }
 
         private void UseTarget(PopupTarget target)
@@ -1188,9 +1200,17 @@ namespace UI.Pages
                 return false;
             }
 
-            foreach (var slot in new[] { inventory.HelmSlot, inventory.BodySlot, inventory.BackpackSlot, inventory.LeftWeaponSlot, inventory.RightWeaponSlot })
+            if (itemStack.ItemConfig.ItemType == ItemType.Helm
+             && itemStack.ItemConfig.BlocksFaceSlot
+             && inventory.FaceSlot.ItemConfig != null
+             && !inventory.CanMoveSlotItemToGrid(inventory.FaceSlot))
             {
-                if (slot.ItemType != itemStack.ItemConfig.ItemType)
+                return false;
+            }
+
+            foreach (var slot in new[] { inventory.HelmSlot, inventory.FaceSlot, inventory.BodySlot, inventory.BackpackSlot, inventory.LeftWeaponSlot, inventory.RightWeaponSlot })
+            {
+                if (inventory.IsSlotBlocked(slot) || slot.ItemType != itemStack.ItemConfig.ItemType)
                 {
                     continue;
                 }

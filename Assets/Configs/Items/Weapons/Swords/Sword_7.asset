@@ -16,7 +16,7 @@ MonoBehaviour:
   <Price>k__BackingField: 22
   <Weight>k__BackingField: 1.2
   <MaxStack>k__BackingField: 1
-  <Icon>k__BackingField: {fileID: 21300000, guid: 6cc8524e138554048a5bee6bd4d1c008, type: 3}
+  <Icon>k__BackingField: {fileID: 21300000, guid: 3cadb72d856e25d4e801f323c0fdeca7, type: 3}
   <Name>k__BackingField:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
@@ -27,8 +27,8 @@ MonoBehaviour:
     m_WaitForCompletion: 0
     m_LocalVariables: []
   <HandPrefab>k__BackingField: {fileID: 5800248454700343163, guid: 31ea0ab59c8bf244eb2cdf9aab417658, type: 3}
-  <Size>k__BackingField: {x: 1, y: 7}
-  <SizeInInventory>k__BackingField: {x: 100, y: 1200}
+  <Size>k__BackingField: {x: 1, y: 5}
+  <SizeInInventory>k__BackingField: {x: 400, y: 400}
   <ItemType>k__BackingField: 3
   weaponInHandPrefab: {fileID: 3734153422565419358, guid: 9809e114a20778d4489c63b075400a8a, type: 3}
   rightHandWeaponAttachment:

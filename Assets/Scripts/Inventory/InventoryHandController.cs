@@ -9,6 +9,7 @@ using Messages;
 using Stats;
 using UI.Inventory;
 using UI.Pages;
+using UniRx;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -57,6 +58,7 @@ namespace Inventory
             lookTransform = animator != null ? animator.transform : playerTransform;
             this.gameModesController = gameModesController;
 
+            playerInventory.Changed.Subscribe(_ => DropPendingOverflowItems());
             mouseDownSubscriber.Subscribe(OnMouseDown);
             mouseUpSubscriber.Subscribe(OnMouseUp);
             gameModeChangedSubscriber.Subscribe(OnGameModeChanged);
@@ -712,6 +714,14 @@ namespace Inventory
             SpawnItemInWorld(itemStack);
         }
 
+        public void DropPendingOverflowItems()
+        {
+            foreach (var overflowItem in playerInventory.ConsumePendingOverflowItems())
+            {
+                SpawnItemInWorld(overflowItem);
+            }
+        }
+
         public bool TryUseFromInventory(ItemStack itemStack, Func<ItemStack, ItemStack> tryStoreOverflow = null)
         {
             if (itemStack?.ItemConfig == null)
@@ -753,6 +763,7 @@ namespace Inventory
                 }
             }
 
+            DropPendingOverflowItems();
             return true;
         }
 

@@ -8,5 +8,6 @@
         Weapon,
         Body,
         Helm,
+        Face,
     }
 }
