@@ -18,6 +18,7 @@ namespace Quests.Graph.Editor
         private const string PreferredPreviewLocale = "ru";
         private const string NodesPathKey = "QuestEditor_NodesPath";
         private const string TransitionsPathKey = "QuestEditor_TransitionsPath";
+        private const string ThemeKey = "QuestEditor_Theme";
         private const float LocalizedPreviewMinHeight = 48f;
         private const float LocalizedPreviewWidth = 268f;
         private const float WorkspaceWidth = 10000f;
@@ -44,9 +45,32 @@ namespace Quests.Graph.Editor
         private QuestTransition pendingTransition;
         private QuestNode sourceNodeForSelection;
         private QuestNode activeConnectionNode;
+        private readonly List<EditorStyleTextOverride> editorStyleTextOverrides = new();
+        private GUIStyle lightWindowStyle;
+        private GUIStyle lightHelpBoxStyle;
+        private GUIStyle lightButtonStyle;
+        private GUIStyle lightMiniButtonStyle;
+        private GUIStyle lightPopupStyle;
+        private GUIStyle lightTextFieldStyle;
+        private GUIStyle lightLabelStyle;
+        private GUIStyle lightFoldoutStyle;
+        private GUIStyle lightBoldLabelStyle;
+        private GUIStyle lightMiniBoldLabelStyle;
+        private GUIStyle lightMiniLabelStyle;
+        private GUIStyle lightWordWrappedMiniLabelStyle;
+        private GUIStyle lightCenteredMiniLabelStyle;
+        private GUIStyle lightPreviewLabelStyle;
+        private Texture2D lightWindowTexture;
+        private Texture2D lightHelpBoxTexture;
+        private Texture2D lightButtonTexture;
+        private Texture2D lightButtonHoverTexture;
+        private Texture2D lightButtonActiveTexture;
+        private Texture2D lightTextFieldTexture;
+        private GUISkin lightSkin;
 
         private float zoom = 1f;
         private Vector2 panOffset = Vector2.zero;
+        private bool useLightTheme;
 
         [MenuItem("Tools/Quest Editor")]
         public static void Open()
@@ -58,6 +82,7 @@ namespace Quests.Graph.Editor
         {
             nodesFolderPath = EditorPrefs.GetString(NodesPathKey, "Assets/QuestNodes");
             transitionsFolderPath = EditorPrefs.GetString(TransitionsPathKey, "Assets/QuestTransitions");
+            useLightTheme = EditorPrefs.GetBool(ThemeKey, false);
             EditorApplication.projectChanged += HandleProjectChanged;
         }
 
@@ -68,22 +93,42 @@ namespace Quests.Graph.Editor
 
         private void OnGUI()
         {
-            if (currentGraph == null)
-            {
-                DrawEmptyState();
-                DrawControlsOverlay();
-                return;
-            }
+            Color previousBackgroundColor = GUI.backgroundColor;
+            Color previousContentColor = GUI.contentColor;
+            GUISkin previousSkin = GUI.skin;
 
-            EnsureGraphNodes();
-            DrawGraphArea();
-            DrawControlsOverlay();
+            try
+            {
+                ApplyThemeGuiColors();
+                ApplyThemeSkin();
+                ApplyThemeEditorStyleTextOverrides();
+                DrawWindowBackground();
+
+                if (currentGraph == null)
+                {
+                    DrawEmptyState();
+                    DrawControlsOverlay();
+                    return;
+                }
+
+                EnsureGraphNodes();
+                DrawGraphArea();
+                DrawControlsOverlay();
+            }
+            finally
+            {
+                RestoreThemeEditorStyleTextOverrides();
+                GUI.skin = previousSkin;
+                GUI.backgroundColor = previousBackgroundColor;
+                GUI.contentColor = previousContentColor;
+            }
         }
 
         private void DrawEmptyState()
         {
             Rect contentRect = new Rect(12f, 12f, position.width - 24f, 52f);
-            GUI.Box(contentRect, GUIContent.none, EditorStyles.helpBox);
+            EditorGUI.DrawRect(contentRect, PanelBackgroundColor);
+            GUI.Box(contentRect, GUIContent.none, HelpBoxStyle);
             EditorGUI.LabelField(
                 new Rect(contentRect.x + 10f, contentRect.y + 10f, contentRect.width - 20f, 32f),
                 "Create or load a quest graph.");
@@ -97,7 +142,6 @@ namespace Quests.Graph.Editor
             const float padding = 10f;
             const float collapsedToggleLeftOffset = 6f;
             const float buttonHeight = 28f;
-
             float panelHeight = Mathf.Max(120f, position.height);
             float panelY = position.height - panelHeight;
             Rect panelRect = new Rect(0f, panelY, OverlayPanelWidth, panelHeight);
@@ -110,7 +154,7 @@ namespace Quests.Graph.Editor
 
             if (!isControlsPanelExpanded)
             {
-                if (GUI.Button(toggleRect, ">"))
+                if (DrawButton(toggleRect, ">"))
                 {
                     isControlsPanelExpanded = true;
                 }
@@ -120,21 +164,21 @@ namespace Quests.Graph.Editor
 
             float y = padding;
 
-            EditorGUI.DrawRect(panelRect, new Color(0.18f, 0.18f, 0.18f, 1f));
-            GUI.Box(panelRect, GUIContent.none, EditorStyles.helpBox);
-            GUILayout.BeginArea(panelRect, GUIContent.none, EditorStyles.helpBox);
+            EditorGUI.DrawRect(panelRect, PanelBackgroundColor);
+            GUI.Box(panelRect, GUIContent.none, HelpBoxStyle);
+            GUILayout.BeginArea(panelRect, GUIContent.none, HelpBoxStyle);
             float contentWidth = OverlayPanelWidth - padding * 2f;
 
             EditorGUI.LabelField(new Rect(padding, padding, contentWidth, 18f), "Quest Nodes Folder Path:");
             y += 18f;
 
-            nodesFolderPath = EditorGUI.TextField(new Rect(padding, y, contentWidth - 160f, 20f), nodesFolderPath);
-            if (GUI.Button(new Rect(padding + contentWidth - 155f, y, 70f, 20f), "Pick"))
+            nodesFolderPath = EditorGUI.TextField(new Rect(padding, y, contentWidth - 160f, 20f), nodesFolderPath, TextFieldStyle);
+            if (DrawButton(new Rect(padding + contentWidth - 155f, y, 70f, 20f), "Pick"))
             {
                 PickFolder("Select folder for Quest Nodes", ref nodesFolderPath, NodesPathKey);
             }
 
-            if (GUI.Button(new Rect(padding + contentWidth - 80f, y, 70f, 20f), "Save"))
+            if (DrawButton(new Rect(padding + contentWidth - 80f, y, 70f, 20f), "Save"))
             {
                 EditorPrefs.SetString(NodesPathKey, nodesFolderPath);
             }
@@ -144,27 +188,36 @@ namespace Quests.Graph.Editor
             EditorGUI.LabelField(new Rect(padding, y, contentWidth, 18f), "Transitions Folder Path:");
             y += 18f;
 
-            transitionsFolderPath = EditorGUI.TextField(new Rect(padding, y, contentWidth - 160f, 20f), transitionsFolderPath);
-            if (GUI.Button(new Rect(padding + contentWidth - 155f, y, 70f, 20f), "Pick"))
+            transitionsFolderPath = EditorGUI.TextField(new Rect(padding, y, contentWidth - 160f, 20f), transitionsFolderPath, TextFieldStyle);
+            if (DrawButton(new Rect(padding + contentWidth - 155f, y, 70f, 20f), "Pick"))
             {
                 PickFolder("Select folder for Quest Transitions", ref transitionsFolderPath, TransitionsPathKey);
             }
 
-            if (GUI.Button(new Rect(padding + contentWidth - 80f, y, 70f, 20f), "Save"))
+            if (DrawButton(new Rect(padding + contentWidth - 80f, y, 70f, 20f), "Save"))
             {
                 EditorPrefs.SetString(TransitionsPathKey, transitionsFolderPath);
             }
 
             y += 36f;
 
-            if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "New Graph"))
+            if (DrawButton(new Rect(padding, y, contentWidth, buttonHeight), GetThemeToggleLabel()))
+            {
+                useLightTheme = !useLightTheme;
+                EditorPrefs.SetBool(ThemeKey, useLightTheme);
+                Repaint();
+            }
+
+            y += buttonHeight + spacing;
+
+            if (DrawButton(new Rect(padding, y, contentWidth, buttonHeight), "New Graph"))
             {
                 CreateNewGraph();
             }
 
             y += buttonHeight + spacing;
 
-            if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "Load Graph"))
+            if (DrawButton(new Rect(padding, y, contentWidth, buttonHeight), "Load Graph"))
             {
                 LoadGraph();
             }
@@ -172,7 +225,7 @@ namespace Quests.Graph.Editor
             y += buttonHeight + spacing;
 
             EditorGUI.BeginDisabledGroup(currentGraph == null);
-            if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "New Node"))
+            if (DrawButton(new Rect(padding, y, contentWidth, buttonHeight), "New Node"))
             {
                 CreateNewNode();
             }
@@ -193,7 +246,7 @@ namespace Quests.Graph.Editor
                 }
 
                 EditorGUI.BeginDisabledGroup(startNode == null);
-                if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "Ping Start Node"))
+                if (DrawButton(new Rect(padding, y, contentWidth, buttonHeight), "Ping Start Node"))
                 {
                     EditorGUIUtility.PingObject(startNode);
                     Selection.activeObject = startNode;
@@ -230,8 +283,8 @@ namespace Quests.Graph.Editor
             if (isSelectingTargetNode)
             {
                 Color previousColor = GUI.backgroundColor;
-                GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
-                if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "Cancel Selection"))
+                GUI.backgroundColor = DangerButtonColor;
+                if (DrawButton(new Rect(padding, y, contentWidth, buttonHeight), "Cancel Selection"))
                 {
                     CancelTargetSelection();
                 }
@@ -241,7 +294,7 @@ namespace Quests.Graph.Editor
 
             GUILayout.EndArea();
 
-            if (GUI.Button(toggleRect, "<"))
+            if (DrawButton(toggleRect, "<"))
             {
                 isControlsPanelExpanded = false;
             }
@@ -395,7 +448,7 @@ namespace Quests.Graph.Editor
 
                 Color previousColor = GUI.color;
                 GUI.color = GetNodeTint(node);
-                rect = GUILayout.Window(i, rect, _ => DrawNodeWindow(node), GetNodeTitle(node));
+                rect = GUILayout.Window(i, rect, _ => DrawNodeWindow(node), GetNodeTitle(node), NodeWindowStyle);
                 GUI.color = previousColor;
 
                 nodeRects[node] = rect;
@@ -495,12 +548,12 @@ namespace Quests.Graph.Editor
 
                 if (IsStartNode(node))
                 {
-                    GUI.backgroundColor = new Color(0.2f, 0.7f, 0.25f);
+                    GUI.backgroundColor = StartBadgeColor;
                     GUI.Box(badgeRect, "S");
                 }
                 else if (IsOrphanNode(node.NodeData))
                 {
-                    GUI.backgroundColor = new Color(1f, 0.6f, 0.15f);
+                    GUI.backgroundColor = WarningBadgeColor;
                     GUI.Box(badgeRect, "!");
                 }
 
@@ -557,7 +610,7 @@ namespace Quests.Graph.Editor
                             .Select(item => ExpandRect(item.Value, 8f))
                             .ToList());
 
-                    Handles.DrawBezier(startPos, endPos, startTangent, endTangent, Handles.color, null, 3f);
+                    Handles.DrawBezier(startPos, endPos, startTangent, endTangent, Handles.color, null, 4.5f);
                     DrawConnectionArrow(endPos, endPos - endTangent);
                 }
             }
@@ -587,20 +640,20 @@ namespace Quests.Graph.Editor
         {
             if (activeConnectionNode == null)
             {
-                return new Color(0.9f, 0.8f, 0.2f, 0.95f);
+                return PrimaryConnectionColor;
             }
 
             if (sourceNode == activeConnectionNode)
             {
-                return new Color(1f, 1f, 1f, 0.98f);
+                return SourceHighlightConnectionColor;
             }
 
             if (targetNode == activeConnectionNode)
             {
-                return new Color(1f, 0.28f, 0.28f, 0.98f);
+                return TargetHighlightConnectionColor;
             }
 
-            return new Color(0.9f, 0.8f, 0.2f, 0.95f);
+            return PrimaryConnectionColor;
         }
 
         private void DrawTargetSelectionOverlay()
@@ -626,14 +679,14 @@ namespace Quests.Graph.Editor
                 }
 
                 bool isHovered = rect.Contains(graphMousePosition);
-                EditorGUI.DrawRect(rect, new Color(0f, 0.75f, 0.2f, isHovered ? 0.45f : 0.25f));
+                EditorGUI.DrawRect(rect, GetSelectionOverlayColor(isHovered));
 
                 GUIStyle style = new GUIStyle(GUI.skin.label)
                 {
                     alignment = TextAnchor.MiddleCenter,
                     fontSize = 52,
                     fontStyle = FontStyle.Bold,
-                    normal = { textColor = Color.white }
+                    normal = { textColor = SelectionOverlayTextColor }
                 };
 
                 GUI.Label(rect, "+", style);
@@ -672,7 +725,7 @@ namespace Quests.Graph.Editor
             EditorGUI.BeginDisabledGroup(isSelectingTargetNode);
 
             Rect removeButtonRect = new Rect(298f, 5f, 16f, 16f);
-            if (GUI.Button(removeButtonRect, "x"))
+            if (DrawMiniButton(removeButtonRect, "x"))
             {
                 DeleteNode(node);
                 EditorGUI.EndDisabledGroup();
@@ -731,10 +784,10 @@ namespace Quests.Graph.Editor
             DrawNodeDataEditor(node);
 
             EditorGUILayout.Space(4f);
-            EditorGUILayout.LabelField("Transitions", EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField("Transitions", MiniBoldLabelStyle);
             DrawTransitionsSection(node.NodeData, node);
 
-            if (GUILayout.Button(IsStartNode(node) ? "Start Node" : "Set As Start"))
+            if (DrawButton(IsStartNode(node) ? "Start Node" : "Set As Start"))
             {
                 MoveNodeToFront(node);
             }
@@ -801,7 +854,7 @@ namespace Quests.Graph.Editor
                 Color accentColor = GetTransitionAccentColor(missingLink, targetOutsideGraph, hasConditions, hasResults);
                 string statusLabel = GetTransitionStatusLabel(missingLink, targetOutsideGraph, hasConditions, conditionCount, hasResults, resultCount);
 
-                EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+                EditorGUILayout.BeginHorizontal(HelpBoxStyle);
                 Rect accentRect = GUILayoutUtility.GetRect(
                     AccentLineWidth,
                     AccentLineWidth,
@@ -814,24 +867,24 @@ namespace Quests.Graph.Editor
 
                 EditorGUILayout.BeginVertical();
                 EditorGUILayout.BeginHorizontal();
-                bool newExpanded = EditorGUILayout.Foldout(isExpanded, $"Transition {i + 1}", true);
+                bool newExpanded = EditorGUILayout.Foldout(isExpanded, $"Transition {i + 1}", true, FoldoutStyle);
                 if (newExpanded != isExpanded)
                 {
                     SetTransitionFoldoutState(foldoutKey, newExpanded);
                     isExpanded = newExpanded;
                 }
 
-                GUILayout.Label(statusLabel, EditorStyles.centeredGreyMiniLabel, GUILayout.Width(110f));
+                GUILayout.Label(statusLabel, CenteredMiniLabelStyle, GUILayout.Width(110f));
                 GUILayout.FlexibleSpace();
 
-                if (GUILayout.Button("X", GUILayout.Width(22f)))
+                if (DrawMiniButton("X", GUILayout.Width(22f)))
                 {
                     removeTransitionIndex = i;
                 }
 
                 Color previousBackground = GUI.backgroundColor;
-                GUI.backgroundColor = missingLink ? new Color(1f, 0.4f, 0.4f) : new Color(1f, 0.7f, 0.2f);
-                bool pickPressed = GUILayout.Button("O", GUILayout.Width(22f));
+                GUI.backgroundColor = missingLink ? DangerButtonColor : LinkButtonColor;
+                bool pickPressed = DrawMiniButton("O", GUILayout.Width(22f));
                 GUI.backgroundColor = previousBackground;
 
                 Rect localButtonRect = GUILayoutUtility.GetLastRect();
@@ -853,7 +906,7 @@ namespace Quests.Graph.Editor
                 if (isExpanded)
                 {
                     EditorGUILayout.EndHorizontal();
-                    DrawQuestEditorDivider(new Color(1f, 1f, 1f, 0.12f));
+                    DrawQuestEditorDivider(StrongDividerColor);
                     EditorGUILayout.Space(3f);
 
                     DrawTransitionAssetField(nodeData, i);
@@ -888,7 +941,7 @@ namespace Quests.Graph.Editor
                 if (i < nodeData.Transitions.Count - 1)
                 {
                     EditorGUILayout.Space(3f);
-                    DrawQuestEditorDivider(new Color(1f, 1f, 1f, 0.08f));
+                    DrawQuestEditorDivider(SoftDividerColor);
                     EditorGUILayout.Space(5f);
                 }
                 else
@@ -897,7 +950,7 @@ namespace Quests.Graph.Editor
                 }
             }
 
-            if (GUILayout.Button("+ Add Transition"))
+            if (DrawButton("+ Add Transition"))
             {
                 CreateTransitionAsset(nodeData);
                 ClearTransitionFoldoutStates(nodeData);
@@ -1198,12 +1251,12 @@ namespace Quests.Graph.Editor
 
             if (IsStartNode(node))
             {
-                return new Color(0.82f, 1f, 0.82f);
+                return StartNodeTint;
             }
 
             if (IsOrphanNode(node.NodeData))
             {
-                return new Color(1f, 0.92f, 0.72f);
+                return OrphanNodeTint;
             }
 
             return Color.white;
@@ -1230,7 +1283,7 @@ namespace Quests.Graph.Editor
 
             if (editorTitleProperty != null)
             {
-                EditorGUILayout.PropertyField(editorTitleProperty, new GUIContent("Node Title"));
+                DrawPropertyFieldWithCustomLabel(editorTitleProperty, "Node Title");
             }
 
             if (nameProperty != null)
@@ -1240,7 +1293,7 @@ namespace Quests.Graph.Editor
 
             if (iconProperty != null)
             {
-                EditorGUILayout.PropertyField(iconProperty, new GUIContent("Sprite"));
+                DrawPropertyFieldWithCustomLabel(iconProperty, "Sprite");
             }
 
             DrawMapTargetSelector(nodeData, mapTargetSourceProperty, sceneMapTargetIdProperty, scriptMapTargetKeyProperty);
@@ -1292,7 +1345,7 @@ namespace Quests.Graph.Editor
                 sceneMapTargetIdProperty.stringValue,
                 availableTargets);
 
-            int newSelectedIndex = EditorGUILayout.Popup("Map Pointer", selectedIndex, options);
+            int newSelectedIndex = DrawPopupField("Map Pointer", selectedIndex, options);
             if (newSelectedIndex != selectedIndex)
             {
                 ApplyMapTargetSelection(
@@ -1307,7 +1360,7 @@ namespace Quests.Graph.Editor
 
             if (sourceType == QuestMapTargetSourceType.ScriptTarget)
             {
-                EditorGUILayout.PropertyField(scriptMapTargetKeyProperty, new GUIContent("Script Target Key"));
+                DrawPropertyFieldWithCustomLabel(scriptMapTargetKeyProperty, "Script Target Key");
                 if (string.IsNullOrWhiteSpace(scriptMapTargetKeyProperty.stringValue))
                 {
                     EditorGUILayout.HelpBox("Script target mode requires a non-empty key.", MessageType.Warning);
@@ -1577,9 +1630,9 @@ namespace Quests.Graph.Editor
             }
         }
 
-        private static void DrawQuestResourceEntries(SerializedProperty entriesProperty, string label)
+        private void DrawQuestResourceEntries(SerializedProperty entriesProperty, string label)
         {
-            EditorGUILayout.LabelField(label, EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField(label, MiniBoldLabelStyle);
 
             int removeIndex = -1;
             for (int i = 0; i < entriesProperty.arraySize; i++)
@@ -1593,7 +1646,7 @@ namespace Quests.Graph.Editor
                 Color accentColor = GetQuestResourceEntryAccentColor(entryType);
                 string entryTitle = GetQuestResourceEntryTitle(typeProperty);
 
-                EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+                EditorGUILayout.BeginHorizontal(HelpBoxStyle);
                 Rect accentRect = GUILayoutUtility.GetRect(
                     AccentLineWidth,
                     AccentLineWidth,
@@ -1606,27 +1659,27 @@ namespace Quests.Graph.Editor
 
                 EditorGUILayout.BeginVertical();
                 EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField($"Entry {i + 1}", EditorStyles.miniBoldLabel, GUILayout.Width(52f));
-                GUILayout.Label(entryTitle, EditorStyles.centeredGreyMiniLabel);
+                EditorGUILayout.LabelField($"Entry {i + 1}", MiniBoldLabelStyle, GUILayout.Width(52f));
+                GUILayout.Label(entryTitle, CenteredMiniLabelStyle);
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("X", GUILayout.Width(22f)))
+                if (DrawMiniButton("X", GUILayout.Width(22f)))
                 {
                     removeIndex = i;
                 }
 
                 EditorGUILayout.EndHorizontal();
-                DrawQuestEditorDivider(new Color(1f, 1f, 1f, 0.10f));
+                DrawQuestEditorDivider(SectionDividerColor);
                 EditorGUILayout.Space(3f);
 
-                EditorGUILayout.PropertyField(typeProperty, new GUIContent("Type"));
+                DrawEnumPropertyField(typeProperty, "Type");
                 switch (entryType)
                 {
                     case QuestResourceEntryType.Money:
-                        EditorGUILayout.PropertyField(moneyAmountProperty, new GUIContent("Amount"));
+                        DrawPropertyFieldWithCustomLabel(moneyAmountProperty, "Amount");
                         break;
                     case QuestResourceEntryType.Item:
-                        EditorGUILayout.PropertyField(itemConfigProperty, new GUIContent("Item"));
-                        EditorGUILayout.PropertyField(itemCountProperty, new GUIContent("Count"));
+                        DrawPropertyFieldWithCustomLabel(itemConfigProperty, "Item");
+                        DrawPropertyFieldWithCustomLabel(itemCountProperty, "Count");
                         break;
                 }
 
@@ -1637,7 +1690,7 @@ namespace Quests.Graph.Editor
                 if (i < entriesProperty.arraySize - 1)
                 {
                     EditorGUILayout.Space(2f);
-                    DrawQuestEditorDivider(new Color(1f, 1f, 1f, 0.06f));
+                    DrawQuestEditorDivider(SoftestDividerColor);
                     EditorGUILayout.Space(4f);
                 }
                 else
@@ -1651,7 +1704,7 @@ namespace Quests.Graph.Editor
                 entriesProperty.DeleteArrayElementAtIndex(removeIndex);
             }
 
-            if (GUILayout.Button($"+ Add {label} Entry"))
+            if (DrawButton($"+ Add {label} Entry"))
             {
                 entriesProperty.arraySize++;
             }
@@ -1697,34 +1750,34 @@ namespace Quests.Graph.Editor
             }
         }
 
-        private static Color GetTransitionAccentColor(bool missingLink, bool targetOutsideGraph, bool hasConditions, bool hasResults)
+        private Color GetTransitionAccentColor(bool missingLink, bool targetOutsideGraph, bool hasConditions, bool hasResults)
         {
             if (missingLink)
             {
-                return new Color(0.92f, 0.34f, 0.34f, 1f);
+                return DangerAccentColor;
             }
 
             if (targetOutsideGraph)
             {
-                return new Color(0.95f, 0.66f, 0.22f, 1f);
+                return WarningAccentColor;
             }
 
             if (hasConditions && hasResults)
             {
-                return new Color(0.24f, 0.72f, 0.78f, 1f);
+                return HybridAccentColor;
             }
 
             if (hasConditions)
             {
-                return new Color(0.26f, 0.63f, 0.86f, 1f);
+                return ConditionAccentColor;
             }
 
             if (hasResults)
             {
-                return new Color(0.38f, 0.78f, 0.42f, 1f);
+                return RewardAccentColor;
             }
 
-            return new Color(0.38f, 0.78f, 0.42f, 1f);
+            return RewardAccentColor;
         }
 
         private static string GetTransitionStatusLabel(
@@ -1767,13 +1820,13 @@ namespace Quests.Graph.Editor
             return "Linked";
         }
 
-        private static Color GetQuestResourceEntryAccentColor(QuestResourceEntryType entryType)
+        private Color GetQuestResourceEntryAccentColor(QuestResourceEntryType entryType)
         {
             return entryType switch
             {
-                QuestResourceEntryType.Money => new Color(0.85f, 0.68f, 0.22f, 1f),
-                QuestResourceEntryType.Item => new Color(0.24f, 0.78f, 0.76f, 1f),
-                _ => new Color(0.6f, 0.6f, 0.6f, 1f)
+                QuestResourceEntryType.Money => MoneyAccentColor,
+                QuestResourceEntryType.Item => ItemAccentColor,
+                _ => NeutralAccentColor
             };
         }
 
@@ -1794,7 +1847,7 @@ namespace Quests.Graph.Editor
             return displayNames[index];
         }
 
-        private static void DrawQuestEditorDivider(Color color)
+        private void DrawQuestEditorDivider(Color color)
         {
             Rect dividerRect = EditorGUILayout.GetControlRect(false, 1f);
             EditorGUI.DrawRect(dividerRect, color);
@@ -1899,12 +1952,12 @@ namespace Quests.Graph.Editor
         {
             Vector2 normalizedDirection = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.right;
             Vector2 right = new Vector2(-normalizedDirection.y, normalizedDirection.x);
-            Vector2 arrowBase = tipPosition - normalizedDirection * 14f;
+            Vector2 arrowBase = tipPosition - normalizedDirection * 18f;
             Vector3[] arrow =
             {
                 tipPosition,
-                arrowBase + right * 6f,
-                arrowBase - right * 6f
+                arrowBase + right * 7.5f,
+                arrowBase - right * 7.5f
             };
             Handles.DrawAAConvexPolygon(arrow);
         }
@@ -2206,7 +2259,7 @@ namespace Quests.Graph.Editor
             return Mathf.Approximately(a.x, b.x) && Mathf.Approximately(a.y, b.y);
         }
 
-        private static float DrawLocalizedFieldArea(float x, float y, float width, SerializedProperty property, string label)
+        private float DrawLocalizedFieldArea(float x, float y, float width, SerializedProperty property, string label)
         {
             float areaHeight = GetLocalizedFieldAreaHeight(property);
             GUILayout.BeginArea(new Rect(x, y, width, areaHeight));
@@ -2225,7 +2278,7 @@ namespace Quests.Graph.Editor
                 return baseHeight;
             }
 
-            GUIStyle previewStyle = new GUIStyle(EditorStyles.textArea)
+            GUIStyle previewStyle = new GUIStyle(GUI.skin.label)
             {
                 wordWrap = true
             };
@@ -2250,7 +2303,7 @@ namespace Quests.Graph.Editor
             Repaint();
         }
 
-        private static void DrawLocalizedStringSelector(SerializedProperty localizedStringProperty, string label)
+        private void DrawLocalizedStringSelector(SerializedProperty localizedStringProperty, string label)
         {
             if (localizedStringProperty == null)
             {
@@ -2284,9 +2337,9 @@ namespace Quests.Graph.Editor
             string currentTableValue = tableCollectionNameProperty.stringValue;
             int selectedCollectionIndex = GetSelectedCollectionIndex(collections, currentTableValue);
 
-            EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+            EditorGUILayout.LabelField(label, BoldLabelStyle);
 
-            int newCollectionIndex = EditorGUILayout.Popup("Table", selectedCollectionIndex, GetCachedStringTableOptions());
+            int newCollectionIndex = DrawPopupField("Table", selectedCollectionIndex, GetCachedStringTableOptions());
             if (newCollectionIndex != selectedCollectionIndex)
             {
                 ApplyCollectionSelection(tableCollectionNameProperty, keyIdProperty, keyProperty, collections, newCollectionIndex);
@@ -2308,7 +2361,7 @@ namespace Quests.Graph.Editor
                 : "<None>";
 
             Rect entryRect = EditorGUILayout.GetControlRect();
-            if (EditorGUI.DropdownButton(entryRect, new GUIContent($"Entry: {currentEntryLabel}"), FocusType.Passive))
+            if (GUI.Button(entryRect, $"Entry: {currentEntryLabel}", PopupStyle))
             {
                 LocalizedEntrySelectorWindow.Show(
                     entryRect,
@@ -2497,7 +2550,7 @@ namespace Quests.Graph.Editor
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(label);
 
-            if (GUILayout.Button(currentSelectionLabel, EditorStyles.popup))
+            if (GUILayout.Button(currentSelectionLabel, PopupStyle))
             {
                 if (TryOpenLocalizedStringSearchPicker(tableProperty, entryProperty))
                 {
@@ -2628,7 +2681,7 @@ namespace Quests.Graph.Editor
             #endif
         }
 
-        private static void DrawLocalizedStringPreview(SerializedProperty localizedStringProperty)
+        private void DrawLocalizedStringPreview(SerializedProperty localizedStringProperty)
         {
             string previewText = GetLocalizedStringPreview(localizedStringProperty, PreferredPreviewLocale);
             if (string.IsNullOrWhiteSpace(previewText))
@@ -2636,9 +2689,9 @@ namespace Quests.Graph.Editor
                 return;
             }
 
-            EditorGUILayout.LabelField("RU Preview", EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField("RU Preview", MiniBoldLabelStyle);
 
-            GUIStyle previewStyle = new GUIStyle(EditorStyles.textArea)
+            GUIStyle previewStyle = new GUIStyle(PreviewLabelStyle)
             {
                 wordWrap = true
             };
@@ -2646,13 +2699,16 @@ namespace Quests.Graph.Editor
             float width = LocalizedPreviewWidth;
             float height = Mathf.Max(LocalizedPreviewMinHeight, previewStyle.CalcHeight(new GUIContent(previewText), width));
 
-            EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.TextArea(
+            EditorGUILayout.BeginVertical(
+                useLightTheme ? HelpBoxStyle : EditorStyles.helpBox,
+                GUILayout.MinHeight(LocalizedPreviewMinHeight),
+                GUILayout.Height(height));
+            GUILayout.Label(
                 previewText,
                 previewStyle,
                 GUILayout.MinHeight(LocalizedPreviewMinHeight),
                 GUILayout.Height(height));
-            EditorGUI.EndDisabledGroup();
+            EditorGUILayout.EndVertical();
         }
 
         private static string GetLocalizedStringPreview(SerializedProperty localizedStringProperty, string localeCode)
@@ -2998,13 +3054,611 @@ namespace Quests.Graph.Editor
         {
             Handles.BeginGUI();
 
-            Color minorColor = new Color(0.25f, 0.25f, 0.25f, 0.35f);
-            Color majorColor = new Color(0.25f, 0.25f, 0.25f, 0.6f);
+            EditorGUI.DrawRect(rect, CanvasBackgroundColor);
 
-            DrawGridLines(rect, 20f, minorColor);
-            DrawGridLines(rect, 100f, majorColor);
+            DrawGridLines(rect, 20f, MinorGridColor);
+            DrawGridLines(rect, 100f, MajorGridColor);
 
             Handles.EndGUI();
+        }
+
+        private string GetThemeToggleLabel()
+        {
+            return useLightTheme ? "Switch to Night Theme" : "Switch to Light Theme";
+        }
+
+        private void ApplyThemeGuiColors()
+        {
+            if (!useLightTheme)
+            {
+                return;
+            }
+
+            GUI.backgroundColor = ControlBackgroundColor;
+            GUI.contentColor = ControlContentColor;
+        }
+
+        private void ApplyThemeSkin()
+        {
+            if (!useLightTheme)
+            {
+                return;
+            }
+
+            GUI.skin = LightSkin;
+        }
+
+        private void DrawWindowBackground()
+        {
+            if (Event.current.type != EventType.Repaint)
+            {
+                return;
+            }
+
+            EditorGUI.DrawRect(new Rect(0f, 0f, position.width, position.height), WindowBackgroundColor);
+        }
+
+        private void ApplyThemeEditorStyleTextOverrides()
+        {
+            if (!useLightTheme)
+            {
+                return;
+            }
+
+            editorStyleTextOverrides.Clear();
+            OverrideEditorStyleTextColor(EditorStyles.label);
+            OverrideEditorStyleTextColor(EditorStyles.boldLabel);
+            OverrideEditorStyleTextColor(EditorStyles.miniLabel);
+            OverrideEditorStyleTextColor(EditorStyles.miniBoldLabel);
+            OverrideEditorStyleTextColor(EditorStyles.wordWrappedLabel);
+            OverrideEditorStyleTextColor(EditorStyles.wordWrappedMiniLabel);
+            OverrideEditorStyleTextColor(EditorStyles.centeredGreyMiniLabel);
+            OverrideEditorStyleTextColor(EditorStyles.foldout);
+            OverrideEditorStyleTextColor(EditorStyles.toggle);
+            OverrideEditorStyleTextColor(EditorStyles.textField);
+            OverrideEditorStyleTextColor(EditorStyles.textArea);
+            OverrideEditorStyleTextColor(EditorStyles.popup);
+            OverrideEditorStyleTextColor(EditorStyles.miniButton);
+            OverrideEditorStyleTextColor(EditorStyles.miniButtonLeft);
+            OverrideEditorStyleTextColor(EditorStyles.miniButtonMid);
+            OverrideEditorStyleTextColor(EditorStyles.miniButtonRight);
+            OverrideEditorStyleTextColor(EditorStyles.objectField);
+            OverrideEditorStyleTextColor(EditorStyles.objectFieldThumb);
+            OverrideEditorStyleTextColor(EditorStyles.helpBox);
+        }
+
+        private void RestoreThemeEditorStyleTextOverrides()
+        {
+            if (editorStyleTextOverrides.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = editorStyleTextOverrides.Count - 1; i >= 0; i--)
+            {
+                editorStyleTextOverrides[i].Restore();
+            }
+
+            editorStyleTextOverrides.Clear();
+        }
+
+        private void OverrideEditorStyleTextColor(GUIStyle style)
+        {
+            if (style == null)
+            {
+                return;
+            }
+
+            editorStyleTextOverrides.Add(new EditorStyleTextOverride(style));
+            SetStyleTextColor(style, Color.black);
+        }
+
+        private bool DrawButton(Rect rect, string label)
+        {
+            return GUI.Button(rect, label, ButtonStyle);
+        }
+
+        private bool DrawMiniButton(Rect rect, string label)
+        {
+            return GUI.Button(rect, label, MiniButtonStyle);
+        }
+
+        private bool DrawButton(string label, params GUILayoutOption[] options)
+        {
+            return GUILayout.Button(label, ButtonStyle, options);
+        }
+
+        private bool DrawMiniButton(string label, params GUILayoutOption[] options)
+        {
+            return GUILayout.Button(label, MiniButtonStyle, options);
+        }
+
+        private GUIStyle NodeWindowStyle => useLightTheme
+            ? lightWindowStyle ??= CreateNodeWindowStyle()
+            : GUI.skin.window;
+
+        private GUIStyle HelpBoxStyle => useLightTheme
+            ? lightHelpBoxStyle ??= CreateHelpBoxStyle()
+            : EditorStyles.helpBox;
+
+        private GUIStyle ButtonStyle => useLightTheme
+            ? lightButtonStyle ??= CreateButtonStyle(GUI.skin.button)
+            : GUI.skin.button;
+
+        private GUIStyle MiniButtonStyle => useLightTheme
+            ? lightMiniButtonStyle ??= CreateButtonStyle(EditorStyles.miniButton)
+            : EditorStyles.miniButton;
+
+        private GUIStyle PopupStyle => useLightTheme
+            ? lightPopupStyle ??= CreatePopupStyle()
+            : EditorStyles.popup;
+
+        private GUIStyle TextFieldStyle => useLightTheme
+            ? lightTextFieldStyle ??= CreateTextInputStyle(EditorStyles.textField)
+            : EditorStyles.textField;
+
+        private GUIStyle LabelStyle => useLightTheme
+            ? lightLabelStyle ??= CreateLabelStyle(EditorStyles.label)
+            : EditorStyles.label;
+
+        private GUIStyle FoldoutStyle => useLightTheme
+            ? lightFoldoutStyle ??= CreateLabelStyle(EditorStyles.foldout)
+            : EditorStyles.foldout;
+
+        private GUIStyle BoldLabelStyle => useLightTheme
+            ? lightBoldLabelStyle ??= CreateLabelStyle(EditorStyles.boldLabel)
+            : EditorStyles.boldLabel;
+
+        private GUIStyle MiniBoldLabelStyle => useLightTheme
+            ? lightMiniBoldLabelStyle ??= CreateLabelStyle(EditorStyles.miniBoldLabel)
+            : EditorStyles.miniBoldLabel;
+
+        private GUIStyle MiniLabelStyle => useLightTheme
+            ? lightMiniLabelStyle ??= CreateLabelStyle(EditorStyles.miniLabel, MutedContentColor)
+            : EditorStyles.miniLabel;
+
+        private GUIStyle WordWrappedMiniLabelStyle => useLightTheme
+            ? lightWordWrappedMiniLabelStyle ??= CreateLabelStyle(EditorStyles.wordWrappedMiniLabel, MutedContentColor)
+            : EditorStyles.wordWrappedMiniLabel;
+
+        private GUIStyle CenteredMiniLabelStyle => useLightTheme
+            ? lightCenteredMiniLabelStyle ??= CreateLabelStyle(EditorStyles.centeredGreyMiniLabel, MutedContentColor)
+            : EditorStyles.centeredGreyMiniLabel;
+
+        private GUIStyle PreviewLabelStyle => useLightTheme
+            ? lightPreviewLabelStyle ??= CreatePreviewTextStyle()
+            : EditorStyles.wordWrappedLabel;
+
+        private GUISkin LightSkin => lightSkin ??= CreateLightSkin();
+
+        private GUIStyle CreateNodeWindowStyle()
+        {
+            lightWindowTexture ??= CreateSolidTexture(new Color(0.95f, 0.96f, 0.98f, 1f));
+
+            var style = new GUIStyle(GUI.skin.window);
+            ApplyThemeState(style.normal, lightWindowTexture, ControlContentColor);
+            ApplyThemeState(style.hover, lightWindowTexture, ControlContentColor);
+            ApplyThemeState(style.active, lightWindowTexture, ControlContentColor);
+            ApplyThemeState(style.focused, lightWindowTexture, ControlContentColor);
+            ApplyThemeState(style.onNormal, lightWindowTexture, ControlContentColor);
+            ApplyThemeState(style.onHover, lightWindowTexture, ControlContentColor);
+            ApplyThemeState(style.onActive, lightWindowTexture, ControlContentColor);
+            ApplyThemeState(style.onFocused, lightWindowTexture, ControlContentColor);
+
+            return style;
+        }
+
+        private GUIStyle CreateHelpBoxStyle()
+        {
+            lightHelpBoxTexture ??= CreateSolidTexture(new Color(0.96f, 0.95f, 0.92f, 1f));
+
+            var style = new GUIStyle(EditorStyles.helpBox);
+            ApplyThemeState(style.normal, lightHelpBoxTexture, ControlContentColor);
+            ApplyThemeState(style.hover, lightHelpBoxTexture, ControlContentColor);
+            ApplyThemeState(style.active, lightHelpBoxTexture, ControlContentColor);
+            ApplyThemeState(style.focused, lightHelpBoxTexture, ControlContentColor);
+
+            return style;
+        }
+
+        private GUIStyle CreateButtonStyle(GUIStyle sourceStyle)
+        {
+            lightButtonTexture ??= CreateSolidTexture(new Color(0.94f, 0.92f, 0.88f, 1f));
+            lightButtonHoverTexture ??= CreateSolidTexture(new Color(0.91f, 0.89f, 0.85f, 1f));
+            lightButtonActiveTexture ??= CreateSolidTexture(new Color(0.87f, 0.85f, 0.81f, 1f));
+
+            var style = new GUIStyle(sourceStyle);
+            ApplyThemeState(style.normal, lightButtonTexture, ControlContentColor);
+            ApplyThemeState(style.hover, lightButtonHoverTexture, ControlContentColor);
+            ApplyThemeState(style.active, lightButtonActiveTexture, ControlContentColor);
+            ApplyThemeState(style.focused, lightButtonHoverTexture, ControlContentColor);
+            ApplyThemeState(style.onNormal, lightButtonTexture, ControlContentColor);
+            ApplyThemeState(style.onHover, lightButtonHoverTexture, ControlContentColor);
+            ApplyThemeState(style.onActive, lightButtonActiveTexture, ControlContentColor);
+            ApplyThemeState(style.onFocused, lightButtonHoverTexture, ControlContentColor);
+
+            return style;
+        }
+
+        private GUIStyle CreateTextInputStyle(GUIStyle sourceStyle)
+        {
+            lightTextFieldTexture ??= CreateSolidTexture(new Color(0.98f, 0.97f, 0.95f, 1f));
+
+            var style = new GUIStyle(sourceStyle);
+            ApplyThemeState(style.normal, lightTextFieldTexture, ControlContentColor);
+            ApplyThemeState(style.hover, lightTextFieldTexture, ControlContentColor);
+            ApplyThemeState(style.active, lightTextFieldTexture, ControlContentColor);
+            ApplyThemeState(style.focused, lightTextFieldTexture, ControlContentColor);
+            ApplyThemeState(style.onNormal, lightTextFieldTexture, ControlContentColor);
+            ApplyThemeState(style.onHover, lightTextFieldTexture, ControlContentColor);
+            ApplyThemeState(style.onActive, lightTextFieldTexture, ControlContentColor);
+            ApplyThemeState(style.onFocused, lightTextFieldTexture, ControlContentColor);
+
+            return style;
+        }
+
+        private GUIStyle CreatePopupStyle()
+        {
+            var style = CreateButtonStyle(EditorStyles.popup);
+            style.alignment = TextAnchor.MiddleLeft;
+            return style;
+        }
+
+        private GUIStyle CreatePreviewTextStyle()
+        {
+            var style = new GUIStyle(EditorStyles.wordWrappedLabel)
+            {
+                fontSize = 12,
+                wordWrap = true,
+                richText = false,
+                padding = new RectOffset(6, 6, 4, 4)
+            };
+
+            style.normal.textColor = ControlContentColor;
+            style.hover.textColor = ControlContentColor;
+            style.active.textColor = ControlContentColor;
+            style.focused.textColor = ControlContentColor;
+            return style;
+        }
+
+        private GUISkin CreateLightSkin()
+        {
+            GUISkin sourceSkin = GUI.skin;
+            GUISkin skin = UnityEngine.Object.Instantiate(sourceSkin);
+            skin.label = CreateLabelStyle(sourceSkin.label);
+            skin.button = CreateButtonStyle(sourceSkin.button);
+            skin.textField = CreateTextInputStyle(sourceSkin.textField);
+            skin.textArea = CreateTextInputStyle(sourceSkin.textArea);
+            skin.box = CreateHelpBoxStyle();
+            skin.window = CreateNodeWindowStyle();
+            skin.toggle = CreateLabelStyle(sourceSkin.toggle);
+            skin.settings.selectionColor = new Color(0.77f, 0.84f, 0.93f, 1f);
+            skin.settings.cursorColor = ControlContentColor;
+
+            skin.customStyles = RegisterLightCustomStyles(sourceSkin, skin.customStyles);
+
+            return skin;
+        }
+
+        private GUIStyle[] RegisterLightCustomStyles(GUISkin sourceSkin, GUIStyle[] styles)
+        {
+            styles = RegisterNamedStyle(sourceSkin, styles, "TextField", lightTextFieldTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "TextArea", lightTextFieldTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "IN TextField", lightTextFieldTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectField", lightTextFieldTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectFieldButton", lightButtonTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "IN ObjectField", lightTextFieldTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "IN ObjectFieldText", lightTextFieldTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "Popup", lightButtonTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "IN Popup", lightButtonTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "MiniPopup", lightButtonTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "MiniPullDown", lightButtonTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "DropDown", lightButtonTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "DropDownButton", lightButtonTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectFieldThumb", lightTextFieldTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectFieldMiniThumb", lightTextFieldTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "SearchTextField", lightTextFieldTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "ToolbarSearchTextField", lightTextFieldTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "ToolbarSeachTextField", lightTextFieldTexture);
+            return styles;
+        }
+
+        private GUIStyle[] RegisterNamedStyle(GUISkin sourceSkin, GUIStyle[] styles, string styleName, Texture2D backgroundTexture)
+        {
+            GUIStyle style = sourceSkin.FindStyle(styleName);
+            return style != null
+                ? AppendOrReplaceStyle(styles, CreateNamedStyle(style, styleName, backgroundTexture))
+                : styles;
+        }
+
+        private GUIStyle CreateLabelStyle(GUIStyle sourceStyle)
+        {
+            return CreateLabelStyle(sourceStyle, ControlContentColor);
+        }
+
+        private GUIStyle CreateLabelStyle(GUIStyle sourceStyle, Color textColor)
+        {
+            var style = new GUIStyle(sourceStyle);
+            style.normal.textColor = textColor;
+            style.hover.textColor = textColor;
+            style.active.textColor = textColor;
+            style.focused.textColor = textColor;
+            style.onNormal.textColor = textColor;
+            style.onHover.textColor = textColor;
+            style.onActive.textColor = textColor;
+            style.onFocused.textColor = textColor;
+            return style;
+        }
+
+        private GUIStyle CreateNamedStyle(GUIStyle sourceStyle, string styleName, Texture2D backgroundTexture)
+        {
+            var style = new GUIStyle(sourceStyle) { name = styleName };
+            ApplyThemeState(style.normal, backgroundTexture, ControlContentColor);
+            ApplyThemeState(style.hover, backgroundTexture, ControlContentColor);
+            ApplyThemeState(style.active, backgroundTexture, ControlContentColor);
+            ApplyThemeState(style.focused, backgroundTexture, ControlContentColor);
+            ApplyThemeState(style.onNormal, backgroundTexture, ControlContentColor);
+            ApplyThemeState(style.onHover, backgroundTexture, ControlContentColor);
+            ApplyThemeState(style.onActive, backgroundTexture, ControlContentColor);
+            ApplyThemeState(style.onFocused, backgroundTexture, ControlContentColor);
+            return style;
+        }
+
+        private void DrawEnumPropertyField(SerializedProperty property, string label)
+        {
+            if (property == null)
+            {
+                return;
+            }
+
+            if (property.propertyType != SerializedPropertyType.Enum)
+            {
+                DrawPropertyFieldWithCustomLabel(property, label);
+                return;
+            }
+
+            int selectedIndex = DrawPopupField(label, property.enumValueIndex, property.enumDisplayNames);
+            if (selectedIndex != property.enumValueIndex)
+            {
+                property.enumValueIndex = selectedIndex;
+            }
+        }
+
+        private void DrawPropertyFieldWithCustomLabel(SerializedProperty property, string label, bool includeChildren = false)
+        {
+            if (property == null)
+            {
+                return;
+            }
+
+            float height = EditorGUI.GetPropertyHeight(property, includeChildren);
+            Rect totalRect = EditorGUILayout.GetControlRect(true, height);
+            Rect fieldRect = EditorGUI.PrefixLabel(totalRect, new GUIContent(label), LabelStyle);
+            EditorGUI.PropertyField(fieldRect, property, GUIContent.none, includeChildren);
+        }
+
+        private int DrawPopupField(string label, int selectedIndex, string[] options)
+        {
+            Rect totalRect = EditorGUILayout.GetControlRect();
+            Rect fieldRect = EditorGUI.PrefixLabel(totalRect, new GUIContent(label), LabelStyle);
+            return EditorGUI.Popup(fieldRect, selectedIndex, options, PopupStyle);
+        }
+
+        private static void ApplyThemeState(GUIStyleState state, Texture2D backgroundTexture, Color textColor)
+        {
+            state.background = backgroundTexture;
+            state.scaledBackgrounds = new[] { backgroundTexture };
+            state.textColor = textColor;
+        }
+
+        private static void SetStyleTextColor(GUIStyle style, Color color)
+        {
+            style.normal.textColor = color;
+            style.hover.textColor = color;
+            style.active.textColor = color;
+            style.focused.textColor = color;
+            style.onNormal.textColor = color;
+            style.onHover.textColor = color;
+            style.onActive.textColor = color;
+            style.onFocused.textColor = color;
+        }
+
+        private static GUIStyle[] AppendOrReplaceStyle(GUIStyle[] styles, GUIStyle style)
+        {
+            if (styles == null || styles.Length == 0)
+            {
+                return new[] { style };
+            }
+
+            for (int i = 0; i < styles.Length; i++)
+            {
+                if (styles[i] != null && styles[i].name == style.name)
+                {
+                    styles[i] = style;
+                    return styles;
+                }
+            }
+
+            GUIStyle[] result = new GUIStyle[styles.Length + 1];
+            styles.CopyTo(result, 0);
+            result[styles.Length] = style;
+            return result;
+        }
+
+        private static Texture2D CreateSolidTexture(Color color)
+        {
+            var texture = new Texture2D(1, 1, TextureFormat.RGBA32, false)
+            {
+                hideFlags = HideFlags.HideAndDontSave
+            };
+            texture.SetPixel(0, 0, color);
+            texture.Apply();
+            return texture;
+        }
+
+        private readonly struct EditorStyleTextOverride
+        {
+            private readonly GUIStyle style;
+            private readonly Color normal;
+            private readonly Color hover;
+            private readonly Color active;
+            private readonly Color focused;
+            private readonly Color onNormal;
+            private readonly Color onHover;
+            private readonly Color onActive;
+            private readonly Color onFocused;
+
+            public EditorStyleTextOverride(GUIStyle style)
+            {
+                this.style = style;
+                normal = style.normal.textColor;
+                hover = style.hover.textColor;
+                active = style.active.textColor;
+                focused = style.focused.textColor;
+                onNormal = style.onNormal.textColor;
+                onHover = style.onHover.textColor;
+                onActive = style.onActive.textColor;
+                onFocused = style.onFocused.textColor;
+            }
+
+            public void Restore()
+            {
+                style.normal.textColor = normal;
+                style.hover.textColor = hover;
+                style.active.textColor = active;
+                style.focused.textColor = focused;
+                style.onNormal.textColor = onNormal;
+                style.onHover.textColor = onHover;
+                style.onActive.textColor = onActive;
+                style.onFocused.textColor = onFocused;
+            }
+        }
+
+        private Color PanelBackgroundColor => useLightTheme
+            ? new Color(0.96f, 0.95f, 0.92f, 1f)
+            : new Color(0.18f, 0.18f, 0.18f, 1f);
+
+        private Color CanvasBackgroundColor => useLightTheme
+            ? new Color(0.98f, 0.97f, 0.95f, 1f)
+            : new Color(0.13f, 0.13f, 0.13f, 1f);
+
+        private Color MinorGridColor => useLightTheme
+            ? new Color(0.35f, 0.40f, 0.48f, 0.18f)
+            : new Color(0.25f, 0.25f, 0.25f, 0.35f);
+
+        private Color MajorGridColor => useLightTheme
+            ? new Color(0.32f, 0.37f, 0.46f, 0.30f)
+            : new Color(0.25f, 0.25f, 0.25f, 0.60f);
+
+        private Color PrimaryConnectionColor => useLightTheme
+            ? new Color(0.30f, 0.28f, 0.24f, 0.98f)
+            : new Color(0.96f, 0.96f, 0.96f, 0.98f);
+
+        private Color SourceHighlightConnectionColor => useLightTheme
+            ? new Color(0.18f, 0.18f, 0.18f, 0.98f)
+            : new Color(1f, 1f, 1f, 0.98f);
+
+        private Color TargetHighlightConnectionColor => useLightTheme
+            ? new Color(0.86f, 0.18f, 0.18f, 0.98f)
+            : new Color(1f, 0.28f, 0.28f, 0.98f);
+
+        private Color ControlBackgroundColor => useLightTheme
+            ? new Color(0.96f, 0.95f, 0.92f, 1f)
+            : Color.white;
+
+        private Color ControlContentColor => useLightTheme
+            ? Color.black
+            : Color.white;
+
+        private Color MutedContentColor => useLightTheme
+            ? Color.black
+            : new Color(0.75f, 0.75f, 0.75f, 1f);
+
+        private Color WindowBackgroundColor => useLightTheme
+            ? new Color(0.97f, 0.96f, 0.94f, 1f)
+            : new Color(0.22f, 0.22f, 0.22f, 1f);
+
+        private Color DangerButtonColor => useLightTheme
+            ? new Color(0.88f, 0.32f, 0.32f, 1f)
+            : new Color(1f, 0.40f, 0.40f, 1f);
+
+        private Color LinkButtonColor => useLightTheme
+            ? new Color(0.84f, 0.62f, 0.18f, 1f)
+            : new Color(1f, 0.70f, 0.20f, 1f);
+
+        private Color StartBadgeColor => useLightTheme
+            ? new Color(0.22f, 0.60f, 0.26f, 1f)
+            : new Color(0.20f, 0.70f, 0.25f, 1f);
+
+        private Color WarningBadgeColor => useLightTheme
+            ? new Color(0.84f, 0.56f, 0.14f, 1f)
+            : new Color(1f, 0.60f, 0.15f, 1f);
+
+        private Color StartNodeTint => useLightTheme
+            ? new Color(0.84f, 0.95f, 0.84f, 1f)
+            : new Color(0.82f, 1f, 0.82f, 1f);
+
+        private Color OrphanNodeTint => useLightTheme
+            ? new Color(0.98f, 0.90f, 0.74f, 1f)
+            : new Color(1f, 0.92f, 0.72f, 1f);
+
+        private Color SelectionOverlayTextColor => useLightTheme
+            ? new Color(0.10f, 0.16f, 0.12f, 1f)
+            : Color.white;
+
+        private Color DangerAccentColor => useLightTheme
+            ? new Color(0.82f, 0.30f, 0.30f, 1f)
+            : new Color(0.92f, 0.34f, 0.34f, 1f);
+
+        private Color WarningAccentColor => useLightTheme
+            ? new Color(0.78f, 0.52f, 0.12f, 1f)
+            : new Color(0.95f, 0.66f, 0.22f, 1f);
+
+        private Color HybridAccentColor => useLightTheme
+            ? new Color(0.20f, 0.58f, 0.64f, 1f)
+            : new Color(0.24f, 0.72f, 0.78f, 1f);
+
+        private Color ConditionAccentColor => useLightTheme
+            ? new Color(0.21f, 0.52f, 0.72f, 1f)
+            : new Color(0.26f, 0.63f, 0.86f, 1f);
+
+        private Color RewardAccentColor => useLightTheme
+            ? new Color(0.31f, 0.65f, 0.35f, 1f)
+            : new Color(0.38f, 0.78f, 0.42f, 1f);
+
+        private Color MoneyAccentColor => useLightTheme
+            ? new Color(0.74f, 0.58f, 0.18f, 1f)
+            : new Color(0.85f, 0.68f, 0.22f, 1f);
+
+        private Color ItemAccentColor => useLightTheme
+            ? new Color(0.20f, 0.66f, 0.64f, 1f)
+            : new Color(0.24f, 0.78f, 0.76f, 1f);
+
+        private Color NeutralAccentColor => useLightTheme
+            ? new Color(0.48f, 0.48f, 0.48f, 1f)
+            : new Color(0.60f, 0.60f, 0.60f, 1f);
+
+        private Color StrongDividerColor => useLightTheme
+            ? new Color(0f, 0f, 0f, 0.12f)
+            : new Color(1f, 1f, 1f, 0.12f);
+
+        private Color SectionDividerColor => useLightTheme
+            ? new Color(0f, 0f, 0f, 0.10f)
+            : new Color(1f, 1f, 1f, 0.10f);
+
+        private Color SoftDividerColor => useLightTheme
+            ? new Color(0f, 0f, 0f, 0.08f)
+            : new Color(1f, 1f, 1f, 0.08f);
+
+        private Color SoftestDividerColor => useLightTheme
+            ? new Color(0f, 0f, 0f, 0.06f)
+            : new Color(1f, 1f, 1f, 0.06f);
+
+        private Color GetSelectionOverlayColor(bool isHovered)
+        {
+            return useLightTheme
+                ? new Color(0.18f, 0.65f, 0.24f, isHovered ? 0.32f : 0.18f)
+                : new Color(0f, 0.75f, 0.20f, isHovered ? 0.45f : 0.25f);
         }
 
         private void DrawGridLines(Rect rect, float spacing, Color color)

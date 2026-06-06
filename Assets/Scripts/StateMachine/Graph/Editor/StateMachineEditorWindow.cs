@@ -11,6 +11,7 @@ namespace StateMachine.Graph.Editor
     {
         private const string StatesPathKey = "StateMachineEditor_StatesPath";
         private const string TransitionsPathKey = "StateMachineEditor_TransitionsPath";
+        private const string ThemeKey = "StateMachineEditor_Theme";
         private const float WorkspaceWidth = 10000f;
         private const float WorkspaceHeight = 10000f;
         private const float ZoomMin = 0.25f;
@@ -29,9 +30,27 @@ namespace StateMachine.Graph.Editor
         private bool isControlsPanelExpanded = true;
         private Transition pendingTransition;
         private Node sourceNodeForSelection;
+        private readonly List<EditorStyleTextOverride> editorStyleTextOverrides = new();
+        private GUIStyle lightWindowStyle;
+        private GUIStyle lightHelpBoxStyle;
+        private GUIStyle lightButtonStyle;
+        private GUIStyle lightMiniButtonStyle;
+        private GUIStyle lightPopupStyle;
+        private GUIStyle lightTextFieldStyle;
+        private GUIStyle lightMiniBoldLabelStyle;
+        private GUIStyle lightMiniLabelStyle;
+        private GUIStyle lightCenteredMiniLabelStyle;
+        private Texture2D lightWindowTexture;
+        private Texture2D lightHelpBoxTexture;
+        private Texture2D lightButtonTexture;
+        private Texture2D lightButtonHoverTexture;
+        private Texture2D lightButtonActiveTexture;
+        private Texture2D lightTextFieldTexture;
+        private GUISkin lightSkin;
 
         private float zoom = 1f;
         private Vector2 panOffset = Vector2.zero;
+        private bool useLightTheme;
 
         [MenuItem("Tools/State Machine Editor")]
         public static void Open()
@@ -43,26 +62,47 @@ namespace StateMachine.Graph.Editor
         {
             statesFolderPath = EditorPrefs.GetString(StatesPathKey, "Assets/States");
             transitionsFolderPath = EditorPrefs.GetString(TransitionsPathKey, "Assets/Transitions");
+            useLightTheme = EditorPrefs.GetBool(ThemeKey, false);
         }
 
         private void OnGUI()
         {
-            if (currentGraph == null)
-            {
-                DrawEmptyState();
-                DrawControlsOverlay();
-                return;
-            }
+            Color previousBackgroundColor = GUI.backgroundColor;
+            Color previousContentColor = GUI.contentColor;
+            GUISkin previousSkin = GUI.skin;
 
-            EnsureGraphNodes();
-            DrawGraphArea();
-            DrawControlsOverlay();
+            try
+            {
+                ApplyThemeGuiColors();
+                ApplyThemeSkin();
+                ApplyThemeEditorStyleTextOverrides();
+                DrawWindowBackground();
+
+                if (currentGraph == null)
+                {
+                    DrawEmptyState();
+                    DrawControlsOverlay();
+                    return;
+                }
+
+                EnsureGraphNodes();
+                DrawGraphArea();
+                DrawControlsOverlay();
+            }
+            finally
+            {
+                RestoreThemeEditorStyleTextOverrides();
+                GUI.skin = previousSkin;
+                GUI.backgroundColor = previousBackgroundColor;
+                GUI.contentColor = previousContentColor;
+            }
         }
 
         private void DrawEmptyState()
         {
             Rect contentRect = new Rect(12f, 12f, position.width - 24f, 52f);
-            GUI.Box(contentRect, GUIContent.none, EditorStyles.helpBox);
+            EditorGUI.DrawRect(contentRect, PanelBackgroundColor);
+            GUI.Box(contentRect, GUIContent.none, HelpBoxStyle);
             EditorGUI.LabelField(
                 new Rect(contentRect.x + 10f, contentRect.y + 10f, contentRect.width - 20f, 32f),
                 "Create or load a state machine graph.");
@@ -75,7 +115,6 @@ namespace StateMachine.Graph.Editor
             const float spacing = 6f;
             const float padding = 10f;
             const float collapsedToggleLeftOffset = 6f;
-
             float panelHeight = Mathf.Max(120f, position.height);
             float panelY = position.height - panelHeight;
             Rect panelRect = new Rect(0f, panelY, OverlayPanelWidth, panelHeight);
@@ -88,7 +127,7 @@ namespace StateMachine.Graph.Editor
 
             if (!isControlsPanelExpanded)
             {
-                if (GUI.Button(toggleRect, ">"))
+                if (DrawButton(toggleRect, ">"))
                 {
                     isControlsPanelExpanded = true;
                 }
@@ -99,21 +138,21 @@ namespace StateMachine.Graph.Editor
             const float buttonHeight = 28f;
             float y = padding;
 
-            EditorGUI.DrawRect(panelRect, new Color(0.18f, 0.18f, 0.18f, 1f));
-            GUI.Box(panelRect, GUIContent.none, EditorStyles.helpBox);
-            GUILayout.BeginArea(panelRect, GUIContent.none, EditorStyles.helpBox);
+            EditorGUI.DrawRect(panelRect, PanelBackgroundColor);
+            GUI.Box(panelRect, GUIContent.none, HelpBoxStyle);
+            GUILayout.BeginArea(panelRect, GUIContent.none, HelpBoxStyle);
             float contentWidth = OverlayPanelWidth - padding * 2f;
 
             EditorGUI.LabelField(new Rect(padding, padding, contentWidth, 18f), "States Folder Path:");
             y += 18f;
 
-            statesFolderPath = EditorGUI.TextField(new Rect(padding, y, contentWidth - 160f, 20f), statesFolderPath);
-            if (GUI.Button(new Rect(padding + contentWidth - 155f, y, 70f, 20f), "Pick"))
+            statesFolderPath = EditorGUI.TextField(new Rect(padding, y, contentWidth - 160f, 20f), statesFolderPath, TextFieldStyle);
+            if (DrawButton(new Rect(padding + contentWidth - 155f, y, 70f, 20f), "Pick"))
             {
                 PickFolder("Select folder for States", ref statesFolderPath, StatesPathKey);
             }
 
-            if (GUI.Button(new Rect(padding + contentWidth - 80f, y, 70f, 20f), "Save"))
+            if (DrawButton(new Rect(padding + contentWidth - 80f, y, 70f, 20f), "Save"))
             {
                 EditorPrefs.SetString(StatesPathKey, statesFolderPath);
             }
@@ -123,27 +162,36 @@ namespace StateMachine.Graph.Editor
             EditorGUI.LabelField(new Rect(padding, y, contentWidth, 18f), "Transitions Folder Path:");
             y += 18f;
 
-            transitionsFolderPath = EditorGUI.TextField(new Rect(padding, y, contentWidth - 160f, 20f), transitionsFolderPath);
-            if (GUI.Button(new Rect(padding + contentWidth - 155f, y, 70f, 20f), "Pick"))
+            transitionsFolderPath = EditorGUI.TextField(new Rect(padding, y, contentWidth - 160f, 20f), transitionsFolderPath, TextFieldStyle);
+            if (DrawButton(new Rect(padding + contentWidth - 155f, y, 70f, 20f), "Pick"))
             {
                 PickFolder("Select folder for Transitions", ref transitionsFolderPath, TransitionsPathKey);
             }
 
-            if (GUI.Button(new Rect(padding + contentWidth - 80f, y, 70f, 20f), "Save"))
+            if (DrawButton(new Rect(padding + contentWidth - 80f, y, 70f, 20f), "Save"))
             {
                 EditorPrefs.SetString(TransitionsPathKey, transitionsFolderPath);
             }
 
             y += 36f;
 
-            if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "New Graph"))
+            if (DrawButton(new Rect(padding, y, contentWidth, buttonHeight), GetThemeToggleLabel()))
+            {
+                useLightTheme = !useLightTheme;
+                EditorPrefs.SetBool(ThemeKey, useLightTheme);
+                Repaint();
+            }
+
+            y += buttonHeight + spacing;
+
+            if (DrawButton(new Rect(padding, y, contentWidth, buttonHeight), "New Graph"))
             {
                 CreateNewGraph();
             }
 
             y += buttonHeight + spacing;
 
-            if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "Load Graph"))
+            if (DrawButton(new Rect(padding, y, contentWidth, buttonHeight), "Load Graph"))
             {
                 LoadGraph();
             }
@@ -151,7 +199,7 @@ namespace StateMachine.Graph.Editor
             y += buttonHeight + spacing;
 
             EditorGUI.BeginDisabledGroup(currentGraph == null);
-            if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "New State"))
+            if (DrawButton(new Rect(padding, y, contentWidth, buttonHeight), "New State"))
             {
                 CreateNewState();
             }
@@ -172,7 +220,7 @@ namespace StateMachine.Graph.Editor
                 }
 
                 EditorGUI.BeginDisabledGroup(startState == null);
-                if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "Ping Start State"))
+                if (DrawButton(new Rect(padding, y, contentWidth, buttonHeight), "Ping Start State"))
                 {
                     EditorGUIUtility.PingObject(startState);
                     Selection.activeObject = startState;
@@ -185,8 +233,8 @@ namespace StateMachine.Graph.Editor
             if (isSelectingTargetNode)
             {
                 Color previousColor = GUI.backgroundColor;
-                GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
-                if (GUI.Button(new Rect(padding, y, contentWidth, buttonHeight), "Cancel Selection"))
+                GUI.backgroundColor = DangerButtonColor;
+                if (DrawButton(new Rect(padding, y, contentWidth, buttonHeight), "Cancel Selection"))
                 {
                     CancelTargetSelection();
                 }
@@ -196,7 +244,7 @@ namespace StateMachine.Graph.Editor
 
             GUILayout.EndArea();
 
-            if (GUI.Button(toggleRect, "<"))
+            if (DrawButton(toggleRect, "<"))
             {
                 isControlsPanelExpanded = false;
             }
@@ -343,7 +391,7 @@ namespace StateMachine.Graph.Editor
 
                 Color previousColor = GUI.color;
                 GUI.color = GetNodeTint(node);
-                rect = GUILayout.Window(i, rect, _ => DrawNodeWindow(node), GetNodeTitle(node));
+                rect = GUILayout.Window(i, rect, _ => DrawNodeWindow(node), GetNodeTitle(node), NodeWindowStyle);
                 GUI.color = previousColor;
 
                 nodeRects[node] = rect;
@@ -440,12 +488,12 @@ namespace StateMachine.Graph.Editor
 
                 if (IsStartNode(node))
                 {
-                    GUI.backgroundColor = new Color(0.2f, 0.7f, 0.25f);
+                    GUI.backgroundColor = StartBadgeColor;
                     GUI.Box(badgeRect, "S");
                 }
                 else if (IsOrphanState(node.State))
                 {
-                    GUI.backgroundColor = new Color(1f, 0.6f, 0.15f);
+                    GUI.backgroundColor = WarningBadgeColor;
                     GUI.Box(badgeRect, "!");
                 }
 
@@ -492,7 +540,7 @@ namespace StateMachine.Graph.Editor
                         startPos = new Vector2(sourceRect.xMax - 12f, sourceRect.center.y);
                     }
 
-                    Handles.color = new Color(0.9f, 0.8f, 0.2f, 0.95f);
+                    Handles.color = PrimaryConnectionColor;
                     Vector2[] routePoints = BuildConnectionRoute(startPos, sourceRect, targetRect, nodeRects.Values);
                     DrawSmoothedConnection(routePoints);
                     DrawConnectionArrow(routePoints);
@@ -565,8 +613,8 @@ namespace StateMachine.Graph.Editor
             }
 
             Vector2 perpendicular = new Vector2(-direction.y, direction.x);
-            Vector2 arrowBase1 = arrowTip - direction * 10f + perpendicular * 4f;
-            Vector2 arrowBase2 = arrowTip - direction * 10f - perpendicular * 4f;
+            Vector2 arrowBase1 = arrowTip - direction * 13f + perpendicular * 5.5f;
+            Vector2 arrowBase2 = arrowTip - direction * 13f - perpendicular * 5.5f;
             Handles.DrawAAConvexPolygon(arrowTip, arrowBase1, arrowBase2);
         }
 
@@ -577,7 +625,7 @@ namespace StateMachine.Graph.Editor
                 return;
             }
 
-            const float lineWidth = 2f;
+            const float lineWidth = 3.5f;
             const float cornerRadius = 22f;
 
             if (routePoints.Count == 2)
@@ -1022,14 +1070,14 @@ namespace StateMachine.Graph.Editor
                 }
 
                 bool isHovered = rect.Contains(Event.current.mousePosition);
-                EditorGUI.DrawRect(rect, new Color(0f, 0.75f, 0.2f, isHovered ? 0.45f : 0.25f));
+                EditorGUI.DrawRect(rect, GetSelectionOverlayColor(isHovered));
 
                 GUIStyle style = new GUIStyle(GUI.skin.label)
                 {
                     alignment = TextAnchor.MiddleCenter,
                     fontSize = 52,
                     fontStyle = FontStyle.Bold,
-                    normal = { textColor = Color.white }
+                    normal = { textColor = SelectionOverlayTextColor }
                 };
 
                 GUI.Label(rect, "+", style);
@@ -1083,7 +1131,7 @@ namespace StateMachine.Graph.Editor
             EditorGUI.BeginDisabledGroup(isSelectingTargetNode);
 
             Rect removeButtonRect = new Rect(298f, 5f, 16f, 16f);
-            if (GUI.Button(removeButtonRect, "x"))
+            if (DrawMiniButton(removeButtonRect, "x"))
             {
                 DeleteNode(node);
                 EditorGUI.EndDisabledGroup();
@@ -1120,7 +1168,7 @@ namespace StateMachine.Graph.Editor
             EnsureCollections(node.State);
             DrawStateEditor(node.State, node);
 
-            if (GUILayout.Button(IsStartNode(node) ? "Start State" : "Set As Start"))
+            if (DrawButton(IsStartNode(node) ? "Start State" : "Set As Start"))
             {
                 MoveNodeToFront(node);
             }
@@ -1154,11 +1202,11 @@ namespace StateMachine.Graph.Editor
             }
 
             EditorGUILayout.Space(4f);
-            EditorGUILayout.LabelField("Behaviours", EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField("Behaviours", MiniBoldLabelStyle);
             DrawBehavioursSection(state);
 
             EditorGUILayout.Space(4f);
-            EditorGUILayout.LabelField("Transitions", EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField("Transitions", MiniBoldLabelStyle);
             DrawTransitionsSection(state, ownerNode);
         }
 
@@ -1184,7 +1232,7 @@ namespace StateMachine.Graph.Editor
                     MarkDirty(state);
                 }
 
-                if (GUILayout.Button("X", GUILayout.Width(22f)))
+                if (DrawMiniButton("X", GUILayout.Width(22f)))
                 {
                     removeBehaviourIndex = i;
                 }
@@ -1194,10 +1242,10 @@ namespace StateMachine.Graph.Editor
 
             if (state.Behaviours.Count == 0)
             {
-                EditorGUILayout.LabelField("- none -", EditorStyles.miniLabel);
+                EditorGUILayout.LabelField("- none -", MiniLabelStyle);
             }
 
-            if (GUILayout.Button("+ Add Behaviour"))
+            if (DrawButton("+ Add Behaviour"))
             {
                 state.Behaviours.Add(null);
                 MarkDirty(state);
@@ -1231,27 +1279,27 @@ namespace StateMachine.Graph.Editor
                 Color previousColor = GUI.color;
                 if (missingLink)
                 {
-                    GUI.color = new Color(1f, 0.75f, 0.75f);
+                    GUI.color = MissingLinkPanelTint;
                 }
                 else if (targetOutsideGraph)
                 {
-                    GUI.color = new Color(1f, 0.9f, 0.65f);
+                    GUI.color = OutsideGraphPanelTint;
                 }
 
-                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                EditorGUILayout.BeginVertical(HelpBoxStyle);
                 GUI.color = previousColor;
 
                 EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField($"Transition {i + 1}", EditorStyles.miniBoldLabel);
+                EditorGUILayout.LabelField($"Transition {i + 1}", MiniBoldLabelStyle);
 
-                if (GUILayout.Button("X", GUILayout.Width(22f)))
+                if (DrawMiniButton("X", GUILayout.Width(22f)))
                 {
                     removeTransitionIndex = i;
                 }
 
                 Color previousBackground = GUI.backgroundColor;
-                GUI.backgroundColor = missingLink ? new Color(1f, 0.4f, 0.4f) : new Color(1f, 0.7f, 0.2f);
-                bool pickPressed = GUILayout.Button("O", GUILayout.Width(22f));
+                GUI.backgroundColor = missingLink ? DangerButtonColor : LinkButtonColor;
+                bool pickPressed = DrawMiniButton("O", GUILayout.Width(22f));
                 GUI.backgroundColor = previousBackground;
 
                 Rect localButtonRect = GUILayoutUtility.GetLastRect();
@@ -1293,7 +1341,7 @@ namespace StateMachine.Graph.Editor
                 EditorGUILayout.Space(2f);
             }
 
-            if (GUILayout.Button("+ Add Transition"))
+            if (DrawButton("+ Add Transition"))
             {
                 CreateTransitionAsset(state);
             }
@@ -1372,7 +1420,7 @@ namespace StateMachine.Graph.Editor
 
             if (typeProperty != null)
             {
-                EditorGUILayout.PropertyField(typeProperty);
+                DrawEnumPropertyField(typeProperty);
             }
 
             if (targetStateProperty != null)
@@ -1641,12 +1689,12 @@ namespace StateMachine.Graph.Editor
 
             if (IsStartNode(node))
             {
-                return new Color(0.82f, 1f, 0.82f);
+                return StartNodeTint;
             }
 
             if (IsOrphanState(node.State))
             {
-                return new Color(1f, 0.92f, 0.72f);
+                return OrphanNodeTint;
             }
 
             return Color.white;
@@ -1705,13 +1753,14 @@ namespace StateMachine.Graph.Editor
 
         private void DrawBackgroundGrid(Rect rect)
         {
-            Color minorColor = new Color(0.25f, 0.25f, 0.25f, 0.35f);
-            Color majorColor = new Color(0.25f, 0.25f, 0.25f, 0.6f);
+            Color minorColor = MinorGridColor;
+            Color majorColor = MajorGridColor;
 
             float gridSpacing = 20f * zoom;
             float majorStep = gridSpacing * 5f;
             Vector2 offset = new Vector2(panOffset.x % gridSpacing, panOffset.y % gridSpacing);
 
+            EditorGUI.DrawRect(rect, CanvasBackgroundColor);
             Handles.BeginGUI();
 
             Handles.color = minorColor;
@@ -1737,6 +1786,503 @@ namespace StateMachine.Graph.Editor
             }
 
             Handles.EndGUI();
+        }
+
+        private string GetThemeToggleLabel()
+        {
+            return useLightTheme ? "Switch to Night Theme" : "Switch to Light Theme";
+        }
+
+        private void ApplyThemeGuiColors()
+        {
+            if (!useLightTheme)
+            {
+                return;
+            }
+
+            GUI.backgroundColor = ControlBackgroundColor;
+            GUI.contentColor = ControlContentColor;
+        }
+
+        private void ApplyThemeSkin()
+        {
+            if (!useLightTheme)
+            {
+                return;
+            }
+
+            GUI.skin = LightSkin;
+        }
+
+        private void DrawWindowBackground()
+        {
+            if (Event.current.type != EventType.Repaint)
+            {
+                return;
+            }
+
+            EditorGUI.DrawRect(new Rect(0f, 0f, position.width, position.height), WindowBackgroundColor);
+        }
+
+        private void ApplyThemeEditorStyleTextOverrides()
+        {
+            if (!useLightTheme)
+            {
+                return;
+            }
+
+            editorStyleTextOverrides.Clear();
+            OverrideEditorStyleTextColor(EditorStyles.label);
+            OverrideEditorStyleTextColor(EditorStyles.boldLabel);
+            OverrideEditorStyleTextColor(EditorStyles.miniLabel);
+            OverrideEditorStyleTextColor(EditorStyles.miniBoldLabel);
+            OverrideEditorStyleTextColor(EditorStyles.wordWrappedLabel);
+            OverrideEditorStyleTextColor(EditorStyles.wordWrappedMiniLabel);
+            OverrideEditorStyleTextColor(EditorStyles.centeredGreyMiniLabel);
+            OverrideEditorStyleTextColor(EditorStyles.foldout);
+            OverrideEditorStyleTextColor(EditorStyles.toggle);
+            OverrideEditorStyleTextColor(EditorStyles.textField);
+            OverrideEditorStyleTextColor(EditorStyles.textArea);
+            OverrideEditorStyleTextColor(EditorStyles.popup);
+            OverrideEditorStyleTextColor(EditorStyles.miniButton);
+            OverrideEditorStyleTextColor(EditorStyles.miniButtonLeft);
+            OverrideEditorStyleTextColor(EditorStyles.miniButtonMid);
+            OverrideEditorStyleTextColor(EditorStyles.miniButtonRight);
+            OverrideEditorStyleTextColor(EditorStyles.objectField);
+            OverrideEditorStyleTextColor(EditorStyles.objectFieldThumb);
+            OverrideEditorStyleTextColor(EditorStyles.helpBox);
+        }
+
+        private void RestoreThemeEditorStyleTextOverrides()
+        {
+            if (editorStyleTextOverrides.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = editorStyleTextOverrides.Count - 1; i >= 0; i--)
+            {
+                editorStyleTextOverrides[i].Restore();
+            }
+
+            editorStyleTextOverrides.Clear();
+        }
+
+        private void OverrideEditorStyleTextColor(GUIStyle style)
+        {
+            if (style == null)
+            {
+                return;
+            }
+
+            editorStyleTextOverrides.Add(new EditorStyleTextOverride(style));
+            SetStyleTextColor(style, Color.black);
+        }
+
+        private bool DrawButton(Rect rect, string label)
+        {
+            return GUI.Button(rect, label, ButtonStyle);
+        }
+
+        private bool DrawMiniButton(Rect rect, string label)
+        {
+            return GUI.Button(rect, label, MiniButtonStyle);
+        }
+
+        private bool DrawButton(string label, params GUILayoutOption[] options)
+        {
+            return GUILayout.Button(label, ButtonStyle, options);
+        }
+
+        private bool DrawMiniButton(string label, params GUILayoutOption[] options)
+        {
+            return GUILayout.Button(label, MiniButtonStyle, options);
+        }
+
+        private GUIStyle NodeWindowStyle => useLightTheme
+            ? lightWindowStyle ??= CreateNodeWindowStyle()
+            : GUI.skin.window;
+
+        private GUIStyle HelpBoxStyle => useLightTheme
+            ? lightHelpBoxStyle ??= CreateHelpBoxStyle()
+            : EditorStyles.helpBox;
+
+        private GUIStyle ButtonStyle => useLightTheme
+            ? lightButtonStyle ??= CreateButtonStyle(GUI.skin.button)
+            : GUI.skin.button;
+
+        private GUIStyle MiniButtonStyle => useLightTheme
+            ? lightMiniButtonStyle ??= CreateButtonStyle(EditorStyles.miniButton)
+            : EditorStyles.miniButton;
+
+        private GUIStyle PopupStyle => useLightTheme
+            ? lightPopupStyle ??= CreatePopupStyle()
+            : EditorStyles.popup;
+
+        private GUIStyle TextFieldStyle => useLightTheme
+            ? lightTextFieldStyle ??= CreateTextInputStyle(EditorStyles.textField)
+            : EditorStyles.textField;
+
+        private GUIStyle MiniBoldLabelStyle => useLightTheme
+            ? lightMiniBoldLabelStyle ??= CreateLabelStyle(EditorStyles.miniBoldLabel)
+            : EditorStyles.miniBoldLabel;
+
+        private GUIStyle MiniLabelStyle => useLightTheme
+            ? lightMiniLabelStyle ??= CreateLabelStyle(EditorStyles.miniLabel, MutedContentColor)
+            : EditorStyles.miniLabel;
+
+        private GUIStyle CenteredMiniLabelStyle => useLightTheme
+            ? lightCenteredMiniLabelStyle ??= CreateLabelStyle(EditorStyles.centeredGreyMiniLabel, MutedContentColor)
+            : EditorStyles.centeredGreyMiniLabel;
+
+        private GUISkin LightSkin => lightSkin ??= CreateLightSkin();
+
+        private GUIStyle CreateNodeWindowStyle()
+        {
+            lightWindowTexture ??= CreateSolidTexture(new Color(0.95f, 0.96f, 0.98f, 1f));
+
+            var style = new GUIStyle(GUI.skin.window);
+            ApplyThemeState(style.normal, lightWindowTexture, ControlContentColor);
+            ApplyThemeState(style.hover, lightWindowTexture, ControlContentColor);
+            ApplyThemeState(style.active, lightWindowTexture, ControlContentColor);
+            ApplyThemeState(style.focused, lightWindowTexture, ControlContentColor);
+            ApplyThemeState(style.onNormal, lightWindowTexture, ControlContentColor);
+            ApplyThemeState(style.onHover, lightWindowTexture, ControlContentColor);
+            ApplyThemeState(style.onActive, lightWindowTexture, ControlContentColor);
+            ApplyThemeState(style.onFocused, lightWindowTexture, ControlContentColor);
+
+            return style;
+        }
+
+        private GUIStyle CreateHelpBoxStyle()
+        {
+            lightHelpBoxTexture ??= CreateSolidTexture(new Color(0.96f, 0.95f, 0.92f, 1f));
+
+            var style = new GUIStyle(EditorStyles.helpBox);
+            ApplyThemeState(style.normal, lightHelpBoxTexture, ControlContentColor);
+            ApplyThemeState(style.hover, lightHelpBoxTexture, ControlContentColor);
+            ApplyThemeState(style.active, lightHelpBoxTexture, ControlContentColor);
+            ApplyThemeState(style.focused, lightHelpBoxTexture, ControlContentColor);
+
+            return style;
+        }
+
+        private GUIStyle CreateButtonStyle(GUIStyle sourceStyle)
+        {
+            lightButtonTexture ??= CreateSolidTexture(new Color(0.94f, 0.92f, 0.88f, 1f));
+            lightButtonHoverTexture ??= CreateSolidTexture(new Color(0.91f, 0.89f, 0.85f, 1f));
+            lightButtonActiveTexture ??= CreateSolidTexture(new Color(0.87f, 0.85f, 0.81f, 1f));
+
+            var style = new GUIStyle(sourceStyle);
+            ApplyThemeState(style.normal, lightButtonTexture, ControlContentColor);
+            ApplyThemeState(style.hover, lightButtonHoverTexture, ControlContentColor);
+            ApplyThemeState(style.active, lightButtonActiveTexture, ControlContentColor);
+            ApplyThemeState(style.focused, lightButtonHoverTexture, ControlContentColor);
+            ApplyThemeState(style.onNormal, lightButtonTexture, ControlContentColor);
+            ApplyThemeState(style.onHover, lightButtonHoverTexture, ControlContentColor);
+            ApplyThemeState(style.onActive, lightButtonActiveTexture, ControlContentColor);
+            ApplyThemeState(style.onFocused, lightButtonHoverTexture, ControlContentColor);
+
+            return style;
+        }
+
+        private GUIStyle CreateTextInputStyle(GUIStyle sourceStyle)
+        {
+            lightTextFieldTexture ??= CreateSolidTexture(new Color(0.98f, 0.97f, 0.95f, 1f));
+
+            var style = new GUIStyle(sourceStyle);
+            ApplyThemeState(style.normal, lightTextFieldTexture, ControlContentColor);
+            ApplyThemeState(style.hover, lightTextFieldTexture, ControlContentColor);
+            ApplyThemeState(style.active, lightTextFieldTexture, ControlContentColor);
+            ApplyThemeState(style.focused, lightTextFieldTexture, ControlContentColor);
+            ApplyThemeState(style.onNormal, lightTextFieldTexture, ControlContentColor);
+            ApplyThemeState(style.onHover, lightTextFieldTexture, ControlContentColor);
+            ApplyThemeState(style.onActive, lightTextFieldTexture, ControlContentColor);
+            ApplyThemeState(style.onFocused, lightTextFieldTexture, ControlContentColor);
+
+            return style;
+        }
+
+        private GUIStyle CreatePopupStyle()
+        {
+            var style = CreateButtonStyle(EditorStyles.popup);
+            style.alignment = TextAnchor.MiddleLeft;
+            return style;
+        }
+
+        private GUISkin CreateLightSkin()
+        {
+            GUISkin sourceSkin = GUI.skin;
+            GUISkin skin = UnityEngine.Object.Instantiate(sourceSkin);
+            skin.label = CreateLabelStyle(sourceSkin.label);
+            skin.button = CreateButtonStyle(sourceSkin.button);
+            skin.textField = CreateTextInputStyle(sourceSkin.textField);
+            skin.textArea = CreateTextInputStyle(sourceSkin.textArea);
+            skin.box = CreateHelpBoxStyle();
+            skin.window = CreateNodeWindowStyle();
+            skin.toggle = CreateLabelStyle(sourceSkin.toggle);
+            skin.settings.selectionColor = new Color(0.77f, 0.84f, 0.93f, 1f);
+            skin.settings.cursorColor = ControlContentColor;
+
+            skin.customStyles = RegisterLightCustomStyles(sourceSkin, skin.customStyles);
+
+            return skin;
+        }
+
+        private GUIStyle[] RegisterLightCustomStyles(GUISkin sourceSkin, GUIStyle[] styles)
+        {
+            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectField", lightTextFieldTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectFieldButton", lightButtonTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "IN ObjectField", lightTextFieldTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "IN ObjectFieldText", lightTextFieldTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "Popup", lightButtonTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "IN Popup", lightButtonTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "MiniPopup", lightButtonTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "MiniPullDown", lightButtonTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "DropDown", lightButtonTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "DropDownButton", lightButtonTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectFieldThumb", lightTextFieldTexture);
+            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectFieldMiniThumb", lightTextFieldTexture);
+            return styles;
+        }
+
+        private GUIStyle[] RegisterNamedStyle(GUISkin sourceSkin, GUIStyle[] styles, string styleName, Texture2D backgroundTexture)
+        {
+            GUIStyle style = sourceSkin.FindStyle(styleName);
+            return style != null
+                ? AppendOrReplaceStyle(styles, CreateNamedStyle(style, styleName, backgroundTexture))
+                : styles;
+        }
+
+        private GUIStyle CreateLabelStyle(GUIStyle sourceStyle)
+        {
+            return CreateLabelStyle(sourceStyle, ControlContentColor);
+        }
+
+        private GUIStyle CreateLabelStyle(GUIStyle sourceStyle, Color textColor)
+        {
+            var style = new GUIStyle(sourceStyle);
+            style.normal.textColor = textColor;
+            style.hover.textColor = textColor;
+            style.active.textColor = textColor;
+            style.focused.textColor = textColor;
+            style.onNormal.textColor = textColor;
+            style.onHover.textColor = textColor;
+            style.onActive.textColor = textColor;
+            style.onFocused.textColor = textColor;
+            return style;
+        }
+
+        private GUIStyle CreateNamedStyle(GUIStyle sourceStyle, string styleName, Texture2D backgroundTexture)
+        {
+            var style = new GUIStyle(sourceStyle) { name = styleName };
+            ApplyThemeState(style.normal, backgroundTexture, ControlContentColor);
+            ApplyThemeState(style.hover, backgroundTexture, ControlContentColor);
+            ApplyThemeState(style.active, backgroundTexture, ControlContentColor);
+            ApplyThemeState(style.focused, backgroundTexture, ControlContentColor);
+            ApplyThemeState(style.onNormal, backgroundTexture, ControlContentColor);
+            ApplyThemeState(style.onHover, backgroundTexture, ControlContentColor);
+            ApplyThemeState(style.onActive, backgroundTexture, ControlContentColor);
+            ApplyThemeState(style.onFocused, backgroundTexture, ControlContentColor);
+            return style;
+        }
+
+        private void DrawEnumPropertyField(SerializedProperty property, string label = null)
+        {
+            if (property == null)
+            {
+                return;
+            }
+
+            if (property.propertyType != SerializedPropertyType.Enum)
+            {
+                if (string.IsNullOrEmpty(label))
+                {
+                    EditorGUILayout.PropertyField(property);
+                }
+                else
+                {
+                    EditorGUILayout.PropertyField(property, new GUIContent(label));
+                }
+
+                return;
+            }
+
+            string popupLabel = string.IsNullOrEmpty(label) ? property.displayName : label;
+            int selectedIndex = EditorGUILayout.Popup(popupLabel, property.enumValueIndex, property.enumDisplayNames, PopupStyle);
+            if (selectedIndex != property.enumValueIndex)
+            {
+                property.enumValueIndex = selectedIndex;
+            }
+        }
+
+        private static void ApplyThemeState(GUIStyleState state, Texture2D backgroundTexture, Color textColor)
+        {
+            state.background = backgroundTexture;
+            state.scaledBackgrounds = new[] { backgroundTexture };
+            state.textColor = textColor;
+        }
+
+        private static void SetStyleTextColor(GUIStyle style, Color color)
+        {
+            style.normal.textColor = color;
+            style.hover.textColor = color;
+            style.active.textColor = color;
+            style.focused.textColor = color;
+            style.onNormal.textColor = color;
+            style.onHover.textColor = color;
+            style.onActive.textColor = color;
+            style.onFocused.textColor = color;
+        }
+
+        private static GUIStyle[] AppendOrReplaceStyle(GUIStyle[] styles, GUIStyle style)
+        {
+            if (styles == null || styles.Length == 0)
+            {
+                return new[] { style };
+            }
+
+            for (int i = 0; i < styles.Length; i++)
+            {
+                if (styles[i] != null && styles[i].name == style.name)
+                {
+                    styles[i] = style;
+                    return styles;
+                }
+            }
+
+            GUIStyle[] result = new GUIStyle[styles.Length + 1];
+            styles.CopyTo(result, 0);
+            result[styles.Length] = style;
+            return result;
+        }
+
+        private static Texture2D CreateSolidTexture(Color color)
+        {
+            var texture = new Texture2D(1, 1, TextureFormat.RGBA32, false)
+            {
+                hideFlags = HideFlags.HideAndDontSave
+            };
+            texture.SetPixel(0, 0, color);
+            texture.Apply();
+            return texture;
+        }
+
+        private readonly struct EditorStyleTextOverride
+        {
+            private readonly GUIStyle style;
+            private readonly Color normal;
+            private readonly Color hover;
+            private readonly Color active;
+            private readonly Color focused;
+            private readonly Color onNormal;
+            private readonly Color onHover;
+            private readonly Color onActive;
+            private readonly Color onFocused;
+
+            public EditorStyleTextOverride(GUIStyle style)
+            {
+                this.style = style;
+                normal = style.normal.textColor;
+                hover = style.hover.textColor;
+                active = style.active.textColor;
+                focused = style.focused.textColor;
+                onNormal = style.onNormal.textColor;
+                onHover = style.onHover.textColor;
+                onActive = style.onActive.textColor;
+                onFocused = style.onFocused.textColor;
+            }
+
+            public void Restore()
+            {
+                style.normal.textColor = normal;
+                style.hover.textColor = hover;
+                style.active.textColor = active;
+                style.focused.textColor = focused;
+                style.onNormal.textColor = onNormal;
+                style.onHover.textColor = onHover;
+                style.onActive.textColor = onActive;
+                style.onFocused.textColor = onFocused;
+            }
+        }
+
+        private Color PanelBackgroundColor => useLightTheme
+            ? new Color(0.96f, 0.95f, 0.92f, 1f)
+            : new Color(0.18f, 0.18f, 0.18f, 1f);
+
+        private Color CanvasBackgroundColor => useLightTheme
+            ? new Color(0.98f, 0.97f, 0.95f, 1f)
+            : new Color(0.13f, 0.13f, 0.13f, 1f);
+
+        private Color MinorGridColor => useLightTheme
+            ? new Color(0.35f, 0.40f, 0.48f, 0.18f)
+            : new Color(0.25f, 0.25f, 0.25f, 0.35f);
+
+        private Color MajorGridColor => useLightTheme
+            ? new Color(0.32f, 0.37f, 0.46f, 0.30f)
+            : new Color(0.25f, 0.25f, 0.25f, 0.60f);
+
+        private Color PrimaryConnectionColor => useLightTheme
+            ? new Color(0.30f, 0.28f, 0.24f, 0.98f)
+            : new Color(0.96f, 0.96f, 0.96f, 0.98f);
+
+        private Color ControlBackgroundColor => useLightTheme
+            ? new Color(0.96f, 0.95f, 0.92f, 1f)
+            : Color.white;
+
+        private Color ControlContentColor => useLightTheme
+            ? Color.black
+            : Color.white;
+
+        private Color MutedContentColor => useLightTheme
+            ? Color.black
+            : new Color(0.75f, 0.75f, 0.75f, 1f);
+
+        private Color WindowBackgroundColor => useLightTheme
+            ? new Color(0.97f, 0.96f, 0.94f, 1f)
+            : new Color(0.22f, 0.22f, 0.22f, 1f);
+
+        private Color DangerButtonColor => useLightTheme
+            ? new Color(0.88f, 0.32f, 0.32f, 1f)
+            : new Color(1f, 0.40f, 0.40f, 1f);
+
+        private Color LinkButtonColor => useLightTheme
+            ? new Color(0.84f, 0.62f, 0.18f, 1f)
+            : new Color(1f, 0.70f, 0.20f, 1f);
+
+        private Color StartBadgeColor => useLightTheme
+            ? new Color(0.22f, 0.60f, 0.26f, 1f)
+            : new Color(0.20f, 0.70f, 0.25f, 1f);
+
+        private Color WarningBadgeColor => useLightTheme
+            ? new Color(0.84f, 0.56f, 0.14f, 1f)
+            : new Color(1f, 0.60f, 0.15f, 1f);
+
+        private Color MissingLinkPanelTint => useLightTheme
+            ? new Color(1f, 0.86f, 0.86f, 1f)
+            : new Color(1f, 0.75f, 0.75f, 1f);
+
+        private Color OutsideGraphPanelTint => useLightTheme
+            ? new Color(1f, 0.93f, 0.78f, 1f)
+            : new Color(1f, 0.90f, 0.65f, 1f);
+
+        private Color StartNodeTint => useLightTheme
+            ? new Color(0.84f, 0.95f, 0.84f, 1f)
+            : new Color(0.82f, 1f, 0.82f, 1f);
+
+        private Color OrphanNodeTint => useLightTheme
+            ? new Color(0.98f, 0.90f, 0.74f, 1f)
+            : new Color(1f, 0.92f, 0.72f, 1f);
+
+        private Color SelectionOverlayTextColor => useLightTheme
+            ? new Color(0.10f, 0.16f, 0.12f, 1f)
+            : Color.white;
+
+        private Color GetSelectionOverlayColor(bool isHovered)
+        {
+            return useLightTheme
+                ? new Color(0.18f, 0.65f, 0.24f, isHovered ? 0.32f : 0.18f)
+                : new Color(0f, 0.75f, 0.20f, isHovered ? 0.45f : 0.25f);
         }
     }
 }

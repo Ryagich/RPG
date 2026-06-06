@@ -21,7 +21,7 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  isQuestPhrase: 0
+  isQuestPhrase: 1
   questAnswer:
     text:
       m_TableReference:
@@ -33,7 +33,7 @@ MonoBehaviour:
       m_WaitForCompletion: 0
       m_LocalVariables: []
     nextPhrase: {fileID: 0}
-    hasConditions: 0
+    hasConditions: 1
     conditions: []
   answers:
   - text:
