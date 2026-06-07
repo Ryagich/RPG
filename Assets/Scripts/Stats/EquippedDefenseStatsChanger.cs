@@ -61,7 +61,13 @@ namespace Stats
 
         private void RefreshBonuses()
         {
-            var currentBonuses = GetBonuses(playerInventory.HelmSlot) + GetBonuses(playerInventory.BodySlot);
+            var currentBonuses =
+                GetBonuses(playerInventory.HelmSlot)
+                + GetBonuses(playerInventory.FaceSlot)
+                + GetBonuses(playerInventory.BodySlot)
+                + GetBonuses(playerInventory.HandsSlot)
+                + GetBonuses(playerInventory.LegsSlot)
+                + GetBonuses(playerInventory.HipsSlot);
 
             ApplyDelta(StatType.PhysicalDefense, currentBonuses.PhysicalDefense - appliedBonuses.PhysicalDefense);
             ApplyDelta(StatType.TemperatureDefense, currentBonuses.TemperatureDefense - appliedBonuses.TemperatureDefense);

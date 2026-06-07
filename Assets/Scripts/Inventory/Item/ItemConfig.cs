@@ -8,7 +8,12 @@ namespace Inventory.Item
     [CreateAssetMenu(fileName = "ItemConfig", menuName = "configs/Inventory/ItemConfig")]
     public class ItemConfig : ScriptableObject
     {
-        private bool HasDefenseModifiers => ItemType == ItemType.Body || ItemType == ItemType.Helm;
+        private bool HasDefenseModifiers => ItemType == ItemType.Body
+                                           || ItemType == ItemType.Helm
+                                           || ItemType == ItemType.Face
+                                           || ItemType == ItemType.Hands
+                                           || ItemType == ItemType.Legs
+                                           || ItemType == ItemType.Hips;
         private bool HasFaceBlockingFlag => ItemType == ItemType.Helm;
         private bool HasUsableStats => ItemType == ItemType.Usable;
         private bool HasWeaponPrefab => ItemType == ItemType.Weapon;
@@ -16,6 +21,9 @@ namespace Inventory.Item
                                            || ItemType == ItemType.Body
                                            || ItemType == ItemType.Helm
                                            || ItemType == ItemType.Face
+                                           || ItemType == ItemType.Hands
+                                           || ItemType == ItemType.Legs
+                                           || ItemType == ItemType.Hips
                                            || ItemType == ItemType.Weapon;
 
         [field: SerializeField] public string Id { get; private set; } = "Item Config ID";

@@ -20,6 +20,9 @@ namespace Inventory
         private ItemConfig lastHelmItemConfig;
         private ItemConfig lastFaceItemConfig;
         private ItemConfig lastBodyItemConfig;
+        private ItemConfig lastHandsItemConfig;
+        private ItemConfig lastLegsItemConfig;
+        private ItemConfig lastHipsItemConfig;
         private ItemConfig lastBackpackItemConfig;
         private ItemConfig lastLeftWeaponItemConfig;
         private ItemConfig lastRightWeaponItemConfig;
@@ -47,6 +50,9 @@ namespace Inventory
                 && lastHelmItemConfig == playerInventory.HelmSlot.ItemConfig
                 && lastFaceItemConfig == playerInventory.FaceSlot.ItemConfig
                 && lastBodyItemConfig == playerInventory.BodySlot.ItemConfig
+                && lastHandsItemConfig == playerInventory.HandsSlot.ItemConfig
+                && lastLegsItemConfig == playerInventory.LegsSlot.ItemConfig
+                && lastHipsItemConfig == playerInventory.HipsSlot.ItemConfig
                 && lastBackpackItemConfig == playerInventory.BackpackSlot.ItemConfig
                 && lastLeftWeaponItemConfig == playerInventory.LeftWeaponSlot.ItemConfig
                 && lastRightWeaponItemConfig == playerInventory.RightWeaponSlot.ItemConfig)
@@ -59,6 +65,9 @@ namespace Inventory
             ApplySlotVisuals(playerInventory.HelmSlot, "Helm");
             ApplySlotVisuals(playerInventory.FaceSlot, "Face");
             ApplySlotVisuals(playerInventory.BodySlot, "Body");
+            ApplySlotVisuals(playerInventory.HandsSlot, "Hands");
+            ApplySlotVisuals(playerInventory.LegsSlot, "Legs");
+            ApplySlotVisuals(playerInventory.HipsSlot, "Hips");
             ApplySlotVisuals(playerInventory.BackpackSlot, "Backpack");
             ApplySlotVisuals(playerInventory.LeftWeaponSlot, "LeftWeapon");
             ApplySlotVisuals(playerInventory.RightWeaponSlot, "RightWeapon");
@@ -67,6 +76,9 @@ namespace Inventory
             lastHelmItemConfig = playerInventory.HelmSlot.ItemConfig;
             lastFaceItemConfig = playerInventory.FaceSlot.ItemConfig;
             lastBodyItemConfig = playerInventory.BodySlot.ItemConfig;
+            lastHandsItemConfig = playerInventory.HandsSlot.ItemConfig;
+            lastLegsItemConfig = playerInventory.LegsSlot.ItemConfig;
+            lastHipsItemConfig = playerInventory.HipsSlot.ItemConfig;
             lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;
             lastLeftWeaponItemConfig = playerInventory.LeftWeaponSlot.ItemConfig;
             lastRightWeaponItemConfig = playerInventory.RightWeaponSlot.ItemConfig;

@@ -9,5 +9,8 @@
         Body,
         Helm,
         Face,
+        Hands,
+        Legs,
+        Hips,
     }
 }

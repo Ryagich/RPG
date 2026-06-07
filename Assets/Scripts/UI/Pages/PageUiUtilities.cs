@@ -262,6 +262,18 @@ namespace UI.Pages
             {
                 slotRect = slotsViewContainer.BodySlot.GetComponent<RectTransform>();
             }
+            else if (slotModel == playerInventory.HandsSlot && slotsViewContainer.HandsSlot)
+            {
+                slotRect = slotsViewContainer.HandsSlot.GetComponent<RectTransform>();
+            }
+            else if (slotModel == playerInventory.LegsSlot && slotsViewContainer.LegsSlot)
+            {
+                slotRect = slotsViewContainer.LegsSlot.GetComponent<RectTransform>();
+            }
+            else if (slotModel == playerInventory.HipsSlot && slotsViewContainer.HipsSlot)
+            {
+                slotRect = slotsViewContainer.HipsSlot.GetComponent<RectTransform>();
+            }
             else if (slotModel == playerInventory.BackpackSlot && slotsViewContainer.BackpackSlot)
             {
                 slotRect = slotsViewContainer.BackpackSlot.GetComponent<RectTransform>();
@@ -590,7 +602,11 @@ namespace UI.Pages
                     CreateUsablePopupStats(popupRect, uiConfig, statIconsConfig, resolver, itemConfig);
                     break;
                 case ItemType.Helm:
+                case ItemType.Face:
                 case ItemType.Body:
+                case ItemType.Hands:
+                case ItemType.Legs:
+                case ItemType.Hips:
                     CreateClothesPopupStats(
                         popupRect,
                         uiConfig,
@@ -1045,7 +1061,11 @@ namespace UI.Pages
             return itemType switch
             {
                 ItemType.Helm => playerInventory.HelmSlot.ItemConfig,
+                ItemType.Face => playerInventory.FaceSlot.ItemConfig,
                 ItemType.Body => playerInventory.BodySlot.ItemConfig,
+                ItemType.Hands => playerInventory.HandsSlot.ItemConfig,
+                ItemType.Legs => playerInventory.LegsSlot.ItemConfig,
+                ItemType.Hips => playerInventory.HipsSlot.ItemConfig,
                 _ => null
             };
         }

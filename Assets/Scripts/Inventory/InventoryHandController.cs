@@ -112,7 +112,7 @@ namespace Inventory
                     backpackTakenFromSlot = slotItemStack;
                 }
 
-                if (slotModel.ItemType == ItemType.Body || slotModel.ItemType == ItemType.Helm)
+                if (IsDefenseEquipmentType(slotModel.ItemType))
                 {
                     equippedDefenseStatsChanger.BeginDelayedRefresh();
                 }
@@ -356,6 +356,16 @@ namespace Inventory
         }
 
         private bool HasItemInHand() => playerInventory.HandSlot.Value?.ItemStack != null;
+
+        private static bool IsDefenseEquipmentType(ItemType itemType)
+        {
+            return itemType is ItemType.Helm
+                or ItemType.Face
+                or ItemType.Body
+                or ItemType.Hands
+                or ItemType.Legs
+                or ItemType.Hips;
+        }
 
         private void ClearHand()
         {

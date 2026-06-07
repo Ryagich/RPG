@@ -27,6 +27,9 @@ namespace Inventory.Inventories
                                       + GetSlotWeight(HelmSlot)
                                       + GetSlotWeight(FaceSlot)
                                       + GetSlotWeight(BodySlot)
+                                      + GetSlotWeight(HandsSlot)
+                                      + GetSlotWeight(LegsSlot)
+                                      + GetSlotWeight(HipsSlot)
                                       + GetSlotWeight(BackpackSlot)
                                       + GetSlotWeight(LeftWeaponSlot)
                                       + GetSlotWeight(RightWeaponSlot)
@@ -37,6 +40,9 @@ namespace Inventory.Inventories
         public SlotModel HelmSlot = new(ItemType.Helm, SlotStackLimitType.SingleItem);
         public SlotModel FaceSlot = new(ItemType.Face, SlotStackLimitType.SingleItem);
         public SlotModel BodySlot = new(ItemType.Body, SlotStackLimitType.SingleItem);
+        public SlotModel HandsSlot = new(ItemType.Hands, SlotStackLimitType.SingleItem);
+        public SlotModel LegsSlot = new(ItemType.Legs, SlotStackLimitType.SingleItem);
+        public SlotModel HipsSlot = new(ItemType.Hips, SlotStackLimitType.SingleItem);
         public SlotModel BackpackSlot = new(ItemType.Backpack, SlotStackLimitType.SingleItem);
         public SlotModel LeftWeaponSlot = new(ItemType.Weapon, SlotStackLimitType.SingleItem);
         public SlotModel RightWeaponSlot = new(ItemType.Weapon, SlotStackLimitType.SingleItem);
@@ -998,6 +1004,9 @@ namespace Inventory.Inventories
             yield return HelmSlot;
             yield return FaceSlot;
             yield return BodySlot;
+            yield return HandsSlot;
+            yield return LegsSlot;
+            yield return HipsSlot;
             yield return BackpackSlot;
             yield return LeftWeaponSlot;
             yield return RightWeaponSlot;
