@@ -12,5 +12,6 @@
         Hands,
         Legs,
         Hips,
+        Arms,
     }
 }

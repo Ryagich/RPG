@@ -12,6 +12,7 @@ namespace Inventory.Item
                                            || ItemType == ItemType.Helm
                                            || ItemType == ItemType.Face
                                            || ItemType == ItemType.Hands
+                                           || ItemType == ItemType.Arms
                                            || ItemType == ItemType.Legs
                                            || ItemType == ItemType.Hips;
         private bool HasFaceBlockingFlag => ItemType == ItemType.Helm;
@@ -22,6 +23,7 @@ namespace Inventory.Item
                                            || ItemType == ItemType.Helm
                                            || ItemType == ItemType.Face
                                            || ItemType == ItemType.Hands
+                                           || ItemType == ItemType.Arms
                                            || ItemType == ItemType.Legs
                                            || ItemType == ItemType.Hips
                                            || ItemType == ItemType.Weapon;

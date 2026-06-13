@@ -9,6 +9,7 @@ namespace Inventory.Slot
         [field: SerializeField] public SlotView FaceSlot { get; private set; }
         [field: SerializeField] public SlotView BodySlot { get; private set; }
         [field: SerializeField] public SlotView HandsSlot { get; private set; }
+        [field: SerializeField] public SlotView ArmsSlot { get; private set; }
         [field: SerializeField] public SlotView LegsSlot { get; private set; }
         [field: SerializeField] public SlotView HipsSlot { get; private set; }
         [field: SerializeField] public SlotView BackpackSlot { get; private set; }

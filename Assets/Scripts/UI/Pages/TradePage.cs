@@ -163,6 +163,7 @@ namespace UI.Pages
                             new SnapshotSlot(playerInventory.FaceSlot.ItemType, playerInventory.FaceSlot.StackLimitType, playerInventory.FaceSlot.ItemStack),
                             new SnapshotSlot(playerInventory.BodySlot.ItemType, playerInventory.BodySlot.StackLimitType, playerInventory.BodySlot.ItemStack),
                             new SnapshotSlot(playerInventory.HandsSlot.ItemType, playerInventory.HandsSlot.StackLimitType, playerInventory.HandsSlot.ItemStack),
+                            new SnapshotSlot(playerInventory.ArmsSlot.ItemType, playerInventory.ArmsSlot.StackLimitType, playerInventory.ArmsSlot.ItemStack),
                             new SnapshotSlot(playerInventory.LegsSlot.ItemType, playerInventory.LegsSlot.StackLimitType, playerInventory.LegsSlot.ItemStack),
                             new SnapshotSlot(playerInventory.HipsSlot.ItemType, playerInventory.HipsSlot.StackLimitType, playerInventory.HipsSlot.ItemStack),
                             new SnapshotSlot(playerInventory.BackpackSlot.ItemType, playerInventory.BackpackSlot.StackLimitType, playerInventory.BackpackSlot.ItemStack),
@@ -542,6 +543,7 @@ namespace UI.Pages
         private ItemConfig lastFaceItemConfig;
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastHandsItemConfig;
+        private ItemConfig lastArmsSlotItemConfig;
         private ItemConfig lastLegsItemConfig;
         private ItemConfig lastHipsItemConfig;
         private ItemConfig lastBackpackItemConfig;
@@ -843,6 +845,11 @@ namespace UI.Pages
                 return true;
             }
 
+            if (PageUiUtilities.TryGetSlotUnderPointer(centerSection.ArmsSlot, playerInventory.ArmsSlot, screenPoint, handItemType, eventCamera, out slotModel))
+            {
+                return true;
+            }
+
             if (PageUiUtilities.TryGetSlotUnderPointer(centerSection.LegsSlot, playerInventory.LegsSlot, screenPoint, handItemType, eventCamera, out slotModel))
             {
                 return true;
@@ -1080,6 +1087,7 @@ namespace UI.Pages
                                  playerInventory.FaceSlot,
                                  playerInventory.BodySlot,
                                  playerInventory.HandsSlot,
+                                 playerInventory.ArmsSlot,
                                  playerInventory.LegsSlot,
                                  playerInventory.HipsSlot,
                                  playerInventory.BackpackSlot,
@@ -1253,6 +1261,7 @@ namespace UI.Pages
             DrawSlotItem(centerSection.FaceSlot, playerInventory.FaceSlot);
             DrawSlotItem(centerSection.BodySlot, playerInventory.BodySlot);
             DrawSlotItem(centerSection.HandsSlot, playerInventory.HandsSlot);
+            DrawSlotItem(centerSection.ArmsSlot, playerInventory.ArmsSlot);
             DrawSlotItem(centerSection.LegsSlot, playerInventory.LegsSlot);
             DrawSlotItem(centerSection.HipsSlot, playerInventory.HipsSlot);
             DrawSlotItem(centerSection.BackpackSlot, playerInventory.BackpackSlot);
@@ -1489,6 +1498,7 @@ namespace UI.Pages
                    || lastFaceItemConfig != playerInventory.FaceSlot.ItemConfig
                    || lastBodyItemConfig != playerInventory.BodySlot.ItemConfig
                    || lastHandsItemConfig != playerInventory.HandsSlot.ItemConfig
+                   || lastArmsSlotItemConfig != playerInventory.ArmsSlot.ItemConfig
                    || lastLegsItemConfig != playerInventory.LegsSlot.ItemConfig
                    || lastHipsItemConfig != playerInventory.HipsSlot.ItemConfig
                    || lastBackpackItemConfig != playerInventory.BackpackSlot.ItemConfig
@@ -1506,6 +1516,7 @@ namespace UI.Pages
             lastFaceItemConfig = playerInventory.FaceSlot.ItemConfig;
             lastBodyItemConfig = playerInventory.BodySlot.ItemConfig;
             lastHandsItemConfig = playerInventory.HandsSlot.ItemConfig;
+            lastArmsSlotItemConfig = playerInventory.ArmsSlot.ItemConfig;
             lastLegsItemConfig = playerInventory.LegsSlot.ItemConfig;
             lastHipsItemConfig = playerInventory.HipsSlot.ItemConfig;
             lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;

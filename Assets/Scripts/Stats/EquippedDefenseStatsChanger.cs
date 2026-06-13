@@ -66,6 +66,7 @@ namespace Stats
                 + GetBonuses(playerInventory.FaceSlot)
                 + GetBonuses(playerInventory.BodySlot)
                 + GetBonuses(playerInventory.HandsSlot)
+                + GetBonuses(playerInventory.ArmsSlot)
                 + GetBonuses(playerInventory.LegsSlot)
                 + GetBonuses(playerInventory.HipsSlot);
 

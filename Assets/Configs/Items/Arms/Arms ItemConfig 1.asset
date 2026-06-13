@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60723d5f93cc4ad190a060664630a272, type: 3}
-  m_Name: Legs ItemConfig 1
+  m_Name: Arms ItemConfig 1
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
-  <Id>k__BackingField: Legs ItemConfig 1
+  <Id>k__BackingField: Arms ItemConfig 1
   <Price>k__BackingField: 1
   <Weight>k__BackingField: 2.4
   <MaxStack>k__BackingField: 1
-  <Icon>k__BackingField: {fileID: 21300000, guid: f290cfe2ff6885d478fcc4fb46b2f06a, type: 3}
+  <Icon>k__BackingField: {fileID: 21300000, guid: 31e90a44e917258429392c02fad3834a, type: 3}
   <Name>k__BackingField:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
@@ -26,10 +26,10 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  <HandPrefab>k__BackingField: {fileID: 3017878677904035100, guid: 061a4a5b554ccfc4e930e8cf946cc543, type: 3}
+  <HandPrefab>k__BackingField: {fileID: 8412793563037666870, guid: 60581469430259a43a6832ef8db1a4d1, type: 3}
   <Size>k__BackingField: {x: 2, y: 2}
   <SizeInInventory>k__BackingField: {x: 120, y: 120}
-  <ItemType>k__BackingField: 8
+  <ItemType>k__BackingField: 10
   weaponInHandPrefab: {fileID: 0}
   rightHandWeaponAttachment:
     localPosition: {x: 0, y: 0, z: 0}
@@ -47,10 +47,14 @@ MonoBehaviour:
   foodStat: 0
   chillStat: 0
   equippedVisuals:
-  - <BodyPart>k__BackingField: 30
-    <VisualName>k__BackingField: Chr_LegRight_Male_01
-  - <BodyPart>k__BackingField: 31
-    <VisualName>k__BackingField: Chr_LegLeft_Male_01
+  - <BodyPart>k__BackingField: 16
+    <VisualName>k__BackingField: Chr_ArmUpperLeft_Male_01
+  - <BodyPart>k__BackingField: 18
+    <VisualName>k__BackingField: Chr_ArmLowerLeft_Male_01
+  - <BodyPart>k__BackingField: 17
+    <VisualName>k__BackingField: Chr_ArmUpperRight_Male_01
+  - <BodyPart>k__BackingField: 20
+    <VisualName>k__BackingField: Chr_ArmLowerRight_Male_01
   references:
     version: 2
     RefIds: []

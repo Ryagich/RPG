@@ -266,6 +266,10 @@ namespace UI.Pages
             {
                 slotRect = slotsViewContainer.HandsSlot.GetComponent<RectTransform>();
             }
+            else if (slotModel == playerInventory.ArmsSlot && slotsViewContainer.ArmsSlot)
+            {
+                slotRect = slotsViewContainer.ArmsSlot.GetComponent<RectTransform>();
+            }
             else if (slotModel == playerInventory.LegsSlot && slotsViewContainer.LegsSlot)
             {
                 slotRect = slotsViewContainer.LegsSlot.GetComponent<RectTransform>();
@@ -605,6 +609,7 @@ namespace UI.Pages
                 case ItemType.Face:
                 case ItemType.Body:
                 case ItemType.Hands:
+                case ItemType.Arms:
                 case ItemType.Legs:
                 case ItemType.Hips:
                     CreateClothesPopupStats(
@@ -1064,6 +1069,7 @@ namespace UI.Pages
                 ItemType.Face => playerInventory.FaceSlot.ItemConfig,
                 ItemType.Body => playerInventory.BodySlot.ItemConfig,
                 ItemType.Hands => playerInventory.HandsSlot.ItemConfig,
+                ItemType.Arms => playerInventory.ArmsSlot.ItemConfig,
                 ItemType.Legs => playerInventory.LegsSlot.ItemConfig,
                 ItemType.Hips => playerInventory.HipsSlot.ItemConfig,
                 _ => null

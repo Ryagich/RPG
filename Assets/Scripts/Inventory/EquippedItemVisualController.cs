@@ -21,6 +21,7 @@ namespace Inventory
         private ItemConfig lastFaceItemConfig;
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastHandsItemConfig;
+        private ItemConfig lastArmsSlotItemConfig;
         private ItemConfig lastLegsItemConfig;
         private ItemConfig lastHipsItemConfig;
         private ItemConfig lastBackpackItemConfig;
@@ -51,6 +52,7 @@ namespace Inventory
                 && lastFaceItemConfig == playerInventory.FaceSlot.ItemConfig
                 && lastBodyItemConfig == playerInventory.BodySlot.ItemConfig
                 && lastHandsItemConfig == playerInventory.HandsSlot.ItemConfig
+                && lastArmsSlotItemConfig == playerInventory.ArmsSlot.ItemConfig
                 && lastLegsItemConfig == playerInventory.LegsSlot.ItemConfig
                 && lastHipsItemConfig == playerInventory.HipsSlot.ItemConfig
                 && lastBackpackItemConfig == playerInventory.BackpackSlot.ItemConfig
@@ -66,6 +68,7 @@ namespace Inventory
             ApplySlotVisuals(playerInventory.FaceSlot, "Face");
             ApplySlotVisuals(playerInventory.BodySlot, "Body");
             ApplySlotVisuals(playerInventory.HandsSlot, "Hands");
+            ApplySlotVisuals(playerInventory.ArmsSlot, "ArmsSlot");
             ApplySlotVisuals(playerInventory.LegsSlot, "Legs");
             ApplySlotVisuals(playerInventory.HipsSlot, "Hips");
             ApplySlotVisuals(playerInventory.BackpackSlot, "Backpack");
@@ -77,6 +80,7 @@ namespace Inventory
             lastFaceItemConfig = playerInventory.FaceSlot.ItemConfig;
             lastBodyItemConfig = playerInventory.BodySlot.ItemConfig;
             lastHandsItemConfig = playerInventory.HandsSlot.ItemConfig;
+            lastArmsSlotItemConfig = playerInventory.ArmsSlot.ItemConfig;
             lastLegsItemConfig = playerInventory.LegsSlot.ItemConfig;
             lastHipsItemConfig = playerInventory.HipsSlot.ItemConfig;
             lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;

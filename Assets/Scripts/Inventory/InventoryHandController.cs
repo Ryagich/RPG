@@ -363,6 +363,7 @@ namespace Inventory
                 or ItemType.Face
                 or ItemType.Body
                 or ItemType.Hands
+                or ItemType.Arms
                 or ItemType.Legs
                 or ItemType.Hips;
         }

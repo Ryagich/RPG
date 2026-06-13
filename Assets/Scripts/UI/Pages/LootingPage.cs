@@ -95,6 +95,7 @@ namespace UI.Pages
         private ItemConfig lastFaceItemConfig;
         private ItemConfig lastBodyItemConfig;
         private ItemConfig lastHandsItemConfig;
+        private ItemConfig lastArmsSlotItemConfig;
         private ItemConfig lastLegsItemConfig;
         private ItemConfig lastHipsItemConfig;
         private ItemConfig lastBackpackItemConfig;
@@ -288,6 +289,7 @@ namespace UI.Pages
                                  playerInventory.FaceSlot,
                                  playerInventory.BodySlot,
                                  playerInventory.HandsSlot,
+                                 playerInventory.ArmsSlot,
                                  playerInventory.LegsSlot,
                                  playerInventory.HipsSlot,
                                  playerInventory.BackpackSlot,
@@ -356,6 +358,11 @@ namespace UI.Pages
             }
 
             if (TryGetSlotUnderPointer(slotsViewContainer.HandsSlot, playerInventory.HandsSlot, screenPoint, handItemType, out slotModel))
+            {
+                return true;
+            }
+
+            if (TryGetSlotUnderPointer(slotsViewContainer.ArmsSlot, playerInventory.ArmsSlot, screenPoint, handItemType, out slotModel))
             {
                 return true;
             }
@@ -591,6 +598,7 @@ namespace UI.Pages
                    || lastFaceItemConfig != playerInventory.FaceSlot.ItemConfig
                    || lastBodyItemConfig != playerInventory.BodySlot.ItemConfig
                    || lastHandsItemConfig != playerInventory.HandsSlot.ItemConfig
+                   || lastArmsSlotItemConfig != playerInventory.ArmsSlot.ItemConfig
                    || lastLegsItemConfig != playerInventory.LegsSlot.ItemConfig
                    || lastHipsItemConfig != playerInventory.HipsSlot.ItemConfig
                    || lastBackpackItemConfig != playerInventory.BackpackSlot.ItemConfig
@@ -628,6 +636,7 @@ namespace UI.Pages
             lastFaceItemConfig = playerInventory.FaceSlot.ItemConfig;
             lastBodyItemConfig = playerInventory.BodySlot.ItemConfig;
             lastHandsItemConfig = playerInventory.HandsSlot.ItemConfig;
+            lastArmsSlotItemConfig = playerInventory.ArmsSlot.ItemConfig;
             lastLegsItemConfig = playerInventory.LegsSlot.ItemConfig;
             lastHipsItemConfig = playerInventory.HipsSlot.ItemConfig;
             lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;
@@ -765,6 +774,7 @@ namespace UI.Pages
             DrawSlotItem(slotsViewContainer.FaceSlot, playerInventory.FaceSlot);
             DrawSlotItem(slotsViewContainer.BodySlot, playerInventory.BodySlot);
             DrawSlotItem(slotsViewContainer.HandsSlot, playerInventory.HandsSlot);
+            DrawSlotItem(slotsViewContainer.ArmsSlot, playerInventory.ArmsSlot);
             DrawSlotItem(slotsViewContainer.LegsSlot, playerInventory.LegsSlot);
             DrawSlotItem(slotsViewContainer.HipsSlot, playerInventory.HipsSlot);
             DrawSlotItem(slotsViewContainer.BackpackSlot, playerInventory.BackpackSlot);
@@ -1097,6 +1107,7 @@ namespace UI.Pages
                 or ItemType.Face
                 or ItemType.Body
                 or ItemType.Hands
+                or ItemType.Arms
                 or ItemType.Legs
                 or ItemType.Hips
                 or ItemType.Backpack
@@ -1252,6 +1263,7 @@ namespace UI.Pages
                          inventory.FaceSlot,
                          inventory.BodySlot,
                          inventory.HandsSlot,
+                         inventory.ArmsSlot,
                          inventory.LegsSlot,
                          inventory.HipsSlot,
                          inventory.BackpackSlot,

@@ -16,7 +16,7 @@ MonoBehaviour:
   <Price>k__BackingField: 1
   <Weight>k__BackingField: 2.4
   <MaxStack>k__BackingField: 1
-  <Icon>k__BackingField: {fileID: 21300000, guid: cf62cacef6efe584d9462ed6dce2240c, type: 3}
+  <Icon>k__BackingField: {fileID: 21300000, guid: 0b9a4a1bb4cf1134ea8fc1672970d1cd, type: 3}
   <Name>k__BackingField:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
