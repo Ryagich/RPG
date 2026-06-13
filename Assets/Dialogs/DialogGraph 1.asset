@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f017ef0dab3961d4d9cc460c84f52c76, type: 3}
+  m_Name: DialogGraph 1
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.DialogGraph
+  Nodes:
+  - Position: {x: 1522.8628, y: 290.98038}
+    Phrase: {fileID: 11400000, guid: 4337390c93dfa9b4db1fdebe80f0e3d6, type: 2}
+  - Position: {x: 1498.47, y: 566.1565}
+    Phrase: {fileID: 11400000, guid: 2fb2dbfc0afb54346b0901d0948e5e49, type: 2}
+  - Position: {x: 1101.0194, y: 328.03906}
+    Phrase: {fileID: 11400000, guid: 6f702fc1cac2cdf418d8e3212e8ba742, type: 2}
+  - Position: {x: 700.3919, y: 318.2352}
+    Phrase: {fileID: 11400000, guid: 9ef9d13472ae65a44b5ea0f6a87348ce, type: 2}
+  <EntryPhrase>k__BackingField: {fileID: 11400000, guid: 6f702fc1cac2cdf418d8e3212e8ba742, type: 2}
