@@ -28,7 +28,7 @@ MonoBehaviour:
     m_LocalVariables: []
   <HandPrefab>k__BackingField: {fileID: 60322173640079774, guid: c662dc5a3ec80594e894ef85d083877c, type: 3}
   <Size>k__BackingField: {x: 2, y: 2}
-  <SizeInInventory>k__BackingField: {x: 200, y: 155}
+  <SizeInInventory>k__BackingField: {x: 120, y: 120}
   <ItemType>k__BackingField: 7
   weaponInHandPrefab: {fileID: 0}
   rightHandWeaponAttachment:

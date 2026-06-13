@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60723d5f93cc4ad190a060664630a272, type: 3}
-  m_Name: Hands ItemConfig 2
+  m_Name: Legs ItemConfig 2
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
-  <Id>k__BackingField: Hands ItemConfig 2
+  <Id>k__BackingField: Legs ItemConfig 2
   <Price>k__BackingField: 1
   <Weight>k__BackingField: 2.4
   <MaxStack>k__BackingField: 1
@@ -26,10 +26,10 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  <HandPrefab>k__BackingField: {fileID: 527265807136324786, guid: 2f2659c832026064c811111f1ae6eed3, type: 3}
+  <HandPrefab>k__BackingField: {fileID: 2552690629549065809, guid: 363f3c14ff95fc947a766d365c41a8ce, type: 3}
   <Size>k__BackingField: {x: 2, y: 2}
   <SizeInInventory>k__BackingField: {x: 120, y: 120}
-  <ItemType>k__BackingField: 7
+  <ItemType>k__BackingField: 8
   weaponInHandPrefab: {fileID: 0}
   rightHandWeaponAttachment:
     localPosition: {x: 0, y: 0, z: 0}
@@ -47,10 +47,10 @@ MonoBehaviour:
   foodStat: 0
   chillStat: 0
   equippedVisuals:
-  - <BodyPart>k__BackingField: 22
-    <VisualName>k__BackingField: Chr_HandLeft_Male_01
-  - <BodyPart>k__BackingField: 23
-    <VisualName>k__BackingField: Chr_HandRight_Male_01
+  - <BodyPart>k__BackingField: 30
+    <VisualName>k__BackingField: Chr_LegRight_Male_02
+  - <BodyPart>k__BackingField: 31
+    <VisualName>k__BackingField: Chr_LegLeft_Male_02
   references:
     version: 2
     RefIds: []
