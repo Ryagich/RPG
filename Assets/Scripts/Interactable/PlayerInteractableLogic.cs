@@ -53,23 +53,26 @@ namespace Interactable
             {
                 Interactables.Remove(interactable);
             }
+            activeInteractables.Remove(interactable);
             if (interactable)
             {
                 interactable.Destroyed -= OnDestroyed;
             }
         }
 
-        private void InteractableEndedInteract(Interactable interactable)
-        {
-            activeInteractables.Remove(interactable);
-            interactable.ObjectEndManualInteracted -= InteractableEndedInteract;
-        }
-
         private void Remove(InteractableEndMessage msg)
         {
             Interactables.Remove(msg.Interactable);
             msg.Interactable.Destroyed -= OnDestroyed;
-            msg.Interactable.EndInteract(scope);
+            if (msg.Interactable.InteractionMode is InteractionMode.Manual)
+            {
+                EndManualInteraction(msg.Interactable);
+            }
+            else
+            {
+                msg.Interactable.EndInteract(scope);
+            }
+
             if (Interactables.Count is 0)
             {
                 t = .0f;
@@ -85,16 +88,27 @@ namespace Interactable
                                                                    && !activeInteractables.Contains(i)))
                 {
                     interactable.Interact(scope);
-                    interactable.ObjectEndManualInteracted += InteractableEndedInteract;
                     newActives.Add(interactable);
                 }
                 manualT = .0f;
             }
-            foreach (var interactable in activeInteractables)
+
+            var previousActives = activeInteractables;
+            activeInteractables = newActives;
+            foreach (var interactable in previousActives)
             {
                 interactable.EndManualInteract(scope);
             }
-            activeInteractables = newActives;
+        }
+
+        private void EndManualInteraction(Interactable interactable)
+        {
+            if (!activeInteractables.Remove(interactable))
+            {
+                return;
+            }
+
+            interactable.EndManualInteract(scope);
         }
 
         public void FixedTick()

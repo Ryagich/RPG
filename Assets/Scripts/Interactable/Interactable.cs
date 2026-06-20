@@ -9,7 +9,6 @@ namespace Interactable
         public event Action<LifetimeScope> Interacted;
         public event Action<LifetimeScope> EndInteracted;
         public event Action<LifetimeScope> EndManualInteracted;
-        public Action<Interactable> ObjectEndManualInteracted;
         public event Action<Interactable> Destroyed;
 
         public InteractionMode InteractionMode = InteractionMode.Automatic; 
