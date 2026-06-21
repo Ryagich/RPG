@@ -10,6 +10,7 @@ namespace UI.Pages
     public class PagesController : IStartable
     {
         private readonly MainPage mainPage;
+        private readonly PausePage pausePage;
         private readonly InventoryPage inventoryPage;
         private readonly LootingPage lootingPage;
         private readonly DialoguePage dialoguePage;
@@ -21,6 +22,7 @@ namespace UI.Pages
         public PagesController 
             (
                 MainPage mainPage,
+                PausePage pausePage,
                 InventoryPage inventoryPage,
                 LootingPage lootingPage,
                 DialoguePage dialoguePage,
@@ -30,6 +32,7 @@ namespace UI.Pages
             )
         {
             this.mainPage = mainPage;
+            this.pausePage = pausePage;
             this.inventoryPage = inventoryPage;
             this.lootingPage = lootingPage;
             this.dialoguePage = dialoguePage;
@@ -52,6 +55,9 @@ namespace UI.Pages
             {
                 case GameMode.Game:
                     currentPage = mainPage;
+                    break;
+                case GameMode.Pause:
+                    currentPage = pausePage;
                     break;
                 case GameMode.Inventory:
                     currentPage = inventoryPage;
@@ -88,6 +94,7 @@ namespace UI.Pages
     public enum PageType
     {
         MainGame,
+        Pause,
         Inventory,
         Looting,
         Dialogue,

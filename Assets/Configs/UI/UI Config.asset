@@ -22,6 +22,7 @@ MonoBehaviour:
   <InfoAboutInventory>k__BackingField: {fileID: 4248279467150377410, guid: 2792d016ebedd1c489e5f08ff6be9004, type: 3}
   <InfoAboutPlayer>k__BackingField: {fileID: 1558630750454747041, guid: a13a6008c3052644ea080a95629a3a2d, type: 3}
   <DialogueContainer>k__BackingField: {fileID: 677269434685781985, guid: 17f8d839d3036af499c4ab29d41ad950, type: 3}
+  <PauseMenu>k__BackingField: {fileID: 8794213445826204213, guid: 80bddbcce88a11e4bbf184fefee5499c, type: 3}
   <SellInventory>k__BackingField: {fileID: 3517618128280596531, guid: 2c110c241289ce144aee2f0b12c24cfa, type: 3}
   <InventoryInTrading>k__BackingField: {fileID: 6562754561215371127, guid: b5978c7d4b7212f4c974cbb202bd2c1e, type: 3}
   <SellInfo>k__BackingField: {fileID: 7629633191945355716, guid: 4dc3948d66fe4624e9444f5cac2c114e, type: 3}
@@ -40,8 +41,8 @@ MonoBehaviour:
   <BloodScreen>k__BackingField: {fileID: 6954517100673734187, guid: 1ef875ffe6f78654e93fd87d9b089594, type: 3}
   <QuestionsScrollView>k__BackingField: {fileID: 707761718070598100, guid: c33aa409ea59827428a93a221e236f9b, type: 3}
   <MapScroll>k__BackingField: {fileID: 1530147576499778349, guid: 03edd212fc4830a4586415c21b2d8251, type: 3}
-  <CharacterIcon>k__BackingField: {fileID: 4805136065742791000, guid: e7249d5a33f8dea4e9676faf09c6bd55, type: 3}
-  <MapIcon>k__BackingField: {fileID: 690087236037604892, guid: de9893f733b2e7142a24e5e9ff3cf666, type: 3}
   <Title>k__BackingField: {fileID: 4063777794044691344, guid: b5ceb1f7ecd982640831c8109ca6910a, type: 3}
   <QuestShortInfo>k__BackingField: {fileID: 4061160960222311978, guid: 761cbacecc5240c4fa9ce199d4fdee45, type: 3}
   <QuestPopup>k__BackingField: {fileID: 7082239865615404425, guid: 2d084fc95e8845348962e2b23219af33, type: 3}
+  <CharacterIcon>k__BackingField: {fileID: 4805136065742791000, guid: e7249d5a33f8dea4e9676faf09c6bd55, type: 3}
+  <MapIcon>k__BackingField: {fileID: 690087236037604892, guid: de9893f733b2e7142a24e5e9ff3cf666, type: 3}

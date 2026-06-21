@@ -14,6 +14,7 @@ namespace UI
             builder.RegisterInstance(Canvas).As<Canvas>();
 
             builder.Register<MainPage>(Lifetime.Singleton);
+            builder.Register<PausePage>(Lifetime.Singleton);
             builder.Register<DialoguePage>(Lifetime.Singleton);
             builder.RegisterEntryPoint<MapPage>().AsSelf();
             

@@ -32,6 +32,8 @@ namespace Messages
     }
     
     public readonly struct InteractableInputMessage { }
+
+    public readonly struct PauseInputMessage { }
     
     public readonly struct MouseDown
     {

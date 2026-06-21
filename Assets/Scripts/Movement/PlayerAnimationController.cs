@@ -77,7 +77,7 @@ namespace Movement
 
         private void OnGameModeChanged(GameModeChangedMessage msg)
         {
-            isGameplayActive = msg.GameMode is GameMode.Game;
+            isGameplayActive = AllowsLocomotion(msg.GameMode);
 
             if (!isGameplayActive)
             {
@@ -124,6 +124,11 @@ namespace Movement
             {
                 ApplyLocomotionParameters(Vector2.zero, false, force: true);
             }
+        }
+
+        private static bool AllowsLocomotion(GameMode mode)
+        {
+            return mode is GameMode.Game or GameMode.Inventory;
         }
     }
 }

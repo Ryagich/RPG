@@ -23,6 +23,7 @@ namespace UI.Configs
         [field: SerializeField] public InfoAboutInventory InfoAboutInventory { get; private set; }
         [field: SerializeField] public InfoAboutPlayer InfoAboutPlayer { get; private set; }
         [field: SerializeField] public DialogueContainer DialogueContainer { get; private set; }
+        [field: SerializeField] public PauseMenu PauseMenu { get; private set; }
         
         //Trade
         [field: SerializeField] public ScrollRect SellInventory { get; private set; }

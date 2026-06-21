@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Container;
+using GameModes;
 using MessagePipe;
 using Messages;
 using UniRx;
@@ -18,6 +19,7 @@ namespace Interactable
 
         private float t;
         private float manualT;
+        private GameMode currentGameMode = GameMode.Game;
 
         // ReSharper disable once IdentifierTypo
         public readonly ReactiveCollection<Interactable> Interactables = new();
@@ -31,7 +33,8 @@ namespace Interactable
                 [Key("Scope ID")] string scopeID,
                 ISubscriber<string, InteractableMessage> interactableSubscriber,
                 ISubscriber<string, InteractableEndMessage> interactableEndSubscriber,
-                ISubscriber<InteractableInputMessage> interactableInputSubscriber
+                ISubscriber<InteractableInputMessage> interactableInputSubscriber,
+                ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber
             )
         {
             this.scope = scope;
@@ -39,6 +42,7 @@ namespace Interactable
             interactableSubscriber.Subscribe(scopeID, Add).AddTo(disposables);
             interactableEndSubscriber.Subscribe(scopeID, Remove).AddTo(disposables);
             interactableInputSubscriber.Subscribe(Interact).AddTo(disposables);
+            gameModeChangedSubscriber.Subscribe(OnGameModeChanged).AddTo(disposables);
         }
         
         private void Add(InteractableMessage msg)
@@ -109,6 +113,32 @@ namespace Interactable
             }
 
             interactable.EndManualInteract(scope);
+        }
+
+        private void OnGameModeChanged(GameModeChangedMessage message)
+        {
+            var previousMode = currentGameMode;
+            currentGameMode = message.GameMode;
+
+            if (message.GameMode == GameMode.Game && previousMode != GameMode.Game)
+            {
+                EndAllManualInteractions();
+            }
+        }
+
+        private void EndAllManualInteractions()
+        {
+            if (activeInteractables.Count == 0)
+            {
+                return;
+            }
+
+            var interactablesToEnd = activeInteractables.ToArray();
+            activeInteractables.Clear();
+            foreach (var interactable in interactablesToEnd)
+            {
+                interactable.EndManualInteract(scope);
+            }
         }
 
         public void FixedTick()

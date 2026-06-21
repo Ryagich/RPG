@@ -41,7 +41,7 @@ namespace Movement
 
         private void OnGameModeChanged(GameModeChangedMessage msg)
         {
-            if (msg.GameMode is GameMode.Game)
+            if (AllowsPlayerMovement(msg.GameMode))
             {
                 playerMovement.ChangeState(true);
                 cameraMotor.ChangeGameplayTarget(transform);
@@ -53,5 +53,10 @@ namespace Movement
         }
         
         private void OnMove(PlayerMoveMessage msg) => direction = msg.Direction;
+
+        private static bool AllowsPlayerMovement(GameMode mode)
+        {
+            return mode is GameMode.Game or GameMode.Inventory;
+        }
     }
 }

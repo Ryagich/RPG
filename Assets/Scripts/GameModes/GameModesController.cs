@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using MessagePipe;
 using Messages;
 using UnityEngine;
@@ -11,54 +12,115 @@ namespace GameModes
         public GameMode GameMode { get; private set; } = GameMode.Game;
 
         private readonly IPublisher<GameModeChangedMessage> gameModeChangedPublisher;
+        private readonly Stack<GameMode> navigationHistory = new();
 
         public GameModesController(
             IPublisher<GameModeChangedMessage> gameModeChangedPublisher,
-            ISubscriber<ChangeGameModeRequest> openPageRequestSubscriber)
+            ISubscriber<ChangeGameModeRequest> openPageRequestSubscriber,
+            ISubscriber<PauseInputMessage> pauseInputSubscriber)
         {
             this.gameModeChangedPublisher = gameModeChangedPublisher;
 
             openPageRequestSubscriber.Subscribe(ChangeGameMode);
+            pauseInputSubscriber.Subscribe(OnPauseInput);
         }
 
         public void Start()
         {
-            EnterMainGameMode();
-            ApplyCursorState(GameMode.Game);
-            gameModeChangedPublisher.Publish(new GameModeChangedMessage(GameMode.Game));
-        }
-
-        private void EnterMainGameMode()
-        {
-            if (GameMode is GameMode.Game)
-            {
-                ApplyCursorState(GameMode.Game);
-                return;
-            }
-
-            GameMode = GameMode.Game;
-            ApplyCursorState(GameMode);
-            gameModeChangedPublisher.Publish(new GameModeChangedMessage(GameMode));
+            navigationHistory.Clear();
+            ApplyGameMode(GameMode.Game);
         }
 
         private void ChangeGameMode(ChangeGameModeRequest msg)
         {
-            if (GameMode == msg.Mode)
+            if (msg.Mode == GameMode.Pause)
             {
                 if (GameMode is GameMode.Game)
                 {
-                    EnterMainGameMode();
+                    EnterPauseMode();
                 }
-                else
-                {
-                    EnterMainGameMode();
-                    return;
-                }
+
+                return;
             }
 
-            GameMode = msg.Mode;
-            ApplyCursorState(GameMode);
-            gameModeChangedPublisher.Publish(new GameModeChangedMessage(GameMode));
+            if (msg.Mode == GameMode.Game)
+            {
+                EnterMainGameMode();
+                return;
+            }
+
+            if (msg.Mode == GameMode)
+            {
+                return;
+            }
+
+            if (navigationHistory.Count > 0 && navigationHistory.Peek() == msg.Mode)
+            {
+                navigationHistory.Pop();
+                ApplyGameMode(msg.Mode);
+                return;
+            }
+
+            navigationHistory.Push(GameMode);
+            ApplyGameMode(msg.Mode);
+        }
+
+        private void OnPauseInput(PauseInputMessage _)
+        {
+            switch (GameMode)
+            {
+                case GameMode.Game:
+                    EnterPauseMode();
+                    return;
+                case GameMode.Pause:
+                    ExitPauseMode();
+                    return;
+                default:
+                    ReturnToPreviousMode();
+                    return;
+            }
+        }
+
+        private void EnterMainGameMode()
+        {
+            navigationHistory.Clear();
+            ApplyGameMode(GameMode.Game);
+        }
+
+        private void EnterPauseMode()
+        {
+            navigationHistory.Push(GameMode.Game);
+            ApplyGameMode(GameMode.Pause);
+        }
+
+        private void ExitPauseMode()
+        {
+            if (navigationHistory.Count > 0 && navigationHistory.Peek() == GameMode.Game)
+            {
+                navigationHistory.Pop();
+            }
+
+            ApplyGameMode(GameMode.Game);
+        }
+
+        private void ReturnToPreviousMode()
+        {
+            if (navigationHistory.Count == 0)
+            {
+                EnterMainGameMode();
+                return;
+            }
+
+            var previousMode = navigationHistory.Pop();
+            ApplyGameMode(previousMode);
+        }
+
+        private void ApplyGameMode(GameMode mode)
+        {
+            GameMode = mode;
+            ApplyCursorState(mode);
+            ApplyTimeScale(mode);
+            gameModeChangedPublisher.Publish(new GameModeChangedMessage(mode));
         }
 
         private static void ApplyCursorState(GameMode mode)
@@ -67,11 +129,17 @@ namespace GameModes
             Cursor.lockState = isGameplayMode ? CursorLockMode.Locked : CursorLockMode.None;
             Cursor.visible = !isGameplayMode;
         }
+
+        private static void ApplyTimeScale(GameMode mode)
+        {
+            Time.timeScale = mode == GameMode.Pause ? 0f : 1f;
+        }
     }
 
     public enum GameMode
     {
         Game,
+        Pause,
         Inventory,
         Looting,
         Dialogue,

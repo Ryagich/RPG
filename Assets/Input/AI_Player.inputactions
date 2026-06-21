@@ -70,6 +70,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "f4bbcd17-5f44-4293-991d-bf4f0ce6530f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Map",
                     "type": "Button",
                     "id": "f6db1292-4c25-4d2a-963f-8ab038c48b48",
@@ -234,6 +243,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "ShowStats",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e6357b24-a2f4-4dc4-aef6-a30a73a1ef87",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
