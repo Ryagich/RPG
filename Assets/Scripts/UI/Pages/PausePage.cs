@@ -6,6 +6,7 @@ using UI.UIElements;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using Utils;
 
 namespace UI.Pages
 {

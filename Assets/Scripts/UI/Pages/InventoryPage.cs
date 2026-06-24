@@ -72,8 +72,10 @@ namespace UI.Pages
         private readonly IObjectResolver resolver;
 
         private RectTransform contentRect = null!;
+        private RectTransform sectionsLayoutRect = null!;
         private StatsHolder statsHolder = null!;
         private RectTransform rightRect = null!;
+        private RightPlayerInventory rightPlayerInventory = null!;
         private InfoAboutPlayer infoAboutPlayer = null!;
         private InfoAboutInventory infoAboutInventory = null!;
         private SlotsViewContainer slotsViewContainer = null!;
@@ -90,6 +92,7 @@ namespace UI.Pages
         private BloodScreenController bloodScreenController;
         private Image bloodScreen;
         private RectTransform popupRect;
+        private RectTransform popupContentRect;
         private RectTransform popupParentRect;
         private PopupTarget hoverPopupTarget;
         private float hoverPopupElapsed;
@@ -159,13 +162,18 @@ namespace UI.Pages
             statsHolder = resolver.Instantiate(uiConfig.StatsHolder, contentRect);
             statsHolder.name = $"{uiConfig.StatsHolder.name} | {Type}";
 
-            rightRect = resolver.Instantiate(uiConfig.RightSection, contentRect);
-            slotsViewContainer = resolver.Instantiate(uiConfig.CenterSection, contentRect);
+            sectionsLayoutRect = PageUiUtilities.CreateSectionsLayout(contentRect, Type.ToString());
+            PageUiUtilities.CreateSectionPlaceholder(sectionsLayoutRect, "Left");
+            slotsViewContainer = resolver.Instantiate(uiConfig.CenterSection, sectionsLayoutRect);
+            rightPlayerInventory = resolver.Instantiate(uiConfig.RightPlayerInventory, sectionsLayoutRect);
+            rightRect = rightPlayerInventory.GetComponent<RectTransform>();
+            PageUiUtilities.RegisterSectionInLayout(slotsViewContainer.GetComponent<RectTransform>());
+            PageUiUtilities.RegisterSectionInLayout(rightRect);
             PageUiUtilities.FillSlotsViewContainerStats(slotsViewContainer, statsController);
             
-            infoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
-            infoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
-            inventoryView = resolver.Instantiate(uiConfig.InventoryView, rightRect);
+            infoAboutPlayer = rightPlayerInventory.InfoAboutPlayer;
+            infoAboutInventory = rightPlayerInventory.InfoAboutInventory;
+            inventoryView = rightPlayerInventory.InventoryView;
             inventoryScrollRect = inventoryView.GetComponent<ScrollRect>();
             PageUiUtilities.FillInfoAboutPlayer(infoAboutPlayer, characterInfo, playerMoneyStorage);
             
@@ -873,7 +881,9 @@ namespace UI.Pages
             contentRect = null;
             statsHolder = null;
             bloodScreen = null;
+            sectionsLayoutRect = null;
             rightRect = null;
+            rightPlayerInventory = null;
             infoAboutPlayer = null;
             infoAboutInventory = null;
             slotsViewContainer = null;
@@ -881,6 +891,7 @@ namespace UI.Pages
             inventoryScrollRect = null;
             handSlotRect = null;
             popupRect = null;
+            popupContentRect = null;
             popupParentRect = null;
             Current = null;
         }
@@ -979,10 +990,18 @@ namespace UI.Pages
                 return false;
             }
 
+            popupContentRect = PageUiUtilities.CreatePopupContent(popupRect, uiConfig, resolver, openMode == PopupOpenMode.RightClick);
+            if (popupContentRect == null)
+            {
+                ClosePopup();
+                return false;
+            }
+
             if (openMode == PopupOpenMode.Hover)
             {
                 PageUiUtilities.FillInventoryHoverPopup(
                     popupRect,
+                    popupContentRect,
                     uiConfig,
                     localizationConfig,
                     statIconsConfig,
@@ -1001,7 +1020,7 @@ namespace UI.Pages
                 CreatePopupButtons(target);
             }
 
-            PageUiUtilities.RecalculatePopupSize(popupRect);
+            PageUiUtilities.RecalculatePopupLayout(popupRect, popupContentRect);
             PageUiUtilities.UpdatePopupPosition(popupRect, popupParentRect, GetEventCamera(), screenPoint);
             popupOpenMode = openMode;
             return true;
@@ -1087,7 +1106,7 @@ namespace UI.Pages
 
         private void CreatePopupButton(string label, UnityEngine.Events.UnityAction onClick)
         {
-            PageUiUtilities.CreatePopupButton(popupRect, uiConfig, resolver, label, onClick);
+            PageUiUtilities.CreatePopupButton(popupContentRect, uiConfig, resolver, label, onClick);
         }
 
         private bool TryGetPopupTarget(Vector2 screenPoint, out PopupTarget target)
@@ -1328,6 +1347,7 @@ namespace UI.Pages
 
             Object.Destroy(popupRect.gameObject);
             popupRect = null;
+            popupContentRect = null;
             popupOpenMode = PopupOpenMode.None;
         }
 

@@ -503,6 +503,7 @@ namespace UI.Pages
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
 
         private RectTransform contentRect = null!;
+        private RectTransform sectionsLayoutRect = null!;
         private RectTransform leftRect = null!;
         private RectTransform rightRect = null!;
         private InfoAboutPlayer leftInfoAboutPlayer = null!;
@@ -518,6 +519,7 @@ namespace UI.Pages
         private SellInfo rightSellInfo = null!;
         private RectTransform handSlotRect = null!;
         private RectTransform popupRect;
+        private RectTransform popupContentRect;
         private RectTransform popupParentRect;
         private readonly CompositeDisposable redrawDisposables = new();
         private readonly Dictionary<IInventory, InventoryView> inventoryViews = new();
@@ -615,23 +617,27 @@ namespace UI.Pages
             contentRect.name = $"{uiConfig.ContentPref.name} | {Type}";
             popupParentRect = contentRect;
 
-            leftRect = resolver.Instantiate(uiConfig.LeftSection, contentRect);
-            centerSection = resolver.Instantiate(uiConfig.CenterSection, contentRect);
+            sectionsLayoutRect = PageUiUtilities.CreateSectionsLayout(contentRect, Type.ToString());
+            leftRect = resolver.Instantiate(uiConfig.LeftAnotherInventoryInTrade, sectionsLayoutRect).GetComponent<RectTransform>();
+            centerSection = resolver.Instantiate(uiConfig.CenterSection, sectionsLayoutRect);
             PageUiUtilities.FillSlotsViewContainerStats(centerSection, statsController);
-            rightRect = resolver.Instantiate(uiConfig.RightSection, contentRect);
+            rightRect = resolver.Instantiate(uiConfig.RightPlayerInventoryInTrade, sectionsLayoutRect).GetComponent<RectTransform>();
+            PageUiUtilities.RegisterSectionInLayout(leftRect);
+            PageUiUtilities.RegisterSectionInLayout(centerSection.GetComponent<RectTransform>());
+            PageUiUtilities.RegisterSectionInLayout(rightRect);
 
-            leftInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, leftRect);
-            leftInfoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, leftRect);
-            leftSellInfo = resolver.Instantiate(uiConfig.SellInfo, leftRect);
-            targetSellInventoryView = resolver.Instantiate(uiConfig.SellInventory, leftRect).GetComponent<InventoryView>();
-            targetInventoryView = resolver.Instantiate(uiConfig.InventoryInTrading, leftRect).GetComponent<InventoryView>();
+            leftInfoAboutPlayer = GetRequiredComponentInChildren<InfoAboutPlayer>(leftRect, "left trade inventory");
+            leftInfoAboutInventory = GetRequiredComponentInChildren<InfoAboutInventory>(leftRect, "left trade inventory");
+            leftSellInfo = GetRequiredComponentInChildren<SellInfo>(leftRect, "left trade inventory");
+            targetSellInventoryView = GetRequiredInventoryView(leftRect, "Sell Inventory");
+            targetInventoryView = GetRequiredInventoryView(leftRect, "Inventory In Trade");
             PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, dialogueContext.CurrentTargetCharacterInfo, dialogueContext.CurrentTargetMoneyStorage);
 
-            rightInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
-            rightInfoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
-            rightSellInfo = resolver.Instantiate(uiConfig.SellInfo, rightRect);
-            playerSellInventoryView = resolver.Instantiate(uiConfig.SellInventory, rightRect).GetComponent<InventoryView>();
-            playerInventoryView = resolver.Instantiate(uiConfig.InventoryInTrading, rightRect).GetComponent<InventoryView>();
+            rightInfoAboutPlayer = GetRequiredComponentInChildren<InfoAboutPlayer>(rightRect, "right trade inventory");
+            rightInfoAboutInventory = GetRequiredComponentInChildren<InfoAboutInventory>(rightRect, "right trade inventory");
+            rightSellInfo = GetRequiredComponentInChildren<SellInfo>(rightRect, "right trade inventory");
+            playerSellInventoryView = GetRequiredInventoryView(rightRect, "Sell Inventory");
+            playerInventoryView = GetRequiredInventoryView(rightRect, "Inventory In Trade");
             PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo, playerMoneyStorage);
 
             inventoryViews.Clear();
@@ -674,6 +680,31 @@ namespace UI.Pages
             var tradingExitButton = resolver.Instantiate(uiConfig.TradingExitButton, centerSection.transform);
             tradingExitButton.onClick.AddListener(ReturnToDialogue);
             ReDraw();
+        }
+
+        private static T GetRequiredComponentInChildren<T>(RectTransform root, string ownerName) where T : Component
+        {
+            var component = root ? root.GetComponentInChildren<T>(true) : null;
+            if (!component)
+            {
+                Debug.LogError($"Missing {typeof(T).Name} in {ownerName} prefab.");
+            }
+
+            return component;
+        }
+
+        private static InventoryView GetRequiredInventoryView(RectTransform root, string namePart)
+        {
+            var inventoryView = root
+                ? root.GetComponentsInChildren<InventoryView>(true)
+                    .FirstOrDefault(view => view.name.Contains(namePart, StringComparison.OrdinalIgnoreCase))
+                : null;
+            if (!inventoryView)
+            {
+                Debug.LogError($"Missing InventoryView with name containing '{namePart}' in trade inventory prefab.");
+            }
+
+            return inventoryView;
         }
 
         public void Tick()
@@ -771,6 +802,7 @@ namespace UI.Pages
             }
 
             contentRect = null;
+            sectionsLayoutRect = null;
             leftRect = null;
             rightRect = null;
             leftInfoAboutPlayer = null;
@@ -787,6 +819,7 @@ namespace UI.Pages
             rightSellInfo = null;
             handSlotRect = null;
             popupRect = null;
+            popupContentRect = null;
             popupParentRect = null;
             playerSellInventory = null;
             targetSellInventory = null;
@@ -1624,10 +1657,18 @@ namespace UI.Pages
                 return false;
             }
 
+            popupContentRect = PageUiUtilities.CreatePopupContent(popupRect, uiConfig, resolver, openMode == PopupOpenMode.RightClick);
+            if (popupContentRect == null)
+            {
+                ClosePopup();
+                return false;
+            }
+
             if (openMode == PopupOpenMode.Hover)
             {
                 PageUiUtilities.FillInventoryHoverPopup(
                     popupRect,
+                    popupContentRect,
                     uiConfig,
                     localizationConfig,
                     statIconsConfig,
@@ -1646,7 +1687,7 @@ namespace UI.Pages
                 CreatePopupButtons(target);
             }
 
-            PageUiUtilities.RecalculatePopupSize(popupRect);
+            PageUiUtilities.RecalculatePopupLayout(popupRect, popupContentRect);
             PageUiUtilities.UpdatePopupPosition(popupRect, popupParentRect, GetEventCamera(), screenPoint);
             popupOpenMode = openMode;
             return true;
@@ -1684,7 +1725,7 @@ namespace UI.Pages
 
         private void CreatePopupButton(string label, UnityEngine.Events.UnityAction onClick, bool interactable = true)
         {
-            PageUiUtilities.CreatePopupButton(popupRect, uiConfig, resolver, label, onClick, interactable);
+            PageUiUtilities.CreatePopupButton(popupContentRect, uiConfig, resolver, label, onClick, interactable);
         }
 
         private bool TryMoveTargetToSell(PopupTarget target, int count)
@@ -2066,6 +2107,7 @@ namespace UI.Pages
 
             Object.Destroy(popupRect.gameObject);
             popupRect = null;
+            popupContentRect = null;
             popupOpenMode = PopupOpenMode.None;
         }
 

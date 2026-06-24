@@ -323,6 +323,7 @@ GameObject:
   - component: {fileID: 8143402613065094946}
   - component: {fileID: 888405860233156128}
   - component: {fileID: 677269434685781985}
+  - component: {fileID: 3947659308518981227}
   m_Layer: 5
   m_Name: Dialogue
   m_TagString: Untagged
@@ -350,7 +351,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 640, y: -0.000030517578}
+  m_SizeDelta: {x: 640, y: 0}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &8143402613065094946
 CanvasRenderer:
@@ -407,6 +408,32 @@ MonoBehaviour:
   <AnswerScroll>k__BackingField: {fileID: 6747388266266181366}
   <AnswerContent>k__BackingField: {fileID: 7054950124037100683}
   <TradeButton>k__BackingField: {fileID: 7026609611190172331}
+--- !u!114 &3947659308518981227
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2815021933234080889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
+  m_Padding:
+    m_Left: 5
+    m_Right: 5
+    m_Top: 10
+    m_Bottom: 5
+  m_ChildAlignment: 0
+  m_Spacing: 5
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &3101560981389783341
 GameObject:
   m_ObjectHideFlags: 0
@@ -739,8 +766,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3867948907267361692}
   m_HandleRect: {fileID: 4930031672990935491}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.99002
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1026,6 +1053,7 @@ GameObject:
   - component: {fileID: 324379964008530416}
   - component: {fileID: 6670671927449889571}
   - component: {fileID: 6747388266266181366}
+  - component: {fileID: 8123400011122233344}
   m_Layer: 5
   m_Name: Answer Scroll View
   m_TagString: Untagged
@@ -1051,9 +1079,9 @@ RectTransform:
   m_Father: {fileID: 2381003713843196178}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -15, y: 202.5}
-  m_SizeDelta: {x: -15, y: 267.5}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 265}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &324379964008530416
 CanvasRenderer:
@@ -1123,6 +1151,26 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8123400011122233344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5711951973012247964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 0
+  m_PreferredWidth: -1
+  m_PreferredHeight: 265
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: 265
+  m_LayoutPriority: 1
 --- !u!1 &6226651609289519693
 GameObject:
   m_ObjectHideFlags: 0
@@ -1135,6 +1183,7 @@ GameObject:
   - component: {fileID: 9107181958637792244}
   - component: {fileID: 4703427613554801014}
   - component: {fileID: 7026609611190172331}
+  - component: {fileID: 8123400011122233345}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -1157,10 +1206,10 @@ RectTransform:
   - {fileID: 1537647143113304095}
   m_Father: {fileID: 2381003713843196178}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 15}
-  m_SizeDelta: {x: 160, y: 45}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 45}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &9107181958637792244
 CanvasRenderer:
@@ -1244,6 +1293,26 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8123400011122233345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6226651609289519693}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 0
+  m_PreferredWidth: -1
+  m_PreferredHeight: 45
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: 45
+  m_LayoutPriority: 1
 --- !u!1 &6558122688279055298
 GameObject:
   m_ObjectHideFlags: 0
@@ -1418,6 +1487,7 @@ GameObject:
   - component: {fileID: 8599304387603404895}
   - component: {fileID: 6641307234105827232}
   - component: {fileID: 1203983388658396431}
+  - component: {fileID: 8123400011122233346}
   m_Layer: 5
   m_Name: Dialogue Scroll View
   m_TagString: Untagged
@@ -1442,10 +1512,10 @@ RectTransform:
   - {fileID: 3337526123441178145}
   m_Father: {fileID: 2381003713843196178}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -15, y: -372.5}
-  m_SizeDelta: {x: -15, y: 715}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 715}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!222 &8599304387603404895
 CanvasRenderer:
@@ -1515,6 +1585,26 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8123400011122233346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7514069135798722010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 0
+  m_PreferredWidth: -1
+  m_PreferredHeight: 715
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: 715
+  m_LayoutPriority: 1
 --- !u!1 &7783347265900783483
 GameObject:
   m_ObjectHideFlags: 0

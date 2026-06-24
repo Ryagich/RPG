@@ -568,9 +568,105 @@ namespace UI.Pages
             canvasGroup.interactable = blocksRaycasts;
         }
 
+        public static RectTransform CreateSectionsLayout(RectTransform parent, string pageName)
+        {
+            if (parent == null)
+            {
+                return null;
+            }
+
+            // Keep page sections under a dedicated stretch container so layout remains stable
+            // when the screen size changes, regardless of whether the page uses 1, 2, or 3 sections.
+            var layoutObject = new GameObject(
+                $"Sections Layout | {pageName}",
+                typeof(RectTransform),
+                typeof(HorizontalLayoutGroup));
+            var layoutRect = layoutObject.GetComponent<RectTransform>();
+            layoutRect.SetParent(parent, false);
+            layoutRect.anchorMin = Vector2.zero;
+            layoutRect.anchorMax = Vector2.one;
+            layoutRect.offsetMin = Vector2.zero;
+            layoutRect.offsetMax = Vector2.zero;
+            layoutRect.pivot = new Vector2(0.5f, 0.5f);
+
+            var layoutGroup = layoutObject.GetComponent<HorizontalLayoutGroup>();
+            layoutGroup.spacing = 0f;
+            layoutGroup.childAlignment = TextAnchor.MiddleCenter;
+            layoutGroup.childControlWidth = true;
+            layoutGroup.childControlHeight = true;
+            layoutGroup.childForceExpandWidth = true;
+            layoutGroup.childForceExpandHeight = true;
+            layoutGroup.childScaleWidth = false;
+            layoutGroup.childScaleHeight = false;
+
+            return layoutRect;
+        }
+
+        public static RectTransform CreateSectionPlaceholder(RectTransform layoutRect, string sectionName)
+        {
+            if (layoutRect == null)
+            {
+                return null;
+            }
+
+            // Create an empty layout child only when a section is absent, so the remaining
+            // real sections still keep their intended third of the screen.
+            var placeholderObject = new GameObject(
+                $"{sectionName} Placeholder",
+                typeof(RectTransform),
+                typeof(LayoutElement));
+            var placeholderRect = placeholderObject.GetComponent<RectTransform>();
+            placeholderRect.SetParent(layoutRect, false);
+            placeholderRect.anchorMin = Vector2.zero;
+            placeholderRect.anchorMax = Vector2.one;
+            placeholderRect.offsetMin = Vector2.zero;
+            placeholderRect.offsetMax = Vector2.zero;
+            placeholderRect.pivot = new Vector2(0.5f, 0.5f);
+
+            RegisterSectionInLayout(placeholderRect);
+            return placeholderRect;
+        }
+
+        public static void RegisterSectionInLayout(RectTransform sectionRect)
+        {
+            if (sectionRect == null)
+            {
+                return;
+            }
+
+            var layoutElement = sectionRect.GetComponent<LayoutElement>();
+            if (layoutElement == null)
+            {
+                layoutElement = sectionRect.gameObject.AddComponent<LayoutElement>();
+            }
+
+            layoutElement.minWidth = 0f;
+            layoutElement.preferredWidth = -1f;
+            layoutElement.flexibleWidth = 1f;
+            layoutElement.minHeight = 0f;
+            layoutElement.preferredHeight = -1f;
+            layoutElement.flexibleHeight = 1f;
+        }
+
+        public static RectTransform CreatePopupContent(RectTransform popupRect, UIConfig uiConfig, IObjectResolver resolver, bool blocksRaycasts)
+        {
+            if (popupRect == null || uiConfig?.PopupContent == null || resolver == null)
+            {
+                return null;
+            }
+
+            var popupContent = resolver.Instantiate(uiConfig.PopupContent, popupRect);
+            popupContent.name = uiConfig.PopupContent.name;
+
+            var popupContentRect = popupContent.transform as RectTransform;
+            SetPopupRaycastState(popupContentRect, blocksRaycasts);
+            return popupContentRect;
+        }
+
         public static void FillInventoryHoverPopup
             (
                 RectTransform popupRect,
+                RectTransform popupContentRect,
                 UIConfig uiConfig,
                 LocalizationConfig localizationConfig,
                 StatIconsConfig statIconsConfig,
@@ -586,6 +682,7 @@ namespace UI.Pages
             )
         {
             if (popupRect == null
+             || popupContentRect == null
              || uiConfig == null
              || localizationConfig == null
              || statIconsConfig == null
@@ -598,12 +695,12 @@ namespace UI.Pages
             }
 
             CreatePopupItemName(popupRect, uiConfig, resolver, itemConfig);
-            CreatePopupWeight(popupRect, uiConfig, localizationConfig, resolver, itemStack);
+            CreatePopupWeight(popupContentRect, uiConfig, localizationConfig, resolver, itemStack);
 
             switch (itemConfig.ItemType)
             {
                 case ItemType.Usable:
-                    CreateUsablePopupStats(popupRect, uiConfig, statIconsConfig, resolver, itemConfig);
+                    CreateUsablePopupStats(popupContentRect, uiConfig, statIconsConfig, resolver, itemConfig);
                     break;
                 case ItemType.Helm:
                 case ItemType.Face:
@@ -613,7 +710,7 @@ namespace UI.Pages
                 case ItemType.Legs:
                 case ItemType.Hips:
                     CreateClothesPopupStats(
-                        popupRect,
+                        popupContentRect,
                         uiConfig,
                         statIconsConfig,
                         statsController,
@@ -626,14 +723,14 @@ namespace UI.Pages
                         negativeChangeColor);
                     break;
                 case ItemType.Backpack when itemConfig is BackpackItemConfig backpackItemConfig:
-                    CreateBackpackSizePopup(popupRect, uiConfig, resolver, backpackItemConfig);
+                    CreateBackpackSizePopup(popupContentRect, uiConfig, resolver, backpackItemConfig);
                     break;
             }
         }
 
         public static void CreatePopupButton
             (
-                RectTransform popupRect,
+                RectTransform popupContentRect,
                 UIConfig uiConfig,
                 IObjectResolver resolver,
                 string label,
@@ -641,12 +738,12 @@ namespace UI.Pages
                 bool interactable = true
             )
         {
-            if (popupRect == null || uiConfig?.PopupButton == null || resolver == null)
+            if (popupContentRect == null || uiConfig?.PopupButton == null || resolver == null)
             {
                 return;
             }
 
-            var button = resolver.Instantiate(uiConfig.PopupButton, popupRect);
+            var button = resolver.Instantiate(uiConfig.PopupButton, popupContentRect);
             button.name = $"{uiConfig.PopupButton.name} | {label}";
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(onClick);
@@ -657,6 +754,12 @@ namespace UI.Pages
             {
                 text.text = label;
             }
+        }
+
+        public static void RecalculatePopupLayout(RectTransform popupRect, RectTransform popupContentRect)
+        {
+            RecalculatePopupSize(popupContentRect);
+            RecalculatePopupSize(popupRect);
         }
 
         public static void RecalculatePopupSize(RectTransform popupRect)
@@ -853,10 +956,15 @@ namespace UI.Pages
                 return;
             }
 
-            var itemName = resolver.Instantiate(uiConfig.PopupItemName, popupRect);
-            itemName.name = $"{uiConfig.PopupItemName.name} | {itemConfig.name}";
-            itemName.text = itemConfig.Name.GetLocalizedStringCached();
-            itemName.transform.SetAsFirstSibling();
+            var popupTitle = resolver.Instantiate(uiConfig.PopupItemName, popupRect);
+            popupTitle.name = $"{uiConfig.PopupItemName.name} | {itemConfig.name}";
+
+            if (popupTitle.Text != null)
+            {
+                popupTitle.Text.text = itemConfig.Name.GetLocalizedStringCached();
+            }
+
+            popupTitle.transform.SetAsFirstSibling();
         }
 
         private static void CreatePopupWeight

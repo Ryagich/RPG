@@ -126,7 +126,7 @@ namespace Input
         {
             if (gameModesController.GameMode == GameMode.Trade)
             {
-                changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Dialogue));
+                changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Inventory));
                 return;
             }
 
@@ -138,7 +138,7 @@ namespace Input
 
             if (gameModesController.GameMode == GameMode.Inventory)
             {
-                pauseInputPublisher.Publish(new PauseInputMessage());
+                changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Game));
                 return;
             }
 

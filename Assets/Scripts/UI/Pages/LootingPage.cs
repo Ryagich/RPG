@@ -64,8 +64,11 @@ namespace UI.Pages
         private readonly IObjectResolver resolver;
 
         private RectTransform contentRect = null!;
+        private RectTransform sectionsLayoutRect = null!;
         private RectTransform rightRect = null!;
+        private RightPlayerInventory rightPlayerInventory = null!;
         private RectTransform leftRect = null!;
+        private LeftAnotherInventory leftAnotherInventory = null!;
         private InfoAboutPlayer rightInfoAboutPlayer = null!;
         private InfoAboutPlayer leftInfoAboutPlayer = null!;
         private InfoAboutInventory rightInfoAboutInventory = null!;
@@ -86,6 +89,7 @@ namespace UI.Pages
         private BloodScreenController bloodScreenController;
         private Image bloodScreen;
         private RectTransform popupRect;
+        private RectTransform popupContentRect;
         private RectTransform popupParentRect;
         private PopupTarget hoverPopupTarget;
         private float hoverPopupElapsed;
@@ -191,19 +195,25 @@ namespace UI.Pages
             contentRect.name = $"{uiConfig.ContentPref.name} | {Type}";
             popupParentRect = contentRect;
 
-            leftRect = resolver.Instantiate(uiConfig.LeftSection, contentRect);
-            slotsViewContainer = resolver.Instantiate(uiConfig.CenterSection, contentRect);
+            sectionsLayoutRect = PageUiUtilities.CreateSectionsLayout(contentRect, Type.ToString());
+            leftAnotherInventory = resolver.Instantiate(uiConfig.LeftAnotherInventory, sectionsLayoutRect);
+            leftRect = leftAnotherInventory.GetComponent<RectTransform>();
+            slotsViewContainer = resolver.Instantiate(uiConfig.CenterSection, sectionsLayoutRect);
             PageUiUtilities.FillSlotsViewContainerStats(slotsViewContainer, statsController);
-            rightRect = resolver.Instantiate(uiConfig.RightSection, contentRect);
+            rightPlayerInventory = resolver.Instantiate(uiConfig.RightPlayerInventory, sectionsLayoutRect);
+            rightRect = rightPlayerInventory.GetComponent<RectTransform>();
+            PageUiUtilities.RegisterSectionInLayout(leftRect);
+            PageUiUtilities.RegisterSectionInLayout(slotsViewContainer.GetComponent<RectTransform>());
+            PageUiUtilities.RegisterSectionInLayout(rightRect);
 
-            rightInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, rightRect);
-            rightInfoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, rightRect);
-            playerInventoryView = resolver.Instantiate(uiConfig.InventoryView, rightRect);
+            rightInfoAboutPlayer = rightPlayerInventory.InfoAboutPlayer;
+            rightInfoAboutInventory = rightPlayerInventory.InfoAboutInventory;
+            playerInventoryView = rightPlayerInventory.InventoryView;
             PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo, playerMoneyStorage);
 
-            leftInfoAboutPlayer = resolver.Instantiate(uiConfig.InfoAboutPlayer, leftRect);
-            leftInfoAboutInventory = resolver.Instantiate(uiConfig.InfoAboutInventory, leftRect);
-            targetInventoryView = resolver.Instantiate(uiConfig.InventoryView, leftRect);
+            leftInfoAboutPlayer = leftAnotherInventory.InfoAboutPlayer;
+            leftInfoAboutInventory = leftAnotherInventory.InfoAboutInventory;
+            targetInventoryView = leftAnotherInventory.InventoryView;
             PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, lootingContext.CurrentTargetCharacterInfo, lootingContext.CurrentTargetMoneyStorage);
 
             inventoryViews.Clear();
@@ -991,10 +1001,18 @@ namespace UI.Pages
                 return false;
             }
 
+            popupContentRect = PageUiUtilities.CreatePopupContent(popupRect, uiConfig, resolver, openMode == PopupOpenMode.RightClick);
+            if (popupContentRect == null)
+            {
+                ClosePopup();
+                return false;
+            }
+
             if (openMode == PopupOpenMode.Hover)
             {
                 PageUiUtilities.FillInventoryHoverPopup(
                     popupRect,
+                    popupContentRect,
                     uiConfig,
                     localizationConfig,
                     statIconsConfig,
@@ -1013,7 +1031,7 @@ namespace UI.Pages
                 CreatePopupButtons(target);
             }
 
-            PageUiUtilities.RecalculatePopupSize(popupRect);
+            PageUiUtilities.RecalculatePopupLayout(popupRect, popupContentRect);
             PageUiUtilities.UpdatePopupPosition(popupRect, popupParentRect, GetEventCamera(), screenPoint);
             popupOpenMode = openMode;
             return true;
@@ -1097,7 +1115,7 @@ namespace UI.Pages
 
         private void CreatePopupButton(string label, UnityEngine.Events.UnityAction onClick, bool interactable = true)
         {
-            PageUiUtilities.CreatePopupButton(popupRect, uiConfig, resolver, label, onClick, interactable);
+            PageUiUtilities.CreatePopupButton(popupContentRect, uiConfig, resolver, label, onClick, interactable);
         }
 
         private bool CanUseInventoryItem(ItemConfig itemConfig)
@@ -1513,6 +1531,7 @@ namespace UI.Pages
 
             UnityEngine.Object.Destroy(popupRect.gameObject);
             popupRect = null;
+            popupContentRect = null;
             popupOpenMode = PopupOpenMode.None;
         }
 
@@ -1545,8 +1564,11 @@ namespace UI.Pages
             }
 
             contentRect = null;
+            sectionsLayoutRect = null;
             rightRect = null;
+            rightPlayerInventory = null;
             leftRect = null;
+            leftAnotherInventory = null;
             rightInfoAboutPlayer = null;
             leftInfoAboutPlayer = null;
             rightInfoAboutInventory = null;
@@ -1557,6 +1579,7 @@ namespace UI.Pages
             targetInventoryView = null;
             handSlotRect = null;
             popupRect = null;
+            popupContentRect = null;
             popupParentRect = null;
             Current = null;
         }

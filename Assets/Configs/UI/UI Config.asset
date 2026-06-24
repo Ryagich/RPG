@@ -16,13 +16,17 @@ MonoBehaviour:
   <InteractableText>k__BackingField: {fileID: 1042406616399098687, guid: 9135cd225f633e243b1ffa243718093a, type: 3}
   <Tile>k__BackingField: {fileID: 3521090342024453214, guid: 2765049fb2cddd54db80c1519b88a3fd, type: 3}
   <RightSection>k__BackingField: {fileID: 2905255636178868728, guid: de5de57fdf6539143b7b9f46d772ccc8, type: 3}
+  <RightPlayerInventory>k__BackingField: {fileID: 4123456789012345678, guid: c8576afc65a51484f895533808d12f07, type: 3}
   <CenterSection>k__BackingField: {fileID: 8295545419508832720, guid: 1e1551f3122f49b489a1227175beda0a, type: 3}
   <LeftSection>k__BackingField: {fileID: 4744890346096254285, guid: 98f1ad6627c19ac43a4f1b5d13c41cee, type: 3}
+  <LeftAnotherInventory>k__BackingField: {fileID: 7333333333333333333, guid: 8ead9b3cb5747254fb34059e6d528909, type: 3}
   <InventoryView>k__BackingField: {fileID: 2695229041853354339, guid: d51f424532a90824190ae26cb62a8f7f, type: 3}
   <InfoAboutInventory>k__BackingField: {fileID: 4248279467150377410, guid: 2792d016ebedd1c489e5f08ff6be9004, type: 3}
   <InfoAboutPlayer>k__BackingField: {fileID: 1558630750454747041, guid: a13a6008c3052644ea080a95629a3a2d, type: 3}
   <DialogueContainer>k__BackingField: {fileID: 677269434685781985, guid: 17f8d839d3036af499c4ab29d41ad950, type: 3}
   <PauseMenu>k__BackingField: {fileID: 8794213445826204213, guid: 80bddbcce88a11e4bbf184fefee5499c, type: 3}
+  <LeftAnotherInventoryInTrade>k__BackingField: {fileID: 1814612195659931177, guid: f026a66a750b29942bc40cf1e8db8fe7, type: 3}
+  <RightPlayerInventoryInTrade>k__BackingField: {fileID: 4179578154594752861, guid: ef9aaa61a212f794f9176875b9d74ea0, type: 3}
   <SellInventory>k__BackingField: {fileID: 3517618128280596531, guid: 2c110c241289ce144aee2f0b12c24cfa, type: 3}
   <InventoryInTrading>k__BackingField: {fileID: 6562754561215371127, guid: b5978c7d4b7212f4c974cbb202bd2c1e, type: 3}
   <SellInfo>k__BackingField: {fileID: 7629633191945355716, guid: 4dc3948d66fe4624e9444f5cac2c114e, type: 3}
@@ -32,7 +36,8 @@ MonoBehaviour:
   <NotificationInDialog>k__BackingField: {fileID: 1522965911973430939, guid: a2683e0e9721343418c4299b215e1f06, type: 3}
   <StatsHolder>k__BackingField: {fileID: 7495129228834389673, guid: ab9f6ea1b64d2cf48b6efc688c9e249f, type: 3}
   <PopupRect>k__BackingField: {fileID: 2905255636178868728, guid: 12b0999af4e93bf418857b096b6cc62b, type: 3}
-  <PopupItemName>k__BackingField: {fileID: 7165394721513020807, guid: dc99eac617168734c9d2eae12b8110f0, type: 3}
+  <PopupContent>k__BackingField: {fileID: 6244085611169673521, guid: 452ae0bdab372c04d8b495c2d6723d60, type: 3}
+  <PopupItemName>k__BackingField: {fileID: 5158057010978054321, guid: 8c23f21c3e68ebe48b746b3b9c27bb5b, type: 3}
   <PopupWeight>k__BackingField: {fileID: 7165394721513020807, guid: b83d8c88f2c06bf4aaee7f7febeb7d7a, type: 3}
   <PopupButton>k__BackingField: {fileID: 5973226020501958766, guid: 531b3f64fd18a2348aeac7908e34e078, type: 3}
   <PopupHoverOpenDelaySeconds>k__BackingField: 0.5
