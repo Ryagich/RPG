@@ -25,6 +25,7 @@ MonoBehaviour:
   <InfoAboutPlayer>k__BackingField: {fileID: 1558630750454747041, guid: a13a6008c3052644ea080a95629a3a2d, type: 3}
   <DialogueContainer>k__BackingField: {fileID: 677269434685781985, guid: 17f8d839d3036af499c4ab29d41ad950, type: 3}
   <PauseMenu>k__BackingField: {fileID: 8794213445826204213, guid: 80bddbcce88a11e4bbf184fefee5499c, type: 3}
+  <MenuUI>k__BackingField: {fileID: 3420270240661638511, guid: 37e41ce379a75a541affa1f7e407121c, type: 3}
   <LeftAnotherInventoryInTrade>k__BackingField: {fileID: 1814612195659931177, guid: f026a66a750b29942bc40cf1e8db8fe7, type: 3}
   <RightPlayerInventoryInTrade>k__BackingField: {fileID: 4179578154594752861, guid: ef9aaa61a212f794f9176875b9d74ea0, type: 3}
   <SellInventory>k__BackingField: {fileID: 3517618128280596531, guid: 2c110c241289ce144aee2f0b12c24cfa, type: 3}

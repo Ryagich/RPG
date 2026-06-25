@@ -2,6 +2,7 @@ using GameModes;
 using Inventory;
 using MessagePipe;
 using Messages;
+using TargetLock;
 using UnityEngine;
 using VContainer.Unity;
 
@@ -18,6 +19,7 @@ namespace CameraScripts
 
         public CameraMotor(
             CameraConfig config,
+            TargetLockConfig targetLockConfig,
             Camera cam,
             Transform target,
             CharacterVisualRoot characterVisualRoot,
@@ -26,7 +28,7 @@ namespace CameraScripts
             var camTransform = cam.transform;
             var facingTarget = characterVisualRoot != null ? characterVisualRoot.transform : target;
 
-            cameraMovement = new CameraMovement(config, camTransform, target, facingTarget);
+            cameraMovement = new CameraMovement(config, targetLockConfig, camTransform, target, facingTarget);
             cameraMovementInPlace = new CameraMovementInPlace(config, camTransform);
             this.gameModeChangedSubscriber = gameModeChangedSubscriber;
         }
@@ -62,6 +64,11 @@ namespace CameraScripts
         public void ChangeCameraMode(CameraModes mode)
         {
             cameraMode = mode;
+        }
+
+        public void SetTargetLockTarget(Transform target)
+        {
+            cameraMovement.SetLockTarget(target);
         }
 
         public Quaternion GetGameplayPlanarRotation()

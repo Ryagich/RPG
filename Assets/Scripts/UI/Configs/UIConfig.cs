@@ -26,6 +26,7 @@ namespace UI.Configs
         [field: SerializeField] public InfoAboutPlayer InfoAboutPlayer { get; private set; }
         [field: SerializeField] public DialogueContainer DialogueContainer { get; private set; }
         [field: SerializeField] public PauseMenu PauseMenu { get; private set; }
+        [field: SerializeField] public MenuUI MenuUI { get; private set; }
         
         //Trade
         [field: SerializeField] public GameObject LeftAnotherInventoryInTrade { get; private set; }

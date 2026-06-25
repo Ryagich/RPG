@@ -4,6 +4,7 @@ using Inventory.Inventories;
 using MessagePipe;
 using Messages;
 using Stats;
+using TargetLock;
 using UnityEngine;
 using VContainer.Unity;
 
@@ -21,6 +22,7 @@ namespace Movement
         private readonly PlayerMovementConfig playerMovementConfig;
         private readonly PlayerInventory playerInventory;
         private readonly StatsController statsController;
+        private readonly TargetLockController targetLockController;
 
         private Vector2 bufferedInputDirection;
         private Vector2 targetVelocity;
@@ -42,6 +44,7 @@ namespace Movement
                 CharacterController controller,
                 PlayerInventory playerInventory,
                 StatsController statsController,
+                TargetLockController targetLockController,
                 ISubscriber<PlayerMoveMessage> playerMoveSubscriber
             )
         {
@@ -52,6 +55,7 @@ namespace Movement
             this.controller = controller;
             this.playerInventory = playerInventory;
             this.statsController = statsController;
+            this.targetLockController = targetLockController;
             currentSpeedChangeRate = playerMovementConfig.WalkSpeedChangeRate;
 
             playerMoveSubscriber.Subscribe(OnMove);
@@ -206,6 +210,11 @@ namespace Movement
 
         private void RotateTowardsMovement(Vector3 worldMoveDirection, Vector2 movementInput)
         {
+            if (targetLockController.IsLocked)
+            {
+                return;
+            }
+
             // Only forward-driven movement should rotate the character.
             // Strafe and backward input must preserve the current facing so the player can move
             // sideways/backwards relative to the camera instead of turning into the movement vector.

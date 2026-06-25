@@ -5,6 +5,7 @@ using Inventory.Item;
 using MessagePipe;
 using Messages;
 using Movement;
+using TargetLock;
 using UniRx;
 using UnityEngine;
 using VContainer.Unity;
@@ -119,6 +120,7 @@ namespace Inventory
         private readonly GameModesController gameModesController;
         private readonly PlayerMovement playerMovement;
         private readonly PlayerAnimationController playerAnimationController;
+        private readonly TargetLockController targetLockController;
         private readonly CompositeDisposable disposables = new();
         private readonly SerialDisposable weaponAttachmentBlendDisposable = new();
         private readonly int weaponAnimationLayerIndex;
@@ -149,6 +151,7 @@ namespace Inventory
             GameModesController gameModesController,
             PlayerMovement playerMovement,
             PlayerAnimationController playerAnimationController,
+            TargetLockController targetLockController,
             ISubscriber<WeaponSlotInputMessage> weaponSlotInputSubscriber,
             ISubscriber<MouseDown> mouseDownSubscriber,
             ISubscriber<MouseUp> mouseUpSubscriber,
@@ -162,6 +165,7 @@ namespace Inventory
             this.gameModesController = gameModesController;
             this.playerMovement = playerMovement;
             this.playerAnimationController = playerAnimationController;
+            this.targetLockController = targetLockController;
             weaponAnimationLayerIndex = animator != null
                 ? animator.GetLayerIndex(WeaponAnimationLayerName)
                 : -1;
@@ -456,6 +460,7 @@ namespace Inventory
             }
 
             LogLeftClick("weapon in hand -> request Attack", selectedItemConfig);
+            targetLockController?.TryFaceAttackTarget();
             TriggerAttack();
         }
 

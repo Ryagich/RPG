@@ -48,9 +48,9 @@ MonoBehaviour:
   chillStat: 0
   equippedVisuals:
   - <BodyPart>k__BackingField: 22
-    <VisualName>k__BackingField: Chr_HandLeft_Male_01
+    <VisualName>k__BackingField: Chr_HandLeft_Male_02
   - <BodyPart>k__BackingField: 23
-    <VisualName>k__BackingField: Chr_HandRight_Male_01
+    <VisualName>k__BackingField: Chr_HandRight_Male_02
   references:
     version: 2
     RefIds: []

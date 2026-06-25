@@ -4,6 +4,7 @@ using Messages;
 using UI.Configs;
 using UI.UIElements;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using VContainer;
 using VContainer.Unity;
 using Utils;
@@ -12,6 +13,8 @@ namespace UI.Pages
 {
     public class PausePage : BasePage
     {
+        private const string MenuSceneName = "Menu";
+
         public override PageType Type { get; } = PageType.Pause;
 
         private readonly UIConfig uiConfig;
@@ -52,6 +55,11 @@ namespace UI.Pages
             {
                 pauseMenu.ContinueButton.onClick.AddListener(ContinueGame);
             }
+
+            if (pauseMenu.MenuButton != null)
+            {
+                pauseMenu.MenuButton.onClick.AddListener(LoadMenu);
+            }
         }
 
         public override void Hide()
@@ -61,6 +69,11 @@ namespace UI.Pages
                 if (pauseMenu.ContinueButton != null)
                 {
                     pauseMenu.ContinueButton.onClick.RemoveListener(ContinueGame);
+                }
+
+                if (pauseMenu.MenuButton != null)
+                {
+                    pauseMenu.MenuButton.onClick.RemoveListener(LoadMenu);
                 }
 
                 pauseMenu = null;
@@ -75,6 +88,14 @@ namespace UI.Pages
         private void ContinueGame()
         {
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Game));
+        }
+
+        private static void LoadMenu()
+        {
+            Time.timeScale = 1f;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            SceneManager.LoadScene(MenuSceneName);
         }
     }
 }

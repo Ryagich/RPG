@@ -34,6 +34,23 @@ namespace Messages
     public readonly struct InteractableInputMessage { }
 
     public readonly struct PauseInputMessage { }
+
+    public enum TargetLockCommand
+    {
+        Toggle,
+        Next,
+        Previous
+    }
+
+    public readonly struct TargetLockInputMessage
+    {
+        public readonly TargetLockCommand Command;
+
+        public TargetLockInputMessage(TargetLockCommand command)
+        {
+            Command = command;
+        }
+    }
     
     public readonly struct MouseDown
     {

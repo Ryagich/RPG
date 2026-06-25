@@ -6,6 +6,7 @@ using Interactable;
 using Inventory;
 using Localization;
 using Movement;
+using TargetLock;
 using UI;
 using UI.Configs;
 using UI.Map;
@@ -17,6 +18,8 @@ namespace Container.Project
 {
     public class ProjectLifetimeScope : LifetimeScope
     {
+        private static ProjectLifetimeScope instance;
+
         [field: SerializeField] public InputConfig InputConfig { get; private set; }
         [field: SerializeField] public CameraConfig CameraConfig { get; private set; }
         [field: SerializeField] public PlayerMovementConfig PlayerMovementConfig { get; private set; }
@@ -29,7 +32,31 @@ namespace Container.Project
         [field: SerializeField] public ColorsConfig ColorsConfig { get; private set; }
         [field: SerializeField] public StatIconsConfig StatIconsConfig { get; private set; }
         [field: SerializeField] public MapConfig MapConfig { get; private set; }
-        
+        [field: SerializeField] public TargetLockConfig TargetLockConfig { get; private set; }
+
+        protected override void Awake()
+        {
+            if (instance != null && instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+            base.Awake();
+        }
+
+        protected override void OnDestroy()
+        {
+            if (instance == this)
+            {
+                instance = null;
+            }
+
+            base.OnDestroy();
+        }
+
         protected override void Configure(IContainerBuilder builder)
         {
             // === Общие зависимости ===
@@ -45,6 +72,7 @@ namespace Container.Project
             builder.RegisterInstance(ColorsConfig).AsSelf();
             builder.RegisterInstance(StatIconsConfig).AsSelf();
             builder.RegisterInstance(MapConfig).AsSelf();
+            builder.RegisterInstance(TargetLockConfig).AsSelf();
 
             builder.RegisterEntryPoint<Bootloader>().AsSelf();
         }

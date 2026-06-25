@@ -18,6 +18,7 @@ namespace Input
         private readonly IPublisher<MouseDown> mouseDown;
         private readonly IPublisher<MouseUp> mouseUp;
         private readonly IPublisher<PauseInputMessage> pauseInputPublisher;
+        private readonly IPublisher<TargetLockInputMessage> targetLockInputPublisher;
         private readonly IPublisher<ShowStatsInputMessage> showStatsInputPublisher;
         private readonly IPublisher<FastSlotInputMessage> fastSlotInputPublisher;
         private readonly IPublisher<WeaponSlotInputMessage> weaponSlotInputPublisher;
@@ -25,6 +26,9 @@ namespace Input
 
         private Vector2 currentMoveDirection;
         private bool isRunPressed;
+        private bool pollTargetLockToggleFallback;
+        private bool pollTargetLockNextFallback;
+        private bool pollTargetLockPreviousFallback;
 
         private InputHandler
             (
@@ -35,6 +39,7 @@ namespace Input
                 IPublisher<MouseDown> mouseDown,
                 IPublisher<MouseUp> mouseUp,
                 IPublisher<PauseInputMessage> pauseInputPublisher,
+                IPublisher<TargetLockInputMessage> targetLockInputPublisher,
                 IPublisher<ShowStatsInputMessage> showStatsInputPublisher,
                 IPublisher<FastSlotInputMessage> fastSlotInputPublisher,
                 IPublisher<WeaponSlotInputMessage> weaponSlotInputPublisher,
@@ -48,6 +53,7 @@ namespace Input
             this.mouseDown = mouseDown;
             this.mouseUp = mouseUp;
             this.pauseInputPublisher = pauseInputPublisher;
+            this.targetLockInputPublisher = targetLockInputPublisher;
             this.showStatsInputPublisher = showStatsInputPublisher;
             this.fastSlotInputPublisher = fastSlotInputPublisher;
             this.weaponSlotInputPublisher = weaponSlotInputPublisher;
@@ -72,6 +78,9 @@ namespace Input
             SubscribeFastSlotAction("FastSlot3", 3);
             SubscribeFastSlotAction("FastSlot4", 4);
             SubscribePauseAction("Pause");
+            SubscribeTargetLockAction("TargetLock", TargetLockCommand.Toggle, ref pollTargetLockToggleFallback);
+            SubscribeTargetLockAction("TargetLockNext", TargetLockCommand.Next, ref pollTargetLockNextFallback);
+            SubscribeTargetLockAction("TargetLockPrevious", TargetLockCommand.Previous, ref pollTargetLockPreviousFallback);
 
             if (inputConfig.ShowStats != null && inputConfig.ShowStats.action != null)
             {
@@ -84,6 +93,7 @@ namespace Input
             }
 
             Observable.EveryUpdate().Subscribe(_ => PollWeaponSlotInputs());
+            Observable.EveryUpdate().Subscribe(_ => PollTargetLockFallbackInputs());
         }
         
         private void OnMove(InputAction.CallbackContext context)
@@ -228,9 +238,35 @@ namespace Input
             action.started += Pause;
         }
 
+        private void SubscribeTargetLockAction(
+            string actionName,
+            TargetLockCommand command,
+            ref bool useFallback)
+        {
+            var actionMap = inputConfig.Movement?.action?.actionMap;
+            var action = actionMap?.FindAction(actionName, false);
+            if (action == null)
+            {
+                useFallback = true;
+                return;
+            }
+
+            action.started += _ => PublishTargetLockCommand(command);
+        }
+
         private void Pause(InputAction.CallbackContext context)
         {
             pauseInputPublisher.Publish(new PauseInputMessage());
+        }
+
+        private void PublishTargetLockCommand(TargetLockCommand command)
+        {
+            if (gameModesController.GameMode != GameMode.Game)
+            {
+                return;
+            }
+
+            targetLockInputPublisher.Publish(new TargetLockInputMessage(command));
         }
 
         private void PollShowStatsFallback()
@@ -268,6 +304,30 @@ namespace Input
             if (keyboard.digit2Key.wasPressedThisFrame)
             {
                 weaponSlotInputPublisher.Publish(new WeaponSlotInputMessage(2));
+            }
+        }
+
+        private void PollTargetLockFallbackInputs()
+        {
+            var keyboard = Keyboard.current;
+            if (keyboard == null)
+            {
+                return;
+            }
+
+            if (pollTargetLockToggleFallback && keyboard.qKey.wasPressedThisFrame)
+            {
+                PublishTargetLockCommand(TargetLockCommand.Toggle);
+            }
+
+            if (pollTargetLockNextFallback && keyboard.eKey.wasPressedThisFrame)
+            {
+                PublishTargetLockCommand(TargetLockCommand.Next);
+            }
+
+            if (pollTargetLockPreviousFallback && keyboard.zKey.wasPressedThisFrame)
+            {
+                PublishTargetLockCommand(TargetLockCommand.Previous);
             }
         }
     }

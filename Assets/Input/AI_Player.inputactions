@@ -88,6 +88,33 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "TargetLock",
+                    "type": "Button",
+                    "id": "64b5c5ea-65c5-43da-b4d9-2446f94a1072",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "TargetLockNext",
+                    "type": "Button",
+                    "id": "6b3fdfbb-18b0-4ac8-96f6-bc9fa6f2230a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "TargetLockPrevious",
+                    "type": "Button",
+                    "id": "e18945c5-27d3-443f-9406-4a9a75e8dc0c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "FastSlot1",
                     "type": "Button",
                     "id": "b69f1ca0-f6f5-449e-894b-f84e0ea3eb1a",
@@ -265,6 +292,39 @@
                     "processors": "",
                     "groups": "",
                     "action": "Map",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e9e9fb40-a46c-4e2a-a095-dae4072fa8a3",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TargetLock",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "48d968f1-45e3-4f1f-b039-69328b90a15b",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TargetLockNext",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f9a8f251-6017-401f-9f8e-b7e68a860eea",
+                    "path": "<Keyboard>/z",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TargetLockPrevious",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

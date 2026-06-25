@@ -25,6 +25,7 @@ namespace Container.Game
             builder.RegisterMessageBroker<PlayerMoveMessage>(options);
             builder.RegisterMessageBroker<InteractableInputMessage>(options);
             builder.RegisterMessageBroker<PauseInputMessage>(options);
+            builder.RegisterMessageBroker<TargetLockInputMessage>(options);
             builder.RegisterMessageBroker<MouseDown>(options);
             builder.RegisterMessageBroker<MouseUp>(options);
             builder.RegisterMessageBroker<ShowStatsInputMessage>(options);

@@ -6,6 +6,7 @@ using Money;
 using Movement;
 using Quests;
 using Stats;
+using TargetLock;
 using UI;
 using UnityEngine;
 using VContainer;
@@ -45,6 +46,7 @@ namespace Container
                                           });
 
             builder.RegisterEntryPoint<CameraMotor>().AsSelf();
+            builder.RegisterEntryPoint<TargetLockController>().AsSelf();
             builder.RegisterEntryPoint<PlayerGravity>().AsSelf();
             builder.RegisterEntryPoint<PlayerMovementController>().AsSelf();
             builder.RegisterEntryPoint<PlayerMovement>().AsSelf();

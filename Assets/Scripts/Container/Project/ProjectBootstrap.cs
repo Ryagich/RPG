@@ -7,9 +7,11 @@ namespace Container.Project
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Initialize()
         {
-            // защита от двойного создания
-            if (Object.FindObjectOfType<ProjectLifetimeScope>() != null)
+            if (Object.FindAnyObjectByType<ProjectLifetimeScope>() != null)
+            {
                 return;
+            }
+
             var prefab = Resources.Load<ProjectLifetimeScope>("Project/ProjectLifetimeScope");
 
             if (prefab == null)
@@ -18,7 +20,8 @@ namespace Container.Project
                 return;
             }
 
-            Object.Instantiate(prefab);
+            var scope = Object.Instantiate(prefab);
+            scope.name = prefab.name;
         }
     }
 }

@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90a4e7f98cc749149a40d716476f0208, type: 3}
+  m_Name: TargetLockConfig
+  m_EditorClassIdentifier: Assembly-CSharp::TargetLock.TargetLockConfig
+  <SearchRadius>k__BackingField: 14
+  <BreakRadius>k__BackingField: 18
+  <MaxScreenAngle>k__BackingField: 70
+  <MaxPlayerAngle>k__BackingField: 135
+  <BreakScreenAngle>k__BackingField: 135
+  <LostTargetGraceSeconds>k__BackingField: 0.45
+  <LineOfSightOriginOffset>k__BackingField: {x: 0, y: 1.4, z: 0}
+  <LineOfSightMask>k__BackingField:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  <FacingRotationSpeed>k__BackingField: 720
+  <CenterWeight>k__BackingField: 1
+  <DistanceWeight>k__BackingField: 0.25
+  <PlayerFacingWeight>k__BackingField: 0.2
+  <CameraTargetOffset>k__BackingField: {x: 0, y: 1.2, z: 0}
+  <CameraYawSharpness>k__BackingField: 9
+  <CameraPitch>k__BackingField: 10
+  <CameraDistanceMultiplier>k__BackingField: 1.05
+  <CameraShoulderOffsetMultiplier>k__BackingField: 0.4
+  <CameraFocusBlend>k__BackingField: 0.45
+  <CameraMaxManualYawOffset>k__BackingField: 35
+  <CameraMaxManualPitchOffset>k__BackingField: 15
