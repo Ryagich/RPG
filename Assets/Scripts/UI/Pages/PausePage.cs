@@ -1,10 +1,10 @@
 using GameModes;
+using Loading;
 using MessagePipe;
 using Messages;
 using UI.Configs;
 using UI.UIElements;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using VContainer;
 using VContainer.Unity;
 using Utils;
@@ -21,6 +21,7 @@ namespace UI.Pages
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
+        private readonly SceneLoadingService sceneLoadingService;
 
         private RectTransform contentRect;
         private PauseMenu pauseMenu;
@@ -29,11 +30,13 @@ namespace UI.Pages
             UIConfig uiConfig,
             Canvas canvas,
             IObjectResolver resolver,
-            IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher)
+            IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
+            SceneLoadingService sceneLoadingService)
         {
             this.uiConfig = uiConfig;
             this.resolver = resolver;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
+            this.sceneLoadingService = sceneLoadingService;
 
             canvasRect = canvas.GetComponent<RectTransform>();
         }
@@ -90,12 +93,12 @@ namespace UI.Pages
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Game));
         }
 
-        private static void LoadMenu()
+        private void LoadMenu()
         {
             Time.timeScale = 1f;
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
-            SceneManager.LoadScene(MenuSceneName);
+            sceneLoadingService.Load(MenuSceneName);
         }
     }
 }

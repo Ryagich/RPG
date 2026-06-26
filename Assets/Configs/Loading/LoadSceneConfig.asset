@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eddbd412a7764f8cb90f4722d0ae1035, type: 3}
+  m_Name: LoadSceneConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Loading.LoadSceneConfig
+  <LoadSceneName>k__BackingField: Load Scene
+  <MenuSceneName>k__BackingField: Menu
+  <PressAnyKeyText>k__BackingField: Press any key
+  <SimpleAnimationFrameSeconds>k__BackingField: 0.18
+  <ReadyTextBlinkSpeed>k__BackingField: 1.25
+  <ReadyTextMinAlpha>k__BackingField: 0.45
+  <ReadyTextMaxAlpha>k__BackingField: 0.95

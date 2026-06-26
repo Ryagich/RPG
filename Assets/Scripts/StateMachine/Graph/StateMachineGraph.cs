@@ -10,6 +10,6 @@ namespace StateMachine.Graph
     {
         public List<Node> Nodes = new();
 
-        public State GetEntryState() => Nodes.First().State;
+        public State GetEntryState() => Nodes.FirstOrDefault(node => node?.State != null)?.State;
     }
 }

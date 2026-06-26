@@ -30,6 +30,7 @@ namespace StateMachine.Graph.Editor
         private bool isControlsPanelExpanded = true;
         private Transition pendingTransition;
         private Node sourceNodeForSelection;
+        private Node activeConnectionNode;
         private readonly List<EditorStyleTextOverride> editorStyleTextOverrides = new();
         private GUIStyle lightWindowStyle;
         private GUIStyle lightHelpBoxStyle;
@@ -63,6 +64,17 @@ namespace StateMachine.Graph.Editor
             statesFolderPath = EditorPrefs.GetString(StatesPathKey, "Assets/States");
             transitionsFolderPath = EditorPrefs.GetString(TransitionsPathKey, "Assets/Transitions");
             useLightTheme = EditorPrefs.GetBool(ThemeKey, false);
+            EditorApplication.projectChanged += HandleProjectChanged;
+        }
+
+        private void OnDisable()
+        {
+            EditorApplication.projectChanged -= HandleProjectChanged;
+        }
+
+        private void HandleProjectChanged()
+        {
+            Repaint();
         }
 
         private void OnGUI()
@@ -399,10 +411,15 @@ namespace StateMachine.Graph.Editor
             }
 
             EndWindows();
+            HandleConnectionHighlightSelection(currentEvent);
             EditorGUI.EndDisabledGroup();
 
-            DrawNodeMarkers();
-            DrawConnections();
+            if (currentEvent.type == EventType.Repaint)
+            {
+                DrawNodeMarkers();
+                DrawConnections();
+            }
+
             DrawTargetSelectionOverlay();
 
             GUI.matrix = oldMatrix;
@@ -540,7 +557,7 @@ namespace StateMachine.Graph.Editor
                         startPos = new Vector2(sourceRect.xMax - 12f, sourceRect.center.y);
                     }
 
-                    Handles.color = PrimaryConnectionColor;
+                    Handles.color = GetConnectionColor(node, targetNode);
                     Vector2[] routePoints = BuildConnectionRoute(startPos, sourceRect, targetRect, nodeRects.Values);
                     DrawSmoothedConnection(routePoints);
                     DrawConnectionArrow(routePoints);
@@ -548,6 +565,49 @@ namespace StateMachine.Graph.Editor
             }
 
             Handles.EndGUI();
+        }
+
+        private void HandleConnectionHighlightSelection(Event currentEvent)
+        {
+            if (isSelectingTargetNode ||
+                currentEvent.rawType != EventType.MouseDown ||
+                currentEvent.button != 0)
+            {
+                return;
+            }
+
+            Vector2 graphMousePosition = GetGraphMousePosition(currentEvent.mousePosition);
+            bool clickedNode = nodeRects.Any(pair => pair.Value.Contains(graphMousePosition));
+            if (!clickedNode && activeConnectionNode != null)
+            {
+                activeConnectionNode = null;
+                Repaint();
+            }
+        }
+
+        private Color GetConnectionColor(Node sourceNode, Node targetNode)
+        {
+            if (activeConnectionNode == null)
+            {
+                return PrimaryConnectionColor;
+            }
+
+            if (sourceNode == activeConnectionNode)
+            {
+                return SourceHighlightConnectionColor;
+            }
+
+            if (targetNode == activeConnectionNode)
+            {
+                return TargetHighlightConnectionColor;
+            }
+
+            return PrimaryConnectionColor;
+        }
+
+        private Vector2 GetGraphMousePosition(Vector2 mousePosition)
+        {
+            return (mousePosition - panOffset) / zoom;
         }
 
         private static Vector2[] BuildConnectionRoute(Vector2 startPos, Rect sourceRect, Rect targetRect, IEnumerable<Rect> allNodeRects)
@@ -1128,6 +1188,15 @@ namespace StateMachine.Graph.Editor
 
         private void DrawNodeWindow(Node node)
         {
+            if (!isSelectingTargetNode &&
+                Event.current.rawType == EventType.MouseDown &&
+                Event.current.button == 0 &&
+                activeConnectionNode != node)
+            {
+                activeConnectionNode = node;
+                Repaint();
+            }
+
             EditorGUI.BeginDisabledGroup(isSelectingTargetNode);
 
             Rect removeButtonRect = new Rect(298f, 5f, 16f, 16f);
@@ -2225,6 +2294,14 @@ namespace StateMachine.Graph.Editor
         private Color PrimaryConnectionColor => useLightTheme
             ? new Color(0.30f, 0.28f, 0.24f, 0.98f)
             : new Color(0.96f, 0.96f, 0.96f, 0.98f);
+
+        private Color SourceHighlightConnectionColor => useLightTheme
+            ? new Color(0.18f, 0.18f, 0.18f, 0.98f)
+            : new Color(1f, 1f, 1f, 0.98f);
+
+        private Color TargetHighlightConnectionColor => useLightTheme
+            ? new Color(0.86f, 0.18f, 0.18f, 0.98f)
+            : new Color(1f, 0.28f, 0.28f, 0.98f);
 
         private Color ControlBackgroundColor => useLightTheme
             ? new Color(0.96f, 0.95f, 0.92f, 1f)

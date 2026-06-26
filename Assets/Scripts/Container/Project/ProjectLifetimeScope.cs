@@ -5,6 +5,7 @@ using Input;
 using Interactable;
 using Inventory;
 using Localization;
+using Loading;
 using Movement;
 using TargetLock;
 using UI;
@@ -33,6 +34,7 @@ namespace Container.Project
         [field: SerializeField] public StatIconsConfig StatIconsConfig { get; private set; }
         [field: SerializeField] public MapConfig MapConfig { get; private set; }
         [field: SerializeField] public TargetLockConfig TargetLockConfig { get; private set; }
+        [field: SerializeField] public LoadSceneConfig LoadSceneConfig { get; private set; }
 
         protected override void Awake()
         {
@@ -73,6 +75,8 @@ namespace Container.Project
             builder.RegisterInstance(StatIconsConfig).AsSelf();
             builder.RegisterInstance(MapConfig).AsSelf();
             builder.RegisterInstance(TargetLockConfig).AsSelf();
+            builder.RegisterInstance(LoadSceneConfig).AsSelf();
+            builder.Register<SceneLoadingService>(Lifetime.Singleton).AsSelf();
 
             builder.RegisterEntryPoint<Bootloader>().AsSelf();
         }

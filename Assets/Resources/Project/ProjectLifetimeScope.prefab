@@ -62,3 +62,4 @@ MonoBehaviour:
   <StatIconsConfig>k__BackingField: {fileID: 11400000, guid: 50f9a09c9214a8b4581f8c2cfbaa1810, type: 2}
   <MapConfig>k__BackingField: {fileID: 11400000, guid: a9fb77d7cddf4f5c8f3f74a2c9d886ad, type: 2}
   <TargetLockConfig>k__BackingField: {fileID: 11400000, guid: 0dc24276d11c421e9473fe8fd41716d7, type: 2}
+  <LoadSceneConfig>k__BackingField: {fileID: 11400000, guid: 9b5c9388ee344532950fb6ae3c053a14, type: 2}

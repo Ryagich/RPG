@@ -1,8 +1,8 @@
 using Container.Project;
+using Loading;
 using UI.Configs;
 using UI.UIElements;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using VContainer;
 using VContainer.Unity;
 
@@ -76,14 +76,20 @@ namespace Container.Menu
         private readonly UIConfig uiConfig;
         private readonly Canvas canvas;
         private readonly IObjectResolver resolver;
+        private readonly SceneLoadingService sceneLoadingService;
 
         private MenuUI menuUI;
 
-        public MenuController(UIConfig uiConfig, Canvas canvas, IObjectResolver resolver)
+        public MenuController(
+            UIConfig uiConfig,
+            Canvas canvas,
+            IObjectResolver resolver,
+            SceneLoadingService sceneLoadingService)
         {
             this.uiConfig = uiConfig;
             this.canvas = canvas;
             this.resolver = resolver;
+            this.sceneLoadingService = sceneLoadingService;
         }
 
         public void Start()
@@ -116,14 +122,14 @@ namespace Container.Menu
             menuUI.ToGameButton.onClick.RemoveListener(LoadGame);
         }
 
-        private static void LoadDevelop()
+        private void LoadDevelop()
         {
-            SceneManager.LoadScene(DevelopSceneName);
+            sceneLoadingService.Load(DevelopSceneName);
         }
 
-        private static void LoadGame()
+        private void LoadGame()
         {
-            SceneManager.LoadScene(GameSceneName);
+            sceneLoadingService.Load(GameSceneName);
         }
     }
 }

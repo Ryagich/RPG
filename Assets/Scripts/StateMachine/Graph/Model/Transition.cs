@@ -14,12 +14,17 @@ namespace StateMachine.Graph.Model
         
         public bool CanTransition(StateMachineContext context)
         {
+            if (TargetState == null || Conditions == null)
+            {
+                return false;
+            }
+
             switch (Type)
             {
                 case TransitionType.All:
-                    return Conditions.All(condition => condition.IsCondition(context));
+                    return Conditions.All(condition => condition != null && condition.IsCondition(context));
                 case TransitionType.Any:
-                    return Conditions.Any(condition => condition.IsCondition(context));
+                    return Conditions.Any(condition => condition != null && condition.IsCondition(context));
                 default:
                     return false;
             }
