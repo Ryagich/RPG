@@ -12,22 +12,30 @@ namespace Inventory
     {
         private readonly PlayerInventory playerInventory;
         private readonly InventoryHandController inventoryHandController;
+        private bool isPlayerDead;
 
         public PlayerFastSlotsController(
             PlayerInventory playerInventory,
             InventoryHandController inventoryHandController,
-            ISubscriber<FastSlotInputMessage> fastSlotInputSubscriber)
+            ISubscriber<FastSlotInputMessage> fastSlotInputSubscriber,
+            ISubscriber<PlayerDiedMessage> playerDiedSubscriber)
         {
             this.playerInventory = playerInventory;
             this.inventoryHandController = inventoryHandController;
 
             fastSlotInputSubscriber.Subscribe(OnFastSlotInput);
+            playerDiedSubscriber.Subscribe(_ => isPlayerDead = true);
         }
 
         public void Start() { }
 
         private void OnFastSlotInput(FastSlotInputMessage message)
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             if (!playerInventory.TryGetFastSlot(message.SlotIndex, out var fastSlot)
              || fastSlot?.ItemConfig == null
              || fastSlot.ItemConfig.ItemType != ItemType.Usable

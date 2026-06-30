@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efb52f478c147d096959e87f6347dd5, type: 3}
+  m_Name: Blinking Text Config
+  m_EditorClassIdentifier: Assembly-CSharp::UI.Configs.BlinkingTextConfig
+  <BlinkSpeed>k__BackingField: 1.25
+  <MinAlpha>k__BackingField: 0.45
+  <MaxAlpha>k__BackingField: 0.95

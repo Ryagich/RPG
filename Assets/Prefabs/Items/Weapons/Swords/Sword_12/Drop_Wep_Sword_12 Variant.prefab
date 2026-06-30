@@ -124,6 +124,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Drop_Wep_Sword_12 Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 1540267643872684, guid: 0e2c93b26f53b644ab3b9fbeb0bbbbce, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 4083083598227818, guid: 0e2c93b26f53b644ab3b9fbeb0bbbbce, type: 3}
       propertyPath: m_LocalScale.x
       value: 1
@@ -138,15 +142,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4083083598227818, guid: 0e2c93b26f53b644ab3b9fbeb0bbbbce, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.97
       objectReference: {fileID: 0}
     - target: {fileID: 4083083598227818, guid: 0e2c93b26f53b644ab3b9fbeb0bbbbce, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -1.014
       objectReference: {fileID: 0}
     - target: {fileID: 4083083598227818, guid: 0e2c93b26f53b644ab3b9fbeb0bbbbce, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 0.63
       objectReference: {fileID: 0}
     - target: {fileID: 4083083598227818, guid: 0e2c93b26f53b644ab3b9fbeb0bbbbce, type: 3}
       propertyPath: m_LocalRotation.w

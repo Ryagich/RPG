@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 152973143322067790}
   - component: {fileID: 6275556758085975013}
   - component: {fileID: 4332619480324244431}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Drop Arms 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}

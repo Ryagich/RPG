@@ -124,7 +124,7 @@ GameObject:
   - component: {fileID: 5064758352648007453}
   - component: {fileID: 7661143584398490830}
   - component: {fileID: 7674209345445032183}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Drop Body 18
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -139,7 +139,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3003760289856087577}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1

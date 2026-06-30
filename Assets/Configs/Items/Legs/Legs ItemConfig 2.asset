@@ -37,7 +37,7 @@ MonoBehaviour:
   beltWeaponAttachment:
     localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
-  physicalDefense: 2
+  physicalDefense: 0.02
   temperatureDefense: 3
   psiDefense: 1
   magicDefense: 4

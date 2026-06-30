@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 668245727034107444}
   - component: {fileID: 5899790572422085928}
   - component: {fileID: 6862040602233322375}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Drop Body 12
   m_TagString: Untagged
   m_Icon: {fileID: 0}

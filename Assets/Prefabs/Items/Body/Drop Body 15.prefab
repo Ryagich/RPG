@@ -214,7 +214,7 @@ GameObject:
   - component: {fileID: 4483478044381914341}
   - component: {fileID: 2991362382272414294}
   - component: {fileID: 5688455221196891307}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Drop Body 15
   m_TagString: Untagged
   m_Icon: {fileID: 0}

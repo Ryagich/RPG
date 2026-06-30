@@ -14,8 +14,6 @@ namespace Movement
         private readonly PlayerMovement playerMovement;
         private readonly CameraMotor cameraMotor;
         private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
-
-        private Vector2 direction;
         
         public PlayerMovementController
             (
@@ -52,7 +50,10 @@ namespace Movement
             }
         }
         
-        private void OnMove(PlayerMoveMessage msg) => direction = msg.Direction;
+        private void OnMove(PlayerMoveMessage msg)
+        {
+            playerMovement.SetMovementInput(msg.Direction, msg.IsRunning);
+        }
 
         private static bool AllowsPlayerMovement(GameMode mode)
         {

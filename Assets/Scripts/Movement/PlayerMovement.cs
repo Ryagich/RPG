@@ -1,8 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using CameraScripts;
 using Inventory.Inventories;
-using MessagePipe;
-using Messages;
 using Stats;
 using TargetLock;
 using UnityEngine;
@@ -44,8 +42,7 @@ namespace Movement
                 CharacterController controller,
                 PlayerInventory playerInventory,
                 StatsController statsController,
-                TargetLockController targetLockController,
-                ISubscriber<PlayerMoveMessage> playerMoveSubscriber
+                TargetLockController targetLockController
             )
         {
             this.playerMovementConfig = playerMovementConfig;
@@ -57,13 +54,11 @@ namespace Movement
             this.statsController = statsController;
             this.targetLockController = targetLockController;
             currentSpeedChangeRate = playerMovementConfig.WalkSpeedChangeRate;
-
-            playerMoveSubscriber.Subscribe(OnMove);
         }
 
         public void Tick()
         {
-            if (!canMove)
+            if (controller == null || !controller.enabled || !canMove)
             {
                 currentVelocity = Vector2.zero;
                 return;
@@ -125,10 +120,10 @@ namespace Movement
             isRunning = canMove && wantsToRun && isRunAllowed && CanRunByStamina();
         }
 
-        private void OnMove(PlayerMoveMessage msg)
+        public void SetMovementInput(Vector2 direction, bool isRunning)
         {
-            bufferedInputDirection = msg.Direction;
-            bufferedRunPressed = msg.IsRunning;
+            bufferedInputDirection = direction;
+            bufferedRunPressed = isRunning;
             ApplyBufferedInputState();
         }
 

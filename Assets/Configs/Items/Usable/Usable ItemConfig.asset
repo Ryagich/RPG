@@ -30,7 +30,7 @@ MonoBehaviour:
   <Size>k__BackingField: {x: 1, y: 2}
   <SizeInInventory>k__BackingField: {x: 80, y: 155}
   <ItemType>k__BackingField: 1
-  physicalDefense: 7
+  physicalDefense: 0.07
   temperatureDefense: 6
   psiDefense: 2
   magicDefense: 4

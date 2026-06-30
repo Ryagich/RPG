@@ -1,5 +1,4 @@
 using Container.Project;
-using UI.UIElements;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -23,7 +22,6 @@ namespace Container.Loading
 
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterComponentInHierarchy<LoadSceneUI>().AsSelf();
         }
     }
 }

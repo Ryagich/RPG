@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 959914010773897651}
   - component: {fileID: 2024281921100844151}
   - component: {fileID: 4602330415971895728}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Drop Hips 24
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -27,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1789493083133792540}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1

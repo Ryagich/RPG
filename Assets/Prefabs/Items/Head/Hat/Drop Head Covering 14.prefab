@@ -124,7 +124,7 @@ GameObject:
   - component: {fileID: 4266164009768627824}
   - component: {fileID: 6571757201132930222}
   - component: {fileID: 838984268998850453}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Drop Head Covering 14
   m_TagString: Untagged
   m_Icon: {fileID: 0}

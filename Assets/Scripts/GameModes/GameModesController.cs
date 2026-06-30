@@ -33,6 +33,18 @@ namespace GameModes
 
         private void ChangeGameMode(ChangeGameModeRequest msg)
         {
+            if (GameMode == GameMode.Death)
+            {
+                return;
+            }
+
+            if (msg.Mode == GameMode.Death)
+            {
+                navigationHistory.Clear();
+                ApplyGameMode(GameMode.Death);
+                return;
+            }
+
             if (msg.Mode == GameMode.Pause)
             {
                 if (GameMode is GameMode.Game)
@@ -67,6 +79,11 @@ namespace GameModes
 
         private void OnPauseInput(PauseInputMessage _)
         {
+            if (GameMode == GameMode.Death)
+            {
+                return;
+            }
+
             switch (GameMode)
             {
                 case GameMode.Game:
@@ -125,7 +142,7 @@ namespace GameModes
 
         private static void ApplyCursorState(GameMode mode)
         {
-            var isGameplayMode = mode == GameMode.Game;
+            var isGameplayMode = mode is GameMode.Game or GameMode.Death;
             Cursor.lockState = isGameplayMode ? CursorLockMode.Locked : CursorLockMode.None;
             Cursor.visible = !isGameplayMode;
         }
@@ -145,5 +162,6 @@ namespace GameModes
         Dialogue,
         Trade,
         Map,
+        Death,
     }
 }

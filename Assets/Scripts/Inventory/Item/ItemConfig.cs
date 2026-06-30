@@ -18,6 +18,7 @@ namespace Inventory.Item
         private bool HasFaceBlockingFlag => ItemType == ItemType.Helm;
         private bool HasUsableStats => ItemType == ItemType.Usable;
         private bool HasWeaponPrefab => ItemType == ItemType.Weapon;
+        private bool HasWeaponDamage => ItemType == ItemType.Weapon;
         private bool HasEquippedVisuals => ItemType == ItemType.Backpack
                                            || ItemType == ItemType.Body
                                            || ItemType == ItemType.Helm
@@ -39,9 +40,10 @@ namespace Inventory.Item
         [field: SerializeField] public Vector2Int SizeInInventory { get; private set; } = new(50, 50);
         [field: SerializeField] public ItemType ItemType { get; private set; }
         [SerializeField, ShowIf(nameof(HasWeaponPrefab))] private GameObject weaponInHandPrefab;
+        [SerializeField, ShowIf(nameof(HasWeaponDamage))] private Vector2Int weaponDamageRange = new(9, 11);
         [SerializeField, ShowIf(nameof(HasWeaponPrefab))] private WeaponAttachmentTransformData rightHandWeaponAttachment = new();
         [SerializeField, ShowIf(nameof(HasWeaponPrefab))] private WeaponAttachmentTransformData beltWeaponAttachment = new();
-        [SerializeField, ShowIf(nameof(HasDefenseModifiers)), Min(0f)] private float physicalDefense;
+        [SerializeField, ShowIf(nameof(HasDefenseModifiers)), Range(0f, 1f)] private float physicalDefense;
         [SerializeField, ShowIf(nameof(HasDefenseModifiers)), Min(0f)] private float temperatureDefense;
         [SerializeField, ShowIf(nameof(HasDefenseModifiers)), Min(0f)] private float psiDefense;
         [SerializeField, ShowIf(nameof(HasDefenseModifiers)), Min(0f)] private float magicDefense;
@@ -52,10 +54,11 @@ namespace Inventory.Item
         [SerializeField, ShowIf(nameof(HasUsableStats))] private float chillStat;
         [SerializeField, ShowIf(nameof(HasEquippedVisuals))] private List<EquippedItemVisual> equippedVisuals = new();
 
-        public float PhysicalDefense => physicalDefense;
+        public float PhysicalDefense => NormalizeProtectionValue(physicalDefense);
         public float TemperatureDefense => temperatureDefense;
         public float PsiDefense => psiDefense;
         public float MagicDefense => magicDefense;
+        public Vector2Int WeaponDamageRange => weaponDamageRange;
         public bool BlocksFaceSlot => blocksFaceSlot;
         public float HpStat => hpStat;
         public float WaterStat => waterStat;
@@ -65,5 +68,24 @@ namespace Inventory.Item
         public WeaponAttachmentTransformData RightHandWeaponAttachment => rightHandWeaponAttachment;
         public WeaponAttachmentTransformData BeltWeaponAttachment => beltWeaponAttachment;
         public IReadOnlyList<EquippedItemVisual> EquippedVisuals => equippedVisuals;
+
+        public int GetRandomWeaponDamage()
+        {
+            var min = Mathf.Min(weaponDamageRange.x, weaponDamageRange.y);
+            var max = Mathf.Max(weaponDamageRange.x, weaponDamageRange.y);
+            return Random.Range(min, max + 1);
+        }
+
+        private void OnValidate()
+        {
+            physicalDefense = NormalizeProtectionValue(physicalDefense);
+        }
+
+        private static float NormalizeProtectionValue(float value)
+        {
+            return value > 1f
+                ? Mathf.Clamp01(value * 0.01f)
+                : Mathf.Clamp01(value);
+        }
     }
 }

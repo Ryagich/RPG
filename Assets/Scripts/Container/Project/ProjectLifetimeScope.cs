@@ -7,6 +7,8 @@ using Inventory;
 using Localization;
 using Loading;
 using Movement;
+using NPC;
+using Player;
 using TargetLock;
 using UI;
 using UI.Configs;
@@ -34,7 +36,10 @@ namespace Container.Project
         [field: SerializeField] public StatIconsConfig StatIconsConfig { get; private set; }
         [field: SerializeField] public MapConfig MapConfig { get; private set; }
         [field: SerializeField] public TargetLockConfig TargetLockConfig { get; private set; }
+        [field: SerializeField] public NpcVisionConfig NpcVisionConfig { get; private set; }
+        [field: SerializeField] public NpcItemPickupConfig NpcItemPickupConfig { get; private set; }
         [field: SerializeField] public LoadSceneConfig LoadSceneConfig { get; private set; }
+        [field: SerializeField] public DeathConfig DeathConfig { get; private set; }
 
         protected override void Awake()
         {
@@ -75,7 +80,10 @@ namespace Container.Project
             builder.RegisterInstance(StatIconsConfig).AsSelf();
             builder.RegisterInstance(MapConfig).AsSelf();
             builder.RegisterInstance(TargetLockConfig).AsSelf();
+            builder.RegisterInstance(NpcVisionConfig).AsSelf();
+            builder.RegisterInstance(NpcItemPickupConfig).AsSelf();
             builder.RegisterInstance(LoadSceneConfig).AsSelf();
+            builder.RegisterInstance(DeathConfig).AsSelf();
             builder.Register<SceneLoadingService>(Lifetime.Singleton).AsSelf();
 
             builder.RegisterEntryPoint<Bootloader>().AsSelf();

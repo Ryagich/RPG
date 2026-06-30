@@ -57,9 +57,11 @@ MonoBehaviour:
   <LocalizationConfig>k__BackingField: {fileID: 11400000, guid: 218bbd0d351ca0241a663a64b9ff391e, type: 2}
   <InteractableConfig>k__BackingField: {fileID: 11400000, guid: f195d5bf3de756241b499edc07dd19bb, type: 2}
   <InventoryConfig>k__BackingField: {fileID: 11400000, guid: c944c7194d92c2a4b809de1b4768183a, type: 2}
-  <PlayerWeaponAnimationConfig>k__BackingField: {fileID: 11400000, guid: 1bfcfd7ed3c0a2645bce22a1d093817f, type: 2}
   <ColorsConfig>k__BackingField: {fileID: 11400000, guid: 063c0d25c66a34b4a8329a35699fa5b2, type: 2}
   <StatIconsConfig>k__BackingField: {fileID: 11400000, guid: 50f9a09c9214a8b4581f8c2cfbaa1810, type: 2}
   <MapConfig>k__BackingField: {fileID: 11400000, guid: a9fb77d7cddf4f5c8f3f74a2c9d886ad, type: 2}
   <TargetLockConfig>k__BackingField: {fileID: 11400000, guid: 0dc24276d11c421e9473fe8fd41716d7, type: 2}
+  <NpcVisionConfig>k__BackingField: {fileID: 11400000, guid: 56f204f2acef1b6499be8a1ee97e0f57, type: 2}
+  <NpcItemPickupConfig>k__BackingField: {fileID: 11400000, guid: 0ea9d6f20eb7ab847b5e33cb28edf3ca, type: 2}
   <LoadSceneConfig>k__BackingField: {fileID: 11400000, guid: 9b5c9388ee344532950fb6ae3c053a14, type: 2}
+  <DeathConfig>k__BackingField: {fileID: 11400000, guid: 101d965d5be64e0b840b45fb632980ee, type: 2}

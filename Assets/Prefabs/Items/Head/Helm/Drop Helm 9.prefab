@@ -124,7 +124,7 @@ GameObject:
   - component: {fileID: 3093053129938848781}
   - component: {fileID: 3401166128900010988}
   - component: {fileID: 4094926159586078870}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Drop Helm 9
   m_TagString: Untagged
   m_Icon: {fileID: 0}

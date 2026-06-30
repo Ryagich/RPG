@@ -31,13 +31,14 @@ MonoBehaviour:
   <SizeInInventory>k__BackingField: {x: 400, y: 400}
   <ItemType>k__BackingField: 3
   weaponInHandPrefab: {fileID: 4549924156844888184, guid: f2c6d43b032895447ad30ed5e346033f, type: 3}
+  weaponDamageRange: {x: 9, y: 11}
   rightHandWeaponAttachment:
     localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
   beltWeaponAttachment:
     localPosition: {x: -0.186, y: -0.11, z: 0.07}
     localEulerAngles: {x: 27, y: 190, z: 12}
-  physicalDefense: 11
+  physicalDefense: 0.11
   temperatureDefense: 31
   psiDefense: 21
   magicDefense: 6

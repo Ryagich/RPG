@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using Colors;
+using Combat;
 using Inventory.Item;
 using Inventory.Inventories;
 using Inventory.Slot;
@@ -1077,25 +1078,41 @@ namespace UI.Pages
             foreach (var statType in DefensePopupStatTypes)
             {
                 var stat = statsController.GetStat(statType);
-                var currentValue = stat.Value.Value;
                 var currentEquippedValue = GetItemStatValue(equippedItemConfig, statType);
                 var hoveredItemValue = GetItemStatValue(itemConfig, statType);
 
                 float baseValue;
                 float finalValue;
 
-                if (isEquippedItemPopup)
+                if (statType == StatType.PhysicalDefense)
                 {
+                    var currentValue = PhysicalDefenseCalculator.CalculateEffective(playerInventory);
+                    if (isEquippedItemPopup)
+                    {
+                        baseValue = PhysicalDefenseCalculator.CalculateEffective(playerInventory, itemConfig.ItemType, null);
+                        finalValue = currentValue;
+                    }
+                    else
+                    {
+                        baseValue = currentValue;
+                        finalValue = PhysicalDefenseCalculator.CalculateEffective(playerInventory, itemConfig.ItemType, itemConfig);
+                    }
+                }
+                else if (isEquippedItemPopup)
+                {
+                    var currentValue = stat.Value.Value;
                     baseValue = currentValue - hoveredItemValue;
                     finalValue = currentValue;
                 }
                 else if (equippedItemConfig == null)
                 {
+                    var currentValue = stat.Value.Value;
                     baseValue = currentValue;
                     finalValue = currentValue + hoveredItemValue;
                 }
                 else
                 {
+                    var currentValue = stat.Value.Value;
                     baseValue = currentValue;
                     finalValue = currentValue - currentEquippedValue + hoveredItemValue;
                 }

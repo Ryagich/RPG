@@ -26,6 +26,11 @@ namespace Movement
 
         public void FixedTick()
         {
+            if (controller == null || !controller.enabled)
+            {
+                return;
+            }
+
             if (controller.isGrounded)
             {
                 // CharacterController updates grounded state from movement resolution.

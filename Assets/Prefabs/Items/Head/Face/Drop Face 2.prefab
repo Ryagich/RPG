@@ -124,7 +124,7 @@ GameObject:
   - component: {fileID: 2746632524636796641}
   - component: {fileID: 7832515245576856713}
   - component: {fileID: 5141257900969097574}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Drop Face 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}

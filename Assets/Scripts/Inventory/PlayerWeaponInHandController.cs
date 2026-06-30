@@ -1,4 +1,5 @@
 using System;
+using Combat;
 using GameModes;
 using Inventory.Inventories;
 using Inventory.Item;
@@ -45,7 +46,7 @@ namespace Inventory
         }
     }
 
-    public sealed class PlayerWeaponInHandController : IStartable, ITickable, IDisposable
+    public sealed class PlayerWeaponInHandController : IWeaponAnimationEventHandler, IStartable, ITickable, IDisposable
     {
         private const string WeaponAnimationLayerName = "Weapon Layers";
         private const string AttackLayerName = "Attack Full Body";
@@ -121,6 +122,7 @@ namespace Inventory
         private readonly PlayerMovement playerMovement;
         private readonly PlayerAnimationController playerAnimationController;
         private readonly TargetLockController targetLockController;
+        private readonly CharacterDamageReceiver ownerDamageReceiver;
         private readonly CompositeDisposable disposables = new();
         private readonly SerialDisposable weaponAttachmentBlendDisposable = new();
         private readonly int weaponAnimationLayerIndex;
@@ -137,6 +139,7 @@ namespace Inventory
         private GameObject currentWeaponInstance;
         private ItemConfig currentWeaponItemConfig;
         private ItemConfig lastObservedSelectedSlotItemConfig;
+        private WeaponDamageZone activeDamageZone;
         private int currentRenderedSlotIndex;
         private WeaponDisplayMode currentDisplayMode;
         private WeaponAnimationKind currentAnimationKind;
@@ -152,6 +155,7 @@ namespace Inventory
             PlayerMovement playerMovement,
             PlayerAnimationController playerAnimationController,
             TargetLockController targetLockController,
+            CharacterDamageReceiver ownerDamageReceiver,
             ISubscriber<WeaponSlotInputMessage> weaponSlotInputSubscriber,
             ISubscriber<MouseDown> mouseDownSubscriber,
             ISubscriber<MouseUp> mouseUpSubscriber,
@@ -166,6 +170,7 @@ namespace Inventory
             this.playerMovement = playerMovement;
             this.playerAnimationController = playerAnimationController;
             this.targetLockController = targetLockController;
+            this.ownerDamageReceiver = ownerDamageReceiver;
             weaponAnimationLayerIndex = animator != null
                 ? animator.GetLayerIndex(WeaponAnimationLayerName)
                 : -1;
@@ -305,6 +310,16 @@ namespace Inventory
             LogLeftClick("attack started event");
         }
 
+        public void BeginDamageWindowFromAnimationEvent()
+        {
+            BeginCurrentWeaponDamageWindow();
+        }
+
+        public void EndDamageWindowFromAnimationEvent()
+        {
+            EndCurrentWeaponDamageWindow();
+        }
+
         public void LockMovementFromAnimationEvent()
         {
             // Animation Event: LockMovement
@@ -353,7 +368,10 @@ namespace Inventory
 
         public void ApplyAttackRootMotion(Animator sourceAnimator)
         {
-            if (!ShouldConsumeAttackRootMotionThisFrame() || characterController == null || sourceAnimator == null)
+            if (!ShouldConsumeAttackRootMotionThisFrame()
+             || characterController == null
+             || !characterController.enabled
+             || sourceAnimator == null)
             {
                 return;
             }
@@ -667,6 +685,7 @@ namespace Inventory
             if (isHitAttackInProgress)
             {
                 isHitAttackInProgress = false;
+                EndCurrentWeaponDamageWindow();
                 UpdateAttackRootMotionAvailability();
                 if (gameModesController.GameMode == GameMode.Game)
                 {
@@ -955,8 +974,43 @@ namespace Inventory
                 return;
             }
 
+            EndCurrentWeaponDamageWindow();
             Object.Destroy(currentWeaponInstance);
             currentWeaponInstance = null;
+        }
+
+        private void BeginCurrentWeaponDamageWindow()
+        {
+            if (activeDamageZone != null)
+            {
+                return;
+            }
+
+            if (currentWeaponInstance == null || currentWeaponItemConfig == null)
+            {
+                return;
+            }
+
+            var weapon = currentWeaponInstance.GetComponentInChildren<Weapon>(true);
+            var damageZone = weapon != null ? weapon.DamageZone : null;
+            if (damageZone == null)
+            {
+                return;
+            }
+
+            activeDamageZone = damageZone;
+            activeDamageZone.BeginDamageWindow(ownerDamageReceiver, currentWeaponItemConfig);
+        }
+
+        private void EndCurrentWeaponDamageWindow()
+        {
+            if (activeDamageZone == null)
+            {
+                return;
+            }
+
+            activeDamageZone.EndDamageWindow();
+            activeDamageZone = null;
         }
 
         private Transform GetTargetParent(WeaponDisplayMode displayMode)

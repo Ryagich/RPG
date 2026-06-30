@@ -124,7 +124,7 @@ GameObject:
   - component: {fileID: 8700222046450186072}
   - component: {fileID: 6286299412109248728}
   - component: {fileID: 4685130020315416097}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Drop Hips 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}

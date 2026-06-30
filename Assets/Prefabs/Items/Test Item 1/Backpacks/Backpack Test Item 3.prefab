@@ -102,7 +102,7 @@ GameObject:
   - component: {fileID: 8275672548770247764}
   - component: {fileID: 5213664939843558923}
   - component: {fileID: 534022199815191217}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Backpack Test Item 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}

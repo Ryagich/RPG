@@ -15,7 +15,7 @@ MonoBehaviour:
   <LoadSceneName>k__BackingField: Load Scene
   <MenuSceneName>k__BackingField: Menu
   <PressAnyKeyText>k__BackingField: Press any key
-  <SimpleAnimationFrameSeconds>k__BackingField: 0.18
+  <SimpleAnimationFrameSeconds>k__BackingField: 0.01
   <ReadyTextBlinkSpeed>k__BackingField: 1.25
   <ReadyTextMinAlpha>k__BackingField: 0.45
   <ReadyTextMaxAlpha>k__BackingField: 0.95

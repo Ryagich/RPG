@@ -12,7 +12,7 @@ namespace UI
         [field: SerializeField] public AdditionalPeriodicStat FoodStat { get; private set; }
         [field: SerializeField] public AdditionalPeriodicStat ChillStat { get; private set; }
         [field: SerializeField] public Stamina StaminaStat { get; private set; }
-        [field: SerializeField] public Stat PhysicalDefenseStat { get; private set; } = CreateDefaultStat();
+        [field: SerializeField] public Stat PhysicalDefenseStat { get; private set; } = CreateDefaultProtectionStat();
         [field: SerializeField] public Stat TemperatureDefenseStat { get; private set; } = CreateDefaultStat();
         [field: SerializeField] public Stat PsiDefenseStat { get; private set; } = CreateDefaultStat();
         [field: SerializeField] public Stat MagicDefenseStat { get; private set; } = CreateDefaultStat();
@@ -29,7 +29,7 @@ namespace UI
                 StatType.Food => FoodStat,
                 StatType.Chill => ChillStat,
                 StatType.Stamina => StaminaStat,
-                StatType.PhysicalDefense => PhysicalDefenseStat ??= CreateDefaultStat(),
+                StatType.PhysicalDefense => PhysicalDefenseStat ??= CreateDefaultProtectionStat(),
                 StatType.TemperatureDefense => TemperatureDefenseStat ??= CreateDefaultStat(),
                 StatType.PsiDefense => PsiDefenseStat ??= CreateDefaultStat(),
                 StatType.MagicDefense => MagicDefenseStat ??= CreateDefaultStat(),
@@ -90,6 +90,11 @@ namespace UI
         private static Stat CreateDefaultStat()
         {
             return new Stat(100f, 0f, 100f);
+        }
+
+        private static Stat CreateDefaultProtectionStat()
+        {
+            return new Stat(1f, 0f, 0f);
         }
     }
 }

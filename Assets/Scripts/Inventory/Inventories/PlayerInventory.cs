@@ -342,6 +342,43 @@ namespace Inventory.Inventories
             return remainingStack.Count > 0 ? remainingStack : null;
         }
 
+        public ItemStack TryAddToGridRebuilding(ItemStack itemStack)
+        {
+            var remainingStack = CloneIfValid(itemStack);
+            if (remainingStack == null)
+            {
+                return itemStack;
+            }
+
+            var changed = FillExistingGridStacks(remainingStack);
+            while (remainingStack.Count > 0)
+            {
+                var countToPlace = Mathf.Min(remainingStack.Count, remainingStack.MaxStack);
+                var stackToPlace = new ItemStack(remainingStack.ItemConfig, countToPlace, remainingStack.IsRotated);
+                if (!TryBuildGridWithAdditionalItem(GetCurrentInventorySize(), stackToPlace, out var rebuiltTiles, out var rebuiltItems))
+                {
+                    break;
+                }
+
+                Tiles = rebuiltTiles;
+                Items.Clear();
+                foreach (var item in rebuiltItems)
+                {
+                    Items.Add(item);
+                }
+
+                remainingStack.Count -= countToPlace;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                NotifyChanged();
+            }
+
+            return remainingStack.Count > 0 ? remainingStack : null;
+        }
+
         public bool CanMoveSlotItemToGrid(ItemType slotType)
         {
             return TryGetOccupiedSlot(slotType, out var slot) && CanMoveSlotItemToGrid(slot);

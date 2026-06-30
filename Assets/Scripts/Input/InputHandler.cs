@@ -23,9 +23,11 @@ namespace Input
         private readonly IPublisher<FastSlotInputMessage> fastSlotInputPublisher;
         private readonly IPublisher<WeaponSlotInputMessage> weaponSlotInputPublisher;
         private readonly GameModesController gameModesController;
+        private readonly ISubscriber<PlayerDiedMessage> playerDiedSubscriber;
 
         private Vector2 currentMoveDirection;
         private bool isRunPressed;
+        private bool isPlayerDead;
         private bool pollTargetLockToggleFallback;
         private bool pollTargetLockNextFallback;
         private bool pollTargetLockPreviousFallback;
@@ -43,7 +45,8 @@ namespace Input
                 IPublisher<ShowStatsInputMessage> showStatsInputPublisher,
                 IPublisher<FastSlotInputMessage> fastSlotInputPublisher,
                 IPublisher<WeaponSlotInputMessage> weaponSlotInputPublisher,
-                GameModesController gameModesController
+                GameModesController gameModesController,
+                ISubscriber<PlayerDiedMessage> playerDiedSubscriber
             )
         {
             this.inputConfig = inputConfig;
@@ -58,6 +61,7 @@ namespace Input
             this.fastSlotInputPublisher = fastSlotInputPublisher;
             this.weaponSlotInputPublisher = weaponSlotInputPublisher;
             this.gameModesController = gameModesController;
+            this.playerDiedSubscriber = playerDiedSubscriber;
         }
 
         public void Start()
@@ -94,16 +98,27 @@ namespace Input
 
             Observable.EveryUpdate().Subscribe(_ => PollWeaponSlotInputs());
             Observable.EveryUpdate().Subscribe(_ => PollTargetLockFallbackInputs());
+            playerDiedSubscriber.Subscribe(OnPlayerDied);
         }
         
         private void OnMove(InputAction.CallbackContext context)
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             currentMoveDirection = context.ReadValue<Vector2>();
             PublishPlayerMove();
         }
 
         private void OnRun(InputAction.CallbackContext context)
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             isRunPressed = context.ReadValueAsButton();
             PublishPlayerMove();
         }
@@ -115,6 +130,11 @@ namespace Input
         
         private void Interactable(InputAction.CallbackContext context)
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             switch (gameModesController.GameMode)
             {
                 case GameMode.Game:
@@ -134,6 +154,11 @@ namespace Input
         
         private void OpenInventory(InputAction.CallbackContext context)
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             if (gameModesController.GameMode == GameMode.Trade)
             {
                 changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Inventory));
@@ -160,6 +185,11 @@ namespace Input
 
         private void OpenMap(InputAction.CallbackContext context)
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             switch (gameModesController.GameMode)
             {
                 case GameMode.Game:
@@ -174,31 +204,61 @@ namespace Input
 
         private void LeftMouseDown(InputAction.CallbackContext context)
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             mouseDown.Publish(new(MouseButtonType.Left));
         }
 
         private void LeftMouseUp(InputAction.CallbackContext context)
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             mouseUp.Publish(new(MouseButtonType.Left));
         }
 
         private void RightMouseDown(InputAction.CallbackContext context)
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             mouseDown.Publish(new(MouseButtonType.Right));
         }
 
         private void RightMouseUp(InputAction.CallbackContext context)
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             mouseUp.Publish(new(MouseButtonType.Right));
         }
 
         private void ShowStatsPressed(InputAction.CallbackContext context)
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             showStatsInputPublisher.Publish(new ShowStatsInputMessage(true));
         }
 
         private void ShowStatsReleased(InputAction.CallbackContext context)
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             showStatsInputPublisher.Publish(new ShowStatsInputMessage(false));
         }
 
@@ -211,7 +271,13 @@ namespace Input
                 return;
             }
 
-            action.started += _ => fastSlotInputPublisher.Publish(new FastSlotInputMessage(slotIndex));
+            action.started += _ =>
+            {
+                if (!isPlayerDead)
+                {
+                    fastSlotInputPublisher.Publish(new FastSlotInputMessage(slotIndex));
+                }
+            };
         }
 
         private void SubscribeMapAction(string actionName)
@@ -256,12 +322,17 @@ namespace Input
 
         private void Pause(InputAction.CallbackContext context)
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             pauseInputPublisher.Publish(new PauseInputMessage());
         }
 
         private void PublishTargetLockCommand(TargetLockCommand command)
         {
-            if (gameModesController.GameMode != GameMode.Game)
+            if (isPlayerDead || gameModesController.GameMode != GameMode.Game)
             {
                 return;
             }
@@ -271,6 +342,11 @@ namespace Input
 
         private void PollShowStatsFallback()
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             var keyboard = Keyboard.current;
             if (keyboard == null)
             {
@@ -290,6 +366,11 @@ namespace Input
 
         private void PollWeaponSlotInputs()
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             var keyboard = Keyboard.current;
             if (keyboard == null)
             {
@@ -309,6 +390,11 @@ namespace Input
 
         private void PollTargetLockFallbackInputs()
         {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
             var keyboard = Keyboard.current;
             if (keyboard == null)
             {
@@ -329,6 +415,15 @@ namespace Input
             {
                 PublishTargetLockCommand(TargetLockCommand.Previous);
             }
+        }
+
+        private void OnPlayerDied(PlayerDiedMessage _)
+        {
+            isPlayerDead = true;
+            currentMoveDirection = Vector2.zero;
+            isRunPressed = false;
+            PublishPlayerMove();
+            showStatsInputPublisher.Publish(new ShowStatsInputMessage(false));
         }
     }
 }

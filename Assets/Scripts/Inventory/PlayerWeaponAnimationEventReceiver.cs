@@ -11,9 +11,9 @@ namespace Inventory
         // - UnlockMovement: restores player movement/rotation at an arbitrary moment in an attack clip.
         // AttackStarted/AttackFinished remain available as optional hooks, but they are not the core
         // events relied on by the current attack clips.
-        private PlayerWeaponInHandController weaponInHandController;
+        private IWeaponAnimationEventHandler weaponInHandController;
 
-        public void Bind(PlayerWeaponInHandController weaponInHandController)
+        public void Bind(IWeaponAnimationEventHandler weaponInHandController)
         {
             this.weaponInHandController = weaponInHandController;
         }
@@ -45,6 +45,16 @@ namespace Inventory
         public void AttackStarted()
         {
             weaponInHandController?.AttackStartedFromAnimationEvent();
+        }
+
+        public void BeginDamageWindow()
+        {
+            weaponInHandController?.BeginDamageWindowFromAnimationEvent();
+        }
+
+        public void EndDamageWindow()
+        {
+            weaponInHandController?.EndDamageWindowFromAnimationEvent();
         }
 
         public void LockMovement()

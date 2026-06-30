@@ -79,10 +79,10 @@ MonoBehaviour:
     <RunDrainMultiplier>k__BackingField: 1.1
     <RegenResumeDelayAfterEmptySeconds>k__BackingField: 0.5
   <PhysicalDefenseStat>k__BackingField:
-    <Max>k__BackingField: 100
+    <Max>k__BackingField: 1
     <Min>k__BackingField: 0
     <Value>k__BackingField:
-      value: 10
+      value: 0.1
   <TemperatureDefenseStat>k__BackingField:
     <Max>k__BackingField: 100
     <Min>k__BackingField: 0

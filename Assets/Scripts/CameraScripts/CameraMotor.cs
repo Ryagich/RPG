@@ -78,7 +78,7 @@ namespace CameraScripts
 
         private void OnGameModeChanged(GameModeChangedMessage msg)
         {
-            cameraMovement.SetLookInputEnabled(msg.GameMode == GameMode.Game);
+            cameraMovement.SetLookInputEnabled(msg.GameMode is GameMode.Game or GameMode.Death);
         }
     }
 

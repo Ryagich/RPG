@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 689009787785484397}
   - component: {fileID: 1234332669358931164}
   - component: {fileID: 1468986840362150574}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Drop Head Covering 7
   m_TagString: Untagged
   m_Icon: {fileID: 0}

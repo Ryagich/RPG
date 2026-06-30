@@ -1,9 +1,11 @@
 using CameraScripts;
+using Combat;
 using Interactable;
 using Inventory;
 using Inventory.Inventories;
 using Money;
 using Movement;
+using Player;
 using Quests;
 using Stats;
 using TargetLock;
@@ -22,11 +24,13 @@ namespace Container
 
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterComponentInHierarchy<CharacterController>().AsSelf();
-            builder.RegisterComponentInHierarchy<Animator>().AsSelf();
-            builder.RegisterComponentInHierarchy<CharacterVisualRoot>().AsSelf();
-            builder.RegisterComponentInHierarchy<PlayerWeaponHandAnchor>().AsSelf();
-            builder.RegisterComponentInHierarchy<PlayerWeaponAnimationEventReceiver>().AsSelf();
+            builder.RegisterComponentInHierarchy<CharacterController>().UnderTransform(transform).AsSelf();
+            builder.RegisterComponentInHierarchy<Animator>().UnderTransform(transform).AsSelf();
+            var ragdollController = GetComponent<PlayerRagdollController>() ?? gameObject.AddComponent<PlayerRagdollController>();
+            builder.RegisterComponent(ragdollController).AsSelf();
+            builder.RegisterComponentInHierarchy<CharacterVisualRoot>().UnderTransform(transform).AsSelf();
+            builder.RegisterComponentInHierarchy<PlayerWeaponHandAnchor>().UnderTransform(transform).AsSelf();
+            builder.RegisterComponentInHierarchy<PlayerWeaponAnimationEventReceiver>().UnderTransform(transform).AsSelf();
 
             builder.RegisterInstance(transform);
             builder.RegisterInstance("Player").Keyed("Scope ID");
@@ -39,6 +43,9 @@ namespace Container
 
             var founder = gameObject.AddComponent<InteractableFounder>();
             builder.RegisterComponent(founder).AsSelf();
+
+            var damageReceiverHost = GetComponent<DamageReceiverHost>() ?? gameObject.AddComponent<DamageReceiverHost>();
+            builder.RegisterComponent(damageReceiverHost).AsSelf();
 
             builder.RegisterBuildCallback(_ =>
                                           {
@@ -59,7 +66,9 @@ namespace Container
             builder.RegisterEntryPoint<StaminaPeriodicChanger>().AsSelf();
             builder.RegisterEntryPoint<StaminaMovementChanger>().AsSelf();
             builder.RegisterEntryPoint<EquippedDefenseStatsChanger>().AsSelf();
+            builder.Register<CharacterDamageReceiver>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<EquippedItemVisualController>().AsSelf();
+            builder.RegisterEntryPoint<PlayerDeathController>().AsSelf();
 
             builder.RegisterEntryPoint<PlayerInventory>().As<IInventory>().AsSelf();
             builder.Register(_ => new MoneyStorage(112), Lifetime.Scoped).AsSelf();

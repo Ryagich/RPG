@@ -33,6 +33,8 @@ namespace Container.Game
             builder.RegisterMessageBroker<WeaponSlotInputMessage>(options);
             builder.RegisterMessageBroker<ChangeGameModeRequest>(options);
             builder.RegisterMessageBroker<GameModeChangedMessage>(options);
+            builder.RegisterMessageBroker<PlayerDiedMessage>(options);
+            builder.RegisterMessageBroker<CharacterDamagedMessage>(options);
             builder.RegisterMessageBroker<InteractableMessage>(options);
             builder.RegisterMessageBroker<InteractableEndMessage>(options);
             builder.RegisterMessageBroker<ItemHolderFoundMessage>(options);
@@ -47,6 +49,7 @@ namespace Container.Game
                                           });
             builder.Register<LootingContext>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueContext>(Lifetime.Singleton).AsSelf();
+            builder.Register<Player.PlayerDeathState>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<GameModesController>().AsSelf();
         }
     }
