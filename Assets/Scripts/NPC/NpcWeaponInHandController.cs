@@ -10,7 +10,7 @@ using Object = UnityEngine.Object;
 
 namespace NPC
 {
-    public sealed class NpcWeaponInHandController : IWeaponAnimationEventHandler, IStartable, IDisposable
+    public sealed class NpcWeaponInHandController : IWeaponAnimationEventHandler, IEquippedWeaponVisual, IStartable, IDisposable
     {
         private static readonly int DrawWeaponRequestedParameterHash = Animator.StringToHash("MoveWeaponInHand");
         private static readonly int SheatheWeaponRequestedParameterHash = Animator.StringToHash("MoveWeaponInBelt");
@@ -68,6 +68,18 @@ namespace NPC
         public void UnlockMovementFromAnimationEvent() { }
         public void AttackFinishedFromAnimationEvent() => EndCurrentWeaponDamageWindow();
         public void ResetAttackRequestFromAnimationEvent() { }
+
+        public void InterruptByHitReaction()
+        {
+            EndCurrentWeaponDamageWindow();
+            if (animator == null)
+            {
+                return;
+            }
+
+            animator.ResetTrigger(DrawWeaponRequestedParameterHash);
+            animator.ResetTrigger(SheatheWeaponRequestedParameterHash);
+        }
 
         public bool TryGetCurrentWeaponSlot(out Inventory.Slot.SlotModel slot)
         {

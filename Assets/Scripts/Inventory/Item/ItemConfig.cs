@@ -26,8 +26,7 @@ namespace Inventory.Item
                                            || ItemType == ItemType.Hands
                                            || ItemType == ItemType.Arms
                                            || ItemType == ItemType.Legs
-                                           || ItemType == ItemType.Hips
-                                           || ItemType == ItemType.Weapon;
+                                           || ItemType == ItemType.Hips;
 
         [field: SerializeField] public string Id { get; private set; } = "Item Config ID";
         [field: SerializeField, Min(1)] public int Price { get; private set; } = 1;

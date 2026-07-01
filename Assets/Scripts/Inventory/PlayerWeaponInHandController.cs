@@ -14,39 +14,7 @@ using Object = UnityEngine.Object;
 
 namespace Inventory
 {
-    [DisallowMultipleComponent]
-    public sealed class PlayerAnimatorRootMotionRelay : MonoBehaviour
-    {
-        private Animator animator;
-        private PlayerWeaponInHandController weaponInHandController;
-
-        private void Awake()
-        {
-            animator = GetComponent<Animator>();
-        }
-
-        public void Bind(PlayerWeaponInHandController controller)
-        {
-            weaponInHandController = controller;
-
-            if (animator == null)
-            {
-                animator = GetComponent<Animator>();
-            }
-        }
-
-        private void OnAnimatorMove()
-        {
-            if (animator == null || weaponInHandController == null || !animator.applyRootMotion)
-            {
-                return;
-            }
-
-            weaponInHandController.ApplyAttackRootMotion(animator);
-        }
-    }
-
-    public sealed class PlayerWeaponInHandController : IWeaponAnimationEventHandler, IStartable, ITickable, IDisposable
+    public sealed class PlayerWeaponInHandController : IWeaponAnimationEventHandler, IEquippedWeaponVisual, IStartable, ITickable, IDisposable
     {
         private const string WeaponAnimationLayerName = "Weapon Layers";
         private const string AttackLayerName = "Attack Full Body";
@@ -69,7 +37,6 @@ namespace Inventory
         private const string DrawWeaponClipName = "A_Draw_Sword";
         private const string SheatheWeaponClipName = "A_Sheathe_Sword";
         private const float FallbackAttachmentBlendDuration = 0.08f;
-        private const float RootMotionThreshold = 0.000001f;
         private const string BeginMoveWeaponToRightHandEventName = "BeginMoveWeaponToRightHand";
         private const string TakeWeaponInHandEventName = "TakeWeaponInHand";
         private const string BeginMoveWeaponToBeltEventName = "BeginMoveWeaponToBelt";
@@ -117,17 +84,17 @@ namespace Inventory
         private readonly PlayerWeaponHandAnchor handAnchor;
         private readonly PlayerWeaponAnimationEventReceiver animationEventReceiver;
         private readonly Animator animator;
-        private readonly CharacterController characterController;
+        private readonly CharacterRootMotionController rootMotionController;
         private readonly GameModesController gameModesController;
         private readonly PlayerMovement playerMovement;
         private readonly PlayerAnimationController playerAnimationController;
         private readonly TargetLockController targetLockController;
         private readonly CharacterDamageReceiver ownerDamageReceiver;
+        private readonly CharacterActionState actionState;
         private readonly CompositeDisposable disposables = new();
         private readonly SerialDisposable weaponAttachmentBlendDisposable = new();
         private readonly int weaponAnimationLayerIndex;
         private readonly int attackLayerIndex;
-        private readonly PlayerAnimatorRootMotionRelay rootMotionRelay;
 
         private int selectedWeaponSlotIndex = 1;
         private bool isWeaponDrawn = true;
@@ -150,12 +117,13 @@ namespace Inventory
             PlayerWeaponHandAnchor handAnchor,
             PlayerWeaponAnimationEventReceiver animationEventReceiver,
             Animator animator,
-            CharacterController characterController,
+            CharacterRootMotionController rootMotionController,
             GameModesController gameModesController,
             PlayerMovement playerMovement,
             PlayerAnimationController playerAnimationController,
             TargetLockController targetLockController,
             CharacterDamageReceiver ownerDamageReceiver,
+            CharacterActionState actionState,
             ISubscriber<WeaponSlotInputMessage> weaponSlotInputSubscriber,
             ISubscriber<MouseDown> mouseDownSubscriber,
             ISubscriber<MouseUp> mouseUpSubscriber,
@@ -165,24 +133,20 @@ namespace Inventory
             this.handAnchor = handAnchor;
             this.animationEventReceiver = animationEventReceiver;
             this.animator = animator;
-            this.characterController = characterController;
+            this.rootMotionController = rootMotionController;
             this.gameModesController = gameModesController;
             this.playerMovement = playerMovement;
             this.playerAnimationController = playerAnimationController;
             this.targetLockController = targetLockController;
             this.ownerDamageReceiver = ownerDamageReceiver;
+            this.actionState = actionState;
             weaponAnimationLayerIndex = animator != null
                 ? animator.GetLayerIndex(WeaponAnimationLayerName)
                 : -1;
             attackLayerIndex = animator != null
                 ? animator.GetLayerIndex(AttackLayerName)
                 : -1;
-            rootMotionRelay = animator != null
-                ? animator.GetComponent<PlayerAnimatorRootMotionRelay>() ?? animator.gameObject.AddComponent<PlayerAnimatorRootMotionRelay>()
-                : null;
-
             animationEventReceiver?.Bind(this);
-            rootMotionRelay?.Bind(this);
 
             weaponSlotInputSubscriber.Subscribe(OnWeaponSlotInput).AddTo(disposables);
             mouseDownSubscriber.Subscribe(OnMouseDown).AddTo(disposables);
@@ -225,6 +189,7 @@ namespace Inventory
             if (shouldPreservePoseForCurrentDraw)
             {
                 MoveCurrentWeaponToRightHandPreservingPose();
+                CleanupSpawnedWeaponInstancesExceptCurrent();
                 return;
             }
 
@@ -232,6 +197,7 @@ namespace Inventory
                 WeaponDisplayMode.RightHand,
                 BeginMoveWeaponToRightHandEventName,
                 TakeWeaponInHandEventName);
+            CleanupSpawnedWeaponInstancesExceptCurrent();
         }
 
         public void TakeWeaponInHandFromAnimationEvent()
@@ -246,6 +212,7 @@ namespace Inventory
                 currentRenderedSlotIndex,
                 WeaponDisplayMode.RightHand,
                 snapToAttachmentTransform: true);
+            CleanupSpawnedWeaponInstancesExceptCurrent();
             CompleteWeaponAnimationFromEvent(WeaponAnimationKind.Draw);
         }
 
@@ -278,6 +245,7 @@ namespace Inventory
                 currentRenderedSlotIndex,
                 WeaponDisplayMode.Belt,
                 snapToAttachmentTransform: false);
+            CleanupSpawnedWeaponInstancesExceptCurrent();
 
             var selectedItemConfig = GetSelectedWeaponItemConfig();
             if (selectedItemConfig == null)
@@ -366,34 +334,74 @@ namespace Inventory
             SetAttackRequested(false);
         }
 
-        public void ApplyAttackRootMotion(Animator sourceAnimator)
+        public void InterruptByHitReaction()
         {
-            if (!ShouldConsumeAttackRootMotionThisFrame()
-             || characterController == null
-             || !characterController.enabled
-             || sourceAnimator == null)
+            CancelAttackFlow(restoreMovement: false);
+            ResetAnimatorRequests();
+            UpdateAttackRootMotionAvailability(forceDisable: true);
+        }
+
+        public bool TryGetCurrentWeaponSlot(out Inventory.Slot.SlotModel slot)
+        {
+            slot = currentRenderedSlotIndex switch
             {
-                return;
+                1 => playerInventory.LeftWeaponSlot,
+                2 => playerInventory.RightWeaponSlot,
+                _ => null
+            };
+
+            if (slot?.ItemConfig?.ItemType == ItemType.Weapon)
+            {
+                return true;
             }
 
-            var localDelta = sourceAnimator.deltaPosition;
-            localDelta.y = 0f;
+            var selectedSlot = selectedWeaponSlotIndex == 1
+                ? playerInventory.LeftWeaponSlot
+                : playerInventory.RightWeaponSlot;
 
-            if (localDelta.sqrMagnitude <= RootMotionThreshold)
+            if (selectedSlot?.ItemConfig?.ItemType == ItemType.Weapon)
             {
-                return;
+                slot = selectedSlot;
+                return true;
             }
 
-            var worldDelta = sourceAnimator.transform.parent != null
-                ? sourceAnimator.transform.parent.TransformVector(localDelta)
-                : localDelta;
-            worldDelta.y = 0f;
+            if (playerInventory.LeftWeaponSlot?.ItemConfig?.ItemType == ItemType.Weapon)
+            {
+                slot = playerInventory.LeftWeaponSlot;
+                return true;
+            }
 
-            characterController.Move(worldDelta);
+            if (playerInventory.RightWeaponSlot?.ItemConfig?.ItemType == ItemType.Weapon)
+            {
+                slot = playerInventory.RightWeaponSlot;
+                return true;
+            }
+
+            slot = null;
+            return false;
+        }
+
+        public bool TryGetCurrentWeaponPose(out Vector3 position, out Quaternion rotation)
+        {
+            if (currentWeaponInstance != null)
+            {
+                position = currentWeaponInstance.transform.position;
+                rotation = currentWeaponInstance.transform.rotation;
+                return true;
+            }
+
+            position = default;
+            rotation = default;
+            return false;
         }
 
         private void OnWeaponSlotInput(WeaponSlotInputMessage message)
         {
+            if (actionState.IsActionBlocked)
+            {
+                return;
+            }
+
             if (message.SlotIndex is < 1 or > 2 || isHitAttackInProgress)
             {
                 return;
@@ -431,6 +439,11 @@ namespace Inventory
 
         private void OnMouseDown(MouseDown message)
         {
+            if (actionState.IsActionBlocked)
+            {
+                return;
+            }
+
             if (message.Button != MouseButtonType.Left)
             {
                 return;
@@ -507,7 +520,13 @@ namespace Inventory
 
         private void RefreshWeaponInHand()
         {
+            if (actionState.IsActionBlocked)
+            {
+                return;
+            }
+
             var selectedItemConfig = ResolveActiveWeaponSelection();
+            CleanupSpawnedWeaponInstancesExceptCurrent(selectedItemConfig);
             var slotItemChanged = lastObservedSelectedSlotItemConfig != selectedItemConfig;
 
             if (slotItemChanged && selectedItemConfig != null && !isWeaponDrawn)
@@ -678,7 +697,7 @@ namespace Inventory
             LogLeftClick("Attack bool set true");
         }
 
-        private void CancelAttackFlow()
+        private void CancelAttackFlow(bool restoreMovement = true)
         {
             var hadActiveAttackFlow = isHitAttackInProgress;
 
@@ -687,12 +706,15 @@ namespace Inventory
                 isHitAttackInProgress = false;
                 EndCurrentWeaponDamageWindow();
                 UpdateAttackRootMotionAvailability();
-                if (gameModesController.GameMode == GameMode.Game)
+                if (restoreMovement && gameModesController.GameMode == GameMode.Game)
                 {
                     playerMovement?.ChangeState(true);
                 }
 
-                playerAnimationController?.SetLocomotionLocked(false);
+                if (restoreMovement)
+                {
+                    playerAnimationController?.SetLocomotionLocked(false);
+                }
             }
 
             if (animator == null)
@@ -817,6 +839,7 @@ namespace Inventory
             weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
             currentWeaponInstance.transform.SetParent(targetParent, true);
             currentDisplayMode = WeaponDisplayMode.Belt;
+            UpdateCurrentWeaponInstanceName();
             UpdateRunningAvailability();
         }
 
@@ -836,6 +859,7 @@ namespace Inventory
             weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
             currentWeaponInstance.transform.SetParent(targetParent, true);
             currentDisplayMode = WeaponDisplayMode.RightHand;
+            UpdateCurrentWeaponInstanceName();
             UpdateRunningAvailability();
         }
 
@@ -903,6 +927,7 @@ namespace Inventory
         private void RenderWeapon(ItemConfig itemConfig, int slotIndex, WeaponDisplayMode displayMode)
         {
             DestroyCurrentWeaponInstance();
+            CleanupSpawnedWeaponInstancesExceptCurrent(itemConfig);
 
             if (itemConfig == null || displayMode == WeaponDisplayMode.None)
             {
@@ -931,12 +956,9 @@ namespace Inventory
             currentDisplayMode = displayMode;
 
             currentWeaponInstance = Object.Instantiate(weaponPrefab, targetParent, false);
-            currentWeaponInstance.name = $"{weaponPrefab.name} | {displayMode}";
+            UpdateCurrentWeaponInstanceName();
 
-            if (displayMode == WeaponDisplayMode.RightHand)
-            {
-                ApplyAttachmentTransform(currentWeaponInstance.transform, itemConfig, displayMode);
-            }
+            ApplyAttachmentTransform(currentWeaponInstance.transform, itemConfig, displayMode);
 
             UpdateRunningAvailability();
         }
@@ -961,6 +983,7 @@ namespace Inventory
 
                 currentRenderedSlotIndex = slotIndex;
                 currentDisplayMode = displayMode;
+                UpdateCurrentWeaponInstanceName();
                 return;
             }
 
@@ -977,6 +1000,62 @@ namespace Inventory
             EndCurrentWeaponDamageWindow();
             Object.Destroy(currentWeaponInstance);
             currentWeaponInstance = null;
+        }
+
+        private void CleanupSpawnedWeaponInstancesExceptCurrent(ItemConfig expectedItemConfig = null)
+        {
+            CleanupSpawnedWeaponInstancesInAnchor(handAnchor?.RightHand, expectedItemConfig);
+            CleanupSpawnedWeaponInstancesInAnchor(handAnchor?.Belt, expectedItemConfig);
+        }
+
+        private void CleanupSpawnedWeaponInstancesInAnchor(Transform anchor, ItemConfig expectedItemConfig)
+        {
+            if (anchor == null)
+            {
+                return;
+            }
+
+            for (var index = anchor.childCount - 1; index >= 0; index--)
+            {
+                var child = anchor.GetChild(index);
+                if (child == null || child.gameObject == currentWeaponInstance)
+                {
+                    continue;
+                }
+
+                if (!IsGeneratedWeaponInstance(child.gameObject, expectedItemConfig))
+                {
+                    continue;
+                }
+
+                Object.Destroy(child.gameObject);
+            }
+        }
+
+        private static bool IsGeneratedWeaponInstance(GameObject candidate, ItemConfig expectedItemConfig)
+        {
+            if (candidate == null)
+            {
+                return false;
+            }
+
+            if (candidate.name.Contains(" | RightHand") || candidate.name.Contains(" | Belt"))
+            {
+                return true;
+            }
+
+            var prefabName = expectedItemConfig?.WeaponInHandPrefab != null
+                ? expectedItemConfig.WeaponInHandPrefab.name
+                : null;
+            return !string.IsNullOrWhiteSpace(prefabName) && candidate.name.StartsWith(prefabName, StringComparison.Ordinal);
+        }
+
+        private void UpdateCurrentWeaponInstanceName()
+        {
+            if (currentWeaponInstance != null && currentWeaponItemConfig?.WeaponInHandPrefab != null)
+            {
+                currentWeaponInstance.name = $"{currentWeaponItemConfig.WeaponInHandPrefab.name} | {currentDisplayMode}";
+            }
         }
 
         private void BeginCurrentWeaponDamageWindow()
@@ -1043,6 +1122,7 @@ namespace Inventory
             var weaponTransform = currentWeaponInstance.transform;
             weaponTransform.SetParent(targetParent, true);
             currentDisplayMode = targetMode;
+            UpdateCurrentWeaponInstanceName();
 
             if (targetMode == WeaponDisplayMode.Belt)
             {
@@ -1320,12 +1400,7 @@ namespace Inventory
                 return;
             }
 
-            animator.applyRootMotion = !forceDisable && IsAttackRootMotionStateActive();
-        }
-
-        private bool ShouldConsumeAttackRootMotionThisFrame()
-        {
-            return animator != null && IsAttackRootMotionStateActive();
+            rootMotionController?.SetRootMotionActive(this, !forceDisable && IsAttackRootMotionStateActive());
         }
 
         private bool IsAttackRootMotionStateActive()

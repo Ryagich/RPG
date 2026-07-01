@@ -5,6 +5,8 @@ using MessagePipe;
 using Messages;
 using VContainer.Unity;
 
+using Combat;
+
 namespace Inventory
 {
     // ReSharper disable once ClassNeverInstantiated.Global
@@ -12,16 +14,19 @@ namespace Inventory
     {
         private readonly PlayerInventory playerInventory;
         private readonly InventoryHandController inventoryHandController;
+        private readonly CharacterActionState actionState;
         private bool isPlayerDead;
 
         public PlayerFastSlotsController(
             PlayerInventory playerInventory,
             InventoryHandController inventoryHandController,
+            CharacterActionState actionState,
             ISubscriber<FastSlotInputMessage> fastSlotInputSubscriber,
             ISubscriber<PlayerDiedMessage> playerDiedSubscriber)
         {
             this.playerInventory = playerInventory;
             this.inventoryHandController = inventoryHandController;
+            this.actionState = actionState;
 
             fastSlotInputSubscriber.Subscribe(OnFastSlotInput);
             playerDiedSubscriber.Subscribe(_ => isPlayerDead = true);
@@ -31,7 +36,7 @@ namespace Inventory
 
         private void OnFastSlotInput(FastSlotInputMessage message)
         {
-            if (isPlayerDead)
+            if (isPlayerDead || actionState.IsActionBlocked)
             {
                 return;
             }

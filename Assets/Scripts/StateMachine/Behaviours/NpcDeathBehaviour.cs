@@ -1,4 +1,5 @@
 using Player;
+using Inventory;
 using StateMachine.Graph.Model;
 using UnityEngine;
 using NPC;
@@ -12,7 +13,7 @@ namespace StateMachine.Behaviours
         public override void Enter(StateMachineContext context)
         {
             context?.GetService<NpcNavMeshController>()?.Disable();
-            context?.GetService<NpcEquippedWeaponDropService>()?.DropCurrentWeapon();
+            context?.GetService<EquippedWeaponDropService>()?.DropCurrentWeapon();
 
             var characterController = context?.GetService<CharacterController>();
             if (characterController != null)

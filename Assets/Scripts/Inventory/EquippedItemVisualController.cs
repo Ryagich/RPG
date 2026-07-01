@@ -25,8 +25,6 @@ namespace Inventory
         private ItemConfig lastLegsItemConfig;
         private ItemConfig lastHipsItemConfig;
         private ItemConfig lastBackpackItemConfig;
-        private ItemConfig lastLeftWeaponItemConfig;
-        private ItemConfig lastRightWeaponItemConfig;
 
         public EquippedItemVisualController(PlayerInventory playerInventory, CharacterVisualRoot characterVisualRoot)
         {
@@ -55,9 +53,7 @@ namespace Inventory
                 && lastArmsSlotItemConfig == playerInventory.ArmsSlot.ItemConfig
                 && lastLegsItemConfig == playerInventory.LegsSlot.ItemConfig
                 && lastHipsItemConfig == playerInventory.HipsSlot.ItemConfig
-                && lastBackpackItemConfig == playerInventory.BackpackSlot.ItemConfig
-                && lastLeftWeaponItemConfig == playerInventory.LeftWeaponSlot.ItemConfig
-                && lastRightWeaponItemConfig == playerInventory.RightWeaponSlot.ItemConfig)
+                && lastBackpackItemConfig == playerInventory.BackpackSlot.ItemConfig)
             {
                 return;
             }
@@ -72,8 +68,6 @@ namespace Inventory
             ApplySlotVisuals(playerInventory.LegsSlot, "Legs");
             ApplySlotVisuals(playerInventory.HipsSlot, "Hips");
             ApplySlotVisuals(playerInventory.BackpackSlot, "Backpack");
-            ApplySlotVisuals(playerInventory.LeftWeaponSlot, "LeftWeapon");
-            ApplySlotVisuals(playerInventory.RightWeaponSlot, "RightWeapon");
 
             characterVisualRoot.ApplyVisuals(desiredVisualsByBodyPart);
             lastHelmItemConfig = playerInventory.HelmSlot.ItemConfig;
@@ -84,8 +78,6 @@ namespace Inventory
             lastLegsItemConfig = playerInventory.LegsSlot.ItemConfig;
             lastHipsItemConfig = playerInventory.HipsSlot.ItemConfig;
             lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;
-            lastLeftWeaponItemConfig = playerInventory.LeftWeaponSlot.ItemConfig;
-            lastRightWeaponItemConfig = playerInventory.RightWeaponSlot.ItemConfig;
         }
 
         private void ApplyDefaultVisuals()

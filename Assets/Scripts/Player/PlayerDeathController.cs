@@ -1,5 +1,6 @@
 using System;
 using GameModes;
+using Inventory;
 using MessagePipe;
 using Messages;
 using Movement;
@@ -22,6 +23,7 @@ namespace Player
         private readonly Animator animator;
         private readonly PlayerMovement playerMovement;
         private readonly PlayerAnimationController playerAnimationController;
+        private readonly EquippedWeaponDropService equippedWeaponDropService;
         private readonly IPublisher<PlayerDiedMessage> playerDiedPublisher;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
         private readonly CompositeDisposable disposables = new();
@@ -36,6 +38,7 @@ namespace Player
             Animator animator,
             PlayerMovement playerMovement,
             PlayerAnimationController playerAnimationController,
+            EquippedWeaponDropService equippedWeaponDropService,
             IPublisher<PlayerDiedMessage> playerDiedPublisher,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher)
         {
@@ -48,6 +51,7 @@ namespace Player
             this.animator = animator;
             this.playerMovement = playerMovement;
             this.playerAnimationController = playerAnimationController;
+            this.equippedWeaponDropService = equippedWeaponDropService;
             this.playerDiedPublisher = playerDiedPublisher;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
         }
@@ -86,6 +90,7 @@ namespace Player
 
             playerMovement?.ChangeState(false);
             playerAnimationController?.SetLocomotionLocked(true);
+            equippedWeaponDropService?.DropCurrentWeapon();
 
             if (characterController != null)
             {

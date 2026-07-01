@@ -25,3 +25,5 @@ MonoBehaviour:
     State: {fileID: 11400000, guid: 0a7108d9d41668648a5ed6f17cda9d7e, type: 2}
   - Position: {x: 520, y: 520}
     State: {fileID: 11400000, guid: 94aa9052ae6dee2488fbe3ac33c300e8, type: 2}
+  - Position: {x: 160, y: 520}
+    State: {fileID: 11400000, guid: a81d40108fac4b24fb115d30da77a001, type: 2}

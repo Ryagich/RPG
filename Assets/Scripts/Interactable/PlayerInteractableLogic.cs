@@ -9,6 +9,8 @@ using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
+using Combat;
+
 namespace Interactable
 {
     // ReSharper disable once ClassNeverInstantiated.Global
@@ -16,6 +18,7 @@ namespace Interactable
     {
         private readonly InteractableConfig config;
         private readonly PlayerLifetimeScope scope;
+        private readonly CharacterActionState actionState;
 
         private float t;
         private float manualT;
@@ -30,6 +33,7 @@ namespace Interactable
             (
                 InteractableConfig config,
                 PlayerLifetimeScope scope,
+                CharacterActionState actionState,
                 [Key("Scope ID")] string scopeID,
                 ISubscriber<string, InteractableMessage> interactableSubscriber,
                 ISubscriber<string, InteractableEndMessage> interactableEndSubscriber,
@@ -39,6 +43,7 @@ namespace Interactable
         {
             this.scope = scope;
             this.config = config;
+            this.actionState = actionState;
             interactableSubscriber.Subscribe(scopeID, Add).AddTo(disposables);
             interactableEndSubscriber.Subscribe(scopeID, Remove).AddTo(disposables);
             interactableInputSubscriber.Subscribe(Interact).AddTo(disposables);
@@ -85,6 +90,12 @@ namespace Interactable
 
         private void Interact(InteractableInputMessage msg)
         {
+            if (actionState.IsActionBlocked)
+            {
+                EndAllManualInteractions();
+                return;
+            }
+
             var newActives = new List<Interactable>();
             if (manualT > config.TimeBetweenInteractions)
             {
@@ -143,6 +154,11 @@ namespace Interactable
 
         public void FixedTick()
         {
+            if (actionState.IsActionBlocked)
+            {
+                return;
+            }
+
             if (t > config.TimeBetweenInteractions)
             {
                 foreach (var interactable in Interactables.Where(i => i.InteractionMode is InteractionMode.Automatic))

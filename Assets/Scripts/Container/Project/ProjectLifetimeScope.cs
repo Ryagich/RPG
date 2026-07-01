@@ -17,6 +17,8 @@ using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
+using Combat;
+
 namespace Container.Project
 {
     public class ProjectLifetimeScope : LifetimeScope
@@ -40,6 +42,7 @@ namespace Container.Project
         [field: SerializeField] public NpcItemPickupConfig NpcItemPickupConfig { get; private set; }
         [field: SerializeField] public LoadSceneConfig LoadSceneConfig { get; private set; }
         [field: SerializeField] public DeathConfig DeathConfig { get; private set; }
+        [field: SerializeField] public HitReactionConfig HitReactionConfig { get; private set; }
 
         protected override void Awake()
         {
@@ -84,6 +87,7 @@ namespace Container.Project
             builder.RegisterInstance(NpcItemPickupConfig).AsSelf();
             builder.RegisterInstance(LoadSceneConfig).AsSelf();
             builder.RegisterInstance(DeathConfig).AsSelf();
+            builder.RegisterInstance(HitReactionConfig != null ? HitReactionConfig : HitReactionConfig.CreateDefault()).AsSelf();
             builder.Register<SceneLoadingService>(Lifetime.Singleton).AsSelf();
 
             builder.RegisterEntryPoint<Bootloader>().AsSelf();

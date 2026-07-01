@@ -66,16 +66,37 @@ namespace Container
             builder.RegisterEntryPoint<StaminaPeriodicChanger>().AsSelf();
             builder.RegisterEntryPoint<StaminaMovementChanger>().AsSelf();
             builder.RegisterEntryPoint<EquippedDefenseStatsChanger>().AsSelf();
+
+            // Player and NPC must keep the same character systems; only the control source differs:
+            // player input drives these systems for Player, while the state machine drives them for NPC.
+            builder.Register<CharacterActionState>(Lifetime.Scoped).AsSelf();
+            builder.Register<CharacterRootMotionController>(Lifetime.Scoped)
+                   .AsSelf()
+                   .As<IStartable>()
+                   .As<System.IDisposable>();
+            builder.Register<PlayerHitReactionController>(Lifetime.Scoped)
+                   .AsSelf()
+                   .As<ICharacterHitReactionController>()
+                   .As<IStartable>()
+                   .As<ITickable>()
+                   .As<System.IDisposable>();
             builder.Register<CharacterDamageReceiver>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<EquippedItemVisualController>().AsSelf();
             builder.RegisterEntryPoint<PlayerDeathController>().AsSelf();
 
             builder.RegisterEntryPoint<PlayerInventory>().As<IInventory>().AsSelf();
+            builder.Register<CharacterWorldItemDropper>(Lifetime.Scoped).AsSelf();
+            builder.Register<EquippedWeaponDropService>(Lifetime.Scoped).AsSelf();
             builder.Register(_ => new MoneyStorage(112), Lifetime.Scoped).AsSelf();
             builder.Register<QuestController>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<InventoryHandController>().AsSelf();
             builder.RegisterEntryPoint<PlayerFastSlotsController>().AsSelf();
-            builder.RegisterEntryPoint<PlayerWeaponInHandController>().AsSelf();
+            builder.Register<PlayerWeaponInHandController>(Lifetime.Scoped)
+                   .AsSelf()
+                   .As<IEquippedWeaponVisual>()
+                   .As<IStartable>()
+                   .As<ITickable>()
+                   .As<System.IDisposable>();
         }
     }
 }

@@ -16,6 +16,8 @@ using UnityEngine.InputSystem;
 using VContainer.Unity;
 using Object = UnityEngine.Object;
 
+using Combat;
+
 namespace Inventory
 {
     // ReSharper disable once ClassNeverInstantiated.Global
@@ -28,6 +30,7 @@ namespace Inventory
         private readonly PlayerInventory playerInventory;
         private readonly EquippedDefenseStatsChanger equippedDefenseStatsChanger;
         private readonly StatsController statsController;
+        private readonly CharacterActionState actionState;
         private readonly Transform playerTransform;
         private readonly Transform lookTransform;
         private readonly GameModesController gameModesController;
@@ -44,6 +47,7 @@ namespace Inventory
             PlayerInventory playerInventory,
             EquippedDefenseStatsChanger equippedDefenseStatsChanger,
             StatsController statsController,
+            CharacterActionState actionState,
             Transform playerTransform,
             Animator animator,
             GameModesController gameModesController,
@@ -54,6 +58,7 @@ namespace Inventory
             this.playerInventory = playerInventory;
             this.equippedDefenseStatsChanger = equippedDefenseStatsChanger;
             this.statsController = statsController;
+            this.actionState = actionState;
             this.playerTransform = playerTransform;
             lookTransform = animator != null ? animator.transform : playerTransform;
             this.gameModesController = gameModesController;
@@ -68,6 +73,11 @@ namespace Inventory
 
         private void OnMouseDown(MouseDown message)
         {
+            if (actionState.IsActionBlocked)
+            {
+                return;
+            }
+
             if (!IsInventoryInteractionMode(gameModesController.GameMode))
             {
                 return;

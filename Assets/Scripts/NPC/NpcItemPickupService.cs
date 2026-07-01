@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Inventory;
 using Inventory.Inventories;
 using Inventory.Item;
 using UnityEngine;
@@ -9,9 +10,9 @@ namespace NPC
     public sealed class NpcItemPickupService
     {
         private readonly PlayerInventory inventory;
-        private readonly NpcWorldItemDropper dropper;
+        private readonly CharacterWorldItemDropper dropper;
 
-        public NpcItemPickupService(PlayerInventory inventory, NpcWorldItemDropper dropper)
+        public NpcItemPickupService(PlayerInventory inventory, CharacterWorldItemDropper dropper)
         {
             this.inventory = inventory;
             this.dropper = dropper;

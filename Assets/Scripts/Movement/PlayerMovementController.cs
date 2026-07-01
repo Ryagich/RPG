@@ -5,6 +5,8 @@ using Messages;
 using UnityEngine;
 using VContainer.Unity;
 
+using Combat;
+
 namespace Movement
 {
     // ReSharper disable once ClassNeverInstantiated.Global
@@ -12,6 +14,7 @@ namespace Movement
     {
         private readonly Transform transform;
         private readonly PlayerMovement playerMovement;
+        private readonly CharacterActionState actionState;
         private readonly CameraMotor cameraMotor;
         private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
         
@@ -19,6 +22,7 @@ namespace Movement
             (
                 Transform transform,
                 PlayerMovement playerMovement,
+                CharacterActionState actionState,
                 CameraMotor cameraMotor,
                 ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber,
                 ISubscriber<PlayerMoveMessage> playerMoveSubscriber
@@ -26,6 +30,7 @@ namespace Movement
         {
             this.transform = transform;
             this.playerMovement = playerMovement;
+            this.actionState = actionState;
             this.cameraMotor = cameraMotor;
             this.gameModeChangedSubscriber = gameModeChangedSubscriber;
 
@@ -52,6 +57,11 @@ namespace Movement
         
         private void OnMove(PlayerMoveMessage msg)
         {
+            if (actionState.IsActionBlocked)
+            {
+                return;
+            }
+
             playerMovement.SetMovementInput(msg.Direction, msg.IsRunning);
         }
 

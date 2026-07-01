@@ -17,6 +17,7 @@ namespace NPC
         private readonly StatsController statsController;
         private readonly PlayerInventory playerInventory;
         private readonly CharacterDamageReceiver damageReceiver;
+        private readonly CharacterActionState actionState;
         private readonly PlayerRagdollController ragdollController;
         private readonly CharacterController characterController;
         private readonly Animator animator;
@@ -26,7 +27,7 @@ namespace NPC
         private readonly NpcItemInterest itemInterest;
         private readonly NpcInventoryPlanner inventoryPlanner;
         private readonly NpcItemPickupService itemPickupService;
-        private readonly NpcEquippedWeaponDropService equippedWeaponDropService;
+        private readonly Inventory.EquippedWeaponDropService equippedWeaponDropService;
         private readonly NpcItemPickupConfig itemPickupConfig;
 
         private RuntimeStateMachine stateMachine;
@@ -38,6 +39,7 @@ namespace NPC
             StatsController statsController,
             PlayerInventory playerInventory,
             CharacterDamageReceiver damageReceiver,
+            CharacterActionState actionState,
             PlayerRagdollController ragdollController,
             CharacterController characterController,
             Animator animator,
@@ -47,7 +49,7 @@ namespace NPC
             NpcItemInterest itemInterest,
             NpcInventoryPlanner inventoryPlanner,
             NpcItemPickupService itemPickupService,
-            NpcEquippedWeaponDropService equippedWeaponDropService,
+            Inventory.EquippedWeaponDropService equippedWeaponDropService,
             NpcItemPickupConfig itemPickupConfig)
         {
             this.stateMachineGraph = stateMachineGraph;
@@ -55,6 +57,7 @@ namespace NPC
             this.statsController = statsController;
             this.playerInventory = playerInventory;
             this.damageReceiver = damageReceiver;
+            this.actionState = actionState;
             this.ragdollController = ragdollController;
             this.characterController = characterController;
             this.animator = animator;
@@ -84,6 +87,7 @@ namespace NPC
             context.SetService(statsController);
             context.SetService(playerInventory);
             context.SetService(damageReceiver);
+            context.SetService(actionState);
             context.SetService(ragdollController);
             context.SetService(characterController);
             context.SetService(animator);
