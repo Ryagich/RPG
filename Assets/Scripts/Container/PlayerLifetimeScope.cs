@@ -46,6 +46,8 @@ namespace Container
 
             var damageReceiverHost = GetComponent<DamageReceiverHost>() ?? gameObject.AddComponent<DamageReceiverHost>();
             builder.RegisterComponent(damageReceiverHost).AsSelf();
+            var targetLockTarget = GetComponent<TargetLockTarget>() ?? gameObject.AddComponent<TargetLockTarget>();
+            builder.RegisterComponent(targetLockTarget).AsSelf();
 
             builder.RegisterBuildCallback(_ =>
                                           {

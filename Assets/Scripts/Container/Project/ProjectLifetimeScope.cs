@@ -1,5 +1,6 @@
 ﻿using CameraScripts;
 using Colors;
+using Factions;
 using Gravity;
 using Input;
 using Interactable;
@@ -40,9 +41,11 @@ namespace Container.Project
         [field: SerializeField] public TargetLockConfig TargetLockConfig { get; private set; }
         [field: SerializeField] public NpcVisionConfig NpcVisionConfig { get; private set; }
         [field: SerializeField] public NpcItemPickupConfig NpcItemPickupConfig { get; private set; }
+        [field: SerializeField] public NpcCombatConfig NpcCombatConfig { get; private set; }
         [field: SerializeField] public LoadSceneConfig LoadSceneConfig { get; private set; }
         [field: SerializeField] public DeathConfig DeathConfig { get; private set; }
         [field: SerializeField] public HitReactionConfig HitReactionConfig { get; private set; }
+        [field: SerializeField] public FactionRelationsConfig FactionRelationsConfig { get; private set; }
 
         protected override void Awake()
         {
@@ -85,9 +88,11 @@ namespace Container.Project
             builder.RegisterInstance(TargetLockConfig).AsSelf();
             builder.RegisterInstance(NpcVisionConfig).AsSelf();
             builder.RegisterInstance(NpcItemPickupConfig).AsSelf();
+            builder.RegisterInstance(NpcCombatConfig).AsSelf();
             builder.RegisterInstance(LoadSceneConfig).AsSelf();
             builder.RegisterInstance(DeathConfig).AsSelf();
             builder.RegisterInstance(HitReactionConfig != null ? HitReactionConfig : HitReactionConfig.CreateDefault()).AsSelf();
+            builder.RegisterInstance(FactionRelationsConfig).AsSelf();
             builder.Register<SceneLoadingService>(Lifetime.Singleton).AsSelf();
 
             builder.RegisterEntryPoint<Bootloader>().AsSelf();

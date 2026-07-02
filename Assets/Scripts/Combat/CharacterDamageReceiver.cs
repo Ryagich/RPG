@@ -26,6 +26,10 @@ namespace Combat
             this.damagedPublisher = damagedPublisher;
         }
 
+        public float CurrentHp => statsController.Hp.Value.Value;
+        public bool IsAlive => CurrentHp > 0f;
+        public Transform OwnerTransform => ownerTransform;
+
         public void ReceiveHit(BodyHitbox hitbox, in WeaponHit hit)
         {
             if (hitbox == null || hit.Damage <= 0f)
@@ -35,14 +39,22 @@ namespace Combat
 
             var bodyMultiplier = Mathf.Max(0f, hitbox.DamageMultiplier);
             var physicalDefense = PhysicalDefenseCalculator.ResolveProtection(playerInventory, hitbox.BodyPart);
-            var finalDamage = hit.Damage * bodyMultiplier * (1f - physicalDefense);
+            var mitigatedDamage = hit.Damage * bodyMultiplier * (1f - physicalDefense);
 
+            if (mitigatedDamage <= 0f)
+            {
+                return;
+            }
+
+            var hp = statsController.Hp;
+            var previousHp = hp.Value.Value;
+            statsController.AddValue(StatType.Hp, -mitigatedDamage);
+            var finalDamage = Mathf.Max(0f, previousHp - hp.Value.Value);
             if (finalDamage <= 0f)
             {
                 return;
             }
 
-            statsController.AddValue(StatType.Hp, -finalDamage);
             damagedPublisher.Publish(
                 new CharacterDamagedMessage(
                     ownerTransform.gameObject,

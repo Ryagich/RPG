@@ -1,4 +1,5 @@
 using Combat;
+using Factions;
 using Inventory;
 using Inventory.Inventories;
 using Money;
@@ -8,6 +9,7 @@ using Player;
 using Quests;
 using StateMachine.Graph;
 using Stats;
+using TargetLock;
 using UnityEngine;
 using UnityEngine.AI;
 using VContainer;
@@ -20,10 +22,12 @@ namespace Container
         [SerializeField] private Character.CharacterInfo characterInfo;
         [SerializeField] private InventoryConfig inventoryConfig;
         [SerializeField] private StateMachineGraph stateMachineGraph;
+        [SerializeField] private FactionConfig faction;
         [SerializeField, ReadOnlyInInspector] private float currentHp;
         [SerializeField, ReadOnlyInInspector] private string currentState = "Not Started";
 
         public StateMachineGraph StateMachineGraph => stateMachineGraph;
+        public FactionConfig Faction => faction;
         public float CurrentHp => currentHp;
         public string CurrentState => currentState;
 
@@ -49,6 +53,8 @@ namespace Container
             builder.RegisterComponent(npcVisionSensor).AsSelf();
             var npcItemInterest = GetComponent<NpcItemInterest>() ?? gameObject.AddComponent<NpcItemInterest>();
             builder.RegisterComponent(npcItemInterest).AsSelf();
+            var targetLockTarget = GetComponent<TargetLockTarget>() ?? gameObject.AddComponent<TargetLockTarget>();
+            builder.RegisterComponent(targetLockTarget).AsSelf();
             var navMeshAgent = GetComponent<NavMeshAgent>() ?? gameObject.AddComponent<NavMeshAgent>();
             builder.RegisterComponent(navMeshAgent).AsSelf();
             builder.RegisterEntryPoint<NpcNavMeshController>().AsSelf();
@@ -73,6 +79,11 @@ namespace Container
             if (inventoryConfig != null)
             {
                 builder.RegisterInstance(inventoryConfig).AsSelf();
+            }
+
+            if (faction != null)
+            {
+                builder.RegisterInstance(faction).AsSelf();
             }
 
             var damageReceiverHost = GetComponent<DamageReceiverHost>() ?? gameObject.AddComponent<DamageReceiverHost>();
@@ -109,6 +120,11 @@ namespace Container
             builder.Register<CharacterWorldItemDropper>(Lifetime.Scoped).AsSelf();
             builder.Register<NpcInventoryPlanner>(Lifetime.Scoped).AsSelf();
             builder.Register<NpcItemPickupService>(Lifetime.Scoped).AsSelf();
+            builder.Register<NpcCombatService>(Lifetime.Scoped)
+                   .AsSelf()
+                   .As<IStartable>()
+                   .As<ITickable>()
+                   .As<System.IDisposable>();
             builder.Register<EquippedWeaponDropService>(Lifetime.Scoped).AsSelf();
             builder.Register(_ => new MoneyStorage(0), Lifetime.Scoped).AsSelf();
             builder.Register<QuestController>(Lifetime.Scoped).AsSelf();

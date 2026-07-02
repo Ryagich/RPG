@@ -32,8 +32,61 @@ namespace EditorTools
         private const string PickupWaitStatePath = StatesFolderPath + "/NpcPickupItemWaitState.asset";
         private const string PickupStatePath = StatesFolderPath + "/NpcPickupItemState.asset";
         private const string ReturnHomeStatePath = StatesFolderPath + "/NpcReturnHomeState.asset";
+        private const string HitReactionStatePath = StatesFolderPath + "/NpcHitReactionState.asset";
+        private const string FleeStatePath = StatesFolderPath + "/NpcFleeState.asset";
+        private const string CombatApproachStatePath = StatesFolderPath + "/NpcCombatApproachState.asset";
+        private const string CombatAttackStatePath = StatesFolderPath + "/NpcCombatAttackState.asset";
+        private const string PostAttackDecisionStatePath = StatesFolderPath + "/NpcPostAttackDecisionState.asset";
+        private const string CombatManeuverStatePath = StatesFolderPath + "/NpcCombatManeuverState.asset";
+        private const string CombatCircleStatePath = StatesFolderPath + "/NpcCombatCircleState.asset";
+        private const string CombatQueueCircleStatePath = StatesFolderPath + "/NpcCombatQueueCircleState.asset";
+        private const string CombatTargetDownStatePath = StatesFolderPath + "/NpcCombatTargetDownState.asset";
+        private const string CombatSearchLastKnownStatePath = StatesFolderPath + "/NpcCombatSearchLastKnownState.asset";
         private const string DeathTransitionPath = TransitionsFolderPath + "/NpcIdleToDeathTransition.asset";
+        private const string AnyToHitReactionTransitionPath = TransitionsFolderPath + "/NpcAnyToHitReactionTransition.asset";
+        private const string HitReactionToFleeTransitionPath = TransitionsFolderPath + "/NpcHitReactionToFleeTransition.asset";
+        private const string HitReactionToCombatApproachTransitionPath = TransitionsFolderPath + "/NpcHitReactionToCombatApproachTransition.asset";
+        private const string HitReactionToSearchLastKnownTransitionPath = TransitionsFolderPath + "/NpcHitReactionToSearchLastKnownTransition.asset";
+        private const string HitReactionToIdleTransitionPath = TransitionsFolderPath + "/NpcHitReactionToIdleTransition.asset";
         private const string IdleToMoveTransitionPath = TransitionsFolderPath + "/NpcIdleToMoveToItemTransition.asset";
+        private const string IdleToFleeTransitionPath = TransitionsFolderPath + "/NpcIdleToFleeTransition.asset";
+        private const string IdleToCombatApproachTransitionPath = TransitionsFolderPath + "/NpcIdleToCombatApproachTransition.asset";
+        private const string MoveToItemToFleeTransitionPath = TransitionsFolderPath + "/NpcMoveToItemToFleeTransition.asset";
+        private const string MoveToItemToCombatApproachTransitionPath = TransitionsFolderPath + "/NpcMoveToItemToCombatApproachTransition.asset";
+        private const string PickupWaitToFleeTransitionPath = TransitionsFolderPath + "/NpcPickupWaitToFleeTransition.asset";
+        private const string PickupWaitToCombatApproachTransitionPath = TransitionsFolderPath + "/NpcPickupWaitToCombatApproachTransition.asset";
+        private const string PickupToFleeTransitionPath = TransitionsFolderPath + "/NpcPickupToFleeTransition.asset";
+        private const string PickupToCombatApproachTransitionPath = TransitionsFolderPath + "/NpcPickupToCombatApproachTransition.asset";
+        private const string ReturnHomeToFleeTransitionPath = TransitionsFolderPath + "/NpcReturnHomeToFleeTransition.asset";
+        private const string ReturnHomeToCombatApproachTransitionPath = TransitionsFolderPath + "/NpcReturnHomeToCombatApproachTransition.asset";
+        private const string FleeToCombatApproachTransitionPath = TransitionsFolderPath + "/NpcFleeToCombatApproachTransition.asset";
+        private const string FleeToIdleTransitionPath = TransitionsFolderPath + "/NpcFleeToIdleTransition.asset";
+        private const string CombatApproachToCircleTransitionPath = TransitionsFolderPath + "/NpcCombatApproachToCircleTransition.asset";
+        private const string CombatApproachToQueueTransitionPath = TransitionsFolderPath + "/NpcCombatApproachToQueueTransition.asset";
+        private const string CombatApproachToTargetDownTransitionPath = TransitionsFolderPath + "/NpcCombatApproachToTargetDownTransition.asset";
+        private const string CombatApproachToAttackTransitionPath = TransitionsFolderPath + "/NpcCombatApproachToAttackTransition.asset";
+        private const string CombatApproachToSearchLastKnownTransitionPath = TransitionsFolderPath + "/NpcCombatApproachToSearchLastKnownTransition.asset";
+        private const string CombatAttackToPostAttackDecisionTransitionPath = TransitionsFolderPath + "/NpcCombatAttackToPostAttackDecisionTransition.asset";
+        private const string CombatAttackToTargetDownTransitionPath = TransitionsFolderPath + "/NpcCombatAttackToTargetDownTransition.asset";
+        private const string CombatAttackToSearchLastKnownTransitionPath = TransitionsFolderPath + "/NpcCombatAttackToSearchLastKnownTransition.asset";
+        private const string PostAttackDecisionToTargetDownTransitionPath = TransitionsFolderPath + "/NpcPostAttackDecisionToTargetDownTransition.asset";
+        private const string PostAttackDecisionToQueueTransitionPath = TransitionsFolderPath + "/NpcPostAttackDecisionToQueueTransition.asset";
+        private const string PostAttackDecisionToAttackTransitionPath = TransitionsFolderPath + "/NpcPostAttackDecisionToAttackTransition.asset";
+        private const string PostAttackDecisionToApproachTransitionPath = TransitionsFolderPath + "/NpcPostAttackDecisionToApproachTransition.asset";
+        private const string PostAttackDecisionToManeuverTransitionPath = TransitionsFolderPath + "/NpcPostAttackDecisionToManeuverTransition.asset";
+        private const string PostAttackDecisionToCircleTransitionPath = TransitionsFolderPath + "/NpcPostAttackDecisionToCircleTransition.asset";
+        private const string CombatManeuverToTargetDownTransitionPath = TransitionsFolderPath + "/NpcCombatManeuverToTargetDownTransition.asset";
+        private const string CombatManeuverToApproachTransitionPath = TransitionsFolderPath + "/NpcCombatManeuverToApproachTransition.asset";
+        private const string CombatCircleToTargetDownTransitionPath = TransitionsFolderPath + "/NpcCombatCircleToTargetDownTransition.asset";
+        private const string CombatCircleToApproachTransitionPath = TransitionsFolderPath + "/NpcCombatCircleToApproachTransition.asset";
+        private const string CombatQueueToTargetDownTransitionPath = TransitionsFolderPath + "/NpcCombatQueueToTargetDownTransition.asset";
+        private const string CombatQueueToApproachTransitionPath = TransitionsFolderPath + "/NpcCombatQueueToApproachTransition.asset";
+        private const string CombatQueueToSearchLastKnownTransitionPath = TransitionsFolderPath + "/NpcCombatQueueToSearchLastKnownTransition.asset";
+        private const string CombatTargetDownToApproachTransitionPath = TransitionsFolderPath + "/NpcCombatTargetDownToApproachTransition.asset";
+        private const string CombatTargetDownToIdleTransitionPath = TransitionsFolderPath + "/NpcCombatTargetDownToIdleTransition.asset";
+        private const string CombatSearchToTargetDownTransitionPath = TransitionsFolderPath + "/NpcCombatSearchToTargetDownTransition.asset";
+        private const string CombatSearchToApproachTransitionPath = TransitionsFolderPath + "/NpcCombatSearchToApproachTransition.asset";
+        private const string CombatSearchToIdleTransitionPath = TransitionsFolderPath + "/NpcCombatSearchToIdleTransition.asset";
         private const string MoveToWaitTransitionPath = TransitionsFolderPath + "/NpcMoveToItemToPickupWaitTransition.asset";
         private const string WaitToPickupTransitionPath = TransitionsFolderPath + "/NpcPickupWaitToPickupTransition.asset";
         private const string PickupToReturnTransitionPath = TransitionsFolderPath + "/NpcPickupToReturnHomeTransition.asset";
@@ -52,14 +105,50 @@ namespace EditorTools
         private const string PickupCompletedConditionPath = ConditionsFolderPath + "/NpcPickupCompletedCondition.asset";
         private const string ChainPickupFoundConditionPath = ConditionsFolderPath + "/NpcChainPickupFoundCondition.asset";
         private const string ReachedHomeConditionPath = ConditionsFolderPath + "/NpcReachedHomeCondition.asset";
+        private const string HitReactionActiveConditionPath = ConditionsFolderPath + "/NpcHitReactionActiveCondition.asset";
+        private const string HitReactionInactiveConditionPath = ConditionsFolderPath + "/NpcHitReactionInactiveCondition.asset";
+        private const string CanFightTargetConditionPath = ConditionsFolderPath + "/NpcCanFightTargetCondition.asset";
+        private const string CanFightVisibleTargetConditionPath = ConditionsFolderPath + "/NpcCanFightVisibleTargetCondition.asset";
+        private const string ShouldFleeConditionPath = ConditionsFolderPath + "/NpcShouldFleeCondition.asset";
+        private const string FleeCompletedConditionPath = ConditionsFolderPath + "/NpcFleeCompletedCondition.asset";
+        private const string AttackCompletedConditionPath = ConditionsFolderPath + "/NpcAttackCompletedCondition.asset";
+        private const string CombatMoveCompletedConditionPath = ConditionsFolderPath + "/NpcCombatMoveCompletedCondition.asset";
+        private const string CombatTargetDownConditionPath = ConditionsFolderPath + "/NpcCombatTargetDownCondition.asset";
+        private const string ShouldQueueForCombatSlotConditionPath = ConditionsFolderPath + "/NpcShouldQueueForCombatSlotCondition.asset";
+        private const string HasDirectCombatSlotConditionPath = ConditionsFolderPath + "/NpcHasDirectCombatSlotCondition.asset";
+        private const string TargetDownWaitCompletedConditionPath = ConditionsFolderPath + "/NpcTargetDownWaitCompletedCondition.asset";
+        private const string InitialCircleRequestedConditionPath = ConditionsFolderPath + "/NpcInitialCircleRequestedCondition.asset";
+        private const string PostAttackDecisionAttackConditionPath = ConditionsFolderPath + "/NpcPostAttackDecisionAttackCondition.asset";
+        private const string PostAttackDecisionApproachConditionPath = ConditionsFolderPath + "/NpcPostAttackDecisionApproachCondition.asset";
+        private const string PostAttackDecisionManeuverConditionPath = ConditionsFolderPath + "/NpcPostAttackDecisionManeuverCondition.asset";
+        private const string PostAttackDecisionCircleConditionPath = ConditionsFolderPath + "/NpcPostAttackDecisionCircleCondition.asset";
+        private const string CombatTargetInAttackViewConditionPath = ConditionsFolderPath + "/NpcCombatTargetInAttackViewCondition.asset";
+        private const string CombatTargetOutsideAttackViewConditionPath = ConditionsFolderPath + "/NpcCombatTargetOutsideAttackViewCondition.asset";
+        private const string CombatTargetLostConditionPath = ConditionsFolderPath + "/NpcCombatTargetLostCondition.asset";
+        private const string ShouldSearchLastKnownTargetConditionPath = ConditionsFolderPath + "/NpcShouldSearchLastKnownTargetCondition.asset";
+        private const string LastKnownLookCompletedConditionPath = ConditionsFolderPath + "/NpcLastKnownLookCompletedCondition.asset";
         private const string DeathBehaviourPath = BehavioursFolderPath + "/NpcDeathBehaviour.asset";
         private const string ScanVisibleItemsBehaviourPath = BehavioursFolderPath + "/NpcScanVisibleItemsBehaviour.asset";
+        private const string ScanEnemiesBehaviourPath = BehavioursFolderPath + "/NpcScanEnemiesBehaviour.asset";
+        private const string SheatheWeaponBehaviourPath = BehavioursFolderPath + "/NpcSheatheWeaponBehaviour.asset";
         private const string MoveToItemBehaviourPath = BehavioursFolderPath + "/NpcMoveToInterestedItemBehaviour.asset";
         private const string WaitPickupBehaviourPath = BehavioursFolderPath + "/NpcWaitPickupBehaviour.asset";
         private const string PickupInterestedItemBehaviourPath = BehavioursFolderPath + "/NpcPickupInterestedItemBehaviour.asset";
         private const string ReturnHomeBehaviourPath = BehavioursFolderPath + "/NpcReturnHomeBehaviour.asset";
+        private const string HitReactionBehaviourPath = BehavioursFolderPath + "/NpcHitReactionBehaviour.asset";
+        private const string FleeBehaviourPath = BehavioursFolderPath + "/NpcFleeBehaviour.asset";
+        private const string InitialCombatTacticBehaviourPath = BehavioursFolderPath + "/NpcInitialCombatTacticBehaviour.asset";
+        private const string CombatApproachBehaviourPath = BehavioursFolderPath + "/NpcCombatApproachBehaviour.asset";
+        private const string CombatAttackBehaviourPath = BehavioursFolderPath + "/NpcCombatAttackBehaviour.asset";
+        private const string PostAttackDecisionBehaviourPath = BehavioursFolderPath + "/NpcPostAttackDecisionBehaviour.asset";
+        private const string CombatManeuverBehaviourPath = BehavioursFolderPath + "/NpcCombatManeuverBehaviour.asset";
+        private const string CombatCircleBehaviourPath = BehavioursFolderPath + "/NpcCombatCircleBehaviour.asset";
+        private const string CombatQueueCircleBehaviourPath = BehavioursFolderPath + "/NpcCombatQueueCircleBehaviour.asset";
+        private const string CombatTargetDownBehaviourPath = BehavioursFolderPath + "/NpcCombatTargetDownBehaviour.asset";
+        private const string CombatSearchLastKnownBehaviourPath = BehavioursFolderPath + "/NpcCombatSearchLastKnownBehaviour.asset";
         private const string NpcVisionConfigPath = NpcConfigFolderPath + "/NpcVisionConfig.asset";
         private const string NpcItemPickupConfigPath = NpcConfigFolderPath + "/NpcItemPickupConfig.asset";
+        private const string NpcCombatConfigPath = NpcConfigFolderPath + "/NpcCombatConfig.asset";
         private const string PlayerPrefabPath = "Assets/Prefabs/Scopes/Player.prefab";
         private const string NpcPrefabPath = "Assets/Prefabs/Scopes/NPC.prefab";
         private const string ProjectLifetimeScopePrefabPath = "Assets/Resources/Project/ProjectLifetimeScope.prefab";
@@ -67,6 +156,8 @@ namespace EditorTools
         [MenuItem(MenuPath)]
         public static void CreateBaseNpcAssets()
         {
+            ClearInspectorSelectionBeforePrefabContentsEdit();
+
             EnsureFolder(StateMachineFolderPath);
             EnsureFolder(StatesFolderPath);
             EnsureFolder(TransitionsFolderPath);
@@ -80,8 +171,61 @@ namespace EditorTools
             var pickupWaitState = LoadOrCreate<State>(PickupWaitStatePath);
             var pickupState = LoadOrCreate<State>(PickupStatePath);
             var returnHomeState = LoadOrCreate<State>(ReturnHomeStatePath);
+            var hitReactionState = LoadOrCreate<State>(HitReactionStatePath);
+            var fleeState = LoadOrCreate<State>(FleeStatePath);
+            var combatApproachState = LoadOrCreate<State>(CombatApproachStatePath);
+            var combatAttackState = LoadOrCreate<State>(CombatAttackStatePath);
+            var postAttackDecisionState = LoadOrCreate<State>(PostAttackDecisionStatePath);
+            var combatManeuverState = LoadOrCreate<State>(CombatManeuverStatePath);
+            var combatCircleState = LoadOrCreate<State>(CombatCircleStatePath);
+            var combatQueueCircleState = LoadOrCreate<State>(CombatQueueCircleStatePath);
+            var combatTargetDownState = LoadOrCreate<State>(CombatTargetDownStatePath);
+            var combatSearchLastKnownState = LoadOrCreate<State>(CombatSearchLastKnownStatePath);
             var deathTransition = LoadOrCreate<Transition>(DeathTransitionPath);
+            var anyToHitReactionTransition = LoadOrCreate<Transition>(AnyToHitReactionTransitionPath);
+            var hitReactionToFleeTransition = LoadOrCreate<Transition>(HitReactionToFleeTransitionPath);
+            var hitReactionToCombatApproachTransition = LoadOrCreate<Transition>(HitReactionToCombatApproachTransitionPath);
+            var hitReactionToSearchLastKnownTransition = LoadOrCreate<Transition>(HitReactionToSearchLastKnownTransitionPath);
+            var hitReactionToIdleTransition = LoadOrCreate<Transition>(HitReactionToIdleTransitionPath);
             var idleToMoveTransition = LoadOrCreate<Transition>(IdleToMoveTransitionPath);
+            var idleToFleeTransition = LoadOrCreate<Transition>(IdleToFleeTransitionPath);
+            var idleToCombatApproachTransition = LoadOrCreate<Transition>(IdleToCombatApproachTransitionPath);
+            var moveToItemToFleeTransition = LoadOrCreate<Transition>(MoveToItemToFleeTransitionPath);
+            var moveToItemToCombatApproachTransition = LoadOrCreate<Transition>(MoveToItemToCombatApproachTransitionPath);
+            var pickupWaitToFleeTransition = LoadOrCreate<Transition>(PickupWaitToFleeTransitionPath);
+            var pickupWaitToCombatApproachTransition = LoadOrCreate<Transition>(PickupWaitToCombatApproachTransitionPath);
+            var pickupToFleeTransition = LoadOrCreate<Transition>(PickupToFleeTransitionPath);
+            var pickupToCombatApproachTransition = LoadOrCreate<Transition>(PickupToCombatApproachTransitionPath);
+            var returnHomeToFleeTransition = LoadOrCreate<Transition>(ReturnHomeToFleeTransitionPath);
+            var returnHomeToCombatApproachTransition = LoadOrCreate<Transition>(ReturnHomeToCombatApproachTransitionPath);
+            var fleeToCombatApproachTransition = LoadOrCreate<Transition>(FleeToCombatApproachTransitionPath);
+            var fleeToIdleTransition = LoadOrCreate<Transition>(FleeToIdleTransitionPath);
+            var combatApproachToCircleTransition = LoadOrCreate<Transition>(CombatApproachToCircleTransitionPath);
+            var combatApproachToQueueTransition = LoadOrCreate<Transition>(CombatApproachToQueueTransitionPath);
+            var combatApproachToTargetDownTransition = LoadOrCreate<Transition>(CombatApproachToTargetDownTransitionPath);
+            var combatApproachToAttackTransition = LoadOrCreate<Transition>(CombatApproachToAttackTransitionPath);
+            var combatApproachToSearchLastKnownTransition = LoadOrCreate<Transition>(CombatApproachToSearchLastKnownTransitionPath);
+            var combatAttackToPostAttackDecisionTransition = LoadOrCreate<Transition>(CombatAttackToPostAttackDecisionTransitionPath);
+            var combatAttackToTargetDownTransition = LoadOrCreate<Transition>(CombatAttackToTargetDownTransitionPath);
+            var combatAttackToSearchLastKnownTransition = LoadOrCreate<Transition>(CombatAttackToSearchLastKnownTransitionPath);
+            var postAttackDecisionToTargetDownTransition = LoadOrCreate<Transition>(PostAttackDecisionToTargetDownTransitionPath);
+            var postAttackDecisionToQueueTransition = LoadOrCreate<Transition>(PostAttackDecisionToQueueTransitionPath);
+            var postAttackDecisionToAttackTransition = LoadOrCreate<Transition>(PostAttackDecisionToAttackTransitionPath);
+            var postAttackDecisionToApproachTransition = LoadOrCreate<Transition>(PostAttackDecisionToApproachTransitionPath);
+            var postAttackDecisionToManeuverTransition = LoadOrCreate<Transition>(PostAttackDecisionToManeuverTransitionPath);
+            var postAttackDecisionToCircleTransition = LoadOrCreate<Transition>(PostAttackDecisionToCircleTransitionPath);
+            var combatManeuverToTargetDownTransition = LoadOrCreate<Transition>(CombatManeuverToTargetDownTransitionPath);
+            var combatManeuverToApproachTransition = LoadOrCreate<Transition>(CombatManeuverToApproachTransitionPath);
+            var combatCircleToTargetDownTransition = LoadOrCreate<Transition>(CombatCircleToTargetDownTransitionPath);
+            var combatCircleToApproachTransition = LoadOrCreate<Transition>(CombatCircleToApproachTransitionPath);
+            var combatQueueToTargetDownTransition = LoadOrCreate<Transition>(CombatQueueToTargetDownTransitionPath);
+            var combatQueueToApproachTransition = LoadOrCreate<Transition>(CombatQueueToApproachTransitionPath);
+            var combatQueueToSearchLastKnownTransition = LoadOrCreate<Transition>(CombatQueueToSearchLastKnownTransitionPath);
+            var combatTargetDownToApproachTransition = LoadOrCreate<Transition>(CombatTargetDownToApproachTransitionPath);
+            var combatTargetDownToIdleTransition = LoadOrCreate<Transition>(CombatTargetDownToIdleTransitionPath);
+            var combatSearchToTargetDownTransition = LoadOrCreate<Transition>(CombatSearchToTargetDownTransitionPath);
+            var combatSearchToApproachTransition = LoadOrCreate<Transition>(CombatSearchToApproachTransitionPath);
+            var combatSearchToIdleTransition = LoadOrCreate<Transition>(CombatSearchToIdleTransitionPath);
             var moveToWaitTransition = LoadOrCreate<Transition>(MoveToWaitTransitionPath);
             var waitToPickupTransition = LoadOrCreate<Transition>(WaitToPickupTransitionPath);
             var pickupToReturnTransition = LoadOrCreate<Transition>(PickupToReturnTransitionPath);
@@ -100,18 +244,103 @@ namespace EditorTools
             var pickupCompletedCondition = LoadOrCreate<NpcPickupCompletedCondition>(PickupCompletedConditionPath);
             var chainPickupFoundCondition = LoadOrCreate<NpcChainPickupFoundCondition>(ChainPickupFoundConditionPath);
             var reachedHomeCondition = LoadOrCreate<NpcReachedHomeCondition>(ReachedHomeConditionPath);
+            var hitReactionActiveCondition = LoadOrCreate<CharacterHitReactionActiveCondition>(HitReactionActiveConditionPath);
+            var hitReactionInactiveCondition = LoadOrCreate<CharacterHitReactionInactiveCondition>(HitReactionInactiveConditionPath);
+            var canFightTargetCondition = LoadOrCreate<NpcCanFightTargetCondition>(CanFightTargetConditionPath);
+            var canFightVisibleTargetCondition = LoadOrCreate<NpcCanFightVisibleTargetCondition>(CanFightVisibleTargetConditionPath);
+            var shouldFleeCondition = LoadOrCreate<NpcShouldFleeCondition>(ShouldFleeConditionPath);
+            var fleeCompletedCondition = LoadOrCreate<NpcFleeCompletedCondition>(FleeCompletedConditionPath);
+            var attackCompletedCondition = LoadOrCreate<NpcAttackCompletedCondition>(AttackCompletedConditionPath);
+            var combatMoveCompletedCondition = LoadOrCreate<NpcCombatMoveCompletedCondition>(CombatMoveCompletedConditionPath);
+            var combatTargetDownCondition = LoadOrCreate<NpcCombatTargetDownCondition>(CombatTargetDownConditionPath);
+            var shouldQueueForCombatSlotCondition = LoadOrCreate<NpcShouldQueueForCombatSlotCondition>(ShouldQueueForCombatSlotConditionPath);
+            var hasDirectCombatSlotCondition = LoadOrCreate<NpcHasDirectCombatSlotCondition>(HasDirectCombatSlotConditionPath);
+            var targetDownWaitCompletedCondition = LoadOrCreate<NpcTargetDownWaitCompletedCondition>(TargetDownWaitCompletedConditionPath);
+            var initialCircleRequestedCondition = LoadOrCreate<NpcInitialCircleRequestedCondition>(InitialCircleRequestedConditionPath);
+            var postAttackDecisionAttackCondition = LoadOrCreate<NpcPostAttackDecisionCondition>(PostAttackDecisionAttackConditionPath);
+            var postAttackDecisionApproachCondition = LoadOrCreate<NpcPostAttackDecisionCondition>(PostAttackDecisionApproachConditionPath);
+            var postAttackDecisionManeuverCondition = LoadOrCreate<NpcPostAttackDecisionCondition>(PostAttackDecisionManeuverConditionPath);
+            var postAttackDecisionCircleCondition = LoadOrCreate<NpcPostAttackDecisionCondition>(PostAttackDecisionCircleConditionPath);
+            var combatTargetInAttackViewCondition = LoadOrCreate<NpcCombatTargetInAttackViewCondition>(CombatTargetInAttackViewConditionPath);
+            var combatTargetOutsideAttackViewCondition = LoadOrCreate<NpcCombatTargetOutsideAttackViewCondition>(CombatTargetOutsideAttackViewConditionPath);
+            var combatTargetLostCondition = LoadOrCreate<NpcCombatTargetLostCondition>(CombatTargetLostConditionPath);
+            var shouldSearchLastKnownTargetCondition = LoadOrCreate<NpcShouldSearchLastKnownTargetCondition>(ShouldSearchLastKnownTargetConditionPath);
+            var lastKnownLookCompletedCondition = LoadOrCreate<NpcLastKnownLookCompletedCondition>(LastKnownLookCompletedConditionPath);
             var deathBehaviour = LoadOrCreate<NpcDeathBehaviour>(DeathBehaviourPath);
             var scanVisibleItemsBehaviour = LoadOrCreate<NpcScanVisibleItemsBehaviour>(ScanVisibleItemsBehaviourPath);
+            var scanEnemiesBehaviour = LoadOrCreate<NpcScanEnemiesBehaviour>(ScanEnemiesBehaviourPath);
+            var sheatheWeaponBehaviour = LoadOrCreate<NpcSheatheWeaponBehaviour>(SheatheWeaponBehaviourPath);
             var moveToItemBehaviour = LoadOrCreate<NpcMoveToInterestedItemBehaviour>(MoveToItemBehaviourPath);
             var waitPickupBehaviour = LoadOrCreate<NpcWaitPickupBehaviour>(WaitPickupBehaviourPath);
             var pickupInterestedItemBehaviour = LoadOrCreate<NpcPickupInterestedItemBehaviour>(PickupInterestedItemBehaviourPath);
             var returnHomeBehaviour = LoadOrCreate<NpcReturnHomeBehaviour>(ReturnHomeBehaviourPath);
+            var hitReactionBehaviour = LoadOrCreate<NpcHitReactionBehaviour>(HitReactionBehaviourPath);
+            var fleeBehaviour = LoadOrCreate<NpcFleeBehaviour>(FleeBehaviourPath);
+            var initialCombatTacticBehaviour = LoadOrCreate<NpcInitialCombatTacticBehaviour>(InitialCombatTacticBehaviourPath);
+            var combatApproachBehaviour = LoadOrCreate<NpcCombatApproachBehaviour>(CombatApproachBehaviourPath);
+            var combatAttackBehaviour = LoadOrCreate<NpcCombatAttackBehaviour>(CombatAttackBehaviourPath);
+            var postAttackDecisionBehaviour = LoadOrCreate<NpcPostAttackDecisionBehaviour>(PostAttackDecisionBehaviourPath);
+            var combatManeuverBehaviour = LoadOrCreate<NpcCombatManeuverBehaviour>(CombatManeuverBehaviourPath);
+            var combatCircleBehaviour = LoadOrCreate<NpcCombatCircleBehaviour>(CombatCircleBehaviourPath);
+            var combatQueueCircleBehaviour = LoadOrCreate<NpcCombatQueueCircleBehaviour>(CombatQueueCircleBehaviourPath);
+            var combatTargetDownBehaviour = LoadOrCreate<NpcCombatTargetDownBehaviour>(CombatTargetDownBehaviourPath);
+            var combatSearchLastKnownBehaviour = LoadOrCreate<NpcCombatSearchLastKnownBehaviour>(CombatSearchLastKnownBehaviourPath);
             var visionConfig = LoadOrCreate<NpcVisionConfig>(NpcVisionConfigPath);
             var itemPickupConfig = LoadOrCreate<NpcItemPickupConfig>(NpcItemPickupConfigPath);
+            var combatConfig = LoadOrCreate<NpcCombatConfig>(NpcCombatConfigPath);
+            EditorUtility.SetDirty(combatConfig);
             var graph = LoadOrCreate<StateMachineGraph>(GraphPath);
 
             ConfigureTransition(deathTransition, deathState, hpDepletedCondition);
+            ConfigureDecisionCondition(postAttackDecisionAttackCondition, NpcCombatDecision.Attack);
+            ConfigureDecisionCondition(postAttackDecisionApproachCondition, NpcCombatDecision.Approach);
+            ConfigureDecisionCondition(postAttackDecisionManeuverCondition, NpcCombatDecision.Maneuver);
+            ConfigureDecisionCondition(postAttackDecisionCircleCondition, NpcCombatDecision.Circle);
+
+            ConfigureTransition(anyToHitReactionTransition, hitReactionState, hitReactionActiveCondition);
+            ConfigureTransition(hitReactionToFleeTransition, fleeState, hitReactionInactiveCondition, shouldFleeCondition);
+            ConfigureTransition(hitReactionToCombatApproachTransition, combatApproachState, hitReactionInactiveCondition, canFightTargetCondition);
+            ConfigureTransition(hitReactionToSearchLastKnownTransition, combatSearchLastKnownState, hitReactionInactiveCondition, shouldSearchLastKnownTargetCondition);
+            ConfigureTransition(hitReactionToIdleTransition, idleState, hitReactionInactiveCondition);
             ConfigureTransition(idleToMoveTransition, moveToItemState, hasInterestingItemCondition);
+            ConfigureTransition(idleToFleeTransition, fleeState, shouldFleeCondition);
+            ConfigureTransition(idleToCombatApproachTransition, combatApproachState, canFightTargetCondition);
+            ConfigureTransition(moveToItemToFleeTransition, fleeState, shouldFleeCondition);
+            ConfigureTransition(moveToItemToCombatApproachTransition, combatApproachState, canFightTargetCondition);
+            ConfigureTransition(pickupWaitToFleeTransition, fleeState, shouldFleeCondition);
+            ConfigureTransition(pickupWaitToCombatApproachTransition, combatApproachState, canFightTargetCondition);
+            ConfigureTransition(pickupToFleeTransition, fleeState, shouldFleeCondition);
+            ConfigureTransition(pickupToCombatApproachTransition, combatApproachState, canFightTargetCondition);
+            ConfigureTransition(returnHomeToFleeTransition, fleeState, shouldFleeCondition);
+            ConfigureTransition(returnHomeToCombatApproachTransition, combatApproachState, canFightTargetCondition);
+            ConfigureTransition(fleeToCombatApproachTransition, combatApproachState, canFightVisibleTargetCondition);
+            ConfigureTransition(fleeToIdleTransition, returnHomeState, fleeCompletedCondition);
+            ConfigureTransition(combatApproachToCircleTransition, combatCircleState, initialCircleRequestedCondition);
+            ConfigureTransition(combatApproachToQueueTransition, combatQueueCircleState, shouldQueueForCombatSlotCondition);
+            ConfigureTransition(combatApproachToTargetDownTransition, combatTargetDownState, combatTargetDownCondition);
+            ConfigureTransition(combatApproachToAttackTransition, combatAttackState, combatTargetInAttackViewCondition);
+            ConfigureTransition(combatApproachToSearchLastKnownTransition, combatSearchLastKnownState, combatTargetLostCondition);
+            ConfigureTransition(combatAttackToPostAttackDecisionTransition, postAttackDecisionState, attackCompletedCondition);
+            ConfigureTransition(combatAttackToTargetDownTransition, combatTargetDownState, combatTargetDownCondition);
+            ConfigureTransition(combatAttackToSearchLastKnownTransition, combatSearchLastKnownState, combatTargetLostCondition);
+            ConfigureTransition(postAttackDecisionToTargetDownTransition, combatTargetDownState, combatTargetDownCondition);
+            ConfigureTransition(postAttackDecisionToQueueTransition, combatQueueCircleState, shouldQueueForCombatSlotCondition);
+            ConfigureTransition(postAttackDecisionToAttackTransition, combatAttackState, postAttackDecisionAttackCondition);
+            ConfigureTransition(postAttackDecisionToApproachTransition, combatApproachState, postAttackDecisionApproachCondition);
+            ConfigureTransition(postAttackDecisionToManeuverTransition, combatManeuverState, postAttackDecisionManeuverCondition);
+            ConfigureTransition(postAttackDecisionToCircleTransition, combatCircleState, postAttackDecisionCircleCondition);
+            ConfigureTransition(combatManeuverToTargetDownTransition, combatTargetDownState, combatTargetDownCondition);
+            ConfigureTransition(combatManeuverToApproachTransition, combatApproachState, combatMoveCompletedCondition);
+            ConfigureTransition(combatCircleToTargetDownTransition, combatTargetDownState, combatTargetDownCondition);
+            ConfigureTransition(combatCircleToApproachTransition, combatApproachState, combatMoveCompletedCondition);
+            ConfigureTransition(combatQueueToTargetDownTransition, combatTargetDownState, combatTargetDownCondition);
+            ConfigureTransition(combatQueueToApproachTransition, combatApproachState, hasDirectCombatSlotCondition);
+            ConfigureTransition(combatQueueToSearchLastKnownTransition, combatSearchLastKnownState, combatTargetLostCondition);
+            ConfigureTransition(combatTargetDownToApproachTransition, combatApproachState, canFightTargetCondition);
+            ConfigureTransition(combatTargetDownToIdleTransition, idleState, targetDownWaitCompletedCondition);
+            ConfigureTransition(combatSearchToTargetDownTransition, combatTargetDownState, combatTargetDownCondition);
+            ConfigureTransition(combatSearchToApproachTransition, combatApproachState, canFightVisibleTargetCondition);
+            ConfigureTransition(combatSearchToIdleTransition, idleState, lastKnownLookCompletedCondition);
             ConfigureTransition(moveToWaitTransition, pickupWaitState, reachedInterestedItemCondition);
             ConfigureTransition(waitToPickupTransition, pickupState, pickupWaitElapsedCondition);
             ConfigureTransition(pickupToMoveTransition, moveToItemState, chainPickupFoundCondition);
@@ -125,14 +354,21 @@ namespace EditorTools
             deathState.Transitions = new List<Transition>();
             EditorUtility.SetDirty(deathState);
 
-            idleState.Behaviours = new List<BaseBehaviour> { scanVisibleItemsBehaviour };
-            idleState.Transitions = new List<Transition> { deathTransition, idleToMoveTransition };
+            hitReactionState.Behaviours = new List<BaseBehaviour> { hitReactionBehaviour };
+            hitReactionState.Transitions = new List<Transition> { deathTransition, hitReactionToFleeTransition, hitReactionToCombatApproachTransition, hitReactionToSearchLastKnownTransition, hitReactionToIdleTransition };
+            EditorUtility.SetDirty(hitReactionState);
+
+            idleState.Behaviours = new List<BaseBehaviour> { sheatheWeaponBehaviour, scanEnemiesBehaviour, scanVisibleItemsBehaviour };
+            idleState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, idleToFleeTransition, idleToCombatApproachTransition, idleToMoveTransition };
             EditorUtility.SetDirty(idleState);
 
-            moveToItemState.Behaviours = new List<BaseBehaviour> { moveToItemBehaviour };
+            moveToItemState.Behaviours = new List<BaseBehaviour> { scanEnemiesBehaviour, moveToItemBehaviour };
             moveToItemState.Transitions = new List<Transition>
             {
                 deathTransition,
+                anyToHitReactionTransition,
+                moveToItemToFleeTransition,
+                moveToItemToCombatApproachTransition,
                 missingItemToNextPickupTransition,
                 missingItemToReturnTransition,
                 lostCompetitionToReturnTransition,
@@ -140,10 +376,13 @@ namespace EditorTools
             };
             EditorUtility.SetDirty(moveToItemState);
 
-            pickupWaitState.Behaviours = new List<BaseBehaviour> { waitPickupBehaviour };
+            pickupWaitState.Behaviours = new List<BaseBehaviour> { scanEnemiesBehaviour, waitPickupBehaviour };
             pickupWaitState.Transitions = new List<Transition>
             {
                 deathTransition,
+                anyToHitReactionTransition,
+                pickupWaitToFleeTransition,
+                pickupWaitToCombatApproachTransition,
                 missingItemToNextPickupTransition,
                 missingItemToReturnTransition,
                 lostCompetitionToReturnTransition,
@@ -151,13 +390,76 @@ namespace EditorTools
             };
             EditorUtility.SetDirty(pickupWaitState);
 
-            pickupState.Behaviours = new List<BaseBehaviour> { pickupInterestedItemBehaviour };
-            pickupState.Transitions = new List<Transition> { deathTransition, pickupToMoveTransition, pickupToReturnTransition };
+            pickupState.Behaviours = new List<BaseBehaviour> { scanEnemiesBehaviour, pickupInterestedItemBehaviour };
+            pickupState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, pickupToFleeTransition, pickupToCombatApproachTransition, pickupToMoveTransition, pickupToReturnTransition };
             EditorUtility.SetDirty(pickupState);
 
-            returnHomeState.Behaviours = new List<BaseBehaviour> { returnHomeBehaviour };
-            returnHomeState.Transitions = new List<Transition> { deathTransition, returnToIdleTransition };
+            returnHomeState.Behaviours = new List<BaseBehaviour> { scanEnemiesBehaviour, returnHomeBehaviour };
+            returnHomeState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, returnHomeToFleeTransition, returnHomeToCombatApproachTransition, returnToIdleTransition };
             EditorUtility.SetDirty(returnHomeState);
+
+            fleeState.Behaviours = new List<BaseBehaviour> { scanEnemiesBehaviour, fleeBehaviour };
+            fleeState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, fleeToCombatApproachTransition, fleeToIdleTransition };
+            EditorUtility.SetDirty(fleeState);
+
+            combatApproachState.Behaviours = new List<BaseBehaviour> { initialCombatTacticBehaviour, combatApproachBehaviour };
+            combatApproachState.Transitions = new List<Transition>
+            {
+                deathTransition,
+                anyToHitReactionTransition,
+                combatApproachToTargetDownTransition,
+                combatApproachToSearchLastKnownTransition,
+                combatApproachToQueueTransition,
+                combatApproachToCircleTransition,
+                combatApproachToAttackTransition
+            };
+            EditorUtility.SetDirty(combatApproachState);
+
+            combatAttackState.Behaviours = new List<BaseBehaviour> { combatAttackBehaviour };
+            combatAttackState.Transitions = new List<Transition>
+            {
+                deathTransition,
+                anyToHitReactionTransition,
+                combatAttackToTargetDownTransition,
+                combatAttackToSearchLastKnownTransition,
+                combatAttackToPostAttackDecisionTransition
+            };
+            EditorUtility.SetDirty(combatAttackState);
+
+            postAttackDecisionState.Behaviours = new List<BaseBehaviour> { postAttackDecisionBehaviour };
+            postAttackDecisionState.Transitions = new List<Transition>
+            {
+                deathTransition,
+                anyToHitReactionTransition,
+                postAttackDecisionToTargetDownTransition,
+                combatAttackToSearchLastKnownTransition,
+                postAttackDecisionToQueueTransition,
+                postAttackDecisionToManeuverTransition,
+                postAttackDecisionToCircleTransition,
+                postAttackDecisionToApproachTransition,
+                postAttackDecisionToAttackTransition
+            };
+            EditorUtility.SetDirty(postAttackDecisionState);
+
+            combatManeuverState.Behaviours = new List<BaseBehaviour> { combatManeuverBehaviour };
+            combatManeuverState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, combatManeuverToTargetDownTransition, combatAttackToSearchLastKnownTransition, combatManeuverToApproachTransition };
+            EditorUtility.SetDirty(combatManeuverState);
+
+            combatCircleState.Behaviours = new List<BaseBehaviour> { combatCircleBehaviour };
+            combatCircleState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, combatCircleToTargetDownTransition, combatAttackToSearchLastKnownTransition, combatCircleToApproachTransition };
+            EditorUtility.SetDirty(combatCircleState);
+
+            combatQueueCircleState.Behaviours = new List<BaseBehaviour> { combatQueueCircleBehaviour };
+            combatQueueCircleState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, combatQueueToTargetDownTransition, combatQueueToSearchLastKnownTransition, combatQueueToApproachTransition };
+            EditorUtility.SetDirty(combatQueueCircleState);
+
+            combatTargetDownState.Behaviours = new List<BaseBehaviour> { combatTargetDownBehaviour };
+            combatTargetDownState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, combatTargetDownToApproachTransition, combatTargetDownToIdleTransition };
+            EditorUtility.SetDirty(combatTargetDownState);
+
+            combatSearchLastKnownState.Behaviours = new List<BaseBehaviour> { scanEnemiesBehaviour, combatSearchLastKnownBehaviour };
+            combatSearchLastKnownState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, combatSearchToTargetDownTransition, combatSearchToApproachTransition, combatSearchToIdleTransition };
+            EditorUtility.SetDirty(combatSearchLastKnownState);
 
             graph.Nodes = new List<Node>
             {
@@ -166,15 +468,27 @@ namespace EditorTools
                 new(pickupWaitState) { Position = new Vector2(860f, 80f) },
                 new(pickupState) { Position = new Vector2(1200f, 80f) },
                 new(returnHomeState) { Position = new Vector2(860f, 330f) },
+                new(fleeState) { Position = new Vector2(160f, -180f) },
+                new(combatApproachState) { Position = new Vector2(520f, -180f) },
+                new(combatAttackState) { Position = new Vector2(860f, -180f) },
+                new(postAttackDecisionState) { Position = new Vector2(1200f, -180f) },
+                new(combatManeuverState) { Position = new Vector2(1200f, -420f) },
+                new(combatCircleState) { Position = new Vector2(520f, -420f) },
+                new(combatQueueCircleState) { Position = new Vector2(160f, -420f) },
+                new(combatTargetDownState) { Position = new Vector2(1200f, -650f) },
+                new(combatSearchLastKnownState) { Position = new Vector2(860f, -650f) },
+                new(hitReactionState) { Position = new Vector2(160f, 520f) },
                 new(deathState) { Position = new Vector2(520f, 520f) }
             };
             EditorUtility.SetDirty(graph);
 
             CreateOrUpdateNpcPrefab(graph, visionConfig);
-            AssignProjectNpcConfigs(visionConfig, itemPickupConfig);
+            AssignProjectNpcConfigs(visionConfig, itemPickupConfig, combatConfig);
 
             AssetDatabase.SaveAssets();
+            AssetDatabase.ForceReserializeAssets(new[] { NpcCombatConfigPath });
             AssetDatabase.Refresh();
+            SelectAssetAfterPrefabContentsEdit(NpcPrefabPath);
             Debug.Log($"Created base NPC assets: {GraphPath}, {NpcPrefabPath}");
         }
 
@@ -192,18 +506,41 @@ namespace EditorTools
             return asset;
         }
 
-        private static void ConfigureTransition(Transition transition, State targetState, BaseCondition condition)
+        private static void ConfigureTransition(Transition transition, State targetState, params BaseCondition[] conditions)
         {
             transition.Type = TransitionType.All;
             transition.Conditions.Clear();
-            transition.Conditions.Add(condition);
+            if (conditions != null)
+            {
+                foreach (var condition in conditions)
+                {
+                    if (condition != null)
+                    {
+                        transition.Conditions.Add(condition);
+                    }
+                }
+            }
+
             transition.ActionOnTransitions.Clear();
             transition.TargetState = targetState;
             EditorUtility.SetDirty(transition);
         }
 
+        private static void ConfigureDecisionCondition(NpcPostAttackDecisionCondition condition, NpcCombatDecision decision)
+        {
+            if (condition == null)
+            {
+                return;
+            }
+
+            condition.ExpectedDecision = decision;
+            EditorUtility.SetDirty(condition);
+        }
+
         private static void CreateOrUpdateNpcPrefab(StateMachineGraph graph, NpcVisionConfig visionConfig)
         {
+            ClearInspectorSelectionBeforePrefabContentsEdit();
+
             var sourcePath = AssetDatabase.LoadAssetAtPath<GameObject>(NpcPrefabPath) != null
                 ? NpcPrefabPath
                 : PlayerPrefabPath;
@@ -325,8 +662,10 @@ namespace EditorTools
             }
         }
 
-        private static void AssignProjectNpcConfigs(NpcVisionConfig visionConfig, NpcItemPickupConfig itemPickupConfig)
+        private static void AssignProjectNpcConfigs(NpcVisionConfig visionConfig, NpcItemPickupConfig itemPickupConfig, NpcCombatConfig combatConfig)
         {
+            ClearInspectorSelectionBeforePrefabContentsEdit();
+
             var root = PrefabUtility.LoadPrefabContents(ProjectLifetimeScopePrefabPath);
             if (root == null)
             {
@@ -354,6 +693,12 @@ namespace EditorTools
                 if (itemPickupConfigProperty != null)
                 {
                     itemPickupConfigProperty.objectReferenceValue = itemPickupConfig;
+                }
+
+                var combatConfigProperty = projectScopeObject.FindProperty("<NpcCombatConfig>k__BackingField");
+                if (combatConfigProperty != null)
+                {
+                    combatConfigProperty.objectReferenceValue = combatConfig;
                 }
 
                 projectScopeObject.ApplyModifiedPropertiesWithoutUndo();
@@ -419,6 +764,21 @@ namespace EditorTools
 
                 current = next;
             }
+        }
+
+        private static void ClearInspectorSelectionBeforePrefabContentsEdit()
+        {
+            Selection.activeObject = null;
+            UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
+        }
+
+        private static void SelectAssetAfterPrefabContentsEdit(string assetPath)
+        {
+            EditorApplication.delayCall += () =>
+            {
+                Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(assetPath);
+                UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
+            };
         }
 
         private static void MoveComponentAfterTransform(Component component)

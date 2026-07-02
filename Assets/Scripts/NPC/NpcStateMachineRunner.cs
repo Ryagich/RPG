@@ -27,6 +27,9 @@ namespace NPC
         private readonly NpcItemInterest itemInterest;
         private readonly NpcInventoryPlanner inventoryPlanner;
         private readonly NpcItemPickupService itemPickupService;
+        private readonly NpcCombatService combatService;
+        private readonly NpcCombatConfig combatConfig;
+        private readonly ICharacterHitReactionController hitReactionController;
         private readonly Inventory.EquippedWeaponDropService equippedWeaponDropService;
         private readonly NpcItemPickupConfig itemPickupConfig;
 
@@ -49,6 +52,9 @@ namespace NPC
             NpcItemInterest itemInterest,
             NpcInventoryPlanner inventoryPlanner,
             NpcItemPickupService itemPickupService,
+            NpcCombatService combatService,
+            NpcCombatConfig combatConfig,
+            ICharacterHitReactionController hitReactionController,
             Inventory.EquippedWeaponDropService equippedWeaponDropService,
             NpcItemPickupConfig itemPickupConfig)
         {
@@ -67,6 +73,9 @@ namespace NPC
             this.itemInterest = itemInterest;
             this.inventoryPlanner = inventoryPlanner;
             this.itemPickupService = itemPickupService;
+            this.combatService = combatService;
+            this.combatConfig = combatConfig;
+            this.hitReactionController = hitReactionController;
             this.equippedWeaponDropService = equippedWeaponDropService;
             this.itemPickupConfig = itemPickupConfig;
         }
@@ -97,6 +106,9 @@ namespace NPC
             context.SetService(itemInterest);
             context.SetService(inventoryPlanner);
             context.SetService(itemPickupService);
+            context.SetService(combatService);
+            context.SetService(combatConfig);
+            context.SetService(hitReactionController);
             context.SetService(equippedWeaponDropService);
             context.SetService(itemPickupConfig);
 

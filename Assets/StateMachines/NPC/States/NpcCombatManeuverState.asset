@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf29600a98724efea7cca5403fff2012, type: 3}
+  m_Name: NpcCombatManeuverState
+  m_EditorClassIdentifier: Assembly-CSharp::StateMachine.Graph.Model.State
+  <Name>k__BackingField:
+    m_TableReference:
+      m_TableCollectionName: 
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  Behaviours:
+  - {fileID: 11400000, guid: bc4700f94cff4a7479a0c751e8a0027a, type: 2}
+  Transitions:
+  - {fileID: 11400000, guid: d80909d90496c7d409b9353319b0c1a3, type: 2}
+  - {fileID: 11400000, guid: a81d40108fac4b24fb115d30da77a005, type: 2}
+  - {fileID: 11400000, guid: 5979c68e4093e814c9641c513d5d01ba, type: 2}
+  - {fileID: 11400000, guid: 976733f7eaf83e34589138b3ad32cd44, type: 2}
+  - {fileID: 11400000, guid: 62bfbb945ba95fc439cb63fc13061576, type: 2}
+  references:
+    version: 2
+    RefIds: []

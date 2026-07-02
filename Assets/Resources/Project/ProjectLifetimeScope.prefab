@@ -63,6 +63,8 @@ MonoBehaviour:
   <TargetLockConfig>k__BackingField: {fileID: 11400000, guid: 0dc24276d11c421e9473fe8fd41716d7, type: 2}
   <NpcVisionConfig>k__BackingField: {fileID: 11400000, guid: 56f204f2acef1b6499be8a1ee97e0f57, type: 2}
   <NpcItemPickupConfig>k__BackingField: {fileID: 11400000, guid: 0ea9d6f20eb7ab847b5e33cb28edf3ca, type: 2}
+  <NpcCombatConfig>k__BackingField: {fileID: 11400000, guid: 726503d3536573744bd6064fc04fe05b, type: 2}
   <LoadSceneConfig>k__BackingField: {fileID: 11400000, guid: 9b5c9388ee344532950fb6ae3c053a14, type: 2}
   <DeathConfig>k__BackingField: {fileID: 11400000, guid: 101d965d5be64e0b840b45fb632980ee, type: 2}
   <HitReactionConfig>k__BackingField: {fileID: 11400000, guid: 2d0cbbd1f6af4e74986c7f818a5dd4d4, type: 2}
+  <FactionRelationsConfig>k__BackingField: {fileID: 11400000, guid: 3fdfd03541e8492bb9c360909a9db487, type: 2}

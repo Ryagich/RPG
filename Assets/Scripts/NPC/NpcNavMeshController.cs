@@ -15,6 +15,8 @@ namespace NPC
         private readonly NavMeshAgent agent;
         private readonly CharacterController characterController;
         private readonly Animator animator;
+        private readonly float defaultStoppingDistance;
+        private readonly float defaultSpeed;
 
         private bool isFacingLocked;
 
@@ -23,6 +25,8 @@ namespace NPC
             this.agent = agent;
             this.characterController = characterController;
             this.animator = animator;
+            defaultStoppingDistance = agent != null ? agent.stoppingDistance : 0f;
+            defaultSpeed = agent != null ? agent.speed : 0f;
         }
 
         public Vector3 Velocity => agent != null ? agent.velocity : Vector3.zero;
@@ -101,7 +105,7 @@ namespace NPC
             UpdateAnimator(displacement / Mathf.Max(Time.deltaTime, 0.0001f));
         }
 
-        public bool MoveTo(Vector3 destination, float sampleRadius = DefaultSampleRadius)
+        public bool MoveTo(Vector3 destination, float sampleRadius = DefaultSampleRadius, float? stoppingDistance = null)
         {
             if (!CanUseAgent())
             {
@@ -114,6 +118,7 @@ namespace NPC
             }
 
             agent.isStopped = false;
+            agent.stoppingDistance = Mathf.Max(0f, stoppingDistance ?? defaultStoppingDistance);
             agent.updatePosition = characterController == null;
             agent.updateRotation = characterController == null;
             return agent.SetDestination(hit.position);
@@ -189,6 +194,24 @@ namespace NPC
         public void SetFacingLocked(bool isLocked)
         {
             isFacingLocked = isLocked;
+        }
+
+        public void SetSpeedMultiplier(float multiplier)
+        {
+            if (agent == null)
+            {
+                return;
+            }
+
+            agent.speed = Mathf.Max(0.01f, defaultSpeed * Mathf.Max(0.01f, multiplier));
+        }
+
+        public void ResetSpeed()
+        {
+            if (agent != null)
+            {
+                agent.speed = defaultSpeed;
+            }
         }
 
         public bool WarpToNearestNavMesh(Vector3 position, float sampleRadius = DefaultSampleRadius)

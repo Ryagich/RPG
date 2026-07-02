@@ -429,6 +429,35 @@ namespace Inventory.Inventories
             return true;
         }
 
+        public bool TryMoveFirstGridItemToEmptySlot(ItemType slotType)
+        {
+            var slot = GetSlots().FirstOrDefault(currentSlot => currentSlot.ItemType == slotType && currentSlot.ItemStack == null);
+            if (slot == null)
+            {
+                return false;
+            }
+
+            var item = Items.FirstOrDefault(currentItem => currentItem?.ItemStack?.ItemConfig?.ItemType == slotType);
+            if (item?.ItemStack == null || !CanAcceptItemInSlot(slot, item.ItemStack))
+            {
+                return false;
+            }
+
+            foreach (var tile in Tiles.tiles)
+            {
+                if (tile.ItemInInventory == item)
+                {
+                    tile.SetItem(null);
+                }
+            }
+
+            slot.ItemStack = item.ItemStack;
+            Items.Remove(item);
+            HandleSlotItemChanged(slot);
+            NotifyChanged();
+            return true;
+        }
+
         public bool TryTakeFromSlot(ItemType slotType, out ItemStack itemStack)
         {
             itemStack = null;

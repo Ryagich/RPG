@@ -10,6 +10,7 @@ namespace NPC
         private const float DegreesPerSegment = 5f;
 
         private static readonly Color VisionGizmoColor = new(1f, 0.86f, 0.12f, 0.8f);
+        private static readonly Color AttackViewGizmoColor = new(1f, 0.12f, 0.08f, 0.85f);
 
         [SerializeField] private NpcVisionConfig config;
         [SerializeField] private Transform origin;
@@ -17,6 +18,8 @@ namespace NPC
         public NpcVisionConfig Config => config;
         public float ViewDistance => config != null ? config.ViewDistance : 0f;
         public float ViewAngle => config != null ? config.ViewAngle : 0f;
+        public float AttackViewDistance => config != null ? config.AttackViewDistance : 0f;
+        public float AttackViewAngle => config != null ? config.AttackViewAngle : 0f;
 
         [Inject]
         public void Construct(NpcVisionConfig npcVisionConfig)
@@ -29,32 +32,12 @@ namespace NPC
 
         public bool IsInView(Vector3 worldPosition)
         {
-            if (config == null || config.ViewDistance <= 0f || config.ViewAngle <= 0f)
-            {
-                return false;
-            }
+            return config != null && IsInCone(worldPosition, config.ViewDistance, config.ViewAngle);
+        }
 
-            var originPosition = GetOriginPosition();
-            var toTarget = worldPosition - originPosition;
-            toTarget.y = 0f;
-
-            var distanceSqr = toTarget.sqrMagnitude;
-            if (distanceSqr > config.ViewDistance * config.ViewDistance)
-            {
-                return false;
-            }
-
-            if (distanceSqr <= Mathf.Epsilon)
-            {
-                return true;
-            }
-
-            if (config.ViewAngle >= 360f)
-            {
-                return true;
-            }
-
-            return Vector3.Angle(GetPlanarForward(), toTarget.normalized) <= config.ViewAngle * 0.5f;
+        public bool IsInAttackView(Vector3 worldPosition)
+        {
+            return config != null && IsInCone(worldPosition, config.AttackViewDistance, config.AttackViewAngle);
         }
 
         private void OnDrawGizmos()
@@ -87,19 +70,65 @@ namespace NPC
 
         private void DrawVisionGizmo()
         {
-            if (config == null || config.ViewDistance <= 0f || config.ViewAngle <= 0f)
+            if (config == null)
+            {
+                return;
+            }
+
+            DrawViewConeGizmo();
+            DrawAttackViewConeGizmo();
+        }
+
+        private void DrawViewConeGizmo()
+        {
+            DrawConeGizmo(config.ViewDistance, config.ViewAngle, VisionGizmoColor);
+        }
+
+        private void DrawAttackViewConeGizmo()
+        {
+            DrawConeGizmo(config.AttackViewDistance, config.AttackViewAngle, AttackViewGizmoColor);
+        }
+
+        private bool IsInCone(Vector3 worldPosition, float distance, float angle)
+        {
+            if (distance <= 0f || angle <= 0f)
+            {
+                return false;
+            }
+
+            var originPosition = GetOriginPosition();
+            var toTarget = worldPosition - originPosition;
+            toTarget.y = 0f;
+
+            var distanceSqr = toTarget.sqrMagnitude;
+            if (distanceSqr > distance * distance)
+            {
+                return false;
+            }
+
+            if (distanceSqr <= Mathf.Epsilon || angle >= 360f)
+            {
+                return true;
+            }
+
+            return Vector3.Angle(GetPlanarForward(), toTarget.normalized) <= angle * 0.5f;
+        }
+
+        private void DrawConeGizmo(float distance, float angle, Color color)
+        {
+            if (distance <= 0f || angle <= 0f)
             {
                 return;
             }
 
             var previousColor = Gizmos.color;
-            Gizmos.color = VisionGizmoColor;
+            Gizmos.color = color;
 
             var originPosition = GetOriginPosition();
             var forward = GetPlanarForward();
-            var angle = Mathf.Clamp(config.ViewAngle, 0f, 360f);
-            var halfAngle = angle * 0.5f;
-            var segments = Mathf.Max(MinSegments, Mathf.CeilToInt(angle / DegreesPerSegment));
+            var clampedAngle = Mathf.Clamp(angle, 0f, 360f);
+            var halfAngle = clampedAngle * 0.5f;
+            var segments = Mathf.Max(MinSegments, Mathf.CeilToInt(clampedAngle / DegreesPerSegment));
             var previousPoint = Vector3.zero;
             var firstPoint = Vector3.zero;
             var lastPoint = Vector3.zero;
@@ -107,9 +136,9 @@ namespace NPC
             for (var index = 0; index <= segments; index++)
             {
                 var step = segments == 0 ? 0f : index / (float)segments;
-                var currentAngle = -halfAngle + angle * step;
+                var currentAngle = -halfAngle + clampedAngle * step;
                 var direction = Quaternion.AngleAxis(currentAngle, Vector3.up) * forward;
-                var point = originPosition + direction * config.ViewDistance;
+                var point = originPosition + direction * distance;
 
                 if (index == 0)
                 {
@@ -124,7 +153,7 @@ namespace NPC
                 lastPoint = point;
             }
 
-            if (angle < 360f)
+            if (clampedAngle < 360f)
             {
                 Gizmos.DrawLine(originPosition, firstPoint);
                 Gizmos.DrawLine(originPosition, lastPoint);

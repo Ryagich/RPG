@@ -23,7 +23,25 @@ MonoBehaviour:
     State: {fileID: 11400000, guid: ec54e462080fce5448fed716aa7f287f, type: 2}
   - Position: {x: 860, y: 330}
     State: {fileID: 11400000, guid: 0a7108d9d41668648a5ed6f17cda9d7e, type: 2}
-  - Position: {x: 520, y: 520}
-    State: {fileID: 11400000, guid: 94aa9052ae6dee2488fbe3ac33c300e8, type: 2}
+  - Position: {x: 160, y: -180}
+    State: {fileID: 11400000, guid: c31c40382af2aea48bb99df39ca1330d, type: 2}
+  - Position: {x: 520, y: -180}
+    State: {fileID: 11400000, guid: b501f515a4bdd0f43aae8f75b345d1f8, type: 2}
+  - Position: {x: 860, y: -180}
+    State: {fileID: 11400000, guid: 2125528491b751541accea1b52275751, type: 2}
+  - Position: {x: 1200, y: -180}
+    State: {fileID: 11400000, guid: 76bf9dc91015cbb4382712bb17b8e560, type: 2}
+  - Position: {x: 1200, y: -420}
+    State: {fileID: 11400000, guid: df97e9e02e16aac4b88dd6f6b6bd10c8, type: 2}
+  - Position: {x: 520, y: -420}
+    State: {fileID: 11400000, guid: 0693328ba8804e14992a9a7e61d6f89e, type: 2}
+  - Position: {x: 160, y: -420}
+    State: {fileID: 11400000, guid: d83d2c3b3c44b2d4486bc8d6baced3ae, type: 2}
+  - Position: {x: 1200, y: -650}
+    State: {fileID: 11400000, guid: 3e10c7a98288b6b47bb1295362b00954, type: 2}
+  - Position: {x: 860, y: -650}
+    State: {fileID: 11400000, guid: ab5b6c186f3d6ab4fa0e989888b883a8, type: 2}
   - Position: {x: 160, y: 520}
     State: {fileID: 11400000, guid: a81d40108fac4b24fb115d30da77a001, type: 2}
+  - Position: {x: 520, y: 520}
+    State: {fileID: 11400000, guid: 94aa9052ae6dee2488fbe3ac33c300e8, type: 2}

@@ -11,17 +11,39 @@ namespace StateMachine.Behaviours
         public override void Enter(StateMachineContext context)
         {
             context?.GetService<NpcItemInterest>()?.SetState("HitReaction");
-            context?.GetService<NpcNavMeshController>()?.Stop();
+            var nav = context?.GetService<NpcNavMeshController>();
+            nav?.ResetSpeed();
+            nav?.Stop();
+            FaceThreat(context);
         }
 
         public override void Logic(StateMachineContext context)
         {
             context?.GetService<NpcNavMeshController>()?.Stop();
+            FaceThreat(context);
         }
 
         public override void Exit(StateMachineContext context)
         {
             context?.GetService<CharacterActionState>()?.SetActionBlocked(false);
+        }
+
+        private static void FaceThreat(StateMachineContext context)
+        {
+            var combat = context?.GetService<NpcCombatService>();
+            if (combat == null)
+            {
+                return;
+            }
+
+            if (combat.HasCombatTarget)
+            {
+                combat.FaceTarget();
+            }
+            else
+            {
+                combat.FaceLastKnownPosition();
+            }
         }
     }
 }

@@ -22,10 +22,13 @@ MonoBehaviour:
     m_WaitForCompletion: 0
     m_LocalVariables: []
   Behaviours:
+  - {fileID: 11400000, guid: 5d6300b9173c70742b3bb31188f86647, type: 2}
   - {fileID: 11400000, guid: 42e720dde165bd44087470c3387e05a1, type: 2}
   Transitions:
   - {fileID: 11400000, guid: d80909d90496c7d409b9353319b0c1a3, type: 2}
   - {fileID: 11400000, guid: a81d40108fac4b24fb115d30da77a005, type: 2}
+  - {fileID: 11400000, guid: 77bc8525ea6988f488de87ec95781f20, type: 2}
+  - {fileID: 11400000, guid: 1a5f0c8026262994883a05defce992c9, type: 2}
   - {fileID: 11400000, guid: 62c09d5f4d6c72244a708f6acb4545a3, type: 2}
   references:
     version: 2

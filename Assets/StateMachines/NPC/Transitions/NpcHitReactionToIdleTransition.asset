@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StateMachine.Graph.Model.Transition
   Type: 1
   <Conditions>k__BackingField:
-  - {fileID: 11400000, guid: a81d40108fac4b24fb115d30da77a004, type: 2}
+  - {fileID: 11400000, guid: 4806533d9dd26bb4a87a7a4fd670d17a, type: 2}
   <ActionOnTransitions>k__BackingField: []
   TargetState: {fileID: 11400000, guid: c85cb7d2e06c4c04eaf222688dcf9148, type: 2}

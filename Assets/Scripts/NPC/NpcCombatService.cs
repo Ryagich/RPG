@@ -1,0 +1,1213 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Combat;
+using Container;
+using Factions;
+using Inventory.Inventories;
+using Inventory.Item;
+using MessagePipe;
+using Messages;
+using Stats;
+using TargetLock;
+using UniRx;
+using UnityEngine;
+using UnityEngine.AI;
+using VContainer.Unity;
+
+namespace NPC
+{
+    public sealed class NpcCombatService : IStartable, ITickable, IDisposable
+    {
+        private static readonly List<NpcCombatService> ActiveServices = new();
+
+        private readonly Transform ownerTransform;
+        private readonly NpcVision vision;
+        private readonly NpcCombatConfig combatConfig;
+        private readonly FactionRelationsConfig factionRelationsConfig;
+        private readonly PlayerInventory inventory;
+        private readonly StatsController statsController;
+        private readonly CharacterDamageReceiver ownerDamageReceiver;
+        private readonly NpcWeaponInHandController weaponController;
+        private readonly ICharacterHitReactionController hitReactionController;
+        private readonly ISubscriber<CharacterDamagedMessage> damagedSubscriber;
+        private readonly CompositeDisposable disposables = new();
+        private readonly HashSet<CharacterDamageReceiver> personalEnemies = new();
+
+        private NpcLifetimeScope ownerScope;
+        private float nextScanTime;
+        private float aggressionNotificationTimer;
+        private TargetLockTarget notificationTarget;
+        private bool hasPendingAggressionNotification;
+
+        public NpcCombatService(
+            Transform ownerTransform,
+            NpcVision vision,
+            NpcCombatConfig combatConfig,
+            FactionRelationsConfig factionRelationsConfig,
+            PlayerInventory inventory,
+            StatsController statsController,
+            CharacterDamageReceiver ownerDamageReceiver,
+            NpcWeaponInHandController weaponController,
+            ICharacterHitReactionController hitReactionController,
+            ISubscriber<CharacterDamagedMessage> damagedSubscriber)
+        {
+            this.ownerTransform = ownerTransform;
+            this.vision = vision;
+            this.combatConfig = combatConfig;
+            this.factionRelationsConfig = factionRelationsConfig;
+            this.inventory = inventory;
+            this.statsController = statsController;
+            this.ownerDamageReceiver = ownerDamageReceiver;
+            this.weaponController = weaponController;
+            this.hitReactionController = hitReactionController;
+            this.damagedSubscriber = damagedSubscriber;
+        }
+
+        public TargetLockTarget CurrentTarget { get; private set; }
+        public Vector3 LastKnownTargetPosition { get; private set; }
+        public Vector3 FleeDestination { get; private set; }
+        public Vector3 CombatMoveDestination { get; private set; }
+        public bool HasCombatTarget => CurrentTarget != null && CurrentTarget.IsTargetable && IsTargetAlive(CurrentTarget);
+        public bool HasLastKnownTargetPosition { get; private set; }
+        public bool HasFleeDestination { get; private set; }
+        public bool HasCombatMoveDestination { get; private set; }
+        public bool ShouldSearchLastKnownTarget => !HasCombatTarget && HasLastKnownTargetPosition;
+        public bool IsCurrentTargetDown => CurrentTarget != null && (!CurrentTarget.IsTargetable || !IsTargetAlive(CurrentTarget));
+        public bool IsTargetVisible => HasCombatTarget && vision != null && vision.IsInView(CurrentTarget.AimPosition);
+        public bool IsTargetInAttackView => HasCombatTarget && vision != null && vision.IsInAttackView(CurrentTarget.AimPosition);
+        public bool HasWeaponReady => weaponController != null && weaponController.HasWeaponInWeaponSlots;
+        public bool HasAnyWeaponAvailable => HasWeaponReady
+                                             || inventory?.Items.Any(item => item?.ItemStack?.ItemConfig?.ItemType == ItemType.Weapon) == true;
+        public bool HasThreat => HasCombatTarget || HasLastKnownTargetPosition;
+        public bool ShouldFlee => HasThreat && !HasAnyWeaponAvailable;
+
+        public void Start()
+        {
+            ownerScope = ownerTransform != null ? ownerTransform.GetComponent<NpcLifetimeScope>() : null;
+            if (!ActiveServices.Contains(this))
+            {
+                ActiveServices.Add(this);
+            }
+
+            damagedSubscriber.Subscribe(OnCharacterDamaged).AddTo(disposables);
+        }
+
+        public void Tick()
+        {
+            TickAggressionNotification();
+        }
+
+        public void Dispose()
+        {
+            ActiveServices.Remove(this);
+            disposables.Dispose();
+        }
+
+        public bool ScanForEnemy(bool force = false)
+        {
+            if (!force && Time.time < nextScanTime)
+            {
+                return HasCombatTarget;
+            }
+
+            nextScanTime = Time.time + Mathf.Max(0.05f, combatConfig != null ? combatConfig.EnemyScanInterval : 0.25f);
+            var bestTarget = FindBestVisibleEnemy();
+            if (bestTarget == null)
+            {
+                return HasCombatTarget;
+            }
+
+            SetTarget(bestTarget);
+            return true;
+        }
+
+        public void ClearTarget()
+        {
+            CurrentTarget = null;
+            HasLastKnownTargetPosition = false;
+            LastKnownTargetPosition = default;
+            ClearFleeDestination();
+            ClearAggressionNotification();
+        }
+
+        public void ClearFleeDestination()
+        {
+            HasFleeDestination = false;
+        }
+
+        public void ClearCombatMoveDestination()
+        {
+            HasCombatMoveDestination = false;
+        }
+
+        public bool TryPrepareWeapon()
+        {
+            if (weaponController == null)
+            {
+                return false;
+            }
+
+            if (!weaponController.HasWeaponInWeaponSlots)
+            {
+                inventory?.TryMoveFirstGridItemToEmptySlot(ItemType.Weapon);
+            }
+
+            return weaponController.RequestDrawWeapon();
+        }
+
+        public bool TrySelectFleeDestination()
+        {
+            if (ownerTransform == null || !TryGetThreatPosition(out var threatPosition))
+            {
+                return false;
+            }
+
+            var awayDirection = ownerTransform.position - threatPosition;
+            awayDirection.y = 0f;
+            if (awayDirection.sqrMagnitude <= 0.0001f)
+            {
+                awayDirection = -ownerTransform.forward;
+                awayDirection.y = 0f;
+            }
+
+            awayDirection.Normalize();
+            var minDistance = combatConfig != null ? combatConfig.FleeMinDistance : 6f;
+            var maxDistance = Mathf.Max(minDistance, combatConfig != null ? combatConfig.FleeMaxDistance : 10f);
+            var angleJitter = combatConfig != null ? combatConfig.FleeAngleJitter : 25f;
+            var attempts = Mathf.Max(1, combatConfig != null ? combatConfig.FleeSampleAttempts : 8);
+            var sampleRadius = combatConfig != null ? combatConfig.FleeNavMeshSampleRadius : 3f;
+            var currentThreatDistance = PlanarDistance(ownerTransform.position, threatPosition);
+            var primaryEscapeBlocked = IsPrimaryEscapeBlocked(awayDirection, minDistance, sampleRadius);
+            var bestScore = float.NegativeInfinity;
+            var bestPosition = Vector3.zero;
+            var hasBestPosition = false;
+            var angleStages = new[]
+            {
+                angleJitter,
+                Mathf.Max(angleJitter, 60f),
+                Mathf.Max(angleJitter, 120f),
+                180f
+            };
+
+            foreach (var angleLimit in angleStages)
+            {
+                TryEvaluateFleeDirection(
+                    awayDirection,
+                    0f,
+                    minDistance,
+                    maxDistance,
+                    sampleRadius,
+                    threatPosition,
+                    currentThreatDistance,
+                    primaryEscapeBlocked,
+                    ref bestScore,
+                    ref bestPosition,
+                    ref hasBestPosition);
+
+                TryEvaluateFleeDirection(
+                    awayDirection,
+                    angleLimit * 0.5f,
+                    minDistance,
+                    maxDistance,
+                    sampleRadius,
+                    threatPosition,
+                    currentThreatDistance,
+                    primaryEscapeBlocked,
+                    ref bestScore,
+                    ref bestPosition,
+                    ref hasBestPosition);
+
+                TryEvaluateFleeDirection(
+                    awayDirection,
+                    -angleLimit * 0.5f,
+                    minDistance,
+                    maxDistance,
+                    sampleRadius,
+                    threatPosition,
+                    currentThreatDistance,
+                    primaryEscapeBlocked,
+                    ref bestScore,
+                    ref bestPosition,
+                    ref hasBestPosition);
+
+                TryEvaluateFleeDirection(
+                    awayDirection,
+                    angleLimit,
+                    minDistance,
+                    maxDistance,
+                    sampleRadius,
+                    threatPosition,
+                    currentThreatDistance,
+                    primaryEscapeBlocked,
+                    ref bestScore,
+                    ref bestPosition,
+                    ref hasBestPosition);
+
+                TryEvaluateFleeDirection(
+                    awayDirection,
+                    -angleLimit,
+                    minDistance,
+                    maxDistance,
+                    sampleRadius,
+                    threatPosition,
+                    currentThreatDistance,
+                    primaryEscapeBlocked,
+                    ref bestScore,
+                    ref bestPosition,
+                    ref hasBestPosition);
+
+                for (var attempt = 0; attempt < attempts; attempt++)
+                {
+                    var angle = UnityEngine.Random.Range(-angleLimit, angleLimit);
+                    var distance = UnityEngine.Random.Range(minDistance, maxDistance);
+                    var direction = Quaternion.Euler(0f, angle, 0f) * awayDirection;
+                    var candidate = ownerTransform.position + direction * distance;
+                    TryEvaluateFleeCandidate(
+                        candidate,
+                        sampleRadius,
+                        threatPosition,
+                        currentThreatDistance,
+                        awayDirection,
+                        primaryEscapeBlocked,
+                        ref bestScore,
+                        ref bestPosition,
+                        ref hasBestPosition);
+                }
+            }
+
+            if (!hasBestPosition)
+            {
+                return false;
+            }
+
+            FleeDestination = bestPosition;
+            HasFleeDestination = true;
+            return true;
+        }
+
+        private void TryEvaluateFleeDirection(
+            Vector3 awayDirection,
+            float angle,
+            float minDistance,
+            float maxDistance,
+            float sampleRadius,
+            Vector3 threatPosition,
+            float currentThreatDistance,
+            bool primaryEscapeBlocked,
+            ref float bestScore,
+            ref Vector3 bestPosition,
+            ref bool hasBestPosition)
+        {
+            var direction = Quaternion.Euler(0f, angle, 0f) * awayDirection;
+            var distances = new[]
+            {
+                maxDistance,
+                (minDistance + maxDistance) * 0.5f,
+                minDistance
+            };
+
+            foreach (var distance in distances)
+            {
+                var candidate = ownerTransform.position + direction * distance;
+                TryEvaluateFleeCandidate(
+                    candidate,
+                    sampleRadius,
+                    threatPosition,
+                    currentThreatDistance,
+                    awayDirection,
+                    primaryEscapeBlocked,
+                    ref bestScore,
+                    ref bestPosition,
+                    ref hasBestPosition);
+            }
+        }
+
+        private void TryEvaluateFleeCandidate(
+            Vector3 candidate,
+            float sampleRadius,
+            Vector3 threatPosition,
+            float currentThreatDistance,
+            Vector3 awayDirection,
+            bool primaryEscapeBlocked,
+            ref float bestScore,
+            ref Vector3 bestPosition,
+            ref bool hasBestPosition)
+        {
+            if (!TrySampleReachablePosition(candidate, sampleRadius, out var reachablePosition, out var pathLength, out var firstPathDirection))
+            {
+                return;
+            }
+
+            var displacement = reachablePosition - ownerTransform.position;
+            displacement.y = 0f;
+            if (displacement.sqrMagnitude <= 0.25f)
+            {
+                return;
+            }
+
+            var destinationThreatDistance = PlanarDistance(reachablePosition, threatPosition);
+            var distanceGain = destinationThreatDistance - currentThreatDistance;
+            var directness = displacement.sqrMagnitude > 0.0001f
+                ? Vector3.Dot(displacement.normalized, awayDirection)
+                : 0f;
+            var firstMoveAway = firstPathDirection.sqrMagnitude > 0.0001f
+                ? Vector3.Dot(firstPathDirection.normalized, awayDirection)
+                : directness;
+            var opennessProbeDistance = combatConfig != null ? combatConfig.FleeOpennessProbeDistance : 3f;
+            var opennessWeight = combatConfig != null ? combatConfig.FleeOpennessWeight : 20f;
+            if (primaryEscapeBlocked)
+            {
+                opennessWeight *= 1.5f;
+            }
+
+            var distanceGainWeight = primaryEscapeBlocked ? 6f : 8f;
+            var openness = CalculateFleeOpenness(reachablePosition, opennessProbeDistance);
+            var safetyPenalty = 0f;
+            if (distanceGain < 0f)
+            {
+                safetyPenalty += Mathf.Abs(distanceGain) * 20f;
+            }
+
+            if (directness < 0f)
+            {
+                safetyPenalty += Mathf.Abs(directness) * 12f;
+            }
+
+            if (firstMoveAway < 0f)
+            {
+                safetyPenalty += Mathf.Abs(firstMoveAway) * 30f;
+            }
+
+            var score = distanceGain * distanceGainWeight
+                        + Mathf.Max(0f, directness) * 2f
+                        + Mathf.Max(0f, firstMoveAway) * 4f
+                        + displacement.magnitude * 0.1f
+                        + openness * opennessWeight
+                        - pathLength * 0.05f
+                        - safetyPenalty;
+
+            if (score <= bestScore)
+            {
+                return;
+            }
+
+            bestScore = score;
+            bestPosition = reachablePosition;
+            hasBestPosition = true;
+        }
+
+        private bool TrySampleReachablePosition(
+            Vector3 candidate,
+            float sampleRadius,
+            out Vector3 position,
+            out float pathLength,
+            out Vector3 firstPathDirection)
+        {
+            position = default;
+            pathLength = 0f;
+            firstPathDirection = default;
+            if (!NavMesh.SamplePosition(candidate, out var destinationHit, sampleRadius, NavMesh.AllAreas))
+            {
+                return false;
+            }
+
+            if (!NavMesh.SamplePosition(ownerTransform.position, out var startHit, sampleRadius, NavMesh.AllAreas))
+            {
+                return false;
+            }
+
+            var path = new NavMeshPath();
+            if (!NavMesh.CalculatePath(startHit.position, destinationHit.position, NavMesh.AllAreas, path)
+             || path.status != NavMeshPathStatus.PathComplete
+             || path.corners == null
+             || path.corners.Length == 0)
+            {
+                return false;
+            }
+
+            for (var index = 1; index < path.corners.Length; index++)
+            {
+                var segment = path.corners[index] - path.corners[index - 1];
+                segment.y = 0f;
+                pathLength += segment.magnitude;
+            }
+
+            if (path.corners.Length > 1)
+            {
+                firstPathDirection = path.corners[1] - path.corners[0];
+                firstPathDirection.y = 0f;
+            }
+
+            position = destinationHit.position;
+            return true;
+        }
+
+        private bool IsPrimaryEscapeBlocked(Vector3 awayDirection, float distance, float sampleRadius)
+        {
+            if (!NavMesh.SamplePosition(ownerTransform.position, out var startHit, sampleRadius, NavMesh.AllAreas))
+            {
+                return false;
+            }
+
+            var target = startHit.position + awayDirection * distance;
+            return NavMesh.Raycast(startHit.position, target, out _, NavMesh.AllAreas);
+        }
+
+        private static float CalculateFleeOpenness(Vector3 position, float probeDistance)
+        {
+            probeDistance = Mathf.Max(0.1f, probeDistance);
+            const int probeCount = 8;
+            var openness = 0f;
+            for (var index = 0; index < probeCount; index++)
+            {
+                var angle = 360f / probeCount * index;
+                var direction = Quaternion.Euler(0f, angle, 0f) * Vector3.forward;
+                var target = position + direction * probeDistance;
+                if (!NavMesh.Raycast(position, target, out var hit, NavMesh.AllAreas))
+                {
+                    openness += 1f;
+                    continue;
+                }
+
+                openness += Mathf.Clamp01(hit.distance / probeDistance);
+            }
+
+            return openness / probeCount;
+        }
+
+        private static float PlanarDistance(Vector3 a, Vector3 b)
+        {
+            a.y = 0f;
+            b.y = 0f;
+            return Vector3.Distance(a, b);
+        }
+
+        public bool TrySelectCombatManeuverDestination(NpcCombatManeuverKind kind)
+        {
+            if (ownerTransform == null || !HasCombatTarget)
+            {
+                return false;
+            }
+
+            var toTarget = CurrentTarget.transform.position - ownerTransform.position;
+            toTarget.y = 0f;
+            if (toTarget.sqrMagnitude <= 0.0001f)
+            {
+                return false;
+            }
+
+            toTarget.Normalize();
+            var sampleRadius = combatConfig != null ? combatConfig.CombatMoveNavMeshSampleRadius : 2f;
+            var destination = kind switch
+            {
+                NpcCombatManeuverKind.Strafe => BuildStrafeDestination(toTarget),
+                NpcCombatManeuverKind.Backstep => BuildBackstepDestination(toTarget),
+                NpcCombatManeuverKind.Circle => BuildCircleDestination(),
+                NpcCombatManeuverKind.QueueCircle => BuildQueueCircleDestination(),
+                _ => ownerTransform.position
+            };
+
+            if (!NavMesh.SamplePosition(destination, out var hit, sampleRadius, NavMesh.AllAreas))
+            {
+                return false;
+            }
+
+            CombatMoveDestination = hit.position;
+            HasCombatMoveDestination = true;
+            return true;
+        }
+
+        public NpcCombatDecision SelectPostAttackDecision()
+        {
+            if (!HasCombatTarget || !IsTargetVisible)
+            {
+                return NpcCombatDecision.Approach;
+            }
+
+            if (!IsTargetInAttackView)
+            {
+                return NpcCombatDecision.Approach;
+            }
+
+            var attackWeight = Mathf.Max(0f, combatConfig != null ? combatConfig.PostAttackImmediateAttackWeight : 0.45f);
+            var strafeWeight = Mathf.Max(0f, combatConfig != null ? combatConfig.PostAttackStrafeWeight : 0.25f);
+            var backstepWeight = Mathf.Max(0f, combatConfig != null ? combatConfig.PostAttackBackstepWeight : 0.2f);
+            var circleWeight = Mathf.Max(0f, combatConfig != null ? combatConfig.PostAttackCircleWeight : 0.1f);
+            var totalWeight = attackWeight + strafeWeight + backstepWeight + circleWeight;
+            if (totalWeight <= 0f)
+            {
+                return NpcCombatDecision.Attack;
+            }
+
+            var roll = UnityEngine.Random.Range(0f, totalWeight);
+            if (roll < attackWeight)
+            {
+                return NpcCombatDecision.Attack;
+            }
+
+            roll -= attackWeight;
+            if (roll < strafeWeight && TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Strafe))
+            {
+                return NpcCombatDecision.Maneuver;
+            }
+
+            roll -= strafeWeight;
+            if (roll < backstepWeight && TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Backstep))
+            {
+                return NpcCombatDecision.Maneuver;
+            }
+
+            return TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Circle)
+                ? NpcCombatDecision.Circle
+                : NpcCombatDecision.Attack;
+        }
+
+        public void ReceiveAggressionNotification(TargetLockTarget target, bool sourceIsFriendly)
+        {
+            if (target == null || !target.IsTargetable || !IsTargetAlive(target) || target.transform == ownerTransform)
+            {
+                return;
+            }
+
+            if (!sourceIsFriendly && !IsEnemy(target))
+            {
+                return;
+            }
+
+            if (sourceIsFriendly)
+            {
+                RememberPersonalEnemy(target);
+            }
+
+            SetTarget(target);
+        }
+
+        public bool ShouldStartInitialCircle()
+        {
+            var chance = combatConfig != null ? combatConfig.InitialCircleChance : 0.25f;
+            return HasCombatTarget
+                   && IsTargetVisible
+                   && UnityEngine.Random.value < Mathf.Clamp01(chance)
+                   && TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Circle);
+        }
+
+        public bool ShouldQueueForCombatSlot()
+        {
+            return HasCombatTarget && GetDirectAttackRank() >= GetMaxDirectAttackers();
+        }
+
+        public bool HasDirectCombatSlot()
+        {
+            return HasCombatTarget && GetDirectAttackRank() < GetMaxDirectAttackers();
+        }
+
+        public bool TrySelectQueueCircleDestination()
+        {
+            return TrySelectCombatManeuverDestination(NpcCombatManeuverKind.QueueCircle);
+        }
+
+        public bool TryGetApproachDestination(out Vector3 destination, out float stoppingDistance)
+        {
+            destination = default;
+            stoppingDistance = combatConfig != null ? combatConfig.ApproachStoppingDistance : 1.6f;
+            if (!HasCombatTarget)
+            {
+                return false;
+            }
+
+            var rank = GetDirectAttackRank();
+            if (rank < 0 || rank >= GetMaxDirectAttackers())
+            {
+                destination = CurrentTarget.transform.position;
+                return true;
+            }
+
+            var radius = combatConfig != null ? combatConfig.DirectAttackSlotRadius : 1.65f;
+            var slotCount = Mathf.Max(1, GetMaxDirectAttackers());
+            var angle = 360f / slotCount * rank;
+            var offset = Quaternion.Euler(0f, angle, 0f) * Vector3.forward * radius;
+            destination = CurrentTarget.transform.position + offset;
+            stoppingDistance = combatConfig != null ? combatConfig.CombatMoveReachedDistance : 0.45f;
+            return true;
+        }
+
+        public bool TryResolveCurrentTargetDown()
+        {
+            if (!IsCurrentTargetDown)
+            {
+                return HasCombatTarget;
+            }
+
+            ClearAggressionNotification();
+            var oldTarget = CurrentTarget;
+            CurrentTarget = null;
+            if (oldTarget != null)
+            {
+                LastKnownTargetPosition = oldTarget.transform.position;
+                HasLastKnownTargetPosition = true;
+            }
+
+            return TryAdoptNearbyCombatTarget();
+        }
+
+        public bool TryAdoptNearbyCombatTarget()
+        {
+            if (ownerTransform == null)
+            {
+                return false;
+            }
+
+            var radius = combatConfig != null ? combatConfig.AggressionNotificationRadius : 12f;
+            var radiusSqr = radius * radius;
+            TargetLockTarget bestTarget = null;
+            var bestDistanceSqr = float.PositiveInfinity;
+
+            foreach (var other in ActiveServices.ToArray())
+            {
+                if (other == null || other == this || other.ownerTransform == null || !other.HasCombatTarget)
+                {
+                    continue;
+                }
+
+                if ((other.ownerTransform.position - ownerTransform.position).sqrMagnitude > radiusSqr)
+                {
+                    continue;
+                }
+
+                var relation = GetRelationTo(other);
+                if (relation == NpcFactionRelation.Hostile)
+                {
+                    continue;
+                }
+
+                if (relation == NpcFactionRelation.Neutral && !IsEnemy(other.CurrentTarget))
+                {
+                    continue;
+                }
+
+                var distanceSqr = (other.CurrentTarget.transform.position - ownerTransform.position).sqrMagnitude;
+                if (distanceSqr >= bestDistanceSqr)
+                {
+                    continue;
+                }
+
+                bestDistanceSqr = distanceSqr;
+                bestTarget = other.CurrentTarget;
+            }
+
+            if (bestTarget == null)
+            {
+                return false;
+            }
+
+            RememberPersonalEnemy(bestTarget);
+            SetTarget(bestTarget);
+            return true;
+        }
+
+        public void SheatheWeapon()
+        {
+            weaponController?.RequestSheatheWeapon();
+        }
+
+        public bool RequestAttack()
+        {
+            return HasClearAttackLane() && weaponController != null && weaponController.RequestAttack();
+        }
+
+        public bool HasClearAttackLane()
+        {
+            if (combatConfig == null || !combatConfig.PreventFriendlyFire || ownerTransform == null || !HasCombatTarget)
+            {
+                return true;
+            }
+
+            var start = ownerTransform.position;
+            var end = CurrentTarget.transform.position;
+            start.y = 0f;
+            end.y = 0f;
+            var toTarget = end - start;
+            var targetDistance = toTarget.magnitude;
+            if (targetDistance <= 0.01f)
+            {
+                return true;
+            }
+
+            var direction = toTarget / targetDistance;
+            var laneRadius = combatConfig.FriendlyFireLaneRadius;
+            var laneRadiusSqr = laneRadius * laneRadius;
+
+            foreach (var other in ActiveServices.ToArray())
+            {
+                if (other == null || other == this || other.ownerTransform == null)
+                {
+                    continue;
+                }
+
+                if (GetRelationTo(other) == NpcFactionRelation.Hostile)
+                {
+                    continue;
+                }
+
+                var otherPosition = other.ownerTransform.position;
+                otherPosition.y = 0f;
+                var toOther = otherPosition - start;
+                var projectedDistance = Vector3.Dot(toOther, direction);
+                if (projectedDistance <= 0f || projectedDistance >= targetDistance)
+                {
+                    continue;
+                }
+
+                var closestPoint = start + direction * projectedDistance;
+                if ((otherPosition - closestPoint).sqrMagnitude <= laneRadiusSqr)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public void RefreshTargetVisibility()
+        {
+            if (!HasCombatTarget)
+            {
+                return;
+            }
+
+            if (IsTargetVisible)
+            {
+                LastKnownTargetPosition = CurrentTarget.transform.position;
+                HasLastKnownTargetPosition = true;
+            }
+        }
+
+        public void FaceTarget()
+        {
+            if (!HasCombatTarget || ownerTransform == null)
+            {
+                return;
+            }
+
+            FacePosition(CurrentTarget.transform.position);
+        }
+
+        public void FaceLastKnownPosition()
+        {
+            if (!HasLastKnownTargetPosition)
+            {
+                return;
+            }
+
+            FacePosition(LastKnownTargetPosition);
+        }
+
+        private bool TryGetThreatPosition(out Vector3 threatPosition)
+        {
+            if (HasCombatTarget)
+            {
+                threatPosition = CurrentTarget.transform.position;
+                LastKnownTargetPosition = threatPosition;
+                HasLastKnownTargetPosition = true;
+                return true;
+            }
+
+            if (HasLastKnownTargetPosition)
+            {
+                threatPosition = LastKnownTargetPosition;
+                return true;
+            }
+
+            threatPosition = default;
+            return false;
+        }
+
+        private Vector3 BuildStrafeDestination(Vector3 toTarget)
+        {
+            var side = UnityEngine.Random.value < 0.5f ? -1f : 1f;
+            var distance = RandomRange(
+                combatConfig != null ? combatConfig.StrafeMinDistance : 1.2f,
+                combatConfig != null ? combatConfig.StrafeMaxDistance : 2.2f);
+            var sideways = Vector3.Cross(Vector3.up, toTarget).normalized * side;
+            return ownerTransform.position + sideways * distance;
+        }
+
+        private Vector3 BuildBackstepDestination(Vector3 toTarget)
+        {
+            var distance = RandomRange(
+                combatConfig != null ? combatConfig.BackstepMinDistance : 1.2f,
+                combatConfig != null ? combatConfig.BackstepMaxDistance : 2.4f);
+            return ownerTransform.position - toTarget * distance;
+        }
+
+        private Vector3 BuildCircleDestination()
+        {
+            var targetPosition = CurrentTarget.transform.position;
+            var fromTarget = ownerTransform.position - targetPosition;
+            fromTarget.y = 0f;
+            if (fromTarget.sqrMagnitude <= 0.0001f)
+            {
+                fromTarget = -ownerTransform.forward;
+                fromTarget.y = 0f;
+            }
+
+            fromTarget.Normalize();
+            var radius = RandomRange(
+                combatConfig != null ? combatConfig.CircleMinRadius : 2.2f,
+                combatConfig != null ? combatConfig.CircleMaxRadius : 3.6f);
+            var minAngle = combatConfig != null ? combatConfig.CircleMinAngle : 35f;
+            var maxAngle = Mathf.Max(minAngle, combatConfig != null ? combatConfig.CircleMaxAngle : 75f);
+            var angle = UnityEngine.Random.Range(minAngle, maxAngle);
+            if (UnityEngine.Random.value < 0.5f)
+            {
+                angle = -angle;
+            }
+
+            var direction = Quaternion.Euler(0f, angle, 0f) * fromTarget;
+            return targetPosition + direction.normalized * radius;
+        }
+
+        private Vector3 BuildQueueCircleDestination()
+        {
+            var targetPosition = CurrentTarget.transform.position;
+            var fromTarget = ownerTransform.position - targetPosition;
+            fromTarget.y = 0f;
+            if (fromTarget.sqrMagnitude <= 0.0001f)
+            {
+                fromTarget = -ownerTransform.forward;
+                fromTarget.y = 0f;
+            }
+
+            fromTarget.Normalize();
+            var radius = RandomRange(
+                combatConfig != null ? combatConfig.QueueCircleMinRadius : 3.8f,
+                combatConfig != null ? combatConfig.QueueCircleMaxRadius : 5.4f);
+            var minAngle = combatConfig != null ? combatConfig.QueueCircleMinAngle : 25f;
+            var maxAngle = Mathf.Max(minAngle, combatConfig != null ? combatConfig.QueueCircleMaxAngle : 65f);
+            var angle = UnityEngine.Random.Range(minAngle, maxAngle);
+            if (UnityEngine.Random.value < 0.5f)
+            {
+                angle = -angle;
+            }
+
+            var direction = Quaternion.Euler(0f, angle, 0f) * fromTarget;
+            return targetPosition + direction.normalized * radius;
+        }
+
+        private int GetDirectAttackRank()
+        {
+            if (!HasCombatTarget)
+            {
+                return int.MaxValue;
+            }
+
+            var participants = GetTargetParticipants(CurrentTarget);
+            for (var index = 0; index < participants.Count; index++)
+            {
+                if (participants[index] == this)
+                {
+                    return index;
+                }
+            }
+
+            return int.MaxValue;
+        }
+
+        private List<NpcCombatService> GetTargetParticipants(TargetLockTarget target)
+        {
+            return ActiveServices
+                .Where(service => service != null
+                               && service.ownerTransform != null
+                               && service.HasCombatTarget
+                               && service.CurrentTarget == target
+                               && service.HasAnyWeaponAvailable)
+                .OrderBy(service => (service.ownerTransform.position - target.transform.position).sqrMagnitude)
+                .ThenBy(service => service.ownerTransform.GetInstanceID())
+                .ToList();
+        }
+
+        private int GetMaxDirectAttackers()
+        {
+            return Mathf.Max(1, combatConfig != null ? combatConfig.MaxDirectAttackersPerTarget : 4);
+        }
+
+        private static float RandomRange(float min, float max)
+        {
+            return UnityEngine.Random.Range(Mathf.Min(min, max), Mathf.Max(min, max));
+        }
+
+        private TargetLockTarget FindBestVisibleEnemy()
+        {
+            if (ownerTransform == null || vision == null)
+            {
+                return null;
+            }
+
+            var targets = UnityEngine.Object.FindObjectsByType<TargetLockTarget>(
+                FindObjectsInactive.Exclude,
+                FindObjectsSortMode.None);
+            TargetLockTarget bestTarget = null;
+            var bestDistanceSqr = float.PositiveInfinity;
+            var maxDistance = combatConfig != null ? combatConfig.TargetSearchRadius : 18f;
+            var maxDistanceSqr = maxDistance * maxDistance;
+
+            foreach (var target in targets)
+            {
+                if (target == null || !target.IsTargetable || !IsTargetAlive(target) || target.transform == ownerTransform)
+                {
+                    continue;
+                }
+
+                var targetScope = target.GetComponentInParent<NpcLifetimeScope>();
+                if (targetScope == ownerScope)
+                {
+                    continue;
+                }
+
+                var distanceSqr = (target.transform.position - ownerTransform.position).sqrMagnitude;
+                if (distanceSqr > maxDistanceSqr || distanceSqr >= bestDistanceSqr)
+                {
+                    continue;
+                }
+
+                if (!vision.IsInView(target.AimPosition) || !IsEnemy(target))
+                {
+                    continue;
+                }
+
+                bestDistanceSqr = distanceSqr;
+                bestTarget = target;
+            }
+
+            return bestTarget;
+        }
+
+        private bool IsEnemy(TargetLockTarget target)
+        {
+            if (target == null)
+            {
+                return false;
+            }
+
+            var damageReceiver = target.GetComponentInParent<DamageReceiverHost>()?.Receiver;
+            if (damageReceiver != null && personalEnemies.Contains(damageReceiver))
+            {
+                return true;
+            }
+
+            var targetFaction = target.GetComponentInParent<NpcLifetimeScope>()?.Faction;
+            var ownerFaction = ownerScope != null ? ownerScope.Faction : null;
+            if (target.GetComponentInParent<PlayerLifetimeScope>() != null && targetFaction == null)
+            {
+                return false;
+            }
+
+            if (ownerFaction == null || targetFaction == null)
+            {
+                return combatConfig != null && combatConfig.TreatFactionlessTargetsAsHostile;
+            }
+
+            return factionRelationsConfig != null && factionRelationsConfig.IsHostile(ownerFaction, targetFaction);
+        }
+
+        private void RememberPersonalEnemy(TargetLockTarget target)
+        {
+            var damageReceiver = target != null
+                ? target.GetComponentInParent<DamageReceiverHost>()?.Receiver
+                : null;
+            if (damageReceiver != null)
+            {
+                personalEnemies.Add(damageReceiver);
+            }
+        }
+
+        private static bool IsTargetAlive(TargetLockTarget target)
+        {
+            var receiver = target != null
+                ? target.GetComponentInParent<DamageReceiverHost>()?.Receiver
+                : null;
+            return receiver == null || receiver.IsAlive;
+        }
+
+        private void SetTarget(TargetLockTarget target)
+        {
+            if (target != null && (!target.IsTargetable || !IsTargetAlive(target)))
+            {
+                return;
+            }
+
+            var previousTarget = CurrentTarget;
+            CurrentTarget = target;
+            if (target != null)
+            {
+                LastKnownTargetPosition = target.transform.position;
+                HasLastKnownTargetPosition = true;
+            }
+
+            if (target != null && target != previousTarget)
+            {
+                ScheduleAggressionNotification(target);
+            }
+        }
+
+        private void ScheduleAggressionNotification(TargetLockTarget target)
+        {
+            notificationTarget = target;
+            hasPendingAggressionNotification = true;
+            aggressionNotificationTimer = combatConfig != null ? combatConfig.AggressionNotificationDelay : 1.2f;
+        }
+
+        private void ClearAggressionNotification()
+        {
+            notificationTarget = null;
+            hasPendingAggressionNotification = false;
+            aggressionNotificationTimer = 0f;
+        }
+
+        private void TickAggressionNotification()
+        {
+            if (!hasPendingAggressionNotification)
+            {
+                return;
+            }
+
+            if (statsController?.Hp?.Value?.Value <= 0f || notificationTarget == null || !notificationTarget.IsTargetable)
+            {
+                ClearAggressionNotification();
+                return;
+            }
+
+            if (hitReactionController?.IsReacting == true)
+            {
+                aggressionNotificationTimer = combatConfig != null ? combatConfig.AggressionNotificationDelay : 1.2f;
+                return;
+            }
+
+            aggressionNotificationTimer -= Time.deltaTime;
+            if (aggressionNotificationTimer > 0f)
+            {
+                return;
+            }
+
+            NotifyNearbyNpcsAboutAggression();
+            ClearAggressionNotification();
+        }
+
+        private void NotifyNearbyNpcsAboutAggression()
+        {
+            if (ownerTransform == null || notificationTarget == null)
+            {
+                return;
+            }
+
+            var radius = combatConfig != null ? combatConfig.AggressionNotificationRadius : 12f;
+            var radiusSqr = radius * radius;
+            foreach (var other in ActiveServices.ToArray())
+            {
+                if (other == null || other == this || other.ownerTransform == null)
+                {
+                    continue;
+                }
+
+                if ((other.ownerTransform.position - ownerTransform.position).sqrMagnitude > radiusSqr)
+                {
+                    continue;
+                }
+
+                var relation = GetRelationTo(other);
+                if (relation == NpcFactionRelation.Hostile)
+                {
+                    continue;
+                }
+
+                other.ReceiveAggressionNotification(notificationTarget, relation == NpcFactionRelation.Friendly);
+            }
+        }
+
+        private NpcFactionRelation GetRelationTo(NpcCombatService other)
+        {
+            var ownerFaction = ownerScope != null ? ownerScope.Faction : null;
+            var otherFaction = other.ownerScope != null ? other.ownerScope.Faction : null;
+            if (ownerFaction != null && ownerFaction == otherFaction)
+            {
+                return NpcFactionRelation.Friendly;
+            }
+
+            if (ownerFaction == null || otherFaction == null || factionRelationsConfig == null)
+            {
+                return NpcFactionRelation.Neutral;
+            }
+
+            if (factionRelationsConfig.IsHostile(ownerFaction, otherFaction))
+            {
+                return NpcFactionRelation.Hostile;
+            }
+
+            return factionRelationsConfig.IsFriendly(ownerFaction, otherFaction)
+                ? NpcFactionRelation.Friendly
+                : NpcFactionRelation.Neutral;
+        }
+
+        private void OnCharacterDamaged(CharacterDamagedMessage message)
+        {
+            if (message.CharacterTransform != ownerTransform || message.Attacker == null || message.Attacker == ownerDamageReceiver)
+            {
+                return;
+            }
+
+            personalEnemies.Add(message.Attacker);
+            var attackerTarget = FindTargetByReceiver(message.Attacker);
+            if (attackerTarget != null)
+            {
+                SetTarget(attackerTarget);
+            }
+            else
+            {
+                LastKnownTargetPosition = message.Attacker.OwnerTransform != null
+                    ? message.Attacker.OwnerTransform.position
+                    : message.Point;
+                HasLastKnownTargetPosition = true;
+            }
+        }
+
+        private static TargetLockTarget FindTargetByReceiver(CharacterDamageReceiver receiver)
+        {
+            var targetFromOwner = receiver?.OwnerTransform != null
+                ? receiver.OwnerTransform.GetComponentInParent<TargetLockTarget>()
+                : null;
+            if (targetFromOwner != null)
+            {
+                return targetFromOwner;
+            }
+
+            var hosts = UnityEngine.Object.FindObjectsByType<DamageReceiverHost>(
+                FindObjectsInactive.Exclude,
+                FindObjectsSortMode.None);
+            foreach (var host in hosts)
+            {
+                if (host != null && host.Receiver == receiver)
+                {
+                    return host.GetComponentInParent<TargetLockTarget>();
+                }
+            }
+
+            return null;
+        }
+
+        private void FacePosition(Vector3 position)
+        {
+            var direction = position - ownerTransform.position;
+            direction.y = 0f;
+            if (direction.sqrMagnitude <= 0.0001f)
+            {
+                return;
+            }
+
+            ownerTransform.rotation = Quaternion.RotateTowards(
+                ownerTransform.rotation,
+                Quaternion.LookRotation(direction.normalized, Vector3.up),
+                720f * Time.deltaTime);
+        }
+    }
+}

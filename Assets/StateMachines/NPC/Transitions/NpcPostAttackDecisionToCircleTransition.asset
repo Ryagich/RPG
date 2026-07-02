@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12c47722f9be47fdb6ef15bd167bc2f5, type: 3}
+  m_Name: NpcPostAttackDecisionToCircleTransition
+  m_EditorClassIdentifier: Assembly-CSharp::StateMachine.Graph.Model.Transition
+  Type: 1
+  <Conditions>k__BackingField:
+  - {fileID: 11400000, guid: 42dcac799c361a6499da4e355789fc7d, type: 2}
+  <ActionOnTransitions>k__BackingField: []
+  TargetState: {fileID: 11400000, guid: 0693328ba8804e14992a9a7e61d6f89e, type: 2}

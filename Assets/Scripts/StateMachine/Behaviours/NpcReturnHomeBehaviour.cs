@@ -9,6 +9,7 @@ namespace StateMachine.Behaviours
     {
         public override void Enter(StateMachineContext context)
         {
+            context?.GetService<NpcNavMeshController>()?.SetFacingLocked(false);
             context?.GetService<NpcItemInterest>()?.SetState("ReturningHome");
             MoveHome(context);
         }

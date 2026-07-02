@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f6711126d7ff7843b629afea503c1cd, type: 3}
+  m_Name: NpcCombatConfig
+  m_EditorClassIdentifier: Assembly-CSharp::NPC.NpcCombatConfig
+  <EnemyScanInterval>k__BackingField: 0.25
+  <TreatFactionlessTargetsAsHostile>k__BackingField: 1
+  <ApproachStoppingDistance>k__BackingField: 1.6
+  <LastKnownReachedDistance>k__BackingField: 1.2
+  <LookAtLastKnownDuration>k__BackingField: 2
+  <AttackRequestInterval>k__BackingField: 0.65
+  <TargetSearchRadius>k__BackingField: 18
+  <AttackStateTimeout>k__BackingField: 3
+  <InitialCircleChance>k__BackingField: 0.25
+  <PostAttackImmediateAttackWeight>k__BackingField: 0.45
+  <PostAttackStrafeWeight>k__BackingField: 0.25
+  <PostAttackBackstepWeight>k__BackingField: 0.2
+  <PostAttackCircleWeight>k__BackingField: 0.1
+  <CombatMoveReachedDistance>k__BackingField: 0.45
+  <CombatMoveNavMeshSampleRadius>k__BackingField: 2
+  <StrafeMinDistance>k__BackingField: 1.2
+  <StrafeMaxDistance>k__BackingField: 2.2
+  <BackstepMinDistance>k__BackingField: 1.2
+  <BackstepMaxDistance>k__BackingField: 2.4
+  <CircleMinRadius>k__BackingField: 2.2
+  <CircleMaxRadius>k__BackingField: 3.6
+  <CircleMinAngle>k__BackingField: 35
+  <CircleMaxAngle>k__BackingField: 75
+  <MaxDirectAttackersPerTarget>k__BackingField: 4
+  <DirectAttackSlotRadius>k__BackingField: 1.65
+  <QueueCircleMinRadius>k__BackingField: 3.8
+  <QueueCircleMaxRadius>k__BackingField: 5.4
+  <QueueCircleMinAngle>k__BackingField: 25
+  <QueueCircleMaxAngle>k__BackingField: 65
+  <PreventFriendlyFire>k__BackingField: 1
+  <FriendlyFireLaneRadius>k__BackingField: 0.65
+  <TargetDownWaitDuration>k__BackingField: 2
+  <AggressionNotificationDelay>k__BackingField: 1.2
+  <AggressionNotificationRadius>k__BackingField: 12
+  <FleeSpeedMultiplier>k__BackingField: 1.65
+  <FleeMinDistance>k__BackingField: 6
+  <FleeMaxDistance>k__BackingField: 10
+  <FleeAngleJitter>k__BackingField: 25
+  <FleeSampleAttempts>k__BackingField: 8
+  <FleeNavMeshSampleRadius>k__BackingField: 3
+  <FleeReachedDistance>k__BackingField: 0.75
+  <FleeLookBackDuration>k__BackingField: 1.5
