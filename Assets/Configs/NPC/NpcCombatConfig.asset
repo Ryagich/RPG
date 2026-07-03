@@ -30,6 +30,18 @@ MonoBehaviour:
   <PostAttackStrafeWeight>k__BackingField: 0.25
   <PostAttackBackstepWeight>k__BackingField: 0.2
   <PostAttackCircleWeight>k__BackingField: 0.1
+  <PostAttackWaitWeight>k__BackingField: 0.12
+  <PostAttackKeepDistanceWeight>k__BackingField: 0.18
+  <WaitMinDuration>k__BackingField: 0.35
+  <WaitMaxDuration>k__BackingField: 1.1
+  <KeepDistanceMinDuration>k__BackingField: 1.2
+  <KeepDistanceMaxDuration>k__BackingField: 2.4
+  <KeepDistanceMinRange>k__BackingField: 2.3
+  <KeepDistanceMaxRange>k__BackingField: 3.5
+  <KeepDistanceRepositionInterval>k__BackingField: 0.35
+  <KeepDistanceAttackDelay>k__BackingField: 0.35
+  <KeepDistanceStrafeChance>k__BackingField: 0.65
+  <KeepDistanceRetreatAngle>k__BackingField: 35
   <CombatMoveReachedDistance>k__BackingField: 0.45
   <CombatMoveNavMeshSampleRadius>k__BackingField: 2
   <CombatMoveStuckTimeout>k__BackingField: 0.75

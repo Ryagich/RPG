@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf29600a98724efea7cca5403fff2012, type: 3}
-  m_Name: NpcPostAttackDecisionState
+  m_Name: NpcCombatWaitState
   m_EditorClassIdentifier: Assembly-CSharp::StateMachine.Graph.Model.State
   <Name>k__BackingField:
     m_TableReference:
@@ -22,19 +22,13 @@ MonoBehaviour:
     m_WaitForCompletion: 0
     m_LocalVariables: []
   Behaviours:
-  - {fileID: 11400000, guid: a1f1c4836166c584eae3f60590bab7f4, type: 2}
+  - {fileID: 11400000, guid: 0cd809c992471ce4797cf91f02105f9e, type: 2}
   Transitions:
   - {fileID: 11400000, guid: d80909d90496c7d409b9353319b0c1a3, type: 2}
   - {fileID: 11400000, guid: a81d40108fac4b24fb115d30da77a005, type: 2}
-  - {fileID: 11400000, guid: 276ac46ef2fb943459f446dd0c7ea414, type: 2}
-  - {fileID: 11400000, guid: 976733f7eaf83e34589138b3ad32cd44, type: 2}
-  - {fileID: 11400000, guid: bc8a5a0630f541c459a4f7f4eb238d17, type: 2}
-  - {fileID: 11400000, guid: 752a56e0aaada66478f558a75b8c2e3d, type: 2}
-  - {fileID: 11400000, guid: e15fbd5565bf33b40a08e3b8c88c4871, type: 2}
-  - {fileID: 11400000, guid: 2420ca0d7b233a146afea76df41c6bed, type: 2}
-  - {fileID: 11400000, guid: 07324031d0d59a8498bb94e813b89025, type: 2}
-  - {fileID: 11400000, guid: 419f083890504bc4eb0fd23cd0885282, type: 2}
-  - {fileID: 11400000, guid: 4b5f287541c20c64d8e9cb384810d6f1, type: 2}
+  - {fileID: 11400000, guid: 50b06021808475646a9dc9527a4e753a, type: 2}
+  - {fileID: 11400000, guid: 157fb80d806bd944297b3c5c72790eee, type: 2}
+  - {fileID: 11400000, guid: 00cb17bc9d3c1b64093eff1d0574993f, type: 2}
   references:
     version: 2
     RefIds: []

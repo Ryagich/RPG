@@ -19,6 +19,7 @@ namespace TargetLock
         private readonly CameraMotor cameraMotor;
         private readonly Transform playerTransform;
         private readonly Transform visualTransform;
+        private readonly TargetLockTargetFilter targetFilter;
         private readonly ISubscriber<TargetLockInputMessage> targetLockInputSubscriber;
         private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
         private readonly CompositeDisposable disposables = new();
@@ -32,6 +33,7 @@ namespace TargetLock
             CameraMotor cameraMotor,
             Transform playerTransform,
             Animator animator,
+            TargetLockTargetFilter targetFilter,
             ISubscriber<TargetLockInputMessage> targetLockInputSubscriber,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
         {
@@ -40,6 +42,7 @@ namespace TargetLock
             this.cameraMotor = cameraMotor;
             this.playerTransform = playerTransform;
             visualTransform = animator != null ? animator.transform : playerTransform;
+            this.targetFilter = targetFilter;
             this.targetLockInputSubscriber = targetLockInputSubscriber;
             this.gameModeChangedSubscriber = gameModeChangedSubscriber;
         }
@@ -58,14 +61,21 @@ namespace TargetLock
 
         public void Tick()
         {
-            if (Mode == TargetLockMode.Disabled || CurrentTarget == null)
+            if (Mode == TargetLockMode.Disabled)
             {
+                return;
+            }
+
+            if (CurrentTarget == null)
+            {
+                TryLockBestTarget(Mode);
                 return;
             }
 
             if (ShouldBreakImmediately(CurrentTarget))
             {
-                Unlock();
+                DropCurrentTarget();
+                TryLockBestTarget(Mode);
                 return;
             }
 
@@ -74,7 +84,8 @@ namespace TargetLock
                 invalidCurrentTargetTime += Time.deltaTime;
                 if (invalidCurrentTargetTime >= config.LostTargetGraceSeconds)
                 {
-                    Unlock();
+                    DropCurrentTarget();
+                    TryLockBestTarget(Mode);
                 }
 
                 return;
@@ -102,9 +113,12 @@ namespace TargetLock
                 return false;
             }
 
-            if (CurrentTarget == null
-             || ShouldBreakImmediately(CurrentTarget)
-             || !IsMaintainedTarget(CurrentTarget))
+            if (CurrentTarget != null && ShouldBreakImmediately(CurrentTarget))
+            {
+                DropCurrentTarget();
+            }
+
+            if (CurrentTarget == null || !IsMaintainedTarget(CurrentTarget))
             {
                 if (!TryLockBestTarget(Mode))
                 {
@@ -153,7 +167,7 @@ namespace TargetLock
             switch (Mode)
             {
                 case TargetLockMode.Disabled:
-                    TryLockBestTarget(TargetLockMode.Hard);
+                    ArmMode(TargetLockMode.Hard);
                     break;
                 case TargetLockMode.Hard:
                     SwitchMode(TargetLockMode.Soft);
@@ -178,7 +192,10 @@ namespace TargetLock
              || ShouldBreakImmediately(CurrentTarget)
              || !IsMaintainedTarget(CurrentTarget))
             {
+                Mode = nextMode;
+                invalidCurrentTargetTime = 0f;
                 TryLockBestTarget(nextMode);
+                UpdateCameraTarget();
                 return;
             }
 
@@ -191,7 +208,7 @@ namespace TargetLock
         {
             if (Mode == TargetLockMode.Disabled || CurrentTarget == null)
             {
-                TryLockBestTarget(TargetLockMode.Hard);
+                ArmMode(Mode == TargetLockMode.Disabled ? TargetLockMode.Hard : Mode);
                 return;
             }
 
@@ -245,6 +262,11 @@ namespace TargetLock
 
         private bool TryLockBestTarget(TargetLockMode mode)
         {
+            if (mode == TargetLockMode.Disabled)
+            {
+                return false;
+            }
+
             var candidates = GetCandidates();
             TargetLockTarget bestTarget = null;
             var bestScore = float.PositiveInfinity;
@@ -344,7 +366,7 @@ namespace TargetLock
 
         private bool IsValidTarget(TargetLockTarget target)
         {
-            return target != null && target.IsTargetable && target.transform != playerTransform;
+            return targetFilter?.CanLock(target) == true;
         }
 
         private bool ShouldBreakImmediately(TargetLockTarget target)
@@ -447,6 +469,29 @@ namespace TargetLock
 
             CurrentTarget = target;
             Mode = mode;
+            invalidCurrentTargetTime = 0f;
+            UpdateCameraTarget();
+        }
+
+        private void ArmMode(TargetLockMode mode)
+        {
+            if (mode == TargetLockMode.Disabled)
+            {
+                Unlock();
+                return;
+            }
+
+            Mode = mode;
+            invalidCurrentTargetTime = 0f;
+            if (!TryLockBestTarget(mode))
+            {
+                UpdateCameraTarget();
+            }
+        }
+
+        private void DropCurrentTarget()
+        {
+            CurrentTarget = null;
             invalidCurrentTargetTime = 0f;
             UpdateCameraTarget();
         }

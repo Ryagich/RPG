@@ -35,6 +35,10 @@ MonoBehaviour:
     State: {fileID: 11400000, guid: df97e9e02e16aac4b88dd6f6b6bd10c8, type: 2}
   - Position: {x: 520, y: -420}
     State: {fileID: 11400000, guid: 0693328ba8804e14992a9a7e61d6f89e, type: 2}
+  - Position: {x: 860, y: -420}
+    State: {fileID: 11400000, guid: aebe7c3617a51c04ab37fbaa3a2a2fb7, type: 2}
+  - Position: {x: 1540, y: -420}
+    State: {fileID: 11400000, guid: 9d0820a0a50513148b952d452fb34340, type: 2}
   - Position: {x: 160, y: -420}
     State: {fileID: 11400000, guid: d83d2c3b3c44b2d4486bc8d6baced3ae, type: 2}
   - Position: {x: 1200, y: -650}

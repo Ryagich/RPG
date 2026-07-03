@@ -120,6 +120,7 @@ namespace Container
             builder.Register<CharacterWorldItemDropper>(Lifetime.Scoped).AsSelf();
             builder.Register<NpcInventoryPlanner>(Lifetime.Scoped).AsSelf();
             builder.Register<NpcItemPickupService>(Lifetime.Scoped).AsSelf();
+            builder.Register<NpcTargetLockController>(Lifetime.Scoped).AsSelf();
             builder.Register<NpcCombatService>(Lifetime.Scoped)
                    .AsSelf()
                    .As<IStartable>()

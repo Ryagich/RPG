@@ -123,7 +123,10 @@ namespace Stats
 
         private bool CanRegenerateHp()
         {
-            return hpRegenBlockedRemainingTime <= 0f && !HasEmptyAdditionalStat();
+            var hpStat = statsController.Hp;
+            return hpStat.Value.Value > hpStat.Min
+                && hpRegenBlockedRemainingTime <= 0f
+                && !HasEmptyAdditionalStat();
         }
 
         private bool HasEmptyAdditionalStat()

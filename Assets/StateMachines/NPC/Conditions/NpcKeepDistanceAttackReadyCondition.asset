@@ -9,7 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9e79aecdb8a74452b6b01c7cb368e2d5, type: 3}
-  m_Name: DeathConfig
-  m_EditorClassIdentifier: Assembly-CSharp::Player.DeathConfig
-  <CannotDie>k__BackingField: 1
+  m_Script: {fileID: 11500000, guid: 877c2926284c4dc4a882241d80e61819, type: 3}
+  m_Name: NpcKeepDistanceAttackReadyCondition
+  m_EditorClassIdentifier: Assembly-CSharp::StateMachine.Conditions.NpcKeepDistanceAttackReadyCondition

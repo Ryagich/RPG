@@ -26,11 +26,11 @@ namespace NPC
         private readonly NpcVision vision;
         private readonly NpcCombatConfig combatConfig;
         private readonly FactionRelationsConfig factionRelationsConfig;
-        private readonly DeathConfig deathConfig;
         private readonly PlayerInventory inventory;
         private readonly StatsController statsController;
         private readonly CharacterDamageReceiver ownerDamageReceiver;
         private readonly NpcWeaponInHandController weaponController;
+        private readonly NpcTargetLockController targetLockController;
         private readonly ICharacterHitReactionController hitReactionController;
         private readonly ISubscriber<CharacterDamagedMessage> damagedSubscriber;
         private readonly CompositeDisposable disposables = new();
@@ -48,11 +48,11 @@ namespace NPC
             NpcVision vision,
             NpcCombatConfig combatConfig,
             FactionRelationsConfig factionRelationsConfig,
-            DeathConfig deathConfig,
             PlayerInventory inventory,
             StatsController statsController,
             CharacterDamageReceiver ownerDamageReceiver,
             NpcWeaponInHandController weaponController,
+            NpcTargetLockController targetLockController,
             ICharacterHitReactionController hitReactionController,
             ISubscriber<CharacterDamagedMessage> damagedSubscriber)
         {
@@ -60,11 +60,11 @@ namespace NPC
             this.vision = vision;
             this.combatConfig = combatConfig;
             this.factionRelationsConfig = factionRelationsConfig;
-            this.deathConfig = deathConfig;
             this.inventory = inventory;
             this.statsController = statsController;
             this.ownerDamageReceiver = ownerDamageReceiver;
             this.weaponController = weaponController;
+            this.targetLockController = targetLockController;
             this.hitReactionController = hitReactionController;
             this.damagedSubscriber = damagedSubscriber;
         }
@@ -101,6 +101,28 @@ namespace NPC
                                              || inventory?.Items.Any(item => item?.ItemStack?.ItemConfig?.ItemType == ItemType.Weapon) == true;
         public bool HasThreat => HasCombatTarget || HasLastKnownTargetPosition;
         public bool ShouldFlee => HasThreat && !HasAnyWeaponAvailable;
+
+        public static bool IsTargetHostileToReceiver(TargetLockTarget potentialHostile, CharacterDamageReceiver receiver)
+        {
+            if (potentialHostile == null || receiver == null)
+            {
+                return false;
+            }
+
+            foreach (var service in ActiveServices.ToArray())
+            {
+                if (service == null
+                 || service.ownerTransform == null
+                 || !service.IsOwnerOfTarget(potentialHostile))
+                {
+                    continue;
+                }
+
+                return service.IsHostileTo(receiver);
+            }
+
+            return false;
+        }
 
         public void Start()
         {
@@ -555,7 +577,9 @@ namespace NPC
             var strafeWeight = Mathf.Max(0f, combatConfig != null ? combatConfig.PostAttackStrafeWeight : 0.25f);
             var backstepWeight = Mathf.Max(0f, combatConfig != null ? combatConfig.PostAttackBackstepWeight : 0.2f);
             var circleWeight = Mathf.Max(0f, combatConfig != null ? combatConfig.PostAttackCircleWeight : 0.1f);
-            var totalWeight = attackWeight + strafeWeight + backstepWeight + circleWeight;
+            var waitWeight = Mathf.Max(0f, combatConfig != null ? combatConfig.PostAttackWaitWeight : 0.12f);
+            var keepDistanceWeight = Mathf.Max(0f, combatConfig != null ? combatConfig.PostAttackKeepDistanceWeight : 0.18f);
+            var totalWeight = attackWeight + strafeWeight + backstepWeight + circleWeight + waitWeight + keepDistanceWeight;
             if (totalWeight <= 0f)
             {
                 return NpcCombatDecision.Attack;
@@ -577,6 +601,18 @@ namespace NPC
             if (roll < backstepWeight && TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Backstep))
             {
                 return NpcCombatDecision.Maneuver;
+            }
+
+            roll -= backstepWeight;
+            if (roll < waitWeight)
+            {
+                return NpcCombatDecision.Wait;
+            }
+
+            roll -= waitWeight;
+            if (roll < keepDistanceWeight && TrySelectKeepDistanceDestination())
+            {
+                return NpcCombatDecision.KeepDistance;
             }
 
             return TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Circle)
@@ -633,6 +669,65 @@ namespace NPC
             return TrySelectCombatManeuverDestination(NpcCombatManeuverKind.QueueCircle);
         }
 
+        public bool TrySelectKeepDistanceDestination()
+        {
+            if (ownerTransform == null || !HasCombatTarget)
+            {
+                return false;
+            }
+
+            var targetPosition = CurrentTarget.transform.position;
+            var ownerPosition = ownerTransform.position;
+            var fromTarget = ownerPosition - targetPosition;
+            fromTarget.y = 0f;
+            if (fromTarget.sqrMagnitude <= 0.0001f)
+            {
+                fromTarget = -ownerTransform.forward;
+                fromTarget.y = 0f;
+            }
+
+            if (fromTarget.sqrMagnitude <= 0.0001f)
+            {
+                return false;
+            }
+
+            fromTarget.Normalize();
+            var minRange = combatConfig != null ? combatConfig.KeepDistanceMinRange : 2.3f;
+            var maxRange = Mathf.Max(minRange, combatConfig != null ? combatConfig.KeepDistanceMaxRange : 3.5f);
+            var currentDistance = PlanarDistance(ownerPosition, targetPosition);
+            var desiredRange = UnityEngine.Random.Range(minRange, maxRange);
+            var direction = fromTarget;
+
+            if (currentDistance < minRange)
+            {
+                var angle = combatConfig != null ? combatConfig.KeepDistanceRetreatAngle : 35f;
+                direction = Quaternion.Euler(0f, UnityEngine.Random.Range(-angle, angle), 0f) * fromTarget;
+                desiredRange = maxRange;
+            }
+            else if (currentDistance <= maxRange)
+            {
+                var strafeChance = combatConfig != null ? combatConfig.KeepDistanceStrafeChance : 0.65f;
+                if (UnityEngine.Random.value < Mathf.Clamp01(strafeChance))
+                {
+                    var side = UnityEngine.Random.value < 0.5f ? -1f : 1f;
+                    var tangent = Vector3.Cross(Vector3.up, fromTarget).normalized * side;
+                    direction = (fromTarget * 0.35f + tangent).normalized;
+                    desiredRange = Mathf.Clamp(currentDistance, minRange, maxRange);
+                }
+            }
+
+            var candidate = targetPosition + direction.normalized * desiredRange;
+            var sampleRadius = combatConfig != null ? combatConfig.CombatMoveNavMeshSampleRadius : 2f;
+            if (!TrySampleReachablePosition(candidate, sampleRadius, out var reachablePosition))
+            {
+                return TryGetAlternativeKeepDistanceDestination(targetPosition, fromTarget, minRange, maxRange, sampleRadius, out reachablePosition);
+            }
+
+            CombatMoveDestination = reachablePosition;
+            HasCombatMoveDestination = true;
+            return true;
+        }
+
         public bool TryGetApproachDestination(out Vector3 destination, out float stoppingDistance)
         {
             destination = default;
@@ -656,6 +751,44 @@ namespace NPC
             destination = CurrentTarget.transform.position + offset;
             stoppingDistance = combatConfig != null ? combatConfig.CombatMoveReachedDistance : 0.45f;
             return true;
+        }
+
+        private bool TryGetAlternativeKeepDistanceDestination(
+            Vector3 targetPosition,
+            Vector3 fromTarget,
+            float minRange,
+            float maxRange,
+            float sampleRadius,
+            out Vector3 destination)
+        {
+            destination = default;
+            var baseAngle = Mathf.Atan2(fromTarget.x, fromTarget.z) * Mathf.Rad2Deg;
+            Span<float> angleOffsets = stackalloc[] { 30f, -30f, 60f, -60f, 100f, -100f, 145f, -145f, 180f };
+            Span<float> ranges = stackalloc[]
+            {
+                maxRange,
+                (minRange + maxRange) * 0.5f,
+                minRange
+            };
+
+            foreach (var range in ranges)
+            {
+                foreach (var angleOffset in angleOffsets)
+                {
+                    var direction = Quaternion.Euler(0f, baseAngle + angleOffset, 0f) * Vector3.forward;
+                    var candidate = targetPosition + direction * range;
+                    if (!TrySampleReachablePosition(candidate, sampleRadius, out destination))
+                    {
+                        continue;
+                    }
+
+                    CombatMoveDestination = destination;
+                    HasCombatMoveDestination = true;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public bool TryGetAlternativeApproachDestination(out Vector3 destination, out float stoppingDistance)
@@ -925,6 +1058,11 @@ namespace NPC
                 return;
             }
 
+            if (targetLockController?.TryFace(CurrentTarget) == true)
+            {
+                return;
+            }
+
             FacePosition(CurrentTarget.transform.position);
         }
 
@@ -1172,6 +1310,48 @@ namespace NPC
             return factionRelationsConfig != null && factionRelationsConfig.IsHostile(ownerFaction, targetFaction);
         }
 
+        private bool IsHostileTo(CharacterDamageReceiver receiver)
+        {
+            if (receiver == null || receiver == ownerDamageReceiver)
+            {
+                return false;
+            }
+
+            if (personalEnemies.Contains(receiver))
+            {
+                return true;
+            }
+
+            if (HasCombatTarget)
+            {
+                var currentTargetReceiver = CurrentTarget.GetComponentInParent<DamageReceiverHost>()?.Receiver;
+                if (currentTargetReceiver == receiver)
+                {
+                    return true;
+                }
+            }
+
+            var receiverTarget = FindTargetByReceiver(receiver);
+            return receiverTarget != null && IsEnemy(receiverTarget);
+        }
+
+        private bool IsOwnerOfTarget(TargetLockTarget target)
+        {
+            if (target == null)
+            {
+                return false;
+            }
+
+            var targetScope = target.GetComponentInParent<NpcLifetimeScope>();
+            if (targetScope != null && targetScope == ownerScope)
+            {
+                return true;
+            }
+
+            var targetReceiver = target.GetComponentInParent<DamageReceiverHost>()?.Receiver;
+            return targetReceiver != null && targetReceiver == ownerDamageReceiver;
+        }
+
         private void RememberPersonalEnemy(TargetLockTarget target)
         {
             var damageReceiver = target != null
@@ -1185,18 +1365,10 @@ namespace NPC
 
         private bool IsTargetAlive(TargetLockTarget target)
         {
-            if (target != null
-             && deathConfig != null
-             && deathConfig.CannotDie
-             && target.GetComponentInParent<PlayerLifetimeScope>() != null)
-            {
-                return true;
-            }
-
             var receiver = target != null
                 ? target.GetComponentInParent<DamageReceiverHost>()?.Receiver
                 : null;
-            return receiver == null || receiver.IsAlive;
+            return receiver != null && receiver.IsAlive;
         }
 
         private void SetTarget(TargetLockTarget target)

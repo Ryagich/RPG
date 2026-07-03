@@ -55,6 +55,7 @@ namespace Container
                                           });
 
             builder.RegisterEntryPoint<CameraMotor>().AsSelf();
+            builder.Register<TargetLockTargetFilter>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<TargetLockController>().AsSelf();
             builder.RegisterEntryPoint<PlayerGravity>().AsSelf();
             builder.RegisterEntryPoint<PlayerMovementController>().AsSelf();

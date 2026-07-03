@@ -39,6 +39,8 @@ namespace EditorTools
         private const string PostAttackDecisionStatePath = StatesFolderPath + "/NpcPostAttackDecisionState.asset";
         private const string CombatManeuverStatePath = StatesFolderPath + "/NpcCombatManeuverState.asset";
         private const string CombatCircleStatePath = StatesFolderPath + "/NpcCombatCircleState.asset";
+        private const string CombatWaitStatePath = StatesFolderPath + "/NpcCombatWaitState.asset";
+        private const string CombatKeepDistanceStatePath = StatesFolderPath + "/NpcCombatKeepDistanceState.asset";
         private const string CombatQueueCircleStatePath = StatesFolderPath + "/NpcCombatQueueCircleState.asset";
         private const string CombatTargetDownStatePath = StatesFolderPath + "/NpcCombatTargetDownState.asset";
         private const string CombatSearchLastKnownStatePath = StatesFolderPath + "/NpcCombatSearchLastKnownState.asset";
@@ -75,10 +77,19 @@ namespace EditorTools
         private const string PostAttackDecisionToApproachTransitionPath = TransitionsFolderPath + "/NpcPostAttackDecisionToApproachTransition.asset";
         private const string PostAttackDecisionToManeuverTransitionPath = TransitionsFolderPath + "/NpcPostAttackDecisionToManeuverTransition.asset";
         private const string PostAttackDecisionToCircleTransitionPath = TransitionsFolderPath + "/NpcPostAttackDecisionToCircleTransition.asset";
+        private const string PostAttackDecisionToWaitTransitionPath = TransitionsFolderPath + "/NpcPostAttackDecisionToWaitTransition.asset";
+        private const string PostAttackDecisionToKeepDistanceTransitionPath = TransitionsFolderPath + "/NpcPostAttackDecisionToKeepDistanceTransition.asset";
         private const string CombatManeuverToTargetDownTransitionPath = TransitionsFolderPath + "/NpcCombatManeuverToTargetDownTransition.asset";
         private const string CombatManeuverToApproachTransitionPath = TransitionsFolderPath + "/NpcCombatManeuverToApproachTransition.asset";
         private const string CombatCircleToTargetDownTransitionPath = TransitionsFolderPath + "/NpcCombatCircleToTargetDownTransition.asset";
         private const string CombatCircleToApproachTransitionPath = TransitionsFolderPath + "/NpcCombatCircleToApproachTransition.asset";
+        private const string CombatWaitToTargetDownTransitionPath = TransitionsFolderPath + "/NpcCombatWaitToTargetDownTransition.asset";
+        private const string CombatWaitToSearchLastKnownTransitionPath = TransitionsFolderPath + "/NpcCombatWaitToSearchLastKnownTransition.asset";
+        private const string CombatWaitToPostAttackDecisionTransitionPath = TransitionsFolderPath + "/NpcCombatWaitToPostAttackDecisionTransition.asset";
+        private const string CombatKeepDistanceToTargetDownTransitionPath = TransitionsFolderPath + "/NpcCombatKeepDistanceToTargetDownTransition.asset";
+        private const string CombatKeepDistanceToSearchLastKnownTransitionPath = TransitionsFolderPath + "/NpcCombatKeepDistanceToSearchLastKnownTransition.asset";
+        private const string CombatKeepDistanceToAttackTransitionPath = TransitionsFolderPath + "/NpcCombatKeepDistanceToAttackTransition.asset";
+        private const string CombatKeepDistanceToPostAttackDecisionTransitionPath = TransitionsFolderPath + "/NpcCombatKeepDistanceToPostAttackDecisionTransition.asset";
         private const string CombatQueueToTargetDownTransitionPath = TransitionsFolderPath + "/NpcCombatQueueToTargetDownTransition.asset";
         private const string CombatQueueToApproachTransitionPath = TransitionsFolderPath + "/NpcCombatQueueToApproachTransition.asset";
         private const string CombatQueueToSearchLastKnownTransitionPath = TransitionsFolderPath + "/NpcCombatQueueToSearchLastKnownTransition.asset";
@@ -122,7 +133,10 @@ namespace EditorTools
         private const string PostAttackDecisionApproachConditionPath = ConditionsFolderPath + "/NpcPostAttackDecisionApproachCondition.asset";
         private const string PostAttackDecisionManeuverConditionPath = ConditionsFolderPath + "/NpcPostAttackDecisionManeuverCondition.asset";
         private const string PostAttackDecisionCircleConditionPath = ConditionsFolderPath + "/NpcPostAttackDecisionCircleCondition.asset";
+        private const string PostAttackDecisionWaitConditionPath = ConditionsFolderPath + "/NpcPostAttackDecisionWaitCondition.asset";
+        private const string PostAttackDecisionKeepDistanceConditionPath = ConditionsFolderPath + "/NpcPostAttackDecisionKeepDistanceCondition.asset";
         private const string CombatTargetInAttackViewConditionPath = ConditionsFolderPath + "/NpcCombatTargetInAttackViewCondition.asset";
+        private const string KeepDistanceAttackReadyConditionPath = ConditionsFolderPath + "/NpcKeepDistanceAttackReadyCondition.asset";
         private const string CombatTargetOutsideAttackViewConditionPath = ConditionsFolderPath + "/NpcCombatTargetOutsideAttackViewCondition.asset";
         private const string CombatTargetLostConditionPath = ConditionsFolderPath + "/NpcCombatTargetLostCondition.asset";
         private const string ShouldSearchLastKnownTargetConditionPath = ConditionsFolderPath + "/NpcShouldSearchLastKnownTargetCondition.asset";
@@ -143,6 +157,8 @@ namespace EditorTools
         private const string PostAttackDecisionBehaviourPath = BehavioursFolderPath + "/NpcPostAttackDecisionBehaviour.asset";
         private const string CombatManeuverBehaviourPath = BehavioursFolderPath + "/NpcCombatManeuverBehaviour.asset";
         private const string CombatCircleBehaviourPath = BehavioursFolderPath + "/NpcCombatCircleBehaviour.asset";
+        private const string CombatWaitBehaviourPath = BehavioursFolderPath + "/NpcCombatWaitBehaviour.asset";
+        private const string CombatKeepDistanceBehaviourPath = BehavioursFolderPath + "/NpcCombatKeepDistanceBehaviour.asset";
         private const string CombatQueueCircleBehaviourPath = BehavioursFolderPath + "/NpcCombatQueueCircleBehaviour.asset";
         private const string CombatTargetDownBehaviourPath = BehavioursFolderPath + "/NpcCombatTargetDownBehaviour.asset";
         private const string CombatSearchLastKnownBehaviourPath = BehavioursFolderPath + "/NpcCombatSearchLastKnownBehaviour.asset";
@@ -178,6 +194,8 @@ namespace EditorTools
             var postAttackDecisionState = LoadOrCreate<State>(PostAttackDecisionStatePath);
             var combatManeuverState = LoadOrCreate<State>(CombatManeuverStatePath);
             var combatCircleState = LoadOrCreate<State>(CombatCircleStatePath);
+            var combatWaitState = LoadOrCreate<State>(CombatWaitStatePath);
+            var combatKeepDistanceState = LoadOrCreate<State>(CombatKeepDistanceStatePath);
             var combatQueueCircleState = LoadOrCreate<State>(CombatQueueCircleStatePath);
             var combatTargetDownState = LoadOrCreate<State>(CombatTargetDownStatePath);
             var combatSearchLastKnownState = LoadOrCreate<State>(CombatSearchLastKnownStatePath);
@@ -214,10 +232,19 @@ namespace EditorTools
             var postAttackDecisionToApproachTransition = LoadOrCreate<Transition>(PostAttackDecisionToApproachTransitionPath);
             var postAttackDecisionToManeuverTransition = LoadOrCreate<Transition>(PostAttackDecisionToManeuverTransitionPath);
             var postAttackDecisionToCircleTransition = LoadOrCreate<Transition>(PostAttackDecisionToCircleTransitionPath);
+            var postAttackDecisionToWaitTransition = LoadOrCreate<Transition>(PostAttackDecisionToWaitTransitionPath);
+            var postAttackDecisionToKeepDistanceTransition = LoadOrCreate<Transition>(PostAttackDecisionToKeepDistanceTransitionPath);
             var combatManeuverToTargetDownTransition = LoadOrCreate<Transition>(CombatManeuverToTargetDownTransitionPath);
             var combatManeuverToApproachTransition = LoadOrCreate<Transition>(CombatManeuverToApproachTransitionPath);
             var combatCircleToTargetDownTransition = LoadOrCreate<Transition>(CombatCircleToTargetDownTransitionPath);
             var combatCircleToApproachTransition = LoadOrCreate<Transition>(CombatCircleToApproachTransitionPath);
+            var combatWaitToTargetDownTransition = LoadOrCreate<Transition>(CombatWaitToTargetDownTransitionPath);
+            var combatWaitToSearchLastKnownTransition = LoadOrCreate<Transition>(CombatWaitToSearchLastKnownTransitionPath);
+            var combatWaitToPostAttackDecisionTransition = LoadOrCreate<Transition>(CombatWaitToPostAttackDecisionTransitionPath);
+            var combatKeepDistanceToTargetDownTransition = LoadOrCreate<Transition>(CombatKeepDistanceToTargetDownTransitionPath);
+            var combatKeepDistanceToSearchLastKnownTransition = LoadOrCreate<Transition>(CombatKeepDistanceToSearchLastKnownTransitionPath);
+            var combatKeepDistanceToAttackTransition = LoadOrCreate<Transition>(CombatKeepDistanceToAttackTransitionPath);
+            var combatKeepDistanceToPostAttackDecisionTransition = LoadOrCreate<Transition>(CombatKeepDistanceToPostAttackDecisionTransitionPath);
             var combatQueueToTargetDownTransition = LoadOrCreate<Transition>(CombatQueueToTargetDownTransitionPath);
             var combatQueueToApproachTransition = LoadOrCreate<Transition>(CombatQueueToApproachTransitionPath);
             var combatQueueToSearchLastKnownTransition = LoadOrCreate<Transition>(CombatQueueToSearchLastKnownTransitionPath);
@@ -261,7 +288,10 @@ namespace EditorTools
             var postAttackDecisionApproachCondition = LoadOrCreate<NpcPostAttackDecisionCondition>(PostAttackDecisionApproachConditionPath);
             var postAttackDecisionManeuverCondition = LoadOrCreate<NpcPostAttackDecisionCondition>(PostAttackDecisionManeuverConditionPath);
             var postAttackDecisionCircleCondition = LoadOrCreate<NpcPostAttackDecisionCondition>(PostAttackDecisionCircleConditionPath);
+            var postAttackDecisionWaitCondition = LoadOrCreate<NpcPostAttackDecisionCondition>(PostAttackDecisionWaitConditionPath);
+            var postAttackDecisionKeepDistanceCondition = LoadOrCreate<NpcPostAttackDecisionCondition>(PostAttackDecisionKeepDistanceConditionPath);
             var combatTargetInAttackViewCondition = LoadOrCreate<NpcCombatTargetInAttackViewCondition>(CombatTargetInAttackViewConditionPath);
+            var keepDistanceAttackReadyCondition = LoadOrCreate<NpcKeepDistanceAttackReadyCondition>(KeepDistanceAttackReadyConditionPath);
             var combatTargetOutsideAttackViewCondition = LoadOrCreate<NpcCombatTargetOutsideAttackViewCondition>(CombatTargetOutsideAttackViewConditionPath);
             var combatTargetLostCondition = LoadOrCreate<NpcCombatTargetLostCondition>(CombatTargetLostConditionPath);
             var shouldSearchLastKnownTargetCondition = LoadOrCreate<NpcShouldSearchLastKnownTargetCondition>(ShouldSearchLastKnownTargetConditionPath);
@@ -282,6 +312,8 @@ namespace EditorTools
             var postAttackDecisionBehaviour = LoadOrCreate<NpcPostAttackDecisionBehaviour>(PostAttackDecisionBehaviourPath);
             var combatManeuverBehaviour = LoadOrCreate<NpcCombatManeuverBehaviour>(CombatManeuverBehaviourPath);
             var combatCircleBehaviour = LoadOrCreate<NpcCombatCircleBehaviour>(CombatCircleBehaviourPath);
+            var combatWaitBehaviour = LoadOrCreate<NpcCombatWaitBehaviour>(CombatWaitBehaviourPath);
+            var combatKeepDistanceBehaviour = LoadOrCreate<NpcCombatKeepDistanceBehaviour>(CombatKeepDistanceBehaviourPath);
             var combatQueueCircleBehaviour = LoadOrCreate<NpcCombatQueueCircleBehaviour>(CombatQueueCircleBehaviourPath);
             var combatTargetDownBehaviour = LoadOrCreate<NpcCombatTargetDownBehaviour>(CombatTargetDownBehaviourPath);
             var combatSearchLastKnownBehaviour = LoadOrCreate<NpcCombatSearchLastKnownBehaviour>(CombatSearchLastKnownBehaviourPath);
@@ -296,6 +328,8 @@ namespace EditorTools
             ConfigureDecisionCondition(postAttackDecisionApproachCondition, NpcCombatDecision.Approach);
             ConfigureDecisionCondition(postAttackDecisionManeuverCondition, NpcCombatDecision.Maneuver);
             ConfigureDecisionCondition(postAttackDecisionCircleCondition, NpcCombatDecision.Circle);
+            ConfigureDecisionCondition(postAttackDecisionWaitCondition, NpcCombatDecision.Wait);
+            ConfigureDecisionCondition(postAttackDecisionKeepDistanceCondition, NpcCombatDecision.KeepDistance);
 
             ConfigureTransition(anyToHitReactionTransition, hitReactionState, hitReactionActiveCondition);
             ConfigureTransition(hitReactionToFleeTransition, fleeState, hitReactionInactiveCondition, shouldFleeCondition);
@@ -329,10 +363,19 @@ namespace EditorTools
             ConfigureTransition(postAttackDecisionToApproachTransition, combatApproachState, postAttackDecisionApproachCondition);
             ConfigureTransition(postAttackDecisionToManeuverTransition, combatManeuverState, postAttackDecisionManeuverCondition);
             ConfigureTransition(postAttackDecisionToCircleTransition, combatCircleState, postAttackDecisionCircleCondition);
+            ConfigureTransition(postAttackDecisionToWaitTransition, combatWaitState, postAttackDecisionWaitCondition);
+            ConfigureTransition(postAttackDecisionToKeepDistanceTransition, combatKeepDistanceState, postAttackDecisionKeepDistanceCondition);
             ConfigureTransition(combatManeuverToTargetDownTransition, combatTargetDownState, combatTargetDownCondition);
             ConfigureTransition(combatManeuverToApproachTransition, combatApproachState, combatMoveCompletedCondition);
             ConfigureTransition(combatCircleToTargetDownTransition, combatTargetDownState, combatTargetDownCondition);
             ConfigureTransition(combatCircleToApproachTransition, combatApproachState, combatMoveCompletedCondition);
+            ConfigureTransition(combatWaitToTargetDownTransition, combatTargetDownState, combatTargetDownCondition);
+            ConfigureTransition(combatWaitToSearchLastKnownTransition, combatSearchLastKnownState, combatTargetLostCondition);
+            ConfigureTransition(combatWaitToPostAttackDecisionTransition, postAttackDecisionState, combatMoveCompletedCondition);
+            ConfigureTransition(combatKeepDistanceToTargetDownTransition, combatTargetDownState, combatTargetDownCondition);
+            ConfigureTransition(combatKeepDistanceToSearchLastKnownTransition, combatSearchLastKnownState, combatTargetLostCondition);
+            ConfigureTransition(combatKeepDistanceToAttackTransition, combatAttackState, keepDistanceAttackReadyCondition);
+            ConfigureTransition(combatKeepDistanceToPostAttackDecisionTransition, postAttackDecisionState, combatMoveCompletedCondition);
             ConfigureTransition(combatQueueToTargetDownTransition, combatTargetDownState, combatTargetDownCondition);
             ConfigureTransition(combatQueueToApproachTransition, combatApproachState, hasDirectCombatSlotCondition);
             ConfigureTransition(combatQueueToSearchLastKnownTransition, combatSearchLastKnownState, combatTargetLostCondition);
@@ -436,6 +479,8 @@ namespace EditorTools
                 postAttackDecisionToQueueTransition,
                 postAttackDecisionToManeuverTransition,
                 postAttackDecisionToCircleTransition,
+                postAttackDecisionToWaitTransition,
+                postAttackDecisionToKeepDistanceTransition,
                 postAttackDecisionToApproachTransition,
                 postAttackDecisionToAttackTransition
             };
@@ -448,6 +493,29 @@ namespace EditorTools
             combatCircleState.Behaviours = new List<BaseBehaviour> { combatCircleBehaviour };
             combatCircleState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, combatCircleToTargetDownTransition, combatAttackToSearchLastKnownTransition, combatCircleToApproachTransition };
             EditorUtility.SetDirty(combatCircleState);
+
+            combatWaitState.Behaviours = new List<BaseBehaviour> { combatWaitBehaviour };
+            combatWaitState.Transitions = new List<Transition>
+            {
+                deathTransition,
+                anyToHitReactionTransition,
+                combatWaitToTargetDownTransition,
+                combatWaitToSearchLastKnownTransition,
+                combatWaitToPostAttackDecisionTransition
+            };
+            EditorUtility.SetDirty(combatWaitState);
+
+            combatKeepDistanceState.Behaviours = new List<BaseBehaviour> { combatKeepDistanceBehaviour };
+            combatKeepDistanceState.Transitions = new List<Transition>
+            {
+                deathTransition,
+                anyToHitReactionTransition,
+                combatKeepDistanceToTargetDownTransition,
+                combatKeepDistanceToSearchLastKnownTransition,
+                combatKeepDistanceToAttackTransition,
+                combatKeepDistanceToPostAttackDecisionTransition
+            };
+            EditorUtility.SetDirty(combatKeepDistanceState);
 
             combatQueueCircleState.Behaviours = new List<BaseBehaviour> { combatQueueCircleBehaviour };
             combatQueueCircleState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, combatQueueToTargetDownTransition, combatQueueToSearchLastKnownTransition, combatQueueToApproachTransition };
@@ -474,6 +542,8 @@ namespace EditorTools
                 new(postAttackDecisionState) { Position = new Vector2(1200f, -180f) },
                 new(combatManeuverState) { Position = new Vector2(1200f, -420f) },
                 new(combatCircleState) { Position = new Vector2(520f, -420f) },
+                new(combatWaitState) { Position = new Vector2(860f, -420f) },
+                new(combatKeepDistanceState) { Position = new Vector2(1540f, -420f) },
                 new(combatQueueCircleState) { Position = new Vector2(160f, -420f) },
                 new(combatTargetDownState) { Position = new Vector2(1200f, -650f) },
                 new(combatSearchLastKnownState) { Position = new Vector2(860f, -650f) },

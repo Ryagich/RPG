@@ -6,7 +6,8 @@ namespace NPC
         Attack = 1,
         Approach = 2,
         Maneuver = 3,
-        Circle = 4
+        Circle = 4,
+        Wait = 5,
+        KeepDistance = 6
     }
 }
-

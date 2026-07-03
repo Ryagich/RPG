@@ -24,6 +24,20 @@ namespace NPC
         [field: SerializeField, Min(0f)] public float PostAttackStrafeWeight { get; private set; } = 0.25f;
         [field: SerializeField, Min(0f)] public float PostAttackBackstepWeight { get; private set; } = 0.2f;
         [field: SerializeField, Min(0f)] public float PostAttackCircleWeight { get; private set; } = 0.1f;
+        [field: SerializeField, Min(0f)] public float PostAttackWaitWeight { get; private set; } = 0.12f;
+        [field: SerializeField, Min(0f)] public float PostAttackKeepDistanceWeight { get; private set; } = 0.18f;
+        [field: Header("Combat Wait")]
+        [field: SerializeField, Min(0f)] public float WaitMinDuration { get; private set; } = 0.35f;
+        [field: SerializeField, Min(0f)] public float WaitMaxDuration { get; private set; } = 1.1f;
+        [field: Header("Keep Distance")]
+        [field: SerializeField, Min(0f)] public float KeepDistanceMinDuration { get; private set; } = 1.2f;
+        [field: SerializeField, Min(0f)] public float KeepDistanceMaxDuration { get; private set; } = 2.4f;
+        [field: SerializeField, Min(0.1f)] public float KeepDistanceMinRange { get; private set; } = 2.3f;
+        [field: SerializeField, Min(0.1f)] public float KeepDistanceMaxRange { get; private set; } = 3.5f;
+        [field: SerializeField, Min(0.05f)] public float KeepDistanceRepositionInterval { get; private set; } = 0.35f;
+        [field: SerializeField, Min(0f)] public float KeepDistanceAttackDelay { get; private set; } = 0.35f;
+        [field: SerializeField, Range(0f, 1f)] public float KeepDistanceStrafeChance { get; private set; } = 0.65f;
+        [field: SerializeField, Range(0f, 75f)] public float KeepDistanceRetreatAngle { get; private set; } = 35f;
         [field: Header("Combat Movement")]
         [field: SerializeField, Min(0f)] public float CombatMoveReachedDistance { get; private set; } = 0.45f;
         [field: SerializeField, Min(0.1f)] public float CombatMoveNavMeshSampleRadius { get; private set; } = 2f;

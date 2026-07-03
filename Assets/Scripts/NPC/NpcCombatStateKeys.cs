@@ -12,6 +12,11 @@ namespace NPC
         public const string ComboAttackRequests = "NpcCombat.ComboAttackRequests";
         public const string ComboAttackNextRequestTime = "NpcCombat.ComboAttackNextRequestTime";
         public const string PostAttackDecision = "NpcCombat.PostAttackDecision";
+        public const string WaitTimer = "NpcCombat.WaitTimer";
+        public const string WaitDuration = "NpcCombat.WaitDuration";
+        public const string KeepDistanceTimer = "NpcCombat.KeepDistanceTimer";
+        public const string KeepDistanceDuration = "NpcCombat.KeepDistanceDuration";
+        public const string KeepDistanceNextRepositionTime = "NpcCombat.KeepDistanceNextRepositionTime";
         public const string CombatMoveCompleted = "NpcCombat.CombatMoveCompleted";
         public const string CombatMoveLastPosition = "NpcCombat.CombatMoveLastPosition";
         public const string CombatMoveStuckTimer = "NpcCombat.CombatMoveStuckTimer";
