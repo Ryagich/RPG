@@ -11,6 +11,7 @@ namespace StateMachine.Behaviours
         {
             context?.GetService<NpcNavMeshController>()?.SetFacingLocked(true);
             context?.SetValue(NpcCombatStateKeys.CombatMoveCompleted, false);
+            NpcCombatMoveProgress.Reset(context);
             Move(context);
         }
 
@@ -22,6 +23,7 @@ namespace StateMachine.Behaviours
         public override void Exit(StateMachineContext context)
         {
             context?.RemoveValue(NpcCombatStateKeys.CombatMoveCompleted);
+            NpcCombatMoveProgress.Clear(context);
             context?.GetService<NpcCombatService>()?.ClearCombatMoveDestination();
         }
 
@@ -43,7 +45,8 @@ namespace StateMachine.Behaviours
             combat.RefreshTargetVisibility();
             combat.FaceTarget();
 
-            var reachedDistance = context.GetService<NpcCombatConfig>()?.CombatMoveReachedDistance ?? 0.45f;
+            var config = context.GetService<NpcCombatConfig>();
+            var reachedDistance = config?.CombatMoveReachedDistance ?? 0.45f;
             if (Vector3.Distance(context.Owner.transform.position, combat.CombatMoveDestination) <= reachedDistance)
             {
                 nav.Stop();
@@ -51,7 +54,20 @@ namespace StateMachine.Behaviours
                 return;
             }
 
-            nav.MoveTo(combat.CombatMoveDestination, stoppingDistance: reachedDistance);
+            if (NpcCombatMoveProgress.IsStuck(context, config))
+            {
+                nav.Stop();
+                context.SetValue(NpcCombatStateKeys.CombatMoveCompleted, true);
+                return;
+            }
+
+            if (nav.MoveTo(combat.CombatMoveDestination, stoppingDistance: reachedDistance))
+            {
+                return;
+            }
+
+            nav.Stop();
+            context.SetValue(NpcCombatStateKeys.CombatMoveCompleted, true);
         }
     }
 }

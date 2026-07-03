@@ -264,6 +264,10 @@ namespace Inventory
             CompleteWeaponAnimationFromEvent(WeaponAnimationKind.Sheathe);
         }
 
+        public void HoldAttackReadyFromAnimationEvent()
+        {
+        }
+
         public void AttackStartedFromAnimationEvent()
         {
             // Animation Event: AttackStarted
@@ -526,7 +530,6 @@ namespace Inventory
             }
 
             var selectedItemConfig = ResolveActiveWeaponSelection();
-            CleanupSpawnedWeaponInstancesExceptCurrent(selectedItemConfig);
             var slotItemChanged = lastObservedSelectedSlotItemConfig != selectedItemConfig;
 
             if (slotItemChanged && selectedItemConfig != null && !isWeaponDrawn)
@@ -1004,6 +1007,7 @@ namespace Inventory
 
         private void CleanupSpawnedWeaponInstancesExceptCurrent(ItemConfig expectedItemConfig = null)
         {
+            expectedItemConfig ??= currentWeaponItemConfig;
             CleanupSpawnedWeaponInstancesInAnchor(handAnchor?.RightHand, expectedItemConfig);
             CleanupSpawnedWeaponInstancesInAnchor(handAnchor?.Belt, expectedItemConfig);
         }
@@ -1037,11 +1041,6 @@ namespace Inventory
             if (candidate == null)
             {
                 return false;
-            }
-
-            if (candidate.name.Contains(" | RightHand") || candidate.name.Contains(" | Belt"))
-            {
-                return true;
             }
 
             var prefabName = expectedItemConfig?.WeaponInHandPrefab != null

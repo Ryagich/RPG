@@ -43,7 +43,26 @@ namespace StateMachine.Behaviours
                 stoppingDistance = config != null ? config.ApproachStoppingDistance : 1.6f;
             }
 
-            nav.MoveTo(destination, stoppingDistance: stoppingDistance);
+            if (nav.HasReachedDestination
+             && !combat.CanStartAttack
+             && combat.TryGetCloserAttackApproachDestination(out var closerDestination, out var closerStoppingDistance))
+            {
+                destination = closerDestination;
+                stoppingDistance = closerStoppingDistance;
+            }
+
+            if (nav.MoveTo(destination, stoppingDistance: stoppingDistance))
+            {
+                return;
+            }
+
+            if (combat.TryGetAlternativeApproachDestination(out destination, out stoppingDistance)
+             && nav.MoveTo(destination, stoppingDistance: stoppingDistance))
+            {
+                return;
+            }
+
+            nav.MoveTo(combat.CurrentTarget.transform.position, stoppingDistance: config != null ? config.ApproachStoppingDistance : 1.6f);
         }
     }
 }

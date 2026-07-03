@@ -8,6 +8,7 @@ using Inventory.Inventories;
 using Inventory.Item;
 using MessagePipe;
 using Messages;
+using Player;
 using Stats;
 using TargetLock;
 using UniRx;
@@ -25,6 +26,7 @@ namespace NPC
         private readonly NpcVision vision;
         private readonly NpcCombatConfig combatConfig;
         private readonly FactionRelationsConfig factionRelationsConfig;
+        private readonly DeathConfig deathConfig;
         private readonly PlayerInventory inventory;
         private readonly StatsController statsController;
         private readonly CharacterDamageReceiver ownerDamageReceiver;
@@ -38,6 +40,7 @@ namespace NPC
         private float nextScanTime;
         private float aggressionNotificationTimer;
         private TargetLockTarget notificationTarget;
+        private TargetLockTarget initialCircleEvaluatedTarget;
         private bool hasPendingAggressionNotification;
 
         public NpcCombatService(
@@ -45,6 +48,7 @@ namespace NPC
             NpcVision vision,
             NpcCombatConfig combatConfig,
             FactionRelationsConfig factionRelationsConfig,
+            DeathConfig deathConfig,
             PlayerInventory inventory,
             StatsController statsController,
             CharacterDamageReceiver ownerDamageReceiver,
@@ -56,6 +60,7 @@ namespace NPC
             this.vision = vision;
             this.combatConfig = combatConfig;
             this.factionRelationsConfig = factionRelationsConfig;
+            this.deathConfig = deathConfig;
             this.inventory = inventory;
             this.statsController = statsController;
             this.ownerDamageReceiver = ownerDamageReceiver;
@@ -76,6 +81,21 @@ namespace NPC
         public bool IsCurrentTargetDown => CurrentTarget != null && (!CurrentTarget.IsTargetable || !IsTargetAlive(CurrentTarget));
         public bool IsTargetVisible => HasCombatTarget && vision != null && vision.IsInView(CurrentTarget.AimPosition);
         public bool IsTargetInAttackView => HasCombatTarget && vision != null && vision.IsInAttackView(CurrentTarget.AimPosition);
+        public bool IsTargetInAttackRange
+        {
+            get
+            {
+                if (!HasCombatTarget || vision == null || ownerTransform == null)
+                {
+                    return false;
+                }
+
+                var distance = vision.AttackViewDistance + (combatConfig != null ? combatConfig.AttackStartDistanceTolerance : 0.25f);
+                return PlanarDistance(ownerTransform.position, CurrentTarget.AimPosition) <= distance;
+            }
+        }
+
+        public bool CanStartAttack => HasCombatTarget && HasClearAttackLane() && (IsTargetInAttackView || IsTargetInAttackRange);
         public bool HasWeaponReady => weaponController != null && weaponController.HasWeaponInWeaponSlots;
         public bool HasAnyWeaponAvailable => HasWeaponReady
                                              || inventory?.Items.Any(item => item?.ItemStack?.ItemConfig?.ItemType == ItemType.Weapon) == true;
@@ -125,6 +145,7 @@ namespace NPC
         public void ClearTarget()
         {
             CurrentTarget = null;
+            initialCircleEvaluatedTarget = null;
             HasLastKnownTargetPosition = false;
             LastKnownTargetPosition = default;
             ClearFleeDestination();
@@ -508,12 +529,12 @@ namespace NPC
                 _ => ownerTransform.position
             };
 
-            if (!NavMesh.SamplePosition(destination, out var hit, sampleRadius, NavMesh.AllAreas))
+            if (!TrySampleReachablePosition(destination, sampleRadius, out var reachablePosition))
             {
                 return false;
             }
 
-            CombatMoveDestination = hit.position;
+            CombatMoveDestination = reachablePosition;
             HasCombatMoveDestination = true;
             return true;
         }
@@ -525,7 +546,7 @@ namespace NPC
                 return NpcCombatDecision.Approach;
             }
 
-            if (!IsTargetInAttackView)
+            if (!CanStartAttack)
             {
                 return NpcCombatDecision.Approach;
             }
@@ -585,9 +606,14 @@ namespace NPC
 
         public bool ShouldStartInitialCircle()
         {
+            if (!HasCombatTarget || initialCircleEvaluatedTarget == CurrentTarget)
+            {
+                return false;
+            }
+
+            initialCircleEvaluatedTarget = CurrentTarget;
             var chance = combatConfig != null ? combatConfig.InitialCircleChance : 0.25f;
-            return HasCombatTarget
-                   && IsTargetVisible
+            return IsTargetVisible
                    && UnityEngine.Random.value < Mathf.Clamp01(chance)
                    && TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Circle);
         }
@@ -630,6 +656,100 @@ namespace NPC
             destination = CurrentTarget.transform.position + offset;
             stoppingDistance = combatConfig != null ? combatConfig.CombatMoveReachedDistance : 0.45f;
             return true;
+        }
+
+        public bool TryGetAlternativeApproachDestination(out Vector3 destination, out float stoppingDistance)
+        {
+            destination = default;
+            stoppingDistance = combatConfig != null ? combatConfig.CombatMoveReachedDistance : 0.45f;
+            if (ownerTransform == null || !HasCombatTarget)
+            {
+                return false;
+            }
+
+            var targetPosition = CurrentTarget.transform.position;
+            var fromTarget = ownerTransform.position - targetPosition;
+            fromTarget.y = 0f;
+            if (fromTarget.sqrMagnitude <= 0.0001f)
+            {
+                fromTarget = -ownerTransform.forward;
+                fromTarget.y = 0f;
+            }
+
+            fromTarget.Normalize();
+            var baseAngle = Mathf.Atan2(fromTarget.x, fromTarget.z) * Mathf.Rad2Deg;
+            var radius = combatConfig != null ? combatConfig.DirectAttackSlotRadius : 1.65f;
+            var sampleRadius = combatConfig != null ? combatConfig.CombatMoveNavMeshSampleRadius : 2f;
+            Span<float> angleOffsets = stackalloc[] { 45f, -45f, 90f, -90f, 135f, -135f, 180f, 0f };
+            Span<float> radiusMultipliers = stackalloc[] { 1f, 1.25f, 0.8f };
+
+            foreach (var radiusMultiplier in radiusMultipliers)
+            {
+                foreach (var angleOffset in angleOffsets)
+                {
+                    var direction = Quaternion.Euler(0f, baseAngle + angleOffset, 0f) * Vector3.forward;
+                    var candidate = targetPosition + direction * radius * radiusMultiplier;
+                    if (!TrySampleReachablePosition(candidate, sampleRadius, out destination))
+                    {
+                        continue;
+                    }
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool TryGetCloserAttackApproachDestination(out Vector3 destination, out float stoppingDistance)
+        {
+            destination = default;
+            stoppingDistance = combatConfig != null ? combatConfig.CombatMoveReachedDistance : 0.45f;
+            if (ownerTransform == null || !HasCombatTarget || vision == null)
+            {
+                return false;
+            }
+
+            var targetPosition = CurrentTarget.transform.position;
+            var fromTarget = ownerTransform.position - targetPosition;
+            fromTarget.y = 0f;
+            if (fromTarget.sqrMagnitude <= 0.0001f)
+            {
+                fromTarget = -CurrentTarget.transform.forward;
+                fromTarget.y = 0f;
+            }
+
+            if (fromTarget.sqrMagnitude <= 0.0001f)
+            {
+                fromTarget = -ownerTransform.forward;
+                fromTarget.y = 0f;
+            }
+
+            fromTarget.Normalize();
+            var attackDistance = Mathf.Max(0.35f, vision.AttackViewDistance);
+            var tolerance = combatConfig != null ? combatConfig.AttackStartDistanceTolerance : 0.25f;
+            var desiredRadius = Mathf.Max(0.35f, attackDistance - tolerance * 0.5f);
+            var sampleRadius = combatConfig != null ? combatConfig.CombatMoveNavMeshSampleRadius : 2f;
+            var baseAngle = Mathf.Atan2(fromTarget.x, fromTarget.z) * Mathf.Rad2Deg;
+            Span<float> angleOffsets = stackalloc[] { 0f, 20f, -20f, 45f, -45f, 75f, -75f, 110f, -110f };
+            Span<float> radiusMultipliers = stackalloc[] { 0.85f, 0.65f, 1f };
+
+            foreach (var radiusMultiplier in radiusMultipliers)
+            {
+                foreach (var angleOffset in angleOffsets)
+                {
+                    var direction = Quaternion.Euler(0f, baseAngle + angleOffset, 0f) * Vector3.forward;
+                    var candidate = targetPosition + direction * desiredRadius * radiusMultiplier;
+                    if (!TrySampleReachablePosition(candidate, sampleRadius, out destination))
+                    {
+                        continue;
+                    }
+
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public bool TryResolveCurrentTargetDown()
@@ -714,6 +834,21 @@ namespace NPC
         public bool RequestAttack()
         {
             return HasClearAttackLane() && weaponController != null && weaponController.RequestAttack();
+        }
+
+        public bool ConsumeAttackComboWindow()
+        {
+            return weaponController?.ConsumeAttackComboWindow() == true;
+        }
+
+        public bool RequestComboAttack()
+        {
+            return HasClearAttackLane() && weaponController != null && weaponController.RequestComboAttack();
+        }
+
+        public void ClearAttackRequest()
+        {
+            weaponController?.ClearAttackRequest();
         }
 
         public bool HasClearAttackLane()
@@ -895,6 +1030,32 @@ namespace NPC
             return targetPosition + direction.normalized * radius;
         }
 
+        private bool TrySampleReachablePosition(Vector3 destination, float sampleRadius, out Vector3 reachablePosition)
+        {
+            reachablePosition = default;
+            if (ownerTransform == null)
+            {
+                return false;
+            }
+
+            if (!NavMesh.SamplePosition(destination, out var hit, sampleRadius, NavMesh.AllAreas))
+            {
+                return false;
+            }
+
+            var path = new NavMeshPath();
+            if (!NavMesh.CalculatePath(ownerTransform.position, hit.position, NavMesh.AllAreas, path)
+             || path.status != NavMeshPathStatus.PathComplete
+             || path.corners == null
+             || path.corners.Length == 0)
+            {
+                return false;
+            }
+
+            reachablePosition = hit.position;
+            return true;
+        }
+
         private int GetDirectAttackRank()
         {
             if (!HasCombatTarget)
@@ -1022,8 +1183,16 @@ namespace NPC
             }
         }
 
-        private static bool IsTargetAlive(TargetLockTarget target)
+        private bool IsTargetAlive(TargetLockTarget target)
         {
+            if (target != null
+             && deathConfig != null
+             && deathConfig.CannotDie
+             && target.GetComponentInParent<PlayerLifetimeScope>() != null)
+            {
+                return true;
+            }
+
             var receiver = target != null
                 ? target.GetComponentInParent<DamageReceiverHost>()?.Receiver
                 : null;
@@ -1039,6 +1208,11 @@ namespace NPC
 
             var previousTarget = CurrentTarget;
             CurrentTarget = target;
+            if (target != previousTarget)
+            {
+                initialCircleEvaluatedTarget = null;
+            }
+
             if (target != null)
             {
                 LastKnownTargetPosition = target.transform.position;

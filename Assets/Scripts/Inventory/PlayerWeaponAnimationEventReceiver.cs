@@ -40,6 +40,7 @@ namespace Inventory
 
         public void HoldAttackReady()
         {
+            weaponInHandController?.HoldAttackReadyFromAnimationEvent();
         }
 
         public void AttackStarted()

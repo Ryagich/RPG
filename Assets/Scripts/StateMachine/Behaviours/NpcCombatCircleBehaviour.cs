@@ -11,6 +11,7 @@ namespace StateMachine.Behaviours
         {
             context?.GetService<NpcNavMeshController>()?.SetFacingLocked(true);
             context?.SetValue(NpcCombatStateKeys.CombatMoveCompleted, false);
+            NpcCombatMoveProgress.Reset(context);
             var combat = context?.GetService<NpcCombatService>();
             if (combat != null && !combat.HasCombatMoveDestination)
             {
@@ -29,6 +30,7 @@ namespace StateMachine.Behaviours
         {
             context?.RemoveValue(NpcCombatStateKeys.CombatMoveCompleted);
             context?.RemoveValue(NpcCombatStateKeys.InitialCircleRequested);
+            NpcCombatMoveProgress.Clear(context);
             context?.GetService<NpcCombatService>()?.ClearCombatMoveDestination();
         }
 
@@ -50,7 +52,8 @@ namespace StateMachine.Behaviours
             combat.RefreshTargetVisibility();
             combat.FaceTarget();
 
-            var reachedDistance = context.GetService<NpcCombatConfig>()?.CombatMoveReachedDistance ?? 0.45f;
+            var config = context.GetService<NpcCombatConfig>();
+            var reachedDistance = config?.CombatMoveReachedDistance ?? 0.45f;
             if (Vector3.Distance(context.Owner.transform.position, combat.CombatMoveDestination) <= reachedDistance)
             {
                 nav.Stop();
@@ -58,7 +61,90 @@ namespace StateMachine.Behaviours
                 return;
             }
 
-            nav.MoveTo(combat.CombatMoveDestination, stoppingDistance: reachedDistance);
+            if (NpcCombatMoveProgress.IsStuck(context, config))
+            {
+                combat.ClearCombatMoveDestination();
+                NpcCombatMoveProgress.Reset(context);
+                if (!combat.TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Circle))
+                {
+                    nav.Stop();
+                    context.SetValue(NpcCombatStateKeys.CombatMoveCompleted, true);
+                    return;
+                }
+            }
+
+            if (nav.MoveTo(combat.CombatMoveDestination, stoppingDistance: reachedDistance))
+            {
+                return;
+            }
+
+            combat.ClearCombatMoveDestination();
+            NpcCombatMoveProgress.Reset(context);
+            if (combat.TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Circle)
+             && nav.MoveTo(combat.CombatMoveDestination, stoppingDistance: reachedDistance))
+            {
+                return;
+            }
+
+            nav.Stop();
+            context.SetValue(NpcCombatStateKeys.CombatMoveCompleted, true);
+        }
+    }
+
+    internal static class NpcCombatMoveProgress
+    {
+        public static void Reset(StateMachineContext context)
+        {
+            if (context?.Owner == null)
+            {
+                return;
+            }
+
+            context.SetValue(NpcCombatStateKeys.CombatMoveLastPosition, context.Owner.transform.position);
+            context.SetValue(NpcCombatStateKeys.CombatMoveStuckTimer, 0f);
+        }
+
+        public static void Clear(StateMachineContext context)
+        {
+            context?.RemoveValue(NpcCombatStateKeys.CombatMoveLastPosition);
+            context?.RemoveValue(NpcCombatStateKeys.CombatMoveStuckTimer);
+        }
+
+        public static bool IsStuck(StateMachineContext context, NpcCombatConfig config)
+        {
+            if (context?.Owner == null)
+            {
+                return false;
+            }
+
+            var currentPosition = context.Owner.transform.position;
+            if (!context.TryGetValue<Vector3>(NpcCombatStateKeys.CombatMoveLastPosition, out var lastPosition))
+            {
+                Reset(context);
+                return false;
+            }
+
+            var progressDistance = config != null ? config.CombatMoveProgressDistance : 0.08f;
+            if (PlanarDistance(currentPosition, lastPosition) >= progressDistance)
+            {
+                context.SetValue(NpcCombatStateKeys.CombatMoveLastPosition, currentPosition);
+                context.SetValue(NpcCombatStateKeys.CombatMoveStuckTimer, 0f);
+                return false;
+            }
+
+            context.TryGetValue<float>(NpcCombatStateKeys.CombatMoveStuckTimer, out var timer);
+            timer += context.DeltaTime;
+            context.SetValue(NpcCombatStateKeys.CombatMoveStuckTimer, timer);
+
+            var stuckTimeout = config != null ? config.CombatMoveStuckTimeout : 0.75f;
+            return timer >= stuckTimeout;
+        }
+
+        private static float PlanarDistance(Vector3 a, Vector3 b)
+        {
+            a.y = 0f;
+            b.y = 0f;
+            return Vector3.Distance(a, b);
         }
     }
 }

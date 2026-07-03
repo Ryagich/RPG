@@ -6,6 +6,7 @@ namespace Inventory
         void BeginMoveWeaponToRightHandFromAnimationEvent();
         void PutWeaponOnBeltFromAnimationEvent();
         void BeginMoveWeaponToBeltFromAnimationEvent();
+        void HoldAttackReadyFromAnimationEvent();
         void AttackStartedFromAnimationEvent();
         void BeginDamageWindowFromAnimationEvent();
         void EndDamageWindowFromAnimationEvent();

@@ -35,6 +35,7 @@ namespace NPC
         private ItemConfig currentWeaponItemConfig;
         private WeaponDamageZone activeDamageZone;
         private bool isWeaponDrawn;
+        private bool hasAttackComboWindow;
         private int currentRenderedSlotIndex;
         private WeaponDisplayMode currentDisplayMode;
 
@@ -73,6 +74,7 @@ namespace NPC
         public void BeginMoveWeaponToRightHandFromAnimationEvent() => MoveCurrentWeapon(WeaponDisplayMode.RightHand);
         public void PutWeaponOnBeltFromAnimationEvent() => MoveCurrentWeapon(WeaponDisplayMode.Belt);
         public void BeginMoveWeaponToBeltFromAnimationEvent() => MoveCurrentWeapon(WeaponDisplayMode.Belt);
+        public void HoldAttackReadyFromAnimationEvent() => hasAttackComboWindow = true;
         public void AttackStartedFromAnimationEvent() => actionState?.SetActionBlocked(true);
         public void BeginDamageWindowFromAnimationEvent() => BeginCurrentWeaponDamageWindow();
         public void EndDamageWindowFromAnimationEvent() => EndCurrentWeaponDamageWindow();
@@ -81,7 +83,6 @@ namespace NPC
         public void AttackFinishedFromAnimationEvent()
         {
             EndCurrentWeaponDamageWindow();
-            SetAttackRequested(false);
             actionState?.SetActionBlocked(false);
         }
 
@@ -100,6 +101,11 @@ namespace NPC
                 return false;
             }
 
+            if (IsWeaponDrawn)
+            {
+                return true;
+            }
+
             isWeaponDrawn = true;
             if (animator != null)
             {
@@ -113,6 +119,11 @@ namespace NPC
 
         public void RequestSheatheWeapon()
         {
+            if (!isWeaponDrawn && currentDisplayMode != WeaponDisplayMode.RightHand)
+            {
+                return;
+            }
+
             isWeaponDrawn = false;
             if (animator != null)
             {
@@ -134,9 +145,38 @@ namespace NPC
             return true;
         }
 
+        public bool RequestComboAttack()
+        {
+            if (!IsWeaponDrawn)
+            {
+                return false;
+            }
+
+            SetAttackRequested(true);
+            return true;
+        }
+
+        public bool ConsumeAttackComboWindow()
+        {
+            if (!hasAttackComboWindow)
+            {
+                return false;
+            }
+
+            hasAttackComboWindow = false;
+            return true;
+        }
+
+        public void ClearAttackRequest()
+        {
+            hasAttackComboWindow = false;
+            SetAttackRequested(false);
+        }
+
         public void InterruptByHitReaction()
         {
             EndCurrentWeaponDamageWindow();
+            hasAttackComboWindow = false;
             if (animator == null)
             {
                 return;

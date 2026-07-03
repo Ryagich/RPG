@@ -10,7 +10,8 @@ namespace StateMachine.Conditions
         public override bool IsCondition(StateMachineContext context)
         {
             var combat = context?.GetService<NpcCombatService>();
-            return combat != null && combat.HasCombatTarget && !combat.IsTargetInAttackView;
+            combat?.RefreshTargetVisibility();
+            return combat != null && combat.HasCombatTarget && !combat.CanStartAttack;
         }
     }
 }

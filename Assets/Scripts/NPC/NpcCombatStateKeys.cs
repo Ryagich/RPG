@@ -9,8 +9,12 @@ namespace NPC
         public const string AttackBlockObserved = "NpcCombat.AttackBlockObserved";
         public const string AttackElapsed = "NpcCombat.AttackElapsed";
         public const string AttackCompleted = "NpcCombat.AttackCompleted";
+        public const string ComboAttackRequests = "NpcCombat.ComboAttackRequests";
+        public const string ComboAttackNextRequestTime = "NpcCombat.ComboAttackNextRequestTime";
         public const string PostAttackDecision = "NpcCombat.PostAttackDecision";
         public const string CombatMoveCompleted = "NpcCombat.CombatMoveCompleted";
+        public const string CombatMoveLastPosition = "NpcCombat.CombatMoveLastPosition";
+        public const string CombatMoveStuckTimer = "NpcCombat.CombatMoveStuckTimer";
         public const string InitialCircleRequested = "NpcCombat.InitialCircleRequested";
         public const string TargetDownWaitTimer = "NpcCombat.TargetDownWaitTimer";
         public const string TargetDownWaitCompleted = "NpcCombat.TargetDownWaitCompleted";

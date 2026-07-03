@@ -20,6 +20,11 @@ MonoBehaviour:
   <AttackRequestInterval>k__BackingField: 0.65
   <TargetSearchRadius>k__BackingField: 18
   <AttackStateTimeout>k__BackingField: 3
+  <AttackStartDistanceTolerance>k__BackingField: 0.25
+  <ComboAttackChance>k__BackingField: 0.55
+  <MaxComboAttackRequests>k__BackingField: 2
+  <ComboAttackInputDelay>k__BackingField: 0.18
+  <ComboAttackInputInterval>k__BackingField: 0.22
   <InitialCircleChance>k__BackingField: 0.25
   <PostAttackImmediateAttackWeight>k__BackingField: 0.45
   <PostAttackStrafeWeight>k__BackingField: 0.25
@@ -27,6 +32,8 @@ MonoBehaviour:
   <PostAttackCircleWeight>k__BackingField: 0.1
   <CombatMoveReachedDistance>k__BackingField: 0.45
   <CombatMoveNavMeshSampleRadius>k__BackingField: 2
+  <CombatMoveStuckTimeout>k__BackingField: 0.75
+  <CombatMoveProgressDistance>k__BackingField: 0.08
   <StrafeMinDistance>k__BackingField: 1.2
   <StrafeMaxDistance>k__BackingField: 2.2
   <BackstepMinDistance>k__BackingField: 1.2
@@ -52,5 +59,7 @@ MonoBehaviour:
   <FleeAngleJitter>k__BackingField: 25
   <FleeSampleAttempts>k__BackingField: 8
   <FleeNavMeshSampleRadius>k__BackingField: 3
+  <FleeOpennessProbeDistance>k__BackingField: 3
+  <FleeOpennessWeight>k__BackingField: 20
   <FleeReachedDistance>k__BackingField: 0.75
   <FleeLookBackDuration>k__BackingField: 1.5

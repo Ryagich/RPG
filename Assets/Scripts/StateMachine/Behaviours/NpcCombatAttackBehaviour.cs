@@ -17,6 +17,8 @@ namespace StateMachine.Behaviours
             context?.SetValue(NpcCombatStateKeys.AttackBlockObserved, false);
             context?.SetValue(NpcCombatStateKeys.AttackElapsed, 0f);
             context?.SetValue(NpcCombatStateKeys.AttackCompleted, false);
+            context?.SetValue(NpcCombatStateKeys.ComboAttackRequests, 0);
+            context?.SetValue(NpcCombatStateKeys.ComboAttackNextRequestTime, GetComboInputDelay(context));
             TryRequestAttack(context);
         }
 
@@ -64,6 +66,7 @@ namespace StateMachine.Behaviours
             if (isActionBlocked)
             {
                 context.SetValue(NpcCombatStateKeys.AttackBlockObserved, true);
+                TryRequestComboAttack(context, elapsed);
                 return;
             }
 
@@ -83,12 +86,69 @@ namespace StateMachine.Behaviours
             }
         }
 
+        private static void TryRequestComboAttack(StateMachineContext context, float elapsed)
+        {
+            var combat = context?.GetService<NpcCombatService>();
+            if (combat == null)
+            {
+                return;
+            }
+
+            var config = context.GetService<NpcCombatConfig>();
+            var maxComboRequests = config != null ? config.MaxComboAttackRequests : 2;
+            context.TryGetValue<int>(NpcCombatStateKeys.ComboAttackRequests, out var comboRequests);
+            if (comboRequests >= maxComboRequests)
+            {
+                return;
+            }
+
+            context.TryGetValue<float>(NpcCombatStateKeys.ComboAttackNextRequestTime, out var nextRequestTime);
+            if (elapsed < nextRequestTime)
+            {
+                return;
+            }
+
+            context.SetValue(
+                NpcCombatStateKeys.ComboAttackNextRequestTime,
+                elapsed + (config != null ? config.ComboAttackInputInterval : 0.22f));
+
+            if (!combat.CanStartAttack)
+            {
+                return;
+            }
+
+            var chance = config != null ? config.ComboAttackChance : 0.55f;
+            if (Random.value > Mathf.Clamp01(chance))
+            {
+                context.SetValue(NpcCombatStateKeys.ComboAttackRequests, maxComboRequests);
+                return;
+            }
+
+            if (!combat.RequestComboAttack())
+            {
+                return;
+            }
+
+            context.SetValue(NpcCombatStateKeys.ComboAttackRequests, comboRequests + 1);
+            context.SetValue(NpcCombatStateKeys.AttackRequested, true);
+            context.SetValue(NpcCombatStateKeys.AttackElapsed, 0f);
+            context.SetValue(NpcCombatStateKeys.ComboAttackNextRequestTime, GetComboInputDelay(context));
+        }
+
+        private static float GetComboInputDelay(StateMachineContext context)
+        {
+            return context?.GetService<NpcCombatConfig>()?.ComboAttackInputDelay ?? 0.18f;
+        }
+
         public override void Exit(StateMachineContext context)
         {
+            context?.GetService<NpcCombatService>()?.ClearAttackRequest();
             context?.RemoveValue(NpcCombatStateKeys.AttackRequested);
             context?.RemoveValue(NpcCombatStateKeys.AttackBlockObserved);
             context?.RemoveValue(NpcCombatStateKeys.AttackElapsed);
             context?.RemoveValue(NpcCombatStateKeys.AttackCompleted);
+            context?.RemoveValue(NpcCombatStateKeys.ComboAttackRequests);
+            context?.RemoveValue(NpcCombatStateKeys.ComboAttackNextRequestTime);
         }
     }
 }

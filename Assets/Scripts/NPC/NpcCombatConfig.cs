@@ -13,6 +13,11 @@ namespace NPC
         [field: SerializeField, Min(0f)] public float AttackRequestInterval { get; private set; } = 0.65f;
         [field: SerializeField, Min(0f)] public float TargetSearchRadius { get; private set; } = 18f;
         [field: SerializeField, Min(0.1f)] public float AttackStateTimeout { get; private set; } = 3f;
+        [field: SerializeField, Min(0f)] public float AttackStartDistanceTolerance { get; private set; } = 0.25f;
+        [field: SerializeField, Range(0f, 1f)] public float ComboAttackChance { get; private set; } = 0.55f;
+        [field: SerializeField, Min(0)] public int MaxComboAttackRequests { get; private set; } = 2;
+        [field: SerializeField, Min(0f)] public float ComboAttackInputDelay { get; private set; } = 0.18f;
+        [field: SerializeField, Min(0.01f)] public float ComboAttackInputInterval { get; private set; } = 0.22f;
         [field: Header("Combat Decisions")]
         [field: SerializeField, Range(0f, 1f)] public float InitialCircleChance { get; private set; } = 0.25f;
         [field: SerializeField, Min(0f)] public float PostAttackImmediateAttackWeight { get; private set; } = 0.45f;
@@ -22,6 +27,8 @@ namespace NPC
         [field: Header("Combat Movement")]
         [field: SerializeField, Min(0f)] public float CombatMoveReachedDistance { get; private set; } = 0.45f;
         [field: SerializeField, Min(0.1f)] public float CombatMoveNavMeshSampleRadius { get; private set; } = 2f;
+        [field: SerializeField, Min(0.1f)] public float CombatMoveStuckTimeout { get; private set; } = 0.75f;
+        [field: SerializeField, Min(0.001f)] public float CombatMoveProgressDistance { get; private set; } = 0.08f;
         [field: SerializeField, Min(0.1f)] public float StrafeMinDistance { get; private set; } = 1.2f;
         [field: SerializeField, Min(0.1f)] public float StrafeMaxDistance { get; private set; } = 2.2f;
         [field: SerializeField, Min(0.1f)] public float BackstepMinDistance { get; private set; } = 1.2f;

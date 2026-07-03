@@ -8,6 +8,7 @@ namespace NPC
     {
         private const float DefaultSampleRadius = 2f;
         private const float VelocityThreshold = 0.01f;
+        private const float DestinationReuseDistance = 0.08f;
         private const string DirectionXParameter = "DirectionX";
         private const string DirectionYParameter = "DirectionY";
         private const string IsRunParameter = "IsRun";
@@ -19,6 +20,9 @@ namespace NPC
         private readonly float defaultSpeed;
 
         private bool isFacingLocked;
+        private bool hasMoveRequest;
+        private Vector3 lastRequestedDestination;
+        private float lastRequestedStoppingDistance;
 
         public NpcNavMeshController(NavMeshAgent agent, CharacterController characterController, Animator animator)
         {
@@ -117,11 +121,36 @@ namespace NPC
                 return false;
             }
 
+            var path = new NavMeshPath();
+            if (!NavMesh.CalculatePath(agent.transform.position, hit.position, NavMesh.AllAreas, path)
+             || path.status != NavMeshPathStatus.PathComplete
+             || path.corners == null
+             || path.corners.Length == 0)
+            {
+                return false;
+            }
+
+            var resolvedStoppingDistance = Mathf.Max(0f, stoppingDistance ?? defaultStoppingDistance);
+            if (CanReuseCurrentPath(hit.position, resolvedStoppingDistance))
+            {
+                agent.isStopped = false;
+                agent.stoppingDistance = resolvedStoppingDistance;
+                return true;
+            }
+
             agent.isStopped = false;
-            agent.stoppingDistance = Mathf.Max(0f, stoppingDistance ?? defaultStoppingDistance);
+            agent.stoppingDistance = resolvedStoppingDistance;
             agent.updatePosition = characterController == null;
             agent.updateRotation = characterController == null;
-            return agent.SetDestination(hit.position);
+            var didSetPath = agent.SetPath(path);
+            if (didSetPath)
+            {
+                hasMoveRequest = true;
+                lastRequestedDestination = hit.position;
+                lastRequestedStoppingDistance = resolvedStoppingDistance;
+            }
+
+            return didSetPath;
         }
 
         public bool TryCalculateEta(Vector3 destination, out float eta, float sampleRadius = DefaultSampleRadius)
@@ -139,7 +168,7 @@ namespace NPC
 
             var path = new NavMeshPath();
             if (!NavMesh.CalculatePath(agent.transform.position, hit.position, NavMesh.AllAreas, path)
-             || path.status == NavMeshPathStatus.PathInvalid
+             || path.status != NavMeshPathStatus.PathComplete
              || path.corners == null
              || path.corners.Length == 0)
             {
@@ -170,6 +199,7 @@ namespace NPC
                 agent.isStopped = true;
             }
 
+            ClearMoveRequest();
             UpdateAnimator(Vector3.zero);
         }
 
@@ -222,7 +252,13 @@ namespace NPC
             }
 
             return NavMesh.SamplePosition(position, out var hit, sampleRadius, NavMesh.AllAreas)
-                && agent.Warp(hit.position);
+                && Warp(hit.position);
+        }
+
+        private bool Warp(Vector3 position)
+        {
+            ClearMoveRequest();
+            return agent.Warp(position);
         }
 
         private bool CanUseAgent()
@@ -233,6 +269,26 @@ namespace NPC
             }
 
             return agent.isOnNavMesh || WarpToNearestNavMesh(agent.transform.position);
+        }
+
+        private bool CanReuseCurrentPath(Vector3 destination, float stoppingDistance)
+        {
+            if (!hasMoveRequest || agent == null || agent.pathPending || !agent.hasPath || agent.isStopped)
+            {
+                return false;
+            }
+
+            var destinationDelta = destination - lastRequestedDestination;
+            destinationDelta.y = 0f;
+            return destinationDelta.sqrMagnitude <= DestinationReuseDistance * DestinationReuseDistance
+                && Mathf.Abs(stoppingDistance - lastRequestedStoppingDistance) <= 0.01f;
+        }
+
+        private void ClearMoveRequest()
+        {
+            hasMoveRequest = false;
+            lastRequestedDestination = default;
+            lastRequestedStoppingDistance = default;
         }
 
         private Vector3 GetFacingDirection(Vector3 fallbackDirection)
