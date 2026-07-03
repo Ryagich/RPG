@@ -26,6 +26,7 @@ namespace Interactable
 
         // ReSharper disable once IdentifierTypo
         public readonly ReactiveCollection<Interactable> Interactables = new();
+        private readonly List<Interactable> nearbyInteractables = new();
         private List<Interactable> activeInteractables = new();
         private readonly CompositeDisposable disposables = new();
 
@@ -52,12 +53,19 @@ namespace Interactable
         
         private void Add(InteractableMessage msg)
         {
-            Interactables.Add(msg.Interactable);
+            if (msg.Interactable == null || nearbyInteractables.Contains(msg.Interactable))
+            {
+                return;
+            }
+
+            nearbyInteractables.Add(msg.Interactable);
             msg.Interactable.Destroyed += OnDestroyed;
+            RefreshAvailableInteractables();
         }
 
         private void OnDestroyed(Interactable interactable)
         {
+            nearbyInteractables.Remove(interactable);
             if (Interactables.Contains(interactable))
             {
                 Interactables.Remove(interactable);
@@ -71,6 +79,7 @@ namespace Interactable
 
         private void Remove(InteractableEndMessage msg)
         {
+            nearbyInteractables.Remove(msg.Interactable);
             Interactables.Remove(msg.Interactable);
             msg.Interactable.Destroyed -= OnDestroyed;
             if (msg.Interactable.InteractionMode is InteractionMode.Manual)
@@ -82,7 +91,7 @@ namespace Interactable
                 msg.Interactable.EndInteract(scope);
             }
 
-            if (Interactables.Count is 0)
+            if (nearbyInteractables.Count is 0)
             {
                 t = .0f;
             }
@@ -90,6 +99,7 @@ namespace Interactable
 
         private void Interact(InteractableInputMessage msg)
         {
+            RefreshAvailableInteractables();
             if (actionState.IsActionBlocked)
             {
                 EndAllManualInteractions();
@@ -100,6 +110,7 @@ namespace Interactable
             if (manualT > config.TimeBetweenInteractions)
             {
                 foreach (var interactable in Interactables.Where(i => i.InteractionMode is InteractionMode.Manual
+                                                                   && IsInteractableAvailable(i)
                                                                    && !activeInteractables.Contains(i)))
                 {
                     interactable.Interact(scope);
@@ -154,6 +165,7 @@ namespace Interactable
 
         public void FixedTick()
         {
+            RefreshAvailableInteractables();
             if (actionState.IsActionBlocked)
             {
                 return;
@@ -161,7 +173,8 @@ namespace Interactable
 
             if (t > config.TimeBetweenInteractions)
             {
-                foreach (var interactable in Interactables.Where(i => i.InteractionMode is InteractionMode.Automatic))
+                foreach (var interactable in Interactables.Where(i => i.InteractionMode is InteractionMode.Automatic
+                                                                   && IsInteractableAvailable(i)))
                 {
                     interactable.Interact(scope);
                 }
@@ -172,6 +185,57 @@ namespace Interactable
                 t += Time.fixedDeltaTime;
                 manualT += Time.fixedDeltaTime;
             }
+        }
+
+        private void RefreshAvailableInteractables()
+        {
+            for (var i = nearbyInteractables.Count - 1; i >= 0; i--)
+            {
+                if (nearbyInteractables[i] == null)
+                {
+                    nearbyInteractables.RemoveAt(i);
+                }
+            }
+
+            var available = nearbyInteractables
+                .Where(IsInteractableAvailable)
+                .ToList();
+
+            for (var i = Interactables.Count - 1; i >= 0; i--)
+            {
+                var interactable = Interactables[i];
+                if (interactable == null || !available.Contains(interactable))
+                {
+                    Interactables.RemoveAt(i);
+                }
+            }
+
+            foreach (var interactable in available)
+            {
+                if (!Interactables.Contains(interactable))
+                {
+                    Interactables.Add(interactable);
+                }
+            }
+
+            foreach (var interactable in activeInteractables.ToArray())
+            {
+                if (interactable == null || !available.Contains(interactable))
+                {
+                    EndManualInteraction(interactable);
+                }
+            }
+        }
+
+        private bool IsInteractableAvailable(Interactable interactable)
+        {
+            if (interactable == null)
+            {
+                return false;
+            }
+
+            var availability = interactable.GetComponent<IInteractableAvailability>();
+            return availability == null || availability.IsInteractableAvailable(scope);
         }
     }
 }

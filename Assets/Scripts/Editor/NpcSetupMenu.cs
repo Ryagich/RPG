@@ -32,6 +32,7 @@ namespace EditorTools
         private const string PickupWaitStatePath = StatesFolderPath + "/NpcPickupItemWaitState.asset";
         private const string PickupStatePath = StatesFolderPath + "/NpcPickupItemState.asset";
         private const string ReturnHomeStatePath = StatesFolderPath + "/NpcReturnHomeState.asset";
+        private const string DialogueStatePath = StatesFolderPath + "/NpcDialogueState.asset";
         private const string HitReactionStatePath = StatesFolderPath + "/NpcHitReactionState.asset";
         private const string FleeStatePath = StatesFolderPath + "/NpcFleeState.asset";
         private const string CombatApproachStatePath = StatesFolderPath + "/NpcCombatApproachState.asset";
@@ -61,6 +62,12 @@ namespace EditorTools
         private const string PickupToCombatApproachTransitionPath = TransitionsFolderPath + "/NpcPickupToCombatApproachTransition.asset";
         private const string ReturnHomeToFleeTransitionPath = TransitionsFolderPath + "/NpcReturnHomeToFleeTransition.asset";
         private const string ReturnHomeToCombatApproachTransitionPath = TransitionsFolderPath + "/NpcReturnHomeToCombatApproachTransition.asset";
+        private const string IdleToDialogueTransitionPath = TransitionsFolderPath + "/NpcIdleToDialogueTransition.asset";
+        private const string MoveToItemToDialogueTransitionPath = TransitionsFolderPath + "/NpcMoveToItemToDialogueTransition.asset";
+        private const string PickupWaitToDialogueTransitionPath = TransitionsFolderPath + "/NpcPickupWaitToDialogueTransition.asset";
+        private const string PickupToDialogueTransitionPath = TransitionsFolderPath + "/NpcPickupToDialogueTransition.asset";
+        private const string ReturnHomeToDialogueTransitionPath = TransitionsFolderPath + "/NpcReturnHomeToDialogueTransition.asset";
+        private const string DialogueToIdleTransitionPath = TransitionsFolderPath + "/NpcDialogueToIdleTransition.asset";
         private const string FleeToCombatApproachTransitionPath = TransitionsFolderPath + "/NpcFleeToCombatApproachTransition.asset";
         private const string FleeToIdleTransitionPath = TransitionsFolderPath + "/NpcFleeToIdleTransition.asset";
         private const string CombatApproachToCircleTransitionPath = TransitionsFolderPath + "/NpcCombatApproachToCircleTransition.asset";
@@ -141,6 +148,8 @@ namespace EditorTools
         private const string CombatTargetLostConditionPath = ConditionsFolderPath + "/NpcCombatTargetLostCondition.asset";
         private const string ShouldSearchLastKnownTargetConditionPath = ConditionsFolderPath + "/NpcShouldSearchLastKnownTargetCondition.asset";
         private const string LastKnownLookCompletedConditionPath = ConditionsFolderPath + "/NpcLastKnownLookCompletedCondition.asset";
+        private const string DialogueRequestedConditionPath = ConditionsFolderPath + "/NpcDialogueRequestedCondition.asset";
+        private const string DialogueEndedConditionPath = ConditionsFolderPath + "/NpcDialogueEndedCondition.asset";
         private const string DeathBehaviourPath = BehavioursFolderPath + "/NpcDeathBehaviour.asset";
         private const string ScanVisibleItemsBehaviourPath = BehavioursFolderPath + "/NpcScanVisibleItemsBehaviour.asset";
         private const string ScanEnemiesBehaviourPath = BehavioursFolderPath + "/NpcScanEnemiesBehaviour.asset";
@@ -149,6 +158,7 @@ namespace EditorTools
         private const string WaitPickupBehaviourPath = BehavioursFolderPath + "/NpcWaitPickupBehaviour.asset";
         private const string PickupInterestedItemBehaviourPath = BehavioursFolderPath + "/NpcPickupInterestedItemBehaviour.asset";
         private const string ReturnHomeBehaviourPath = BehavioursFolderPath + "/NpcReturnHomeBehaviour.asset";
+        private const string DialogueBehaviourPath = BehavioursFolderPath + "/NpcDialogueBehaviour.asset";
         private const string HitReactionBehaviourPath = BehavioursFolderPath + "/NpcHitReactionBehaviour.asset";
         private const string FleeBehaviourPath = BehavioursFolderPath + "/NpcFleeBehaviour.asset";
         private const string InitialCombatTacticBehaviourPath = BehavioursFolderPath + "/NpcInitialCombatTacticBehaviour.asset";
@@ -165,6 +175,7 @@ namespace EditorTools
         private const string NpcVisionConfigPath = NpcConfigFolderPath + "/NpcVisionConfig.asset";
         private const string NpcItemPickupConfigPath = NpcConfigFolderPath + "/NpcItemPickupConfig.asset";
         private const string NpcCombatConfigPath = NpcConfigFolderPath + "/NpcCombatConfig.asset";
+        private const string DefaultNpcDialogPath = "Assets/Dialogs/Test Dialog.asset";
         private const string PlayerPrefabPath = "Assets/Prefabs/Scopes/Player.prefab";
         private const string NpcPrefabPath = "Assets/Prefabs/Scopes/NPC.prefab";
         private const string ProjectLifetimeScopePrefabPath = "Assets/Resources/Project/ProjectLifetimeScope.prefab";
@@ -187,6 +198,7 @@ namespace EditorTools
             var pickupWaitState = LoadOrCreate<State>(PickupWaitStatePath);
             var pickupState = LoadOrCreate<State>(PickupStatePath);
             var returnHomeState = LoadOrCreate<State>(ReturnHomeStatePath);
+            var dialogueState = LoadOrCreate<State>(DialogueStatePath);
             var hitReactionState = LoadOrCreate<State>(HitReactionStatePath);
             var fleeState = LoadOrCreate<State>(FleeStatePath);
             var combatApproachState = LoadOrCreate<State>(CombatApproachStatePath);
@@ -216,6 +228,12 @@ namespace EditorTools
             var pickupToCombatApproachTransition = LoadOrCreate<Transition>(PickupToCombatApproachTransitionPath);
             var returnHomeToFleeTransition = LoadOrCreate<Transition>(ReturnHomeToFleeTransitionPath);
             var returnHomeToCombatApproachTransition = LoadOrCreate<Transition>(ReturnHomeToCombatApproachTransitionPath);
+            var idleToDialogueTransition = LoadOrCreate<Transition>(IdleToDialogueTransitionPath);
+            var moveToItemToDialogueTransition = LoadOrCreate<Transition>(MoveToItemToDialogueTransitionPath);
+            var pickupWaitToDialogueTransition = LoadOrCreate<Transition>(PickupWaitToDialogueTransitionPath);
+            var pickupToDialogueTransition = LoadOrCreate<Transition>(PickupToDialogueTransitionPath);
+            var returnHomeToDialogueTransition = LoadOrCreate<Transition>(ReturnHomeToDialogueTransitionPath);
+            var dialogueToIdleTransition = LoadOrCreate<Transition>(DialogueToIdleTransitionPath);
             var fleeToCombatApproachTransition = LoadOrCreate<Transition>(FleeToCombatApproachTransitionPath);
             var fleeToIdleTransition = LoadOrCreate<Transition>(FleeToIdleTransitionPath);
             var combatApproachToCircleTransition = LoadOrCreate<Transition>(CombatApproachToCircleTransitionPath);
@@ -296,6 +314,8 @@ namespace EditorTools
             var combatTargetLostCondition = LoadOrCreate<NpcCombatTargetLostCondition>(CombatTargetLostConditionPath);
             var shouldSearchLastKnownTargetCondition = LoadOrCreate<NpcShouldSearchLastKnownTargetCondition>(ShouldSearchLastKnownTargetConditionPath);
             var lastKnownLookCompletedCondition = LoadOrCreate<NpcLastKnownLookCompletedCondition>(LastKnownLookCompletedConditionPath);
+            var dialogueRequestedCondition = LoadOrCreate<NpcDialogueRequestedCondition>(DialogueRequestedConditionPath);
+            var dialogueEndedCondition = LoadOrCreate<NpcDialogueEndedCondition>(DialogueEndedConditionPath);
             var deathBehaviour = LoadOrCreate<NpcDeathBehaviour>(DeathBehaviourPath);
             var scanVisibleItemsBehaviour = LoadOrCreate<NpcScanVisibleItemsBehaviour>(ScanVisibleItemsBehaviourPath);
             var scanEnemiesBehaviour = LoadOrCreate<NpcScanEnemiesBehaviour>(ScanEnemiesBehaviourPath);
@@ -304,6 +324,7 @@ namespace EditorTools
             var waitPickupBehaviour = LoadOrCreate<NpcWaitPickupBehaviour>(WaitPickupBehaviourPath);
             var pickupInterestedItemBehaviour = LoadOrCreate<NpcPickupInterestedItemBehaviour>(PickupInterestedItemBehaviourPath);
             var returnHomeBehaviour = LoadOrCreate<NpcReturnHomeBehaviour>(ReturnHomeBehaviourPath);
+            var dialogueBehaviour = LoadOrCreate<NpcDialogueBehaviour>(DialogueBehaviourPath);
             var hitReactionBehaviour = LoadOrCreate<NpcHitReactionBehaviour>(HitReactionBehaviourPath);
             var fleeBehaviour = LoadOrCreate<NpcFleeBehaviour>(FleeBehaviourPath);
             var initialCombatTacticBehaviour = LoadOrCreate<NpcInitialCombatTacticBehaviour>(InitialCombatTacticBehaviourPath);
@@ -347,6 +368,12 @@ namespace EditorTools
             ConfigureTransition(pickupToCombatApproachTransition, combatApproachState, canFightTargetCondition);
             ConfigureTransition(returnHomeToFleeTransition, fleeState, shouldFleeCondition);
             ConfigureTransition(returnHomeToCombatApproachTransition, combatApproachState, canFightTargetCondition);
+            ConfigureTransition(idleToDialogueTransition, dialogueState, dialogueRequestedCondition);
+            ConfigureTransition(moveToItemToDialogueTransition, dialogueState, dialogueRequestedCondition);
+            ConfigureTransition(pickupWaitToDialogueTransition, dialogueState, dialogueRequestedCondition);
+            ConfigureTransition(pickupToDialogueTransition, dialogueState, dialogueRequestedCondition);
+            ConfigureTransition(returnHomeToDialogueTransition, dialogueState, dialogueRequestedCondition);
+            ConfigureTransition(dialogueToIdleTransition, idleState, dialogueEndedCondition);
             ConfigureTransition(fleeToCombatApproachTransition, combatApproachState, canFightVisibleTargetCondition);
             ConfigureTransition(fleeToIdleTransition, returnHomeState, fleeCompletedCondition);
             ConfigureTransition(combatApproachToCircleTransition, combatCircleState, initialCircleRequestedCondition);
@@ -402,7 +429,7 @@ namespace EditorTools
             EditorUtility.SetDirty(hitReactionState);
 
             idleState.Behaviours = new List<BaseBehaviour> { sheatheWeaponBehaviour, scanEnemiesBehaviour, scanVisibleItemsBehaviour };
-            idleState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, idleToFleeTransition, idleToCombatApproachTransition, idleToMoveTransition };
+            idleState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, idleToFleeTransition, idleToCombatApproachTransition, idleToDialogueTransition, idleToMoveTransition };
             EditorUtility.SetDirty(idleState);
 
             moveToItemState.Behaviours = new List<BaseBehaviour> { scanEnemiesBehaviour, moveToItemBehaviour };
@@ -412,6 +439,7 @@ namespace EditorTools
                 anyToHitReactionTransition,
                 moveToItemToFleeTransition,
                 moveToItemToCombatApproachTransition,
+                moveToItemToDialogueTransition,
                 missingItemToNextPickupTransition,
                 missingItemToReturnTransition,
                 lostCompetitionToReturnTransition,
@@ -426,6 +454,7 @@ namespace EditorTools
                 anyToHitReactionTransition,
                 pickupWaitToFleeTransition,
                 pickupWaitToCombatApproachTransition,
+                pickupWaitToDialogueTransition,
                 missingItemToNextPickupTransition,
                 missingItemToReturnTransition,
                 lostCompetitionToReturnTransition,
@@ -434,12 +463,16 @@ namespace EditorTools
             EditorUtility.SetDirty(pickupWaitState);
 
             pickupState.Behaviours = new List<BaseBehaviour> { scanEnemiesBehaviour, pickupInterestedItemBehaviour };
-            pickupState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, pickupToFleeTransition, pickupToCombatApproachTransition, pickupToMoveTransition, pickupToReturnTransition };
+            pickupState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, pickupToFleeTransition, pickupToCombatApproachTransition, pickupToDialogueTransition, pickupToMoveTransition, pickupToReturnTransition };
             EditorUtility.SetDirty(pickupState);
 
             returnHomeState.Behaviours = new List<BaseBehaviour> { scanEnemiesBehaviour, returnHomeBehaviour };
-            returnHomeState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, returnHomeToFleeTransition, returnHomeToCombatApproachTransition, returnToIdleTransition };
+            returnHomeState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, returnHomeToFleeTransition, returnHomeToCombatApproachTransition, returnHomeToDialogueTransition, returnToIdleTransition };
             EditorUtility.SetDirty(returnHomeState);
+
+            dialogueState.Behaviours = new List<BaseBehaviour> { dialogueBehaviour };
+            dialogueState.Transitions = new List<Transition> { deathTransition, dialogueToIdleTransition };
+            EditorUtility.SetDirty(dialogueState);
 
             fleeState.Behaviours = new List<BaseBehaviour> { scanEnemiesBehaviour, fleeBehaviour };
             fleeState.Transitions = new List<Transition> { deathTransition, anyToHitReactionTransition, fleeToCombatApproachTransition, fleeToIdleTransition };
@@ -536,6 +569,7 @@ namespace EditorTools
                 new(pickupWaitState) { Position = new Vector2(860f, 80f) },
                 new(pickupState) { Position = new Vector2(1200f, 80f) },
                 new(returnHomeState) { Position = new Vector2(860f, 330f) },
+                new(dialogueState) { Position = new Vector2(520f, 330f) },
                 new(fleeState) { Position = new Vector2(160f, -180f) },
                 new(combatApproachState) { Position = new Vector2(520f, -180f) },
                 new(combatAttackState) { Position = new Vector2(860f, -180f) },
@@ -655,6 +689,12 @@ namespace EditorTools
                     inventoryConfigProperty.objectReferenceValue = inventoryConfig;
                 }
 
+                var dialogProperty = npcScopeObject.FindProperty("dialog");
+                if (dialogProperty != null && dialogProperty.objectReferenceValue == null)
+                {
+                    dialogProperty.objectReferenceValue = AssetDatabase.LoadAssetAtPath<Object>(DefaultNpcDialogPath);
+                }
+
                 var stateMachineProperty = npcScopeObject.FindProperty("stateMachineGraph");
                 if (stateMachineProperty != null)
                 {
@@ -714,6 +754,19 @@ namespace EditorTools
                     root.AddComponent<NpcItemInterest>();
                 }
 
+                var interactable = root.GetComponent<Interactable.Interactable>();
+                if (interactable == null)
+                {
+                    interactable = root.AddComponent<Interactable.Interactable>();
+                }
+
+                interactable.InteractionMode = Interactable.InteractionMode.Manual;
+
+                if (root.GetComponent<NpcDialogueAvailability>() == null)
+                {
+                    root.AddComponent<NpcDialogueAvailability>();
+                }
+
                 var navMeshAgent = root.GetComponent<NavMeshAgent>();
                 if (navMeshAgent == null)
                 {
@@ -721,6 +774,7 @@ namespace EditorTools
                 }
 
                 ConfigureNpcNavMeshAgent(navMeshAgent);
+                ConfigureNpcDialogueZone(root);
 
                 MoveComponentAfterTransform(npcScope);
 
@@ -817,6 +871,38 @@ namespace EditorTools
             agent.acceleration = 8f;
             agent.stoppingDistance = 0.15f;
             agent.autoBraking = true;
+        }
+
+        private static void ConfigureNpcDialogueZone(GameObject root)
+        {
+            const string dialogueZoneName = "Dialogue Interactable Zone";
+            var zoneTransform = root.transform.Find(dialogueZoneName);
+            if (zoneTransform == null)
+            {
+                var zoneObject = new GameObject(dialogueZoneName);
+                zoneTransform = zoneObject.transform;
+                zoneTransform.SetParent(root.transform, false);
+            }
+
+            zoneTransform.localPosition = new Vector3(0f, 1f, 0f);
+            zoneTransform.localRotation = Quaternion.identity;
+            zoneTransform.localScale = Vector3.one;
+
+            var interactableLayer = LayerMask.NameToLayer("Interactable");
+            if (interactableLayer >= 0)
+            {
+                zoneTransform.gameObject.layer = interactableLayer;
+            }
+
+            var trigger = zoneTransform.GetComponent<SphereCollider>();
+            if (trigger == null)
+            {
+                trigger = zoneTransform.gameObject.AddComponent<SphereCollider>();
+            }
+
+            trigger.isTrigger = true;
+            trigger.center = Vector3.zero;
+            trigger.radius = 1.8f;
         }
 
         private static void EnsureFolder(string folderPath)

@@ -124,6 +124,11 @@ namespace NPC
             return false;
         }
 
+        public bool IsHostileToReceiver(CharacterDamageReceiver receiver)
+        {
+            return IsHostileTo(receiver);
+        }
+
         public void Start()
         {
             ownerScope = ownerTransform != null ? ownerTransform.GetComponent<NpcLifetimeScope>() : null;

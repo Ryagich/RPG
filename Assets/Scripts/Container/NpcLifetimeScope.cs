@@ -1,4 +1,5 @@
 using Combat;
+using Dialogs.Graph;
 using Factions;
 using Inventory;
 using Inventory.Inventories;
@@ -19,10 +20,14 @@ namespace Container
 {
     public class NpcLifetimeScope : LifetimeScope
     {
+        private const string DialogueZoneName = "Dialogue Interactable Zone";
+
         [SerializeField] private Character.CharacterInfo characterInfo;
         [SerializeField] private InventoryConfig inventoryConfig;
+        [SerializeField] private DialogGraph dialog;
         [SerializeField] private StateMachineGraph stateMachineGraph;
         [SerializeField] private FactionConfig faction;
+        [SerializeField, Min(0.1f)] private float dialogueInteractionRadius = 1.8f;
         [SerializeField, ReadOnlyInInspector] private float currentHp;
         [SerializeField, ReadOnlyInInspector] private string currentState = "Not Started";
 
@@ -55,6 +60,12 @@ namespace Container
             builder.RegisterComponent(npcItemInterest).AsSelf();
             var targetLockTarget = GetComponent<TargetLockTarget>() ?? gameObject.AddComponent<TargetLockTarget>();
             builder.RegisterComponent(targetLockTarget).AsSelf();
+            var interactable = GetComponent<Interactable.Interactable>() ?? gameObject.AddComponent<Interactable.Interactable>();
+            interactable.InteractionMode = Interactable.InteractionMode.Manual;
+            builder.RegisterComponent(interactable).AsSelf();
+            var dialogueAvailability = GetComponent<NpcDialogueAvailability>() ?? gameObject.AddComponent<NpcDialogueAvailability>();
+            builder.RegisterComponent(dialogueAvailability).AsSelf();
+            EnsureDialogueInteractionZone();
             var navMeshAgent = GetComponent<NavMeshAgent>() ?? gameObject.AddComponent<NavMeshAgent>();
             builder.RegisterComponent(navMeshAgent).AsSelf();
             builder.RegisterEntryPoint<NpcNavMeshController>().AsSelf();
@@ -74,6 +85,11 @@ namespace Container
             if (characterInfo != null)
             {
                 builder.RegisterInstance(characterInfo).AsSelf();
+            }
+
+            if (dialog != null)
+            {
+                builder.RegisterInstance(dialog).AsSelf();
             }
 
             if (inventoryConfig != null)
@@ -126,10 +142,35 @@ namespace Container
                    .As<IStartable>()
                    .As<ITickable>()
                    .As<System.IDisposable>();
+            builder.Register<NpcDialogueController>(Lifetime.Scoped).AsSelf();
+            builder.RegisterEntryPoint<NpcDialogueInteractableLogic>().AsSelf();
             builder.Register<EquippedWeaponDropService>(Lifetime.Scoped).AsSelf();
             builder.Register(_ => new MoneyStorage(0), Lifetime.Scoped).AsSelf();
             builder.Register<QuestController>(Lifetime.Scoped).AsSelf();
 
+        }
+
+        private void EnsureDialogueInteractionZone()
+        {
+            var zoneTransform = transform.Find(DialogueZoneName);
+            if (zoneTransform == null)
+            {
+                var zoneObject = new GameObject(DialogueZoneName);
+                zoneTransform = zoneObject.transform;
+                zoneTransform.SetParent(transform, false);
+                zoneTransform.localPosition = new Vector3(0f, 1f, 0f);
+            }
+
+            var interactableLayer = LayerMask.NameToLayer("Interactable");
+            if (interactableLayer >= 0)
+            {
+                zoneTransform.gameObject.layer = interactableLayer;
+            }
+
+            var trigger = zoneTransform.GetComponent<SphereCollider>() ?? zoneTransform.gameObject.AddComponent<SphereCollider>();
+            trigger.isTrigger = true;
+            trigger.center = Vector3.zero;
+            trigger.radius = dialogueInteractionRadius;
         }
     }
 }
