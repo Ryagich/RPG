@@ -7,10 +7,13 @@ namespace CameraScripts
     // ReSharper disable once ClassNeverInstantiated.Global
     public class CameraMovement
     {
+        private const int MaxCollisionHits = 16;
+
         private readonly CameraConfig config;
         private readonly TargetLockConfig targetLockConfig;
         private readonly Transform cameraTransform;
         private readonly Transform facingTarget;
+        private readonly RaycastHit[] collisionHits = new RaycastHit[MaxCollisionHits];
 
         private Transform target;
         private Transform lockTarget;
@@ -55,14 +58,17 @@ namespace CameraScripts
 
             var pivotPosition = GetPivotPosition();
             var desiredRotation = Quaternion.Euler(pitch, yaw, 0f);
-            var desiredPosition = pivotPosition + desiredRotation * GetCameraOffset();
+            var desiredPosition = ResolveCollision(pivotPosition, pivotPosition + desiredRotation * GetCameraOffset());
             var lookPoint = GetLookPoint(pivotPosition);
-            var desiredLookRotation = Quaternion.LookRotation((lookPoint - desiredPosition).normalized, Vector3.up);
 
             var positionLerp = 1f - Mathf.Exp(-config.PositionSharpness * deltaTime);
             var rotationLerp = 1f - Mathf.Exp(-config.RotationSharpness * deltaTime);
 
-            cameraTransform.position = Vector3.Lerp(cameraTransform.position, desiredPosition, positionLerp);
+            var smoothedPosition = Vector3.Lerp(cameraTransform.position, desiredPosition, positionLerp);
+            var finalPosition = ResolveCollision(pivotPosition, smoothedPosition);
+            var desiredLookRotation = GetLookRotation(lookPoint, finalPosition);
+
+            cameraTransform.position = finalPosition;
             cameraTransform.rotation = Quaternion.Slerp(cameraTransform.rotation, desiredLookRotation, rotationLerp);
         }
 
@@ -122,8 +128,9 @@ namespace CameraScripts
                 var pivotPosition = GetPivotPosition();
                 var desiredRotation = Quaternion.Euler(pitch, yaw, 0f);
                 var desiredPosition = pivotPosition + desiredRotation * new Vector3(config.ShoulderOffset, 0f, -config.Distance);
+                desiredPosition = ResolveCollision(pivotPosition, desiredPosition);
                 cameraTransform.position = desiredPosition;
-                cameraTransform.rotation = Quaternion.LookRotation((pivotPosition - desiredPosition).normalized, Vector3.up);
+                cameraTransform.rotation = GetLookRotation(pivotPosition, desiredPosition);
             }
 
             isInitialized = true;
@@ -156,6 +163,77 @@ namespace CameraScripts
 
             var lockPoint = lockTarget.position + targetLockConfig.CameraTargetOffset;
             return Vector3.Lerp(pivotPosition, lockPoint, targetLockConfig.CameraFocusBlend);
+        }
+
+        private Quaternion GetLookRotation(Vector3 lookPoint, Vector3 cameraPosition)
+        {
+            var direction = lookPoint - cameraPosition;
+            if (direction.sqrMagnitude <= Mathf.Epsilon)
+            {
+                return cameraTransform.rotation;
+            }
+
+            return Quaternion.LookRotation(direction.normalized, Vector3.up);
+        }
+
+        private Vector3 ResolveCollision(Vector3 pivotPosition, Vector3 desiredPosition)
+        {
+            var pivotToCamera = desiredPosition - pivotPosition;
+            var desiredDistance = pivotToCamera.magnitude;
+            if (desiredDistance <= Mathf.Epsilon)
+            {
+                return desiredPosition;
+            }
+
+            var direction = pivotToCamera / desiredDistance;
+            var hitCount = config.CollisionRadius > 0f
+                ? Physics.SphereCastNonAlloc(
+                    pivotPosition,
+                    config.CollisionRadius,
+                    direction,
+                    collisionHits,
+                    desiredDistance,
+                    config.CollisionLayers,
+                    QueryTriggerInteraction.Ignore)
+                : Physics.RaycastNonAlloc(
+                    pivotPosition,
+                    direction,
+                    collisionHits,
+                    desiredDistance,
+                    config.CollisionLayers,
+                    QueryTriggerInteraction.Ignore);
+
+            var closestDistance = desiredDistance;
+            var hasBlockingHit = false;
+            for (var i = 0; i < hitCount; i++)
+            {
+                var hit = collisionHits[i];
+                if (IsIgnoredCollision(hit.collider) || hit.distance >= closestDistance)
+                {
+                    continue;
+                }
+
+                closestDistance = hit.distance;
+                hasBlockingHit = true;
+            }
+
+            if (!hasBlockingHit)
+            {
+                return desiredPosition;
+            }
+
+            var adjustedDistance = Mathf.Max(0f, closestDistance - config.CollisionPadding);
+            return pivotPosition + direction * adjustedDistance;
+        }
+
+        private bool IsIgnoredCollision(Collider collider)
+        {
+            if (collider == null || target == null)
+            {
+                return false;
+            }
+
+            return collider.transform.root == target.root;
         }
 
         private void UpdateManualLook()

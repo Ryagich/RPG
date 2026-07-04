@@ -17,6 +17,12 @@ namespace CameraScripts
         [field: SerializeField, Min(0f)] public float RotationSharpness { get; private set; } = 12f;
 
         [field: Space]
+        [field: Header("Gameplay Collision")]
+        [field: SerializeField] public LayerMask CollisionLayers { get; private set; } = Physics.DefaultRaycastLayers;
+        [field: SerializeField, Min(0f)] public float CollisionRadius { get; private set; } = 0.25f;
+        [field: SerializeField, Min(0f)] public float CollisionPadding { get; private set; } = 0.08f;
+
+        [field: Space]
         [field: Header("Gameplay Orbit")]
         [field: SerializeField] public float DefaultPitch { get; private set; } = 12f;
         [field: SerializeField] public float MinPitch { get; private set; } = -20f;
