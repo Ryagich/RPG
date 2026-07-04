@@ -175,6 +175,15 @@ namespace Inventory
         public void Tick()
         {
             UpdateAttackRootMotionAvailability();
+
+            if (hasPendingRefresh
+             && !isWeaponAnimationInProgress
+             && !actionState.IsActionBlocked
+             && !IsAttackBlockingWeaponChanges())
+            {
+                hasPendingRefresh = false;
+                RefreshWeaponInHand();
+            }
         }
 
         public void BeginMoveWeaponToRightHandFromAnimationEvent()
@@ -401,12 +410,12 @@ namespace Inventory
 
         private void OnWeaponSlotInput(WeaponSlotInputMessage message)
         {
-            if (actionState.IsActionBlocked)
+            if (actionState.IsActionBlocked || IsAttackBlockingWeaponChanges())
             {
                 return;
             }
 
-            if (message.SlotIndex is < 1 or > 2 || isHitAttackInProgress)
+            if (message.SlotIndex is < 1 or > 2)
             {
                 return;
             }
@@ -524,8 +533,9 @@ namespace Inventory
 
         private void RefreshWeaponInHand()
         {
-            if (actionState.IsActionBlocked)
+            if (actionState.IsActionBlocked || IsAttackBlockingWeaponChanges())
             {
+                hasPendingRefresh = true;
                 return;
             }
 
@@ -617,7 +627,7 @@ namespace Inventory
 
         private void StartDrawAnimation(int slotIndex, ItemConfig itemConfig, bool preserveCurrentVisual = false)
         {
-            if (itemConfig == null || isHitAttackInProgress)
+            if (itemConfig == null || IsAttackBlockingWeaponChanges())
             {
                 return;
             }
@@ -664,7 +674,7 @@ namespace Inventory
                 return;
             }
 
-            if (isHitAttackInProgress)
+            if (IsAttackBlockingWeaponChanges())
             {
                 return;
             }
@@ -1416,6 +1426,16 @@ namespace Inventory
 
             return animator.IsInTransition(attackLayerIndex)
                 && IsAttackState(animator.GetNextAnimatorStateInfo(attackLayerIndex));
+        }
+
+        private bool IsAttackBlockingWeaponChanges()
+        {
+            return isHitAttackInProgress || IsAttackRootMotionStateActive() || IsAttackRequested();
+        }
+
+        private bool IsAttackRequested()
+        {
+            return animator != null && animator.GetBool(AttackRequestedParameterHash);
         }
 
         private static bool IsAttackState(AnimatorStateInfo stateInfo)
