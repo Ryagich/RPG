@@ -15,11 +15,9 @@ namespace StateMachine.Behaviours
             context?.GetService<NpcNavMeshController>()?.Disable();
             context?.GetService<EquippedWeaponDropService>()?.DropCurrentWeapon();
 
-            var characterController = context?.GetService<CharacterController>();
-            if (characterController != null)
-            {
-                characterController.enabled = false;
-            }
+            DisableCharacterControllers(
+                context?.Owner != null ? context.Owner.transform : null,
+                context?.GetService<CharacterController>());
 
             context?.GetService<PlayerRagdollController>()?.ActivateDeathRagdoll();
 
@@ -27,6 +25,28 @@ namespace StateMachine.Behaviours
             if (animator != null)
             {
                 Object.Destroy(animator);
+            }
+        }
+
+        private static void DisableCharacterControllers(Transform root, CharacterController primaryController)
+        {
+            if (primaryController != null)
+            {
+                primaryController.enabled = false;
+            }
+
+            if (root == null)
+            {
+                return;
+            }
+
+            var controllers = root.GetComponentsInChildren<CharacterController>(true);
+            foreach (var controller in controllers)
+            {
+                if (controller != null)
+                {
+                    controller.enabled = false;
+                }
             }
         }
     }

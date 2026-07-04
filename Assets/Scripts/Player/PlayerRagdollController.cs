@@ -106,10 +106,21 @@ namespace Player
                 .ToArray();
 
             ragdollColliders = GetComponentsInChildren<Collider>(true)
-                .Where(collider => collider != null
-                                && collider.transform != transform
-                                && collider.GetComponent<CharacterController>() == null)
+                .Where(IsRagdollCollider)
                 .ToArray();
+        }
+
+        private bool IsRagdollCollider(Collider collider)
+        {
+            if (collider == null
+             || collider.transform == transform
+             || collider.GetComponent<CharacterController>() != null)
+            {
+                return false;
+            }
+
+            var attachedRigidbody = collider.attachedRigidbody;
+            return attachedRigidbody != null && ragdollRigidbodies.Contains(attachedRigidbody);
         }
 
         private static void EnsureBodyHitbox(Collider ragdollCollider)

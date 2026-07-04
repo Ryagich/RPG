@@ -92,10 +92,7 @@ namespace Player
             playerAnimationController?.SetLocomotionLocked(true);
             equippedWeaponDropService?.DropCurrentWeapon();
 
-            if (characterController != null)
-            {
-                characterController.enabled = false;
-            }
+            DisableCharacterControllers(playerTransform, characterController);
 
             ragdollController?.ActivateDeathRagdoll();
 
@@ -105,6 +102,28 @@ namespace Player
             }
 
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Death));
+        }
+
+        private static void DisableCharacterControllers(Transform root, CharacterController primaryController)
+        {
+            if (primaryController != null)
+            {
+                primaryController.enabled = false;
+            }
+
+            if (root == null)
+            {
+                return;
+            }
+
+            var controllers = root.GetComponentsInChildren<CharacterController>(true);
+            foreach (var controller in controllers)
+            {
+                if (controller != null)
+                {
+                    controller.enabled = false;
+                }
+            }
         }
     }
 }
