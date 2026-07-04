@@ -75,5 +75,8 @@ namespace NPC
         [field: SerializeField, Min(0f)] public float FleeOpennessWeight { get; private set; } = 20f;
         [field: SerializeField, Min(0f)] public float FleeReachedDistance { get; private set; } = 0.75f;
         [field: SerializeField, Min(0f)] public float FleeLookBackDuration { get; private set; } = 1.5f;
+        [field: SerializeField, Min(0f)] public float FleeMinDecisionDuration { get; private set; } = 0.15f;
+        [field: SerializeField, Min(0f)] public float FleeCloseThreatDistance { get; private set; } = 2.25f;
+        [field: SerializeField, Min(0f)] public float FleeFarThreatDistance { get; private set; } = 8f;
     }
 }

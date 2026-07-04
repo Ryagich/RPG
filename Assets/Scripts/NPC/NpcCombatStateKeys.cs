@@ -3,7 +3,10 @@ namespace NPC
     public static class NpcCombatStateKeys
     {
         public const string LastKnownLookTimer = "NpcCombat.LastKnownLookTimer";
+        public const string FleeDecisionTimer = "NpcCombat.FleeDecisionTimer";
         public const string FleeLookTimer = "NpcCombat.FleeLookTimer";
+        public const string FleeLookingBack = "NpcCombat.FleeLookingBack";
+        public const string FleeDamageTriggered = "NpcCombat.FleeDamageTriggered";
         public const string FleeCompleted = "NpcCombat.FleeCompleted";
         public const string AttackRequested = "NpcCombat.AttackRequested";
         public const string AttackBlockObserved = "NpcCombat.AttackBlockObserved";

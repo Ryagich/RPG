@@ -75,3 +75,6 @@ MonoBehaviour:
   <FleeOpennessWeight>k__BackingField: 20
   <FleeReachedDistance>k__BackingField: 0.75
   <FleeLookBackDuration>k__BackingField: 1.5
+  <FleeMinDecisionDuration>k__BackingField: 0.15
+  <FleeCloseThreatDistance>k__BackingField: 2.25
+  <FleeFarThreatDistance>k__BackingField: 8

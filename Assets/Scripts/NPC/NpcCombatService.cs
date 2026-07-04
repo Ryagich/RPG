@@ -42,6 +42,7 @@ namespace NPC
         private TargetLockTarget notificationTarget;
         private TargetLockTarget initialCircleEvaluatedTarget;
         private bool hasPendingAggressionNotification;
+        private bool hasPendingDamageFleeRequest;
 
         public NpcCombatService(
             Transform ownerTransform,
@@ -100,7 +101,8 @@ namespace NPC
         public bool HasAnyWeaponAvailable => HasWeaponReady
                                              || inventory?.Items.Any(item => item?.ItemStack?.ItemConfig?.ItemType == ItemType.Weapon) == true;
         public bool HasThreat => HasCombatTarget || HasLastKnownTargetPosition;
-        public bool ShouldFlee => HasThreat && !HasAnyWeaponAvailable;
+        public bool ShouldFlee => HasCombatTarget && IsTargetVisible && !HasAnyWeaponAvailable;
+        public bool ShouldFleeFromDamageThreat => hasPendingDamageFleeRequest && HasThreat && !HasAnyWeaponAvailable;
 
         public static bool IsTargetHostileToReceiver(TargetLockTarget potentialHostile, CharacterDamageReceiver receiver)
         {
@@ -173,10 +175,16 @@ namespace NPC
         {
             CurrentTarget = null;
             initialCircleEvaluatedTarget = null;
+            hasPendingDamageFleeRequest = false;
             HasLastKnownTargetPosition = false;
             LastKnownTargetPosition = default;
             ClearFleeDestination();
             ClearAggressionNotification();
+        }
+
+        public void ClearDamageFleeRequest()
+        {
+            hasPendingDamageFleeRequest = false;
         }
 
         public void ClearFleeDestination()
@@ -187,6 +195,65 @@ namespace NPC
         public void ClearCombatMoveDestination()
         {
             HasCombatMoveDestination = false;
+        }
+
+        public bool TryGetKnownThreatDistance(out float distance)
+        {
+            distance = 0f;
+            if (ownerTransform == null)
+            {
+                return false;
+            }
+
+            if (HasCombatTarget && IsTargetVisible)
+            {
+                distance = PlanarDistance(ownerTransform.position, CurrentTarget.transform.position);
+                return true;
+            }
+
+            if (HasLastKnownTargetPosition)
+            {
+                distance = PlanarDistance(ownerTransform.position, LastKnownTargetPosition);
+                return true;
+            }
+
+            if (HasCombatTarget)
+            {
+                distance = PlanarDistance(ownerTransform.position, CurrentTarget.transform.position);
+                return true;
+            }
+
+            return false;
+        }
+
+        public float GetFleeDecisionDuration(bool forceFastDecision = false)
+        {
+            var maxDuration = Mathf.Max(0f, combatConfig != null ? combatConfig.FleeLookBackDuration : 1.5f);
+            var minDuration = Mathf.Clamp(combatConfig != null ? combatConfig.FleeMinDecisionDuration : 0.15f, 0f, maxDuration);
+            if (forceFastDecision || IsTargetInAttackRange)
+            {
+                return minDuration;
+            }
+
+            if (!TryGetKnownThreatDistance(out var threatDistance))
+            {
+                return maxDuration;
+            }
+
+            var closeDistance = Mathf.Max(0f, combatConfig != null ? combatConfig.FleeCloseThreatDistance : 2.25f);
+            var farDistance = Mathf.Max(closeDistance + 0.01f, combatConfig != null ? combatConfig.FleeFarThreatDistance : 8f);
+            if (threatDistance <= closeDistance)
+            {
+                return minDuration;
+            }
+
+            if (threatDistance >= farDistance)
+            {
+                return maxDuration;
+            }
+
+            var distanceFactor = Mathf.InverseLerp(closeDistance, farDistance, threatDistance);
+            return Mathf.Lerp(minDuration, maxDuration, distanceFactor);
         }
 
         public bool TryPrepareWeapon()
@@ -1520,6 +1587,8 @@ namespace NPC
                     : message.Point;
                 HasLastKnownTargetPosition = true;
             }
+
+            hasPendingDamageFleeRequest = true;
         }
 
         private static TargetLockTarget FindTargetByReceiver(CharacterDamageReceiver receiver)

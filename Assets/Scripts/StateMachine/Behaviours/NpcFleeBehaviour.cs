@@ -11,6 +11,7 @@ namespace StateMachine.Behaviours
         {
             context?.RemoveValue(NpcCombatStateKeys.FleeCompleted);
             context?.SetValue(NpcCombatStateKeys.FleeLookTimer, 0f);
+            context?.SetValue(NpcCombatStateKeys.FleeLookingBack, false);
             context?.GetService<NpcItemInterest>()?.Clear();
             StoreHomeIfMissing(context);
             var nav = context?.GetService<NpcNavMeshController>();
@@ -18,6 +19,8 @@ namespace StateMachine.Behaviours
             nav?.SetSpeedMultiplier(context?.GetService<NpcCombatConfig>()?.FleeSpeedMultiplier ?? 1.65f);
 
             var combat = context?.GetService<NpcCombatService>();
+            context?.SetValue(NpcCombatStateKeys.FleeDamageTriggered, combat?.ShouldFleeFromDamageThreat == true);
+            combat?.ClearDamageFleeRequest();
             combat?.SheatheWeapon();
             combat?.TrySelectFleeDestination();
             Move(context);
@@ -32,6 +35,8 @@ namespace StateMachine.Behaviours
         {
             context?.GetService<NpcNavMeshController>()?.ResetSpeed();
             context?.RemoveValue(NpcCombatStateKeys.FleeLookTimer);
+            context?.RemoveValue(NpcCombatStateKeys.FleeLookingBack);
+            context?.RemoveValue(NpcCombatStateKeys.FleeDamageTriggered);
             context?.RemoveValue(NpcCombatStateKeys.FleeCompleted);
         }
 
@@ -44,29 +49,38 @@ namespace StateMachine.Behaviours
                 return;
             }
 
+            combat.RefreshTargetVisibility();
             if (!combat.HasFleeDestination && !combat.TrySelectFleeDestination())
             {
+                nav.Stop();
+                combat.ClearTarget();
                 context.SetValue(NpcCombatStateKeys.FleeCompleted, true);
                 return;
             }
 
             var config = context.GetService<NpcCombatConfig>();
             var reachedDistance = config != null ? config.FleeReachedDistance : 0.75f;
-            var distanceToDestination = Vector3.Distance(context.Owner.transform.position, combat.FleeDestination);
-            if (distanceToDestination > reachedDistance)
+            context.TryGetValue<bool>(NpcCombatStateKeys.FleeLookingBack, out var isLookingBack);
+            if (!isLookingBack && !HasReachedFleeDestination(context, nav, combat.FleeDestination, reachedDistance))
             {
                 context.SetValue(NpcCombatStateKeys.FleeLookTimer, 0f);
-                nav.MoveTo(combat.FleeDestination, stoppingDistance: reachedDistance);
+                if (!nav.MoveTo(combat.FleeDestination, stoppingDistance: reachedDistance))
+                {
+                    combat.ClearFleeDestination();
+                }
+
                 return;
             }
 
+            context.SetValue(NpcCombatStateKeys.FleeLookingBack, true);
             nav.Stop();
             combat.FaceLastKnownPosition();
 
             context.TryGetValue<float>(NpcCombatStateKeys.FleeLookTimer, out var timer);
             timer += context.DeltaTime;
             context.SetValue(NpcCombatStateKeys.FleeLookTimer, timer);
-            var lookDuration = config != null ? config.FleeLookBackDuration : 1.5f;
+            context.TryGetValue<bool>(NpcCombatStateKeys.FleeDamageTriggered, out var damageTriggered);
+            var lookDuration = combat.GetFleeDecisionDuration(damageTriggered);
             if (timer < lookDuration)
             {
                 return;
@@ -74,15 +88,42 @@ namespace StateMachine.Behaviours
 
             combat.ClearFleeDestination();
             combat.ScanForEnemy(true);
-            if (combat.IsTargetVisible && combat.ShouldFlee)
+            if (combat.ShouldFlee)
             {
                 context.SetValue(NpcCombatStateKeys.FleeLookTimer, 0f);
-                combat.TrySelectFleeDestination();
-                return;
+                context.SetValue(NpcCombatStateKeys.FleeLookingBack, false);
+                context.SetValue(NpcCombatStateKeys.FleeDamageTriggered, false);
+                if (combat.TrySelectFleeDestination())
+                {
+                    nav.MoveTo(combat.FleeDestination, stoppingDistance: reachedDistance);
+                    return;
+                }
             }
 
             combat.ClearTarget();
             context.SetValue(NpcCombatStateKeys.FleeCompleted, true);
+        }
+
+        private static bool HasReachedFleeDestination(
+            StateMachineContext context,
+            NpcNavMeshController nav,
+            Vector3 destination,
+            float reachedDistance)
+        {
+            if (nav.HasReachedDestination)
+            {
+                return true;
+            }
+
+            if (context.Owner == null)
+            {
+                return false;
+            }
+
+            var currentPosition = context.Owner.transform.position;
+            currentPosition.y = 0f;
+            destination.y = 0f;
+            return Vector3.Distance(currentPosition, destination) <= reachedDistance;
         }
 
         private static void StoreHomeIfMissing(StateMachineContext context)
