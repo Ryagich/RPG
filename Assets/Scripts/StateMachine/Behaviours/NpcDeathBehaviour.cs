@@ -1,5 +1,6 @@
 using Player;
 using Inventory;
+using Inventory.Looting;
 using StateMachine.Graph.Model;
 using UnityEngine;
 using NPC;
@@ -20,6 +21,7 @@ namespace StateMachine.Behaviours
                 context?.GetService<CharacterController>());
 
             context?.GetService<PlayerRagdollController>()?.ActivateDeathRagdoll();
+            context?.GetService<CorpseLootController>()?.ActivateCorpse();
 
             var animator = context?.GetService<Animator>();
             if (animator != null)

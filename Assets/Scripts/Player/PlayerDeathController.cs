@@ -1,6 +1,7 @@
 using System;
 using GameModes;
 using Inventory;
+using Inventory.Looting;
 using MessagePipe;
 using Messages;
 using Movement;
@@ -24,6 +25,7 @@ namespace Player
         private readonly PlayerMovement playerMovement;
         private readonly PlayerAnimationController playerAnimationController;
         private readonly EquippedWeaponDropService equippedWeaponDropService;
+        private readonly CorpseLootController corpseLootController;
         private readonly IPublisher<PlayerDiedMessage> playerDiedPublisher;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
         private readonly CompositeDisposable disposables = new();
@@ -39,6 +41,7 @@ namespace Player
             PlayerMovement playerMovement,
             PlayerAnimationController playerAnimationController,
             EquippedWeaponDropService equippedWeaponDropService,
+            CorpseLootController corpseLootController,
             IPublisher<PlayerDiedMessage> playerDiedPublisher,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher)
         {
@@ -52,6 +55,7 @@ namespace Player
             this.playerMovement = playerMovement;
             this.playerAnimationController = playerAnimationController;
             this.equippedWeaponDropService = equippedWeaponDropService;
+            this.corpseLootController = corpseLootController;
             this.playerDiedPublisher = playerDiedPublisher;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
         }
@@ -95,6 +99,7 @@ namespace Player
             DisableCharacterControllers(playerTransform, characterController);
 
             ragdollController?.ActivateDeathRagdoll();
+            corpseLootController?.ActivateCorpse();
 
             if (animator != null)
             {

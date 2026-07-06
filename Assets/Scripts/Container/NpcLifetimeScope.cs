@@ -3,6 +3,7 @@ using Dialogs.Graph;
 using Factions;
 using Inventory;
 using Inventory.Inventories;
+using Inventory.Looting;
 using Money;
 using Movement;
 using NPC;
@@ -50,6 +51,8 @@ namespace Container
             var ragdollController = GetComponent<PlayerRagdollController>() ?? gameObject.AddComponent<PlayerRagdollController>();
             builder.RegisterComponent(ragdollController).AsSelf();
             builder.RegisterComponentInHierarchy<CharacterVisualRoot>().UnderTransform(transform).AsSelf();
+            var corpseLootController = GetComponent<CorpseLootController>() ?? gameObject.AddComponent<CorpseLootController>();
+            builder.RegisterComponent(corpseLootController).AsSelf();
             builder.RegisterComponentInHierarchy<PlayerWeaponHandAnchor>().UnderTransform(transform).AsSelf();
             builder.RegisterComponentInHierarchy<PlayerWeaponAnimationEventReceiver>().UnderTransform(transform).AsSelf();
             var npcVision = GetComponent<NpcVision>() ?? gameObject.AddComponent<NpcVision>();
@@ -167,7 +170,12 @@ namespace Container
                 zoneTransform.gameObject.layer = interactableLayer;
             }
 
-            var trigger = zoneTransform.GetComponent<SphereCollider>() ?? zoneTransform.gameObject.AddComponent<SphereCollider>();
+            var trigger = zoneTransform.GetComponent<SphereCollider>();
+            if (trigger == null)
+            {
+                trigger = zoneTransform.gameObject.AddComponent<SphereCollider>();
+            }
+
             trigger.isTrigger = true;
             trigger.center = Vector3.zero;
             trigger.radius = dialogueInteractionRadius;

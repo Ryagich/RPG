@@ -3,6 +3,7 @@ using Combat;
 using Interactable;
 using Inventory;
 using Inventory.Inventories;
+using Inventory.Looting;
 using Money;
 using Movement;
 using Player;
@@ -18,9 +19,12 @@ namespace Container
 {
     public class PlayerLifetimeScope : LifetimeScope
     {
+        private const string CorpseZoneName = "Corpse Interactable Zone";
+
         [SerializeField] private CanvasLifetimeScope canvasLifetimeScope;
         [SerializeField] private Character.CharacterInfo characterInfo;
         [SerializeField] private InventoryConfig inventoryConfig;
+        [SerializeField, Min(0.1f)] private float corpseInteractionRadius = 1.8f;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -29,8 +33,16 @@ namespace Container
             var ragdollController = GetComponent<PlayerRagdollController>() ?? gameObject.AddComponent<PlayerRagdollController>();
             builder.RegisterComponent(ragdollController).AsSelf();
             builder.RegisterComponentInHierarchy<CharacterVisualRoot>().UnderTransform(transform).AsSelf();
+            var corpseLootController = GetComponent<CorpseLootController>() ?? gameObject.AddComponent<CorpseLootController>();
+            builder.RegisterComponent(corpseLootController).AsSelf();
             builder.RegisterComponentInHierarchy<PlayerWeaponHandAnchor>().UnderTransform(transform).AsSelf();
             builder.RegisterComponentInHierarchy<PlayerWeaponAnimationEventReceiver>().UnderTransform(transform).AsSelf();
+            var corpseInteractable = GetComponent<Interactable.Interactable>() ?? gameObject.AddComponent<Interactable.Interactable>();
+            corpseInteractable.InteractionMode = InteractionMode.Manual;
+            builder.RegisterComponent(corpseInteractable).AsSelf();
+            var corpseLootAvailability = GetComponent<CorpseLootAvailability>() ?? gameObject.AddComponent<CorpseLootAvailability>();
+            builder.RegisterComponent(corpseLootAvailability).AsSelf();
+            EnsureCorpseInteractionZone();
 
             builder.RegisterInstance(transform);
             builder.RegisterInstance("Player").Keyed("Scope ID");
@@ -86,6 +98,7 @@ namespace Container
             builder.Register<CharacterDamageReceiver>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<EquippedItemVisualController>().AsSelf();
             builder.RegisterEntryPoint<PlayerDeathController>().AsSelf();
+            builder.RegisterEntryPoint<CorpseLootInteractableLogic>().AsSelf();
 
             builder.RegisterEntryPoint<PlayerInventory>().As<IInventory>().AsSelf();
             builder.Register<CharacterWorldItemDropper>(Lifetime.Scoped).AsSelf();
@@ -100,6 +113,34 @@ namespace Container
                    .As<IStartable>()
                    .As<ITickable>()
                    .As<System.IDisposable>();
+        }
+
+        private void EnsureCorpseInteractionZone()
+        {
+            var zoneTransform = transform.Find(CorpseZoneName);
+            if (zoneTransform == null)
+            {
+                var zoneObject = new GameObject(CorpseZoneName);
+                zoneTransform = zoneObject.transform;
+                zoneTransform.SetParent(transform, false);
+                zoneTransform.localPosition = new Vector3(0f, 1f, 0f);
+            }
+
+            var interactableLayer = LayerMask.NameToLayer("Interactable");
+            if (interactableLayer >= 0)
+            {
+                zoneTransform.gameObject.layer = interactableLayer;
+            }
+
+            var trigger = zoneTransform.GetComponent<SphereCollider>();
+            if (trigger == null)
+            {
+                trigger = zoneTransform.gameObject.AddComponent<SphereCollider>();
+            }
+
+            trigger.isTrigger = true;
+            trigger.center = Vector3.zero;
+            trigger.radius = corpseInteractionRadius;
         }
     }
 }

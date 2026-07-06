@@ -1,5 +1,6 @@
 using Combat;
 using Inventory.Inventories;
+using Inventory.Looting;
 using Player;
 using StateMachine;
 using StateMachine.Graph;
@@ -33,6 +34,7 @@ namespace NPC
         private readonly ICharacterHitReactionController hitReactionController;
         private readonly Inventory.EquippedWeaponDropService equippedWeaponDropService;
         private readonly NpcItemPickupConfig itemPickupConfig;
+        private readonly CorpseLootController corpseLootController;
 
         private RuntimeStateMachine stateMachine;
         private Container.NpcLifetimeScope npcScope;
@@ -58,7 +60,8 @@ namespace NPC
             NpcDialogueController dialogueController,
             ICharacterHitReactionController hitReactionController,
             Inventory.EquippedWeaponDropService equippedWeaponDropService,
-            NpcItemPickupConfig itemPickupConfig)
+            NpcItemPickupConfig itemPickupConfig,
+            CorpseLootController corpseLootController)
         {
             this.stateMachineGraph = stateMachineGraph;
             this.ownerTransform = ownerTransform;
@@ -81,6 +84,7 @@ namespace NPC
             this.hitReactionController = hitReactionController;
             this.equippedWeaponDropService = equippedWeaponDropService;
             this.itemPickupConfig = itemPickupConfig;
+            this.corpseLootController = corpseLootController;
         }
 
         public void Start()
@@ -115,6 +119,7 @@ namespace NPC
             context.SetService(hitReactionController);
             context.SetService(equippedWeaponDropService);
             context.SetService(itemPickupConfig);
+            context.SetService(corpseLootController);
 
             stateMachine = new RuntimeStateMachine(stateMachineGraph, context);
             stateMachine.Start();

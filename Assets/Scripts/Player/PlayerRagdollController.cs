@@ -99,6 +99,75 @@ namespace Player
             }
         }
 
+        public bool TryGetRagdollCenter(out Vector3 center)
+        {
+            CacheRagdollParts();
+
+            var boundsInitialized = false;
+            var bounds = default(Bounds);
+            foreach (var ragdollCollider in ragdollColliders)
+            {
+                if (ragdollCollider == null || !ragdollCollider.enabled)
+                {
+                    continue;
+                }
+
+                if (!boundsInitialized)
+                {
+                    bounds = ragdollCollider.bounds;
+                    boundsInitialized = true;
+                    continue;
+                }
+
+                bounds.Encapsulate(ragdollCollider.bounds);
+            }
+
+            if (boundsInitialized)
+            {
+                center = bounds.center;
+                return true;
+            }
+
+            var count = 0;
+            center = Vector3.zero;
+            foreach (var rigidbody in ragdollRigidbodies)
+            {
+                if (rigidbody == null)
+                {
+                    continue;
+                }
+
+                center += rigidbody.worldCenterOfMass;
+                count++;
+            }
+
+            if (count <= 0)
+            {
+                center = transform.position;
+                return false;
+            }
+
+            center /= count;
+            return true;
+        }
+
+        public Transform GetTopRagdollRootUnder(Transform ownerRoot)
+        {
+            CacheRagdollParts();
+            if (ownerRoot == null || ragdollRigidbodies.Length == 0 || ragdollRigidbodies[0] == null)
+            {
+                return null;
+            }
+
+            var current = ragdollRigidbodies[0].transform;
+            while (current.parent != null && current.parent != ownerRoot)
+            {
+                current = current.parent;
+            }
+
+            return current.parent == ownerRoot ? current : null;
+        }
+
         private void CacheRagdollParts()
         {
             ragdollRigidbodies = GetComponentsInChildren<Rigidbody>(true)

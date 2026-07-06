@@ -4,6 +4,7 @@ using Dialogue;
 using Dialogs.Graph;
 using GameModes;
 using Inventory.Inventories;
+using Inventory.Looting;
 using MessagePipe;
 using Messages;
 using Money;
@@ -20,7 +21,10 @@ namespace NPC
         private readonly IInventory inventory;
         private readonly MoneyStorage moneyStorage;
         private readonly DialogueContext dialogueContext;
+        private readonly LootingContext lootingContext;
+        private readonly CorpseLootController corpseLootController;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
+        private bool isLootingInteractionActive;
 
         public NpcDialogueInteractableLogic(
             Interactable.Interactable interactable,
@@ -28,6 +32,8 @@ namespace NPC
             IInventory inventory,
             MoneyStorage moneyStorage,
             DialogueContext dialogueContext,
+            LootingContext lootingContext,
+            CorpseLootController corpseLootController,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
             CharacterInfo characterInfo = null,
             DialogGraph dialog = null)
@@ -39,6 +45,8 @@ namespace NPC
             this.inventory = inventory;
             this.moneyStorage = moneyStorage;
             this.dialogueContext = dialogueContext;
+            this.lootingContext = lootingContext;
+            this.corpseLootController = corpseLootController;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
         }
 
@@ -58,6 +66,14 @@ namespace NPC
 
         private void OnInteracted(LifetimeScope interactorScope)
         {
+            if (corpseLootController?.IsLootable == true && corpseLootController.LootInventory != null)
+            {
+                isLootingInteractionActive = true;
+                lootingContext.SetTarget(corpseLootController.LootInventory, characterInfo);
+                changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Looting));
+                return;
+            }
+
             if (!dialogueController.TryBeginDialogue(interactorScope))
             {
                 return;
@@ -69,6 +85,18 @@ namespace NPC
 
         private void OnEndInteracted(LifetimeScope _)
         {
+            if (isLootingInteractionActive)
+            {
+                if (lootingContext.CurrentTargetInventory == corpseLootController?.LootInventory)
+                {
+                    lootingContext.Clear();
+                }
+
+                isLootingInteractionActive = false;
+                changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Game));
+                return;
+            }
+
             if (dialogueContext.CurrentTarget == interactable)
             {
                 dialogueContext.Clear();
