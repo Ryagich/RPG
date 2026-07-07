@@ -26,21 +26,31 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
+  <Description>k__BackingField:
+    m_TableReference:
+      m_TableCollectionName: Tables
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: Null String
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   <HandPrefab>k__BackingField: {fileID: 3990761959662593595, guid: f6b3e20adcf59fd4d80c6dec4cd8d178, type: 3}
   <Size>k__BackingField: {x: 2, y: 2}
   <SizeInInventory>k__BackingField: {x: 200, y: 125}
   <ItemType>k__BackingField: 5
   weaponInHandPrefab: {fileID: 0}
+  weaponDamageRange: {x: 9, y: 11}
   rightHandWeaponAttachment:
     localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
   beltWeaponAttachment:
     localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
-  physicalDefense: 0.11
-  temperatureDefense: 31
-  psiDefense: 21
-  magicDefense: 6
+  physicalDefense: 0.16
+  temperatureDefense: 1
+  psiDefense: 1
+  magicDefense: 1
   blocksFaceSlot: 1
   hpStat: 0
   waterStat: 0

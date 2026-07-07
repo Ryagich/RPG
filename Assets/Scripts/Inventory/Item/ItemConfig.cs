@@ -34,6 +34,7 @@ namespace Inventory.Item
         [field: SerializeField, Min(1)] public int MaxStack { get; private set; } = 1;
         [field: SerializeField] public Sprite Icon { get; private set; }
         [field: SerializeField] public LocalizedString Name { get; private set; }
+        [field: SerializeField] public LocalizedString Description { get; private set; } = new("Tables", "Null String");
         [field: SerializeField] public ItemHolder HandPrefab { get; private set; }
         [field: SerializeField] public Vector2Int Size { get; private set; } = new(1, 1);
         [field: SerializeField] public Vector2Int SizeInInventory { get; private set; } = new(50, 50);

@@ -52,6 +52,7 @@ namespace Inventory.Inventories
         public FastSlotModel FastSlot2 { get; } = new(2, "FastSlot2", "F2");
         public FastSlotModel FastSlot3 { get; } = new(3, "FastSlot3", "F3");
         public FastSlotModel FastSlot4 { get; } = new(4, "FastSlot4", "F4");
+        public Vector2Int BaseInventorySize => inventoryConfig.Size;
 
         public PlayerInventory(InventoryConfig inventoryConfig)
         {

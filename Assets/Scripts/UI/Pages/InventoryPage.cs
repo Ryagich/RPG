@@ -978,8 +978,12 @@ namespace UI.Pages
                 return false;
             }
 
-            popupRect = resolver.Instantiate(uiConfig.PopupRect, popupParentRect);
-            popupRect.name = $"{uiConfig.PopupRect.name} | Inventory Popup";
+            popupRect = PageUiUtilities.CreatePopupRoot(
+                popupParentRect,
+                uiConfig,
+                resolver,
+                openMode == PopupOpenMode.Hover,
+                "Inventory Popup");
             PageUiUtilities.SetPopupRaycastState(popupRect, openMode == PopupOpenMode.RightClick);
 
             var itemConfig = GetPopupItemConfig(target);

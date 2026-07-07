@@ -48,6 +48,8 @@ namespace UI.Configs
         
         // Popups
         [field: SerializeField] public RectTransform PopupRect { get; private set; }
+        [field: SerializeField] public RectTransform InventoryHoverPopupRect { get; private set; }
+        [field: SerializeField] public Sprite InventoryHoverWeightIcon { get; private set; }
         [field: SerializeField] public PopupContent PopupContent { get; private set; }
         [field: SerializeField] public PopupTitle PopupItemName { get; private set; }
         [field: SerializeField] public TMP_Text PopupWeight { get; private set; }

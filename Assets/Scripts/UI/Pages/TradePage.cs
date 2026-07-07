@@ -1645,8 +1645,12 @@ namespace UI.Pages
             }
 
             ClosePopup();
-            popupRect = resolver.Instantiate(uiConfig.PopupRect, popupParentRect);
-            popupRect.name = $"{uiConfig.PopupRect.name} | Trade Popup";
+            popupRect = PageUiUtilities.CreatePopupRoot(
+                popupParentRect,
+                uiConfig,
+                resolver,
+                openMode == PopupOpenMode.Hover,
+                "Trade Popup");
             PageUiUtilities.SetPopupRaycastState(popupRect, openMode == PopupOpenMode.RightClick);
 
             var itemConfig = GetPopupItemConfig(target);

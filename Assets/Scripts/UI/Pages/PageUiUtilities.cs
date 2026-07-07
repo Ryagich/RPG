@@ -13,6 +13,7 @@ using UI.UIElements;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using UnityEngine.Localization;
 using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
@@ -656,12 +657,50 @@ namespace UI.Pages
                 return null;
             }
 
+            if (IsFantasyWarriorInventoryHoverPopup(popupRect))
+            {
+                SetPopupRaycastState(popupRect, blocksRaycasts);
+                return FindRect(popupRect, "Content") ?? popupRect;
+            }
+
             var popupContent = resolver.Instantiate(uiConfig.PopupContent, popupRect);
             popupContent.name = uiConfig.PopupContent.name;
 
             var popupContentRect = popupContent.transform as RectTransform;
             SetPopupRaycastState(popupContentRect, blocksRaycasts);
             return popupContentRect;
+        }
+
+        public static RectTransform CreatePopupRoot(
+            RectTransform popupParentRect,
+            UIConfig uiConfig,
+            IObjectResolver resolver,
+            bool useInventoryHoverPopup,
+            string nameSuffix)
+        {
+            if (popupParentRect == null || uiConfig == null || resolver == null)
+            {
+                return null;
+            }
+
+            var prefab = useInventoryHoverPopup && uiConfig.InventoryHoverPopupRect != null
+                ? uiConfig.InventoryHoverPopupRect
+                : uiConfig.PopupRect;
+
+            if (prefab == null)
+            {
+                return null;
+            }
+
+            var popupRoot = resolver.Instantiate(prefab, popupParentRect);
+            popupRoot.name = $"{prefab.name} | {nameSuffix}";
+
+            if (useInventoryHoverPopup && prefab == uiConfig.InventoryHoverPopupRect)
+            {
+                PrepareFantasyWarriorInventoryHoverPopup(popupRoot);
+            }
+
+            return popupRoot;
         }
 
         public static void FillInventoryHoverPopup
@@ -691,6 +730,23 @@ namespace UI.Pages
              || playerInventory == null
              || resolver == null
              || itemConfig == null)
+            {
+                return;
+            }
+
+            if (TryFillFantasyWarriorInventoryHoverPopup(
+                    popupRect,
+                    uiConfig,
+                    localizationConfig,
+                    statIconsConfig,
+                    statsController,
+                    playerInventory,
+                    itemConfig,
+                    itemStack,
+                    isEquippedItemPopup,
+                    fillColor,
+                    positiveChangeColor,
+                    negativeChangeColor))
             {
                 return;
             }
@@ -759,6 +815,12 @@ namespace UI.Pages
 
         public static void RecalculatePopupLayout(RectTransform popupRect, RectTransform popupContentRect)
         {
+            if (IsFantasyWarriorInventoryHoverPopup(popupRect))
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(popupRect);
+                return;
+            }
+
             RecalculatePopupSize(popupContentRect);
             RecalculatePopupSize(popupRect);
         }
@@ -818,8 +880,10 @@ namespace UI.Pages
                 localPoint.x + parentRect.width * popupParentRect.pivot.x,
                 localPoint.y - parentRect.height * (1f - popupParentRect.pivot.y));
 
-            anchoredPosition.x = Mathf.Clamp(anchoredPosition.x, 0f, Mathf.Max(0f, parentRect.width - popupRect.rect.width));
-            anchoredPosition.y = Mathf.Clamp(anchoredPosition.y, -Mathf.Max(0f, parentRect.height - popupRect.rect.height), 0f);
+            var popupWidth = popupRect.rect.width * Mathf.Abs(popupRect.localScale.x);
+            var popupHeight = popupRect.rect.height * Mathf.Abs(popupRect.localScale.y);
+            anchoredPosition.x = Mathf.Clamp(anchoredPosition.x, 0f, Mathf.Max(0f, parentRect.width - popupWidth));
+            anchoredPosition.y = Mathf.Clamp(anchoredPosition.y, -Mathf.Max(0f, parentRect.height - popupHeight), 0f);
             popupRect.anchoredPosition = anchoredPosition;
         }
 
@@ -842,6 +906,1198 @@ namespace UI.Pages
             label.raycastTarget = false;
             label.enableWordWrapping = false;
             label.overflowMode = TextOverflowModes.Overflow;
+        }
+
+        private readonly struct FantasyWarriorStatRow
+        {
+            public readonly string Text;
+            public readonly Sprite Icon;
+            public readonly bool HasBar;
+            public readonly float NormalizedBase;
+            public readonly float NormalizedFinal;
+            public readonly Color FillColor;
+            public readonly Color PositiveChangeColor;
+            public readonly Color NegativeChangeColor;
+
+            private FantasyWarriorStatRow(
+                string text,
+                Sprite icon,
+                bool hasBar,
+                float normalizedBase,
+                float normalizedFinal,
+                Color fillColor,
+                Color positiveChangeColor,
+                Color negativeChangeColor)
+            {
+                Text = text;
+                Icon = icon;
+                HasBar = hasBar;
+                NormalizedBase = normalizedBase;
+                NormalizedFinal = normalizedFinal;
+                FillColor = fillColor;
+                PositiveChangeColor = positiveChangeColor;
+                NegativeChangeColor = negativeChangeColor;
+            }
+
+            public static FantasyWarriorStatRow TextOnly(string text, Sprite icon)
+            {
+                return new FantasyWarriorStatRow(text, icon, false, 0f, 0f, Color.white, Color.white, Color.white);
+            }
+
+            public static FantasyWarriorStatRow WithBar(
+                string text,
+                Sprite icon,
+                float normalizedBase,
+                float normalizedFinal,
+                Color fillColor,
+                Color positiveChangeColor,
+                Color negativeChangeColor)
+            {
+                return new FantasyWarriorStatRow(
+                    text,
+                    icon,
+                    true,
+                    Mathf.Clamp01(normalizedBase),
+                    Mathf.Clamp01(normalizedFinal),
+                    fillColor,
+                    positiveChangeColor,
+                    negativeChangeColor);
+            }
+        }
+
+        private static bool TryFillFantasyWarriorInventoryHoverPopup(
+            RectTransform popupRect,
+            UIConfig uiConfig,
+            LocalizationConfig localizationConfig,
+            StatIconsConfig statIconsConfig,
+            StatsController statsController,
+            PlayerInventory playerInventory,
+            ItemConfig itemConfig,
+            ItemStack itemStack,
+            bool isEquippedItemPopup,
+            Color fillColor,
+            Color positiveChangeColor,
+            Color negativeChangeColor)
+        {
+            if (!IsFantasyWarriorInventoryHoverPopup(popupRect) || itemConfig == null)
+            {
+                return false;
+            }
+
+            SetActive(popupRect, "Input_Group", false);
+            SetActive(popupRect, "Label_Equipped", isEquippedItemPopup);
+
+            ConfigureFantasyWarriorItemName(popupRect, itemConfig.Name.GetLocalizedStringCached());
+            ConfigureFantasyWarriorLabel(
+                popupRect,
+                "Content/Item/Name/Label_ItemRarity",
+                GetItemTypeDisplayName(itemConfig.ItemType),
+                TextAlignmentOptions.Left,
+                34f,
+                22f,
+                false);
+            ConfigureFantasyWarriorSizeLabel(popupRect, itemConfig);
+
+            var icon = FindImage(popupRect, "Content/Item/Icon/ICON");
+            if (icon != null)
+            {
+                icon.sprite = itemConfig.Icon;
+                icon.preserveAspect = true;
+                icon.enabled = itemConfig.Icon != null;
+            }
+
+            var description = GetItemDescriptionText(itemConfig);
+            ConfigureFantasyWarriorPrimaryStats(
+                popupRect,
+                itemConfig,
+                playerInventory,
+                isEquippedItemPopup,
+                uiConfig.InventoryHoverWeightIcon,
+                positiveChangeColor,
+                negativeChangeColor);
+            ConfigureFantasyWarriorStatsGroupDensity(popupRect, HasFantasyWarriorPrimaryStat(itemConfig));
+            ConfigureFantasyWarriorStatsGroupLayout(popupRect);
+            var descriptionText = ConfigureFantasyWarriorDescription(popupRect, description);
+            ConfigureFantasyWarriorValueStats(
+                popupRect,
+                (itemStack?.TotalPrice ?? itemConfig.Price).ToString(CultureInfo.InvariantCulture),
+                itemStack == null
+                    ? itemConfig.Weight.ToString("F1", CultureInfo.InvariantCulture)
+                    : itemStack.TotalWeight.ToString("F1", CultureInfo.InvariantCulture),
+                uiConfig.InventoryHoverWeightIcon);
+
+            var rows = new List<FantasyWarriorStatRow>();
+            if (itemStack?.Count > 1)
+            {
+                rows.Add(FantasyWarriorStatRow.TextOnly($"Stack: x{itemStack.Count.ToString(CultureInfo.InvariantCulture)}", null));
+            }
+
+            AddItemSpecificRows(
+                rows,
+                itemConfig,
+                statIconsConfig,
+                statsController,
+                playerInventory,
+                isEquippedItemPopup,
+                fillColor,
+                positiveChangeColor,
+                negativeChangeColor);
+            FillFantasyWarriorStatRows(popupRect, rows, !string.IsNullOrWhiteSpace(description));
+            ResizeFantasyWarriorDescriptionArea(popupRect, descriptionText);
+            return true;
+        }
+
+        private static void AddItemSpecificRows(
+            List<FantasyWarriorStatRow> rows,
+            ItemConfig itemConfig,
+            StatIconsConfig statIconsConfig,
+            StatsController statsController,
+            PlayerInventory playerInventory,
+            bool isEquippedItemPopup,
+            Color fillColor,
+            Color positiveChangeColor,
+            Color negativeChangeColor)
+        {
+            switch (itemConfig.ItemType)
+            {
+                case ItemType.Usable:
+                    AddSignedRow(rows, "HP", itemConfig.HpStat, GetStatIcon(statIconsConfig, StatType.Hp));
+                    AddSignedRow(rows, "Water", itemConfig.WaterStat, GetStatIcon(statIconsConfig, StatType.Water));
+                    AddSignedRow(rows, "Food", itemConfig.FoodStat, GetStatIcon(statIconsConfig, StatType.Food));
+                    AddSignedRow(rows, "Chill", itemConfig.ChillStat, GetStatIcon(statIconsConfig, StatType.Chill));
+                    break;
+                case ItemType.Helm:
+                case ItemType.Face:
+                case ItemType.Body:
+                case ItemType.Hands:
+                case ItemType.Arms:
+                case ItemType.Legs:
+                case ItemType.Hips:
+                    AddFantasyWarriorArmorRows(
+                        rows,
+                        itemConfig,
+                        statIconsConfig,
+                        statsController,
+                        playerInventory,
+                        isEquippedItemPopup,
+                        fillColor,
+                        positiveChangeColor,
+                        negativeChangeColor);
+                    break;
+            }
+        }
+
+        private static void AddSignedRow(List<FantasyWarriorStatRow> rows, string label, float value, Sprite icon)
+        {
+            if (Mathf.Approximately(value, 0f))
+            {
+                return;
+            }
+
+            var text = string.IsNullOrWhiteSpace(label)
+                ? FormatSignedValue(value)
+                : $"{label}: {FormatSignedValue(value)}";
+            rows.Add(FantasyWarriorStatRow.TextOnly(text, icon));
+        }
+
+        private static void AddPercentRow(List<FantasyWarriorStatRow> rows, string label, float value, Sprite icon)
+        {
+            if (Mathf.Approximately(value, 0f))
+            {
+                return;
+            }
+
+            var valueText = $"{FormatSignedValue(value * 100f)}%";
+            var text = string.IsNullOrWhiteSpace(label)
+                ? valueText
+                : $"{label}: {valueText}";
+            rows.Add(FantasyWarriorStatRow.TextOnly(text, icon));
+        }
+
+        private static void AddFantasyWarriorArmorRows(
+            List<FantasyWarriorStatRow> rows,
+            ItemConfig itemConfig,
+            StatIconsConfig statIconsConfig,
+            StatsController statsController,
+            PlayerInventory playerInventory,
+            bool isEquippedItemPopup,
+            Color fillColor,
+            Color positiveChangeColor,
+            Color negativeChangeColor)
+        {
+            if (itemConfig == null || statsController == null || playerInventory == null)
+            {
+                return;
+            }
+
+            var equippedItemConfig = GetEquippedItemConfig(playerInventory, itemConfig.ItemType);
+
+            foreach (var statType in DefensePopupStatTypes)
+            {
+                var hoveredItemValue = GetItemStatValue(itemConfig, statType);
+                var stat = statsController.GetStat(statType);
+                var currentEquippedValue = GetItemStatValue(equippedItemConfig, statType);
+
+                float baseValue;
+                float finalValue;
+
+                if (statType == StatType.PhysicalDefense)
+                {
+                    var currentValue = PhysicalDefenseCalculator.CalculateEffective(playerInventory);
+                    if (isEquippedItemPopup)
+                    {
+                        baseValue = PhysicalDefenseCalculator.CalculateEffective(playerInventory, itemConfig.ItemType, null);
+                        finalValue = currentValue;
+                    }
+                    else
+                    {
+                        baseValue = currentValue;
+                        finalValue = PhysicalDefenseCalculator.CalculateEffective(playerInventory, itemConfig.ItemType, itemConfig);
+                    }
+                }
+                else if (isEquippedItemPopup)
+                {
+                    var currentValue = stat.Value.Value;
+                    baseValue = currentValue - hoveredItemValue;
+                    finalValue = currentValue;
+                }
+                else if (equippedItemConfig == null)
+                {
+                    var currentValue = stat.Value.Value;
+                    baseValue = currentValue;
+                    finalValue = currentValue + hoveredItemValue;
+                }
+                else
+                {
+                    var currentValue = stat.Value.Value;
+                    baseValue = currentValue;
+                    finalValue = currentValue - currentEquippedValue + hoveredItemValue;
+                }
+
+                var normalizedBase = GetNormalizedPopupStatValue(stat, baseValue);
+                var normalizedFinal = GetNormalizedPopupStatValue(stat, finalValue);
+                var displayValue = finalValue - baseValue;
+                if (Mathf.Approximately(displayValue, 0f))
+                {
+                    continue;
+                }
+
+                var text = statType == StatType.PhysicalDefense
+                    ? $"{FormatSignedValue(displayValue * 100f)}%"
+                    : $"{FormatSignedValue(displayValue)}%";
+
+                rows.Add(FantasyWarriorStatRow.WithBar(
+                    text,
+                    GetStatIcon(statIconsConfig, statType),
+                    normalizedBase,
+                    normalizedFinal,
+                    fillColor,
+                    positiveChangeColor,
+                    negativeChangeColor));
+            }
+        }
+
+        private static void FillFantasyWarriorStatRows(RectTransform popupRect, IReadOnlyList<FantasyWarriorStatRow> rows, bool hasDescription)
+        {
+            var rowIndex = 0;
+            for (var i = 0; i < 4; i++)
+            {
+                var rowRect = FindFantasyWarriorStatRow(popupRect, i);
+                if (rowRect == null)
+                {
+                    continue;
+                }
+
+                var hasRow = rowIndex < rows.Count;
+                rowRect.gameObject.SetActive(hasRow);
+                if (!hasRow)
+                {
+                    if (rowRect.TryGetComponent(out LayoutElement inactiveLayoutElement))
+                    {
+                        inactiveLayoutElement.ignoreLayout = true;
+                    }
+
+                    continue;
+                }
+
+                rowRect.name = $"HUD_ItemStat_{rowIndex:00}";
+                rowRect.SetSiblingIndex(rowIndex);
+                ConfigureFantasyWarriorStatRowLayout(rowRect);
+                rowRect.anchoredPosition = new Vector2(0f, -GetFantasyWarriorRowsBlockHeight(rowIndex));
+                var row = rows[rowIndex];
+                SetText(rowRect, "Label_Stat_Text", row.Text);
+                var icon = FindImage(rowRect, "ICON");
+                if (icon != null)
+                {
+                    icon.sprite = row.Icon;
+                    icon.enabled = row.Icon != null;
+                }
+
+                ConfigureFantasyWarriorArmorBar(rowRect, row);
+                rowIndex++;
+            }
+
+            var background = FindRect(popupRect, "Content/Stats_Group/Background");
+            if (background != null)
+            {
+                background.SetSiblingIndex(rowIndex);
+                if (background.TryGetComponent(out LayoutElement backgroundLayoutElement))
+                {
+                    backgroundLayoutElement.ignoreLayout = false;
+                }
+
+                background.anchorMin = new Vector2(0.5f, 1f);
+                background.anchorMax = new Vector2(0.5f, 1f);
+                background.pivot = new Vector2(0.5f, 1f);
+                background.anchoredPosition = new Vector2(0f, -GetFantasyWarriorRowsBlockHeight(rowIndex));
+            }
+
+            SetActive(popupRect, "Content/Stats_Group/Background", hasDescription);
+        }
+
+        private static void ConfigureFantasyWarriorArmorBar(RectTransform rowRect, FantasyWarriorStatRow row)
+        {
+            var barRoot = FindRect(rowRect, "HUD_Stat_Bar");
+            if (!row.HasBar)
+            {
+                if (barRoot != null)
+                {
+                    barRoot.gameObject.SetActive(false);
+                }
+
+                return;
+            }
+
+            if (barRoot == null)
+            {
+                var barObject = new GameObject("HUD_Stat_Bar", typeof(RectTransform));
+                barRoot = barObject.GetComponent<RectTransform>();
+                barRoot.SetParent(rowRect, false);
+            }
+
+            barRoot.gameObject.SetActive(true);
+            barRoot.anchorMin = new Vector2(0f, 0.5f);
+            barRoot.anchorMax = new Vector2(1f, 0.5f);
+            barRoot.pivot = new Vector2(0.5f, 0.5f);
+            barRoot.offsetMin = new Vector2(92f, -9f);
+            barRoot.offsetMax = new Vector2(-170f, 9f);
+
+            var backFill = FindOrCreateFantasyWarriorBarImage(barRoot, "Back");
+            var changedFill = FindOrCreateFantasyWarriorBarImage(barRoot, "Changed");
+            var fill = FindOrCreateFantasyWarriorBarImage(barRoot, "Fill");
+
+            backFill.type = Image.Type.Simple;
+            changedFill.type = Image.Type.Simple;
+            fill.type = Image.Type.Simple;
+
+            backFill.color = Color.black;
+            fill.color = Color.white;
+
+            SetFantasyWarriorBarSegment(backFill.rectTransform, 0f, 1f);
+
+            if (row.NormalizedFinal > row.NormalizedBase)
+            {
+                SetFantasyWarriorBarSegment(fill.rectTransform, 0f, row.NormalizedBase);
+                SetFantasyWarriorBarSegment(changedFill.rectTransform, row.NormalizedBase, row.NormalizedFinal);
+                changedFill.color = EnsureVisibleBarColor(row.PositiveChangeColor, Color.green);
+                changedFill.gameObject.SetActive(true);
+            }
+            else if (row.NormalizedFinal < row.NormalizedBase)
+            {
+                SetFantasyWarriorBarSegment(fill.rectTransform, 0f, row.NormalizedFinal);
+                SetFantasyWarriorBarSegment(changedFill.rectTransform, row.NormalizedFinal, row.NormalizedBase);
+                changedFill.color = EnsureVisibleBarColor(row.NegativeChangeColor, Color.red);
+                changedFill.gameObject.SetActive(true);
+            }
+            else
+            {
+                SetFantasyWarriorBarSegment(fill.rectTransform, 0f, row.NormalizedFinal);
+                changedFill.color = Color.white;
+                changedFill.gameObject.SetActive(false);
+            }
+
+            backFill.transform.SetSiblingIndex(0);
+            changedFill.transform.SetSiblingIndex(1);
+            fill.transform.SetSiblingIndex(2);
+
+            var textRect = FindRect(rowRect, "Label_Stat_Text");
+            if (textRect != null)
+            {
+                textRect.anchorMin = new Vector2(1f, 0.5f);
+                textRect.anchorMax = new Vector2(1f, 0.5f);
+                textRect.pivot = new Vector2(1f, 0.5f);
+                textRect.anchoredPosition = new Vector2(-28f, 0f);
+                textRect.sizeDelta = new Vector2(130f, 48f);
+            }
+        }
+
+        private static Color EnsureVisibleBarColor(Color configuredColor, Color fallback)
+        {
+            if (configuredColor.a <= 0.01f)
+            {
+                configuredColor = fallback;
+            }
+
+            configuredColor.a = 1f;
+            return configuredColor;
+        }
+
+        private static void SetFantasyWarriorBarSegment(RectTransform rect, float normalizedMin, float normalizedMax)
+        {
+            if (rect == null)
+            {
+                return;
+            }
+
+            normalizedMin = Mathf.Clamp01(normalizedMin);
+            normalizedMax = Mathf.Clamp01(normalizedMax);
+            if (normalizedMax < normalizedMin)
+            {
+                (normalizedMin, normalizedMax) = (normalizedMax, normalizedMin);
+            }
+
+            rect.anchorMin = new Vector2(normalizedMin, 0f);
+            rect.anchorMax = new Vector2(normalizedMax, 1f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+        }
+
+        private static Image FindOrCreateFantasyWarriorBarImage(RectTransform barRoot, string name)
+        {
+            var image = FindImage(barRoot, name);
+            RectTransform imageRect;
+            if (image == null)
+            {
+                var imageObject = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                imageRect = imageObject.GetComponent<RectTransform>();
+                imageRect.SetParent(barRoot, false);
+                image = imageObject.GetComponent<Image>();
+            }
+            else
+            {
+                imageRect = image.GetComponent<RectTransform>();
+            }
+
+            image.gameObject.SetActive(true);
+            image.raycastTarget = false;
+            imageRect.anchorMin = Vector2.zero;
+            imageRect.anchorMax = Vector2.one;
+            imageRect.offsetMin = Vector2.zero;
+            imageRect.offsetMax = Vector2.zero;
+            return image;
+        }
+
+        private static RectTransform FindFantasyWarriorStatRow(RectTransform popupRect, int index)
+        {
+            return FindRect(popupRect, $"Content/Stats_Group/HUD_Stat_{index:00}")
+                   ?? FindRect(popupRect, $"Content/Stats_Group/HUD_ItemStat_{index:00}")
+                   ?? FindRect(popupRect, $"Content/Stats_Group/HUD_ArmorStat_{index:00}");
+        }
+
+        private static void ConfigureFantasyWarriorItemName(RectTransform popupRect, string itemName)
+        {
+            var text = FindText(popupRect, "Content/Item/Name/Label_ItemName");
+            if (text == null)
+            {
+                return;
+            }
+
+            text.text = itemName;
+            text.alignment = TextAlignmentOptions.Left;
+            text.enableAutoSizing = true;
+            text.fontSizeMax = 40f;
+            text.fontSizeMin = 20f;
+            text.enableWordWrapping = false;
+            text.overflowMode = TextOverflowModes.Ellipsis;
+        }
+
+        private static void ConfigureFantasyWarriorPrimaryStats(
+            RectTransform popupRect,
+            ItemConfig itemConfig,
+            PlayerInventory playerInventory,
+            bool isEquippedItemPopup,
+            Sprite backpackIcon,
+            Color positiveChangeColor,
+            Color negativeChangeColor)
+        {
+            var primaryStat = FindRect(popupRect, "Content/HUD_Stat_Base_Large");
+            if (primaryStat == null || itemConfig == null)
+            {
+                return;
+            }
+
+            if (itemConfig.ItemType == ItemType.Weapon)
+            {
+                primaryStat.name = "HUD_Stat_WeaponDamage";
+                primaryStat.gameObject.SetActive(true);
+                ConfigureFantasyWarriorFullStatRect(primaryStat);
+                ConfigureFantasyWarriorLabel(
+                    primaryStat,
+                    "Label_Stat_Number",
+                    FormatWeaponDamage(itemConfig),
+                    TextAlignmentOptions.Left,
+                    76f,
+                    48f,
+                    false);
+                SetText(primaryStat, "Label_Stat_Text", string.Empty);
+                return;
+            }
+
+            if (itemConfig is BackpackItemConfig backpackItemConfig)
+            {
+                primaryStat.name = "HUD_Stat_BackpackInventorySize";
+                primaryStat.gameObject.SetActive(true);
+                ConfigureFantasyWarriorFullStatRect(primaryStat);
+                ConfigureFantasyWarriorPrimaryStatIcon(primaryStat, backpackIcon);
+                ConfigureFantasyWarriorLabel(
+                    primaryStat,
+                    "Label_Stat_Number",
+                    FormatBackpackInventorySize(backpackItemConfig, playerInventory, isEquippedItemPopup, positiveChangeColor, negativeChangeColor),
+                    TextAlignmentOptions.Left,
+                    76f,
+                    42f,
+                    false);
+
+                var numberText = FindText(primaryStat, "Label_Stat_Number");
+                if (numberText != null)
+                {
+                    numberText.richText = true;
+                    numberText.color = Color.white;
+                }
+
+                SetText(primaryStat, "Label_Stat_Text", string.Empty);
+                return;
+            }
+
+            primaryStat.name = "HUD_Stat_WeaponDamage_Unused";
+            primaryStat.gameObject.SetActive(false);
+        }
+
+        private static bool HasFantasyWarriorPrimaryStat(ItemConfig itemConfig)
+        {
+            return itemConfig?.ItemType == ItemType.Weapon || itemConfig is BackpackItemConfig;
+        }
+
+        private static void ConfigureFantasyWarriorPrimaryStatIcon(RectTransform statRect, Sprite iconSprite)
+        {
+            var icon = FindImage(statRect, "ICON");
+            if (icon == null)
+            {
+                return;
+            }
+
+            icon.sprite = iconSprite;
+            icon.enabled = iconSprite != null;
+            icon.preserveAspect = true;
+            icon.color = Color.white;
+            icon.raycastTarget = false;
+        }
+
+        private static void ConfigureFantasyWarriorFullStatRect(RectTransform statRect)
+        {
+            if (statRect == null)
+            {
+                return;
+            }
+
+            statRect.anchorMin = new Vector2(0f, statRect.anchorMin.y);
+            statRect.anchorMax = new Vector2(1f, statRect.anchorMax.y);
+            statRect.pivot = new Vector2(0.5f, statRect.pivot.y);
+            statRect.offsetMin = new Vector2(0f, statRect.offsetMin.y);
+            statRect.offsetMax = new Vector2(0f, statRect.offsetMax.y);
+            statRect.anchoredPosition = new Vector2(0f, statRect.anchoredPosition.y);
+        }
+
+        private static void ConfigureFantasyWarriorValueStats(
+            RectTransform popupRect,
+            string priceText,
+            string weightText,
+            Sprite weightIcon)
+        {
+            var valueGroup = FindRect(popupRect, "Content/Value_PriceWeight") ?? FindRect(popupRect, "Content/Value");
+            if (valueGroup == null)
+            {
+                return;
+            }
+
+            valueGroup.name = "Value_PriceWeight";
+
+            var priceStat = FindRect(valueGroup, "HUD_Stat_ItemPrice") ?? FindRect(valueGroup, "HUD_Stat_Value");
+            if (priceStat == null)
+            {
+                return;
+            }
+
+            priceStat.name = "HUD_Stat_ItemPrice";
+            ConfigureFantasyWarriorValueRect(priceStat, true);
+            ConfigureFantasyWarriorLabel(priceStat, "Label_Stat_Text", priceText, TextAlignmentOptions.Left, 56f, 34f, false);
+
+            var weightStat = FindRect(valueGroup, "HUD_Stat_ItemWeight");
+            if (weightStat == null)
+            {
+                weightStat = Object.Instantiate(priceStat, valueGroup);
+            }
+
+            weightStat.name = "HUD_Stat_ItemWeight";
+            weightStat.SetSiblingIndex(priceStat.GetSiblingIndex() + 1);
+            ConfigureFantasyWarriorValueRect(weightStat, false);
+            ConfigureFantasyWarriorLabel(weightStat, "Label_Stat_Text", weightText, TextAlignmentOptions.Right, 56f, 34f, false);
+            ConfigureFantasyWarriorWeightValueContent(weightStat, priceStat);
+
+            var weightIconImage = FindOrCreateFantasyWarriorValueIcon(weightStat, priceStat, true);
+            if (weightIconImage != null && weightIcon != null)
+            {
+                weightIconImage.sprite = weightIcon;
+                weightIconImage.enabled = true;
+                weightIconImage.gameObject.SetActive(true);
+                weightIconImage.preserveAspect = true;
+                weightIconImage.color = Color.white;
+                weightIconImage.raycastTarget = false;
+            }
+        }
+
+        private static Image FindOrCreateFantasyWarriorValueIcon(RectTransform valueStat, RectTransform templateStat, bool alignRight)
+        {
+            if (valueStat == null)
+            {
+                return null;
+            }
+
+            var icon = FindImage(valueStat, "ICON");
+            RectTransform iconRect;
+            if (icon != null)
+            {
+                iconRect = icon.GetComponent<RectTransform>();
+            }
+            else if (FindImage(templateStat, "ICON") is { } templateIcon)
+            {
+                var iconObject = Object.Instantiate(templateIcon.gameObject, valueStat);
+                iconObject.name = "ICON";
+                icon = iconObject.GetComponent<Image>();
+                iconRect = iconObject.GetComponent<RectTransform>();
+            }
+            else
+            {
+                var iconObject = new GameObject("ICON", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                iconRect = iconObject.GetComponent<RectTransform>();
+                iconRect.SetParent(valueStat, false);
+                icon = iconObject.GetComponent<Image>();
+            }
+
+            iconRect.anchorMin = new Vector2(alignRight ? 1f : 0f, 0.5f);
+            iconRect.anchorMax = new Vector2(alignRight ? 1f : 0f, 0.5f);
+            iconRect.pivot = new Vector2(alignRight ? 1f : 0f, 0.5f);
+            iconRect.anchoredPosition = new Vector2(alignRight ? -18f : 18f, 0f);
+            iconRect.sizeDelta = new Vector2(44f, 44f);
+            return icon;
+        }
+
+        private static void ConfigureFantasyWarriorWeightValueContent(RectTransform weightStat, RectTransform priceStat)
+        {
+            var textRect = FindRect(weightStat, "Label_Stat_Text");
+            if (textRect == null)
+            {
+                return;
+            }
+
+            var priceTextRect = FindRect(priceStat, "Label_Stat_Text");
+            var priceText = FindText(priceStat, "Label_Stat_Text");
+            var weightText = textRect.GetComponent<TMP_Text>();
+            if (priceText != null && weightText != null)
+            {
+                weightText.enableAutoSizing = priceText.enableAutoSizing;
+                weightText.fontSize = priceText.fontSize;
+                weightText.fontSizeMax = priceText.fontSizeMax;
+                weightText.fontSizeMin = priceText.fontSizeMin;
+            }
+
+            var priceTextSize = priceTextRect != null
+                ? new Vector2(
+                    Mathf.Max(priceTextRect.sizeDelta.x, priceTextRect.rect.width),
+                    Mathf.Max(priceTextRect.sizeDelta.y, priceTextRect.rect.height))
+                : new Vector2(180f, 64f);
+
+            textRect.anchorMin = new Vector2(1f, 0.5f);
+            textRect.anchorMax = new Vector2(1f, 0.5f);
+            textRect.pivot = new Vector2(1f, 0.5f);
+            textRect.anchoredPosition = new Vector2(-72f, 0f);
+            textRect.sizeDelta = new Vector2(Mathf.Max(180f, priceTextSize.x), Mathf.Max(64f, priceTextSize.y));
+        }
+
+        private static void ConfigureFantasyWarriorValueRect(RectTransform valueRect, bool leftAligned)
+        {
+            if (valueRect == null)
+            {
+                return;
+            }
+
+            valueRect.anchorMin = leftAligned ? new Vector2(0f, 0f) : new Vector2(0.5f, 0f);
+            valueRect.anchorMax = leftAligned ? new Vector2(0.5f, 1f) : new Vector2(1f, 1f);
+            valueRect.pivot = leftAligned ? new Vector2(0f, 0.5f) : new Vector2(1f, 0.5f);
+            valueRect.offsetMin = Vector2.zero;
+            valueRect.offsetMax = Vector2.zero;
+            valueRect.anchoredPosition = Vector2.zero;
+        }
+
+        private static void ConfigureFantasyWarriorSizeLabel(RectTransform popupRect, ItemConfig itemConfig)
+        {
+            if (popupRect == null || itemConfig == null)
+            {
+                return;
+            }
+
+            var labelRect = FindRect(popupRect, "Label_ItemSize");
+            if (labelRect == null)
+            {
+                var labelObject = new GameObject("Label_ItemSize", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+                labelRect = labelObject.GetComponent<RectTransform>();
+                labelRect.SetParent(popupRect, false);
+            }
+
+            labelRect.anchorMin = new Vector2(1f, 1f);
+            labelRect.anchorMax = new Vector2(1f, 1f);
+            labelRect.pivot = new Vector2(1f, 1f);
+            labelRect.anchoredPosition = new Vector2(-24f, -24f);
+            labelRect.sizeDelta = new Vector2(170f, 68f);
+
+            var text = labelRect.GetComponent<TMP_Text>();
+            ApplyFantasyWarriorFont(popupRect, text);
+            text.text = FormatItemSize(itemConfig);
+            text.alignment = TextAlignmentOptions.TopRight;
+            text.enableAutoSizing = true;
+            text.fontSizeMax = 54f;
+            text.fontSizeMin = 34f;
+            text.enableWordWrapping = false;
+            text.overflowMode = TextOverflowModes.Ellipsis;
+            text.raycastTarget = false;
+        }
+
+        private static TMP_Text ConfigureFantasyWarriorDescription(RectTransform popupRect, string description)
+        {
+            var backgroundRect = FindRect(popupRect, "Content/Stats_Group/Background");
+            if (backgroundRect == null)
+            {
+                return null;
+            }
+
+            var descriptionRect = FindRect(backgroundRect, "Label_ItemDescription");
+            if (descriptionRect == null)
+            {
+                var descriptionObject = new GameObject("Label_ItemDescription", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+                descriptionRect = descriptionObject.GetComponent<RectTransform>();
+                descriptionRect.SetParent(backgroundRect, false);
+            }
+
+            descriptionRect.anchorMin = new Vector2(0f, 1f);
+            descriptionRect.anchorMax = new Vector2(0f, 1f);
+            descriptionRect.pivot = new Vector2(0f, 1f);
+            descriptionRect.anchoredPosition = new Vector2(28f, -14f);
+
+            var text = descriptionRect.GetComponent<TMP_Text>();
+            ApplyFantasyWarriorFont(popupRect, text);
+            text.text = string.IsNullOrWhiteSpace(description) ? GetFallbackDescriptionText() : description.Trim();
+            text.alignment = TextAlignmentOptions.TopLeft;
+            text.enableAutoSizing = true;
+            text.fontSizeMax = 32f;
+            text.fontSizeMin = 18f;
+            text.enableWordWrapping = true;
+            text.overflowMode = TextOverflowModes.Ellipsis;
+            text.raycastTarget = false;
+
+            return text;
+        }
+
+        private static void ConfigureFantasyWarriorStatsGroupDensity(RectTransform popupRect, bool hasPrimaryStat)
+        {
+            var statsGroup = FindRect(popupRect, "Content/Stats_Group");
+            if (statsGroup == null)
+            {
+                return;
+            }
+
+            statsGroup.anchoredPosition = hasPrimaryStat
+                ? new Vector2(statsGroup.anchoredPosition.x, -410f)
+                : new Vector2(statsGroup.anchoredPosition.x, -400f);
+            statsGroup.sizeDelta = hasPrimaryStat
+                ? new Vector2(statsGroup.sizeDelta.x, 220f)
+                : new Vector2(statsGroup.sizeDelta.x, 420f);
+
+            var background = FindRect(statsGroup, "Background");
+            if (background != null && background.TryGetComponent(out LayoutElement layoutElement))
+            {
+                layoutElement.ignoreLayout = false;
+                layoutElement.preferredHeight = hasPrimaryStat ? 100f : 190f;
+                layoutElement.minHeight = hasPrimaryStat ? 80f : 160f;
+            }
+        }
+
+        private static void ConfigureFantasyWarriorStatsGroupLayout(RectTransform popupRect)
+        {
+            var statsGroup = FindRect(popupRect, "Content/Stats_Group");
+            if (statsGroup == null)
+            {
+                return;
+            }
+
+            var layoutGroup = statsGroup.GetComponent<VerticalLayoutGroup>();
+            if (layoutGroup != null)
+            {
+                layoutGroup.enabled = false;
+            }
+        }
+
+        private static void ConfigureFantasyWarriorLabel(
+            Transform root,
+            string path,
+            string value,
+            TextAlignmentOptions alignment,
+            float fontSizeMax,
+            float fontSizeMin,
+            bool wrap)
+        {
+            var text = FindText(root, path);
+            if (text == null)
+            {
+                return;
+            }
+
+            ApplyFantasyWarriorFont(root, text);
+            text.text = value;
+            text.alignment = alignment;
+            text.enableAutoSizing = true;
+            text.fontSizeMax = fontSizeMax;
+            text.fontSizeMin = fontSizeMin;
+            text.enableWordWrapping = wrap;
+            text.overflowMode = TextOverflowModes.Ellipsis;
+        }
+
+        private static string FormatWeaponDamage(ItemConfig itemConfig)
+        {
+            var min = Mathf.Min(itemConfig.WeaponDamageRange.x, itemConfig.WeaponDamageRange.y);
+            var max = Mathf.Max(itemConfig.WeaponDamageRange.x, itemConfig.WeaponDamageRange.y);
+            return $"{min.ToString(CultureInfo.InvariantCulture)}-{max.ToString(CultureInfo.InvariantCulture)}";
+        }
+
+        private static string FormatBackpackInventorySize(
+            BackpackItemConfig backpackItemConfig,
+            PlayerInventory playerInventory,
+            bool isEquippedItemPopup,
+            Color positiveChangeColor,
+            Color negativeChangeColor)
+        {
+            var backpackSize = backpackItemConfig.BackpackSize;
+            var referenceSize = isEquippedItemPopup
+                ? playerInventory?.BaseInventorySize ?? backpackSize
+                : GetCurrentPlayerInventorySize(playerInventory, backpackSize);
+            var delta = backpackSize - referenceSize;
+            var sizeText = FormatInventorySize(backpackSize);
+            if (delta == Vector2Int.zero)
+            {
+                return sizeText;
+            }
+
+            var deltaColor = isEquippedItemPopup
+                ? EnsureVisibleBarColor(positiveChangeColor, Color.green)
+                : GetInventorySizeDeltaColor(referenceSize, backpackSize, positiveChangeColor, negativeChangeColor);
+            return $"{sizeText} <color=#{ColorUtility.ToHtmlStringRGBA(deltaColor)}>- {FormatInventorySizeDelta(referenceSize, backpackSize)}</color>";
+        }
+
+        private static Vector2Int GetCurrentPlayerInventorySize(PlayerInventory playerInventory, Vector2Int fallbackSize)
+        {
+            return playerInventory?.Tiles?.tiles == null
+                ? fallbackSize
+                : new Vector2Int(playerInventory.Tiles.tiles.GetLength(0), playerInventory.Tiles.tiles.GetLength(1));
+        }
+
+        private static Color GetInventorySizeDeltaColor(
+            Vector2Int referenceSize,
+            Vector2Int targetSize,
+            Color positiveChangeColor,
+            Color negativeChangeColor)
+        {
+            var referenceArea = referenceSize.x * referenceSize.y;
+            var targetArea = targetSize.x * targetSize.y;
+            if (targetArea > referenceArea)
+            {
+                return EnsureVisibleBarColor(positiveChangeColor, Color.green);
+            }
+
+            if (targetArea < referenceArea)
+            {
+                return EnsureVisibleBarColor(negativeChangeColor, Color.red);
+            }
+
+            return Color.white;
+        }
+
+        private static string FormatInventorySize(Vector2Int size)
+        {
+            return $"{size.x.ToString(CultureInfo.InvariantCulture)}x{size.y.ToString(CultureInfo.InvariantCulture)}";
+        }
+
+        private static string FormatInventorySizeDelta(Vector2Int referenceSize, Vector2Int targetSize)
+        {
+            var delta = targetSize - referenceSize;
+            var referenceArea = referenceSize.x * referenceSize.y;
+            var targetArea = targetSize.x * targetSize.y;
+            var sign = targetArea >= referenceArea ? "+" : "-";
+            return $"{sign}{Mathf.Abs(delta.x).ToString(CultureInfo.InvariantCulture)}x{Mathf.Abs(delta.y).ToString(CultureInfo.InvariantCulture)}";
+        }
+
+        private static string FormatItemSize(ItemConfig itemConfig)
+        {
+            return itemConfig == null
+                ? "0x0"
+                : $"{itemConfig.Size.x.ToString(CultureInfo.InvariantCulture)}x{itemConfig.Size.y.ToString(CultureInfo.InvariantCulture)}";
+        }
+
+        private static string GetItemDescriptionText(ItemConfig itemConfig)
+        {
+            var description = itemConfig?.Description?.GetLocalizedStringCached();
+            if (!string.IsNullOrWhiteSpace(description))
+            {
+                return description;
+            }
+
+            description = itemConfig?.Description?.GetLocalizedString();
+            if (!string.IsNullOrWhiteSpace(description))
+            {
+                return description;
+            }
+
+            return GetFallbackDescriptionText();
+        }
+
+        private static string GetFallbackDescriptionText()
+        {
+            var fallback = new LocalizedString("Tables", "Null String");
+            var text = fallback.GetLocalizedStringCached();
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                return text;
+            }
+
+            text = fallback.GetLocalizedString();
+            return string.IsNullOrWhiteSpace(text) ? "Null String" : text;
+        }
+
+        private static void ResizeFantasyWarriorDescriptionArea(RectTransform popupRect, TMP_Text descriptionText)
+        {
+            var statsGroup = FindRect(popupRect, "Content/Stats_Group");
+            var background = FindRect(popupRect, "Content/Stats_Group/Background");
+            var descriptionRect = FindRect(background, "Label_ItemDescription");
+            if (popupRect == null || statsGroup == null || background == null || descriptionRect == null || descriptionText == null)
+            {
+                return;
+            }
+
+            ConfigureFantasyWarriorStatsGroupLayout(popupRect);
+
+            var statsWidth = statsGroup.rect.width > 0f ? statsGroup.rect.width : 740f;
+            var textWidth = Mathf.Max(220f, statsWidth - 116f);
+            var preferredText = descriptionText.GetPreferredValues(descriptionText.text, textWidth, 0f);
+            var textHeight = Mathf.Clamp(preferredText.y, 32f, 330f);
+            var backgroundWidth = textWidth + 56f;
+            var backgroundHeight = Mathf.Clamp(textHeight + 34f, 72f, 390f);
+            var statsRowsHeight = GetActiveFantasyWarriorStatRowsHeight(statsGroup, out var activeRows);
+            var descriptionActive = background.gameObject.activeSelf;
+            var activeChildren = activeRows + (descriptionActive ? 1 : 0);
+            var spacingHeight = 8f * Mathf.Max(0, activeChildren - 1);
+            var paddingHeight = 0f;
+
+            background.anchorMin = new Vector2(0.5f, 1f);
+            background.anchorMax = new Vector2(0.5f, 1f);
+            background.pivot = new Vector2(0.5f, 1f);
+            background.sizeDelta = new Vector2(backgroundWidth, backgroundHeight);
+            descriptionRect.sizeDelta = new Vector2(textWidth, textHeight);
+
+            if (background.TryGetComponent(out LayoutElement layoutElement))
+            {
+                layoutElement.ignoreLayout = false;
+                layoutElement.minWidth = backgroundWidth;
+                layoutElement.preferredWidth = backgroundWidth;
+                layoutElement.minHeight = backgroundHeight;
+                layoutElement.preferredHeight = backgroundHeight;
+            }
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(background);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(statsGroup);
+            var statsGroupHeight = statsRowsHeight + (descriptionActive ? backgroundHeight : 0f) + spacingHeight + paddingHeight;
+            statsGroup.sizeDelta = new Vector2(statsGroup.sizeDelta.x, statsGroupHeight);
+
+            var value = FindRect(popupRect, "Content/Value_PriceWeight") ?? FindRect(popupRect, "Content/Value");
+            var valueHeight = value != null && value.rect.height > 0f ? value.rect.height : 80f;
+            var descriptionBottom = Mathf.Abs(statsGroup.anchoredPosition.y) + statsGroupHeight;
+            var hasPrimaryStat = HasActiveFantasyWarriorPrimaryStat(popupRect);
+            var fixedBottomArea = valueHeight + (hasPrimaryStat ? 92f : 8f);
+            var minimumHeight = descriptionBottom + fixedBottomArea;
+            var requiredHeight = Mathf.Clamp(minimumHeight, hasPrimaryStat ? 560f : 0f, 980f);
+            popupRect.sizeDelta = new Vector2(popupRect.sizeDelta.x, requiredHeight);
+
+            var content = FindRect(popupRect, "Content");
+            if (content != null)
+            {
+                content.offsetMin = new Vector2(content.offsetMin.x, 40f);
+                content.offsetMax = new Vector2(content.offsetMax.x, -40f);
+            }
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(popupRect);
+        }
+
+        private static void ConfigureFantasyWarriorStatRowLayout(RectTransform rowRect)
+        {
+            if (rowRect == null)
+            {
+                return;
+            }
+
+            rowRect.anchorMin = new Vector2(0f, 1f);
+            rowRect.anchorMax = new Vector2(1f, 1f);
+            rowRect.pivot = new Vector2(0.5f, 1f);
+            rowRect.sizeDelta = new Vector2(-60f, 48f);
+
+            var layoutElement = rowRect.GetComponent<LayoutElement>();
+            if (layoutElement == null)
+            {
+                layoutElement = rowRect.gameObject.AddComponent<LayoutElement>();
+            }
+
+            layoutElement.ignoreLayout = false;
+            layoutElement.minHeight = 44f;
+            layoutElement.preferredHeight = 48f;
+            layoutElement.flexibleHeight = 0f;
+        }
+
+        private static float GetActiveFantasyWarriorStatRowsHeight(RectTransform statsGroup, out int activeRows)
+        {
+            activeRows = 0;
+            if (statsGroup == null)
+            {
+                return 0f;
+            }
+
+            var height = 0f;
+            for (var i = 0; i < statsGroup.childCount; i++)
+            {
+                if (statsGroup.GetChild(i) is not RectTransform row
+                 || !row.gameObject.activeSelf
+                 || !row.name.StartsWith("HUD_ItemStat_"))
+                {
+                    continue;
+                }
+
+                height += row.TryGetComponent(out LayoutElement layoutElement)
+                    ? Mathf.Max(layoutElement.preferredHeight, row.rect.height)
+                    : Mathf.Max(48f, row.rect.height);
+                activeRows++;
+            }
+
+            return height;
+        }
+
+        private static float GetFantasyWarriorRowsBlockHeight(int rowCount)
+        {
+            return rowCount <= 0 ? 0f : rowCount * 48f + Mathf.Max(0, rowCount) * 8f;
+        }
+
+        private static bool HasActiveFantasyWarriorPrimaryStat(RectTransform popupRect)
+        {
+            return FindRect(popupRect, "Content/HUD_Stat_WeaponDamage")?.gameObject.activeSelf == true
+                   || FindRect(popupRect, "Content/HUD_Stat_BackpackInventorySize")?.gameObject.activeSelf == true
+                   || FindRect(popupRect, "Content/HUD_Stat_Base_Large")?.gameObject.activeSelf == true;
+        }
+
+        private static void ApplyFantasyWarriorFont(Transform root, TMP_Text target)
+        {
+            if (root == null || target == null)
+            {
+                return;
+            }
+
+            var source = FindText(root, "Content/Item/Name/Label_ItemName")
+                         ?? FindText(root, "Label_Stat_Text")
+                         ?? root.GetComponentInChildren<TMP_Text>(true);
+            if (source == null || source == target)
+            {
+                return;
+            }
+
+            target.font = source.font;
+            target.fontSharedMaterial = source.fontSharedMaterial;
+        }
+
+        private static void PrepareFantasyWarriorInventoryHoverPopup(RectTransform popupRect)
+        {
+            if (popupRect == null)
+            {
+                return;
+            }
+
+            popupRect.anchorMin = new Vector2(0f, 1f);
+            popupRect.anchorMax = new Vector2(0f, 1f);
+            popupRect.pivot = new Vector2(0f, 1f);
+            popupRect.localScale = Vector3.one * 0.55f;
+            SetPopupRaycastState(popupRect, false);
+        }
+
+        private static bool IsFantasyWarriorInventoryHoverPopup(RectTransform popupRect)
+        {
+            return popupRect != null
+                && popupRect.name.Contains("HUD_FantasyWarrior_ItemPickupInfo04")
+                && popupRect.Find("Content/Item/Icon/ICON") != null;
+        }
+
+        private static RectTransform FindRect(Transform root, string path)
+        {
+            return root == null ? null : root.Find(path) as RectTransform;
+        }
+
+        private static Image FindImage(Transform root, string path)
+        {
+            var rect = FindRect(root, path);
+            return rect == null ? null : rect.GetComponent<Image>();
+        }
+
+        private static TMP_Text FindText(Transform root, string path)
+        {
+            var rect = FindRect(root, path);
+            return rect == null ? null : rect.GetComponent<TMP_Text>();
+        }
+
+        private static void SetText(Transform root, string path, string value)
+        {
+            var text = FindText(root, path);
+            if (text != null)
+            {
+                text.text = value;
+            }
+        }
+
+        private static void SetActive(Transform root, string path, bool isActive)
+        {
+            var rect = FindRect(root, path);
+            if (rect != null)
+            {
+                rect.gameObject.SetActive(isActive);
+            }
+        }
+
+        private static string GetItemTypeDisplayName(ItemType itemType)
+        {
+            return itemType switch
+            {
+                ItemType.Usable => "Usable",
+                ItemType.Helm => "Helm",
+                ItemType.Face => "Face",
+                ItemType.Body => "Body",
+                ItemType.Hands => "Hands",
+                ItemType.Arms => "Arms",
+                ItemType.Legs => "Legs",
+                ItemType.Hips => "Hips",
+                ItemType.Backpack => "Backpack",
+                ItemType.Weapon => "Weapon",
+                _ => itemType.ToString()
+            };
         }
 
         private static void CreateFastSlotLabel(RectTransform parent, string labelText)

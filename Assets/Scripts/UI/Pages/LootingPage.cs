@@ -989,8 +989,12 @@ namespace UI.Pages
                 return false;
             }
 
-            popupRect = resolver.Instantiate(uiConfig.PopupRect, popupParentRect);
-            popupRect.name = $"{uiConfig.PopupRect.name} | Looting Popup";
+            popupRect = PageUiUtilities.CreatePopupRoot(
+                popupParentRect,
+                uiConfig,
+                resolver,
+                openMode == PopupOpenMode.Hover,
+                "Looting Popup");
             PageUiUtilities.SetPopupRaycastState(popupRect, openMode == PopupOpenMode.RightClick);
 
             var itemConfig = GetPopupItemConfig(target);
