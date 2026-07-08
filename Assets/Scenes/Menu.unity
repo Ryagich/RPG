@@ -24181,7 +24181,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1439749071789726, guid: b6c42c396a1ca1e4fa4480b43d392852, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 939812773}
   m_SourcePrefab: {fileID: 100100000, guid: b6c42c396a1ca1e4fa4480b43d392852, type: 3}
 --- !u!4 &606887785 stripped
 Transform:
@@ -36880,6 +36883,25 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4941225311197588, guid: f179bb4745241de41aee557f43679baa, type: 3}
   m_PrefabInstance: {fileID: 936993401}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &939812768 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1439749071789726, guid: b6c42c396a1ca1e4fa4480b43d392852, type: 3}
+  m_PrefabInstance: {fileID: 606887784}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &939812773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 939812768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bab5763a82fed454a84a1592029ed560, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::World.WindmillRotator
+  axis: 0
+  speed: -11
 --- !u!1001 &940017065
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -38164,6 +38186,25 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4773186458092486, guid: b134f3b15eaeff041bc28faf7b5dc10c, type: 3}
   m_PrefabInstance: {fileID: 975791674}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &981602572 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1170638307574600, guid: c5bc69be9e718d142831d4cd3e3227d9, type: 3}
+  m_PrefabInstance: {fileID: 1135640909}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &981602576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 981602572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bab5763a82fed454a84a1592029ed560, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::World.WindmillRotator
+  axis: 2
+  speed: 3
 --- !u!1001 &985219969
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -43665,7 +43706,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1170638307574600, guid: c5bc69be9e718d142831d4cd3e3227d9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 981602576}
   m_SourcePrefab: {fileID: 100100000, guid: c5bc69be9e718d142831d4cd3e3227d9, type: 3}
 --- !u!4 &1135640910 stripped
 Transform:
