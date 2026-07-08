@@ -71,7 +71,7 @@ namespace UI.Pages
             {
                 infoAboutPlayer.Money.text = moneyStorage == null
                                                  ? "---"
-                                                 : $"{moneyStorage.CurrentMoney.Value} RU";
+                                                 : moneyStorage.CurrentMoney.Value.ToString(CultureInfo.InvariantCulture);
             }
         }
 
@@ -105,10 +105,9 @@ namespace UI.Pages
 
             var currentWeightText = currentWeight.ToString("F1", CultureInfo.InvariantCulture);
             var currentWeightLabel = localizationConfig.InventoryCurrentWeight.GetLocalizedStringCached();
-            var kgLabel = localizationConfig.kg.GetLocalizedStringCached();
             var maxLabel = localizationConfig.max.GetLocalizedStringCached();
             var maxText = maxWeight.HasValue && maxWeight.Value >= 0f
-                ? $"{maxLabel} {maxWeight.Value.ToString("F1", CultureInfo.InvariantCulture)} {kgLabel}"
+                ? $"{maxLabel} {maxWeight.Value.ToString("F1", CultureInfo.InvariantCulture)}"
                 : $"{maxLabel} ...";
 
             var grayColor = ColorUtility.ToHtmlStringRGB(colorsConfig.Gray);
@@ -117,7 +116,6 @@ namespace UI.Pages
             infoAboutInventory.Weight.text =
                 $"<color=#{grayColor}>{currentWeightLabel}</color> " +
                 $"<color=#{whiteColor}>{currentWeightText}</color> " +
-                $"<color=#{whiteColor}>{kgLabel}</color> " +
                 $"<color=#{grayColor}>({maxText})</color>";
         }
 
@@ -130,15 +128,13 @@ namespace UI.Pages
 
             var currentWeightText = totalWeight.ToString("F1", CultureInfo.InvariantCulture);
 
-            var kgLabel = localizationConfig.kg.GetLocalizedStringCached();
             var grayColor = ColorUtility.ToHtmlStringRGB(colorsConfig.Gray);
             var whiteColor = ColorUtility.ToHtmlStringRGB(colorsConfig.White);
 
             infoText.text = totalPrice is 0 ? "" :
-                $"<color=#{whiteColor}>{totalPrice} RU</color> " +
+                $"<color=#{whiteColor}>{totalPrice}</color> " +
                 $"<color=#{grayColor}>(</color>" +
                 $"<color=#{whiteColor}>{currentWeightText}</color> " +
-                $"<color=#{whiteColor}>{kgLabel}</color>" +
                 $"<color=#{grayColor}>)</color>";
         }
 
@@ -2240,7 +2236,7 @@ namespace UI.Pages
 
             var popupWeight = resolver.Instantiate(uiConfig.PopupWeight, popupRect);
             popupWeight.name = $"{uiConfig.PopupWeight.name} | Weight";
-            popupWeight.text = $"{itemStack.TotalWeight.ToString("F1", CultureInfo.InvariantCulture)} {localizationConfig.kg.GetLocalizedStringCached()}";
+            popupWeight.text = itemStack.TotalWeight.ToString("F1", CultureInfo.InvariantCulture);
         }
 
         private static void CreateBackpackSizePopup
