@@ -7,7 +7,9 @@ namespace Stats
 {
     public class StatsPeriodicChanger : IStartable, ITickable, System.IDisposable
     {
-        private static readonly StatType[] AdditionalStatTypes = { StatType.Water, StatType.Food, StatType.Chill };
+        // Chill отвечает за сон. Пока нет механик дня/ночи и сна, он выключен из периодики,
+        // но сам стат остаётся в проекте для будущего возврата.
+        private static readonly StatType[] AdditionalStatTypes = { StatType.Water, StatType.Food };
 
         private readonly StatsConfig statsConfig;
         private readonly StatsController statsController;
@@ -59,7 +61,6 @@ namespace Stats
         {
             ApplyPeriodicChange(StatType.Water);
             ApplyPeriodicChange(StatType.Food);
-            ApplyPeriodicChange(StatType.Chill);
 
             ApplyHpPeriodicChange();
             ApplyEmptyAdditionalStatDamage();

@@ -9,6 +9,7 @@ namespace UI.Configs
         [field: SerializeField] public Sprite HpStat { get; private set; }
         [field: SerializeField] public Sprite WaterStat { get; private set; }
         [field: SerializeField] public Sprite FoodStat { get; private set; }
+        // Chill отвечает за сон. Иконка оставлена на будущее, но UI сейчас этот стат не показывает.
         [field: SerializeField] public Sprite ChillStat { get; private set; }
         [field: SerializeField] public Sprite StaminaStat { get; private set; }
         [field: SerializeField] public Sprite PhysicalDefenseStat { get; private set; }

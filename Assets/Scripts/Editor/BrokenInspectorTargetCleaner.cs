@@ -19,7 +19,7 @@ namespace EditorTools
         {
             Selection.objects = Selection.objects.Where(target => target != null).ToArray();
 
-            foreach (var editor in Resources.FindObjectsOfTypeAll<Editor>())
+            foreach (var editor in Resources.FindObjectsOfTypeAll<UnityEditor.Editor>())
             {
                 if (editor == null || !HasBrokenTarget(editor))
                 {
@@ -38,7 +38,7 @@ namespace EditorTools
             }
         }
 
-        private static bool HasBrokenTarget(Editor editor)
+        private static bool HasBrokenTarget(UnityEditor.Editor editor)
         {
             try
             {

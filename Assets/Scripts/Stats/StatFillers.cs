@@ -15,6 +15,8 @@ namespace Stats
                 [StatType.Hp] = new StatFiller(StatType.Hp, statsConfig, statsController),
                 [StatType.Water] = new StatFiller(StatType.Water, statsConfig, statsController),
                 [StatType.Food] = new StatFiller(StatType.Food, statsConfig, statsController),
+                // Chill отвечает за сон. UI сейчас его не запрашивает до появления дня/ночи и сна,
+                // но filler оставлен для будущего возврата без пересборки prefab-связей.
                 [StatType.Chill] = new StatFiller(StatType.Chill, statsConfig, statsController),
                 [StatType.Stamina] = new StatFiller(StatType.Stamina, statsConfig, statsController)
             };

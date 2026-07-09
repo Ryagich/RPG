@@ -4,7 +4,7 @@ using UnityEditor;
 namespace YG.EditorScr
 {
     [CustomEditor(typeof(EventsYG2), true), CanEditMultipleObjects]
-    public class EventsYG2Editor : Editor
+    public class EventsYG2Editor : UnityEditor.Editor
     {
         private SerializedProperty m_DelegatesProperty;
 

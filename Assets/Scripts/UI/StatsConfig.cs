@@ -10,6 +10,8 @@ namespace UI
         [field: SerializeField] public Hp HpStat { get; private set; }
         [field: SerializeField] public AdditionalPeriodicStat WaterStat { get; private set; }
         [field: SerializeField] public AdditionalPeriodicStat FoodStat { get; private set; }
+        // Chill отвечает за сон. Механик дня/ночи и сна пока нет, поэтому системно он выключен,
+        // но config оставлен, чтобы вернуть стат без миграции serialized данных.
         [field: SerializeField] public AdditionalPeriodicStat ChillStat { get; private set; }
         [field: SerializeField] public Stamina StaminaStat { get; private set; }
         [field: SerializeField] public Stat PhysicalDefenseStat { get; private set; } = CreateDefaultProtectionStat();

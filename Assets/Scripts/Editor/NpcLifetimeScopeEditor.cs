@@ -10,7 +10,7 @@ using UnityEngine.Localization.Tables;
 namespace EditorTools
 {
     [CustomEditor(typeof(NpcLifetimeScope))]
-    public sealed class NpcLifetimeScopeEditor : Editor
+    public sealed class NpcLifetimeScopeEditor : UnityEditor.Editor
     {
         private const string PreferredPreviewLocale = "ru";
 

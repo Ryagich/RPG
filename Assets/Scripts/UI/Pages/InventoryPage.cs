@@ -27,7 +27,9 @@ namespace UI.Pages
     // ReSharper disable once ClassNeverInstantiated.Global
     public class InventoryPage : BasePage, ITickable, IInventoryInteractionPage
     {
-        private static readonly StatType[] AdditionalStatTypes = { StatType.Water, StatType.Food, StatType.Chill, StatType.Stamina };
+        // Chill отвечает за сон. Пока нет механик дня/ночи и сна, инвентарь его не отображает,
+        // но стат и prefab-связи остаются для будущего возврата.
+        private static readonly StatType[] AdditionalStatTypes = { StatType.Water, StatType.Food, StatType.Stamina };
 
         private sealed class PopupTarget
         {

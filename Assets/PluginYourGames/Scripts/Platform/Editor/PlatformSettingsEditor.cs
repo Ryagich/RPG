@@ -1,4 +1,4 @@
-п»їusing System;
+using System;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
@@ -9,14 +9,14 @@ using System.Linq;
 namespace YG.EditorScr
 {
     [CustomEditor(typeof(PlatformSettings))]
-    public class PlatformSettingsEditor : Editor
+    public class PlatformSettingsEditor : UnityEditor.Editor
     {
         private PlatformSettings scr;
         private Texture2D iconPlatform;
 
         private SerializedObject serializedInfoYG;
 
-        // С‡С‚РѕР±С‹ РЅРµ Р·Р°С†РёРєР»РёС‚СЊСЃСЏ, РµСЃР»Рё РѕРєРЅРѕ РЅРµСЃРєРѕР»СЊРєРѕ СЂР°Р· СЃРѕР·РґР°С‘С‚СЃСЏ
+        // чтобы не зациклиться, если окно несколько раз создаётся
         private static bool pendingApplyName;
 
         private void OnEnable()
@@ -36,7 +36,7 @@ namespace YG.EditorScr
             string folderPath = Path.GetDirectoryName(assetPath);
             string moduleName = Path.GetFileName(folderPath);
 
-            // РњРµРЅСЏРµРј РїРѕР»Рµ С‡РµСЂРµР· SerializedObject, РЅРѕ РќР• СЃРѕС…СЂР°РЅСЏРµРј Рё РќР• СЂРµС„СЂРµС€РёРј РѕС‚СЃСЋРґР°
+            // Меняем поле через SerializedObject, но НЕ сохраняем и НЕ рефрешим отсюда
             serializedObject.UpdateIfRequiredOrScript();
             var nameFullProp = serializedObject.FindProperty("nameFull");
             if (nameFullProp != null)
@@ -47,7 +47,7 @@ namespace YG.EditorScr
                     nameFullProp.stringValue = newName;
                     serializedObject.ApplyModifiedPropertiesWithoutUndo();
 
-                    // Р•СЃР»Рё РѕС‡РµРЅСЊ РЅСѓР¶РЅРѕ Р·Р°РїРёСЃР°С‚СЊ РЅР° РґРёСЃРє вЂ” РґРµР»Р°РµРј СЌС‚Рѕ РћР”РРќ Р РђР—, РІРЅРµ GUI-С†РёРєР»Р°
+                    // Если очень нужно записать на диск — делаем это ОДИН РАЗ, вне GUI-цикла
                     if (!pendingApplyName)
                     {
                         pendingApplyName = true;
@@ -58,7 +58,7 @@ namespace YG.EditorScr
                                 if (scr != null)
                                 {
                                     EditorUtility.SetDirty(scr);
-                                    // Р—Р°РїРёСЃСЊ + СЃРёРЅС…СЂРѕРЅРЅС‹Р№ СЂРµС„СЂРµС€ РІ РѕРґРЅРѕРј Р·Р°С‰РёС‰С‘РЅРЅРѕРј Р±Р»РѕРєРµ
+                                    // Запись + синхронный рефреш в одном защищённом блоке
                                     using (new ReloadScope())
                                     using (new AssetEditScope())
                                     {
@@ -76,7 +76,7 @@ namespace YG.EditorScr
                 }
             }
 
-            // РРєРѕРЅРєСѓ РіСЂСѓР·РёРј Р±РµР· СЂРµС„СЂРµС€Р° РїСЂРѕРµРєС‚Р°
+            // Иконку грузим без рефреша проекта
             string iconPath = GetIconCurrentPlatformPath(moduleName);
             if (!string.IsNullOrEmpty(iconPath) && File.Exists(iconPath))
             {
@@ -281,7 +281,7 @@ namespace YG.EditorScr
         {
             object value = field.GetValue(target);
 
-            // Р•СЃР»Рё РѕРїС†РёРё РЅРµ РїРµСЂРµРґР°Р»Рё, РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ СЂР°СЃС‚СЏРіРёРІР°РµРј РїРѕР»Рµ
+            // Если опции не передали, по умолчанию растягиваем поле
             if (options == null || options.Length == 0)
                 options = new GUILayoutOption[] { GUILayout.ExpandWidth(true) };
 

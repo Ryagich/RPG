@@ -51,7 +51,9 @@ namespace Inventory.Item
         [SerializeField, ShowIf(nameof(HasUsableStats))] private float hpStat;
         [SerializeField, ShowIf(nameof(HasUsableStats))] private float waterStat;
         [SerializeField, ShowIf(nameof(HasUsableStats))] private float foodStat;
-        [SerializeField, ShowIf(nameof(HasUsableStats))] private float chillStat;
+        // Chill отвечает за сон. Механик дня/ночи и сна пока нет, поэтому стат выключен и скрыт,
+        // но serialized поле оставлено для будущего возврата без миграции данных.
+        [SerializeField, HideInInspector] private float chillStat;
         [SerializeField, ShowIf(nameof(HasEquippedVisuals))] private List<EquippedItemVisual> equippedVisuals = new();
 
         public float PhysicalDefense => NormalizeProtectionValue(physicalDefense);
@@ -63,7 +65,8 @@ namespace Inventory.Item
         public float HpStat => hpStat;
         public float WaterStat => waterStat;
         public float FoodStat => foodStat;
-        public float ChillStat => chillStat;
+        // Chill отвечает за сон и пока не должен влиять на usable items до появления дня/ночи и сна.
+        public float ChillStat => 0f;
         public GameObject WeaponInHandPrefab => weaponInHandPrefab;
         public WeaponAttachmentTransformData RightHandWeaponAttachment => rightHandWeaponAttachment;
         public WeaponAttachmentTransformData BeltWeaponAttachment => beltWeaponAttachment;

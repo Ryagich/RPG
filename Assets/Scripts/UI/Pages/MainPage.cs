@@ -18,8 +18,10 @@ namespace UI.Pages
     // ReSharper disable once ClassNeverInstantiated.Global
     public class MainPage : BasePage
     {
-        private static readonly StatType[] AdditionalStatTypes = { StatType.Water, StatType.Food, StatType.Chill, StatType.Stamina };
-        private static readonly StatType[] AllStatTypes = { StatType.Hp, StatType.Water, StatType.Food, StatType.Chill, StatType.Stamina };
+        // Chill отвечает за сон. Пока нет механик дня/ночи и сна, HUD его не отображает,
+        // но стат и prefab-связи остаются для будущего возврата.
+        private static readonly StatType[] AdditionalStatTypes = { StatType.Water, StatType.Food, StatType.Stamina };
+        private static readonly StatType[] AllStatTypes = { StatType.Hp, StatType.Water, StatType.Food, StatType.Stamina };
 
         private enum HpFillMode
         {

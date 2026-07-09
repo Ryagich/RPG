@@ -7,7 +7,7 @@ using YG.Insides;
 namespace YG.EditorScr
 {
     [CustomEditor(typeof(PlatformEventsYG2)), CanEditMultipleObjects]
-    public class PlatformEventsYG2Editor : Editor
+    public class PlatformEventsYG2Editor : UnityEditor.Editor
     {
         private SerializedProperty platforms;
         private SerializedProperty whenToEvent;

@@ -805,7 +805,8 @@ namespace Inventory
             statsController.AddValue(StatType.Hp, itemConfig.HpStat);
             statsController.AddValue(StatType.Water, itemConfig.WaterStat);
             statsController.AddValue(StatType.Food, itemConfig.FoodStat);
-            statsController.AddValue(StatType.Chill, itemConfig.ChillStat);
+            // Chill отвечает за сон. Механик дня/ночи и сна пока нет, поэтому usable items
+            // не меняют этот стат, но данные оставлены для будущего возврата.
         }
     }
 }

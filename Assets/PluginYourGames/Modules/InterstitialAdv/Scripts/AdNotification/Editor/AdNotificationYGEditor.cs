@@ -3,7 +3,7 @@ using UnityEditor;
 namespace YG.EditorScr
 {
     [CustomEditor(typeof(AdNotificationYG))]
-    public class AdNotificationYGEditor : Editor
+    public class AdNotificationYGEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {

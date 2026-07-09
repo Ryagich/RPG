@@ -24,7 +24,9 @@ namespace UI.Pages
 {
     internal static class PageUiUtilities
     {
-        private static readonly StatType[] UsablePopupStatTypes = { StatType.Hp, StatType.Water, StatType.Food, StatType.Chill };
+        // Chill отвечает за сон. До появления дня/ночи и сна не показываем его в usable item UI,
+        // но сам StatType и serialized данные остаются в проекте.
+        private static readonly StatType[] UsablePopupStatTypes = { StatType.Hp, StatType.Water, StatType.Food };
         private static readonly StatType[] DefensePopupStatTypes = { StatType.PhysicalDefense, StatType.TemperatureDefense, StatType.PsiDefense, StatType.MagicDefense };
 
         public static Image CreateBloodScreen(
@@ -1060,7 +1062,6 @@ namespace UI.Pages
                     AddSignedRow(rows, "HP", itemConfig.HpStat, GetStatIcon(statIconsConfig, StatType.Hp));
                     AddSignedRow(rows, "Water", itemConfig.WaterStat, GetStatIcon(statIconsConfig, StatType.Water));
                     AddSignedRow(rows, "Food", itemConfig.FoodStat, GetStatIcon(statIconsConfig, StatType.Food));
-                    AddSignedRow(rows, "Chill", itemConfig.ChillStat, GetStatIcon(statIconsConfig, StatType.Chill));
                     break;
                 case ItemType.Helm:
                 case ItemType.Face:

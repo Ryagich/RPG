@@ -30,6 +30,27 @@ namespace Container.Game
 
             gameScopePrefab.gameObject.SetActive(wasActive);
             gameLifetimeScope.gameObject.SetActive(wasActive);
+
+            BuildLevelScopes(gameLifetimeScope);
+        }
+
+        private void BuildLevelScopes(GameLifetimeScope gameLifetimeScope)
+        {
+            var scopes = FindObjectsByType<LifetimeScope>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var scope in scopes)
+            {
+                if (scope == null
+                    || scope == gameLifetimeScope
+                    || scope.gameObject.scene != gameObject.scene
+                    || scope.Container != null
+                    || scope.parentReference.Type != typeof(GameLifetimeScope))
+                {
+                    continue;
+                }
+
+                scope.parentReference.Object = gameLifetimeScope;
+                scope.Build();
+            }
         }
     }
 }

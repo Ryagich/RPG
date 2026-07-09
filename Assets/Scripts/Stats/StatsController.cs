@@ -42,6 +42,8 @@ namespace Stats
                 [StatType.Hp] = new Hp(statsConfig.HpStat),
                 [StatType.Water] = new AdditionalPeriodicStat(statsConfig.GetAdditionalPeriodicStatConfig(StatType.Water)),
                 [StatType.Food] = new AdditionalPeriodicStat(statsConfig.GetAdditionalPeriodicStatConfig(StatType.Food)),
+                // Chill отвечает за сон. Механик дня/ночи и сна пока нет, поэтому другие системы
+                // не используют этот стат, но экземпляр оставлен для совместимости и будущего возврата.
                 [StatType.Chill] = new AdditionalPeriodicStat(statsConfig.GetAdditionalPeriodicStatConfig(StatType.Chill)),
                 [StatType.Stamina] = new Stamina(statsConfig.StaminaStat),
                 [StatType.PhysicalDefense] = new (statsConfig.PhysicalDefenseStat),
