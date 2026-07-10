@@ -13,9 +13,8 @@ namespace Landings.Fields
         [SerializeField] private PlantConfig plantConfig;
         [SerializeField, Min(0)] private int targetPlantCount = 8;
         [SerializeField, Min(0.1f)] private float minDistanceBetweenPlants = 0.75f;
-        [SerializeField, Min(0f)] private float sideScatter = 0.25f;
         [SerializeField, Min(1)] private int randomPlacementAttemptsPerPlant = 30;
-        [SerializeField] private List<FieldFurrow> furrows = new();
+        [SerializeField] private List<GameObject> plantingAreas = new();
         [SerializeField] private Transform plantsRoot;
         [SerializeField] private bool growOnStart = true;
         [SerializeField] private Vector2 initialGrowDelay = new(0f, 0.5f);
@@ -86,20 +85,21 @@ namespace Landings.Fields
         private List<PlantCandidate> BuildCandidates()
         {
             var candidates = new List<PlantCandidate>();
-            var availableFurrows = new List<FieldFurrow>();
-            var totalLength = 0f;
-            foreach (var furrow in furrows)
+            var availableAreas = new List<PlantingArea>();
+            var totalArea = 0f;
+            foreach (var plantingArea in plantingAreas)
             {
-                if (furrow == null || furrow.Length <= 0.01f)
+                if (plantingArea == null || !TryGetBounds(plantingArea, out var bounds))
                 {
                     continue;
                 }
 
-                availableFurrows.Add(furrow);
-                totalLength += furrow.Length;
+                var area = Mathf.Max(0.01f, bounds.size.x) * Mathf.Max(0.01f, bounds.size.z);
+                availableAreas.Add(new PlantingArea(bounds, area));
+                totalArea += area;
             }
 
-            if (availableFurrows.Count == 0)
+            if (availableAreas.Count == 0)
             {
                 return candidates;
             }
@@ -107,9 +107,8 @@ namespace Landings.Fields
             var maxAttempts = Mathf.Max(targetPlantCount, targetPlantCount * randomPlacementAttemptsPerPlant);
             for (var attempt = 0; attempt < maxAttempts && candidates.Count < targetPlantCount; attempt++)
             {
-                var furrow = GetRandomFurrow(availableFurrows, totalLength);
-                var sideOffset = Random.Range(-sideScatter, sideScatter);
-                var position = furrow.GetPoint(Random.value, sideOffset);
+                var area = GetRandomArea(availableAreas, totalArea);
+                var position = GetRandomPosition(area.Bounds);
 
                 if (IsFarEnough(position, candidates))
                 {
@@ -125,7 +124,8 @@ namespace Landings.Fields
             var minSqrDistance = minDistanceBetweenPlants * minDistanceBetweenPlants;
             foreach (var candidate in candidates)
             {
-                if ((candidate.Position - position).sqrMagnitude < minSqrDistance)
+                var offset = candidate.Position - position;
+                if (offset.x * offset.x + offset.z * offset.z < minSqrDistance)
                 {
                     return false;
                 }
@@ -134,20 +134,65 @@ namespace Landings.Fields
             return true;
         }
 
-        private static FieldFurrow GetRandomFurrow(IReadOnlyList<FieldFurrow> availableFurrows, float totalLength)
+        private static PlantingArea GetRandomArea(IReadOnlyList<PlantingArea> availableAreas, float totalArea)
         {
-            var targetLength = Random.Range(0f, totalLength);
-            var currentLength = 0f;
-            foreach (var furrow in availableFurrows)
+            var targetArea = Random.Range(0f, totalArea);
+            var currentArea = 0f;
+            foreach (var area in availableAreas)
             {
-                currentLength += furrow.Length;
-                if (targetLength <= currentLength)
+                currentArea += area.Area;
+                if (targetArea <= currentArea)
                 {
-                    return furrow;
+                    return area;
                 }
             }
 
-            return availableFurrows[^1];
+            return availableAreas[^1];
+        }
+
+        private static Vector3 GetRandomPosition(Bounds bounds)
+        {
+            return new Vector3(
+                Random.Range(bounds.min.x, bounds.max.x),
+                bounds.center.y,
+                Random.Range(bounds.min.z, bounds.max.z));
+        }
+
+        private static bool TryGetBounds(GameObject plantingArea, out Bounds bounds)
+        {
+            bounds = default;
+            var hasBounds = false;
+
+            foreach (var renderer in plantingArea.GetComponentsInChildren<Renderer>())
+            {
+                if (!hasBounds)
+                {
+                    bounds = renderer.bounds;
+                    hasBounds = true;
+                    continue;
+                }
+
+                bounds.Encapsulate(renderer.bounds);
+            }
+
+            if (hasBounds)
+            {
+                return true;
+            }
+
+            foreach (var collider in plantingArea.GetComponentsInChildren<Collider>())
+            {
+                if (!hasBounds)
+                {
+                    bounds = collider.bounds;
+                    hasBounds = true;
+                    continue;
+                }
+
+                bounds.Encapsulate(collider.bounds);
+            }
+
+            return hasBounds;
         }
 
         private void StartGrowth(PlantSlot slot, float delay = 0f)
@@ -516,6 +561,18 @@ namespace Landings.Fields
             public PlantCandidate(Vector3 position)
             {
                 Position = position;
+            }
+        }
+
+        private readonly struct PlantingArea
+        {
+            public readonly Bounds Bounds;
+            public readonly float Area;
+
+            public PlantingArea(Bounds bounds, float area)
+            {
+                Bounds = bounds;
+                Area = area;
             }
         }
 
