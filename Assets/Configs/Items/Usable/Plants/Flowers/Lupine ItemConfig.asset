@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60723d5f93cc4ad190a060664630a272, type: 3}
-  m_Name: Larkspur ItemConfig
+  m_Name: Lupine ItemConfig
   m_EditorClassIdentifier: 
-  <Id>k__BackingField: Larkspur ItemConfig ID
+  <Id>k__BackingField: 'Lupine ItemConfig ID '
   <Price>k__BackingField: 3
-  <Weight>k__BackingField: 0.35
+  <Weight>k__BackingField: 0.05
   <MaxStack>k__BackingField: 10
   <Icon>k__BackingField: {fileID: 21300000, guid: 8546fe54597c4c940bed1bf4b8d3d3e4, type: 3}
   <Name>k__BackingField:
@@ -35,8 +35,8 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  <HandPrefab>k__BackingField: {fileID: -4199526118652360919, guid: 3d4e7b57fdb9c8a45ab112911de469d9, type: 3}
-  <Size>k__BackingField: {x: 1, y: 1}
+  <HandPrefab>k__BackingField: {fileID: 8673512413745559765, guid: ec760ce3a9eb87d4aae2dbb0354a9d1b, type: 3}
+  <Size>k__BackingField: {x: 1, y: 2}
   <SizeInInventory>k__BackingField: {x: 70, y: 70}
   <ItemType>k__BackingField: 1
   weaponInHandPrefab: {fileID: 0}
@@ -52,7 +52,7 @@ MonoBehaviour:
   psiDefense: 0
   magicDefense: 0
   blocksFaceSlot: 1
-  hpStat: 7
+  hpStat: 12
   waterStat: 0
   foodStat: 0
   chillStat: 0

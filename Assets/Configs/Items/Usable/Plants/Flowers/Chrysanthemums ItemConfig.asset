@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60723d5f93cc4ad190a060664630a272, type: 3}
-  m_Name: Apple ItemConfig
+  m_Name: Chrysanthemums ItemConfig
   m_EditorClassIdentifier: 
-  <Id>k__BackingField: Apple ItemConfig ID
-  <Price>k__BackingField: 2
-  <Weight>k__BackingField: 0.1
-  <MaxStack>k__BackingField: 15
-  <Icon>k__BackingField: {fileID: 21300000, guid: e3e3e404eb08546488e88db3c3f93a03, type: 3}
+  <Id>k__BackingField: 'Chrysanthemums ItemConfig ID '
+  <Price>k__BackingField: 3
+  <Weight>k__BackingField: 0.05
+  <MaxStack>k__BackingField: 10
+  <Icon>k__BackingField: {fileID: 21300000, guid: 8546fe54597c4c940bed1bf4b8d3d3e4, type: 3}
   <Name>k__BackingField:
     m_TableReference:
       m_TableCollectionName: Tables
@@ -35,8 +35,8 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  <HandPrefab>k__BackingField: {fileID: 3148470226019320683, guid: 7a65819a044a6a543bfc64460a395c7e, type: 3}
-  <Size>k__BackingField: {x: 1, y: 1}
+  <HandPrefab>k__BackingField: {fileID: 6069419998419845422, guid: ef09e584267d5044ebe850ffb1f382d1, type: 3}
+  <Size>k__BackingField: {x: 1, y: 2}
   <SizeInInventory>k__BackingField: {x: 70, y: 70}
   <ItemType>k__BackingField: 1
   weaponInHandPrefab: {fileID: 0}
@@ -52,9 +52,9 @@ MonoBehaviour:
   psiDefense: 0
   magicDefense: 0
   blocksFaceSlot: 1
-  hpStat: 1
-  waterStat: 6
-  foodStat: 3
+  hpStat: 12
+  waterStat: 0
+  foodStat: 0
   chillStat: 0
   equippedVisuals: []
   references:

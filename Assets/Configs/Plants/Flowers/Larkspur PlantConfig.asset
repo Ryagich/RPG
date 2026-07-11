@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 74ace7f3161740358009ca4af8f21d29, type: 3}
-  m_Name: Apple PlantConfig
+  m_Name: Larkspur PlantConfig
   m_EditorClassIdentifier: 
-  <Id>k__BackingField: Apple PlantConfig
-  <Price>k__BackingField: 75
-  <Icon>k__BackingField: {fileID: 21300000, guid: e3e3e404eb08546488e88db3c3f93a03, type: 3}
+  <Id>k__BackingField: Larkspur PlantConfig ID
+  <Price>k__BackingField: 25
+  <Icon>k__BackingField: {fileID: 21300000, guid: dd45f046bef79dc4b93f7753dae5d79f, type: 3}
   <Name>k__BackingField:
     m_TableReference:
       m_TableCollectionName: Tables
@@ -25,21 +25,19 @@ MonoBehaviour:
     m_WaitForCompletion: 0
     m_LocalVariables: []
   <Stages>k__BackingField:
-  - {fileID: 5222249656789897580, guid: c6d9f61b30b02be49ab3349ecbec584f, type: 3}
-  - {fileID: 5222249656789897580, guid: 7e74fe734b9353d408d06b033fceb68b, type: 3}
-  - {fileID: 5222249656789897580, guid: 50824eb70f1ad404186784d7133c1b48, type: 3}
-  - {fileID: 5222249656789897580, guid: 04ed4419e2180514490e161e1fe62a4b, type: 3}
-  <GrowTime>k__BackingField: {x: 3, y: 5}
-  <TimeBetweenStages>k__BackingField: {x: 3, y: 5}
-  <StartPosition>k__BackingField: {x: 0, y: 0, z: 0}
+  - {fileID: 3875006575053518572, guid: aa50bf4661e9863499780f30e2a23473, type: 3}
+  - {fileID: 3875006575053518572, guid: ea9eee8dfd66e4d479d3960be4529514, type: 3}
+  <GrowTime>k__BackingField: {x: 1, y: 2}
+  <TimeBetweenStages>k__BackingField: {x: 1, y: 2}
+  <StartPosition>k__BackingField: {x: 0, y: -2, z: 0}
   <TargetPosition>k__BackingField: {x: 0, y: 0, z: 0}
   <PlantSoundsSettings>k__BackingField: {fileID: 11400000, guid: 5d4dc65609c6e9947b97b5c48afd7dcf, type: 2}
   <ItemGivenSound>k__BackingField: {fileID: 11400000, guid: 6daddde243e7fb141a82538068729e6d, type: 2}
-  <Type>k__BackingField: 2
+  <Type>k__BackingField: 0
   <TreeFruitGrowInterval>k__BackingField: {x: 4, y: 18}
   <FruitFallCheckInterval>k__BackingField: {x: 45, y: 90}
   <FruitFallChancePerCheck>k__BackingField: 0.03
-  <FruitFallChanceOnHit>k__BackingField: 0.5
+  <FruitFallChanceOnHit>k__BackingField: 0.2
   references:
     version: 2
     RefIds: []

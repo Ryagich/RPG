@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 74ace7f3161740358009ca4af8f21d29, type: 3}
-  m_Name: Larkspur PlantConfig
+  m_Name: Chrysanthemums PlantConfig
   m_EditorClassIdentifier: 
-  <Id>k__BackingField: Larkspur PlantConfig
+  <Id>k__BackingField: Chrysanthemums PlantConfig ID
   <Price>k__BackingField: 25
   <Icon>k__BackingField: {fileID: 21300000, guid: dd45f046bef79dc4b93f7753dae5d79f, type: 3}
   <Name>k__BackingField:
@@ -25,8 +25,8 @@ MonoBehaviour:
     m_WaitForCompletion: 0
     m_LocalVariables: []
   <Stages>k__BackingField:
-  - {fileID: 3875006575053518572, guid: aa50bf4661e9863499780f30e2a23473, type: 3}
-  - {fileID: 3875006575053518572, guid: ea9eee8dfd66e4d479d3960be4529514, type: 3}
+  - {fileID: 3737323637720854025, guid: cc6a7a918be8b6f4d9c5e3c5047b1a62, type: 3}
+  - {fileID: 3737323637720854025, guid: 1d09f534d1ffa124b9ccea935f97cb19, type: 3}
   <GrowTime>k__BackingField: {x: 1, y: 2}
   <TimeBetweenStages>k__BackingField: {x: 1, y: 2}
   <StartPosition>k__BackingField: {x: 0, y: -2, z: 0}
@@ -34,6 +34,10 @@ MonoBehaviour:
   <PlantSoundsSettings>k__BackingField: {fileID: 11400000, guid: 5d4dc65609c6e9947b97b5c48afd7dcf, type: 2}
   <ItemGivenSound>k__BackingField: {fileID: 11400000, guid: 6daddde243e7fb141a82538068729e6d, type: 2}
   <Type>k__BackingField: 0
+  <TreeFruitGrowInterval>k__BackingField: {x: 4, y: 18}
+  <FruitFallCheckInterval>k__BackingField: {x: 45, y: 90}
+  <FruitFallChancePerCheck>k__BackingField: 0.03
+  <FruitFallChanceOnHit>k__BackingField: 0.2
   references:
     version: 2
     RefIds: []
