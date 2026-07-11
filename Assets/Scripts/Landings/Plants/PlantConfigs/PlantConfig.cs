@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.Generic;
+using NaughtyAttributes;
 using Sounds;
 using UnityEngine;
 using UnityEngine.Localization;
@@ -21,11 +22,29 @@ namespace Landings.Plants.PlantConfigs
         [field: SerializeField] public PlantSoundsSettings PlantSoundsSettings { get; private set; }
         [field: SerializeField] public SoundConfig ItemGivenSound { get; private set; }
         [field: SerializeField] public PlantType Type { get; private set; }
+
+        [field: Header("Fruit tree settings")]
+        [field: SerializeField, ShowIf(nameof(IsFruitTree))]
+        public Vector2 TreeFruitGrowInterval { get; private set; } = new(4f, 18f);
+
+        [field: SerializeField, ShowIf(nameof(IsFruitTree))]
+        public Vector2 FruitFallCheckInterval { get; private set; } = new(45f, 90f);
+
+        [field: SerializeField, Range(0f, 1f), ShowIf(nameof(IsFruitTree))]
+        [field: Tooltip("Chance of a fruit falling during one check when every fruit point is occupied.")]
+        public float FruitFallChancePerCheck { get; private set; } = 0.03f;
+
+        [field: SerializeField, Range(0f, 1f), ShowIf(nameof(IsFruitTree))]
+        [field: Tooltip("Base chance of a fruit falling after a weapon hit. It is increased by the natural fall chance.")]
+        public float FruitFallChanceOnHit { get; private set; } = 0.2f;
+
+        private bool IsFruitTree => Type == PlantType.FruitTree;
     }
 
     public enum PlantType
     {
         Vegetable,
-        Fruit
+        Fruit,
+        FruitTree
     }
 }

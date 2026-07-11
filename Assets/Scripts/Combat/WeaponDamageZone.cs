@@ -11,6 +11,7 @@ namespace Combat
         [SerializeField] private Collider zoneCollider;
 
         private readonly HashSet<CharacterDamageReceiver> hitReceivers = new();
+        private readonly HashSet<WeaponHitReceiver> hitObjectReceivers = new();
         private CharacterDamageReceiver attacker;
         private ItemConfig weaponConfig;
         private bool isDamageWindowOpen;
@@ -38,6 +39,7 @@ namespace Combat
             attacker = currentAttacker;
             weaponConfig = currentWeaponConfig;
             hitReceivers.Clear();
+            hitObjectReceivers.Clear();
             isDamageWindowOpen = weaponConfig != null;
         }
 
@@ -47,12 +49,32 @@ namespace Combat
             attacker = null;
             weaponConfig = null;
             hitReceivers.Clear();
+            hitObjectReceivers.Clear();
         }
 
         private void OnTriggerEnter(Collider other)
         {
             if (!isDamageWindowOpen || other == null)
             {
+                return;
+            }
+
+            var damage = weaponConfig.GetRandomWeaponDamage();
+            var hit = new WeaponHit(
+                attacker,
+                weaponConfig,
+                damage,
+                other.ClosestPoint(transform.position),
+                other);
+
+            var objectReceiver = other.GetComponentInParent<WeaponHitReceiver>();
+            if (objectReceiver != null)
+            {
+                if (hitObjectReceivers.Add(objectReceiver))
+                {
+                    objectReceiver.ReceiveHit(hit);
+                }
+
                 return;
             }
 
@@ -66,14 +88,6 @@ namespace Combat
             {
                 return;
             }
-
-            var damage = weaponConfig.GetRandomWeaponDamage();
-            var hit = new WeaponHit(
-                attacker,
-                weaponConfig,
-                damage,
-                other.ClosestPoint(transform.position),
-                other);
 
             hitbox.TryReceiveHit(hit);
         }
