@@ -26,6 +26,10 @@ MonoBehaviour:
   <DialogueContainer>k__BackingField: {fileID: 677269434685781985, guid: 17f8d839d3036af499c4ab29d41ad950, type: 3}
   <PauseMenu>k__BackingField: {fileID: 8794213445826204213, guid: 80bddbcce88a11e4bbf184fefee5499c, type: 3}
   <MenuUI>k__BackingField: {fileID: 3420270240661638511, guid: 37e41ce379a75a541affa1f7e407121c, type: 3}
+  <LeftMenuShadowGradient>k__BackingField: {fileID: 60428061725942149, guid: 899dbfd8ccb5b8b42b1006e890039c90, type: 3}
+  <Bindings>k__BackingField: {fileID: 4753608789851655901, guid: 5575f6eaade79a14eb283f60795e5f07, type: 3}
+  <TitleSections>k__BackingField: {fileID: 834713441298765432, guid: f2fcc2c0e6f84184c82dff0b6bd5a67b, type: 3}
+  <TargetLockConfig>k__BackingField: {fileID: 11400000, guid: 0dc24276d11c421e9473fe8fd41716d7, type: 2}
   <DeadUI>k__BackingField: {fileID: 8283280542456453522, guid: db2589fad425b7a4aba3e48f6a381093, type: 3}
   <ClickTextBlinkingConfig>k__BackingField: {fileID: 11400000, guid: 7ae4ae99e7a44d5baf662a11b79cdf72, type: 2}
   <LeftAnotherInventoryInTrade>k__BackingField: {fileID: 1814612195659931177, guid: f026a66a750b29942bc40cf1e8db8fe7, type: 3}

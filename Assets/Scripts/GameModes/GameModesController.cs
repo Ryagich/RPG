@@ -17,11 +17,15 @@ namespace GameModes
         public GameModesController(
             IPublisher<GameModeChangedMessage> gameModeChangedPublisher,
             ISubscriber<ChangeGameModeRequest> openPageRequestSubscriber,
+            ISubscriber<InventoryInputMessage> inventoryInputSubscriber,
+            ISubscriber<MapInputMessage> mapInputSubscriber,
             ISubscriber<PauseInputMessage> pauseInputSubscriber)
         {
             this.gameModeChangedPublisher = gameModeChangedPublisher;
 
             openPageRequestSubscriber.Subscribe(ChangeGameMode);
+            inventoryInputSubscriber.Subscribe(OnInventoryInput);
+            mapInputSubscriber.Subscribe(OnMapInput);
             pauseInputSubscriber.Subscribe(OnPauseInput);
         }
 
@@ -95,6 +99,33 @@ namespace GameModes
                 default:
                     ReturnToPreviousMode();
                     return;
+            }
+        }
+
+        private void OnInventoryInput(InventoryInputMessage _)
+        {
+            if (GameMode == GameMode.Death)
+            {
+                return;
+            }
+
+            ChangeGameMode(new ChangeGameModeRequest(GameMode == GameMode.Inventory ? GameMode.Game : GameMode.Inventory));
+        }
+
+        private void OnMapInput(MapInputMessage _)
+        {
+            if (GameMode == GameMode.Death)
+            {
+                return;
+            }
+
+            if (GameMode is GameMode.Game or GameMode.Inventory)
+            {
+                ChangeGameMode(new ChangeGameModeRequest(GameMode.Map));
+            }
+            else if (GameMode == GameMode.Map)
+            {
+                ChangeGameMode(new ChangeGameModeRequest(GameMode.Game));
             }
         }
 

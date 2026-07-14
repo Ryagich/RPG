@@ -33,6 +33,10 @@ namespace Messages
     
     public readonly struct InteractableInputMessage { }
 
+    public readonly struct InventoryInputMessage { }
+
+    public readonly struct MapInputMessage { }
+
     public readonly struct PauseInputMessage { }
 
     public enum TargetLockCommand

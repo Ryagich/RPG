@@ -24,6 +24,8 @@ namespace Container.Game
             var options = builder.RegisterMessagePipe();
             builder.RegisterMessageBroker<PlayerMoveMessage>(options);
             builder.RegisterMessageBroker<InteractableInputMessage>(options);
+            builder.RegisterMessageBroker<InventoryInputMessage>(options);
+            builder.RegisterMessageBroker<MapInputMessage>(options);
             builder.RegisterMessageBroker<PauseInputMessage>(options);
             builder.RegisterMessageBroker<TargetLockInputMessage>(options);
             builder.RegisterMessageBroker<MouseDown>(options);

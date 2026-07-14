@@ -107,5 +107,9 @@ namespace UI.Pages
         Trade,
         Map,
         Death,
+        MenuMain,
+        MenuSettings,
+        MenuSoundsSettings,
+        MenuGameplaySettings,
     }
 }

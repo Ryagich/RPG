@@ -61,6 +61,23 @@ namespace TargetLock
 
         public void Tick()
         {
+            if (config.ControlMode == TargetLockControlMode.Off)
+            {
+                if (Mode != TargetLockMode.Disabled)
+                {
+                    Unlock();
+                }
+
+                return;
+            }
+
+            if (currentGameMode != GameMode.Game)
+            {
+                return;
+            }
+
+            ApplyConfiguredMode();
+
             if (Mode == TargetLockMode.Disabled)
             {
                 return;
@@ -131,7 +148,7 @@ namespace TargetLock
 
         private void OnTargetLockInput(TargetLockInputMessage message)
         {
-            if (currentGameMode != GameMode.Game)
+            if (config.ControlMode == TargetLockControlMode.Off || currentGameMode != GameMode.Game)
             {
                 return;
             }
@@ -139,7 +156,10 @@ namespace TargetLock
             switch (message.Command)
             {
                 case TargetLockCommand.Toggle:
-                    CycleMode();
+                    if (config.ControlMode == TargetLockControlMode.Switch)
+                    {
+                        CycleMode();
+                    }
                     break;
                 case TargetLockCommand.Next:
                     SelectAdjacentTarget(1);
@@ -177,6 +197,22 @@ namespace TargetLock
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void ApplyConfiguredMode()
+        {
+            if (config.ControlMode == TargetLockControlMode.Switch)
+            {
+                return;
+            }
+
+            var configuredMode = config.ControlMode == TargetLockControlMode.Hard
+                ? TargetLockMode.Hard
+                : TargetLockMode.Soft;
+            if (Mode != configuredMode)
+            {
+                SwitchMode(configuredMode);
             }
         }
 

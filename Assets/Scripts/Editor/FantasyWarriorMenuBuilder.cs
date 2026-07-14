@@ -6,10 +6,9 @@ using UnityEngine.UI;
 
 public static class FantasyWarriorMenuBuilder
 {
-    private const string PrefabPath = "Assets/Prefabs/UI/Menu/Menu UI.prefab";
+    private const string PrefabPath = "Assets/Prefabs/UI/Menu/Main Menu.prefab";
     private const string UIConfigPath = "Assets/Configs/UI/UI Config.asset";
 
-    [MenuItem("Tools/RPG/UI/Rebuild Fantasy Warrior Menu UI")]
     public static void Rebuild()
     {
         AssetDatabase.Refresh();
@@ -38,7 +37,7 @@ public static class FantasyWarriorMenuBuilder
         Sprite verticalTracerySprite = Load<Sprite>("Assets/Content/InterfaceFantasyWarriorHUD/Sprites/FantasyWarrior/SPR_FantasyWarrior_Tracery_Vertical07.png");
         Sprite horizontalTracerySprite = Load<Sprite>("Assets/Content/InterfaceFantasyWarriorHUD/Sprites/FantasyWarrior/SPR_FantasyWarrior_Tracery_Horizontal02.png");
 
-        GameObject root = new GameObject("Menu UI", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(MenuUI));
+        GameObject root = new GameObject("Main Menu", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(MenuUI));
         root.layer = 5;
 
         RectTransform rootRect = root.GetComponent<RectTransform>();

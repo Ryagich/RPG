@@ -5,6 +5,7 @@ using TMPro;
 using UI.Map;
 using UI.Inventory;
 using UI.UIElements;
+using TargetLock;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -27,6 +28,10 @@ namespace UI.Configs
         [field: SerializeField] public DialogueContainer DialogueContainer { get; private set; }
         [field: SerializeField] public PauseMenu PauseMenu { get; private set; }
         [field: SerializeField] public MenuUI MenuUI { get; private set; }
+        [field: SerializeField] public RectTransform LeftMenuShadowGradient { get; private set; }
+        [field: SerializeField] public RectTransform Bindings { get; private set; }
+        [field: SerializeField] public TitleSectionsHolder TitleSections { get; private set; }
+        [field: SerializeField] public TargetLockConfig TargetLockConfig { get; private set; }
         [field: SerializeField] public DeadUI DeadUI { get; private set; }
         [field: SerializeField] public BlinkingTextConfig ClickTextBlinkingConfig { get; private set; }
         

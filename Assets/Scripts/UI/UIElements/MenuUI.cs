@@ -17,6 +17,7 @@ namespace UI.UIElements
 
         [field: SerializeField] public Button ToGameButton { get; private set; }
         [field: SerializeField] public Button ToDevelopButton { get; private set; }
+        [field: SerializeField] public Button SettingsButton { get; private set; }
 
         [SerializeField, Min(0f)] private float fadeOutTime = 1f;
         [SerializeField, Min(0f)] private float visibleTime = 2f;
@@ -172,5 +173,6 @@ namespace UI.UIElements
             canvasGroup.interactable = alpha > 0f;
             canvasGroup.blocksRaycasts = alpha > 0f;
         }
+
     }
 }

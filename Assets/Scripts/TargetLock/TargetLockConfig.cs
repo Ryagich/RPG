@@ -2,9 +2,20 @@ using UnityEngine;
 
 namespace TargetLock
 {
+    public enum TargetLockControlMode
+    {
+        Switch,
+        Hard,
+        Soft,
+        Off
+    }
+
     [CreateAssetMenu(fileName = "TargetLockConfig", menuName = "configs/Target Lock/TargetLockConfig")]
     public sealed class TargetLockConfig : ScriptableObject
     {
+        [field: Header("Player Settings")]
+        [field: SerializeField] public TargetLockControlMode ControlMode { get; private set; } = TargetLockControlMode.Switch;
+
         [field: SerializeField, Min(0f)] public float SearchRadius { get; private set; } = 14f;
         [field: SerializeField, Min(0f)] public float BreakRadius { get; private set; } = 18f;
         [field: SerializeField, Range(1f, 180f)] public float MaxScreenAngle { get; private set; } = 70f;
@@ -28,5 +39,16 @@ namespace TargetLock
         [field: SerializeField, Range(0f, 1f)] public float CameraFocusBlend { get; private set; } = 0.45f;
         [field: SerializeField, Range(0f, 60f)] public float CameraMaxManualYawOffset { get; private set; } = 18f;
         [field: SerializeField, Range(0f, 30f)] public float CameraMaxManualPitchOffset { get; private set; } = 8f;
+
+        public void CycleControlMode()
+        {
+            ControlMode = ControlMode switch
+            {
+                TargetLockControlMode.Switch => TargetLockControlMode.Soft,
+                TargetLockControlMode.Soft => TargetLockControlMode.Hard,
+                TargetLockControlMode.Hard => TargetLockControlMode.Off,
+                _ => TargetLockControlMode.Switch
+            };
+        }
     }
 }

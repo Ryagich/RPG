@@ -94,6 +94,7 @@ namespace Container.Project
             builder.RegisterInstance(HitReactionConfig != null ? HitReactionConfig : HitReactionConfig.CreateDefault()).AsSelf();
             builder.RegisterInstance(FactionRelationsConfig).AsSelf();
             builder.Register<SceneLoadingService>(Lifetime.Singleton).AsSelf();
+            builder.RegisterEntryPoint<InputBindingOverridesBootstrap>();
 
             builder.RegisterEntryPoint<Bootloader>().AsSelf();
         }

@@ -18,4 +18,15 @@ MonoBehaviour:
   <LeftClick>k__BackingField: {fileID: 5637978892861409632, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
   <RightClick>k__BackingField: {fileID: 6652609453448676580, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
   <Run>k__BackingField: {fileID: 5141890984082140844, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
-  <ShowStats>k__BackingField: {fileID: 0}
+  <ShowStats>k__BackingField: {fileID: -7457735126509293610, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <Pause>k__BackingField: {fileID: -7526904096902844659, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <Map>k__BackingField: {fileID: -8128743306769177770, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <TargetLock>k__BackingField: {fileID: 8952107262827035050, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <TargetLockNext>k__BackingField: {fileID: 5161519230524368840, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <TargetLockPrevious>k__BackingField: {fileID: -5362377852351563441, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <FastSlot1>k__BackingField: {fileID: 300430562670587932, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <FastSlot2>k__BackingField: {fileID: -3366649599904600040, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <FastSlot3>k__BackingField: {fileID: -1002622966530559003, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <FastSlot4>k__BackingField: {fileID: -2390000571494691447, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <WeaponSlot1>k__BackingField: {fileID: 8251150019564168807, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <WeaponSlot2>k__BackingField: {fileID: -8069987916060891394, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
