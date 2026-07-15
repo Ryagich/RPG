@@ -89,7 +89,7 @@ namespace UI.Pages
             {
                 isLeaving = true;
                 Time.timeScale = 1f;
-                Cursor.lockState = CursorLockMode.None;
+                Cursor.lockState = CursorLockMode.Confined;
                 Cursor.visible = true;
                 sceneLoadingService.Load(MenuSceneName);
             }

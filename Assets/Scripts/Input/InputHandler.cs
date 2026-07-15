@@ -83,8 +83,8 @@ namespace Input
             inputConfig.FastSlot2.action.started += _ => PublishFastSlot(2);
             inputConfig.FastSlot3.action.started += _ => PublishFastSlot(3);
             inputConfig.FastSlot4.action.started += _ => PublishFastSlot(4);
-            inputConfig.WeaponSlot1.action.started += _ => PublishWeaponSlot(1);
-            inputConfig.WeaponSlot2.action.started += _ => PublishWeaponSlot(2);
+            SubscribeWeaponSlot(inputConfig.WeaponSlot1, 1);
+            SubscribeWeaponSlot(inputConfig.WeaponSlot2, 2);
             inputConfig.Pause.action.started += Pause;
             inputConfig.TargetLock.action.started += _ => PublishTargetLockCommand(TargetLockCommand.Toggle);
             inputConfig.TargetLockNext.action.started += _ => PublishTargetLockCommand(TargetLockCommand.Next);
@@ -239,6 +239,18 @@ namespace Input
             {
                 weaponSlotInputPublisher.Publish(new WeaponSlotInputMessage(slotIndex));
             }
+        }
+
+        private void SubscribeWeaponSlot(InputActionReference actionReference, int slotIndex)
+        {
+            var action = actionReference?.action;
+            if (action == null)
+            {
+                Debug.LogError($"Input action WeaponSlot{slotIndex} is not configured.");
+                return;
+            }
+
+            action.started += _ => PublishWeaponSlot(slotIndex);
         }
 
         private void Pause(InputAction.CallbackContext context)

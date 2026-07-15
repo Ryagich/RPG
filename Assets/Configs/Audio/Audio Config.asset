@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b13212fecf035c40bd99b0887cead49, type: 3}
+  m_Name: Audio Config
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.AudioConfig
+  mixer: {fileID: 24100000, guid: 73b2f93c5f5c1a84986de6b64134645b, type: 2}
+  uiSourcePrefab: {fileID: 6503083919804644428, guid: b992a1ddc9ab38f4688f94c26ebb9461, type: 3}
+  gameSourcePrefab: {fileID: 3099536648732623126, guid: dda45d16bc31f1c4cbb0b01a7d7a6564, type: 3}
+  footstepsSourcePrefab: {fileID: 4475651691867625152, guid: 63385babb7fec69439d9ed21b5bb418e, type: 3}
+  buttonHoverClip: {fileID: 8300000, guid: 71629c64266e0b541b6f0fc0156ebfe0, type: 3}
+  buttonClickClip: {fileID: 8300000, guid: a60f9476a4dd21742acfcca50e5c6062, type: 3}
+  footstepRaycastDistance: 2.5
+  footstepRaycastStartHeight: 0.8
+  footstepRaycastMask:
+    serializedVersion: 2
+    m_Bits: 15873
+  defaultFootstepClips:
+  - {fileID: 8300000, guid: 418b6e21e9497f345bacc6c075cbc6da, type: 3}
+  - {fileID: 8300000, guid: d2e0759bc55b50846b203fdebb852288, type: 3}
+  - {fileID: 8300000, guid: f2fe983b693142a43a523fed7966e8ce, type: 3}
+  - {fileID: 8300000, guid: c17bfcb671ed01548b1cc635d93534cb, type: 3}
+  - {fileID: 8300000, guid: cf8a2cc4c38b909448e58b5b0358815a, type: 3}
+  footstepSurfaces:
+  - layers:
+      serializedVersion: 2
+      m_Bits: 512
+    clips:
+    - {fileID: 8300000, guid: 418b6e21e9497f345bacc6c075cbc6da, type: 3}
+    - {fileID: 8300000, guid: d2e0759bc55b50846b203fdebb852288, type: 3}
+    - {fileID: 8300000, guid: f2fe983b693142a43a523fed7966e8ce, type: 3}
+    - {fileID: 8300000, guid: c17bfcb671ed01548b1cc635d93534cb, type: 3}
+    - {fileID: 8300000, guid: cf8a2cc4c38b909448e58b5b0358815a, type: 3}
+  - layers:
+      serializedVersion: 2
+      m_Bits: 1024
+    clips:
+    - {fileID: 8300000, guid: 418b6e21e9497f345bacc6c075cbc6da, type: 3}
+    - {fileID: 8300000, guid: d2e0759bc55b50846b203fdebb852288, type: 3}
+    - {fileID: 8300000, guid: f2fe983b693142a43a523fed7966e8ce, type: 3}
+    - {fileID: 8300000, guid: c17bfcb671ed01548b1cc635d93534cb, type: 3}
+    - {fileID: 8300000, guid: cf8a2cc4c38b909448e58b5b0358815a, type: 3}
+  - layers:
+      serializedVersion: 2
+      m_Bits: 2048
+    clips:
+    - {fileID: 8300000, guid: 418b6e21e9497f345bacc6c075cbc6da, type: 3}
+    - {fileID: 8300000, guid: d2e0759bc55b50846b203fdebb852288, type: 3}
+    - {fileID: 8300000, guid: f2fe983b693142a43a523fed7966e8ce, type: 3}
+    - {fileID: 8300000, guid: c17bfcb671ed01548b1cc635d93534cb, type: 3}
+    - {fileID: 8300000, guid: cf8a2cc4c38b909448e58b5b0358815a, type: 3}
+  - layers:
+      serializedVersion: 2
+      m_Bits: 4096
+    clips:
+    - {fileID: 8300000, guid: 418b6e21e9497f345bacc6c075cbc6da, type: 3}
+    - {fileID: 8300000, guid: d2e0759bc55b50846b203fdebb852288, type: 3}
+    - {fileID: 8300000, guid: f2fe983b693142a43a523fed7966e8ce, type: 3}
+    - {fileID: 8300000, guid: c17bfcb671ed01548b1cc635d93534cb, type: 3}
+    - {fileID: 8300000, guid: cf8a2cc4c38b909448e58b5b0358815a, type: 3}
+  - layers:
+      serializedVersion: 2
+      m_Bits: 8192
+    clips:
+    - {fileID: 8300000, guid: 418b6e21e9497f345bacc6c075cbc6da, type: 3}
+    - {fileID: 8300000, guid: d2e0759bc55b50846b203fdebb852288, type: 3}
+    - {fileID: 8300000, guid: f2fe983b693142a43a523fed7966e8ce, type: 3}
+    - {fileID: 8300000, guid: c17bfcb671ed01548b1cc635d93534cb, type: 3}
+    - {fileID: 8300000, guid: cf8a2cc4c38b909448e58b5b0358815a, type: 3}
+  walkStepDistance: 1.7
+  runStepDistance: 2.15
+  npcStepDistance: 1.8
+  masterDefaultDecibels: -10
+  uiDefaultDecibels: -30
+  gameDefaultDecibels: -15
+  musicDefaultDecibels: -5

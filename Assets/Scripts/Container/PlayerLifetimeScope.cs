@@ -10,6 +10,7 @@ using Player;
 using Quests;
 using Stats;
 using TargetLock;
+using GameAudio;
 using UI;
 using UnityEngine;
 using VContainer;
@@ -72,6 +73,7 @@ namespace Container
             builder.RegisterEntryPoint<PlayerGravity>().AsSelf();
             builder.RegisterEntryPoint<PlayerMovementController>().AsSelf();
             builder.RegisterEntryPoint<PlayerMovement>().AsSelf();
+            builder.RegisterEntryPoint<PlayerFootstepPlayer>().AsSelf();
             builder.RegisterEntryPoint<PlayerAnimationController>().AsSelf();
             builder.RegisterEntryPoint<PlayerInteractableLogic>().AsSelf();
             builder.RegisterEntryPoint<ItemHolderInteractableLogic>().AsSelf();

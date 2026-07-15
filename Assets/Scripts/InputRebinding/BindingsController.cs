@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using Input;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -20,6 +22,11 @@ public class BindingsController : MonoBehaviour
     [Header("Debug Serialize")]
     [SerializeField] private List<Button> _settingsButtons;
     [SerializeField] private List<Button> _buttons;
+
+    [Header("Mouse Sensitivity")]
+    [SerializeField] private Slider _mouseSensitivitySlider;
+    [SerializeField] private TMP_Text _mouseSensitivityValue;
+
     private void Awake()
     {
         // The bindings prefab is opened as a standalone RPG page. This reference is optional
@@ -40,6 +47,16 @@ public class BindingsController : MonoBehaviour
             rebinder.RebindCCanceled += () => ActivateButtons(button);
             rebinder.Entered += PlayHover;
         }
+
+        InitializeMouseSensitivitySlider();
+    }
+
+    private void OnDestroy()
+    {
+        if (_mouseSensitivitySlider != null)
+        {
+            _mouseSensitivitySlider.onValueChanged.RemoveListener(SetMouseSensitivity);
+        }
     }
 
     public void UpdateText()
@@ -55,6 +72,36 @@ public class BindingsController : MonoBehaviour
     private void PlayHover()
     {
         _soundPlayer?.PlayHover();
+    }
+
+    private void InitializeMouseSensitivitySlider()
+    {
+        if (_mouseSensitivitySlider == null)
+        {
+            Debug.LogError("Mouse sensitivity Slider is not assigned.", this);
+            return;
+        }
+
+        _mouseSensitivitySlider.minValue = MouseSensitivitySettings.Minimum;
+        _mouseSensitivitySlider.maxValue = MouseSensitivitySettings.Maximum;
+        _mouseSensitivitySlider.wholeNumbers = true;
+        _mouseSensitivitySlider.SetValueWithoutNotify(MouseSensitivitySettings.Value);
+        UpdateMouseSensitivityValue(MouseSensitivitySettings.Value);
+        _mouseSensitivitySlider.onValueChanged.AddListener(SetMouseSensitivity);
+    }
+
+    private void SetMouseSensitivity(float value)
+    {
+        MouseSensitivitySettings.Set(value);
+        UpdateMouseSensitivityValue(MouseSensitivitySettings.Value);
+    }
+
+    private void UpdateMouseSensitivityValue(int value)
+    {
+        if (_mouseSensitivityValue != null)
+        {
+            _mouseSensitivityValue.text = value.ToString();
+        }
     }
     
     private void DisableButtons(Button button)

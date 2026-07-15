@@ -14,11 +14,11 @@ TagManager:
   - Interactable
   - Prop
   - Work
-  - 
-  - 
-  - 
-  - 
-  - 
+  - FootstepGrass
+  - FootstepDirt
+  - FootstepStone
+  - FootstepWood
+  - FootstepMetal
   - 
   - 
   - 

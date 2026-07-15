@@ -28,5 +28,5 @@ MonoBehaviour:
   <FastSlot2>k__BackingField: {fileID: -3366649599904600040, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
   <FastSlot3>k__BackingField: {fileID: -1002622966530559003, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
   <FastSlot4>k__BackingField: {fileID: -2390000571494691447, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
-  <WeaponSlot1>k__BackingField: {fileID: 8251150019564168807, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
-  <WeaponSlot2>k__BackingField: {fileID: -8069987916060891394, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <WeaponSlot1>k__BackingField: {fileID: 3130624670488550962, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <WeaponSlot2>k__BackingField: {fileID: 7638103239502390085, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}

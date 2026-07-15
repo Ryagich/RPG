@@ -14,6 +14,7 @@ using Stats;
 using TargetLock;
 using UnityEngine;
 using UnityEngine.AI;
+using GameAudio;
 using VContainer;
 using VContainer.Unity;
 
@@ -72,6 +73,7 @@ namespace Container
             var navMeshAgent = GetComponent<NavMeshAgent>() ?? gameObject.AddComponent<NavMeshAgent>();
             builder.RegisterComponent(navMeshAgent).AsSelf();
             builder.RegisterEntryPoint<NpcNavMeshController>().AsSelf();
+            builder.RegisterEntryPoint<NpcFootstepPlayer>().AsSelf();
 
             builder.RegisterInstance(transform);
             builder.RegisterInstance("NPC").Keyed("Scope ID");

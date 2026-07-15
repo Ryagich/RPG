@@ -3,6 +3,7 @@ using Loading;
 using UI.Configs;
 using UI.Pages;
 using UI.UIElements;
+using GameAudio;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -102,7 +103,7 @@ namespace Container.Menu
         public void Start()
         {
             Time.timeScale = 1f;
-            Cursor.lockState = CursorLockMode.None;
+            Cursor.lockState = CursorLockMode.Confined;
             Cursor.visible = true;
 
             mainPage.GameRequested += LoadGame;
@@ -386,11 +387,45 @@ namespace Container.Menu
 
     public sealed class MenuSoundsSettingsPage : MenuSettingsSectionPage
     {
+        private readonly UIConfig uiConfig;
+        private readonly IObjectResolver resolver;
+        private readonly IAudioService audioService;
+        private SoundSettingsPageUI soundSettingsPage;
+
         public override PageType Type { get; } = PageType.MenuSoundsSettings;
         protected override SettingsSection Section => SettingsSection.Sounds;
 
-        public MenuSoundsSettingsPage(UIConfig uiConfig, Canvas canvas, IObjectResolver resolver)
-            : base(uiConfig, canvas, resolver) { }
+        public MenuSoundsSettingsPage(UIConfig uiConfig, Canvas canvas, IObjectResolver resolver, IAudioService audioService)
+            : base(uiConfig, canvas, resolver)
+        {
+            this.uiConfig = uiConfig;
+            this.resolver = resolver;
+            this.audioService = audioService;
+        }
+
+        protected override bool CanDrawSectionContent()
+        {
+            if (uiConfig.SoundSettings != null)
+            {
+                return true;
+            }
+
+            Debug.LogError("Sound Settings prefab is not assigned in UIConfig.");
+            return false;
+        }
+
+        protected override void DrawSectionContent(RectTransform parent)
+        {
+            soundSettingsPage = resolver.Instantiate(uiConfig.SoundSettings, parent);
+            soundSettingsPage.name = uiConfig.SoundSettings.name;
+            soundSettingsPage.Initialize(audioService);
+        }
+
+        protected override void HideSectionContent()
+        {
+            soundSettingsPage?.Dispose();
+            soundSettingsPage = null;
+        }
     }
 
     public sealed class MenuGameplaySettingsPage : MenuSettingsSectionPage

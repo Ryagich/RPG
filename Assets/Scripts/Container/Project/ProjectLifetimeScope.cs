@@ -19,6 +19,7 @@ using VContainer;
 using VContainer.Unity;
 
 using Combat;
+using GameAudio;
 
 namespace Container.Project
 {
@@ -46,6 +47,7 @@ namespace Container.Project
         [field: SerializeField] public DeathConfig DeathConfig { get; private set; }
         [field: SerializeField] public HitReactionConfig HitReactionConfig { get; private set; }
         [field: SerializeField] public FactionRelationsConfig FactionRelationsConfig { get; private set; }
+        [field: SerializeField] public AudioConfig AudioConfig { get; private set; }
 
         protected override void Awake()
         {
@@ -93,6 +95,8 @@ namespace Container.Project
             builder.RegisterInstance(DeathConfig).AsSelf();
             builder.RegisterInstance(HitReactionConfig != null ? HitReactionConfig : HitReactionConfig.CreateDefault()).AsSelf();
             builder.RegisterInstance(FactionRelationsConfig).AsSelf();
+            builder.RegisterInstance(AudioConfig).AsSelf();
+            builder.RegisterEntryPoint<AudioService>(Lifetime.Singleton).As<IAudioService>().AsSelf();
             builder.Register<SceneLoadingService>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<InputBindingOverridesBootstrap>();
 

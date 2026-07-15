@@ -11,6 +11,7 @@ namespace UI.Pages
     {
         private readonly MainPage mainPage;
         private readonly PausePage pausePage;
+        private readonly PauseSettingsPage pauseSettingsPage;
         private readonly InventoryPage inventoryPage;
         private readonly LootingPage lootingPage;
         private readonly DialoguePage dialoguePage;
@@ -24,6 +25,7 @@ namespace UI.Pages
             (
                 MainPage mainPage,
                 PausePage pausePage,
+                PauseSettingsPage pauseSettingsPage,
                 InventoryPage inventoryPage,
                 LootingPage lootingPage,
                 DialoguePage dialoguePage,
@@ -35,6 +37,7 @@ namespace UI.Pages
         {
             this.mainPage = mainPage;
             this.pausePage = pausePage;
+            this.pauseSettingsPage = pauseSettingsPage;
             this.inventoryPage = inventoryPage;
             this.lootingPage = lootingPage;
             this.dialoguePage = dialoguePage;
@@ -61,6 +64,9 @@ namespace UI.Pages
                     break;
                 case GameMode.Pause:
                     currentPage = pausePage;
+                    break;
+                case GameMode.PauseSettings:
+                    currentPage = pauseSettingsPage;
                     break;
                 case GameMode.Inventory:
                     currentPage = inventoryPage;
@@ -101,6 +107,7 @@ namespace UI.Pages
     {
         MainGame,
         Pause,
+        PauseSettings,
         Inventory,
         Looting,
         Dialogue,

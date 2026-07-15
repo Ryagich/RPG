@@ -174,13 +174,13 @@ namespace GameModes
         private static void ApplyCursorState(GameMode mode)
         {
             var isGameplayMode = mode is GameMode.Game or GameMode.Death;
-            Cursor.lockState = isGameplayMode ? CursorLockMode.Locked : CursorLockMode.None;
+            Cursor.lockState = isGameplayMode ? CursorLockMode.Locked : CursorLockMode.Confined;
             Cursor.visible = !isGameplayMode;
         }
 
         private static void ApplyTimeScale(GameMode mode)
         {
-            Time.timeScale = mode == GameMode.Pause ? 0f : 1f;
+            Time.timeScale = mode is GameMode.Pause or GameMode.PauseSettings ? 0f : 1f;
         }
     }
 
@@ -188,6 +188,7 @@ namespace GameModes
     {
         Game,
         Pause,
+        PauseSettings,
         Inventory,
         Looting,
         Dialogue,

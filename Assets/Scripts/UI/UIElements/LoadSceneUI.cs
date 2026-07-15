@@ -26,7 +26,7 @@ namespace UI.UIElements
         private void Start()
         {
             Time.timeScale = 1f;
-            Cursor.lockState = CursorLockMode.None;
+            Cursor.lockState = CursorLockMode.Confined;
             Cursor.visible = true;
 
             config = FindAnyObjectByType<ProjectLifetimeScope>()?.LoadSceneConfig;

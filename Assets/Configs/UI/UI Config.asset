@@ -28,6 +28,7 @@ MonoBehaviour:
   <MenuUI>k__BackingField: {fileID: 3420270240661638511, guid: 37e41ce379a75a541affa1f7e407121c, type: 3}
   <LeftMenuShadowGradient>k__BackingField: {fileID: 60428061725942149, guid: 899dbfd8ccb5b8b42b1006e890039c90, type: 3}
   <Bindings>k__BackingField: {fileID: 4753608789851655901, guid: 5575f6eaade79a14eb283f60795e5f07, type: 3}
+  <SoundSettings>k__BackingField: {fileID: 3230026426908643272, guid: 7ae44df1a29fcbc4588857b5fdf6911b, type: 3}
   <TitleSections>k__BackingField: {fileID: 834713441298765432, guid: f2fcc2c0e6f84184c82dff0b6bd5a67b, type: 3}
   <TargetLockConfig>k__BackingField: {fileID: 11400000, guid: 0dc24276d11c421e9473fe8fd41716d7, type: 2}
   <DeadUI>k__BackingField: {fileID: 8283280542456453522, guid: db2589fad425b7a4aba3e48f6a381093, type: 3}

@@ -7,6 +7,7 @@ using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 using Inventory.Looting;
+using GameAudio;
 
 namespace Container.Game
 {
@@ -41,6 +42,7 @@ namespace Container.Game
             builder.RegisterMessageBroker<InteractableEndMessage>(options);
             builder.RegisterMessageBroker<ItemHolderFoundMessage>(options);
             builder.RegisterMessageBroker<ItemHolderLostMessage>(options);
+            builder.RegisterMessageBroker<PlaySoundMessage>(options);
              
             // === InputHandler ===
             builder.Register<InputHandler>(Lifetime.Singleton).AsSelf().As<IStartable>();
@@ -53,6 +55,7 @@ namespace Container.Game
             builder.Register<DialogueContext>(Lifetime.Singleton).AsSelf();
             builder.Register<Player.PlayerDeathState>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<GameModesController>().AsSelf();
+            builder.RegisterEntryPoint<SoundMessagePlayer>().AsSelf();
         }
     }
 }

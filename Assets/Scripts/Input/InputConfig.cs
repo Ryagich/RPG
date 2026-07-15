@@ -33,29 +33,74 @@ namespace Input
                 return;
             }
 
-            Interactable ??= CreateReference(actionMap, "Interactable");
-            Inventory ??= CreateReference(actionMap, "Inventory");
-            LeftClick ??= CreateReference(actionMap, "Left Mouse");
-            RightClick ??= CreateReference(actionMap, "Right Mouse");
-            Run ??= CreateReference(actionMap, "Run");
-            ShowStats ??= CreateReference(actionMap, "ShowStats");
-            Pause ??= CreateReference(actionMap, "Pause");
-            Map ??= CreateReference(actionMap, "Map");
-            TargetLock ??= CreateReference(actionMap, "TargetLock");
-            TargetLockNext ??= CreateReference(actionMap, "TargetLockNext");
-            TargetLockPrevious ??= CreateReference(actionMap, "TargetLockPrevious");
-            FastSlot1 ??= CreateReference(actionMap, "FastSlot1");
-            FastSlot2 ??= CreateReference(actionMap, "FastSlot2");
-            FastSlot3 ??= CreateReference(actionMap, "FastSlot3");
-            FastSlot4 ??= CreateReference(actionMap, "FastSlot4");
-            WeaponSlot1 ??= CreateReference(actionMap, "WeaponSlot1");
-            WeaponSlot2 ??= CreateReference(actionMap, "WeaponSlot2");
+            Interactable = EnsureReference(Interactable, actionMap, "Interactable");
+            Inventory = EnsureReference(Inventory, actionMap, "Inventory");
+            LeftClick = EnsureReference(LeftClick, actionMap, "Left Mouse");
+            RightClick = EnsureReference(RightClick, actionMap, "Right Mouse");
+            Run = EnsureReference(Run, actionMap, "Run");
+            ShowStats = EnsureReference(ShowStats, actionMap, "ShowStats");
+            Pause = EnsureReference(Pause, actionMap, "Pause");
+            Map = EnsureReference(Map, actionMap, "Map");
+            TargetLock = EnsureReference(TargetLock, actionMap, "TargetLock");
+            TargetLockNext = EnsureReference(TargetLockNext, actionMap, "TargetLockNext");
+            TargetLockPrevious = EnsureReference(TargetLockPrevious, actionMap, "TargetLockPrevious");
+            FastSlot1 = EnsureReference(FastSlot1, actionMap, "FastSlot1");
+            FastSlot2 = EnsureReference(FastSlot2, actionMap, "FastSlot2");
+            FastSlot3 = EnsureReference(FastSlot3, actionMap, "FastSlot3");
+            FastSlot4 = EnsureReference(FastSlot4, actionMap, "FastSlot4");
+            WeaponSlot1 = EnsureReference(WeaponSlot1, actionMap, "WeaponSlot1");
+            WeaponSlot2 = EnsureReference(WeaponSlot2, actionMap, "WeaponSlot2");
         }
 
-        private static InputActionReference CreateReference(InputActionMap actionMap, string actionName)
+        private static InputActionReference EnsureReference(
+            InputActionReference reference,
+            InputActionMap actionMap,
+            string actionName)
         {
+            if (reference?.action != null)
+            {
+                return reference;
+            }
+
             var action = actionMap.FindAction(actionName, false);
             return action == null ? null : InputActionReference.Create(action);
+        }
+    }
+
+    /// <summary>
+    /// Persistent, project-wide mouse sensitivity expressed in points.
+    /// One hundred points keeps the camera's authored sensitivity unchanged.
+    /// </summary>
+    public static class MouseSensitivitySettings
+    {
+        private const string PreferenceKey = "RPG.Input.MouseSensitivity";
+
+        public const int Minimum = 1;
+        public const int Maximum = 300;
+        public const int Default = 100;
+
+        private static int current = -1;
+
+        public static int Value
+        {
+            get
+            {
+                if (current < Minimum)
+                {
+                    current = Mathf.Clamp(PlayerPrefs.GetInt(PreferenceKey, Default), Minimum, Maximum);
+                }
+
+                return current;
+            }
+        }
+
+        public static float Multiplier => Value / (float)Default;
+
+        public static void Set(float value)
+        {
+            current = Mathf.Clamp(Mathf.RoundToInt(value), Minimum, Maximum);
+            PlayerPrefs.SetInt(PreferenceKey, current);
+            PlayerPrefs.Save();
         }
     }
 }

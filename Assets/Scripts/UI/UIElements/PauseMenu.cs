@@ -7,5 +7,6 @@ namespace UI.UIElements
     {
         [field: SerializeField] public Button ContinueButton { get; private set; }
         [field: SerializeField] public Button MenuButton { get; private set; }
+        [field: SerializeField] public Button SettingsButton { get; private set; }
     }
 }

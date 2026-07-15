@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Input;
 using TargetLock;
 
 namespace CameraScripts
@@ -249,7 +250,7 @@ namespace CameraScripts
                 return;
             }
 
-            var delta = mouse.delta.ReadValue();
+            var delta = mouse.delta.ReadValue() * MouseSensitivitySettings.Multiplier;
             if (delta.sqrMagnitude <= Mathf.Epsilon)
             {
                 return;
@@ -295,7 +296,7 @@ namespace CameraScripts
                 return;
             }
 
-            var delta = mouse.delta.ReadValue();
+            var delta = mouse.delta.ReadValue() * MouseSensitivitySettings.Multiplier;
             if (delta.sqrMagnitude <= Mathf.Epsilon)
             {
                 return;
