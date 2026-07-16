@@ -16,11 +16,10 @@ MonoBehaviour:
     Clips:
     - {fileID: 8300000, guid: 3cea3749460679340829ecbffcd6d7d6, type: 3}
     priority: 128
-    volume: 0.6
+    volume: {x: 0.9, y: 1.1}
     pitch: {x: 0.9, y: 1.1}
-    spatialBlend: 0
     reverbZoneMix: 1
-    MinDistance: 0
-    MaxDistance: 1.25
+    MinDistance: 0.25
+    MaxDistance: 3
     isUISound: 0
     DistanceToPlay: 3

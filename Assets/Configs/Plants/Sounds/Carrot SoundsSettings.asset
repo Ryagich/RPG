@@ -16,18 +16,18 @@ MonoBehaviour:
     Clips:
     - {fileID: 8300000, guid: e1f51cb013bb02a4d9a43040d0f4b811, type: 3}
     priority: 128
-    volume: 0.15
+    volume: {x: 0.9, y: 1.1}
     pitch: {x: 0.9, y: 1.1}
     reverbZoneMix: 1
-    MinDistance: 0
-    MaxDistance: 1.2
+    MinDistance: 0.2
+    MaxDistance: 4
     isUISound: 0
     DistanceToPlay: 4
   <GrownStageSoundSettings>k__BackingField:
     Clips:
     - {fileID: 8300000, guid: e1f51cb013bb02a4d9a43040d0f4b811, type: 3}
     priority: 128
-    volume: 0.15
+    volume: {x: 0.9, y: 1.1}
     pitch: {x: 0.9, y: 1.1}
     reverbZoneMix: 1
     MinDistance: 0
