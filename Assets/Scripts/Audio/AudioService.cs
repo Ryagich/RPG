@@ -17,15 +17,20 @@ namespace GameAudio
         private const string LegacyEffectsPreferenceKey = VolumePreferencePrefix + "Effects";
         private const int UiPoolLimit = 6;
         private const int GamePoolLimit = 20;
-        private const int FootstepsPoolLimit = 16;
+        // Step clips last up to roughly three seconds. This leaves room for overlapping
+        // nearby NPC steps without crowding out UI and other gameplay voices.
+        private const int FootstepsPoolLimit = 48;
+        // A character prefab may contain many ragdoll colliders. Keep enough hits to
+        // reach the actual floor after filtering the actor's own colliders, without
+        // allocating an array for each step.
+        private const int FootstepRaycastHitLimit = 64;
 
         private sealed class SourcePool
         {
-            private readonly Transform parent;
+            private Transform parent;
             private readonly AudioSource prefab;
             private readonly int limit;
             private readonly List<AudioSource> sources = new();
-            private int replacementIndex;
 
             public SourcePool(Transform parent, AudioSource prefab, int limit)
             {
@@ -36,6 +41,8 @@ namespace GameAudio
 
             public AudioSource Get()
             {
+                sources.RemoveAll(source => source == null);
+
                 foreach (var source in sources)
                 {
                     if (source != null && !source.isPlaying)
@@ -54,9 +61,36 @@ namespace GameAudio
                     return source;
                 }
 
-                var reusedSource = sources[replacementIndex++ % sources.Count];
+                // Unity uses a smaller numeric priority as more important. Reuse the
+                // least important active source first, so an NPC cannot interrupt a
+                // player's currently audible step when the pool is saturated.
+                var reusedSource = sources[0];
+                for (var index = 1; index < sources.Count; index++)
+                {
+                    if (sources[index].priority >= reusedSource.priority)
+                    {
+                        reusedSource = sources[index];
+                    }
+                }
                 reusedSource.Stop();
                 return reusedSource;
+            }
+
+            public void SetParent(Transform valueParent)
+            {
+                if (valueParent == null)
+                {
+                    return;
+                }
+
+                parent = valueParent;
+                foreach (var source in sources)
+                {
+                    if (source != null)
+                    {
+                        source.transform.SetParent(parent, true);
+                    }
+                }
             }
 
             private static AudioSource CreateFallbackSource(Transform parent)
@@ -68,16 +102,21 @@ namespace GameAudio
         }
 
         private readonly AudioConfig config;
+        private readonly FootstepConfig footstepConfig;
+        private readonly RaycastHit[] footstepRaycastHits = new RaycastHit[FootstepRaycastHitLimit];
         private GameObject root;
+        private Transform worldSoundParent;
+        private Transform listenerTransform;
         private SourcePool uiPool;
         private SourcePool gamePool;
         private SourcePool footstepsPool;
 
         public static IAudioService Current { get; private set; }
 
-        public AudioService(AudioConfig config)
+        public AudioService(AudioConfig config, FootstepConfig footstepConfig)
         {
             this.config = config;
+            this.footstepConfig = footstepConfig;
         }
 
         public void Start()
@@ -90,9 +129,12 @@ namespace GameAudio
 
             root = new GameObject("Audio Service");
             UnityEngine.Object.DontDestroyOnLoad(root);
-            uiPool = new SourcePool(root.transform, config.UiSourcePrefab, UiPoolLimit);
-            gamePool = new SourcePool(root.transform, config.GameSourcePrefab, GamePoolLimit);
-            footstepsPool = new SourcePool(root.transform, config.FootstepsSourcePrefab, FootstepsPoolLimit);
+            // UI and ordinary game sounds have no prefab-specific settings: each pooled
+            // source is configured immediately before playback. Footsteps retain their
+            // dedicated prefab because it is the project-owned template for this effect.
+            uiPool = new SourcePool(root.transform, null, UiPoolLimit);
+            gamePool = new SourcePool(GetWorldSoundParent(), null, GamePoolLimit);
+            footstepsPool = new SourcePool(GetWorldSoundParent(), config.FootstepSourcePrefab, FootstepsPoolLimit);
 
             foreach (var category in AudioConfig.SettingsCategories)
             {
@@ -119,38 +161,145 @@ namespace GameAudio
         public void PlayUiHover() => PlayUi(config != null ? config.ButtonHoverClip : null);
         public void PlayUiClick() => PlayUi(config != null ? config.ButtonClickClip : null);
 
-        public void PlayFootstep(Vector3 position)
+        public void SetWorldSoundParent(Transform parent)
         {
-            if (config == null || footstepsPool == null)
+            if (parent == null)
             {
                 return;
             }
 
-            var origin = position + Vector3.up * config.FootstepRaycastStartHeight;
-            var mask = config.FootstepRaycastMask.value == 0 ? Physics.DefaultRaycastLayers : config.FootstepRaycastMask.value;
-            if (!Physics.Raycast(origin, Vector3.down, out var hit, config.FootstepRaycastDistance, mask, QueryTriggerInteraction.Ignore))
+            worldSoundParent = parent;
+            gamePool?.SetParent(parent);
+            footstepsPool?.SetParent(parent);
+        }
+
+        public void SetListenerTransform(Transform valueListenerTransform)
+        {
+            listenerTransform = valueListenerTransform;
+        }
+
+        public void PlayFootstep(Vector3 position, Transform actorTransform, bool isPlayerCharacter)
+        {
+            if (footstepConfig == null || footstepsPool == null)
             {
                 return;
             }
 
-            var clips = config.GetFootstepClips(hit);
+            var origin = GetFootstepRayOrigin(position, actorTransform);
+            var mask = footstepConfig.FootstepRaycastMask.value == 0
+                ? Physics.DefaultRaycastLayers
+                : footstepConfig.FootstepRaycastMask.value;
+            var hitCount = Physics.RaycastNonAlloc(
+                origin,
+                Vector3.down,
+                footstepRaycastHits,
+                footstepConfig.FootstepRaycastDistance,
+                mask,
+                QueryTriggerInteraction.Ignore);
+            if (!TryGetFootstepSurfaceHit(hitCount, actorTransform, out var hit))
+            {
+                return;
+            }
+
+            var settings = footstepConfig.GetSoundSettings(hit);
+            var clips = footstepConfig.GetClips(hit, settings);
             var clip = GetRandomClip(clips);
-            if (clip == null)
+            if (clip == null || settings == null)
+            {
+                return;
+            }
+
+            if (!CanPlayAt(position, settings.DistanceToPlay))
             {
                 return;
             }
 
             var source = footstepsPool.Get();
-            ConfigureSource(source, AudioMixerCategory.Game, position, spatial: true);
-            source.volume = UnityEngine.Random.Range(0.88f, 1f);
-            source.pitch = UnityEngine.Random.Range(0.94f, 1.06f);
+            ConfigureSource(source, AudioMixerCategory.Game, hit.point, spatial: true, GetWorldSoundParent());
+            var configuredPriority = Mathf.Clamp(Mathf.RoundToInt(settings.priority), 0, 256);
+            source.priority = isPlayerCharacter
+                ? Mathf.Min(configuredPriority, 64)
+                : Mathf.Max(configuredPriority, 160);
+            source.volume = UnityEngine.Random.Range(settings.volume.x, settings.volume.y);
+            source.pitch = UnityEngine.Random.Range(settings.pitch.x, settings.pitch.y);
+            source.reverbZoneMix = settings.reverbZoneMix;
+            source.minDistance = settings.MinDistance;
+            source.maxDistance = Mathf.Max(settings.MinDistance, settings.MaxDistance);
             source.clip = clip;
             source.Play();
+        }
+
+        private Vector3 GetFootstepRayOrigin(Vector3 position, Transform actorTransform)
+        {
+            if (actorTransform == null)
+            {
+                return position + Vector3.up * footstepConfig.FootstepRaycastStartHeight;
+            }
+
+            var controller = actorTransform.GetComponent<CharacterController>();
+            if (controller == null)
+            {
+                return position + Vector3.up * footstepConfig.FootstepRaycastStartHeight;
+            }
+
+            var localFeetPosition = controller.center - Vector3.up * (controller.height * 0.5f);
+            var worldFeetPosition = controller.transform.TransformPoint(localFeetPosition);
+            var clearance = Mathf.Max(0.02f, controller.skinWidth + 0.02f);
+            return worldFeetPosition + Vector3.up * clearance;
+        }
+
+        private bool TryGetFootstepSurfaceHit(int hitCount, Transform actorTransform, out RaycastHit surfaceHit)
+        {
+            surfaceHit = default;
+            var closestDistance = float.MaxValue;
+
+            for (var index = 0; index < hitCount; index++)
+            {
+                var hit = footstepRaycastHits[index];
+                if (hit.collider == null || IsActorCollider(hit.collider.transform, actorTransform))
+                {
+                    continue;
+                }
+
+                if (hit.distance >= closestDistance)
+                {
+                    continue;
+                }
+
+                closestDistance = hit.distance;
+                surfaceHit = hit;
+            }
+
+            return surfaceHit.collider != null;
+        }
+
+        private static bool IsActorCollider(Transform colliderTransform, Transform actorTransform)
+        {
+            return actorTransform != null
+                   && colliderTransform != null
+                   && (colliderTransform == actorTransform || colliderTransform.IsChildOf(actorTransform));
+        }
+
+        private Transform GetWorldSoundParent()
+        {
+            return worldSoundParent != null ? worldSoundParent : root.transform;
+        }
+
+        private bool CanPlayAt(Vector3 position, float distanceToPlay)
+        {
+            return listenerTransform == null
+                   || distanceToPlay <= 0f
+                   || Vector3.SqrMagnitude(listenerTransform.position - position) <= distanceToPlay * distanceToPlay;
         }
 
         public void Play(SoundSettings settings, Vector3 position, Transform parent = null)
         {
             if (settings == null || gamePool == null)
+            {
+                return;
+            }
+
+            if (!settings.isUISound && !CanPlayAt(position, settings.DistanceToPlay))
             {
                 return;
             }
@@ -163,7 +312,10 @@ namespace GameAudio
 
             var category = settings.isUISound ? AudioMixerCategory.UI : AudioMixerCategory.Game;
             var source = settings.isUISound ? uiPool.Get() : gamePool.Get();
-            ConfigureSource(source, category, position, !settings.isUISound);
+            var sourceParent = settings.isUISound
+                ? root.transform
+                : parent != null ? parent : GetWorldSoundParent();
+            ConfigureSource(source, category, position, !settings.isUISound, sourceParent);
             source.priority = Mathf.Clamp(Mathf.RoundToInt(settings.priority), 0, 256);
             source.volume = UnityEngine.Random.Range(settings.volume.x, settings.volume.y);
             source.pitch = UnityEngine.Random.Range(settings.pitch.x, settings.pitch.y);
@@ -196,17 +348,22 @@ namespace GameAudio
             }
 
             var source = uiPool.Get();
-            ConfigureSource(source, AudioMixerCategory.UI, Vector3.zero, spatial: false);
+            ConfigureSource(source, AudioMixerCategory.UI, Vector3.zero, spatial: false, root.transform);
             source.volume = 1f;
             source.pitch = 1f;
             source.clip = clip;
             source.Play();
         }
 
-        private void ConfigureSource(AudioSource source, AudioMixerCategory category, Vector3 position, bool spatial)
+        private void ConfigureSource(
+            AudioSource source,
+            AudioMixerCategory category,
+            Vector3 position,
+            bool spatial,
+            Transform parent)
         {
             source.Stop();
-            source.transform.SetParent(root.transform, false);
+            source.transform.SetParent(parent, false);
             source.transform.position = position;
             source.loop = false;
             source.spatialBlend = spatial ? 1f : 0f;

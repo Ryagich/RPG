@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Container.Project;
 using GameAudio;
+using Sounds;
 using TMPro;
 using UI.Configs;
 using UI.UIElements;
@@ -19,12 +20,39 @@ namespace EditorTools
     public static class AudioSetupUtility
     {
         private const string ConfigDirectory = "Assets/Configs/Audio";
-        private const string SourcePrefabDirectory = "Assets/Content/Audio/Prefabs";
+        private const string FootstepConfigDirectory = ConfigDirectory + "/Footsteps";
+        private const string SourcePrefabDirectory = "Assets/Prefabs/Audio";
         private const string SettingsPrefabDirectory = "Assets/Prefabs/UI/Settings";
         private const string MixerPath = "Assets/Content/Audio/Mixers/RPG Audio Mixer.mixer";
         private const string UiHoverPath = "Assets/Content/Audio/UI/Button Hover.ogg";
         private const string UiClickPath = "Assets/Content/Audio/UI/Button Click.ogg";
         private const string UiConfigPath = "Assets/Configs/UI/UI Config.asset";
+        private const string DefaultFootstepsDirectory = "Assets/Content/Audio/Footsteps/Default";
+        private const string DirtFootstepsDirectory = "Assets/Content/Audio/Footsteps/Dirt";
+        private const string StoneFootstepsDirectory = "Assets/Content/Audio/Footsteps/Stone";
+        private const string WoodFootstepsDirectory = "Assets/Content/Audio/Footsteps/Wood";
+
+        private sealed class FootstepClipSets
+        {
+            public readonly IReadOnlyList<AudioClip> Default;
+            public readonly IReadOnlyList<AudioClip> Ground;
+            public readonly IReadOnlyList<AudioClip> Stone;
+            public readonly IReadOnlyList<AudioClip> Wood;
+
+            public bool HasRequiredClips => Ground.Count > 0 && Stone.Count > 0 && Wood.Count > 0;
+
+            public FootstepClipSets(
+                IReadOnlyList<AudioClip> defaultClips,
+                IReadOnlyList<AudioClip> ground,
+                IReadOnlyList<AudioClip> stone,
+                IReadOnlyList<AudioClip> wood)
+            {
+                Default = defaultClips;
+                Ground = ground;
+                Stone = stone;
+                Wood = wood;
+            }
+        }
 
         [MenuItem("Tools/RPG/Audio/Create Or Repair Audio Setup")]
         public static void CreateOrRepairFromMenu()
@@ -35,45 +63,40 @@ namespace EditorTools
         public static string CreateOrRepair()
         {
             EnsureFolder("Assets/Configs", "Audio");
-            EnsureFolder("Assets/Content/Audio", "Prefabs");
+            EnsureFolder(ConfigDirectory, "Footsteps");
+            EnsureFolder("Assets/Prefabs", "Audio");
 
             var mixer = AssetDatabase.LoadAssetAtPath<AudioMixer>(MixerPath);
             var hover = AssetDatabase.LoadAssetAtPath<AudioClip>(UiHoverPath);
             var click = AssetDatabase.LoadAssetAtPath<AudioClip>(UiClickPath);
             var footsteps = LoadFootsteps();
-            if (mixer == null || hover == null || click == null || footsteps.Count == 0)
+            if (mixer == null || hover == null || click == null || !footsteps.HasRequiredClips)
             {
-                return "Audio setup was not created: one or more local audio assets are missing.";
+                return "Audio setup was not created: UI clips or one of the Ground, Stone, Wood footstep sets is missing.";
             }
 
-            var uiSource = GetOrCreateSource(
-                SourcePrefabDirectory + "/UI Audio Source.prefab",
-                "UI Audio Source",
-                GetGroup(mixer, "UI"),
-                false);
-            var gameSource = GetOrCreateSource(
-                SourcePrefabDirectory + "/Game Audio Source.prefab",
-                "Game Audio Source",
-                GetGroup(mixer, "Game"),
-                true);
             var footstepsSource = GetOrCreateSource(
-                SourcePrefabDirectory + "/Footsteps Audio Source.prefab",
-                "Footsteps Audio Source",
+                SourcePrefabDirectory + "/Footstep Audio Source.prefab",
+                "Footstep Audio Source",
                 GetGroup(mixer, "Game"),
-                true);
+                true,
+                2.5f,
+                10f);
 
             var config = GetOrCreateConfig();
-            ConfigureFootstepLayers(config, mixer, uiSource, gameSource, footstepsSource, hover, click, footsteps);
+            var footstepConfig = GetOrCreateFootstepConfig();
+            ConfigureAudioConfig(config, mixer, footstepsSource, hover, click);
+            ConfigureFootstepConfig(footstepConfig, footsteps);
 
             var rowPrefab = GetOrCreateSoundSettingsRow();
             var pagePrefab = GetOrCreateSoundSettingsPage(rowPrefab);
             AssignSettingsPrefab(pagePrefab);
             InstallButtonAudio();
-            AssignProjectConfig(config);
+            AssignProjectConfig(config, footstepConfig);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            return "Audio setup created: config, 3 pooled-source prefabs, Sound Settings page and local references.";
+            return "Audio setup created: mixer config, footstep config, five footstep sound configs, the Footstep Audio Source prefab and Sound Settings page.";
         }
 
         private static void EnsureFolder(string parent, string name)
@@ -84,13 +107,30 @@ namespace EditorTools
             }
         }
 
-        private static List<AudioClip> LoadFootsteps()
+        private static FootstepClipSets LoadFootsteps()
         {
-            var clips = new List<AudioClip>();
-            for (var index = 1; index <= 5; index++)
+            return new FootstepClipSets(
+                LoadClips(DefaultFootstepsDirectory),
+                LoadClips(DirtFootstepsDirectory),
+                LoadClips(StoneFootstepsDirectory),
+                LoadClips(WoodFootstepsDirectory));
+        }
+
+        private static List<AudioClip> LoadClips(string directory)
+        {
+            var guids = AssetDatabase.FindAssets("t:AudioClip", new[] { directory });
+            var paths = new string[guids.Length];
+            for (var index = 0; index < guids.Length; index++)
             {
-                var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(
-                    $"Assets/Content/Audio/Footsteps/Default/S_CH_Footstep_{index:000}.wav");
+                paths[index] = AssetDatabase.GUIDToAssetPath(guids[index]);
+            }
+
+            System.Array.Sort(paths, System.StringComparer.Ordinal);
+
+            var clips = new List<AudioClip>(paths.Length);
+            foreach (var path in paths)
+            {
+                var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
                 if (clip != null)
                 {
                     clips.Add(clip);
@@ -106,7 +146,13 @@ namespace EditorTools
             return groups != null && groups.Length > 0 ? groups[0] : null;
         }
 
-        private static AudioSource GetOrCreateSource(string path, string sourceName, AudioMixerGroup group, bool spatial)
+        private static AudioSource GetOrCreateSource(
+            string path,
+            string sourceName,
+            AudioMixerGroup group,
+            bool spatial,
+            float minDistance,
+            float maxDistance)
         {
             var existing = AssetDatabase.LoadAssetAtPath<AudioSource>(path);
             if (existing != null)
@@ -121,8 +167,8 @@ namespace EditorTools
             source.spatialBlend = spatial ? 1f : 0f;
             source.dopplerLevel = 0f;
             source.rolloffMode = AudioRolloffMode.Logarithmic;
-            source.minDistance = 1f;
-            source.maxDistance = spatial ? 14f : 1f;
+            source.minDistance = minDistance;
+            source.maxDistance = maxDistance;
             source.outputAudioMixerGroup = group;
             PrefabUtility.SaveAsPrefabAsset(sourceObject, path);
             Object.DestroyImmediate(sourceObject);
@@ -143,48 +189,87 @@ namespace EditorTools
             return config;
         }
 
-        private static void ConfigureFootstepLayers(
+        private static FootstepConfig GetOrCreateFootstepConfig()
+        {
+            var path = FootstepConfigDirectory + "/Footstep Config.asset";
+            var config = AssetDatabase.LoadAssetAtPath<FootstepConfig>(path);
+            if (config != null)
+            {
+                return config;
+            }
+
+            config = ScriptableObject.CreateInstance<FootstepConfig>();
+            AssetDatabase.CreateAsset(config, path);
+            return config;
+        }
+
+        private static SoundConfig GetOrCreateFootstepSoundConfig(string fileName, IReadOnlyList<AudioClip> clips)
+        {
+            var path = FootstepConfigDirectory + "/" + fileName + ".asset";
+            var config = AssetDatabase.LoadAssetAtPath<SoundConfig>(path);
+            if (config == null)
+            {
+                config = ScriptableObject.CreateInstance<SoundConfig>();
+                AssetDatabase.CreateAsset(config, path);
+            }
+
+            config.ConfigureForProject(clips, new Vector2(0.5f, 0.7f), new Vector2(0.9f, 1.1f), 2.5f, 10f);
+            EditorUtility.SetDirty(config);
+            return config;
+        }
+
+        private static void ConfigureAudioConfig(
             AudioConfig config,
             AudioMixer mixer,
-            AudioSource uiSource,
-            AudioSource gameSource,
             AudioSource footstepsSource,
             AudioClip hover,
-            AudioClip click,
-            IReadOnlyList<AudioClip> footstepClips)
+            AudioClip click)
         {
-            var defaultLayer = LayerMask.NameToLayer("Default");
-            var grassLayer = LayerMask.NameToLayer("FootstepGrass");
-            var dirtLayer = LayerMask.NameToLayer("FootstepDirt");
-            var stoneLayer = LayerMask.NameToLayer("FootstepStone");
-            var woodLayer = LayerMask.NameToLayer("FootstepWood");
-            var metalLayer = LayerMask.NameToLayer("FootstepMetal");
-            var mask = (1 << defaultLayer)
-                       | (1 << grassLayer)
-                       | (1 << dirtLayer)
-                       | (1 << stoneLayer)
-                       | (1 << woodLayer)
-                       | (1 << metalLayer);
-            var surfaces = new[]
+            config.ConfigureForProject(mixer, footstepsSource, hover, click);
+            EditorUtility.SetDirty(config);
+        }
+
+        private static void ConfigureFootstepConfig(
+            FootstepConfig config,
+            FootstepClipSets footstepClips)
+        {
+            var defaultSound = GetOrCreateFootstepSoundConfig(
+                "Default Footsteps Sound Config",
+                footstepClips.Default.Count > 0 ? footstepClips.Default : footstepClips.Ground);
+            var dirtSound = GetOrCreateFootstepSoundConfig("Dirt Footsteps Sound Config", footstepClips.Ground);
+            var stoneSound = GetOrCreateFootstepSoundConfig("Stone Footsteps Sound Config", footstepClips.Stone);
+            var woodSound = GetOrCreateFootstepSoundConfig("Wood Footsteps Sound Config", footstepClips.Wood);
+            var metalSound = GetOrCreateFootstepSoundConfig(
+                "Metal Footsteps Sound Config",
+                footstepClips.Default.Count > 0 ? footstepClips.Default : footstepClips.Ground);
+            var grassLayer = GetLayerBit("FootstepGrass");
+            var dirtLayer = GetLayerBit("FootstepDirt");
+            var stoneLayer = GetLayerBit("FootstepStone");
+            var woodLayer = GetLayerBit("FootstepWood");
+            var metalLayer = GetLayerBit("FootstepMetal");
+            // A step must not depend on scene-specific setup. The layer only selects
+            // a material set below; every ordinary collider remains eligible for the
+            // raycast and falls back to the default clips when it has no mapping.
+            var mask = Physics.DefaultRaycastLayers;
+            var surfaces = new List<FootstepSurfaceSettings>
             {
-                new FootstepSurfaceSettings(1 << grassLayer, footstepClips),
-                new FootstepSurfaceSettings(1 << dirtLayer, footstepClips),
-                new FootstepSurfaceSettings(1 << stoneLayer, footstepClips),
-                new FootstepSurfaceSettings(1 << woodLayer, footstepClips),
-                new FootstepSurfaceSettings(1 << metalLayer, footstepClips),
+                new(grassLayer | dirtLayer, dirtSound),
+                new(stoneLayer, stoneSound),
+                new(woodLayer, woodSound),
+                new(metalLayer, metalSound),
             };
 
             config.ConfigureForProject(
-                mixer,
-                uiSource,
-                gameSource,
-                footstepsSource,
-                hover,
-                click,
-                footstepClips,
+                defaultSound,
                 mask,
                 surfaces);
             EditorUtility.SetDirty(config);
+        }
+
+        private static int GetLayerBit(string layerName)
+        {
+            var layer = LayerMask.NameToLayer(layerName);
+            return layer < 0 ? 0 : 1 << layer;
         }
 
         private static SoundSettingsRow GetOrCreateSoundSettingsRow()
@@ -409,7 +494,7 @@ namespace EditorTools
             PrefabUtility.UnloadPrefabContents(contents);
         }
 
-        private static void AssignProjectConfig(AudioConfig config)
+        private static void AssignProjectConfig(AudioConfig config, FootstepConfig footstepConfig)
         {
             const string projectScopePrefabPath = "Assets/Resources/Project/ProjectLifetimeScope.prefab";
             var prefabContents = PrefabUtility.LoadPrefabContents(projectScopePrefabPath);
@@ -418,6 +503,7 @@ namespace EditorTools
             {
                 var prefabSerializedScope = new SerializedObject(prefabScope);
                 prefabSerializedScope.FindProperty("<AudioConfig>k__BackingField").objectReferenceValue = config;
+                prefabSerializedScope.FindProperty("<FootstepConfig>k__BackingField").objectReferenceValue = footstepConfig;
                 prefabSerializedScope.ApplyModifiedPropertiesWithoutUndo();
                 PrefabUtility.SaveAsPrefabAsset(prefabContents, projectScopePrefabPath);
             }
@@ -429,6 +515,7 @@ namespace EditorTools
             {
                 var serializedScope = new SerializedObject(scope);
                 serializedScope.FindProperty("<AudioConfig>k__BackingField").objectReferenceValue = config;
+                serializedScope.FindProperty("<FootstepConfig>k__BackingField").objectReferenceValue = footstepConfig;
                 serializedScope.ApplyModifiedPropertiesWithoutUndo();
                 EditorUtility.SetDirty(scope);
                 EditorSceneManager.MarkSceneDirty(scope.gameObject.scene);

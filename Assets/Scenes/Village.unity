@@ -2794,6 +2794,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 310756134}
+  - component: {fileID: 2099900001}
   m_Layer: 0
   m_Name: Pavilion
   m_TagString: Untagged
@@ -2972,7 +2973,6 @@ GameObject:
   m_Component:
   - component: {fileID: 330585546}
   - component: {fileID: 330585545}
-  - component: {fileID: 330585544}
   - component: {fileID: 330585547}
   m_Layer: 0
   m_Name: Main Camera
@@ -2981,14 +2981,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &330585544
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 330585543}
-  m_Enabled: 1
 --- !u!20 &330585545
 Camera:
   m_ObjectHideFlags: 0
@@ -3693,6 +3685,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 376205257}
+  - component: {fileID: 2099900002}
   m_Layer: 0
   m_Name: Road
   m_TagString: Untagged
@@ -3990,6 +3983,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 405451220}
+  - component: {fileID: 2099900003}
   m_Layer: 0
   m_Name: Rocks
   m_TagString: Untagged
@@ -17003,6 +16997,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1708392821}
+  - component: {fileID: 2099900004}
   m_Layer: 0
   m_Name: Ground
   m_TagString: Untagged
@@ -20878,6 +20873,70 @@ MonoBehaviour:
     TypeName: Container.Game.GameLifetimeScope
   autoRun: 0
   autoInjectGameObjects: []
+--- !u!114 &2099900001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 310756133}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10b0f6c82ac2f8c4e8ebfd9e75a55a43, type: 3}
+  m_Name: Footstep Surface - Pavilion
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.FootstepSurface
+  surfaceLayerOverride:
+    serializedVersion: 2
+    m_Bits: 4096
+  clips: []
+--- !u!114 &2099900002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 376205256}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10b0f6c82ac2f8c4e8ebfd9e75a55a43, type: 3}
+  m_Name: Footstep Surface - Road
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.FootstepSurface
+  surfaceLayerOverride:
+    serializedVersion: 2
+    m_Bits: 2048
+  clips: []
+--- !u!114 &2099900003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 405451219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10b0f6c82ac2f8c4e8ebfd9e75a55a43, type: 3}
+  m_Name: Footstep Surface - Rocks
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.FootstepSurface
+  surfaceLayerOverride:
+    serializedVersion: 2
+    m_Bits: 2048
+  clips: []
+--- !u!114 &2099900004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1708392820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10b0f6c82ac2f8c4e8ebfd9e75a55a43, type: 3}
+  m_Name: Footstep Surface - Ground
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.FootstepSurface
+  surfaceLayerOverride:
+    serializedVersion: 2
+    m_Bits: 1024
+  clips: []
 --- !u!1001 &2105824259
 PrefabInstance:
   m_ObjectHideFlags: 0

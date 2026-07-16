@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ce989839c634ce3bf3aaa1dae81b2e6, type: 3}
+  m_Name: Footstep Config
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.FootstepConfig
+  footstepRaycastDistance: 2.5
+  footstepRaycastStartHeight: 0.8
+  footstepRaycastMask:
+    serializedVersion: 2
+    m_Bits: -5
+  defaultSoundConfig: {fileID: 11400000, guid: e03a54907c9149658d292ff49ba4f277, type: 2}
+  footstepSurfaces:
+  - layers:
+      serializedVersion: 2
+      m_Bits: 1536
+    soundConfig: {fileID: 11400000, guid: a0aac2129b524e329312e7fc21a1486d, type: 2}
+  - layers:
+      serializedVersion: 2
+      m_Bits: 2048
+    soundConfig: {fileID: 11400000, guid: 0cb00991356a48f1936a9c6149e8667f, type: 2}
+  - layers:
+      serializedVersion: 2
+      m_Bits: 4096
+    soundConfig: {fileID: 11400000, guid: b491d44a553842d8b908d7645eb1659f, type: 2}
+  - layers:
+      serializedVersion: 2
+      m_Bits: 8192
+    soundConfig: {fileID: 11400000, guid: a4f1cbac89e148f19e8eaf8742bcae00, type: 2}
+  walkStepDistance: 1.7
+  runStepDistance: 2.15
+  npcStepDistance: 1.8

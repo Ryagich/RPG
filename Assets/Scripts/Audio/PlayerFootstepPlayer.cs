@@ -10,7 +10,7 @@ namespace GameAudio
         private readonly Transform characterTransform;
         private readonly CharacterController characterController;
         private readonly PlayerMovement playerMovement;
-        private readonly AudioConfig config;
+        private readonly FootstepConfig config;
         private readonly IAudioService audioService;
         private Vector3 lastPosition;
         private float traveledDistance;
@@ -19,7 +19,7 @@ namespace GameAudio
             Transform characterTransform,
             CharacterController characterController,
             PlayerMovement playerMovement,
-            AudioConfig config,
+            FootstepConfig config,
             IAudioService audioService)
         {
             this.characterTransform = characterTransform;
@@ -29,7 +29,10 @@ namespace GameAudio
             this.audioService = audioService;
         }
 
-        public void Start() => lastPosition = characterTransform.position;
+        public void Start()
+        {
+            lastPosition = characterTransform.position;
+        }
 
         public void Tick()
         {
@@ -43,7 +46,7 @@ namespace GameAudio
             delta.y = 0f;
             lastPosition = position;
 
-            if (playerMovement == null || !playerMovement.IsMoving || characterController == null || !characterController.isGrounded)
+            if (playerMovement == null || !playerMovement.IsMoving)
             {
                 traveledDistance = 0f;
                 return;
@@ -54,7 +57,7 @@ namespace GameAudio
             while (traveledDistance >= stepDistance)
             {
                 traveledDistance -= stepDistance;
-                audioService.PlayFootstep(position);
+                audioService.PlayFootstep(position, characterTransform, isPlayerCharacter: true);
             }
         }
     }

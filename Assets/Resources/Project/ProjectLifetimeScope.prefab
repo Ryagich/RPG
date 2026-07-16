@@ -69,3 +69,4 @@ MonoBehaviour:
   <HitReactionConfig>k__BackingField: {fileID: 11400000, guid: 2d0cbbd1f6af4e74986c7f818a5dd4d4, type: 2}
   <FactionRelationsConfig>k__BackingField: {fileID: 11400000, guid: 3fdfd03541e8492bb9c360909a9db487, type: 2}
   <AudioConfig>k__BackingField: {fileID: 11400000, guid: dd5d05181867a8b488402f224a91254f, type: 2}
+  <FootstepConfig>k__BackingField: {fileID: 11400000, guid: 3a3d715d9886471ab9f9822298d8cecb, type: 2}

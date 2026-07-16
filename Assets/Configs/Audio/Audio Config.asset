@@ -13,59 +13,86 @@ MonoBehaviour:
   m_Name: Audio Config
   m_EditorClassIdentifier: Assembly-CSharp::GameAudio.AudioConfig
   mixer: {fileID: 24100000, guid: 73b2f93c5f5c1a84986de6b64134645b, type: 2}
-  uiSourcePrefab: {fileID: 6503083919804644428, guid: b992a1ddc9ab38f4688f94c26ebb9461, type: 3}
-  gameSourcePrefab: {fileID: 3099536648732623126, guid: dda45d16bc31f1c4cbb0b01a7d7a6564, type: 3}
-  footstepsSourcePrefab: {fileID: 4475651691867625152, guid: 63385babb7fec69439d9ed21b5bb418e, type: 3}
+  masterMixerGroup: {fileID: 24300002, guid: 73b2f93c5f5c1a84986de6b64134645b, type: 2}
+  uiMixerGroup: {fileID: 8296641888768157167, guid: 73b2f93c5f5c1a84986de6b64134645b, type: 2}
+  gameMixerGroup: {fileID: -561013206691005878, guid: 73b2f93c5f5c1a84986de6b64134645b, type: 2}
+  musicMixerGroup: {fileID: 9049543159456873, guid: 73b2f93c5f5c1a84986de6b64134645b, type: 2}
+  footstepSourcePrefab: {fileID: 4475651691867625152, guid: 63385babb7fec69439d9ed21b5bb418e, type: 3}
   buttonHoverClip: {fileID: 8300000, guid: 71629c64266e0b541b6f0fc0156ebfe0, type: 3}
   buttonClickClip: {fileID: 8300000, guid: a60f9476a4dd21742acfcca50e5c6062, type: 3}
   footstepRaycastDistance: 2.5
   footstepRaycastStartHeight: 0.8
   footstepRaycastMask:
     serializedVersion: 2
-    m_Bits: 15873
+    m_Bits: -5
   defaultFootstepClips:
-  - {fileID: 8300000, guid: 418b6e21e9497f345bacc6c075cbc6da, type: 3}
-  - {fileID: 8300000, guid: d2e0759bc55b50846b203fdebb852288, type: 3}
-  - {fileID: 8300000, guid: f2fe983b693142a43a523fed7966e8ce, type: 3}
-  - {fileID: 8300000, guid: c17bfcb671ed01548b1cc635d93534cb, type: 3}
-  - {fileID: 8300000, guid: cf8a2cc4c38b909448e58b5b0358815a, type: 3}
+  - {fileID: 8300000, guid: a2dbbe3772824ac4aa024889d3b39238, type: 3}
+  - {fileID: 8300000, guid: 91e2e4fd66d4f5e4a87e0ed6ddb32b79, type: 3}
+  - {fileID: 8300000, guid: 5c8b0fcf2d1db4045beddfd91f33cb70, type: 3}
+  - {fileID: 8300000, guid: b87aa0d8eedb73844880f45faa28a892, type: 3}
+  - {fileID: 8300000, guid: 7d513068a22504641b78031c853ba49d, type: 3}
+  - {fileID: 8300000, guid: 118e490c714547346b606eef6c46f283, type: 3}
+  - {fileID: 8300000, guid: 19c82d54e52f6e04cbf6dbac83a345fb, type: 3}
+  - {fileID: 8300000, guid: a8e064ae5e3f0b9458c41d2862830311, type: 3}
+  - {fileID: 8300000, guid: f303862579648b34f8b2b700e402048e, type: 3}
+  - {fileID: 8300000, guid: d0d63a94a032c214d94b715932a101ec, type: 3}
+  - {fileID: 8300000, guid: 34d50d505fca4e64b8be3ad90b5fd511, type: 3}
+  - {fileID: 8300000, guid: 1c49c3cf52691c542b991204214ee01b, type: 3}
+  - {fileID: 8300000, guid: eb436a272fec72c4ea33516f2d9b9ede, type: 3}
+  - {fileID: 8300000, guid: 49a8e9b8652c5784cac7574c8c75f258, type: 3}
   footstepSurfaces:
   - layers:
       serializedVersion: 2
-      m_Bits: 512
+      m_Bits: 1536
     clips:
-    - {fileID: 8300000, guid: 418b6e21e9497f345bacc6c075cbc6da, type: 3}
-    - {fileID: 8300000, guid: d2e0759bc55b50846b203fdebb852288, type: 3}
-    - {fileID: 8300000, guid: f2fe983b693142a43a523fed7966e8ce, type: 3}
-    - {fileID: 8300000, guid: c17bfcb671ed01548b1cc635d93534cb, type: 3}
-    - {fileID: 8300000, guid: cf8a2cc4c38b909448e58b5b0358815a, type: 3}
-  - layers:
-      serializedVersion: 2
-      m_Bits: 1024
-    clips:
-    - {fileID: 8300000, guid: 418b6e21e9497f345bacc6c075cbc6da, type: 3}
-    - {fileID: 8300000, guid: d2e0759bc55b50846b203fdebb852288, type: 3}
-    - {fileID: 8300000, guid: f2fe983b693142a43a523fed7966e8ce, type: 3}
-    - {fileID: 8300000, guid: c17bfcb671ed01548b1cc635d93534cb, type: 3}
-    - {fileID: 8300000, guid: cf8a2cc4c38b909448e58b5b0358815a, type: 3}
+    - {fileID: 8300000, guid: a2dbbe3772824ac4aa024889d3b39238, type: 3}
+    - {fileID: 8300000, guid: 91e2e4fd66d4f5e4a87e0ed6ddb32b79, type: 3}
+    - {fileID: 8300000, guid: 5c8b0fcf2d1db4045beddfd91f33cb70, type: 3}
+    - {fileID: 8300000, guid: b87aa0d8eedb73844880f45faa28a892, type: 3}
+    - {fileID: 8300000, guid: 7d513068a22504641b78031c853ba49d, type: 3}
+    - {fileID: 8300000, guid: 118e490c714547346b606eef6c46f283, type: 3}
+    - {fileID: 8300000, guid: 19c82d54e52f6e04cbf6dbac83a345fb, type: 3}
+    - {fileID: 8300000, guid: a8e064ae5e3f0b9458c41d2862830311, type: 3}
+    - {fileID: 8300000, guid: f303862579648b34f8b2b700e402048e, type: 3}
+    - {fileID: 8300000, guid: d0d63a94a032c214d94b715932a101ec, type: 3}
+    - {fileID: 8300000, guid: 34d50d505fca4e64b8be3ad90b5fd511, type: 3}
+    - {fileID: 8300000, guid: 1c49c3cf52691c542b991204214ee01b, type: 3}
+    - {fileID: 8300000, guid: eb436a272fec72c4ea33516f2d9b9ede, type: 3}
+    - {fileID: 8300000, guid: 49a8e9b8652c5784cac7574c8c75f258, type: 3}
   - layers:
       serializedVersion: 2
       m_Bits: 2048
     clips:
-    - {fileID: 8300000, guid: 418b6e21e9497f345bacc6c075cbc6da, type: 3}
-    - {fileID: 8300000, guid: d2e0759bc55b50846b203fdebb852288, type: 3}
-    - {fileID: 8300000, guid: f2fe983b693142a43a523fed7966e8ce, type: 3}
-    - {fileID: 8300000, guid: c17bfcb671ed01548b1cc635d93534cb, type: 3}
-    - {fileID: 8300000, guid: cf8a2cc4c38b909448e58b5b0358815a, type: 3}
+    - {fileID: 8300000, guid: 9aa84af9ac52df64f8943cd90e5dd955, type: 3}
+    - {fileID: 8300000, guid: 622dd7a67f3471949b52cfd955059521, type: 3}
+    - {fileID: 8300000, guid: 28c7d41ee7604514aa527ac7ac049be8, type: 3}
+    - {fileID: 8300000, guid: 400f23c1d1528e84e80961ba72a2b1cd, type: 3}
+    - {fileID: 8300000, guid: 7c9508bb894d9f943b43172aa0939be7, type: 3}
+    - {fileID: 8300000, guid: 5876c5e22897d53428758f7183cc02a5, type: 3}
+    - {fileID: 8300000, guid: d8cdb0aec33b2cd4c901a117a2f16912, type: 3}
+    - {fileID: 8300000, guid: 0de229768d554a5459d0d2aa41be4965, type: 3}
+    - {fileID: 8300000, guid: 045e8973ccfaa2244aef03e033891e6f, type: 3}
+    - {fileID: 8300000, guid: 0c38864932f8a0c4a816a9d7c4f83b4b, type: 3}
+    - {fileID: 8300000, guid: 04c791a4e3e613b40b41f6e95faa6d7f, type: 3}
   - layers:
       serializedVersion: 2
       m_Bits: 4096
     clips:
-    - {fileID: 8300000, guid: 418b6e21e9497f345bacc6c075cbc6da, type: 3}
-    - {fileID: 8300000, guid: d2e0759bc55b50846b203fdebb852288, type: 3}
-    - {fileID: 8300000, guid: f2fe983b693142a43a523fed7966e8ce, type: 3}
-    - {fileID: 8300000, guid: c17bfcb671ed01548b1cc635d93534cb, type: 3}
-    - {fileID: 8300000, guid: cf8a2cc4c38b909448e58b5b0358815a, type: 3}
+    - {fileID: 8300000, guid: fc8f13856f167c0459113030e0c0b952, type: 3}
+    - {fileID: 8300000, guid: 2ef62fe4c6a192c40bdb6f13d2a099a4, type: 3}
+    - {fileID: 8300000, guid: 91b2d6994b3679a4d878e8477d578349, type: 3}
+    - {fileID: 8300000, guid: 7d0434bc18971364a9573a61c03357e5, type: 3}
+    - {fileID: 8300000, guid: bec2e0b1a2612914a84de7a1a8ad653b, type: 3}
+    - {fileID: 8300000, guid: a8a6b8ddde5e0b8439c1012cfeff281a, type: 3}
+    - {fileID: 8300000, guid: 575f72dac3760f14089c525d696adbd1, type: 3}
+    - {fileID: 8300000, guid: b2676bff3f8cf0e498e1552164aea52b, type: 3}
+    - {fileID: 8300000, guid: e4a443e4326eac246b2b308a48af4c6e, type: 3}
+    - {fileID: 8300000, guid: 70c064c715065114c87a3fc377217315, type: 3}
+    - {fileID: 8300000, guid: 6f53dd9673e065042b579fc2e589a5bb, type: 3}
+    - {fileID: 8300000, guid: ee71cdd00b3395548a4c13cc773ac1e6, type: 3}
+    - {fileID: 8300000, guid: 251590927b0f5aa43a9379d1eca07883, type: 3}
+    - {fileID: 8300000, guid: e3e8566fd62253c43b818bd01b4a32a4, type: 3}
+    - {fileID: 8300000, guid: 5bc1c75f2bbfc3145b48351fb425b711, type: 3}
   - layers:
       serializedVersion: 2
       m_Bits: 8192

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6643219083112456789}
   - component: {fileID: 4783916517637505112}
   - component: {fileID: 9091702133981790818}
+  - component: {fileID: 7354185206311042624}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -21,6 +22,14 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!81 &7354185206311042624
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4309771568245632549}
+  m_Enabled: 1
 --- !u!4 &2925860065574509289
 Transform:
   m_ObjectHideFlags: 0

@@ -1,26 +1,8 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
 namespace GameAudio
 {
-    [Serializable]
-    public sealed class FootstepSurfaceSettings
-    {
-        [SerializeField] private LayerMask layers;
-        [SerializeField] private List<AudioClip> clips = new();
-
-        public bool Matches(int layer) => (layers.value & (1 << layer)) != 0;
-        public IReadOnlyList<AudioClip> Clips => clips;
-
-        public FootstepSurfaceSettings(LayerMask layers, IEnumerable<AudioClip> clips)
-        {
-            this.layers = layers;
-            this.clips = clips == null ? new List<AudioClip>() : new List<AudioClip>(clips);
-        }
-    }
-
     /// <summary>
     /// Single project-owned source of truth for mixer links, default levels and test sounds.
     /// Runtime volume changes are stored separately in PlayerPrefs, leaving this asset immutable.
@@ -33,25 +15,17 @@ namespace GameAudio
 
         [Header("Mixer")]
         [SerializeField] private AudioMixer mixer;
+        [SerializeField] private AudioMixerGroup masterMixerGroup;
+        [SerializeField] private AudioMixerGroup uiMixerGroup;
+        [SerializeField] private AudioMixerGroup gameMixerGroup;
+        [SerializeField] private AudioMixerGroup musicMixerGroup;
 
-        [Header("Pooled source prefabs")]
-        [SerializeField] private AudioSource uiSourcePrefab;
-        [SerializeField] private AudioSource gameSourcePrefab;
-        [SerializeField] private AudioSource footstepsSourcePrefab;
+        [Header("Pooled source prefab")]
+        [SerializeField] private AudioSource footstepSourcePrefab;
 
         [Header("UI")]
         [SerializeField] private AudioClip buttonHoverClip;
         [SerializeField] private AudioClip buttonClickClip;
-
-        [Header("Footsteps")]
-        [SerializeField, Min(0.1f)] private float footstepRaycastDistance = 2.5f;
-        [SerializeField, Min(0f)] private float footstepRaycastStartHeight = 0.8f;
-        [SerializeField] private LayerMask footstepRaycastMask = ~0;
-        [SerializeField] private List<AudioClip> defaultFootstepClips = new();
-        [SerializeField] private List<FootstepSurfaceSettings> footstepSurfaces = new();
-        [SerializeField, Min(0.1f)] private float walkStepDistance = 1.7f;
-        [SerializeField, Min(0.1f)] private float runStepDistance = 2.15f;
-        [SerializeField, Min(0.1f)] private float npcStepDistance = 1.8f;
 
         [Header("Default mixer levels")]
         [SerializeField, Range(MinimumDecibels, MaximumDecibels)] private float masterDefaultDecibels = -10f;
@@ -60,17 +34,9 @@ namespace GameAudio
         [SerializeField, Range(MinimumDecibels, MaximumDecibels)] private float musicDefaultDecibels = -5f;
 
         public AudioMixer Mixer => mixer;
-        public AudioSource UiSourcePrefab => uiSourcePrefab;
-        public AudioSource GameSourcePrefab => gameSourcePrefab;
-        public AudioSource FootstepsSourcePrefab => footstepsSourcePrefab;
+        public AudioSource FootstepSourcePrefab => footstepSourcePrefab;
         public AudioClip ButtonHoverClip => buttonHoverClip;
         public AudioClip ButtonClickClip => buttonClickClip;
-        public float FootstepRaycastDistance => footstepRaycastDistance;
-        public float FootstepRaycastStartHeight => footstepRaycastStartHeight;
-        public LayerMask FootstepRaycastMask => footstepRaycastMask;
-        public float WalkStepDistance => walkStepDistance;
-        public float RunStepDistance => runStepDistance;
-        public float NpcStepDistance => npcStepDistance;
 
         public static readonly AudioMixerCategory[] SettingsCategories =
         {
@@ -96,59 +62,61 @@ namespace GameAudio
 
         public AudioMixerGroup GetMixerGroup(AudioMixerCategory category)
         {
+            var configuredGroup = category switch
+            {
+                AudioMixerCategory.Master => masterMixerGroup,
+                AudioMixerCategory.UI => uiMixerGroup,
+                AudioMixerCategory.Game => gameMixerGroup,
+                AudioMixerCategory.Music => musicMixerGroup,
+                _ => null,
+            };
+            if (configuredGroup != null)
+            {
+                return configuredGroup;
+            }
+
+            return FindGroup(category);
+        }
+
+        public void ConfigureForProject(
+            AudioMixer valueMixer,
+            AudioSource valueFootstepSourcePrefab,
+            AudioClip valueButtonHoverClip,
+            AudioClip valueButtonClickClip)
+        {
+            mixer = valueMixer;
+            masterMixerGroup = FindGroup(AudioMixerCategory.Master);
+            uiMixerGroup = FindGroup(AudioMixerCategory.UI);
+            gameMixerGroup = FindGroup(AudioMixerCategory.Game);
+            musicMixerGroup = FindGroup(AudioMixerCategory.Music);
+            footstepSourcePrefab = valueFootstepSourcePrefab;
+            buttonHoverClip = valueButtonHoverClip;
+            buttonClickClip = valueButtonClickClip;
+        }
+
+        private AudioMixerGroup FindGroup(AudioMixerCategory category)
+        {
             if (mixer == null)
             {
                 return null;
             }
 
-            var groups = mixer.FindMatchingGroups(category.ToString());
-            return groups != null && groups.Length > 0 ? groups[0] : null;
-        }
-
-        public IReadOnlyList<AudioClip> GetFootstepClips(RaycastHit hit)
-        {
-            var marker = hit.collider != null ? hit.collider.GetComponentInParent<FootstepSurface>() : null;
-            if (marker != null && marker.Clips.Count > 0)
+            var expectedName = category.ToString();
+            var groups = mixer.FindMatchingGroups(expectedName);
+            if (groups == null)
             {
-                return marker.Clips;
+                return null;
             }
 
-            var layer = hit.collider != null ? hit.collider.gameObject.layer : -1;
-            foreach (var surface in footstepSurfaces)
+            foreach (var group in groups)
             {
-                if (surface != null && surface.Matches(layer) && surface.Clips.Count > 0)
+                if (group != null && group.name == expectedName)
                 {
-                    return surface.Clips;
+                    return group;
                 }
             }
 
-            return defaultFootstepClips;
-        }
-
-        public void ConfigureForProject(
-            AudioMixer valueMixer,
-            AudioSource valueUiSourcePrefab,
-            AudioSource valueGameSourcePrefab,
-            AudioSource valueFootstepsSourcePrefab,
-            AudioClip valueButtonHoverClip,
-            AudioClip valueButtonClickClip,
-            IEnumerable<AudioClip> valueDefaultFootstepClips,
-            LayerMask valueFootstepRaycastMask,
-            IEnumerable<FootstepSurfaceSettings> valueFootstepSurfaces)
-        {
-            mixer = valueMixer;
-            uiSourcePrefab = valueUiSourcePrefab;
-            gameSourcePrefab = valueGameSourcePrefab;
-            footstepsSourcePrefab = valueFootstepsSourcePrefab;
-            buttonHoverClip = valueButtonHoverClip;
-            buttonClickClip = valueButtonClickClip;
-            defaultFootstepClips = valueDefaultFootstepClips == null
-                ? new List<AudioClip>()
-                : new List<AudioClip>(valueDefaultFootstepClips);
-            footstepRaycastMask = valueFootstepRaycastMask;
-            footstepSurfaces = valueFootstepSurfaces == null
-                ? new List<FootstepSurfaceSettings>()
-                : new List<FootstepSurfaceSettings>(valueFootstepSurfaces);
+            return null;
         }
     }
 }

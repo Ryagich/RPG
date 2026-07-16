@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac27c1e442104a398b55af29ddd70ab7, type: 3}
+  m_Name: Wood Footsteps Sound Config
+  m_EditorClassIdentifier: Assembly-CSharp::Sounds.SoundConfig
+  <SoundSettings>k__BackingField:
+    Clips:
+    - {fileID: 8300000, guid: fc8f13856f167c0459113030e0c0b952, type: 3}
+    - {fileID: 8300000, guid: 2ef62fe4c6a192c40bdb6f13d2a099a4, type: 3}
+    - {fileID: 8300000, guid: 91b2d6994b3679a4d878e8477d578349, type: 3}
+    - {fileID: 8300000, guid: 7d0434bc18971364a9573a61c03357e5, type: 3}
+    - {fileID: 8300000, guid: bec2e0b1a2612914a84de7a1a8ad653b, type: 3}
+    - {fileID: 8300000, guid: a8a6b8ddde5e0b8439c1012cfeff281a, type: 3}
+    - {fileID: 8300000, guid: 575f72dac3760f14089c525d696adbd1, type: 3}
+    - {fileID: 8300000, guid: b2676bff3f8cf0e498e1552164aea52b, type: 3}
+    - {fileID: 8300000, guid: e4a443e4326eac246b2b308a48af4c6e, type: 3}
+    - {fileID: 8300000, guid: 70c064c715065114c87a3fc377217315, type: 3}
+    - {fileID: 8300000, guid: 6f53dd9673e065042b579fc2e589a5bb, type: 3}
+    - {fileID: 8300000, guid: ee71cdd00b3395548a4c13cc773ac1e6, type: 3}
+    - {fileID: 8300000, guid: 251590927b0f5aa43a9379d1eca07883, type: 3}
+    - {fileID: 8300000, guid: e3e8566fd62253c43b818bd01b4a32a4, type: 3}
+    - {fileID: 8300000, guid: 5bc1c75f2bbfc3145b48351fb425b711, type: 3}
+    priority: 128
+    volume: {x: 0.5, y: 0.7}
+    pitch: {x: 0.9, y: 1.1}
+    reverbZoneMix: 1
+    MinDistance: 2.5
+    MaxDistance: 10
+    isUISound: 0
+    DistanceToPlay: 10

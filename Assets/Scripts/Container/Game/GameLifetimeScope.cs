@@ -13,9 +13,12 @@ namespace Container.Game
 {
     public class GameLifetimeScope : LifetimeScope
     {
+        private const string GlobalSoundsRootName = "Global Sounds";
+
         [field: SerializeField] public PlayerLifetimeScope PlayerPrefab { get; private set; } = null!;
 
         private PlayerLifetimeScope playerScope;
+        private Transform globalSoundsRoot;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -49,13 +52,24 @@ namespace Container.Game
 
             builder.RegisterBuildCallback(container =>
                                           {
+                                              globalSoundsRoot = CreateGlobalSoundsRoot();
+                                              var audioService = container.Resolve<IAudioService>();
+                                              audioService.SetWorldSoundParent(globalSoundsRoot);
                                               playerScope = CreateChildFromPrefab(PlayerPrefab, _ => { });
+                                              audioService.SetListenerTransform(playerScope.transform);
                                           });
             builder.Register<LootingContext>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueContext>(Lifetime.Singleton).AsSelf();
             builder.Register<Player.PlayerDeathState>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<GameModesController>().AsSelf();
             builder.RegisterEntryPoint<SoundMessagePlayer>().AsSelf();
+        }
+
+        private Transform CreateGlobalSoundsRoot()
+        {
+            var soundsRoot = new GameObject(GlobalSoundsRootName).transform;
+            soundsRoot.SetParent(transform, false);
+            return soundsRoot;
         }
     }
 }

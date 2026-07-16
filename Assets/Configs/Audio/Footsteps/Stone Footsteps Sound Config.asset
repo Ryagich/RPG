@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac27c1e442104a398b55af29ddd70ab7, type: 3}
+  m_Name: Stone Footsteps Sound Config
+  m_EditorClassIdentifier: Assembly-CSharp::Sounds.SoundConfig
+  <SoundSettings>k__BackingField:
+    Clips:
+    - {fileID: 8300000, guid: 9aa84af9ac52df64f8943cd90e5dd955, type: 3}
+    - {fileID: 8300000, guid: 622dd7a67f3471949b52cfd955059521, type: 3}
+    - {fileID: 8300000, guid: 28c7d41ee7604514aa527ac7ac049be8, type: 3}
+    - {fileID: 8300000, guid: 400f23c1d1528e84e80961ba72a2b1cd, type: 3}
+    - {fileID: 8300000, guid: 7c9508bb894d9f943b43172aa0939be7, type: 3}
+    - {fileID: 8300000, guid: 5876c5e22897d53428758f7183cc02a5, type: 3}
+    - {fileID: 8300000, guid: d8cdb0aec33b2cd4c901a117a2f16912, type: 3}
+    - {fileID: 8300000, guid: 0de229768d554a5459d0d2aa41be4965, type: 3}
+    - {fileID: 8300000, guid: 045e8973ccfaa2244aef03e033891e6f, type: 3}
+    - {fileID: 8300000, guid: 0c38864932f8a0c4a816a9d7c4f83b4b, type: 3}
+    - {fileID: 8300000, guid: 04c791a4e3e613b40b41f6e95faa6d7f, type: 3}
+    priority: 128
+    volume: {x: 0.5, y: 0.7}
+    pitch: {x: 0.9, y: 1.1}
+    reverbZoneMix: 1
+    MinDistance: 2.5
+    MaxDistance: 10
+    isUISound: 0
+    DistanceToPlay: 10
