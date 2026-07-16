@@ -13,6 +13,7 @@ namespace Landings.Plants
     public sealed class FruitPlantHarvestInteractable : MonoBehaviour, IInteractableAvailability
     {
         public event Action<FruitPlantHarvestInteractable> Emptied;
+        public event Action<ItemHolder> FruitCollected;
 
         [SerializeField] private GameObject plantRoot;
         [SerializeField] private bool destroyPlantWhenEmpty = true;
@@ -115,6 +116,7 @@ namespace Landings.Plants
                 if (remainder == null)
                 {
                     fruits.Remove(fruit);
+                    FruitCollected?.Invoke(fruit);
                     fruit.Destroyed -= OnFruitDestroyed;
                     Destroy(fruit.gameObject);
                     continue;

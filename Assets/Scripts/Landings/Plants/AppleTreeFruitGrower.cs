@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using Inventory.Item;
 using Landings.Plants.PlantConfigs;
+using MessagePipe;
+using Messages;
+using Sounds;
 using UnityEngine;
 
 namespace Landings.Plants
@@ -115,6 +118,9 @@ namespace Landings.Plants
             var slotToGrow = freeSlots[Random.Range(0, freeSlots.Count)];
             slotToGrow.Visual = Instantiate(appleVisualPrefab, slotToGrow.Point);
             slotToGrow.Visual.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            PlaySound(
+                applePlantConfig.PlantSoundsSettings?.GrownUpSoundSettings,
+                slotToGrow.Visual.transform.position);
         }
 
         public void TryDropAppleFromHit()
@@ -197,6 +203,17 @@ namespace Landings.Plants
         private static float RandomInterval(Vector2 interval)
         {
             return Random.Range(Mathf.Max(0.1f, interval.x), Mathf.Max(0.1f, interval.y));
+        }
+
+        private static void PlaySound(SoundSettings settings, Vector3 position)
+        {
+            if (settings == null)
+            {
+                return;
+            }
+
+            GlobalMessagePipe.GetPublisher<PlaySoundMessage>()
+                             .Publish(new PlaySoundMessage(settings, position, null));
         }
 
         private static Transform FindChildRecursive(Transform root, string childName)

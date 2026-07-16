@@ -52,6 +52,7 @@ namespace Container.Game
 
             builder.RegisterBuildCallback(container =>
                                           {
+                                              GlobalMessagePipe.SetProvider(container.AsServiceProvider());
                                               globalSoundsRoot = CreateGlobalSoundsRoot();
                                               var audioService = container.Resolve<IAudioService>();
                                               audioService.SetWorldSoundParent(globalSoundsRoot);

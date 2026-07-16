@@ -4,6 +4,9 @@ using DG.Tweening;
 using Inventory.Item;
 using Landings.Plants;
 using Landings.Plants.PlantConfigs;
+using MessagePipe;
+using Messages;
+using Sounds;
 using UnityEngine;
 
 namespace Landings.Fields
@@ -241,7 +244,7 @@ namespace Landings.Fields
 
         private IEnumerator GrowPlantBody(PlantSlot slot, bool finalStageIsCollectable)
         {
-            yield return GrowFirstStageByUpper(slot);
+            yield return GrowFirstStageByUpper(slot, plantConfig.Stages.Count == 1);
             if (plantConfig.Stages.Count <= 1)
             {
                 if (finalStageIsCollectable && slot.PlantVisual != null)
@@ -255,7 +258,7 @@ namespace Landings.Fields
             yield return GrowStages(slot, plantConfig.Stages, plantConfig.TimeBetweenStages, finalStageIsCollectable, PlantVisualTarget.Plant, 1);
         }
 
-        private IEnumerator GrowFirstStageByUpper(PlantSlot slot)
+        private IEnumerator GrowFirstStageByUpper(PlantSlot slot, bool isFinalStage)
         {
             var firstStage = ReplaceVisual(
                 slot,
@@ -267,6 +270,7 @@ namespace Landings.Fields
             if (growTime <= 0f)
             {
                 firstStage.transform.position = slot.Position + plantConfig.TargetPosition;
+                PlayPlantGrowthSound(isFinalStage, firstStage.transform.position);
                 yield break;
             }
 
@@ -275,6 +279,7 @@ namespace Landings.Fields
                 .SetEase(Ease.Linear);
 
             yield return tween.WaitForCompletion();
+            PlayPlantGrowthSound(isFinalStage, firstStage.transform.position);
         }
 
         private IEnumerator GrowFruit(PlantSlot slot, FruitPlantConfig fruitPlantConfig)
@@ -316,6 +321,7 @@ namespace Landings.Fields
                 foreach (var fruitSlot in growingFruits)
                 {
                     var visual = ReplaceFruitVisual(fruitSlot, fruitPlantConfig.FruitStages[i]);
+                    PlaySound(fruitPlantConfig.FruitSoundConfig?.SoundSettings, visual.transform.position);
                     if (i == fruitPlantConfig.FruitStages.Count - 1)
                     {
                         RegisterFruit(slot, visual, fruitPlantConfig);
@@ -340,8 +346,10 @@ namespace Landings.Fields
             for (var i = startIndex; i < stages.Count; i++)
             {
                 var visual = ReplaceVisual(slot, stages[i], target, slot.Position + plantConfig.TargetPosition);
+                var isFinalStage = i == stages.Count - 1;
+                PlayPlantGrowthSound(isFinalStage, visual.transform.position);
 
-                if (finalStageIsCollectable && i == stages.Count - 1)
+                if (finalStageIsCollectable && isFinalStage)
                 {
                     RegisterCollectable(slot, visual);
                     yield break;
@@ -450,6 +458,7 @@ namespace Landings.Fields
             if (slot.FruitHarvest != null)
             {
                 slot.FruitHarvest.Emptied += OnFruitPlantEmptied;
+                slot.FruitHarvest.FruitCollected += OnFruitCollected;
             }
         }
 
@@ -497,6 +506,7 @@ namespace Landings.Fields
             }
 
             slot.FruitHarvest.Emptied -= OnFruitPlantEmptied;
+            slot.FruitHarvest.FruitCollected -= OnFruitCollected;
             slot.FruitHarvest = null;
         }
 
@@ -528,6 +538,7 @@ namespace Landings.Fields
                     continue;
                 }
 
+                PlayItemGivenSound(itemHolder.transform.position);
                 UnsubscribeCollectable(slot);
                 if (slot.FruitVisual != null && itemHolder.transform.IsChildOf(slot.FruitVisual.transform))
                 {
@@ -552,6 +563,39 @@ namespace Landings.Fields
 
             slot.Collectable.Destroyed -= OnCollectableDestroyed;
             slot.Collectable = null;
+        }
+
+        private void OnFruitCollected(ItemHolder fruit)
+        {
+            if (fruit != null)
+            {
+                PlayItemGivenSound(fruit.transform.position);
+            }
+        }
+
+        private void PlayPlantGrowthSound(bool isFinalStage, Vector3 position)
+        {
+            var plantSounds = plantConfig != null ? plantConfig.PlantSoundsSettings : null;
+            var settings = isFinalStage
+                ? plantSounds?.GrownUpSoundSettings
+                : plantSounds?.GrownStageSoundSettings;
+            PlaySound(settings, position);
+        }
+
+        private void PlayItemGivenSound(Vector3 position)
+        {
+            PlaySound(plantConfig?.ItemGivenSound?.SoundSettings, position);
+        }
+
+        private static void PlaySound(SoundSettings settings, Vector3 position)
+        {
+            if (settings == null)
+            {
+                return;
+            }
+
+            GlobalMessagePipe.GetPublisher<PlaySoundMessage>()
+                             .Publish(new PlaySoundMessage(settings, position, null));
         }
 
         private readonly struct PlantCandidate

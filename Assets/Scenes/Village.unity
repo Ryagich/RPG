@@ -20903,7 +20903,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameAudio.FootstepSurface
   surfaceLayerOverride:
     serializedVersion: 2
-    m_Bits: 2048
+    m_Bits: 1024
   clips: []
 --- !u!114 &2099900003
 MonoBehaviour:
