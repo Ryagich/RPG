@@ -8,6 +8,15 @@ using UnityEngine;
 
 namespace Quests
 {
+    public enum QuestChangeType { Added, Updated, Completed, Removed, Failed }
+
+    public readonly struct QuestChangeInfo
+    {
+        public QuestChangeType Type { get; }
+        public QuestGraph Quest { get; }
+        public QuestChangeInfo(QuestChangeType type, QuestGraph quest) { Type = type; Quest = quest; }
+    }
+
     public class QuestController
     {
         private readonly PlayerInventory playerInventory;
@@ -16,6 +25,7 @@ namespace Quests
         private readonly List<QuestProgress> progress = new();
 
         public IReadOnlyList<QuestProgress> Progress => progress;
+        public event System.Action<QuestChangeInfo> Changed;
 
         public QuestController(PlayerInventory playerInventory, MoneyStorage moneyStorage)
         {
@@ -62,6 +72,7 @@ namespace Quests
             var questProgress = new QuestProgress(questGraph, entryNode);
             progressByQuest.Add(questGraph, questProgress);
             progress.Add(questProgress);
+            Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Added, questGraph));
             return true;
         }
 
@@ -126,6 +137,7 @@ namespace Quests
 
             QuestProgress questProgress = progressByQuest[questGraph];
             questProgress.SetCurrentNode(transition.TargetNode);
+            Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Updated, questGraph));
             return true;
         }
 
@@ -156,6 +168,25 @@ namespace Quests
 
             QuestProgress questProgress = progressByQuest[questGraph];
             questProgress.Complete(nodeData);
+            Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Completed, questGraph));
+            return true;
+        }
+
+        public bool TryRemoveQuest(QuestGraph questGraph)
+        {
+            if (!TryGetProgress(questGraph, out var questProgress)) return false;
+            progressByQuest.Remove(questGraph);
+            progress.Remove(questProgress);
+            Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Removed, questGraph));
+            return true;
+        }
+
+        public bool TryFailQuest(QuestGraph questGraph)
+        {
+            if (!TryGetProgress(questGraph, out var questProgress)) return false;
+            progressByQuest.Remove(questGraph);
+            progress.Remove(questProgress);
+            Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Failed, questGraph));
             return true;
         }
 

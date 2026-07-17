@@ -35,6 +35,8 @@ namespace UI.Configs
         [field: SerializeField] public TargetLockConfig TargetLockConfig { get; private set; }
         [field: SerializeField] public DeadUI DeadUI { get; private set; }
         [field: SerializeField] public BlinkingTextConfig ClickTextBlinkingConfig { get; private set; }
+        [field: SerializeField] public RectTransform QuestNotification { get; private set; }
+        [field: SerializeField] public QuestNotificationConfig QuestNotificationConfig { get; private set; }
         
         //Trade
         [field: SerializeField] public GameObject LeftAnotherInventoryInTrade { get; private set; }

@@ -6,6 +6,8 @@ using MessagePipe;
 using Messages;
 using Stats;
 using UI.Configs;
+using UI;
+using UI.UIElements;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -62,6 +64,7 @@ namespace UI.Pages
         private readonly PlayerInventory playerInventory;
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
+        private readonly QuestNotificationService questNotifications;
         private readonly CompositeDisposable drawDisposables = new();
         private readonly Dictionary<StatType, StatVisibilityState> statVisibilityStates = new();
         private readonly Dictionary<FastSlotModel, StatVisibilityState> fastSlotVisibilityStates = new();
@@ -75,6 +78,7 @@ namespace UI.Pages
         private HeartbeatPulse heartbeatPulse;
         private BloodScreenController bloodScreenController;
         private Image bloodScreen;
+        private QuestNotificationView questNotificationView;
         private float lastHpTarget;
         private HpFillMode hpFillMode;
         private float globalAlpha;
@@ -97,6 +101,7 @@ namespace UI.Pages
                 PlayerInteractableLogic playerInteractableLogic,
                 ItemHolderInteractableLogic itemHolderInteractableLogic,
                 IObjectResolver resolver,
+                QuestNotificationService questNotifications,
                 ISubscriber<ShowStatsInputMessage> showStatsInputSubscriber,
                 ISubscriber<FastSlotInputMessage> fastSlotInputSubscriber
             )
@@ -111,6 +116,7 @@ namespace UI.Pages
             hpFiller = statFillers.Get(StatType.Hp);
             this.playerInteractableLogic = playerInteractableLogic;
             this.itemHolderInteractableLogic = itemHolderInteractableLogic;
+            this.questNotifications = questNotifications;
 
             canvasRect = canvas.GetComponent<RectTransform>();
 
@@ -125,6 +131,19 @@ namespace UI.Pages
 
             statsHolder = resolver.Instantiate(uiConfig.StatsHolder, contentRect);
             statsHolder.name = $"{uiConfig.StatsHolder.name} | {Type}";
+
+            if (uiConfig.QuestNotification != null)
+            {
+                var notificationRoot = resolver.Instantiate(uiConfig.QuestNotification, contentRect);
+                notificationRoot.name = $"{uiConfig.QuestNotification.name} | {Type}";
+                bool viewWasOnPrefab = notificationRoot.TryGetComponent(out questNotificationView);
+                if (!viewWasOnPrefab)
+                {
+                    questNotificationView = notificationRoot.gameObject.AddComponent<QuestNotificationView>();
+                }
+
+                questNotifications.Attach(questNotificationView);
+            }
 
             interactableInterface = new InteractableInterface
                 (
@@ -218,6 +237,11 @@ namespace UI.Pages
 
             statsHolder = null;
             bloodScreen = null;
+            if (questNotificationView != null)
+            {
+                questNotifications.Detach(questNotificationView);
+                questNotificationView = null;
+            }
 
             if (contentRect)
             {

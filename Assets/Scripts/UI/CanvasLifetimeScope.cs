@@ -12,6 +12,7 @@ namespace UI
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterInstance(Canvas).As<Canvas>();
+            builder.RegisterEntryPoint<QuestNotificationService>(Lifetime.Singleton).AsSelf();
 
             builder.Register<MainPage>(Lifetime.Singleton);
             builder.Register<PausePage>(Lifetime.Singleton);

@@ -33,6 +33,8 @@ MonoBehaviour:
   <TargetLockConfig>k__BackingField: {fileID: 11400000, guid: 0dc24276d11c421e9473fe8fd41716d7, type: 2}
   <DeadUI>k__BackingField: {fileID: 8283280542456453522, guid: db2589fad425b7a4aba3e48f6a381093, type: 3}
   <ClickTextBlinkingConfig>k__BackingField: {fileID: 11400000, guid: 7ae4ae99e7a44d5baf662a11b79cdf72, type: 2}
+  <QuestNotification>k__BackingField: {fileID: 6463936110191103304, guid: ad6dd1baf6bf1024c83345211e788cb8, type: 3}
+  <QuestNotificationConfig>k__BackingField: {fileID: 11400000, guid: 1e6a8a461c5d41f8b67ec0c5b11bc540, type: 2}
   <LeftAnotherInventoryInTrade>k__BackingField: {fileID: 1814612195659931177, guid: f026a66a750b29942bc40cf1e8db8fe7, type: 3}
   <RightPlayerInventoryInTrade>k__BackingField: {fileID: 4179578154594752861, guid: ef9aaa61a212f794f9176875b9d74ea0, type: 3}
   <SellInventory>k__BackingField: {fileID: 3517618128280596531, guid: 2c110c241289ce144aee2f0b12c24cfa, type: 3}
