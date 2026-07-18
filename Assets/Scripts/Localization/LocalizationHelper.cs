@@ -38,7 +38,7 @@ namespace Localization
 
         public static string GetLocalizedStringCached(this LocalizedString localizedString)
         {
-            if (localizedString == null)
+            if (!HasTableAndEntry(localizedString))
             {
                 return string.Empty;
             }
@@ -52,6 +52,25 @@ namespace Localization
             return Cache.TryGetValue(keyId, out string localizedValue)
                 ? localizedValue
                 : string.Empty;
+        }
+
+        private static bool HasTableAndEntry(LocalizedString localizedString)
+        {
+            if (localizedString == null)
+            {
+                return false;
+            }
+
+            var tableReference = localizedString.TableReference;
+            bool hasTable = !string.IsNullOrWhiteSpace(tableReference.TableCollectionName) ||
+                            tableReference.TableCollectionNameGuid != System.Guid.Empty;
+            if (!hasTable)
+            {
+                return false;
+            }
+
+            var entryReference = localizedString.TableEntryReference;
+            return entryReference.KeyId != 0;
         }
     }
     

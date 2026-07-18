@@ -25,6 +25,21 @@ namespace Quests
         private readonly List<QuestProgress> progress = new();
 
         public IReadOnlyList<QuestProgress> Progress => progress;
+        public QuestProgress CurrentQuest
+        {
+            get
+            {
+                foreach (var questProgress in progress)
+                {
+                    if (questProgress is { IsCompleted: false })
+                    {
+                        return questProgress;
+                    }
+                }
+
+                return null;
+            }
+        }
         public event System.Action<QuestChangeInfo> Changed;
 
         public QuestController(PlayerInventory playerInventory, MoneyStorage moneyStorage)
@@ -342,18 +357,18 @@ namespace Quests
 
         public QuestProgress(QuestGraph questGraph, QuestNodeData currentNode)
         {
-            QuestGraph = questGraph;
-            CurrentNode = currentNode;
+            QuestGraph = questGraph ?? throw new System.ArgumentNullException(nameof(questGraph));
+            CurrentNode = currentNode ?? throw new System.ArgumentNullException(nameof(currentNode));
         }
 
         public void SetCurrentNode(QuestNodeData nodeData)
         {
-            CurrentNode = nodeData;
+            CurrentNode = nodeData ?? throw new System.ArgumentNullException(nameof(nodeData));
         }
 
         public void Complete(QuestNodeData nodeData)
         {
-            CurrentNode = nodeData;
+            CurrentNode = nodeData ?? throw new System.ArgumentNullException(nameof(nodeData));
             IsCompleted = true;
         }
     }

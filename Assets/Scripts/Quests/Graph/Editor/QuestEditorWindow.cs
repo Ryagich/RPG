@@ -1270,6 +1270,7 @@ namespace Quests.Graph.Editor
 
             SerializedProperty editorTitleProperty = nodeDataObject.FindProperty("editorTitle");
             SerializedProperty nameProperty = nodeDataObject.FindProperty("localizedName");
+            SerializedProperty descriptionProperty = nodeDataObject.FindProperty("localizedDescription");
             SerializedProperty iconProperty = nodeDataObject.FindProperty("icon");
             SerializedProperty mapTargetSourceProperty = nodeDataObject.FindProperty("mapTargetSource");
             SerializedProperty sceneMapTargetIdProperty = nodeDataObject.FindProperty("sceneMapTargetId");
@@ -1289,6 +1290,11 @@ namespace Quests.Graph.Editor
             if (nameProperty != null)
             {
                 DrawLocalizedStringSelector(nameProperty, "Name");
+            }
+
+            if (descriptionProperty != null)
+            {
+                DrawLocalizedStringSelector(descriptionProperty, "Description");
             }
 
             if (iconProperty != null)
@@ -2329,7 +2335,7 @@ namespace Quests.Graph.Editor
 
             if (TryDrawLocalizedStringSearchPicker(localizedStringProperty, label))
             {
-                DrawLocalizedStringPreview(localizedStringProperty);
+                DrawLocalizedStringValidationAndPreview(localizedStringProperty);
                 return;
             }
 
@@ -2370,6 +2376,30 @@ namespace Quests.Graph.Editor
                     keyProperty.propertyPath,
                     entryOptions.Entries,
                     selectedEntryIndex > 0 ? selectedEntryIndex - 1 : -1);
+            }
+
+            DrawLocalizedStringValidationAndPreview(localizedStringProperty);
+        }
+
+        private void DrawLocalizedStringValidationAndPreview(SerializedProperty localizedStringProperty)
+        {
+            SerializedProperty tableReferenceProperty = localizedStringProperty?.FindPropertyRelative("m_TableReference");
+            SerializedProperty entryReferenceProperty = localizedStringProperty?.FindPropertyRelative("m_TableEntryReference");
+            SerializedProperty tableCollectionNameProperty = tableReferenceProperty?.FindPropertyRelative("m_TableCollectionName");
+            SerializedProperty keyIdProperty = entryReferenceProperty?.FindPropertyRelative("m_KeyId");
+            SerializedProperty keyProperty = entryReferenceProperty?.FindPropertyRelative("m_Key");
+
+            StringTableCollection collection = ResolveStringTableCollection(tableCollectionNameProperty?.stringValue);
+            if (collection == null)
+            {
+                EditorGUILayout.HelpBox("Select a valid localization table.", MessageType.None);
+                return;
+            }
+
+            if (ResolveSharedTableEntry(collection, keyIdProperty, keyProperty) == null)
+            {
+                EditorGUILayout.HelpBox("Select a localization entry.", MessageType.None);
+                return;
             }
 
             DrawLocalizedStringPreview(localizedStringProperty);

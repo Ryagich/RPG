@@ -30,6 +30,18 @@ namespace Quests.Editor
             return GetLocalizedStringDisplayName(localizedNameProperty, nodeData.name);
         }
 
+        public static string GetNodeDescription(QuestNodeData nodeData)
+        {
+            if (nodeData == null)
+            {
+                return string.Empty;
+            }
+
+            SerializedObject nodeObject = new SerializedObject(nodeData);
+            SerializedProperty localizedDescriptionProperty = nodeObject.FindProperty("localizedDescription");
+            return GetLocalizedStringPreviewValue(localizedDescriptionProperty);
+        }
+
         public static string GetQuestDisplayName(QuestGraph questGraph)
         {
             if (questGraph == null)
@@ -77,7 +89,8 @@ namespace Quests.Editor
 
             string title = GetNodeEditorTitle(nodeData);
             string localizedName = GetNodeDisplayName(nodeData);
-            DrawPreviewCard(header, nodeData.Icon, title, localizedName);
+            string localizedDescription = GetNodeDescription(nodeData);
+            DrawPreviewCard(header, nodeData.Icon, title, localizedName, localizedDescription);
         }
 
         public static void DrawQuestTransitionPreview(QuestGraph questGraph, QuestTransition transition, string header = "Transition Preview")
@@ -139,6 +152,37 @@ namespace Quests.Editor
             }
 
             return $"Key {entry.Id}";
+        }
+
+        private static string GetLocalizedStringPreviewValue(SerializedProperty localizedStringProperty)
+        {
+            if (localizedStringProperty == null)
+            {
+                return string.Empty;
+            }
+
+            SerializedProperty tableReferenceProperty = localizedStringProperty.FindPropertyRelative("m_TableReference");
+            SerializedProperty tableCollectionNameProperty = tableReferenceProperty?.FindPropertyRelative("m_TableCollectionName");
+            SerializedProperty entryReferenceProperty = localizedStringProperty.FindPropertyRelative("m_TableEntryReference");
+            SerializedProperty keyProperty = entryReferenceProperty?.FindPropertyRelative("m_Key");
+            SerializedProperty keyIdProperty = entryReferenceProperty?.FindPropertyRelative("m_KeyId");
+
+            StringTableCollection collection = ResolveCollection(tableCollectionNameProperty?.stringValue);
+            if (collection == null)
+            {
+                return string.Empty;
+            }
+
+            SharedTableData.SharedTableEntry entry = ResolveEntry(collection, keyIdProperty, keyProperty);
+            if (entry == null)
+            {
+                return string.Empty;
+            }
+
+            string localizedValue = GetLocalizedValue(collection, entry.Id, PreferredPreviewLocale);
+            return !string.IsNullOrWhiteSpace(localizedValue)
+                ? localizedValue
+                : entry.Key ?? string.Empty;
         }
 
         private static string GetFallbackEntryLabel(SerializedProperty keyProperty, SerializedProperty keyIdProperty, string fallbackName)
@@ -229,6 +273,11 @@ namespace Quests.Editor
 
         private static void DrawPreviewCard(string header, Sprite sprite, string title, string description)
         {
+            DrawPreviewCard(header, sprite, title, description, string.Empty);
+        }
+
+        private static void DrawPreviewCard(string header, Sprite sprite, string title, string subtitle, string description)
+        {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField(header, EditorStyles.boldLabel);
             EditorGUILayout.BeginHorizontal();
@@ -236,9 +285,16 @@ namespace Quests.Editor
 
             EditorGUILayout.BeginVertical();
             EditorGUILayout.LabelField(title, EditorStyles.wordWrappedLabel);
-            if (!string.IsNullOrWhiteSpace(description))
+            if (!string.IsNullOrWhiteSpace(subtitle))
             {
                 EditorGUILayout.Space(2f);
+                EditorGUILayout.LabelField(subtitle, EditorStyles.wordWrappedMiniLabel);
+            }
+
+            if (!string.IsNullOrWhiteSpace(description))
+            {
+                EditorGUILayout.Space(4f);
+                EditorGUILayout.LabelField("Description", EditorStyles.miniBoldLabel);
                 EditorGUILayout.LabelField(description, EditorStyles.wordWrappedMiniLabel);
             }
 

@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using Interactable;
 using Inventory.Inventories;
 using Inventory.Slot;
+using Localization;
 using MessagePipe;
 using Messages;
+using Quests;
 using Stats;
 using UI.Configs;
 using UI;
@@ -65,6 +67,7 @@ namespace UI.Pages
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
         private readonly QuestNotificationService questNotifications;
+        private readonly QuestController questController;
         private readonly CompositeDisposable drawDisposables = new();
         private readonly Dictionary<StatType, StatVisibilityState> statVisibilityStates = new();
         private readonly Dictionary<FastSlotModel, StatVisibilityState> fastSlotVisibilityStates = new();
@@ -79,6 +82,7 @@ namespace UI.Pages
         private BloodScreenController bloodScreenController;
         private Image bloodScreen;
         private QuestNotificationView questNotificationView;
+        private QuestDescriptionHolder questDescriptionHolder;
         private float lastHpTarget;
         private HpFillMode hpFillMode;
         private float globalAlpha;
@@ -88,6 +92,14 @@ namespace UI.Pages
         private float globalPhaseElapsed;
         private VisibilityPhase globalPhase;
         private bool holdGlobalAtFull;
+        private float questDescriptionAlpha;
+        private float questDescriptionStartAlpha;
+        private float questDescriptionTargetAlpha;
+        private float questDescriptionPhaseDuration;
+        private float questDescriptionPhaseElapsed;
+        private VisibilityPhase questDescriptionPhase;
+        private bool holdQuestDescriptionAtFull;
+        private bool isShowStatsPressed;
 
         public MainPage
             (
@@ -102,6 +114,7 @@ namespace UI.Pages
                 ItemHolderInteractableLogic itemHolderInteractableLogic,
                 IObjectResolver resolver,
                 QuestNotificationService questNotifications,
+                QuestController questController,
                 ISubscriber<ShowStatsInputMessage> showStatsInputSubscriber,
                 ISubscriber<FastSlotInputMessage> fastSlotInputSubscriber
             )
@@ -117,11 +130,13 @@ namespace UI.Pages
             this.playerInteractableLogic = playerInteractableLogic;
             this.itemHolderInteractableLogic = itemHolderInteractableLogic;
             this.questNotifications = questNotifications;
+            this.questController = questController;
 
             canvasRect = canvas.GetComponent<RectTransform>();
 
             showStatsInputSubscriber.Subscribe(OnShowStatsInputChanged);
             fastSlotInputSubscriber.Subscribe(OnFastSlotInput);
+            questController.Changed += OnQuestChanged;
         }
 
         public override void Draw()
@@ -131,6 +146,12 @@ namespace UI.Pages
 
             statsHolder = resolver.Instantiate(uiConfig.StatsHolder, contentRect);
             statsHolder.name = $"{uiConfig.StatsHolder.name} | {Type}";
+
+            if (uiConfig.QuestDescription != null)
+            {
+                questDescriptionHolder = resolver.Instantiate(uiConfig.QuestDescription, contentRect);
+                questDescriptionHolder.name = $"{uiConfig.QuestDescription.name} | {Type}";
+            }
 
             if (uiConfig.QuestNotification != null)
             {
@@ -154,6 +175,8 @@ namespace UI.Pages
                 );
 
             InitializeVisibilityState();
+            InitializeQuestDescriptionVisibility();
+            RefreshQuestDescriptionContent();
 
             lastHpTarget = statsController.Hp.Value.Value;
             hpFillMode = HpFillMode.Synced;
@@ -210,6 +233,7 @@ namespace UI.Pages
 
             BeginGlobalReleaseSequence();
             ApplyAllVisualAlphas();
+            ApplyQuestDescriptionAlpha();
 
             bloodScreen = PageUiUtilities.CreateBloodScreen(uiConfig, resolver, contentRect, Type);
             heartbeatPulse = new HeartbeatPulse(statsConfig, statsController.Hp, hpFiller);
@@ -237,6 +261,7 @@ namespace UI.Pages
 
             statsHolder = null;
             bloodScreen = null;
+            questDescriptionHolder = null;
             if (questNotificationView != null)
             {
                 questNotifications.Detach(questNotificationView);
@@ -450,21 +475,23 @@ namespace UI.Pages
 
         private void OnShowStatsInputChanged(ShowStatsInputMessage message)
         {
-            if (statsHolder == null)
+            isShowStatsPressed = message.IsPressed;
+
+            if (statsHolder != null)
             {
-                return;
+                if (message.IsPressed)
+                {
+                    BeginGlobalHold();
+                }
+                else
+                {
+                    BeginGlobalReleaseSequence();
+                }
+
+                ApplyAllVisualAlphas();
             }
 
-            if (message.IsPressed)
-            {
-                BeginGlobalHold();
-            }
-            else
-            {
-                BeginGlobalReleaseSequence();
-            }
-
-            ApplyAllVisualAlphas();
+            UpdateQuestDescriptionForInput();
         }
 
         private void OnFastSlotInput(FastSlotInputMessage message)
@@ -512,6 +539,7 @@ namespace UI.Pages
 
             var deltaTime = Time.deltaTime;
             UpdateGlobalVisibility(deltaTime);
+            UpdateQuestDescriptionVisibility(deltaTime);
 
             foreach (var statType in AllStatTypes)
             {
@@ -524,6 +552,28 @@ namespace UI.Pages
             }
 
             ApplyAllVisualAlphas();
+            ApplyQuestDescriptionAlpha();
+        }
+
+        private void OnQuestChanged(QuestChangeInfo _)
+        {
+            if (questDescriptionHolder == null)
+            {
+                return;
+            }
+
+            if (!RefreshQuestDescriptionContent())
+            {
+                HideQuestDescriptionImmediately();
+                return;
+            }
+
+            if (isShowStatsPressed)
+            {
+                BeginQuestDescriptionHold();
+            }
+
+            ApplyQuestDescriptionAlpha();
         }
 
         private void InitializeVisibilityState()
@@ -654,6 +704,209 @@ namespace UI.Pages
                     globalAlpha = 0f;
                     return;
             }
+        }
+
+        private void InitializeQuestDescriptionVisibility()
+        {
+            questDescriptionAlpha = 0f;
+            questDescriptionStartAlpha = 0f;
+            questDescriptionTargetAlpha = 0f;
+            questDescriptionPhaseDuration = 0f;
+            questDescriptionPhaseElapsed = 0f;
+            questDescriptionPhase = VisibilityPhase.Hidden;
+            holdQuestDescriptionAtFull = false;
+            ApplyQuestDescriptionAlpha();
+        }
+
+        private void UpdateQuestDescriptionForInput()
+        {
+            if (questDescriptionHolder == null)
+            {
+                return;
+            }
+
+            if (!RefreshQuestDescriptionContent())
+            {
+                HideQuestDescriptionImmediately();
+                return;
+            }
+
+            if (isShowStatsPressed)
+            {
+                BeginQuestDescriptionHold();
+            }
+            else
+            {
+                BeginQuestDescriptionReleaseSequence();
+            }
+
+            ApplyQuestDescriptionAlpha();
+        }
+
+        private void BeginQuestDescriptionHold()
+        {
+            holdQuestDescriptionAtFull = true;
+            var remainingDuration = GetRemainingRestoreDuration(questDescriptionAlpha);
+            if (remainingDuration <= 0f)
+            {
+                questDescriptionAlpha = 1f;
+                questDescriptionPhase = VisibilityPhase.Holding;
+                questDescriptionPhaseDuration = 0f;
+                questDescriptionPhaseElapsed = 0f;
+                return;
+            }
+
+            questDescriptionStartAlpha = questDescriptionAlpha;
+            questDescriptionTargetAlpha = 1f;
+            questDescriptionPhaseDuration = remainingDuration;
+            questDescriptionPhaseElapsed = 0f;
+            questDescriptionPhase = VisibilityPhase.Restoring;
+        }
+
+        private void BeginQuestDescriptionReleaseSequence()
+        {
+            holdQuestDescriptionAtFull = false;
+            var remainingDuration = GetRemainingRestoreDuration(questDescriptionAlpha);
+            if (remainingDuration <= 0f)
+            {
+                questDescriptionAlpha = 1f;
+                questDescriptionPhase = VisibilityPhase.Showing;
+                questDescriptionPhaseDuration = statsConfig.ShowTime;
+                questDescriptionPhaseElapsed = 0f;
+                return;
+            }
+
+            questDescriptionStartAlpha = questDescriptionAlpha;
+            questDescriptionTargetAlpha = 1f;
+            questDescriptionPhaseDuration = remainingDuration;
+            questDescriptionPhaseElapsed = 0f;
+            questDescriptionPhase = VisibilityPhase.Restoring;
+        }
+
+        private void UpdateQuestDescriptionVisibility(float deltaTime)
+        {
+            if (questDescriptionHolder == null)
+            {
+                return;
+            }
+
+            if (questController.CurrentQuest == null)
+            {
+                HideQuestDescriptionImmediately();
+                return;
+            }
+
+            switch (questDescriptionPhase)
+            {
+                case VisibilityPhase.Restoring:
+                    questDescriptionAlpha = AdvanceAlphaPhase(
+                        ref questDescriptionPhaseElapsed,
+                        questDescriptionPhaseDuration,
+                        questDescriptionStartAlpha,
+                        questDescriptionTargetAlpha,
+                        deltaTime);
+                    if (questDescriptionPhaseElapsed < questDescriptionPhaseDuration)
+                    {
+                        return;
+                    }
+
+                    questDescriptionAlpha = 1f;
+                    questDescriptionPhaseElapsed = 0f;
+                    if (holdQuestDescriptionAtFull)
+                    {
+                        questDescriptionPhaseDuration = 0f;
+                        questDescriptionPhase = VisibilityPhase.Holding;
+                    }
+                    else
+                    {
+                        questDescriptionPhaseDuration = statsConfig.ShowTime;
+                        questDescriptionPhase = VisibilityPhase.Showing;
+                    }
+
+                    return;
+                case VisibilityPhase.Showing:
+                    questDescriptionAlpha = 1f;
+                    questDescriptionPhaseElapsed += deltaTime;
+                    if (questDescriptionPhaseElapsed < questDescriptionPhaseDuration)
+                    {
+                        return;
+                    }
+
+                    questDescriptionPhaseElapsed = 0f;
+                    questDescriptionPhaseDuration = statsConfig.FadeOutTime;
+                    questDescriptionStartAlpha = 1f;
+                    questDescriptionTargetAlpha = 0f;
+                    questDescriptionPhase = VisibilityPhase.Fading;
+                    return;
+                case VisibilityPhase.Fading:
+                    questDescriptionAlpha = AdvanceAlphaPhase(
+                        ref questDescriptionPhaseElapsed,
+                        questDescriptionPhaseDuration,
+                        questDescriptionStartAlpha,
+                        questDescriptionTargetAlpha,
+                        deltaTime);
+                    if (questDescriptionPhaseElapsed < questDescriptionPhaseDuration)
+                    {
+                        return;
+                    }
+
+                    questDescriptionAlpha = 0f;
+                    questDescriptionPhaseElapsed = 0f;
+                    questDescriptionPhaseDuration = 0f;
+                    questDescriptionPhase = VisibilityPhase.Hidden;
+                    return;
+                case VisibilityPhase.Holding:
+                    questDescriptionAlpha = 1f;
+                    return;
+                default:
+                    questDescriptionAlpha = 0f;
+                    return;
+            }
+        }
+
+        private bool RefreshQuestDescriptionContent()
+        {
+            if (questDescriptionHolder == null)
+            {
+                return false;
+            }
+
+            QuestProgress currentQuest = questController.CurrentQuest;
+            if (currentQuest?.QuestGraph == null)
+            {
+                questDescriptionHolder.SetContent(string.Empty, string.Empty);
+                return false;
+            }
+
+            string localizedTitle = currentQuest.QuestGraph.Title.GetLocalizedStringCached();
+            string title = string.IsNullOrWhiteSpace(localizedTitle)
+                ? currentQuest.QuestGraph.name
+                : localizedTitle;
+            string description = currentQuest.CurrentNode.Description.GetLocalizedStringCached();
+            questDescriptionHolder.SetContent(title, description?.Trim() ?? string.Empty);
+            return true;
+        }
+
+        private void HideQuestDescriptionImmediately()
+        {
+            holdQuestDescriptionAtFull = false;
+            questDescriptionAlpha = 0f;
+            questDescriptionStartAlpha = 0f;
+            questDescriptionTargetAlpha = 0f;
+            questDescriptionPhaseDuration = 0f;
+            questDescriptionPhaseElapsed = 0f;
+            questDescriptionPhase = VisibilityPhase.Hidden;
+            ApplyQuestDescriptionAlpha();
+        }
+
+        private void ApplyQuestDescriptionAlpha()
+        {
+            if (questDescriptionHolder == null)
+            {
+                return;
+            }
+
+            questDescriptionHolder.SetAlpha(questController.CurrentQuest == null ? 0f : questDescriptionAlpha);
         }
 
         private void UpdateCriticalState(StatType statType)

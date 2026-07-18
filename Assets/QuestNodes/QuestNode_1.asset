@@ -22,6 +22,15 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
+  localizedDescription:
+    m_TableReference:
+      m_TableCollectionName:
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key:
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   icon: {fileID: 21300000, guid: 6629d384315d5c44d8a3e755a5dee5d7, type: 3}
   ownerGraph: {fileID: 11400000, guid: 6f598694dfbe31846b0044a84b5f1969, type: 2}
   hasAvailabilityRequirements: 0

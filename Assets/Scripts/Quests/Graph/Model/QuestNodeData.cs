@@ -21,6 +21,8 @@ namespace Quests.Graph.Model
         [SerializeField] private string editorTitle;
         [FormerlySerializedAs("<Name>k__BackingField")]
         [SerializeField] private LocalizedString localizedName = new();
+        [FormerlySerializedAs("<Description>k__BackingField")]
+        [SerializeField] private LocalizedString localizedDescription = new();
         [SerializeField] private Sprite icon;
         [SerializeField, HideInInspector] private QuestMapTargetSourceType mapTargetSource;
         [SerializeField, HideInInspector] private string sceneMapTargetId;
@@ -35,6 +37,7 @@ namespace Quests.Graph.Model
 
         public string EditorTitle => string.IsNullOrWhiteSpace(editorTitle) ? name : editorTitle;
         public LocalizedString Name => localizedName;
+        public LocalizedString Description => localizedDescription;
         public Sprite Icon => icon;
         public Transform MapTarget => QuestMapTargetRegistry.GetTarget(this);
         public QuestMapTargetSourceType MapTargetSource => mapTargetSource;

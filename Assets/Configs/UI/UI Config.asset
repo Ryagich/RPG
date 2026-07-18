@@ -45,6 +45,7 @@ MonoBehaviour:
   <AnswerButton>k__BackingField: {fileID: 3726367618566451424, guid: 98a86b5b3b25c664c8280d544e79c35e, type: 3}
   <NotificationInDialog>k__BackingField: {fileID: 1522965911973430939, guid: a2683e0e9721343418c4299b215e1f06, type: 3}
   <StatsHolder>k__BackingField: {fileID: 7495129228834389673, guid: ab9f6ea1b64d2cf48b6efc688c9e249f, type: 3}
+  <QuestDescription>k__BackingField: {fileID: 6341268475938172045, guid: ef4384eb9fcbf2040ac6937b77db2a82, type: 3}
   <PopupRect>k__BackingField: {fileID: 2905255636178868728, guid: 12b0999af4e93bf418857b096b6cc62b, type: 3}
   <InventoryHoverPopupRect>k__BackingField: {fileID: 1006068283565412751, guid: bb60a85470fc02441b54fd01f7fcc185, type: 3}
   <InventoryHoverWeightIcon>k__BackingField: {fileID: 21300000, guid: 99b3031eaf8575048b562049f962ae4a, type: 3}
