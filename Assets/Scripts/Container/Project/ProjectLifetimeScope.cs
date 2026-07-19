@@ -49,6 +49,7 @@ namespace Container.Project
         [field: SerializeField] public FactionRelationsConfig FactionRelationsConfig { get; private set; }
         [field: SerializeField] public AudioConfig AudioConfig { get; private set; }
         [field: SerializeField] public FootstepConfig FootstepConfig { get; private set; }
+        [field: SerializeField] public AnimationEventSoundConfig AnimationEventSoundConfig { get; private set; }
 
         protected override void Awake()
         {
@@ -98,6 +99,7 @@ namespace Container.Project
             builder.RegisterInstance(FactionRelationsConfig).AsSelf();
             builder.RegisterInstance(AudioConfig).AsSelf();
             builder.RegisterInstance(FootstepConfig).AsSelf();
+            builder.RegisterInstance(AnimationEventSoundConfig).AsSelf();
             builder.RegisterEntryPoint<AudioService>(Lifetime.Singleton).As<IAudioService>().AsSelf();
             builder.Register<SceneLoadingService>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<InputBindingOverridesBootstrap>();

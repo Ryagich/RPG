@@ -1,4 +1,7 @@
+using GameAudio;
+using Sounds;
 using UnityEngine;
+using VContainer;
 
 namespace Inventory
 {
@@ -12,6 +15,15 @@ namespace Inventory
         // AttackStarted/AttackFinished remain available as optional hooks, but they are not the core
         // events relied on by the current attack clips.
         private IWeaponAnimationEventHandler weaponInHandController;
+        private AnimationEventSoundConfig animationEventSoundConfig;
+        private IAudioService audioService;
+
+        [Inject]
+        public void Construct(AnimationEventSoundConfig animationEventSoundConfig, IAudioService audioService)
+        {
+            this.animationEventSoundConfig = animationEventSoundConfig;
+            this.audioService = audioService;
+        }
 
         public void Bind(IWeaponAnimationEventHandler weaponInHandController)
         {
@@ -76,6 +88,44 @@ namespace Inventory
         public void ResetAttackRequest()
         {
             weaponInHandController?.ResetAttackRequestFromAnimationEvent();
+        }
+
+        // Parameterless methods are intentionally kept as the public animation-event contract.
+        // Each clip can select its sound without serializing object references into the clip itself.
+        public void PlayFirstWeaponAttackHitSound()
+        {
+            PlaySound(animationEventSoundConfig?.FirstWeaponAttackHitSound);
+        }
+
+        public void PlaySecondWeaponAttackHitSound()
+        {
+            PlaySound(animationEventSoundConfig?.SecondWeaponAttackHitSound);
+        }
+
+        public void PlayThirdWeaponAttackHitSound()
+        {
+            PlaySound(animationEventSoundConfig?.ThirdWeaponAttackHitSound);
+        }
+
+        public void PlayDrawWeaponSound()
+        {
+            PlaySound(animationEventSoundConfig?.DrawWeaponSound);
+        }
+
+        public void PlayHideWeaponSound()
+        {
+            PlaySound(animationEventSoundConfig?.HideWeaponSound);
+        }
+
+        private void PlaySound(SoundConfig soundConfig)
+        {
+            var settings = soundConfig != null ? soundConfig.SoundSettings : null;
+            if (audioService == null || settings == null)
+            {
+                return;
+            }
+
+            audioService.Play(settings, transform.position, transform);
         }
     }
 }
