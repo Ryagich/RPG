@@ -60,14 +60,18 @@ namespace CameraScripts
 
             var pivotPosition = GetPivotPosition();
             var desiredRotation = Quaternion.Euler(pitch, yaw, 0f);
-            var desiredPosition = ResolveCollision(pivotPosition, pivotPosition + desiredRotation * GetCameraOffset());
-            var lookPoint = GetLookPoint(pivotPosition);
+            var shoulderOffset = GetShoulderWorldOffset();
+            var shoulderPivotPosition = pivotPosition + shoulderOffset;
+            var desiredPosition = ResolveCollision(
+                shoulderPivotPosition,
+                shoulderPivotPosition + desiredRotation * GetCameraOffset());
+            var lookPoint = GetLookPoint(pivotPosition, shoulderOffset);
 
             var positionLerp = 1f - Mathf.Exp(-config.PositionSharpness * deltaTime);
             var rotationLerp = 1f - Mathf.Exp(-config.RotationSharpness * deltaTime);
 
             var smoothedPosition = Vector3.Lerp(cameraTransform.position, desiredPosition, positionLerp);
-            var finalPosition = ResolveCollision(pivotPosition, smoothedPosition);
+            var finalPosition = ResolveCollision(shoulderPivotPosition, smoothedPosition);
             var desiredLookRotation = GetLookRotation(lookPoint, finalPosition);
 
             cameraTransform.position = finalPosition;
@@ -139,10 +143,14 @@ namespace CameraScripts
 
                 var pivotPosition = GetPivotPosition();
                 var desiredRotation = Quaternion.Euler(pitch, yaw, 0f);
-                var desiredPosition = pivotPosition + desiredRotation * new Vector3(config.ShoulderOffset, 0f, -config.Distance);
-                desiredPosition = ResolveCollision(pivotPosition, desiredPosition);
+                var shoulderOffset = GetShoulderWorldOffset();
+                var shoulderPivotPosition = pivotPosition + shoulderOffset;
+                var desiredPosition = shoulderPivotPosition + desiredRotation * GetCameraOffset();
+                desiredPosition = ResolveCollision(shoulderPivotPosition, desiredPosition);
                 cameraTransform.position = desiredPosition;
-                cameraTransform.rotation = GetLookRotation(pivotPosition, desiredPosition);
+                cameraTransform.rotation = GetLookRotation(
+                    GetLookPoint(pivotPosition, shoulderOffset),
+                    desiredPosition);
             }
 
             isInitialized = true;
@@ -157,16 +165,22 @@ namespace CameraScripts
         {
             if (lockTarget == null)
             {
-                return new Vector3(
-                    config.ShoulderOffset * distanceMultiplier,
-                    0f,
-                    -config.Distance * distanceMultiplier);
+                return new Vector3(0f, 0f, -config.Distance * distanceMultiplier);
             }
 
-            return new Vector3(
-                config.ShoulderOffset * distanceMultiplier * targetLockConfig.CameraShoulderOffsetMultiplier,
-                0f,
+            return new Vector3(0f, 0f,
                 -config.Distance * distanceMultiplier * targetLockConfig.CameraDistanceMultiplier);
+        }
+
+        private Vector3 GetShoulderWorldOffset()
+        {
+            var shoulderOffset = config.ShoulderOffset * distanceMultiplier;
+            if (lockTarget != null)
+            {
+                shoulderOffset *= targetLockConfig.CameraShoulderOffsetMultiplier;
+            }
+
+            return Quaternion.Euler(0f, yaw, 0f) * (Vector3.right * shoulderOffset);
         }
 
         private void ChangeDistanceMultiplier(float delta)
@@ -182,15 +196,15 @@ namespace CameraScripts
                 config.MaximumDistanceMultiplier);
         }
 
-        private Vector3 GetLookPoint(Vector3 pivotPosition)
+        private Vector3 GetLookPoint(Vector3 pivotPosition, Vector3 shoulderOffset)
         {
             if (lockTarget == null)
             {
-                return pivotPosition;
+                return pivotPosition + shoulderOffset;
             }
 
             var lockPoint = lockTarget.position + targetLockConfig.CameraTargetOffset;
-            return Vector3.Lerp(pivotPosition, lockPoint, targetLockConfig.CameraFocusBlend);
+            return Vector3.Lerp(pivotPosition, lockPoint, targetLockConfig.CameraFocusBlend) + shoulderOffset;
         }
 
         private Quaternion GetLookRotation(Vector3 lookPoint, Vector3 cameraPosition)
