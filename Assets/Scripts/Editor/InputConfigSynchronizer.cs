@@ -34,6 +34,7 @@ namespace Rpg.EditorTools
                          "Movement", "Interactable", "Inventory", "LeftClick", "RightClick", "Run", "ShowStats",
                          "Pause", "Map", "TargetLock", "TargetLockNext", "TargetLockPrevious",
                          "FastSlot1", "FastSlot2", "FastSlot3", "FastSlot4", "WeaponSlot1", "WeaponSlot2",
+                         "CameraZoomIn", "CameraZoomOut",
                      })
             {
                 var property = serializedConfig.FindProperty($"<{actionName}>k__BackingField");

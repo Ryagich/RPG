@@ -13,6 +13,8 @@ namespace CameraScripts
         [field: SerializeField] public Vector3 PivotOffset { get; private set; } = new(0f, 1.6f, 0f);
         [field: SerializeField, Min(0f)] public float Distance { get; private set; } = 4.5f;
         [field: SerializeField] public float ShoulderOffset { get; private set; } = 0.45f;
+        [field: SerializeField, Min(0.01f)] public float MinimumDistanceMultiplier { get; private set; } = 0.5f;
+        [field: SerializeField, Min(0.01f)] public float MaximumDistanceMultiplier { get; private set; } = 2.5f;
         [field: SerializeField, Min(0f)] public float PositionSharpness { get; private set; } = 10f;
         [field: SerializeField, Min(0f)] public float RotationSharpness { get; private set; } = 12f;
 

@@ -22,6 +22,7 @@ namespace CameraScripts
         private float pitch;
         private float targetLockYawOffset;
         private float targetLockPitchOffset;
+        private float distanceMultiplier = 1f;
         private bool hasOrbitSeed;
         private bool isInitialized;
         private bool lookInputEnabled = true;
@@ -89,6 +90,16 @@ namespace CameraScripts
             lookInputEnabled = isEnabled;
         }
 
+        public void ZoomIn()
+        {
+            ChangeDistanceMultiplier(-0.1f);
+        }
+
+        public void ZoomOut()
+        {
+            ChangeDistanceMultiplier(0.1f);
+        }
+
         public void SetLockTarget(Transform t)
         {
             if (lockTarget == t)
@@ -146,13 +157,29 @@ namespace CameraScripts
         {
             if (lockTarget == null)
             {
-                return new Vector3(config.ShoulderOffset, 0f, -config.Distance);
+                return new Vector3(
+                    config.ShoulderOffset * distanceMultiplier,
+                    0f,
+                    -config.Distance * distanceMultiplier);
             }
 
             return new Vector3(
-                config.ShoulderOffset * targetLockConfig.CameraShoulderOffsetMultiplier,
+                config.ShoulderOffset * distanceMultiplier * targetLockConfig.CameraShoulderOffsetMultiplier,
                 0f,
-                -config.Distance * targetLockConfig.CameraDistanceMultiplier);
+                -config.Distance * distanceMultiplier * targetLockConfig.CameraDistanceMultiplier);
+        }
+
+        private void ChangeDistanceMultiplier(float delta)
+        {
+            if (!lookInputEnabled)
+            {
+                return;
+            }
+
+            distanceMultiplier = Mathf.Clamp(
+                distanceMultiplier + delta,
+                config.MinimumDistanceMultiplier,
+                config.MaximumDistanceMultiplier);
         }
 
         private Vector3 GetLookPoint(Vector3 pivotPosition)

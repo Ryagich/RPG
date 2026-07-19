@@ -30,3 +30,5 @@ MonoBehaviour:
   <FastSlot4>k__BackingField: {fileID: -2390000571494691447, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
   <WeaponSlot1>k__BackingField: {fileID: 3130624670488550962, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
   <WeaponSlot2>k__BackingField: {fileID: 7638103239502390085, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <CameraZoomIn>k__BackingField: {fileID: 3285522001739732452, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <CameraZoomOut>k__BackingField: {fileID: 1900393474458460234, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}

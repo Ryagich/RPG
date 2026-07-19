@@ -24,6 +24,8 @@ namespace Input
         [field: SerializeField] public InputActionReference FastSlot4 { get; private set; }
         [field: SerializeField] public InputActionReference WeaponSlot1 { get; private set; }
         [field: SerializeField] public InputActionReference WeaponSlot2 { get; private set; }
+        [field: SerializeField] public InputActionReference CameraZoomIn { get; private set; }
+        [field: SerializeField] public InputActionReference CameraZoomOut { get; private set; }
 
         private void OnEnable()
         {
@@ -50,6 +52,8 @@ namespace Input
             FastSlot4 = EnsureReference(FastSlot4, actionMap, "FastSlot4");
             WeaponSlot1 = EnsureReference(WeaponSlot1, actionMap, "WeaponSlot1");
             WeaponSlot2 = EnsureReference(WeaponSlot2, actionMap, "WeaponSlot2");
+            CameraZoomIn = EnsureReference(CameraZoomIn, actionMap, "CameraZoomIn");
+            CameraZoomOut = EnsureReference(CameraZoomOut, actionMap, "CameraZoomOut");
         }
 
         private static InputActionReference EnsureReference(

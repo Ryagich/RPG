@@ -3,17 +3,23 @@ using Inventory;
 using MessagePipe;
 using Messages;
 using TargetLock;
+using Input;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using VContainer.Unity;
 
 namespace CameraScripts
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class CameraMotor : IStartable, ITickable
+    public class CameraMotor : IStartable, ITickable, System.IDisposable
     {
         private readonly CameraMovement cameraMovement;
         private readonly CameraMovementInPlace cameraMovementInPlace;
         private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
+        private readonly InputConfig inputConfig;
+
+        private InputAction zoomInAction;
+        private InputAction zoomOutAction;
 
         private CameraModes cameraMode = CameraModes.Gameplay;
 
@@ -23,6 +29,7 @@ namespace CameraScripts
             Camera cam,
             Transform target,
             CharacterVisualRoot characterVisualRoot,
+            InputConfig inputConfig,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
         {
             var camTransform = cam.transform;
@@ -30,6 +37,7 @@ namespace CameraScripts
 
             cameraMovement = new CameraMovement(config, targetLockConfig, camTransform, target, facingTarget);
             cameraMovementInPlace = new CameraMovementInPlace(config, camTransform);
+            this.inputConfig = inputConfig;
             this.gameModeChangedSubscriber = gameModeChangedSubscriber;
         }
 
@@ -37,6 +45,30 @@ namespace CameraScripts
         {
             gameModeChangedSubscriber.Subscribe(OnGameModeChanged);
             cameraMovement.SetLookInputEnabled(true);
+            zoomInAction = inputConfig.CameraZoomIn?.action;
+            zoomOutAction = inputConfig.CameraZoomOut?.action;
+            zoomInAction?.Enable();
+            zoomOutAction?.Enable();
+            if (zoomInAction != null)
+            {
+                zoomInAction.performed += OnZoomIn;
+            }
+            if (zoomOutAction != null)
+            {
+                zoomOutAction.performed += OnZoomOut;
+            }
+        }
+
+        public void Dispose()
+        {
+            if (zoomInAction != null)
+            {
+                zoomInAction.performed -= OnZoomIn;
+            }
+            if (zoomOutAction != null)
+            {
+                zoomOutAction.performed -= OnZoomOut;
+            }
         }
 
         public void Tick()
@@ -80,6 +112,10 @@ namespace CameraScripts
         {
             cameraMovement.SetLookInputEnabled(msg.GameMode is GameMode.Game or GameMode.Death);
         }
+
+        private void OnZoomIn(InputAction.CallbackContext _) => cameraMovement.ZoomIn();
+
+        private void OnZoomOut(InputAction.CallbackContext _) => cameraMovement.ZoomOut();
     }
 
     public enum CameraModes
