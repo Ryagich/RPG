@@ -77,7 +77,7 @@ namespace Container.Menu
     public sealed class MenuController : IStartable, System.IDisposable
     {
         private const string DevelopSceneName = "Develop";
-        private const string GameSceneName = "Game";
+        private const string GameSceneName = "Village";
 
         private readonly SceneLoadingService sceneLoadingService;
         private readonly MenuMainPage mainPage;
