@@ -18,6 +18,8 @@ namespace Landings.Plants
         [SerializeField] private PlantConfig applePlantConfig;
         [SerializeField] private ItemConfig appleItemConfig;
         [SerializeField] private Transform applePlaces;
+        [SerializeField] private SoundConfig breakStickSoundConfig;
+        [SerializeField] private Transform breakSoundPlace;
 
         private readonly List<AppleSlot> slots = new();
         private float growTimer;
@@ -166,6 +168,7 @@ namespace Landings.Plants
             }
 
             var applesToDrop = Random.Range(1, occupiedSlots.Count + 1);
+            PlayBreakSound();
             for (var i = 0; i < applesToDrop; i++)
             {
                 var index = Random.Range(0, occupiedSlots.Count);
@@ -214,6 +217,16 @@ namespace Landings.Plants
 
             GlobalMessagePipe.GetPublisher<PlaySoundMessage>()
                              .Publish(new PlaySoundMessage(settings, position, null));
+        }
+
+        private void PlayBreakSound()
+        {
+            if (breakStickSoundConfig == null || breakSoundPlace == null)
+            {
+                return;
+            }
+
+            PlaySound(breakStickSoundConfig.SoundSettings, breakSoundPlace.position);
         }
 
         private static Transform FindChildRecursive(Transform root, string childName)
