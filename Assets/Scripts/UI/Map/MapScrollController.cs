@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using Quests;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -46,6 +47,8 @@ namespace UI.Map
         private float focusElapsedTime;
         private readonly Vector3[] contentWorldCorners = new Vector3[4];
         private readonly List<QuestIconBinding> questIcons = new();
+        private MapIconsConfig mapIconsConfig;
+        private QuestIconBinding hoveredQuestIcon;
 
         public void Initialize(
             ScrollRect mapScroll,
@@ -78,14 +81,25 @@ namespace UI.Map
             isInitialized = true;
         }
 
-        public void SetQuestMarkers(Image iconPrefab, IReadOnlyList<MapQuestMarkerData> markers)
+        public void SetQuestMarkers(
+            Image iconPrefab,
+            MapIconsConfig mapIconsConfig,
+            IReadOnlyList<MapQuestMarkerData> markers)
         {
             ClearQuestIcons();
 
-            if (iconPrefab == null || content == null || markers == null)
+            if (iconPrefab == null || mapIconsConfig == null || content == null || markers == null)
             {
                 return;
             }
+
+            if (!mapIconsConfig.TryGetIcon(MapIconsConfig.QuestIconName, out MapIconDefinition questIconDefinition))
+            {
+                Debug.LogError($"Map Icons Config does not contain '{MapIconsConfig.QuestIconName}' icon definition.");
+                return;
+            }
+
+            this.mapIconsConfig = mapIconsConfig;
 
             foreach (MapQuestMarkerData marker in markers)
             {
@@ -96,6 +110,12 @@ namespace UI.Map
 
                 Image questIcon = Instantiate(iconPrefab, content);
                 questIcon.name = $"{iconPrefab.name} | Quest";
+                if (questIconDefinition.Sprite != null)
+                {
+                    questIcon.sprite = questIconDefinition.Sprite;
+                }
+
+                questIcon.color = questIconDefinition.Color;
 
                 if (questIcon.transform is not RectTransform questIconRect)
                 {
@@ -113,21 +133,8 @@ namespace UI.Map
 
         public bool TryGetQuestMarkerAtScreenPoint(Vector2 screenPoint, out QuestProgress questProgress)
         {
-            for (var i = questIcons.Count - 1; i >= 0; i--)
+            if (TryGetQuestIconAtScreenPoint(screenPoint, out QuestIconBinding questIcon))
             {
-                QuestIconBinding questIcon = questIcons[i];
-                if (questIcon.RectTransform == null ||
-                    questIcon.QuestProgress == null ||
-                    !questIcon.RectTransform.gameObject.activeInHierarchy)
-                {
-                    continue;
-                }
-
-                if (!RectTransformUtility.RectangleContainsScreenPoint(questIcon.RectTransform, screenPoint, eventCamera))
-                {
-                    continue;
-                }
-
                 questProgress = questIcon.QuestProgress;
                 return true;
             }
@@ -148,6 +155,7 @@ namespace UI.Map
             UpdateFocusMovement();
             UpdateCharacterIcon();
             UpdateQuestIcons();
+            UpdateQuestIconHover();
         }
 
         public void FocusOnTarget(Transform targetTransform)
@@ -553,11 +561,78 @@ namespace UI.Map
             {
                 if (questIcons[i].RectTransform != null)
                 {
+                    questIcons[i].RectTransform.DOKill();
                     Destroy(questIcons[i].RectTransform.gameObject);
                 }
             }
 
             questIcons.Clear();
+            hoveredQuestIcon = null;
+        }
+
+        private bool TryGetQuestIconAtScreenPoint(Vector2 screenPoint, out QuestIconBinding questIcon)
+        {
+            for (var i = questIcons.Count - 1; i >= 0; i--)
+            {
+                QuestIconBinding candidate = questIcons[i];
+                if (candidate.RectTransform == null ||
+                    candidate.QuestProgress == null ||
+                    !candidate.RectTransform.gameObject.activeInHierarchy ||
+                    !RectTransformUtility.RectangleContainsScreenPoint(candidate.RectTransform, screenPoint, eventCamera))
+                {
+                    continue;
+                }
+
+                questIcon = candidate;
+                return true;
+            }
+
+            questIcon = null;
+            return false;
+        }
+
+        private void UpdateQuestIconHover()
+        {
+            Pointer pointer = Pointer.current;
+            QuestIconBinding nextHoveredIcon = pointer != null &&
+                                               TryGetQuestIconAtScreenPoint(pointer.position.ReadValue(), out QuestIconBinding questIcon)
+                ? questIcon
+                : null;
+
+            if (ReferenceEquals(nextHoveredIcon, hoveredQuestIcon))
+            {
+                return;
+            }
+
+            AnimateQuestIcon(hoveredQuestIcon, false);
+            hoveredQuestIcon = nextHoveredIcon;
+            AnimateQuestIcon(hoveredQuestIcon, true);
+        }
+
+        private void AnimateQuestIcon(QuestIconBinding questIcon, bool isHovered)
+        {
+            if (questIcon?.RectTransform == null)
+            {
+                return;
+            }
+
+            RectTransform iconRect = questIcon.RectTransform;
+            iconRect.DOKill();
+
+            Vector3 targetScale = isHovered && mapIconsConfig != null
+                ? mapIconsConfig.HoveredIconScale
+                : questIcon.InitialScale;
+
+            if (mapIconsConfig == null || mapIconsConfig.HoverAnimationDuration <= 0f)
+            {
+                iconRect.localScale = targetScale;
+                return;
+            }
+
+            iconRect
+                .DOScale(targetScale, mapIconsConfig.HoverAnimationDuration)
+                .SetEase(mapIconsConfig.HoverEase)
+                .SetUpdate(true);
         }
 
         private bool IsPointerInsideViewport()
@@ -641,18 +716,20 @@ namespace UI.Map
             ClearQuestIcons();
         }
 
-        private readonly struct QuestIconBinding
+        private sealed class QuestIconBinding
         {
             public QuestIconBinding(RectTransform rectTransform, Transform targetTransform, QuestProgress questProgress)
             {
                 RectTransform = rectTransform;
                 TargetTransform = targetTransform;
                 QuestProgress = questProgress;
+                InitialScale = rectTransform.localScale;
             }
 
             public RectTransform RectTransform { get; }
             public Transform TargetTransform { get; }
             public QuestProgress QuestProgress { get; }
+            public Vector3 InitialScale { get; }
         }
     }
 }

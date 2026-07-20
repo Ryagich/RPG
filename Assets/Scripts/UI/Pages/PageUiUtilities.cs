@@ -783,6 +783,84 @@ namespace UI.Pages
             }
         }
 
+        public static bool FillMapQuestPopup(
+            RectTransform popupRect,
+            string questName,
+            string currentStepName,
+            string currentStepDescription,
+            Sprite icon,
+            Color iconColor)
+        {
+            if (popupRect == null)
+            {
+                return false;
+            }
+
+            TMP_Text questNameText = FindText(popupRect, "Content/Item/Name/Label_ItemName");
+            if (questNameText != null)
+            {
+                questNameText.text = questName ?? string.Empty;
+            }
+
+            RectTransform stageRect = FindRect(popupRect, "Content/HUD_Stat_Base_Large");
+            TMP_Text stageText = FindText(stageRect, "Label_Stat_Text");
+            if (stageText != null)
+            {
+                stageText.text = currentStepName ?? string.Empty;
+                ResizePopupSectionToText(stageRect, stageText, null);
+            }
+
+            var popupIcon = FindImage(popupRect, "Content/HUD_Stat_Base_Large/Quest ICON");
+            if (popupIcon != null)
+            {
+                popupIcon.sprite = icon;
+                popupIcon.preserveAspect = true;
+                popupIcon.enabled = icon != null;
+                popupIcon.color = iconColor;
+                popupIcon.raycastTarget = false;
+            }
+
+            RectTransform statsGroupRect = FindRect(popupRect, "Content/Stats_Group");
+            RectTransform backgroundRect = FindRect(statsGroupRect, "Background");
+            TMP_Text descriptionText = FindText(backgroundRect, "Label_ItemDescription");
+            if (descriptionText != null)
+            {
+                descriptionText.text = currentStepDescription ?? string.Empty;
+                ResizePopupSectionToText(statsGroupRect, descriptionText, backgroundRect);
+            }
+
+            return true;
+        }
+
+        private static void ResizePopupSectionToText(RectTransform sectionRect, TMP_Text text, RectTransform backgroundRect)
+        {
+            if (sectionRect == null || text == null)
+            {
+                return;
+            }
+
+            Canvas.ForceUpdateCanvases();
+
+            float availableWidth = text.rectTransform.rect.width;
+            if (availableWidth <= 0f)
+            {
+                return;
+            }
+
+            float preferredTextHeight = Mathf.Ceil(text.GetPreferredValues(text.text, availableWidth, 0f).y);
+            float currentTextHeight = text.rectTransform.rect.height;
+            float sectionPadding = Mathf.Max(0f, sectionRect.rect.height - currentTextHeight);
+            float targetHeight = Mathf.Max(sectionRect.rect.height, preferredTextHeight + sectionPadding);
+
+            sectionRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, targetHeight);
+            if (backgroundRect != null)
+            {
+                backgroundRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, targetHeight);
+            }
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(sectionRect);
+        }
+
         public static void CreatePopupButton
             (
                 RectTransform popupContentRect,

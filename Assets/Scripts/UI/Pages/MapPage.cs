@@ -8,13 +8,14 @@ using Stats;
 using UI.Configs;
 using UI.Map;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using VContainer;
 using VContainer.Unity;
 using Object = UnityEngine.Object;
 
 namespace UI.Pages
 {
-    public sealed class MapPage : BasePage
+    public sealed class MapPage : BasePage, ITickable
     {
         public override PageType Type { get; } = PageType.Map;
 
@@ -30,6 +31,11 @@ namespace UI.Pages
 
         private RectTransform mapRect;
         private Title title;
+        private MapScrollController mapScrollController;
+        private RectTransform popupParentRect;
+        private RectTransform popupRect;
+        private QuestProgress hoveredQuestProgress;
+        private float hoverPopupElapsed;
         private readonly List<MapQuestMarkerData> questMarkers = new();
 
         public MapPage(
@@ -92,7 +98,7 @@ namespace UI.Pages
             CharacterIcon characterIcon = resolver.Instantiate(uiConfig.CharacterIcon, mapHolder.MapScroll.content);
             characterIcon.name = $"{uiConfig.CharacterIcon.name} | {Type}";
 
-            MapScrollController mapScrollController = mapHolder.MapScroll.GetComponent<MapScrollController>();
+            mapScrollController = mapHolder.MapScroll.GetComponent<MapScrollController>();
             if (mapScrollController == null)
             {
                 Debug.LogError("Map prefab is missing MapScrollController.");
@@ -107,10 +113,14 @@ namespace UI.Pages
                 mapConfig);
 
             FillQuestMarkers(mapScrollController);
+            popupParentRect = mapRect;
         }
 
         public override void Hide()
         {
+            CloseMapPopup();
+            ResetHoverPopupState();
+
             if (title != null)
             {
                 title.ExitButton?.onClick.RemoveListener(Close);
@@ -126,6 +136,49 @@ namespace UI.Pages
             }
 
             questMarkers.Clear();
+            mapScrollController = null;
+            popupParentRect = null;
+        }
+
+        public void Tick()
+        {
+            if (mapRect == null || mapScrollController == null || Pointer.current == null)
+            {
+                ResetHoverPopupState();
+                CloseMapPopup();
+                return;
+            }
+
+            Vector2 screenPoint = Pointer.current.position.ReadValue();
+            if (!mapScrollController.TryGetQuestMarkerAtScreenPoint(screenPoint, out QuestProgress questProgress))
+            {
+                ResetHoverPopupState();
+                CloseMapPopup();
+                return;
+            }
+
+            bool targetChanged = !ReferenceEquals(hoveredQuestProgress, questProgress);
+            if (targetChanged)
+            {
+                hoveredQuestProgress = questProgress;
+                hoverPopupElapsed = 0f;
+                CloseMapPopup();
+            }
+            else
+            {
+                hoverPopupElapsed += Time.unscaledDeltaTime;
+            }
+
+            if (popupRect != null)
+            {
+                PageUiUtilities.UpdatePopupPosition(popupRect, popupParentRect, GetEventCamera(), screenPoint);
+                return;
+            }
+
+            if (uiConfig.MapIconsConfig != null && hoverPopupElapsed >= uiConfig.MapIconsConfig.PopupHoverDelaySeconds)
+            {
+                TryOpenQuestPopup(questProgress, screenPoint);
+            }
         }
 
         private void Close()
@@ -142,7 +195,7 @@ namespace UI.Pages
         {
             questMarkers.Clear();
 
-            if (mapScrollController == null || uiConfig.MapIcon == null || questController == null)
+            if (mapScrollController == null || uiConfig.MapIcon == null || uiConfig.MapIconsConfig == null || questController == null)
             {
                 return;
             }
@@ -158,7 +211,67 @@ namespace UI.Pages
                 questMarkers.Add(new MapQuestMarkerData(mapTarget, questProgress));
             }
 
-            mapScrollController.SetQuestMarkers(uiConfig.MapIcon, questMarkers);
+            mapScrollController.SetQuestMarkers(uiConfig.MapIcon, uiConfig.MapIconsConfig, questMarkers);
+        }
+
+        private void TryOpenQuestPopup(QuestProgress questProgress, Vector2 screenPoint)
+        {
+            if (questProgress?.QuestGraph == null || questProgress.CurrentNode == null || popupParentRect == null)
+            {
+                return;
+            }
+
+            if (uiConfig.QuestPopup == null || uiConfig.MapIconsConfig == null ||
+                !uiConfig.MapIconsConfig.TryGetIcon(MapIconsConfig.QuestIconName, out MapIconDefinition questIcon))
+            {
+                Debug.LogError("Quest Popup or Quest icon definition is not assigned.");
+                return;
+            }
+
+            popupRect = resolver.Instantiate(uiConfig.QuestPopup, popupParentRect);
+            popupRect.name = $"{uiConfig.QuestPopup.name} | Map Quest Popup";
+            if (popupRect == null)
+            {
+                return;
+            }
+
+            PageUiUtilities.SetPopupRaycastState(popupRect, false);
+            if (!PageUiUtilities.FillMapQuestPopup(
+                    popupRect,
+                    questProgress.QuestGraph.Title.GetLocalizedStringCached(),
+                    questProgress.CurrentNode.Name.GetLocalizedStringCached(),
+                    questProgress.CurrentNode.Description.GetLocalizedStringCached(),
+                    questIcon.Sprite,
+                    questIcon.Color))
+            {
+                CloseMapPopup();
+                return;
+            }
+
+            Canvas.ForceUpdateCanvases();
+            PageUiUtilities.UpdatePopupPosition(popupRect, popupParentRect, GetEventCamera(), screenPoint);
+        }
+
+        private void ResetHoverPopupState()
+        {
+            hoveredQuestProgress = null;
+            hoverPopupElapsed = 0f;
+        }
+
+        private void CloseMapPopup()
+        {
+            if (popupRect != null)
+            {
+                Object.Destroy(popupRect.gameObject);
+            }
+
+            popupRect = null;
+        }
+
+        private Camera GetEventCamera()
+        {
+            Canvas canvas = mapRect != null ? mapRect.GetComponentInParent<Canvas>() : null;
+            return canvas == null || canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
         }
 
         private static void ConfigureUnscaledAnimators(GameObject root)

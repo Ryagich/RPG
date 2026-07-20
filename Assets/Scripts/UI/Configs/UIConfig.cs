@@ -73,5 +73,7 @@ namespace UI.Configs
         [field: SerializeField] public RectTransform QuestPage { get; private set; }
         [field: SerializeField] public CharacterIcon CharacterIcon { get; private set; }
         [field: SerializeField] public Image MapIcon { get; private set; }
+        [field: SerializeField] public MapIconsConfig MapIconsConfig { get; private set; }
+        [field: SerializeField] public RectTransform QuestPopup { get; private set; }
     }
 }

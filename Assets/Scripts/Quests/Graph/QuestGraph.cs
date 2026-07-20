@@ -11,10 +11,12 @@ namespace Quests.Graph
     {
         [SerializeField] private LocalizedString title = new();
         [SerializeField] private LocalizedString description = new();
+        [SerializeField] private Sprite icon;
 
         public List<QuestNode> Nodes = new();
         public LocalizedString Title => title;
         public LocalizedString Description => description;
+        public Sprite Icon => icon;
 
         public QuestNodeData GetEntryNode() => Nodes.FirstOrDefault()?.NodeData;
 

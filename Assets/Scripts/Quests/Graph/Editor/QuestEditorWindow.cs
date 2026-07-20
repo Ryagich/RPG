@@ -263,6 +263,7 @@ namespace Quests.Graph.Editor
                 graphObject.Update();
                 SerializedProperty titleProperty = graphObject.FindProperty("title");
                 SerializedProperty descriptionProperty = graphObject.FindProperty("description");
+                SerializedProperty iconProperty = graphObject.FindProperty("icon");
                 if (titleProperty != null)
                 {
                     y = DrawLocalizedFieldArea(padding, y, contentWidth, titleProperty, "Name");
@@ -271,6 +272,14 @@ namespace Quests.Graph.Editor
                 if (descriptionProperty != null)
                 {
                     y = DrawLocalizedFieldArea(padding, y, contentWidth, descriptionProperty, "Description");
+                }
+
+                if (iconProperty != null)
+                {
+                    GUILayout.BeginArea(new Rect(padding, y, contentWidth, EditorGUIUtility.singleLineHeight));
+                    DrawPropertyFieldWithCustomLabel(iconProperty, "Map Popup Sprite");
+                    GUILayout.EndArea();
+                    y += EditorGUIUtility.singleLineHeight + spacing;
                 }
 
                 if (graphObject.hasModifiedProperties)
