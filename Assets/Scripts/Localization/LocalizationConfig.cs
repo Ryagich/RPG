@@ -18,5 +18,7 @@ namespace Localization
         [field: SerializeField] public LocalizedString QuestCompleted { get; private set; }
         [field: SerializeField] public LocalizedString QuestFailed { get; private set; }
         [field: SerializeField] public LocalizedString QuestCanceled { get; private set; }
+        [field: SerializeField] public LocalizedString WorldMapTitle { get; private set; }
+        [field: SerializeField] public LocalizedString QuestsTitle { get; private set; }
     }
 }

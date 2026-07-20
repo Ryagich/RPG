@@ -20,6 +20,7 @@ namespace UI
             builder.RegisterEntryPoint<DeathPage>().AsSelf();
             builder.Register<DialoguePage>(Lifetime.Singleton);
             builder.RegisterEntryPoint<MapPage>().AsSelf();
+            builder.RegisterEntryPoint<QuestPage>().AsSelf();
             
             builder.RegisterEntryPoint<TradePage>().AsSelf();
             builder.RegisterEntryPoint<InventoryPage>().AsSelf();

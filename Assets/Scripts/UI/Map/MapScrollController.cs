@@ -463,7 +463,10 @@ namespace UI.Map
             }
 
             float angle = Mathf.Atan2(forward.z, forward.x) * Mathf.Rad2Deg;
-            characterIcon.Direction.localRotation = Quaternion.Euler(0f, 0f, angle);
+            characterIcon.Direction.localRotation = Quaternion.Euler(
+                0f,
+                0f,
+                angle + characterIcon.DirectionAngleOffset);
         }
 
         private void UpdateQuestIcons()

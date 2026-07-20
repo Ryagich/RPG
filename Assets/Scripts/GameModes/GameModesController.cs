@@ -96,6 +96,9 @@ namespace GameModes
                 case GameMode.Pause:
                     ExitPauseMode();
                     return;
+                case GameMode.Quest:
+                    EnterMainGameMode();
+                    return;
                 default:
                     ReturnToPreviousMode();
                     return;
@@ -123,7 +126,7 @@ namespace GameModes
             {
                 ChangeGameMode(new ChangeGameModeRequest(GameMode.Map));
             }
-            else if (GameMode == GameMode.Map)
+            else if (GameMode is GameMode.Map or GameMode.Quest)
             {
                 ChangeGameMode(new ChangeGameModeRequest(GameMode.Game));
             }
@@ -180,7 +183,7 @@ namespace GameModes
 
         private static void ApplyTimeScale(GameMode mode)
         {
-            Time.timeScale = mode is GameMode.Pause or GameMode.PauseSettings ? 0f : 1f;
+            Time.timeScale = mode is GameMode.Pause or GameMode.PauseSettings or GameMode.Map or GameMode.Quest ? 0f : 1f;
         }
     }
 
@@ -194,6 +197,7 @@ namespace GameModes
         Dialogue,
         Trade,
         Map,
+        Quest,
         Death,
     }
 }

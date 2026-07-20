@@ -27,12 +27,12 @@ MonoBehaviour:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
-      m_KeyId: 0
+      m_KeyId: 18129230448803840
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  icon: {fileID: 21300000, guid: 6629d384315d5c44d8a3e755a5dee5d7, type: 3}
+  icon: {fileID: 21300000, guid: 452012ebe6d33bc4bbb53a355f77ce63, type: 3}
   mapTargetSource: 1
   sceneMapTargetId: a547b4d07edf4a3d96d9f3ba7c150b13
   scriptMapTargetKey: 

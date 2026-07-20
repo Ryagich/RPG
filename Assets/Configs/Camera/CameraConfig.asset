@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: CameraConfig
   m_EditorClassIdentifier: Assembly-CSharp::CameraScripts.CameraConfig
   <Smoothing>k__BackingField: 4
-  <PivotOffset>k__BackingField: {x: 0, y: 1.7, z: 0.2}
+  <PivotOffset>k__BackingField: {x: 0, y: 1.5, z: 0.2}
   <Distance>k__BackingField: 1.5
-  <ShoulderOffset>k__BackingField: 0.3
+  <ShoulderOffset>k__BackingField: 0.1
   <MinimumDistanceMultiplier>k__BackingField: 0.75
   <MaximumDistanceMultiplier>k__BackingField: 2.5
   <PositionSharpness>k__BackingField: 10

@@ -17,6 +17,7 @@ namespace UI.Pages
         private readonly DialoguePage dialoguePage;
         private readonly TradePage tradePage;
         private readonly MapPage mapPage;
+        private readonly QuestPage questPage;
         private readonly DeathPage deathPage;
 
         private BasePage currentPage;
@@ -31,6 +32,7 @@ namespace UI.Pages
                 DialoguePage dialoguePage,
                 TradePage tradePage,
                 MapPage mapPage,
+                QuestPage questPage,
                 DeathPage deathPage,
                 ISubscriber<GameModeChangedMessage> gameModeChangeSubscriber
             )
@@ -43,6 +45,7 @@ namespace UI.Pages
             this.dialoguePage = dialoguePage;
             this.tradePage = tradePage;
             this.mapPage = mapPage;
+            this.questPage = questPage;
             this.deathPage = deathPage;
 
             gameModeChangeSubscriber.Subscribe(OnGameModeChanged);
@@ -83,6 +86,9 @@ namespace UI.Pages
                 case GameMode.Map:
                     currentPage = mapPage;
                     break;
+                case GameMode.Quest:
+                    currentPage = questPage;
+                    break;
                 case GameMode.Death:
                     currentPage = deathPage;
                     break;
@@ -113,6 +119,7 @@ namespace UI.Pages
         Dialogue,
         Trade,
         Map,
+        Quest,
         Death,
         MenuMain,
         MenuSettings,

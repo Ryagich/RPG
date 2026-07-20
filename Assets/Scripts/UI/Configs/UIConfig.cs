@@ -68,12 +68,9 @@ namespace UI.Configs
         [field: SerializeField] public StatHolder StatHolderForClothes { get; private set; }
         [field: SerializeField] public Image BloodScreen { get; private set; }
 
-        //Map
-        [field: SerializeField] public ScrollRect QuestionsScrollView { get; private set; }
-        [field: SerializeField] public ScrollRect MapScroll { get; private set; }
-        [field: SerializeField] public Title Title { get; private set; }
-        [field: SerializeField] public QuestShortInfo QuestShortInfo { get; private set; }
-        [field: SerializeField] public RectTransform QuestPopup { get; private set; }
+        // Map and quests
+        [field: SerializeField] public RectTransform Map { get; private set; }
+        [field: SerializeField] public RectTransform QuestPage { get; private set; }
         [field: SerializeField] public CharacterIcon CharacterIcon { get; private set; }
         [field: SerializeField] public Image MapIcon { get; private set; }
     }
