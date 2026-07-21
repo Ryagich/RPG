@@ -6482,6 +6482,63 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a369b77e60b8e214facdaf488d0b947b, type: 3}
+--- !u!1001 &1461797878
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5218760834258215942, guid: 7a65819a044a6a543bfc64460a395c7e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5218760834258215942, guid: 7a65819a044a6a543bfc64460a395c7e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.675
+      objectReference: {fileID: 0}
+    - target: {fileID: 5218760834258215942, guid: 7a65819a044a6a543bfc64460a395c7e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.71
+      objectReference: {fileID: 0}
+    - target: {fileID: 5218760834258215942, guid: 7a65819a044a6a543bfc64460a395c7e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5218760834258215942, guid: 7a65819a044a6a543bfc64460a395c7e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5218760834258215942, guid: 7a65819a044a6a543bfc64460a395c7e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5218760834258215942, guid: 7a65819a044a6a543bfc64460a395c7e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5218760834258215942, guid: 7a65819a044a6a543bfc64460a395c7e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5218760834258215942, guid: 7a65819a044a6a543bfc64460a395c7e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5218760834258215942, guid: 7a65819a044a6a543bfc64460a395c7e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5222249656789897580, guid: 7a65819a044a6a543bfc64460a395c7e, type: 3}
+      propertyPath: m_Name
+      value: Apple Fruit
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7a65819a044a6a543bfc64460a395c7e, type: 3}
 --- !u!1001 &1474414836
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7336,6 +7393,10 @@ PrefabInstance:
     - target: {fileID: 7602466190796115119, guid: 6b8ec1d781512104a9ba7dd8f4710d5f, type: 3}
       propertyPath: m_Name
       value: Lupine Small Plant 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7602466190796115119, guid: 6b8ec1d781512104a9ba7dd8f4710d5f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7605776420732766937, guid: 6b8ec1d781512104a9ba7dd8f4710d5f, type: 3}
       propertyPath: m_LocalScale.x
@@ -9766,6 +9827,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 2076391817}
   - {fileID: 1969877690}
+  - {fileID: 1461797878}
   - {fileID: 629295918}
   - {fileID: 691532382}
   - {fileID: 1651754816}
