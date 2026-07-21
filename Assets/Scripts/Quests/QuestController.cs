@@ -115,7 +115,26 @@ namespace Quests
 
         public Sprite GetQuestSprite(QuestGraph questGraph)
         {
-            return GetDisplayNode(questGraph)?.Icon;
+            return GetDisplayNode(questGraph)?.Icon ?? questGraph?.Icon;
+        }
+
+        public bool TrySetCurrentQuest(QuestGraph questGraph)
+        {
+            if (!TryGetActiveProgress(questGraph, out QuestProgress questProgress))
+            {
+                return false;
+            }
+
+            int currentIndex = progress.IndexOf(questProgress);
+            if (currentIndex <= 0)
+            {
+                return true;
+            }
+
+            progress.RemoveAt(currentIndex);
+            progress.Insert(0, questProgress);
+            Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Updated, questGraph));
+            return true;
         }
 
         public bool CanExecuteTransition(QuestGraph questGraph, QuestTransition transition)
@@ -351,9 +370,12 @@ namespace Quests
 
     public sealed class QuestProgress
     {
+        private readonly List<QuestNodeData> completedNodes = new();
+
         public QuestGraph QuestGraph { get; }
         public QuestNodeData CurrentNode { get; private set; }
         public bool IsCompleted { get; private set; }
+        public IReadOnlyList<QuestNodeData> CompletedNodes => completedNodes;
 
         public QuestProgress(QuestGraph questGraph, QuestNodeData currentNode)
         {
@@ -363,13 +385,23 @@ namespace Quests
 
         public void SetCurrentNode(QuestNodeData nodeData)
         {
+            AddCompletedNode(CurrentNode);
             CurrentNode = nodeData ?? throw new System.ArgumentNullException(nameof(nodeData));
         }
 
         public void Complete(QuestNodeData nodeData)
         {
             CurrentNode = nodeData ?? throw new System.ArgumentNullException(nameof(nodeData));
+            AddCompletedNode(CurrentNode);
             IsCompleted = true;
+        }
+
+        private void AddCompletedNode(QuestNodeData nodeData)
+        {
+            if (nodeData != null && !completedNodes.Contains(nodeData))
+            {
+                completedNodes.Add(nodeData);
+            }
         }
     }
 }

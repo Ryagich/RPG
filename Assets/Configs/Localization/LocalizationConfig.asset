@@ -138,6 +138,24 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
+  <ActiveQuestsOnly>k__BackingField:
+    m_TableReference:
+      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+    m_TableEntryReference:
+      m_KeyId: 20000000000000003
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  <AllQuests>k__BackingField:
+    m_TableReference:
+      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+    m_TableEntryReference:
+      m_KeyId: 20000000000000004
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   references:
     version: 2
     RefIds: []

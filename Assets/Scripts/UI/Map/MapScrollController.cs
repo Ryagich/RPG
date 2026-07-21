@@ -10,14 +10,16 @@ namespace UI.Map
 {
     public readonly struct MapQuestMarkerData
     {
-        public MapQuestMarkerData(Transform targetTransform, QuestProgress questProgress)
+        public MapQuestMarkerData(Transform targetTransform, QuestProgress questProgress, bool isCurrentQuest)
         {
             TargetTransform = targetTransform;
             QuestProgress = questProgress;
+            IsCurrentQuest = isCurrentQuest;
         }
 
         public Transform TargetTransform { get; }
         public QuestProgress QuestProgress { get; }
+        public bool IsCurrentQuest { get; }
     }
 
     public class MapScrollController : MonoBehaviour
@@ -115,7 +117,9 @@ namespace UI.Map
                     questIcon.sprite = questIconDefinition.Sprite;
                 }
 
-                questIcon.color = questIconDefinition.Color;
+                questIcon.color = marker.IsCurrentQuest
+                    ? mapIconsConfig.CurrentTaskMapColor
+                    : questIconDefinition.Color;
 
                 if (questIcon.transform is not RectTransform questIconRect)
                 {

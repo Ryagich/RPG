@@ -33,10 +33,16 @@ namespace UI.Map
         [Header("Popup")]
         [SerializeField, Min(0f)] private float popupHoverDelaySeconds = 0.5f;
 
+        [Header("Quest task colors")]
+        [SerializeField] private Color completedTaskColor = Color.green;
+        [SerializeField] private Color currentTaskMapColor = Color.yellow;
+
         public float HoverAnimationDuration => hoverAnimationDuration;
         public Ease HoverEase => hoverEase;
         public Vector3 HoveredIconScale => hoveredIconScale;
         public float PopupHoverDelaySeconds => popupHoverDelaySeconds;
+        public Color CompletedTaskColor => completedTaskColor;
+        public Color CurrentTaskMapColor => currentTaskMapColor;
 
         public bool TryGetIcon(string iconName, out MapIconDefinition iconDefinition)
         {

@@ -63,3 +63,5 @@ MonoBehaviour:
   <MapIcon>k__BackingField: {fileID: 690087236037604892, guid: de9893f733b2e7142a24e5e9ff3cf666, type: 3}
   <MapIconsConfig>k__BackingField: {fileID: 11400000, guid: c6c1384181bdbc945bd87998907c3f92, type: 2}
   <QuestPopup>k__BackingField: {fileID: 7481254154333405073, guid: 2d084fc95e8845348962e2b23219af33, type: 3}
+  <Quest>k__BackingField: {fileID: 5762696957739934669, guid: 03faf56a89ac8ae42bbe732138837f4c, type: 3}
+  <Task>k__BackingField: {fileID: 4632793549121496294, guid: 3a15cb3c4e5761949acfa22bf7a6938f, type: 3}

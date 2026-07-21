@@ -200,15 +200,16 @@ namespace UI.Pages
                 return;
             }
 
+            QuestProgress currentQuest = questController.CurrentQuest;
             foreach (QuestProgress questProgress in questController.Progress)
             {
                 Transform mapTarget = questProgress?.CurrentNode?.MapTarget;
-                if (questProgress == null || questProgress.IsCompleted || mapTarget == null)
+                if (questProgress == null || mapTarget == null)
                 {
                     continue;
                 }
 
-                questMarkers.Add(new MapQuestMarkerData(mapTarget, questProgress));
+                questMarkers.Add(new MapQuestMarkerData(mapTarget, questProgress, ReferenceEquals(questProgress, currentQuest)));
             }
 
             mapScrollController.SetQuestMarkers(uiConfig.MapIcon, uiConfig.MapIconsConfig, questMarkers);
