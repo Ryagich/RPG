@@ -110,6 +110,7 @@ namespace GameAudio
         private SourcePool uiPool;
         private SourcePool gamePool;
         private SourcePool footstepsPool;
+        private AudioSource mainMenuMusicSource;
 
         public static IAudioService Current { get; private set; }
 
@@ -160,6 +161,45 @@ namespace GameAudio
 
         public void PlayUiHover() => PlayUi(config != null ? config.ButtonHoverClip : null);
         public void PlayUiClick() => PlayUi(config != null ? config.ButtonClickClip : null);
+
+        public void PlayMainMenuMusic()
+        {
+            var clip = config != null ? config.MainMenuMusicClip : null;
+            if (clip == null || root == null)
+            {
+                return;
+            }
+
+            if (mainMenuMusicSource == null)
+            {
+                var sourceObject = new GameObject("Main Menu Music");
+                sourceObject.transform.SetParent(root.transform, false);
+                mainMenuMusicSource = sourceObject.AddComponent<AudioSource>();
+            }
+
+            if (mainMenuMusicSource.isPlaying && mainMenuMusicSource.clip == clip)
+            {
+                return;
+            }
+
+            ConfigureSource(mainMenuMusicSource, AudioMixerCategory.Music, Vector3.zero, spatial: false, root.transform);
+            mainMenuMusicSource.loop = true;
+            mainMenuMusicSource.volume = 1f;
+            mainMenuMusicSource.pitch = 1f;
+            mainMenuMusicSource.clip = clip;
+            mainMenuMusicSource.Play();
+        }
+
+        public void StopMainMenuMusic()
+        {
+            if (mainMenuMusicSource == null)
+            {
+                return;
+            }
+
+            mainMenuMusicSource.Stop();
+            mainMenuMusicSource.clip = null;
+        }
 
         public void SetWorldSoundParent(Transform parent)
         {

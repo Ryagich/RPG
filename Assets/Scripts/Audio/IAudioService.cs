@@ -7,6 +7,8 @@ namespace GameAudio
     {
         void PlayUiHover();
         void PlayUiClick();
+        void PlayMainMenuMusic();
+        void StopMainMenuMusic();
         void SetWorldSoundParent(Transform parent);
         void SetListenerTransform(Transform listenerTransform);
         void PlayFootstep(Vector3 position, Transform actorTransform, bool isPlayerCharacter);

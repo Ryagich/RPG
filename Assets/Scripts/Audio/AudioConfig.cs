@@ -27,6 +27,9 @@ namespace GameAudio
         [SerializeField] private AudioClip buttonHoverClip;
         [SerializeField] private AudioClip buttonClickClip;
 
+        [Header("Music")]
+        [SerializeField] private AudioClip mainMenuMusicClip;
+
         [Header("Default mixer levels")]
         [SerializeField, Range(MinimumDecibels, MaximumDecibels)] private float masterDefaultDecibels = -10f;
         [SerializeField, Range(MinimumDecibels, MaximumDecibels)] private float uiDefaultDecibels = -30f;
@@ -37,6 +40,7 @@ namespace GameAudio
         public AudioSource FootstepSourcePrefab => footstepSourcePrefab;
         public AudioClip ButtonHoverClip => buttonHoverClip;
         public AudioClip ButtonClickClip => buttonClickClip;
+        public AudioClip MainMenuMusicClip => mainMenuMusicClip;
 
         public static readonly AudioMixerCategory[] SettingsCategories =
         {

@@ -84,6 +84,7 @@ namespace Container.Menu
         private readonly MenuSettingsPage bindingsSettingsPage;
         private readonly MenuSoundsSettingsPage soundsSettingsPage;
         private readonly MenuGameplaySettingsPage gameplaySettingsPage;
+        private readonly IAudioService audioService;
         private BasePage currentPage;
 
         public MenuController(
@@ -91,13 +92,15 @@ namespace Container.Menu
             MenuMainPage mainPage,
             MenuSettingsPage bindingsSettingsPage,
             MenuSoundsSettingsPage soundsSettingsPage,
-            MenuGameplaySettingsPage gameplaySettingsPage)
+            MenuGameplaySettingsPage gameplaySettingsPage,
+            IAudioService audioService)
         {
             this.sceneLoadingService = sceneLoadingService;
             this.mainPage = mainPage;
             this.bindingsSettingsPage = bindingsSettingsPage;
             this.soundsSettingsPage = soundsSettingsPage;
             this.gameplaySettingsPage = gameplaySettingsPage;
+            this.audioService = audioService;
         }
 
         public void Start()
@@ -105,6 +108,7 @@ namespace Container.Menu
             Time.timeScale = 1f;
             Cursor.lockState = CursorLockMode.Confined;
             Cursor.visible = true;
+            audioService.PlayMainMenuMusic();
 
             mainPage.GameRequested += LoadGame;
             mainPage.DevelopRequested += LoadDevelop;
@@ -125,15 +129,18 @@ namespace Container.Menu
             UnsubscribeSettingsPage(gameplaySettingsPage);
             currentPage?.Hide();
             currentPage = null;
+            audioService.StopMainMenuMusic();
         }
 
         private void LoadDevelop()
         {
+            audioService.StopMainMenuMusic();
             sceneLoadingService.Load(DevelopSceneName);
         }
 
         private void LoadGame()
         {
+            audioService.StopMainMenuMusic();
             sceneLoadingService.Load(GameSceneName);
         }
 

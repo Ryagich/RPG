@@ -20,6 +20,7 @@ MonoBehaviour:
   footstepSourcePrefab: {fileID: 4475651691867625152, guid: 63385babb7fec69439d9ed21b5bb418e, type: 3}
   buttonHoverClip: {fileID: 8300000, guid: 71629c64266e0b541b6f0fc0156ebfe0, type: 3}
   buttonClickClip: {fileID: 8300000, guid: a60f9476a4dd21742acfcca50e5c6062, type: 3}
+  mainMenuMusicClip: {fileID: 8300000, guid: ee391eb0609460846a4cb061d16ba920, type: 3}
   footstepRaycastDistance: 2.5
   footstepRaycastStartHeight: 0.8
   footstepRaycastMask:
