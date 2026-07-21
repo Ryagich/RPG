@@ -172,10 +172,16 @@ public class InputRebinder : MonoBehaviour, IPointerEnterHandler
 
     public void UpdateText()
     {
-        var localeName = LocalizationSettings.SelectedLocale.Identifier.Code;
+        _text.text = GetLocalizedBindingDisplayName(GetCurrentBinding());
+    }
+
+    public static string GetLocalizedBindingDisplayName(InputBinding binding)
+    {
+        var localeName = LocalizationSettings.SelectedLocale?.Identifier.Code;
         var name = InputControlPath.ToHumanReadableString(
-            GetCurrentBinding().effectivePath,
+            binding.effectivePath,
             InputControlPath.HumanReadableStringOptions.OmitDevice);
+
         switch (localeName)
         {
             case "en" or "EN":
@@ -325,7 +331,7 @@ public class InputRebinder : MonoBehaviour, IPointerEnterHandler
                 break;
         }
 
-        _text.text = name;
+        return name;
     }
 
     public void DisableRebinding()
@@ -339,7 +345,6 @@ public class InputRebinder : MonoBehaviour, IPointerEnterHandler
         Entered?.Invoke();
     }
 }
-
 
 
 

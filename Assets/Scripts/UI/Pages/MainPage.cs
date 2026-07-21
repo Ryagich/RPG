@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Interactable;
 using Inventory.Inventories;
 using Inventory.Slot;
+using Input;
 using Localization;
 using MessagePipe;
 using Messages;
@@ -56,6 +57,7 @@ namespace UI.Pages
         }
 
         private readonly UIConfig uiConfig;
+        private readonly InputConfig inputConfig;
         private readonly StatsConfig statsConfig;
         private readonly StatsController statsController;
         private readonly StatFillers statFillers;
@@ -104,6 +106,7 @@ namespace UI.Pages
         public MainPage
             (
                 UIConfig uiConfig,
+                InputConfig inputConfig,
                 StatsConfig statsConfig,
                 StatsController statsController,
                 StatFillers statFillers,
@@ -121,6 +124,7 @@ namespace UI.Pages
         {
             this.resolver = resolver;
             this.uiConfig = uiConfig;
+            this.inputConfig = inputConfig;
             this.statsConfig = statsConfig;
             this.statsController = statsController;
             this.statFillers = statFillers;
@@ -169,6 +173,7 @@ namespace UI.Pages
             interactableInterface = new InteractableInterface
                 (
                     uiConfig,
+                    inputConfig,
                     contentRect,
                     playerInteractableLogic,
                     itemHolderInteractableLogic

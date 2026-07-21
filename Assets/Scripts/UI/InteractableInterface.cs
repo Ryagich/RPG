@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Input;
 using Interactable;
 using TMPro;
 using UI.Configs;
@@ -14,6 +15,7 @@ namespace UI
     public class InteractableInterface : IDisposable
     {
         private readonly UIConfig uiConfig;
+        private readonly InputConfig inputConfig;
         private readonly RectTransform contentRect;
         private readonly PlayerInteractableLogic playerInteractableLogic;
         private readonly ItemHolderInteractableLogic itemHolderInteractableLogic;
@@ -26,12 +28,14 @@ namespace UI
         public InteractableInterface
             (
                 UIConfig uiConfig,
+                InputConfig inputConfig,
                 RectTransform contentRect,
                 PlayerInteractableLogic playerInteractableLogic,
                 ItemHolderInteractableLogic itemHolderInteractableLogic
             )
         {
             this.uiConfig = uiConfig;
+            this.inputConfig = inputConfig;
             this.contentRect = contentRect;
             this.playerInteractableLogic = playerInteractableLogic;
             this.itemHolderInteractableLogic = itemHolderInteractableLogic;
@@ -70,6 +74,7 @@ namespace UI
         {
             interactableText = Object.Instantiate(uiConfig.InteractableText, contentRect);
             interactableText.raycastTarget = false;
+            interactableText.text = $"[{GetInteractableBindingDisplayName()}]";
 
             // Keep the interaction prompt on a nested canvas so toggling it does not force the whole HUD to rebuild.
             if (!interactableText.TryGetComponent<Canvas>(out _))
@@ -87,6 +92,17 @@ namespace UI
             interactableCanvasGroup.blocksRaycasts = false;
             interactableCanvasGroup.alpha = 0f;
             isVisible = false;
+        }
+
+        private string GetInteractableBindingDisplayName()
+        {
+            var action = inputConfig?.Interactable?.action;
+            if (action == null || action.bindings.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            return InputRebinder.GetLocalizedBindingDisplayName(action.bindings[0]);
         }
         
         public void Dispose()
