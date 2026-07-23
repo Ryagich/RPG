@@ -3785,6 +3785,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4258493491095586132, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7343818703056778769}
+    - targetCorrespondingSourceObject: {fileID: 5286317590193920546, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2647435654439604018}
+    - targetCorrespondingSourceObject: {fileID: 5286317590193920546, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3185818246322079306}
     - targetCorrespondingSourceObject: {fileID: 1862297535398989632, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1489247255426881238}
@@ -5675,6 +5681,46 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_16
+--- !u!1 &1859902767693492653 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5286317590193920546, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &2647435654439604018
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1859902767693492653}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.10000083, y: 0.12615383, z: 0.14325528}
+  m_Center: {x: 0.0000000014686501, y: 0.051162187, z: 0.000009924708}
+--- !u!114 &3185818246322079306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1859902767693492653}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b7ab97a1e8349e486667e62be706130, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Combat.BodyHitbox
+  bodyPart: 1
+  damageMultiplier: 2
 --- !u!1 &1936806115262471018 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5364803688777691365, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9447,8 +9493,8 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.095494404
-  m_Center: {x: 0, y: 0.095494404, z: 0}
+  m_Radius: 0.13
+  m_Center: {x: 0, y: 0.075, z: -0.04}
 --- !u!54 &4824944109597708961
 Rigidbody:
   m_ObjectHideFlags: 0

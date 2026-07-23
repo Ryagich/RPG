@@ -22,14 +22,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &7354185206311042624
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4309771568245632549}
-  m_Enabled: 1
 --- !u!4 &2925860065574509289
 Transform:
   m_ObjectHideFlags: 0
@@ -65,6 +57,7 @@ MonoBehaviour:
   canvasLifetimeScope: {fileID: 8169136782938169325, guid: 5b115a6e80acde043bffd817553046d0, type: 3}
   characterInfo: {fileID: 11400000, guid: 3e00ca4ee5487f047ba759a296c3372a, type: 2}
   inventoryConfig: {fileID: 0}
+  corpseInteractionRadius: 1.8
 --- !u!143 &8919774632917513484
 CharacterController:
   m_ObjectHideFlags: 0
@@ -129,6 +122,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cff68e0ab8fc47eaa6e2babbece5ace0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player.PlayerRagdollController
+--- !u!81 &7354185206311042624
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4309771568245632549}
+  m_Enabled: 1
 --- !u!1001 &3239113870957849037
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3601,6 +3602,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4258493491095586132, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
       insertIndex: -1
       addedObject: {fileID: 743311259273992151}
+    - targetCorrespondingSourceObject: {fileID: 5286317590193920546, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6231004100297312499}
+    - targetCorrespondingSourceObject: {fileID: 5286317590193920546, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6771935235993430465}
     - targetCorrespondingSourceObject: {fileID: 1862297535398989632, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3559502100847002739}
@@ -7748,8 +7755,8 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.095494404
-  m_Center: {x: 0, y: 0.095494404, z: 0}
+  m_Radius: 0.13
+  m_Center: {x: 0, y: 0.075, z: -0.04}
 --- !u!54 &6801876126085947988
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -11647,6 +11654,46 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_03
+--- !u!1 &7327181979220440047 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5286317590193920546, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 3239113870957849037}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &6231004100297312499
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7327181979220440047}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.10000083, y: 0.12615383, z: 0.14325528}
+  m_Center: {x: 0.0000000014686501, y: 0.051162187, z: 0.000009924708}
+--- !u!114 &6771935235993430465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7327181979220440047}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b7ab97a1e8349e486667e62be706130, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Combat.BodyHitbox
+  bodyPart: 1
+  damageMultiplier: 2
 --- !u!1 &7343905583510679805 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5267364180483299632, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}

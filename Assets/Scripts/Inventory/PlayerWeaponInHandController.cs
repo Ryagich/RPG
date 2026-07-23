@@ -17,7 +17,7 @@ namespace Inventory
     public sealed class PlayerWeaponInHandController : IWeaponAnimationEventHandler, IEquippedWeaponVisual, IStartable, ITickable, IDisposable
     {
         private const string WeaponAnimationLayerName = "Weapon Layers";
-        private const string AttackLayerName = "Attack Full Body";
+        private const string AttackLayerName = "Full Body";
         private const string DrawWeaponStatePath = "Weapon Layers.DrawWeapon";
         private const string SheatheWeaponStatePath = "Weapon Layers.SheatheWeapon";
         private const string EmptyIdleStateName = "Empty Idle";
