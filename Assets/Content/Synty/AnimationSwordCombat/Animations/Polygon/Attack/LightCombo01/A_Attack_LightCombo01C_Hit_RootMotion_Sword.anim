@@ -23363,21 +23363,14 @@ AnimationClip:
   m_HasMotionFloatCurves: 1
   m_Events:
   - time: 0
+    functionName: PlayThirdWeaponAttackHitSound
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0
     functionName: BeginDamageWindow
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
-  - time: 0
-    functionName: PlayThirdWeaponAttackHitSound
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
-  - time: 0
-    functionName: PlayThirdWeaponAttackHitSound
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

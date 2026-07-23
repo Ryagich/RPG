@@ -44,7 +44,8 @@ namespace Inventory
         private const string DrawWeaponRequestedParameter = "MoveWeaponInHand";
         private const string SheatheWeaponRequestedParameter = "MoveWeaponInBelt";
         private const string AttackRequestedParameter = "Attack";
-        private const string LeftClickLogPrefix = "[WeaponLmb]";
+        private const string HeavyAttackRequestedParameter = "HeavyAttack";
+        private const string AttackInputLogPrefix = "[WeaponAttack]";
 
         private static readonly int DrawWeaponStateHash = Animator.StringToHash(DrawWeaponStatePath);
         private static readonly int SheatheWeaponStateHash = Animator.StringToHash(SheatheWeaponStatePath);
@@ -65,6 +66,7 @@ namespace Inventory
         private static readonly int DrawWeaponRequestedParameterHash = Animator.StringToHash(DrawWeaponRequestedParameter);
         private static readonly int SheatheWeaponRequestedParameterHash = Animator.StringToHash(SheatheWeaponRequestedParameter);
         private static readonly int AttackRequestedParameterHash = Animator.StringToHash(AttackRequestedParameter);
+        private static readonly int HeavyAttackRequestedParameterHash = Animator.StringToHash(HeavyAttackRequestedParameter);
 
         private enum WeaponDisplayMode
         {
@@ -126,7 +128,6 @@ namespace Inventory
             CharacterActionState actionState,
             ISubscriber<WeaponSlotInputMessage> weaponSlotInputSubscriber,
             ISubscriber<MouseDown> mouseDownSubscriber,
-            ISubscriber<MouseUp> mouseUpSubscriber,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
         {
             this.playerInventory = playerInventory;
@@ -150,7 +151,6 @@ namespace Inventory
 
             weaponSlotInputSubscriber.Subscribe(OnWeaponSlotInput).AddTo(disposables);
             mouseDownSubscriber.Subscribe(OnMouseDown).AddTo(disposables);
-            mouseUpSubscriber.Subscribe(OnMouseUp).AddTo(disposables);
             gameModeChangedSubscriber.Subscribe(OnGameModeChanged).AddTo(disposables);
             playerInventory.Changed.Subscribe(_ => RefreshWeaponInHand()).AddTo(disposables);
             playerInventory.HandSlot.Subscribe(_ => RefreshWeaponInHand()).AddTo(disposables);
@@ -288,7 +288,7 @@ namespace Inventory
 
             playerMovement?.ChangeState(false);
             playerAnimationController?.SetLocomotionLocked(true);
-            LogLeftClick("attack started event");
+            LogAttackInput(null, "attack started event");
         }
 
         public void BeginDamageWindowFromAnimationEvent()
@@ -335,16 +335,16 @@ namespace Inventory
 
             playerAnimationController?.SetLocomotionLocked(false);
             UpdateRunningAvailability();
-            LogLeftClick("attack finished event");
+            LogAttackInput(null, "attack finished event");
             RefreshWeaponInHand();
         }
 
         public void ResetAttackRequestFromAnimationEvent()
         {
-            // Animation Event: ResetAttackRequest
-            // Use on attack clips to clear the Animator Attack bool after the combo input window
-            // or after the transition point where the current attack should stop requesting itself.
-            SetAttackRequested(false);
+            // Legacy event endpoint: ResetAttackRequest.
+            // Its meaning is now "reset animation requests": both mutually exclusive
+            // attack request bools are cleared together.
+            ResetAnimationRequests();
         }
 
         public void InterruptByHitReaction()
@@ -452,46 +452,42 @@ namespace Inventory
 
         private void OnMouseDown(MouseDown message)
         {
-            if (actionState.IsActionBlocked)
+            if (message.Button is not (MouseButtonType.Left or MouseButtonType.Right))
             {
                 return;
             }
 
-            if (message.Button != MouseButtonType.Left)
+            // A hit reaction may also block the player, but only an active weapon attack
+            // is allowed to receive a replacement request while movement is locked.
+            if (actionState.IsActionBlocked && !isHitAttackInProgress)
             {
                 return;
             }
 
-            LogLeftClick("received");
+            LogAttackInput(message.Button, "received");
 
             if (gameModesController.GameMode != GameMode.Game)
             {
-                LogLeftClick("ignored: not in Game mode");
+                LogAttackInput(message.Button, "ignored: not in Game mode");
                 return;
             }
 
             if (isWeaponAnimationInProgress)
             {
-                LogLeftClick("ignored: weapon animation in progress");
-                return;
-            }
-
-            if (isHitAttackInProgress)
-            {
-                LogLeftClick("ignored: hit attack already in progress");
+                LogAttackInput(message.Button, "ignored: weapon animation in progress");
                 return;
             }
 
             var selectedItemConfig = ResolveActiveWeaponSelection();
             if (selectedItemConfig == null)
             {
-                LogLeftClick("ignored: no weapon in active slot");
+                LogAttackInput(message.Button, "ignored: no weapon in active slot");
                 return;
             }
 
             if (!isWeaponDrawn)
             {
-                LogLeftClick("weapon on belt -> request draw", selectedItemConfig);
+                LogAttackInput(message.Button, "weapon on belt -> request draw", selectedItemConfig);
                 isWeaponDrawn = true;
                 RefreshWeaponInHand();
                 return;
@@ -499,21 +495,13 @@ namespace Inventory
 
             if (currentDisplayMode != WeaponDisplayMode.RightHand || currentWeaponItemConfig == null)
             {
-                LogLeftClick("ignored: weapon not in hand", selectedItemConfig);
+                LogAttackInput(message.Button, "ignored: weapon not in hand", selectedItemConfig);
                 return;
             }
 
-            LogLeftClick("weapon in hand -> request Attack", selectedItemConfig);
+            LogAttackInput(message.Button, "weapon in hand -> request attack", selectedItemConfig);
             targetLockController?.TryFaceAttackTarget();
-            TriggerAttack();
-        }
-
-        private void OnMouseUp(MouseUp message)
-        {
-            if (message.Button != MouseButtonType.Left)
-            {
-                return;
-            }
+            TriggerAttack(message.Button);
         }
 
         private void OnGameModeChanged(GameModeChangedMessage message)
@@ -698,16 +686,19 @@ namespace Inventory
             animator.SetTrigger(SheatheWeaponRequestedParameterHash);
         }
 
-        private void TriggerAttack()
+        private void TriggerAttack(MouseButtonType button)
         {
             if (animator == null)
             {
-                LogLeftClick("Attack skipped: animator missing");
+                LogAttackInput(button, "request skipped: animator missing");
                 return;
             }
 
-            SetAttackRequested(true);
-            LogLeftClick("Attack bool set true");
+            var isHeavyAttack = button == MouseButtonType.Right;
+            SetAttackRequests(lightAttackRequested: !isHeavyAttack, heavyAttackRequested: isHeavyAttack);
+            LogAttackInput(button, isHeavyAttack
+                ? "HeavyAttack=true, Attack=false"
+                : "Attack=true, HeavyAttack=false");
         }
 
         private void CancelAttackFlow(bool restoreMovement = true)
@@ -735,11 +726,11 @@ namespace Inventory
                 return;
             }
 
-            SetAttackRequested(false);
+            ResetAnimationRequests();
 
             if (hadActiveAttackFlow)
             {
-                LogLeftClick("attack flow cancelled");
+                LogAttackInput(null, "attack flow cancelled");
             }
         }
 
@@ -1365,23 +1356,29 @@ namespace Inventory
 
             animator.ResetTrigger(DrawWeaponRequestedParameterHash);
             animator.ResetTrigger(SheatheWeaponRequestedParameterHash);
-            SetAttackRequested(false);
+            ResetAnimationRequests();
         }
 
-        private void SetAttackRequested(bool isRequested)
+        private void ResetAnimationRequests()
+        {
+            SetAttackRequests(lightAttackRequested: false, heavyAttackRequested: false);
+        }
+
+        private void SetAttackRequests(bool lightAttackRequested, bool heavyAttackRequested)
         {
             if (animator == null)
             {
                 return;
             }
 
-            animator.SetBool(AttackRequestedParameterHash, isRequested);
+            animator.SetBool(AttackRequestedParameterHash, lightAttackRequested);
+            animator.SetBool(HeavyAttackRequestedParameterHash, heavyAttackRequested);
         }
 
-        private void LogLeftClick(string message, ItemConfig selectedItemConfig = null)
+        private void LogAttackInput(MouseButtonType? button, string message, ItemConfig selectedItemConfig = null)
         {
             Debug.Log(
-                $"{LeftClickLogPrefix} {message} | " +
+                $"{AttackInputLogPrefix} button={button?.ToString() ?? "animation"} {message} | " +
                 $"selectedSlot={selectedWeaponSlotIndex} " +
                 $"selectedItem={(selectedItemConfig ?? GetSelectedWeaponItemConfig())?.name ?? "null"} " +
                 $"isWeaponDrawn={isWeaponDrawn} " +

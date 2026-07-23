@@ -9,7 +9,7 @@ namespace Inventory
     public sealed class PlayerWeaponAnimationEventReceiver : MonoBehaviour
     {
         // Animation event contract used on attack clips:
-        // - ResetAttackRequest: clears the Animator Attack bool so combo transitions do not loop forever.
+        // - ResetAnimationRequests: clears every attack-request bool (Attack and HeavyAttack).
         // - LockMovement: blocks player movement/rotation at an arbitrary moment in an attack clip.
         // - UnlockMovement: restores player movement/rotation at an arbitrary moment in an attack clip.
         // AttackStarted/AttackFinished remain available as optional hooks, but they are not the core
@@ -85,10 +85,13 @@ namespace Inventory
             weaponInHandController?.AttackFinishedFromAnimationEvent();
         }
 
-        public void ResetAttackRequest()
+        public void ResetAnimationRequests()
         {
             weaponInHandController?.ResetAttackRequestFromAnimationEvent();
         }
+
+        // Keeps existing clips working while their Animation Event is renamed.
+        public void ResetAttackRequest() => ResetAnimationRequests();
 
         // Parameterless methods are intentionally kept as the public animation-event contract.
         // Each clip can select its sound without serializing object references into the clip itself.

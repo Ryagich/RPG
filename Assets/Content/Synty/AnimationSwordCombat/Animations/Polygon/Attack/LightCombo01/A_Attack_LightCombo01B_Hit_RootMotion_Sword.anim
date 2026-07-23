@@ -23363,7 +23363,7 @@ AnimationClip:
   m_HasMotionFloatCurves: 1
   m_Events:
   - time: 0
-    functionName: ResetAttackRequest
+    functionName: ResetAnimationRequests
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
@@ -23371,13 +23371,6 @@ AnimationClip:
     messageOptions: 0
   - time: 0.033333335
     functionName: BeginDamageWindow
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
-  - time: 0.033333335
-    functionName: PlaySecondWeaponAttackHitSound
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
