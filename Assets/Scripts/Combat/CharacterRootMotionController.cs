@@ -51,7 +51,7 @@ namespace Combat
 
         private readonly Animator animator;
         private readonly CharacterController characterController;
-        private readonly HashSet<object> activeSources = new();
+        private readonly Dictionary<object, float> activeSources = new();
 
         private CharacterAnimatorRootMotionRelay relay;
 
@@ -81,7 +81,11 @@ namespace Combat
             relay?.Unbind(this);
         }
 
-        public void SetRootMotionActive(object source, bool isActive)
+        /// <summary>
+        /// Enables root motion for a source. Each source can specify how much of its Animator
+        /// displacement should be applied; overlapping sources use the largest multiplier.
+        /// </summary>
+        public void SetRootMotionActive(object source, bool isActive, float positionMultiplier = 1f)
         {
             if (source == null)
             {
@@ -90,7 +94,7 @@ namespace Combat
 
             if (isActive)
             {
-                activeSources.Add(source);
+                activeSources[source] = Mathf.Max(0f, positionMultiplier);
             }
             else
             {
@@ -123,7 +127,19 @@ namespace Combat
                 : localDelta;
             worldDelta.y = 0f;
 
-            characterController.Move(worldDelta);
+            characterController.Move(worldDelta * GetActivePositionMultiplier());
+        }
+
+        private float GetActivePositionMultiplier()
+        {
+            var multiplier = 0f;
+
+            foreach (var sourceMultiplier in activeSources.Values)
+            {
+                multiplier = Mathf.Max(multiplier, sourceMultiplier);
+            }
+
+            return multiplier;
         }
 
         private void UpdateAnimatorRootMotion()

@@ -32,5 +32,9 @@ namespace Movement
         [field: Space]
         [field: Header("Weight")]
         [field: SerializeField, Min(0f)] public float WeightSpeedPenaltyMultiplier { get; private set; } = 3f;
+
+        [field: Space]
+        [field: Header("Dodge")]
+        [field: SerializeField, Min(0f)] public float DodgeRootMotionMultiplier { get; private set; } = 2f;
     }
 }

@@ -4,6 +4,8 @@ using Input;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class BindingsController : MonoBehaviour
@@ -27,6 +29,12 @@ public class BindingsController : MonoBehaviour
     [SerializeField] private Slider _mouseSensitivitySlider;
     [SerializeField] private TMP_Text _mouseSensitivityValue;
 
+    private const string DodgeActionName = "Dodge";
+    private const string DodgeLocalizationTable = "Tables";
+    private const string DodgeLocalizationKey = "Input_Dodge";
+
+    private InputRebinder dodgeRebinder;
+
     private void Awake()
     {
         // The bindings prefab is opened as a standalone RPG page. This reference is optional
@@ -34,6 +42,7 @@ public class BindingsController : MonoBehaviour
         _settingsButtons = _settingsCanvas != null
             ? _settingsCanvas.GetComponentsInChildren<Button>().ToList()
             : new List<Button>();
+        CreateDodgeBindingButton();
         _buttons = GetComponentsInChildren<Button>().ToList();
         foreach (var button in _buttons)
         {
@@ -49,13 +58,71 @@ public class BindingsController : MonoBehaviour
         }
 
         InitializeMouseSensitivitySlider();
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+        UpdateDodgeBindingDisplayName();
     }
 
     private void OnDestroy()
     {
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+
         if (_mouseSensitivitySlider != null)
         {
             _mouseSensitivitySlider.onValueChanged.RemoveListener(SetMouseSensitivity);
+        }
+    }
+
+    private void CreateDodgeBindingButton()
+    {
+        var existingDodgeBinding = GetComponentsInChildren<InputRebinder>(true)
+            .FirstOrDefault(rebinder => rebinder.ActionName == DodgeActionName);
+        if (existingDodgeBinding != null)
+        {
+            dodgeRebinder = existingDodgeBinding;
+            return;
+        }
+
+        var template = GetComponentsInChildren<InputRebinder>(true)
+            .FirstOrDefault(rebinder => rebinder.ActionName == "Right Mouse");
+        if (template == null)
+        {
+            Debug.LogError("Dodge binding could not be created: Right Mouse binding row was not found.", this);
+            return;
+        }
+
+        var dodgeButton = Instantiate(template.gameObject, template.transform.parent);
+        dodgeButton.name = "Button_Dodge";
+        dodgeButton.transform.SetSiblingIndex(template.transform.GetSiblingIndex() + 1);
+
+        foreach (var behaviour in dodgeButton.GetComponentsInChildren<Behaviour>(true))
+        {
+            if (behaviour.GetType().Namespace?.StartsWith("UnityEngine.Localization") == true)
+            {
+                behaviour.enabled = false;
+            }
+        }
+
+        dodgeRebinder = dodgeButton.GetComponent<InputRebinder>();
+        dodgeRebinder.ConfigureAction(DodgeActionName, DodgeActionName);
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        UpdateDodgeBindingDisplayName();
+    }
+
+    private async void UpdateDodgeBindingDisplayName()
+    {
+        if (dodgeRebinder == null)
+        {
+            return;
+        }
+
+        var localizedName = await LocalizationSettings.StringDatabase
+            .GetLocalizedStringAsync(DodgeLocalizationTable, DodgeLocalizationKey).Task;
+        if (dodgeRebinder != null)
+        {
+            dodgeRebinder.SetDisplayName(localizedName);
         }
     }
 

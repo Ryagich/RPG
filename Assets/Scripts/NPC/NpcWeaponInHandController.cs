@@ -78,6 +78,8 @@ namespace NPC
         public void AttackStartedFromAnimationEvent() => actionState?.SetActionBlocked(true);
         public void BeginDamageWindowFromAnimationEvent() => BeginCurrentWeaponDamageWindow();
         public void EndDamageWindowFromAnimationEvent() => EndCurrentWeaponDamageWindow();
+        public void EnableDamageImmunityFromAnimationEvent() { }
+        public void DisableDamageImmunityFromAnimationEvent() { }
         public void LockMovementFromAnimationEvent() => actionState?.SetActionBlocked(true);
         public void UnlockMovementFromAnimationEvent() => actionState?.SetActionBlocked(false);
         public void AttackFinishedFromAnimationEvent()

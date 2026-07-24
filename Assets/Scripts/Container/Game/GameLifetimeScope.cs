@@ -34,6 +34,7 @@ namespace Container.Game
             builder.RegisterMessageBroker<TargetLockInputMessage>(options);
             builder.RegisterMessageBroker<MouseDown>(options);
             builder.RegisterMessageBroker<MouseUp>(options);
+            builder.RegisterMessageBroker<DodgeInputMessage>(options);
             builder.RegisterMessageBroker<ShowStatsInputMessage>(options);
             builder.RegisterMessageBroker<FastSlotInputMessage>(options);
             builder.RegisterMessageBroker<WeaponSlotInputMessage>(options);

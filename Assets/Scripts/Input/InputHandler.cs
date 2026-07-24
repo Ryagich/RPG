@@ -18,6 +18,7 @@ namespace Input
         private readonly IPublisher<MapInputMessage> mapInputPublisher;
         private readonly IPublisher<MouseDown> mouseDown;
         private readonly IPublisher<MouseUp> mouseUp;
+        private readonly IPublisher<DodgeInputMessage> dodgeInputPublisher;
         private readonly IPublisher<PauseInputMessage> pauseInputPublisher;
         private readonly IPublisher<TargetLockInputMessage> targetLockInputPublisher;
         private readonly IPublisher<ShowStatsInputMessage> showStatsInputPublisher;
@@ -40,6 +41,7 @@ namespace Input
                 IPublisher<MapInputMessage> mapInputPublisher,
                 IPublisher<MouseDown> mouseDown,
                 IPublisher<MouseUp> mouseUp,
+                IPublisher<DodgeInputMessage> dodgeInputPublisher,
                 IPublisher<PauseInputMessage> pauseInputPublisher,
                 IPublisher<TargetLockInputMessage> targetLockInputPublisher,
                 IPublisher<ShowStatsInputMessage> showStatsInputPublisher,
@@ -57,6 +59,7 @@ namespace Input
             this.mapInputPublisher = mapInputPublisher;
             this.mouseDown = mouseDown;
             this.mouseUp = mouseUp;
+            this.dodgeInputPublisher = dodgeInputPublisher;
             this.pauseInputPublisher = pauseInputPublisher;
             this.targetLockInputPublisher = targetLockInputPublisher;
             this.showStatsInputPublisher = showStatsInputPublisher;
@@ -79,6 +82,7 @@ namespace Input
             inputConfig.LeftClick.action.canceled += LeftMouseUp;
             inputConfig.RightClick.action.started += RightMouseDown;
             inputConfig.RightClick.action.canceled += RightMouseUp;
+            inputConfig.Dodge.action.started += Dodge;
             inputConfig.FastSlot1.action.started += _ => PublishFastSlot(1);
             inputConfig.FastSlot2.action.started += _ => PublishFastSlot(2);
             inputConfig.FastSlot3.action.started += _ => PublishFastSlot(3);
@@ -203,6 +207,14 @@ namespace Input
             }
 
             mouseUp.Publish(new(MouseButtonType.Right));
+        }
+
+        private void Dodge(InputAction.CallbackContext context)
+        {
+            if (!isPlayerDead)
+            {
+                dodgeInputPublisher.Publish(new DodgeInputMessage());
+            }
         }
 
         private void ShowStatsPressed(InputAction.CallbackContext context)

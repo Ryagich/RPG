@@ -52,6 +52,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Dodge",
+                    "type": "Button",
+                    "id": "247a0586-342f-40f0-8e03-8478e9fa83dc",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Run",
                     "type": "Button",
                     "id": "af691b04-99d2-4e73-b19c-97cad1a0cf92",
@@ -284,6 +293,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Right Mouse",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4a761a3d-da25-40f9-bcb5-24e9746a1d32",
+                    "path": "<Keyboard>/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Dodge",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

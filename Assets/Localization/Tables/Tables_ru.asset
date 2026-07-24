@@ -160,6 +160,10 @@ MonoBehaviour:
     m_Localized: Все задания
     m_Metadata:
       m_Items: []
+  - m_Id: 30000000000000001
+    m_Localized: Уворот
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

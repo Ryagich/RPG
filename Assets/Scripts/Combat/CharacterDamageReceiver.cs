@@ -13,6 +13,7 @@ namespace Combat
         private readonly StatsController statsController;
         private readonly PlayerInventory playerInventory;
         private readonly IPublisher<CharacterDamagedMessage> damagedPublisher;
+        private bool isWeaponDamageBlocked;
 
         public CharacterDamageReceiver(
             Transform ownerTransform,
@@ -30,9 +31,18 @@ namespace Combat
         public bool IsAlive => CurrentHp > 0f;
         public Transform OwnerTransform => ownerTransform;
 
+        /// <summary>
+        /// Blocks only hits delivered through <see cref="WeaponHit"/>. Environmental and periodic
+        /// damage modify stats directly and therefore remain unaffected.
+        /// </summary>
+        public void SetWeaponDamageBlocked(bool isBlocked)
+        {
+            isWeaponDamageBlocked = isBlocked;
+        }
+
         public void ReceiveHit(BodyHitbox hitbox, in WeaponHit hit)
         {
-            if (hitbox == null || hit.Damage <= 0f)
+            if (isWeaponDamageBlocked || hitbox == null || hit.Damage <= 0f)
             {
                 return;
             }

@@ -10,6 +10,8 @@ namespace Inventory
         void AttackStartedFromAnimationEvent();
         void BeginDamageWindowFromAnimationEvent();
         void EndDamageWindowFromAnimationEvent();
+        void EnableDamageImmunityFromAnimationEvent();
+        void DisableDamageImmunityFromAnimationEvent();
         void LockMovementFromAnimationEvent();
         void UnlockMovementFromAnimationEvent();
         void AttackFinishedFromAnimationEvent();

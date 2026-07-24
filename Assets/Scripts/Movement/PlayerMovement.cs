@@ -111,6 +111,11 @@ namespace Movement
         }
 
         public Vector2 CurrentVelocity => currentVelocity;
+        /// <summary>
+        /// The latest movement input received from the input system. Unlike <see cref="CurrentVelocity"/>,
+        /// it remains available when movement is temporarily disabled by an action animation.
+        /// </summary>
+        public Vector2 CurrentInputDirection => bufferedInputDirection;
         public bool IsRunning => isRunning;
         public bool IsMoving => canMove && currentVelocity.sqrMagnitude > InputThreshold;
 

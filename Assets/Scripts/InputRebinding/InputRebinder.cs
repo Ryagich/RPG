@@ -28,6 +28,7 @@ public class InputRebinder : MonoBehaviour, IPointerEnterHandler
     private bool actionWasEnabled;
 
     public bool RebindingEnabled => rebindingEnabled;
+    public string ActionName => _actionName;
 
     private enum Type
     {
@@ -50,6 +51,27 @@ public class InputRebinder : MonoBehaviour, IPointerEnterHandler
             {
                 label.text = displayName;
                 break;
+            }
+        }
+    }
+
+    public void ConfigureAction(string actionName, string displayName)
+    {
+        _actionName = actionName;
+        _bindingIndex = 0;
+        _type = Type.Button;
+        ResolveInputAction();
+        SetDisplayName(displayName);
+    }
+
+    public void SetDisplayName(string displayName)
+    {
+        foreach (var label in GetComponentsInChildren<TMP_Text>(true))
+        {
+            if (label != _text)
+            {
+                label.text = displayName;
+                return;
             }
         }
     }
@@ -345,7 +367,6 @@ public class InputRebinder : MonoBehaviour, IPointerEnterHandler
         Entered?.Invoke();
     }
 }
-
 
 
 

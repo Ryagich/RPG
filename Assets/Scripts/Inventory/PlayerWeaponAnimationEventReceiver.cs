@@ -9,7 +9,7 @@ namespace Inventory
     public sealed class PlayerWeaponAnimationEventReceiver : MonoBehaviour
     {
         // Animation event contract used on attack clips:
-        // - ResetAnimationRequests: clears every attack-request bool (Attack and HeavyAttack).
+        // - ResetAnimationRequests: clears every action-request bool (Attack, HeavyAttack and Dodge).
         // - LockMovement: blocks player movement/rotation at an arbitrary moment in an attack clip.
         // - UnlockMovement: restores player movement/rotation at an arbitrary moment in an attack clip.
         // AttackStarted/AttackFinished remain available as optional hooks, but they are not the core
@@ -68,6 +68,18 @@ namespace Inventory
         public void EndDamageWindow()
         {
             weaponInHandController?.EndDamageWindowFromAnimationEvent();
+        }
+
+        // Dodge animation events. They affect only WeaponHit processing; hunger, thirst and
+        // other periodic HP changes do not go through the weapon-damage pipeline.
+        public void EnableDamageImmunity()
+        {
+            weaponInHandController?.EnableDamageImmunityFromAnimationEvent();
+        }
+
+        public void DisableDamageImmunity()
+        {
+            weaponInHandController?.DisableDamageImmunityFromAnimationEvent();
         }
 
         public void LockMovement()

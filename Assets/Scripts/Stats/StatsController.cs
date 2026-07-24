@@ -8,7 +8,8 @@ namespace Stats
     public enum StatChangeSource
     {
         Manual,
-        Periodic
+        Periodic,
+        Combat
     }
 
     public readonly struct StatChangeInfo

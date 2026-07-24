@@ -76,6 +76,8 @@ namespace Messages
         }
     }
 
+    public readonly struct DodgeInputMessage { }
+
     public readonly struct ShowStatsInputMessage
     {
         public readonly bool IsPressed;

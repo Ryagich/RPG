@@ -25,6 +25,8 @@ namespace Movement
         private bool currentIsRun;
         private bool isGameplayActive = true;
         private bool isLocomotionLocked;
+        private bool isDodgeDirectionLocked;
+        private Vector2 dodgeDirectionalInput;
 
         private PlayerAnimationController(
             CameraMotor cameraMotor,
@@ -52,7 +54,7 @@ namespace Movement
                 return;
             }
 
-            if (isLocomotionLocked)
+            if (isDodgeDirectionLocked || isLocomotionLocked)
             {
                 return;
             }
@@ -118,12 +120,50 @@ namespace Movement
 
             if (isLocked)
             {
-                ApplyLocomotionParameters(Vector2.zero, false, force: true);
+                // Dodge chooses a child of its blend tree from DirectionX/DirectionY. Its
+                // animation event also locks locomotion at time zero, so retain the direction
+                // captured when the Dodge request was made instead of overwriting it with zero.
+                ApplyLocomotionParameters(
+                    isDodgeDirectionLocked ? dodgeDirectionalInput : Vector2.zero,
+                    false,
+                    force: true);
             }
             else
             {
                 ApplyLocomotionParameters(Vector2.zero, false, force: true);
             }
+        }
+
+        /// <summary>
+        /// Captures the direction of a Dodge request before its animation locks player movement.
+        /// The captured local direction is kept in Animator parameters until the corresponding
+        /// UnlockMovement event (or an action cancellation) releases it.
+        /// </summary>
+        public void CaptureDodgeDirection()
+        {
+            var movementInput = playerMovement.CurrentInputDirection;
+            var moveDirection = cameraMotor.GetGameplayPlanarRotation() *
+                                new Vector3(movementInput.x, 0f, movementInput.y);
+            var localMoveDirection = visualTransform.InverseTransformDirection(moveDirection);
+
+            dodgeDirectionalInput = new Vector2(
+                Mathf.Clamp(localMoveDirection.x, -1f, 1f),
+                Mathf.Clamp(localMoveDirection.z, -1f, 1f));
+            isDodgeDirectionLocked = true;
+
+            // The Dodge transition can begin before the time-zero LockMovement event fires.
+            // Write the captured values now so its blend tree never observes the later zeroes.
+            ApplyLocomotionParameters(dodgeDirectionalInput, false, force: true);
+        }
+
+        /// <summary>
+        /// Releases the direction captured for a Dodge. Normal locomotion updates resume on
+        /// the next tick once movement is unlocked.
+        /// </summary>
+        public void ReleaseDodgeDirection()
+        {
+            isDodgeDirectionLocked = false;
+            dodgeDirectionalInput = Vector2.zero;
         }
 
         private static bool AllowsLocomotion(GameMode mode)
