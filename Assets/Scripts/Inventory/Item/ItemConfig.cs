@@ -41,6 +41,7 @@ namespace Inventory.Item
         [field: SerializeField] public ItemType ItemType { get; private set; }
         [SerializeField, ShowIf(nameof(HasWeaponPrefab))] private GameObject weaponInHandPrefab;
         [SerializeField, ShowIf(nameof(HasWeaponDamage))] private Vector2Int weaponDamageRange = new(9, 11);
+        [SerializeField, ShowIf(nameof(HasWeaponDamage))] private Vector2Int heavyWeaponDamageRange = new(9, 11);
         [SerializeField, ShowIf(nameof(HasWeaponPrefab))] private WeaponAttachmentTransformData rightHandWeaponAttachment = new();
         [SerializeField, ShowIf(nameof(HasWeaponPrefab))] private WeaponAttachmentTransformData beltWeaponAttachment = new();
         [SerializeField, ShowIf(nameof(HasDefenseModifiers)), Range(0f, 1f)] private float physicalDefense;
@@ -61,6 +62,7 @@ namespace Inventory.Item
         public float PsiDefense => psiDefense;
         public float MagicDefense => magicDefense;
         public Vector2Int WeaponDamageRange => weaponDamageRange;
+        public Vector2Int HeavyWeaponDamageRange => heavyWeaponDamageRange;
         public bool BlocksFaceSlot => blocksFaceSlot;
         public float HpStat => hpStat;
         public float WaterStat => waterStat;
@@ -72,10 +74,11 @@ namespace Inventory.Item
         public WeaponAttachmentTransformData BeltWeaponAttachment => beltWeaponAttachment;
         public IReadOnlyList<EquippedItemVisual> EquippedVisuals => equippedVisuals;
 
-        public int GetRandomWeaponDamage()
+        public int GetRandomWeaponDamage(bool isHeavyAttack = false)
         {
-            var min = Mathf.Min(weaponDamageRange.x, weaponDamageRange.y);
-            var max = Mathf.Max(weaponDamageRange.x, weaponDamageRange.y);
+            var damageRange = isHeavyAttack ? heavyWeaponDamageRange : weaponDamageRange;
+            var min = Mathf.Min(damageRange.x, damageRange.y);
+            var max = Mathf.Max(damageRange.x, damageRange.y);
             return Random.Range(min, max + 1);
         }
 

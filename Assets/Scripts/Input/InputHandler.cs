@@ -19,6 +19,7 @@ namespace Input
         private readonly IPublisher<MouseDown> mouseDown;
         private readonly IPublisher<MouseUp> mouseUp;
         private readonly IPublisher<DodgeInputMessage> dodgeInputPublisher;
+        private readonly IPublisher<RollInputMessage> rollInputPublisher;
         private readonly IPublisher<PauseInputMessage> pauseInputPublisher;
         private readonly IPublisher<TargetLockInputMessage> targetLockInputPublisher;
         private readonly IPublisher<ShowStatsInputMessage> showStatsInputPublisher;
@@ -42,6 +43,7 @@ namespace Input
                 IPublisher<MouseDown> mouseDown,
                 IPublisher<MouseUp> mouseUp,
                 IPublisher<DodgeInputMessage> dodgeInputPublisher,
+                IPublisher<RollInputMessage> rollInputPublisher,
                 IPublisher<PauseInputMessage> pauseInputPublisher,
                 IPublisher<TargetLockInputMessage> targetLockInputPublisher,
                 IPublisher<ShowStatsInputMessage> showStatsInputPublisher,
@@ -60,6 +62,7 @@ namespace Input
             this.mouseDown = mouseDown;
             this.mouseUp = mouseUp;
             this.dodgeInputPublisher = dodgeInputPublisher;
+            this.rollInputPublisher = rollInputPublisher;
             this.pauseInputPublisher = pauseInputPublisher;
             this.targetLockInputPublisher = targetLockInputPublisher;
             this.showStatsInputPublisher = showStatsInputPublisher;
@@ -83,6 +86,7 @@ namespace Input
             inputConfig.RightClick.action.started += RightMouseDown;
             inputConfig.RightClick.action.canceled += RightMouseUp;
             inputConfig.Dodge.action.started += Dodge;
+            inputConfig.Roll.action.started += Roll;
             inputConfig.FastSlot1.action.started += _ => PublishFastSlot(1);
             inputConfig.FastSlot2.action.started += _ => PublishFastSlot(2);
             inputConfig.FastSlot3.action.started += _ => PublishFastSlot(3);
@@ -214,6 +218,14 @@ namespace Input
             if (!isPlayerDead)
             {
                 dodgeInputPublisher.Publish(new DodgeInputMessage());
+            }
+        }
+
+        private void Roll(InputAction.CallbackContext context)
+        {
+            if (!isPlayerDead)
+            {
+                rollInputPublisher.Publish(new RollInputMessage());
             }
         }
 

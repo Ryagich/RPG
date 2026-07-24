@@ -12,6 +12,7 @@ namespace Input
         [field: SerializeField] public InputActionReference LeftClick { get; private set; }
         [field: SerializeField] public InputActionReference RightClick { get; private set; }
         [field: SerializeField] public InputActionReference Dodge { get; private set; }
+        [field: SerializeField] public InputActionReference Roll { get; private set; }
         [field: SerializeField] public InputActionReference Run { get; private set; }
         [field: SerializeField] public InputActionReference ShowStats { get; private set; }
         [field: SerializeField] public InputActionReference Pause { get; private set; }
@@ -41,6 +42,7 @@ namespace Input
             LeftClick = EnsureReference(LeftClick, actionMap, "Left Mouse");
             RightClick = EnsureReference(RightClick, actionMap, "Right Mouse");
             Dodge = EnsureReference(Dodge, actionMap, "Dodge");
+            Roll = EnsureReference(Roll, actionMap, "Roll");
             Run = EnsureReference(Run, actionMap, "Run");
             ShowStats = EnsureReference(ShowStats, actionMap, "ShowStats");
             Pause = EnsureReference(Pause, actionMap, "Pause");

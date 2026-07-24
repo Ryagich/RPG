@@ -81,6 +81,7 @@ MonoBehaviour:
     <LightAttackCost>k__BackingField: 10
     <HeavyAttackCost>k__BackingField: 20
     <DodgeCost>k__BackingField: 15
+    <RollCost>k__BackingField: 25
   <PhysicalDefenseStat>k__BackingField:
     <Max>k__BackingField: 1
     <Min>k__BackingField: 0

@@ -164,6 +164,10 @@ MonoBehaviour:
     m_Localized: Уворот
     m_Metadata:
       m_Items: []
+  - m_Id: 30000000000000002
+    m_Localized: "\u041a\u0443\u0432\u044b\u0440\u043e\u043a"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

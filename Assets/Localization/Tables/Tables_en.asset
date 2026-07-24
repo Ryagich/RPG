@@ -142,6 +142,10 @@ MonoBehaviour:
     m_Localized: Dodge
     m_Metadata:
       m_Items: []
+  - m_Id: 30000000000000002
+    m_Localized: Roll
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

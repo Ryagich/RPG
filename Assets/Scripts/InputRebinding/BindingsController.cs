@@ -30,10 +30,13 @@ public class BindingsController : MonoBehaviour
     [SerializeField] private TMP_Text _mouseSensitivityValue;
 
     private const string DodgeActionName = "Dodge";
-    private const string DodgeLocalizationTable = "Tables";
+    private const string RollActionName = "Roll";
+    private const string EvasionLocalizationTable = "Tables";
     private const string DodgeLocalizationKey = "Input_Dodge";
+    private const string RollLocalizationKey = "Input_Roll";
 
     private InputRebinder dodgeRebinder;
+    private InputRebinder rollRebinder;
 
     private void Awake()
     {
@@ -42,7 +45,7 @@ public class BindingsController : MonoBehaviour
         _settingsButtons = _settingsCanvas != null
             ? _settingsCanvas.GetComponentsInChildren<Button>().ToList()
             : new List<Button>();
-        CreateDodgeBindingButton();
+        CreateEvasionBindingButtons();
         _buttons = GetComponentsInChildren<Button>().ToList();
         foreach (var button in _buttons)
         {
@@ -59,7 +62,7 @@ public class BindingsController : MonoBehaviour
 
         InitializeMouseSensitivitySlider();
         LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
-        UpdateDodgeBindingDisplayName();
+        UpdateEvasionBindingDisplayNames();
     }
 
     private void OnDestroy()
@@ -72,29 +75,42 @@ public class BindingsController : MonoBehaviour
         }
     }
 
-    private void CreateDodgeBindingButton()
+    private void OnSelectedLocaleChanged(Locale _)
     {
-        var existingDodgeBinding = GetComponentsInChildren<InputRebinder>(true)
-            .FirstOrDefault(rebinder => rebinder.ActionName == DodgeActionName);
-        if (existingDodgeBinding != null)
+        UpdateEvasionBindingDisplayNames();
+    }
+
+    private void CreateEvasionBindingButtons()
+    {
+        dodgeRebinder = CreateEvasionBindingButton(DodgeActionName, transformAfter: null);
+        rollRebinder = CreateEvasionBindingButton(RollActionName, dodgeRebinder?.transform);
+    }
+
+    private InputRebinder CreateEvasionBindingButton(string actionName, Transform transformAfter)
+    {
+        var existingBinding = GetComponentsInChildren<InputRebinder>(true)
+            .FirstOrDefault(rebinder => rebinder.ActionName == actionName);
+        if (existingBinding != null)
         {
-            dodgeRebinder = existingDodgeBinding;
-            return;
+            return existingBinding;
         }
 
         var template = GetComponentsInChildren<InputRebinder>(true)
             .FirstOrDefault(rebinder => rebinder.ActionName == "Right Mouse");
         if (template == null)
         {
-            Debug.LogError("Dodge binding could not be created: Right Mouse binding row was not found.", this);
-            return;
+            Debug.LogError($"{actionName} binding could not be created: Right Mouse binding row was not found.", this);
+            return null;
         }
 
-        var dodgeButton = Instantiate(template.gameObject, template.transform.parent);
-        dodgeButton.name = "Button_Dodge";
-        dodgeButton.transform.SetSiblingIndex(template.transform.GetSiblingIndex() + 1);
+        var bindingButton = Instantiate(template.gameObject, template.transform.parent);
+        bindingButton.name = $"Button_{actionName}";
+        bindingButton.transform.SetSiblingIndex(
+            transformAfter != null
+                ? transformAfter.GetSiblingIndex() + 1
+                : template.transform.GetSiblingIndex() + 1);
 
-        foreach (var behaviour in dodgeButton.GetComponentsInChildren<Behaviour>(true))
+        foreach (var behaviour in bindingButton.GetComponentsInChildren<Behaviour>(true))
         {
             if (behaviour.GetType().Namespace?.StartsWith("UnityEngine.Localization") == true)
             {
@@ -102,27 +118,29 @@ public class BindingsController : MonoBehaviour
             }
         }
 
-        dodgeRebinder = dodgeButton.GetComponent<InputRebinder>();
-        dodgeRebinder.ConfigureAction(DodgeActionName, DodgeActionName);
+        var rebinder = bindingButton.GetComponent<InputRebinder>();
+        rebinder.ConfigureAction(actionName, actionName);
+        return rebinder;
     }
 
-    private void OnSelectedLocaleChanged(Locale _)
+    private void UpdateEvasionBindingDisplayNames()
     {
-        UpdateDodgeBindingDisplayName();
+        UpdateEvasionBindingDisplayName(dodgeRebinder, DodgeLocalizationKey);
+        UpdateEvasionBindingDisplayName(rollRebinder, RollLocalizationKey);
     }
 
-    private async void UpdateDodgeBindingDisplayName()
+    private async void UpdateEvasionBindingDisplayName(InputRebinder rebinder, string localizationKey)
     {
-        if (dodgeRebinder == null)
+        if (rebinder == null)
         {
             return;
         }
 
         var localizedName = await LocalizationSettings.StringDatabase
-            .GetLocalizedStringAsync(DodgeLocalizationTable, DodgeLocalizationKey).Task;
-        if (dodgeRebinder != null)
+            .GetLocalizedStringAsync(EvasionLocalizationTable, localizationKey).Task;
+        if (rebinder != null)
         {
-            dodgeRebinder.SetDisplayName(localizedName);
+            rebinder.SetDisplayName(localizedName);
         }
     }
 

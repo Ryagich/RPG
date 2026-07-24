@@ -34,7 +34,8 @@ namespace Movement
         [field: SerializeField, Min(0f)] public float WeightSpeedPenaltyMultiplier { get; private set; } = 3f;
 
         [field: Space]
-        [field: Header("Dodge")]
+        [field: Header("Evasion root motion")]
         [field: SerializeField, Min(0f)] public float DodgeRootMotionMultiplier { get; private set; } = 2f;
+        [field: SerializeField, Min(0f)] public float RollRootMotionMultiplier { get; private set; } = 3f;
     }
 }

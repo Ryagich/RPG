@@ -17,6 +17,7 @@ namespace Stats
         [field: SerializeField, Min(0f)] public float LightAttackCost { get; private set; } = 10f;
         [field: SerializeField, Min(0f)] public float HeavyAttackCost { get; private set; } = 20f;
         [field: SerializeField, Min(0f)] public float DodgeCost { get; private set; } = 15f;
+        [field: SerializeField, Min(0f)] public float RollCost { get; private set; } = 25f;
 
         public Stamina
             (
@@ -31,6 +32,7 @@ namespace Stats
                 float lightAttackCost,
                 float heavyAttackCost,
                 float dodgeCost,
+                float rollCost,
                 float minSafePercent = 0.15f
             ) : base(max, min, value, periodicChange, minSafePercent)
         {
@@ -41,6 +43,7 @@ namespace Stats
             LightAttackCost = Mathf.Max(0f, lightAttackCost);
             HeavyAttackCost = Mathf.Max(0f, heavyAttackCost);
             DodgeCost = Mathf.Max(0f, dodgeCost);
+            RollCost = Mathf.Max(0f, rollCost);
         }
 
         public Stamina(Stamina oldStat) : this
@@ -56,6 +59,7 @@ namespace Stats
                 oldStat.LightAttackCost,
                 oldStat.HeavyAttackCost,
                 oldStat.DodgeCost,
+                oldStat.RollCost,
                 oldStat.MinSafePercent
             ) { }
 

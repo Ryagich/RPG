@@ -137,6 +137,10 @@ MonoBehaviour:
     m_Key: Input_Dodge
     m_Metadata:
       m_Items: []
+  - m_Id: 30000000000000002
+    m_Key: Input_Roll
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

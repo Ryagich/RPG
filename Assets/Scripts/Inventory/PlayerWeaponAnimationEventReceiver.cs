@@ -9,7 +9,7 @@ namespace Inventory
     public sealed class PlayerWeaponAnimationEventReceiver : MonoBehaviour
     {
         // Animation event contract used on attack clips:
-        // - ResetAnimationRequests: clears every action-request bool (Attack, HeavyAttack and Dodge).
+        // - ResetAnimationRequests: clears every action-request bool (Attack, HeavyAttack, Dodge and Roll).
         // - LockMovement: blocks player movement/rotation at an arbitrary moment in an attack clip.
         // - UnlockMovement: restores player movement/rotation at an arbitrary moment in an attack clip.
         // AttackStarted/AttackFinished remain available as optional hooks, but they are not the core

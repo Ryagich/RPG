@@ -18,6 +18,7 @@ MonoBehaviour:
   <LeftClick>k__BackingField: {fileID: 5637978892861409632, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
   <RightClick>k__BackingField: {fileID: 6652609453448676580, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
   <Dodge>k__BackingField: {fileID: -550484178302480182, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
+  <Roll>k__BackingField: {fileID: -5110727651051834557, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
   <Run>k__BackingField: {fileID: 5141890984082140844, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
   <ShowStats>k__BackingField: {fileID: -7457735126509293610, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}
   <Pause>k__BackingField: {fileID: -7526904096902844659, guid: bdb34958693f0a040a0bc6e7da1f7e64, type: 3}

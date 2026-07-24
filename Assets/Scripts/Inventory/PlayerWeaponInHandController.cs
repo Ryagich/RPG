@@ -42,6 +42,7 @@ namespace Inventory
         private const string HeavyAttackHitRootMotionStateName = "A_Attack_HeavyCombo01A_Hit_RootMotion_Sword";
         private const string HeavyAttackHitStateName = "A_Attack_HeavyCombo01B_Hit_Sword";
         private const string DodgeStateName = "Dodge Tree";
+        private const string RollStateName = "Dodge RollTree";
         private const string DrawWeaponClipName = "A_Draw_Sword";
         private const string SheatheWeaponClipName = "A_Sheathe_Sword";
         private const float FallbackAttachmentBlendDuration = 0.08f;
@@ -54,6 +55,7 @@ namespace Inventory
         private const string AttackRequestedParameter = "Attack";
         private const string HeavyAttackRequestedParameter = "HeavyAttack";
         private const string DodgeRequestedParameter = "Dodge";
+        private const string RollRequestedParameter = "Roll";
         private const string AttackInputLogPrefix = "[WeaponAttack]";
 
         private static readonly int DrawWeaponStateHash = Animator.StringToHash(DrawWeaponStatePath);
@@ -79,11 +81,13 @@ namespace Inventory
         private static readonly int HeavyAttackHitRootMotionStateShortNameHash = Animator.StringToHash(HeavyAttackHitRootMotionStateName);
         private static readonly int HeavyAttackHitStateShortNameHash = Animator.StringToHash(HeavyAttackHitStateName);
         private static readonly int DodgeStateShortNameHash = Animator.StringToHash(DodgeStateName);
+        private static readonly int RollStateShortNameHash = Animator.StringToHash(RollStateName);
         private static readonly int DrawWeaponRequestedParameterHash = Animator.StringToHash(DrawWeaponRequestedParameter);
         private static readonly int SheatheWeaponRequestedParameterHash = Animator.StringToHash(SheatheWeaponRequestedParameter);
         private static readonly int AttackRequestedParameterHash = Animator.StringToHash(AttackRequestedParameter);
         private static readonly int HeavyAttackRequestedParameterHash = Animator.StringToHash(HeavyAttackRequestedParameter);
         private static readonly int DodgeRequestedParameterHash = Animator.StringToHash(DodgeRequestedParameter);
+        private static readonly int RollRequestedParameterHash = Animator.StringToHash(RollRequestedParameter);
 
         private enum WeaponDisplayMode
         {
@@ -150,6 +154,7 @@ namespace Inventory
             ISubscriber<WeaponSlotInputMessage> weaponSlotInputSubscriber,
             ISubscriber<MouseDown> mouseDownSubscriber,
             ISubscriber<DodgeInputMessage> dodgeInputSubscriber,
+            ISubscriber<RollInputMessage> rollInputSubscriber,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
         {
             this.playerInventory = playerInventory;
@@ -176,6 +181,7 @@ namespace Inventory
             weaponSlotInputSubscriber.Subscribe(OnWeaponSlotInput).AddTo(disposables);
             mouseDownSubscriber.Subscribe(OnMouseDown).AddTo(disposables);
             dodgeInputSubscriber.Subscribe(OnDodgeInput).AddTo(disposables);
+            rollInputSubscriber.Subscribe(OnRollInput).AddTo(disposables);
             gameModeChangedSubscriber.Subscribe(OnGameModeChanged).AddTo(disposables);
             playerInventory.Changed.Subscribe(_ => RefreshWeaponInHand()).AddTo(disposables);
             playerInventory.HandSlot.Subscribe(_ => RefreshWeaponInHand()).AddTo(disposables);
@@ -184,7 +190,7 @@ namespace Inventory
         public void Start()
         {
             ResetAnimatorRequests();
-            playerAnimationController?.ReleaseDodgeDirection();
+            playerAnimationController?.ReleaseEvasionDirection();
             ownerDamageReceiver?.SetWeaponDamageBlocked(false);
             RefreshWeaponInHand();
             UpdateRunningAvailability();
@@ -193,7 +199,7 @@ namespace Inventory
 
         public void Dispose()
         {
-            playerAnimationController?.ReleaseDodgeDirection();
+            playerAnimationController?.ReleaseEvasionDirection();
             ownerDamageReceiver?.SetWeaponDamageBlocked(false);
             weaponAttachmentBlendDisposable.Dispose();
             DestroyCurrentWeaponInstance();
@@ -354,7 +360,7 @@ namespace Inventory
             // Animation Event: UnlockMovement
             // Use on attack / return-to-idle clips when control can be returned
             // before the full attack flow has completely ended.
-            playerAnimationController?.ReleaseDodgeDirection();
+            playerAnimationController?.ReleaseEvasionDirection();
 
             if (gameModesController.GameMode == GameMode.Game)
             {
@@ -390,7 +396,7 @@ namespace Inventory
 
         public void InterruptByHitReaction()
         {
-            playerAnimationController?.ReleaseDodgeDirection();
+            playerAnimationController?.ReleaseEvasionDirection();
             CancelAttackFlow(restoreMovement: false);
             ResetAnimatorRequests();
             UpdateAttackRootMotionAvailability(forceDisable: true);
@@ -499,12 +505,6 @@ namespace Inventory
                 return;
             }
 
-            if (IsDodgeInProgress())
-            {
-                LogAttackInput(message.Button, "ignored: dodge in progress");
-                return;
-            }
-
             // A hit reaction may also block the player, but only an active weapon attack
             // is allowed to receive a replacement request while movement is locked.
             if (actionState.IsActionBlocked && !isHitAttackInProgress)
@@ -569,14 +569,14 @@ namespace Inventory
 
         private void OnDodgeInput(DodgeInputMessage _)
         {
-            // Dodge follows the same request protocol as light/heavy attacks. Its bool only
-            // initiates a transition and is cleared by ResetAnimationRequests at the beginning
-            // of the selected clip. Therefore attack states that have a Dodge transition stay
-            // eligible; only hit states and a hit reaction reject the input.
+            // Dodge and Roll follow the same request protocol as light/heavy attacks. Their
+            // bools only initiate transitions and are cleared by ResetAnimationRequests at the
+            // beginning of the selected clip. While another action animation is playing, a new
+            // request remains in the Animator and replaces the preceding request, just like an
+            // attack input does. Only hit states and a hit reaction reject combat input.
             if (animator == null
              || gameModesController.GameMode != GameMode.Game
              || isWeaponAnimationInProgress
-             || IsDodgeInProgress()
              || IsHitAnimationInProgress()
              || (actionState.IsActionBlocked && !isHitAttackInProgress))
             {
@@ -585,15 +585,34 @@ namespace Inventory
 
             SpendStamina(GetStamina().DodgeCost);
 
-            // Capture the live input before the Dodge clip's LockMovement event clears
-            // locomotion parameters. The Dodge Tree uses the same parameters to select
-            // forward/back/left/right clips.
-            playerAnimationController?.CaptureDodgeDirection();
+            CaptureEvasionDirection();
 
             SetAnimationRequests(
                 lightAttackRequested: false,
                 heavyAttackRequested: false,
-                dodgeRequested: true);
+                dodgeRequested: true,
+                rollRequested: false);
+        }
+
+        private void OnRollInput(RollInputMessage _)
+        {
+            if (animator == null
+             || gameModesController.GameMode != GameMode.Game
+             || isWeaponAnimationInProgress
+             || IsHitAnimationInProgress()
+             || (actionState.IsActionBlocked && !isHitAttackInProgress))
+            {
+                return;
+            }
+
+            SpendStamina(GetStamina().RollCost);
+            CaptureEvasionDirection();
+
+            SetAnimationRequests(
+                lightAttackRequested: false,
+                heavyAttackRequested: false,
+                dodgeRequested: false,
+                rollRequested: true);
         }
 
         private void RefreshWeaponInHand()
@@ -776,7 +795,8 @@ namespace Inventory
             SetAnimationRequests(
                 lightAttackRequested: !isHeavyAttack,
                 heavyAttackRequested: isHeavyAttack,
-                dodgeRequested: false);
+                dodgeRequested: false,
+                rollRequested: false);
             LogAttackInput(button, isHeavyAttack
                 ? "HeavyAttack=true, Attack=false"
                 : "Attack=true, HeavyAttack=false");
@@ -784,7 +804,7 @@ namespace Inventory
 
         private void CancelAttackFlow(bool restoreMovement = true)
         {
-            playerAnimationController?.ReleaseDodgeDirection();
+            playerAnimationController?.ReleaseEvasionDirection();
             DisableDamageImmunityFromAnimationEvent();
             var hadActiveAttackFlow = isHitAttackInProgress;
 
@@ -1161,7 +1181,10 @@ namespace Inventory
             }
 
             activeDamageZone = damageZone;
-            activeDamageZone.BeginDamageWindow(ownerDamageReceiver, currentWeaponItemConfig);
+            activeDamageZone.BeginDamageWindow(
+                ownerDamageReceiver,
+                currentWeaponItemConfig,
+                IsHeavyAttackDamageAnimationActive());
         }
 
         private void EndCurrentWeaponDamageWindow()
@@ -1447,13 +1470,15 @@ namespace Inventory
             SetAnimationRequests(
                 lightAttackRequested: false,
                 heavyAttackRequested: false,
-                dodgeRequested: false);
+                dodgeRequested: false,
+                rollRequested: false);
         }
 
         private void SetAnimationRequests(
             bool lightAttackRequested,
             bool heavyAttackRequested,
-            bool dodgeRequested)
+            bool dodgeRequested,
+            bool rollRequested)
         {
             if (animator == null)
             {
@@ -1463,6 +1488,7 @@ namespace Inventory
             animator.SetBool(AttackRequestedParameterHash, lightAttackRequested);
             animator.SetBool(HeavyAttackRequestedParameterHash, heavyAttackRequested);
             animator.SetBool(DodgeRequestedParameterHash, dodgeRequested);
+            animator.SetBool(RollRequestedParameterHash, rollRequested);
         }
 
         private void LogAttackInput(MouseButtonType? button, string message, ItemConfig selectedItemConfig = null)
@@ -1497,8 +1523,8 @@ namespace Inventory
             }
 
             var isRootMotionActive = !forceDisable && IsAttackRootMotionStateActive();
-            var positionMultiplier = isRootMotionActive && IsDodgeInProgress()
-                ? playerMovementConfig.DodgeRootMotionMultiplier
+            var positionMultiplier = isRootMotionActive
+                ? GetEvasionRootMotionMultiplier()
                 : 1f;
             rootMotionController?.SetRootMotionActive(this, isRootMotionActive, positionMultiplier);
         }
@@ -1529,7 +1555,13 @@ namespace Inventory
             return animator != null
                 && (animator.GetBool(AttackRequestedParameterHash)
                  || animator.GetBool(HeavyAttackRequestedParameterHash)
-                 || animator.GetBool(DodgeRequestedParameterHash));
+                 || animator.GetBool(DodgeRequestedParameterHash)
+                 || animator.GetBool(RollRequestedParameterHash));
+        }
+
+        private bool IsEvasionInProgress()
+        {
+            return IsDodgeInProgress() || IsRollInProgress();
         }
 
         private bool IsDodgeInProgress()
@@ -1540,7 +1572,8 @@ namespace Inventory
             }
 
             // The request bool is true only until the entry event resets it. Once the dodge
-            // begins, the state check keeps attacks and a second dodge from interrupting it.
+            // begins, the state check still identifies it for root-motion handling; it does
+            // not block later combat requests from being buffered in the Animator.
             if (animator.GetBool(DodgeRequestedParameterHash)
                 || animator.GetCurrentAnimatorStateInfo(attackLayerIndex).shortNameHash == DodgeStateShortNameHash)
             {
@@ -1549,6 +1582,42 @@ namespace Inventory
 
             return animator.IsInTransition(attackLayerIndex)
                 && animator.GetNextAnimatorStateInfo(attackLayerIndex).shortNameHash == DodgeStateShortNameHash;
+        }
+
+        private bool IsRollInProgress()
+        {
+            if (animator == null || attackLayerIndex < 0)
+            {
+                return false;
+            }
+
+            if (animator.GetBool(RollRequestedParameterHash)
+                || animator.GetCurrentAnimatorStateInfo(attackLayerIndex).shortNameHash == RollStateShortNameHash)
+            {
+                return true;
+            }
+
+            return animator.IsInTransition(attackLayerIndex)
+                && animator.GetNextAnimatorStateInfo(attackLayerIndex).shortNameHash == RollStateShortNameHash;
+        }
+
+        private float GetEvasionRootMotionMultiplier()
+        {
+            if (IsRollInProgress())
+            {
+                return playerMovementConfig.RollRootMotionMultiplier;
+            }
+
+            return IsDodgeInProgress()
+                ? playerMovementConfig.DodgeRootMotionMultiplier
+                : 1f;
+        }
+
+        private void CaptureEvasionDirection()
+        {
+            // Both evasion blend trees select a directional clip from DirectionX/DirectionY.
+            // This must happen before their time-zero LockMovement event clears locomotion.
+            playerAnimationController?.CaptureEvasionDirection();
         }
 
         private bool IsHitAnimationInProgress()
@@ -1577,6 +1646,29 @@ namespace Inventory
                 || stateHash == AttackComboBHitStateShortNameHash
                 || stateHash == AttackHitStateShortNameHash
                 || stateHash == HeavyAttackHitRootMotionStateShortNameHash
+                || stateHash == HeavyAttackHitStateShortNameHash;
+        }
+
+        private bool IsHeavyAttackDamageAnimationActive()
+        {
+            if (animator == null || attackLayerIndex < 0)
+            {
+                return false;
+            }
+
+            if (IsHeavyAttackHitState(animator.GetCurrentAnimatorStateInfo(attackLayerIndex)))
+            {
+                return true;
+            }
+
+            return animator.IsInTransition(attackLayerIndex)
+                && IsHeavyAttackHitState(animator.GetNextAnimatorStateInfo(attackLayerIndex));
+        }
+
+        private static bool IsHeavyAttackHitState(AnimatorStateInfo stateInfo)
+        {
+            var stateHash = stateInfo.shortNameHash;
+            return stateHash == HeavyAttackHitRootMotionStateShortNameHash
                 || stateHash == HeavyAttackHitStateShortNameHash;
         }
 

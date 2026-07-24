@@ -1848,8 +1848,14 @@ namespace UI.Pages
 
         private static string FormatWeaponDamage(ItemConfig itemConfig)
         {
-            var min = Mathf.Min(itemConfig.WeaponDamageRange.x, itemConfig.WeaponDamageRange.y);
-            var max = Mathf.Max(itemConfig.WeaponDamageRange.x, itemConfig.WeaponDamageRange.y);
+            return $"{FormatWeaponDamageRange(itemConfig.WeaponDamageRange)} / " +
+                   FormatWeaponDamageRange(itemConfig.HeavyWeaponDamageRange);
+        }
+
+        private static string FormatWeaponDamageRange(Vector2Int damageRange)
+        {
+            var min = Mathf.Min(damageRange.x, damageRange.y);
+            var max = Mathf.Max(damageRange.x, damageRange.y);
             return $"{min.ToString(CultureInfo.InvariantCulture)}-{max.ToString(CultureInfo.InvariantCulture)}";
         }
 
