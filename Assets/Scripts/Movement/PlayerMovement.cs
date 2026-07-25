@@ -9,7 +9,7 @@ using VContainer.Unity;
 namespace Movement
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class PlayerMovement : ITickable
+    public class PlayerMovement : ITickable, IStaminaMovementState
     {
         private const float InputThreshold = 0.001f;
 

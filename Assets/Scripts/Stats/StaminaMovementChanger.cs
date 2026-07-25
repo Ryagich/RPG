@@ -1,5 +1,4 @@
 using Inventory.Inventories;
-using Movement;
 using UI;
 using UnityEngine;
 using VContainer.Unity;
@@ -11,7 +10,7 @@ namespace Stats
         private readonly StatsConfig statsConfig;
         private readonly StatsController statsController;
         private readonly PlayerInventory playerInventory;
-        private readonly PlayerMovement playerMovement;
+        private readonly IStaminaMovementState movementState;
 
         private float elapsedTime;
         private bool isStarted;
@@ -20,12 +19,12 @@ namespace Stats
             StatsConfig statsConfig,
             StatsController statsController,
             PlayerInventory playerInventory,
-            PlayerMovement playerMovement)
+            IStaminaMovementState movementState)
         {
             this.statsConfig = statsConfig;
             this.statsController = statsController;
             this.playerInventory = playerInventory;
-            this.playerMovement = playerMovement;
+            this.movementState = movementState;
         }
 
         public void Start()
@@ -58,7 +57,7 @@ namespace Stats
 
         private void ApplyMovementDrain()
         {
-            if (!playerMovement.IsMoving)
+            if (movementState?.IsMoving != true)
             {
                 return;
             }
@@ -71,7 +70,7 @@ namespace Stats
                 return;
             }
 
-            if (playerMovement.IsRunning)
+            if (movementState.IsRunning)
             {
                 drainAmount *= staminaStat.RunDrainMultiplier;
             }

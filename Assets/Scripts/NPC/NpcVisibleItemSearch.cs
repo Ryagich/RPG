@@ -43,7 +43,7 @@ namespace NPC
             plans = new List<NpcItemPickupPlan>();
             foreach (var item in sensor.ItemCandidates)
             {
-                if (item == null || !item.CanInteractable || item.Config == null || !vision.IsInView(item.transform.position))
+                if (item == null || !item.CanInteractable || item.Config == null || !vision.IsInView(item.transform))
                 {
                     continue;
                 }

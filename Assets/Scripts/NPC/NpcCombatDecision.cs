@@ -8,6 +8,7 @@ namespace NPC
         Maneuver = 3,
         Circle = 4,
         Wait = 5,
-        KeepDistance = 6
+        KeepDistance = 6,
+        Evade = 7
     }
 }

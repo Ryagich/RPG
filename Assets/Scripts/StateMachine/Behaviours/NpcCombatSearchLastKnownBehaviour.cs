@@ -10,6 +10,7 @@ namespace StateMachine.Behaviours
         public override void Enter(StateMachineContext context)
         {
             context?.GetService<NpcNavMeshController>()?.SetFacingLocked(true);
+            context?.GetService<NpcCombatService>()?.TryPrepareWeapon();
             context?.SetValue(NpcCombatStateKeys.LastKnownLookTimer, 0f);
             Move(context);
         }

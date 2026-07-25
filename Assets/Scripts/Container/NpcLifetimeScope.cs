@@ -29,12 +29,16 @@ namespace Container
         [SerializeField] private DialogGraph dialog;
         [SerializeField] private StateMachineGraph stateMachineGraph;
         [SerializeField] private FactionConfig faction;
+        [Header("Combat AI")]
+        [Tooltip("If empty, this NPC uses the combat profile assigned to its faction.")]
+        [SerializeField] private NpcCombatProfile combatProfileOverride;
         [SerializeField, Min(0.1f)] private float dialogueInteractionRadius = 1.8f;
         [SerializeField, ReadOnlyInInspector] private float currentHp;
         [SerializeField, ReadOnlyInInspector] private string currentState = "Not Started";
 
         public StateMachineGraph StateMachineGraph => stateMachineGraph;
         public FactionConfig Faction => faction;
+        public NpcCombatProfile CombatProfile => combatProfileOverride != null ? combatProfileOverride : faction?.CombatProfile;
         public float CurrentHp => currentHp;
         public string CurrentState => currentState;
 
@@ -72,7 +76,7 @@ namespace Container
             EnsureDialogueInteractionZone();
             var navMeshAgent = GetComponent<NavMeshAgent>() ?? gameObject.AddComponent<NavMeshAgent>();
             builder.RegisterComponent(navMeshAgent).AsSelf();
-            builder.RegisterEntryPoint<NpcNavMeshController>().AsSelf();
+            builder.RegisterEntryPoint<NpcNavMeshController>().AsSelf().As<IStaminaMovementState>();
             builder.RegisterEntryPoint<NpcFootstepPlayer>().AsSelf();
 
             builder.RegisterInstance(transform);
@@ -114,6 +118,8 @@ namespace Container
             builder.Register<StatsController>(Lifetime.Singleton).AsSelf();
             builder.Register<StatFillers>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<StatsPeriodicChanger>().AsSelf();
+            builder.RegisterEntryPoint<StaminaPeriodicChanger>().AsSelf();
+            builder.RegisterEntryPoint<StaminaMovementChanger>().AsSelf();
             builder.RegisterEntryPoint<EquippedDefenseStatsChanger>().AsSelf();
 
             // Player and NPC must keep the same character systems; only the control source differs:
@@ -135,6 +141,7 @@ namespace Container
                    .AsSelf()
                    .As<IEquippedWeaponVisual>()
                    .As<IStartable>()
+                   .As<ITickable>()
                    .As<System.IDisposable>();
 
             builder.RegisterEntryPoint<PlayerInventory>().As<IInventory>().AsSelf();

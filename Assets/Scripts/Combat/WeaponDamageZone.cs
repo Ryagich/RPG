@@ -45,7 +45,9 @@ namespace Combat
             isHeavyAttack = useHeavyAttackDamage;
             hitReceivers.Clear();
             hitObjectReceivers.Clear();
-            isDamageWindowOpen = weaponConfig != null;
+            isDamageWindowOpen = attacker != null
+                                 && weaponConfig != null
+                                 && !attacker.IsWeaponAttackSuppressed;
         }
 
         public void EndDamageWindow()
@@ -60,7 +62,10 @@ namespace Combat
 
         private void OnTriggerEnter(Collider other)
         {
-            if (!isDamageWindowOpen || other == null)
+            if (!isDamageWindowOpen
+             || attacker == null
+             || attacker.IsWeaponAttackSuppressed
+             || other == null)
             {
                 return;
             }

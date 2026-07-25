@@ -54,6 +54,20 @@ namespace Interactable
             }
         }
 
+        private void OnTriggerStay(Collider other)
+        {
+            if (((1 << other.gameObject.layer) & config.InteractiveLayers) == 0)
+            {
+                return;
+            }
+
+            var interactable = other.GetComponentInParent<Interactable>();
+            if (interactable)
+            {
+                interactablePublisher.Publish(scopeID, new InteractableMessage(interactable));
+            }
+        }
+
         private void OnTriggerExit(Collider other)
         {
             if (((1 << other.gameObject.layer) & config.InteractiveLayers) != 0)

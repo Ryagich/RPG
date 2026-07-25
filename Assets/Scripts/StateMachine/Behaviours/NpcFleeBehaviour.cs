@@ -9,6 +9,8 @@ namespace StateMachine.Behaviours
     {
         public override void Enter(StateMachineContext context)
         {
+            context?.RemoveValue(NpcCombatStateKeys.EngagementOriginPosition);
+            context?.RemoveValue(NpcCombatStateKeys.EngagementOriginRotation);
             context?.RemoveValue(NpcCombatStateKeys.FleeCompleted);
             context?.SetValue(NpcCombatStateKeys.FleeLookTimer, 0f);
             context?.SetValue(NpcCombatStateKeys.FleeLookingBack, false);

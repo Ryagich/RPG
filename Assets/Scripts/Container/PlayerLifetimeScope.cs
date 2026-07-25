@@ -72,7 +72,7 @@ namespace Container
             builder.RegisterEntryPoint<TargetLockController>().AsSelf();
             builder.RegisterEntryPoint<PlayerGravity>().AsSelf();
             builder.RegisterEntryPoint<PlayerMovementController>().AsSelf();
-            builder.RegisterEntryPoint<PlayerMovement>().AsSelf();
+            builder.RegisterEntryPoint<PlayerMovement>().AsSelf().As<IStaminaMovementState>();
             builder.RegisterEntryPoint<PlayerFootstepPlayer>().AsSelf();
             builder.RegisterEntryPoint<PlayerAnimationController>().AsSelf();
             builder.RegisterEntryPoint<PlayerInteractableLogic>().AsSelf();

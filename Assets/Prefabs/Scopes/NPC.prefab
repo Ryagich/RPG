@@ -67,6 +67,7 @@ MonoBehaviour:
   dialog: {fileID: 11400000, guid: 88d2c07937d080b4ba52468317585259, type: 2}
   stateMachineGraph: {fileID: 11400000, guid: 9fef677537be06b4e8a00a17d5132a30, type: 2}
   faction: {fileID: 0}
+  combatProfileOverride: {fileID: 0}
   dialogueInteractionRadius: 1.8
   currentHp: 0
   currentState: Not Started

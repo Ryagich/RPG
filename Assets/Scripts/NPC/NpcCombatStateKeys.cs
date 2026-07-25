@@ -14,6 +14,12 @@ namespace NPC
         public const string AttackCompleted = "NpcCombat.AttackCompleted";
         public const string ComboAttackRequests = "NpcCombat.ComboAttackRequests";
         public const string ComboAttackNextRequestTime = "NpcCombat.ComboAttackNextRequestTime";
+        public const string EvasionElapsed = "NpcCombat.EvasionElapsed";
+        public const string EvasionRequested = "NpcCombat.EvasionRequested";
+        public const string EvasionBlockObserved = "NpcCombat.EvasionBlockObserved";
+        public const string ApproachBurstRequested = "NpcCombat.ApproachBurstRequested";
+        public const string ApproachBurstElapsed = "NpcCombat.ApproachBurstElapsed";
+        public const string ApproachBurstBlockObserved = "NpcCombat.ApproachBurstBlockObserved";
         public const string PostAttackDecision = "NpcCombat.PostAttackDecision";
         public const string WaitTimer = "NpcCombat.WaitTimer";
         public const string WaitDuration = "NpcCombat.WaitDuration";
@@ -26,5 +32,7 @@ namespace NPC
         public const string InitialCircleRequested = "NpcCombat.InitialCircleRequested";
         public const string TargetDownWaitTimer = "NpcCombat.TargetDownWaitTimer";
         public const string TargetDownWaitCompleted = "NpcCombat.TargetDownWaitCompleted";
+        public const string EngagementOriginPosition = "NpcCombat.EngagementOriginPosition";
+        public const string EngagementOriginRotation = "NpcCombat.EngagementOriginRotation";
     }
 }

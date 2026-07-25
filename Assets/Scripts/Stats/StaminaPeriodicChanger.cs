@@ -1,5 +1,4 @@
 using UI;
-using Movement;
 using UniRx;
 using UnityEngine;
 using VContainer.Unity;
@@ -10,18 +9,18 @@ namespace Stats
     {
         private readonly StatsConfig statsConfig;
         private readonly StatsController statsController;
-        private readonly PlayerMovement playerMovement;
+        private readonly IStaminaMovementState movementState;
         private readonly System.IDisposable staminaChangeSubscription;
 
         private float elapsedTime;
         private float regenBlockedRemainingTime;
         private bool isStarted;
 
-        public StaminaPeriodicChanger(StatsConfig statsConfig, StatsController statsController, PlayerMovement playerMovement)
+        public StaminaPeriodicChanger(StatsConfig statsConfig, StatsController statsController, IStaminaMovementState movementState)
         {
             this.statsConfig = statsConfig;
             this.statsController = statsController;
-            this.playerMovement = playerMovement;
+            this.movementState = movementState;
             staminaChangeSubscription = statsController.Changed.Subscribe(OnStatChanged);
         }
 
@@ -59,7 +58,7 @@ namespace Stats
         private void ApplyPeriodicChange()
         {
             var staminaStat = (Stamina)statsController.GetStat(StatType.Stamina);
-            var periodicChange = staminaStat.PeriodicChange > 0f && playerMovement.IsMoving
+            var periodicChange = staminaStat.PeriodicChange > 0f && movementState?.IsMoving == true
                 ? staminaStat.MovingRecoveryPeriodicChange
                 : staminaStat.PeriodicChange;
 

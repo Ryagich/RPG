@@ -14,6 +14,7 @@ namespace StateMachine.Behaviours
             var nav = context?.GetService<NpcNavMeshController>();
             nav?.ResetSpeed();
             nav?.Stop();
+            context?.GetService<NpcCombatService>()?.TryPrepareWeapon();
             FaceThreat(context);
         }
 

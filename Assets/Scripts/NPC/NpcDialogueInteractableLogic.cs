@@ -55,6 +55,7 @@ namespace NPC
             interactable.Interacted += OnInteracted;
             interactable.EndInteracted += OnEndInteracted;
             interactable.EndManualInteracted += OnEndInteracted;
+            dialogueController.DialogueInterrupted += OnDialogueInterrupted;
         }
 
         public void Dispose()
@@ -62,6 +63,7 @@ namespace NPC
             interactable.Interacted -= OnInteracted;
             interactable.EndInteracted -= OnEndInteracted;
             interactable.EndManualInteracted -= OnEndInteracted;
+            dialogueController.DialogueInterrupted -= OnDialogueInterrupted;
         }
 
         private void OnInteracted(LifetimeScope interactorScope)
@@ -103,6 +105,16 @@ namespace NPC
             }
 
             dialogueController.EndDialogue();
+            changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Game));
+        }
+
+        private void OnDialogueInterrupted()
+        {
+            if (dialogueContext.CurrentTarget == interactable)
+            {
+                dialogueContext.Clear();
+            }
+
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Game));
         }
     }

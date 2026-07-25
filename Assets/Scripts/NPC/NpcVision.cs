@@ -1,4 +1,5 @@
 using UnityEngine;
+using TargetLock;
 using VContainer;
 
 namespace NPC
@@ -32,12 +33,40 @@ namespace NPC
 
         public bool IsInView(Vector3 worldPosition)
         {
-            return config != null && IsInCone(worldPosition, config.ViewDistance, config.ViewAngle);
+            return config != null
+                   && IsInCone(worldPosition, config.ViewDistance, config.ViewAngle)
+                   && HasLineOfSight(worldPosition, null);
+        }
+
+        public bool IsInView(TargetLockTarget target)
+        {
+            return target != null
+                   && config != null
+                   && IsInCone(target.AimPosition, config.ViewDistance, config.ViewAngle)
+                   && HasLineOfSight(target.AimPosition, target.transform);
+        }
+
+        public bool IsInView(Transform target)
+        {
+            return target != null
+                   && config != null
+                   && IsInCone(target.position, config.ViewDistance, config.ViewAngle)
+                   && HasLineOfSight(target.position, target);
         }
 
         public bool IsInAttackView(Vector3 worldPosition)
         {
-            return config != null && IsInCone(worldPosition, config.AttackViewDistance, config.AttackViewAngle);
+            return config != null
+                   && IsInCone(worldPosition, config.AttackViewDistance, config.AttackViewAngle)
+                   && HasLineOfSight(worldPosition, null);
+        }
+
+        public bool IsInAttackView(TargetLockTarget target)
+        {
+            return target != null
+                   && config != null
+                   && IsInCone(target.AimPosition, config.AttackViewDistance, config.AttackViewAngle)
+                   && HasLineOfSight(target.AimPosition, target.transform);
         }
 
         private void OnDrawGizmos()
@@ -112,6 +141,48 @@ namespace NPC
             }
 
             return Vector3.Angle(GetPlanarForward(), toTarget.normalized) <= angle * 0.5f;
+        }
+
+        private bool HasLineOfSight(Vector3 worldPosition, Transform targetTransform)
+        {
+            if (!config.UseLineOfSight)
+            {
+                return true;
+            }
+
+            var originPosition = GetOriginPosition();
+            var toTarget = worldPosition - originPosition;
+            var distance = toTarget.magnitude;
+            if (distance <= Mathf.Epsilon)
+            {
+                return true;
+            }
+
+            if (!Physics.Raycast(
+                    originPosition,
+                    toTarget / distance,
+                    out var hit,
+                    distance,
+                    config.VisionOccluderMask,
+                    QueryTriggerInteraction.Ignore))
+            {
+                return true;
+            }
+
+            return targetTransform != null && IsTargetCollider(hit.collider, targetTransform);
+        }
+
+        private static bool IsTargetCollider(Collider collider, Transform targetTransform)
+        {
+            if (collider == null || targetTransform == null)
+            {
+                return false;
+            }
+
+            var colliderTransform = collider.transform;
+            return colliderTransform == targetTransform
+                   || colliderTransform.IsChildOf(targetTransform)
+                   || targetTransform.IsChildOf(colliderTransform);
         }
 
         private void DrawConeGizmo(float distance, float angle, Color color)

@@ -18,6 +18,7 @@ namespace Combat
         private readonly HitReactionConfig config;
         private readonly CharacterActionState actionState;
         private readonly CharacterRootMotionController rootMotionController;
+        private readonly CharacterDamageReceiver ownerDamageReceiver;
         private readonly Transform ownerTransform;
         private readonly Animator animator;
         private readonly ISubscriber<CharacterDamagedMessage> damagedSubscriber;
@@ -30,6 +31,7 @@ namespace Combat
             HitReactionConfig config,
             CharacterActionState actionState,
             CharacterRootMotionController rootMotionController,
+            CharacterDamageReceiver ownerDamageReceiver,
             Transform ownerTransform,
             Animator animator,
             ISubscriber<CharacterDamagedMessage> damagedSubscriber)
@@ -37,6 +39,7 @@ namespace Combat
             this.config = config;
             this.actionState = actionState;
             this.rootMotionController = rootMotionController;
+            this.ownerDamageReceiver = ownerDamageReceiver;
             this.ownerTransform = ownerTransform;
             this.animator = animator;
             this.damagedSubscriber = damagedSubscriber;
@@ -52,6 +55,7 @@ namespace Combat
 
         public void Dispose()
         {
+            ownerDamageReceiver?.SetWeaponAttackSuppressed(false);
             damageSubscription?.Dispose();
         }
 
@@ -117,6 +121,9 @@ namespace Combat
             reactionTimer = config.ReactionCooldown;
             cooldownTimer = config.ReactionCooldown;
             actionState.SetActionBlocked(true);
+            // Stop outgoing weapon damage before interrupting animation flow. This also protects
+            // against a delayed BeginDamageWindow event from the attack that was interrupted.
+            ownerDamageReceiver?.SetWeaponAttackSuppressed(true);
             rootMotionController?.SetRootMotionActive(this, true);
 
             OnReactionStarted();
@@ -127,6 +134,7 @@ namespace Combat
         {
             rootMotionController?.SetRootMotionActive(this, false);
             actionState.SetActionBlocked(false);
+            ownerDamageReceiver?.SetWeaponAttackSuppressed(false);
             OnReactionEnded();
         }
 

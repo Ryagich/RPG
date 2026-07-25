@@ -26,8 +26,8 @@ MonoBehaviour:
   Transitions:
   - {fileID: 11400000, guid: d80909d90496c7d409b9353319b0c1a3, type: 2}
   - {fileID: 11400000, guid: 8bf85fea2cf9eea4c8dcf897ff7165e6, type: 2}
-  - {fileID: 11400000, guid: d7274210b3c2eee47b042693a502b32b, type: 2}
   - {fileID: 11400000, guid: 98a6d27d76cfeee4f97064a210431917, type: 2}
+  - {fileID: 11400000, guid: d7274210b3c2eee47b042693a502b32b, type: 2}
   - {fileID: 11400000, guid: a81d40108fac4b24fb115d30da77a006, type: 2}
   references:
     version: 2

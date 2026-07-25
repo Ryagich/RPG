@@ -22,6 +22,7 @@ MonoBehaviour:
     m_WaitForCompletion: 0
     m_LocalVariables: []
   <Icon>k__BackingField: {fileID: 0}
+  <CombatProfile>k__BackingField: {fileID: 11400000, guid: fc99f706b6784287877bc7263e0e144b, type: 2}
   references:
     version: 2
     RefIds: []

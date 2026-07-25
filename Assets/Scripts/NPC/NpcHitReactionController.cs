@@ -14,12 +14,13 @@ namespace NPC
             HitReactionConfig config,
             CharacterActionState actionState,
             CharacterRootMotionController rootMotionController,
+            CharacterDamageReceiver ownerDamageReceiver,
             Transform ownerTransform,
             Animator animator,
             ISubscriber<CharacterDamagedMessage> damagedSubscriber,
             NpcNavMeshController navMeshController,
             NpcWeaponInHandController weaponInHandController)
-            : base(config, actionState, rootMotionController, ownerTransform, animator, damagedSubscriber)
+            : base(config, actionState, rootMotionController, ownerDamageReceiver, ownerTransform, animator, damagedSubscriber)
         {
             this.navMeshController = navMeshController;
             this.weaponInHandController = weaponInHandController;

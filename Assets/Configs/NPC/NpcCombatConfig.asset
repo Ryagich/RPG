@@ -25,6 +25,18 @@ MonoBehaviour:
   <MaxComboAttackRequests>k__BackingField: 2
   <ComboAttackInputDelay>k__BackingField: 0.18
   <ComboAttackInputInterval>k__BackingField: 0.22
+  <DamageMemoryDuration>k__BackingField: 4
+  <PersonalSpaceDistance>k__BackingField: 1.05
+  <PersonalSpaceReleaseDistance>k__BackingField: 1.45
+  <SpacingRetreatCooldown>k__BackingField: 0.8
+  <MaxConsecutiveSpacingRetreats>k__BackingField: 1
+  <EvasionStateTimeout>k__BackingField: 1.35
+  <ApproachBurstBaseChance>k__BackingField: 0.4
+  <ApproachBurstCooldown>k__BackingField: 2.2
+  <ApproachBurstDecisionInterval>k__BackingField: 0.8
+  <ApproachBurstMinDistance>k__BackingField: 2.5
+  <ApproachBurstMaxDistance>k__BackingField: 6.5
+  <TargetRetreatSpeedThreshold>k__BackingField: 0.5
   <InitialCircleChance>k__BackingField: 0.25
   <PostAttackImmediateAttackWeight>k__BackingField: 0.45
   <PostAttackStrafeWeight>k__BackingField: 0.25
@@ -32,6 +44,8 @@ MonoBehaviour:
   <PostAttackCircleWeight>k__BackingField: 0.1
   <PostAttackWaitWeight>k__BackingField: 0.12
   <PostAttackKeepDistanceWeight>k__BackingField: 0.18
+  <AttackRepetitionPenalty>k__BackingField: 0.65
+  <MaxConsecutiveAttackDecisions>k__BackingField: 2
   <WaitMinDuration>k__BackingField: 0.35
   <WaitMaxDuration>k__BackingField: 1.1
   <KeepDistanceMinDuration>k__BackingField: 1.2

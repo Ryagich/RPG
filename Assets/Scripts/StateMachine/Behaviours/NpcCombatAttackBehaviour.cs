@@ -80,7 +80,15 @@ namespace StateMachine.Behaviours
         private static void TryRequestAttack(StateMachineContext context)
         {
             var combat = context?.GetService<NpcCombatService>();
-            if (combat != null && combat.TryPrepareWeapon() && combat.RequestAttack())
+            if (combat == null || !combat.TryPrepareWeapon())
+            {
+                return;
+            }
+
+            var requested = combat.ShouldUseHeavyAttack(isCombo: false)
+                ? combat.RequestHeavyAttack()
+                : combat.RequestAttack();
+            if (requested)
             {
                 context.SetValue(NpcCombatStateKeys.AttackRequested, true);
             }
@@ -124,7 +132,10 @@ namespace StateMachine.Behaviours
                 return;
             }
 
-            if (!combat.RequestComboAttack())
+            var requested = combat.ShouldUseHeavyAttack(isCombo: true)
+                ? combat.RequestHeavyAttack()
+                : combat.RequestComboAttack();
+            if (!requested)
             {
                 return;
             }

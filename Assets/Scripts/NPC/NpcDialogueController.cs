@@ -1,5 +1,6 @@
 using Combat;
 using Movement;
+using System;
 using UnityEngine;
 using VContainer.Unity;
 
@@ -30,6 +31,7 @@ namespace NPC
         public bool IsDialogueRequested { get; private set; }
         public bool IsInDialogueState { get; private set; }
         public Transform InteractorTransform { get; private set; }
+        public event Action DialogueInterrupted;
 
         public bool CanStartDialogue(LifetimeScope interactorScope)
         {
@@ -89,6 +91,14 @@ namespace NPC
         {
             IsInDialogueState = false;
             navMeshController?.SetFacingLocked(false);
+
+            if (!IsDialogueRequested)
+            {
+                return;
+            }
+
+            EndDialogue();
+            DialogueInterrupted?.Invoke();
         }
 
         private void FaceInteractor()

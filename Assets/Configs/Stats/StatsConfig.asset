@@ -26,7 +26,7 @@ MonoBehaviour:
     <Value>k__BackingField:
       value: 100
     <MinSafePercent>k__BackingField: 0.15
-    <PeriodicChange>k__BackingField: -0.1
+    <PeriodicChange>k__BackingField: -0.01
     <PeriodicHpDamageWhenEmpty>k__BackingField: 0.1
   <FoodStat>k__BackingField:
     <Max>k__BackingField: 100
@@ -34,7 +34,7 @@ MonoBehaviour:
     <Value>k__BackingField:
       value: 100
     <MinSafePercent>k__BackingField: 0.15
-    <PeriodicChange>k__BackingField: -0.1
+    <PeriodicChange>k__BackingField: -0.005
     <PeriodicHpDamageWhenEmpty>k__BackingField: 0.1
   <ChillStat>k__BackingField:
     <Max>k__BackingField: 100
@@ -50,7 +50,7 @@ MonoBehaviour:
     <Value>k__BackingField:
       value: 300
     <MinSafePercent>k__BackingField: 0.05
-    <PeriodicChange>k__BackingField: 0.45
+    <PeriodicChange>k__BackingField: 0.65
     <MovingRecoveryPeriodicChange>k__BackingField: 0.2
     <WeightDrainMultiplierCurve>k__BackingField:
       serializedVersion: 2
@@ -78,10 +78,10 @@ MonoBehaviour:
       m_RotationOrder: 4
     <RunDrainMultiplier>k__BackingField: 1.1
     <RegenResumeDelayAfterEmptySeconds>k__BackingField: 0.5
-    <LightAttackCost>k__BackingField: 10
-    <HeavyAttackCost>k__BackingField: 20
-    <DodgeCost>k__BackingField: 15
-    <RollCost>k__BackingField: 25
+    <LightAttackCost>k__BackingField: 2
+    <HeavyAttackCost>k__BackingField: 4
+    <DodgeCost>k__BackingField: 3
+    <RollCost>k__BackingField: 5
   <PhysicalDefenseStat>k__BackingField:
     <Max>k__BackingField: 1
     <Min>k__BackingField: 0

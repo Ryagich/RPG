@@ -14,6 +14,7 @@ namespace Combat
         private readonly PlayerInventory playerInventory;
         private readonly IPublisher<CharacterDamagedMessage> damagedPublisher;
         private bool isWeaponDamageBlocked;
+        private bool isWeaponAttackSuppressed;
 
         public CharacterDamageReceiver(
             Transform ownerTransform,
@@ -39,6 +40,18 @@ namespace Combat
         {
             isWeaponDamageBlocked = isBlocked;
         }
+
+        /// <summary>
+        /// Suppresses outgoing hits made by this character's weapon. This is intentionally
+        /// independent from <see cref="SetWeaponDamageBlocked"/>, which protects this receiver
+        /// from incoming weapon damage during invulnerability frames.
+        /// </summary>
+        public void SetWeaponAttackSuppressed(bool isSuppressed)
+        {
+            isWeaponAttackSuppressed = isSuppressed;
+        }
+
+        public bool IsWeaponAttackSuppressed => isWeaponAttackSuppressed;
 
         public void ReceiveHit(BodyHitbox hitbox, in WeaponHit hit)
         {

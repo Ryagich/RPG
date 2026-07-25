@@ -14,6 +14,7 @@ using TargetLock;
 using UniRx;
 using UnityEngine;
 using UnityEngine.AI;
+using VContainer;
 using VContainer.Unity;
 
 namespace NPC
@@ -43,6 +44,16 @@ namespace NPC
         private TargetLockTarget initialCircleEvaluatedTarget;
         private bool hasPendingAggressionNotification;
         private bool hasPendingDamageFleeRequest;
+        private float recentDamageTaken;
+        private float recentDamageDealt;
+        private float spacingRetreatCooldown;
+        private int consecutiveSpacingRetreats;
+        private float approachBurstCooldown;
+        private int consecutiveAttackDecisions;
+        private TargetLockTarget motionObservedTarget;
+        private Vector3 previousTargetPosition;
+        private bool hasPreviousTargetPosition;
+        private float targetRetreatSpeed;
 
         public NpcCombatService(
             Transform ownerTransform,
@@ -80,8 +91,8 @@ namespace NPC
         public bool HasCombatMoveDestination { get; private set; }
         public bool ShouldSearchLastKnownTarget => !HasCombatTarget && HasLastKnownTargetPosition;
         public bool IsCurrentTargetDown => CurrentTarget != null && (!CurrentTarget.IsTargetable || !IsTargetAlive(CurrentTarget));
-        public bool IsTargetVisible => HasCombatTarget && vision != null && vision.IsInView(CurrentTarget.AimPosition);
-        public bool IsTargetInAttackView => HasCombatTarget && vision != null && vision.IsInAttackView(CurrentTarget.AimPosition);
+        public bool IsTargetVisible => HasCombatTarget && vision != null && vision.IsInView(CurrentTarget);
+        public bool IsTargetInAttackView => HasCombatTarget && vision != null && vision.IsInAttackView(CurrentTarget);
         public bool IsTargetInAttackRange
         {
             get
@@ -103,6 +114,9 @@ namespace NPC
         public bool HasThreat => HasCombatTarget || HasLastKnownTargetPosition;
         public bool ShouldFlee => HasCombatTarget && IsTargetVisible && !HasAnyWeaponAvailable;
         public bool ShouldFleeFromDamageThreat => hasPendingDamageFleeRequest && HasThreat && !HasAnyWeaponAvailable;
+        public bool IsTargetTooClose => HasCombatTarget && ownerTransform != null
+            && PlanarDistance(ownerTransform.position, CurrentTarget.transform.position) <= GetPersonalSpaceDistance();
+        public float StaminaNormalized => weaponController != null ? weaponController.StaminaNormalized : 0f;
 
         public static bool IsTargetHostileToReceiver(TargetLockTarget potentialHostile, CharacterDamageReceiver receiver)
         {
@@ -145,6 +159,7 @@ namespace NPC
         public void Tick()
         {
             TickAggressionNotification();
+            TickTacticalMemory();
         }
 
         public void Dispose()
@@ -176,6 +191,8 @@ namespace NPC
             CurrentTarget = null;
             initialCircleEvaluatedTarget = null;
             hasPendingDamageFleeRequest = false;
+            consecutiveAttackDecisions = 0;
+            ResetTargetMotion();
             HasLastKnownTargetPosition = false;
             LastKnownTargetPosition = default;
             ClearFleeDestination();
@@ -598,6 +615,195 @@ namespace NPC
             return Vector3.Distance(a, b);
         }
 
+        private void TickTacticalMemory()
+        {
+            var memoryDuration = Mathf.Max(0.1f, combatConfig != null ? combatConfig.DamageMemoryDuration : 4f);
+            var decay = Time.deltaTime / memoryDuration;
+            recentDamageTaken = Mathf.MoveTowards(recentDamageTaken, 0f, Mathf.Max(0.01f, recentDamageTaken) * decay);
+            recentDamageDealt = Mathf.MoveTowards(recentDamageDealt, 0f, Mathf.Max(0.01f, recentDamageDealt) * decay);
+            spacingRetreatCooldown = Mathf.Max(0f, spacingRetreatCooldown - Time.deltaTime);
+            approachBurstCooldown = Mathf.Max(0f, approachBurstCooldown - Time.deltaTime);
+            TickTargetMotion();
+
+            if (HasCombatTarget && ownerTransform != null
+                && PlanarDistance(ownerTransform.position, CurrentTarget.transform.position) >= GetPersonalSpaceReleaseDistance())
+            {
+                consecutiveSpacingRetreats = 0;
+            }
+        }
+
+        private void TickTargetMotion()
+        {
+            if (!HasCombatTarget || ownerTransform == null)
+            {
+                ResetTargetMotion();
+                return;
+            }
+
+            var target = CurrentTarget;
+            var targetPosition = target.transform.position;
+            if (motionObservedTarget != target || !hasPreviousTargetPosition)
+            {
+                motionObservedTarget = target;
+                previousTargetPosition = targetPosition;
+                hasPreviousTargetPosition = true;
+                targetRetreatSpeed = 0f;
+                return;
+            }
+
+            var movement = targetPosition - previousTargetPosition;
+            movement.y = 0f;
+            previousTargetPosition = targetPosition;
+
+            var toTarget = targetPosition - ownerTransform.position;
+            toTarget.y = 0f;
+            if (toTarget.sqrMagnitude <= 0.0001f || Time.deltaTime <= Mathf.Epsilon)
+            {
+                targetRetreatSpeed = 0f;
+                return;
+            }
+
+            targetRetreatSpeed = Mathf.Max(0f, Vector3.Dot(movement / Time.deltaTime, toTarget.normalized));
+        }
+
+        private void ResetTargetMotion()
+        {
+            motionObservedTarget = null;
+            previousTargetPosition = default;
+            hasPreviousTargetPosition = false;
+            targetRetreatSpeed = 0f;
+        }
+
+        private float GetSituationalAggression()
+        {
+            var baseAggression = GetProfileValue(profile => profile.Aggression, 0.5f);
+            var pressureResponse = GetProfileValue(profile => profile.PressureResponse, 0.7f);
+            var exchange = GetDamageExchange();
+            var hpAdvantage = GetHpAdvantage();
+            var lowHealthPressure = GetLowHealthPressure();
+            return Mathf.Clamp01(baseAggression
+                                 + (exchange - 0.5f) * pressureResponse
+                                 + hpAdvantage * 0.25f
+                                 - lowHealthPressure * 0.15f);
+        }
+
+        private float GetSituationalCaution()
+        {
+            var baseCaution = GetProfileValue(profile => profile.Caution, 0.5f);
+            var damageResponse = GetProfileValue(profile => profile.DamageCautionResponse, 0.75f);
+            var staminaResponse = GetProfileValue(profile => profile.LowStaminaCautionResponse, 0.8f);
+            // An unknown/even exchange is neutral. Caution rises only after the NPC is
+            // actually losing the recent exchange, rather than being permanently biased
+            // towards retreat before either fighter has landed a hit.
+            var damagePressure = Mathf.Max(0f, (0.5f - GetDamageExchange()) * 2f);
+            var hpDeficit = Mathf.Max(0f, -GetHpAdvantage());
+            var lowHealthPressure = GetLowHealthPressure();
+            var staminaDeficit = 1f - StaminaNormalized;
+            return Mathf.Clamp01(baseCaution
+                                 + damagePressure * damageResponse * 0.45f
+                                 + hpDeficit * damageResponse * 0.5f
+                                 + lowHealthPressure * damageResponse * 0.75f
+                                 + staminaDeficit * staminaResponse * 0.45f);
+        }
+
+        private float GetDamageExchange()
+        {
+            var total = recentDamageTaken + recentDamageDealt;
+            return total <= Mathf.Epsilon ? 0.5f : recentDamageDealt / total;
+        }
+
+        private float GetOwnerHpNormalized()
+        {
+            var maxHp = statsController?.Hp.Max ?? 0f;
+            return ownerDamageReceiver == null || maxHp <= Mathf.Epsilon
+                ? 1f
+                : Mathf.Clamp01(ownerDamageReceiver.CurrentHp / maxHp);
+        }
+
+        private float GetLowHealthPressure()
+        {
+            return Mathf.InverseLerp(0.65f, 0.2f, GetOwnerHpNormalized());
+        }
+
+        private float GetHpAdvantage()
+        {
+            if (ownerDamageReceiver == null || !HasCombatTarget)
+            {
+                return 0f;
+            }
+
+            var targetReceiver = FindDamageReceiver(CurrentTarget);
+            if (targetReceiver == null)
+            {
+                return 0f;
+            }
+
+            var ownerMaxHp = statsController?.Hp.Max ?? 0f;
+            var targetStats = GetStatsController(targetReceiver);
+            var targetMaxHp = targetStats?.Hp.Max ?? 0f;
+            if (ownerMaxHp <= Mathf.Epsilon || targetMaxHp <= Mathf.Epsilon)
+            {
+                return 0f;
+            }
+
+            var ownerHp = Mathf.Clamp01(ownerDamageReceiver.CurrentHp / ownerMaxHp);
+            var targetHp = Mathf.Clamp01(targetReceiver.CurrentHp / targetMaxHp);
+            return ownerHp - targetHp;
+        }
+
+        private static CharacterDamageReceiver FindDamageReceiver(TargetLockTarget target)
+        {
+            return target != null ? target.GetComponentInParent<DamageReceiverHost>()?.Receiver : null;
+        }
+
+        private static StatsController GetStatsController(CharacterDamageReceiver receiver)
+        {
+            var scope = receiver?.OwnerTransform?.GetComponentInParent<LifetimeScope>();
+            return scope != null && scope.Container.TryResolve<StatsController>(out var targetStats)
+                ? targetStats
+                : null;
+        }
+
+        private float GetProfileValue(Func<NpcCombatProfile, float> selector, float fallback)
+        {
+            var profile = ownerScope?.CombatProfile;
+            return profile != null && selector != null ? Mathf.Clamp01(selector(profile)) : fallback;
+        }
+
+        private float GetPersonalSpaceDistance()
+        {
+            return Mathf.Max(0.1f, combatConfig != null ? combatConfig.PersonalSpaceDistance : 1.05f);
+        }
+
+        private float GetPersonalSpaceReleaseDistance()
+        {
+            return Mathf.Max(GetPersonalSpaceDistance(), combatConfig != null ? combatConfig.PersonalSpaceReleaseDistance : 1.45f);
+        }
+
+        private bool CanUseSpacingRetreat()
+        {
+            var maxRetreats = Mathf.Max(1, combatConfig != null ? combatConfig.MaxConsecutiveSpacingRetreats : 1);
+            return spacingRetreatCooldown <= 0f && consecutiveSpacingRetreats < maxRetreats;
+        }
+
+        private bool CanUseSpacingEvasion()
+        {
+            return CanUseSpacingRetreat()
+                   && weaponController?.CanRequestEvasion == true
+                   && StaminaNormalized >= 0.12f;
+        }
+
+        private void RegisterSpacingRetreat()
+        {
+            consecutiveSpacingRetreats++;
+            spacingRetreatCooldown = Mathf.Max(0f, combatConfig != null ? combatConfig.SpacingRetreatCooldown : 0.8f);
+        }
+
+        private static float ScaleWeight(float weight, float multiplier)
+        {
+            return Mathf.Max(0f, weight) * Mathf.Max(0f, multiplier);
+        }
+
         public bool TrySelectCombatManeuverDestination(NpcCombatManeuverKind kind)
         {
             if (ownerTransform == null || !HasCombatTarget)
@@ -637,59 +843,109 @@ namespace NPC
         {
             if (!HasCombatTarget || !IsTargetVisible)
             {
-                return NpcCombatDecision.Approach;
+                return FinalizePostAttackDecision(NpcCombatDecision.Approach);
             }
 
             if (!CanStartAttack)
             {
-                return NpcCombatDecision.Approach;
+                return FinalizePostAttackDecision(NpcCombatDecision.Approach);
             }
 
-            var attackWeight = Mathf.Max(0f, combatConfig != null ? combatConfig.PostAttackImmediateAttackWeight : 0.45f);
-            var strafeWeight = Mathf.Max(0f, combatConfig != null ? combatConfig.PostAttackStrafeWeight : 0.25f);
-            var backstepWeight = Mathf.Max(0f, combatConfig != null ? combatConfig.PostAttackBackstepWeight : 0.2f);
-            var circleWeight = Mathf.Max(0f, combatConfig != null ? combatConfig.PostAttackCircleWeight : 0.1f);
-            var waitWeight = Mathf.Max(0f, combatConfig != null ? combatConfig.PostAttackWaitWeight : 0.12f);
-            var keepDistanceWeight = Mathf.Max(0f, combatConfig != null ? combatConfig.PostAttackKeepDistanceWeight : 0.18f);
-            var totalWeight = attackWeight + strafeWeight + backstepWeight + circleWeight + waitWeight + keepDistanceWeight;
+            var aggression = GetSituationalAggression();
+            var caution = GetSituationalCaution();
+            var unpredictability = GetProfileValue(profile => profile.Unpredictability, 0.35f);
+            var tooClose = IsTargetTooClose;
+            var maxConsecutiveAttacks = Mathf.Max(1, combatConfig != null ? combatConfig.MaxConsecutiveAttackDecisions : 2);
+            var repeatedAttackProgress = Mathf.Clamp01(consecutiveAttackDecisions / (float)maxConsecutiveAttacks);
+            var repetitionPenalty = combatConfig != null ? combatConfig.AttackRepetitionPenalty : 0.65f;
+            var variationBoost = 1f + repeatedAttackProgress * (0.2f + Mathf.Clamp01(repetitionPenalty) * 0.45f);
+
+            var attackWeight = ScaleWeight(
+                combatConfig != null ? combatConfig.PostAttackImmediateAttackWeight : 0.45f,
+                (0.45f + aggression * 1.45f - caution * 0.35f)
+                * (1f - repeatedAttackProgress * Mathf.Clamp01(repetitionPenalty)));
+            var strafeWeight = ScaleWeight(
+                combatConfig != null ? combatConfig.PostAttackStrafeWeight : 0.25f,
+                (0.55f + caution * 1.25f + unpredictability * 0.35f) * variationBoost);
+            var retreatWeight = CanUseSpacingRetreat()
+                ? ScaleWeight(
+                    combatConfig != null ? combatConfig.PostAttackBackstepWeight : 0.2f,
+                    (tooClose ? 2.8f + caution * 1.4f : 0.25f + caution * 0.5f) * variationBoost)
+                : 0f;
+            var evasionShare = CanUseSpacingEvasion()
+                ? Mathf.Lerp(0.3f, 0.7f, GetProfileValue(profile => profile.DodgePreference, 0.55f))
+                : 0f;
+            var evasionWeight = retreatWeight * evasionShare;
+            var backstepWeight = retreatWeight * (1f - evasionShare);
+            var circleWeight = ScaleWeight(
+                combatConfig != null ? combatConfig.PostAttackCircleWeight : 0.1f,
+                (0.45f + caution * 0.75f + unpredictability * 0.7f) * variationBoost);
+            var waitWeight = ScaleWeight(
+                combatConfig != null ? combatConfig.PostAttackWaitWeight : 0.12f,
+                (0.35f + caution * 1.35f + (1f - aggression) * 0.25f) * variationBoost);
+            var keepDistanceWeight = ScaleWeight(
+                combatConfig != null ? combatConfig.PostAttackKeepDistanceWeight : 0.18f,
+                (0.4f + caution * 1.55f + GetProfileValue(profile => profile.DistancePreference, 0.5f)) * variationBoost);
+            var totalWeight = attackWeight + strafeWeight + evasionWeight + backstepWeight + circleWeight + waitWeight + keepDistanceWeight;
             if (totalWeight <= 0f)
             {
-                return NpcCombatDecision.Attack;
+                return FinalizePostAttackDecision(NpcCombatDecision.Attack);
             }
 
             var roll = UnityEngine.Random.Range(0f, totalWeight);
             if (roll < attackWeight)
             {
-                return NpcCombatDecision.Attack;
+                return FinalizePostAttackDecision(NpcCombatDecision.Attack);
             }
 
             roll -= attackWeight;
             if (roll < strafeWeight && TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Strafe))
             {
-                return NpcCombatDecision.Maneuver;
+                return FinalizePostAttackDecision(NpcCombatDecision.Maneuver);
             }
 
             roll -= strafeWeight;
+            if (roll < evasionWeight)
+            {
+                return FinalizePostAttackDecision(NpcCombatDecision.Evade);
+            }
+
+            roll -= evasionWeight;
             if (roll < backstepWeight && TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Backstep))
             {
-                return NpcCombatDecision.Maneuver;
+                RegisterSpacingRetreat();
+                return FinalizePostAttackDecision(NpcCombatDecision.Maneuver);
             }
 
             roll -= backstepWeight;
             if (roll < waitWeight)
             {
-                return NpcCombatDecision.Wait;
+                return FinalizePostAttackDecision(NpcCombatDecision.Wait);
             }
 
             roll -= waitWeight;
             if (roll < keepDistanceWeight && TrySelectKeepDistanceDestination())
             {
-                return NpcCombatDecision.KeepDistance;
+                return FinalizePostAttackDecision(NpcCombatDecision.KeepDistance);
             }
 
-            return TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Circle)
+            return FinalizePostAttackDecision(TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Circle)
                 ? NpcCombatDecision.Circle
-                : NpcCombatDecision.Attack;
+                : NpcCombatDecision.Attack);
+        }
+
+        private NpcCombatDecision FinalizePostAttackDecision(NpcCombatDecision decision)
+        {
+            if (decision == NpcCombatDecision.Attack)
+            {
+                consecutiveAttackDecisions++;
+            }
+            else if (decision != NpcCombatDecision.None)
+            {
+                consecutiveAttackDecisions = 0;
+            }
+
+            return decision;
         }
 
         public void ReceiveAggressionNotification(TargetLockTarget target, bool sourceIsFriendly)
@@ -1041,6 +1297,43 @@ namespace NPC
             return HasClearAttackLane() && weaponController != null && weaponController.RequestAttack();
         }
 
+        public bool RequestHeavyAttack()
+        {
+            return HasClearAttackLane() && weaponController != null && weaponController.RequestHeavyAttack();
+        }
+
+        public bool ShouldUseHeavyAttack(bool isCombo)
+        {
+            if (!CanStartAttack || weaponController == null)
+            {
+                return false;
+            }
+
+            var aggression = GetSituationalAggression();
+            var caution = GetSituationalCaution();
+            var pressure = Mathf.Max(0f, GetDamageExchange() - 0.5f);
+            var preference = GetProfileValue(profile => profile.HeavyAttackPreference, 0.35f);
+            var unpredictability = GetProfileValue(profile => profile.Unpredictability, 0.35f);
+            var chance = 0.03f
+                         + preference * 0.14f
+                         + aggression * 0.12f
+                         + pressure * 0.16f
+                         + (isCombo ? 0.05f + unpredictability * 0.07f : 0f)
+                         - caution * 0.12f;
+
+            if (IsTargetTooClose)
+            {
+                chance *= 0.45f;
+            }
+
+            if (StaminaNormalized < 0.25f)
+            {
+                chance *= 0.25f;
+            }
+
+            return UnityEngine.Random.value < Mathf.Clamp(chance, 0.02f, 0.45f);
+        }
+
         public bool ConsumeAttackComboWindow()
         {
             return weaponController?.ConsumeAttackComboWindow() == true;
@@ -1049,6 +1342,108 @@ namespace NPC
         public bool RequestComboAttack()
         {
             return HasClearAttackLane() && weaponController != null && weaponController.RequestComboAttack();
+        }
+
+        public bool TryRequestSpacingEvasion()
+        {
+            if (!CanUseSpacingEvasion() || ownerTransform == null || CurrentTarget == null)
+            {
+                return false;
+            }
+
+            var awayFromTarget = ownerTransform.position - CurrentTarget.transform.position;
+            awayFromTarget.y = 0f;
+            if (awayFromTarget.sqrMagnitude <= 0.0001f)
+            {
+                awayFromTarget = -ownerTransform.forward;
+            }
+
+            awayFromTarget.Normalize();
+            var caution = GetSituationalCaution();
+            var useBackwardDirection = IsTargetTooClose && UnityEngine.Random.value < 0.55f + caution * 0.3f;
+            var direction = useBackwardDirection
+                ? awayFromTarget
+                : Quaternion.AngleAxis(UnityEngine.Random.value < 0.5f ? -90f : 90f, Vector3.up) * awayFromTarget;
+            var rollPreference = GetProfileValue(profile => profile.RollPreference, 0.3f);
+            var dodgePreference = GetProfileValue(profile => profile.DodgePreference, 0.55f);
+            var rollChance = Mathf.Clamp01(
+                (rollPreference / Mathf.Max(0.01f, rollPreference + dodgePreference))
+                + (IsTargetTooClose ? 0.12f : 0f)
+                + (1f - GetOwnerHpNormalized()) * 0.12f
+                - (1f - StaminaNormalized) * 0.35f);
+            var requested = UnityEngine.Random.value < rollChance
+                ? weaponController.RequestRoll(direction)
+                : weaponController.RequestDodge(direction);
+
+            if (requested)
+            {
+                RegisterSpacingRetreat();
+            }
+
+            return requested;
+        }
+
+        public bool TryRequestApproachBurst()
+        {
+            if (approachBurstCooldown > 0f
+             || !HasCombatTarget
+             || !IsTargetVisible
+             || ownerTransform == null
+             || weaponController?.CanRequestEvasion != true
+             || StaminaNormalized < 0.25f)
+            {
+                return false;
+            }
+
+            var toTarget = CurrentTarget.transform.position - ownerTransform.position;
+            toTarget.y = 0f;
+            var distance = toTarget.magnitude;
+            var minDistance = Mathf.Max(0.1f, combatConfig != null ? combatConfig.ApproachBurstMinDistance : 2.5f);
+            var maxDistance = Mathf.Max(minDistance, combatConfig != null ? combatConfig.ApproachBurstMaxDistance : 6.5f);
+            if (distance < minDistance || distance > maxDistance || toTarget.sqrMagnitude <= 0.0001f)
+            {
+                return false;
+            }
+
+            // A lunge is intentionally a forward dodge/roll. If the NPC has not yet turned
+            // towards the target, let normal approach facing finish first instead of producing
+            // a visually confusing sideways dodge.
+            if (Vector3.Dot(ownerTransform.forward, toTarget.normalized) < 0.8f)
+            {
+                return false;
+            }
+
+            var aggression = GetSituationalAggression();
+            var unpredictability = GetProfileValue(profile => profile.Unpredictability, 0.35f);
+            var retreatThreshold = combatConfig != null ? combatConfig.TargetRetreatSpeedThreshold : 0.5f;
+            var targetIsRetreating = targetRetreatSpeed >= Mathf.Max(0f, retreatThreshold);
+            var baseChance = combatConfig != null ? combatConfig.ApproachBurstBaseChance : 0.4f;
+            var styleMultiplier = 0.35f + aggression * 0.6f + unpredictability * 0.3f;
+            var movementMultiplier = targetIsRetreating ? 1.55f : 0.28f;
+            var chance = Mathf.Clamp01(baseChance * styleMultiplier * movementMultiplier);
+            if (UnityEngine.Random.value >= chance)
+            {
+                approachBurstCooldown = Mathf.Max(0.05f, combatConfig != null ? combatConfig.ApproachBurstDecisionInterval : 0.8f);
+                return false;
+            }
+
+            var rollPreference = GetProfileValue(profile => profile.RollPreference, 0.3f);
+            var dodgePreference = GetProfileValue(profile => profile.DodgePreference, 0.55f);
+            var distanceProgress = Mathf.InverseLerp(minDistance, maxDistance, distance);
+            var rollChance = Mathf.Clamp01(
+                rollPreference / Mathf.Max(0.01f, rollPreference + dodgePreference)
+                + distanceProgress * 0.2f
+                + unpredictability * 0.1f
+                - (1f - StaminaNormalized) * 0.25f);
+            var requested = UnityEngine.Random.value < rollChance
+                ? weaponController.RequestRoll(toTarget.normalized)
+                : weaponController.RequestDodge(toTarget.normalized);
+            if (requested)
+            {
+                approachBurstCooldown = Mathf.Max(0f, combatConfig != null ? combatConfig.ApproachBurstCooldown : 2.2f);
+            }
+
+            return requested;
         }
 
         public void ClearAttackRequest()
@@ -1342,7 +1737,7 @@ namespace NPC
                     continue;
                 }
 
-                if (!vision.IsInView(target.AimPosition) || !IsEnemy(target))
+                if (!vision.IsInView(target) || !IsEnemy(target))
                 {
                     continue;
                 }
@@ -1455,6 +1850,8 @@ namespace NPC
             if (target != previousTarget)
             {
                 initialCircleEvaluatedTarget = null;
+                consecutiveAttackDecisions = 0;
+                ResetTargetMotion();
             }
 
             if (target != null)
@@ -1569,11 +1966,18 @@ namespace NPC
 
         private void OnCharacterDamaged(CharacterDamagedMessage message)
         {
-            if (message.CharacterTransform != ownerTransform || message.Attacker == null || message.Attacker == ownerDamageReceiver)
+            if (message.Attacker == ownerDamageReceiver)
+            {
+                recentDamageDealt += message.FinalDamage;
+                return;
+            }
+
+            if (message.CharacterTransform != ownerTransform || message.Attacker == null)
             {
                 return;
             }
 
+            recentDamageTaken += message.FinalDamage;
             personalEnemies.Add(message.Attacker);
             var attackerTarget = FindTargetByReceiver(message.Attacker);
             if (attackerTarget != null)

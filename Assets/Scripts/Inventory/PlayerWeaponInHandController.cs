@@ -398,6 +398,9 @@ namespace Inventory
         {
             playerAnimationController?.ReleaseEvasionDirection();
             CancelAttackFlow(restoreMovement: false);
+            // A damage window can be active before the AttackStarted event has set its flag.
+            // Hit reaction must close it regardless of that timing.
+            EndCurrentWeaponDamageWindow();
             ResetAnimatorRequests();
             UpdateAttackRootMotionAvailability(forceDisable: true);
         }

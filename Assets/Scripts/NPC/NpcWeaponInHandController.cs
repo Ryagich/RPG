@@ -3,6 +3,8 @@ using Combat;
 using Inventory;
 using Inventory.Inventories;
 using Inventory.Item;
+using Movement;
+using Stats;
 using UniRx;
 using UnityEngine;
 using VContainer.Unity;
@@ -10,11 +12,21 @@ using Object = UnityEngine.Object;
 
 namespace NPC
 {
-    public sealed class NpcWeaponInHandController : IWeaponAnimationEventHandler, IEquippedWeaponVisual, IStartable, IDisposable
+    public sealed class NpcWeaponInHandController : IWeaponAnimationEventHandler, IEquippedWeaponVisual, IStartable, ITickable, IDisposable
     {
         private static readonly int DrawWeaponRequestedParameterHash = Animator.StringToHash("MoveWeaponInHand");
         private static readonly int SheatheWeaponRequestedParameterHash = Animator.StringToHash("MoveWeaponInBelt");
         private static readonly int AttackRequestedParameterHash = Animator.StringToHash("Attack");
+        private static readonly int HeavyAttackRequestedParameterHash = Animator.StringToHash("HeavyAttack");
+        private static readonly int DodgeRequestedParameterHash = Animator.StringToHash("Dodge");
+        private static readonly int RollRequestedParameterHash = Animator.StringToHash("Roll");
+        private static readonly int DirectionXParameterHash = Animator.StringToHash("DirectionX");
+        private static readonly int DirectionYParameterHash = Animator.StringToHash("DirectionY");
+        private static readonly int EmptyStateHash = Animator.StringToHash("Empty Idle");
+        private static readonly int HeavyAttackHitRootMotionStateHash = Animator.StringToHash("A_Attack_HeavyCombo01A_Hit_RootMotion_Sword");
+        private static readonly int HeavyAttackHitStateHash = Animator.StringToHash("A_Attack_HeavyCombo01B_Hit_Sword");
+        private static readonly int DodgeStateHash = Animator.StringToHash("Dodge Tree");
+        private static readonly int RollStateHash = Animator.StringToHash("Dodge RollTree");
 
         private enum WeaponDisplayMode
         {
@@ -29,6 +41,10 @@ namespace NPC
         private readonly Animator animator;
         private readonly CharacterDamageReceiver ownerDamageReceiver;
         private readonly CharacterActionState actionState;
+        private readonly CharacterRootMotionController rootMotionController;
+        private readonly NpcNavMeshController navMeshController;
+        private readonly PlayerMovementConfig movementConfig;
+        private readonly StatsController statsController;
         private readonly CompositeDisposable disposables = new();
 
         private GameObject currentWeaponInstance;
@@ -36,8 +52,10 @@ namespace NPC
         private WeaponDamageZone activeDamageZone;
         private bool isWeaponDrawn;
         private bool hasAttackComboWindow;
+        private bool isEvasionDirectionLocked;
         private int currentRenderedSlotIndex;
         private WeaponDisplayMode currentDisplayMode;
+        private readonly int fullBodyLayerIndex;
 
         public NpcWeaponInHandController(
             PlayerInventory inventory,
@@ -45,7 +63,11 @@ namespace NPC
             PlayerWeaponAnimationEventReceiver animationEventReceiver,
             Animator animator,
             CharacterDamageReceiver ownerDamageReceiver,
-            CharacterActionState actionState)
+            CharacterActionState actionState,
+            CharacterRootMotionController rootMotionController,
+            NpcNavMeshController navMeshController,
+            PlayerMovementConfig movementConfig,
+            StatsController statsController)
         {
             this.inventory = inventory;
             this.handAnchor = handAnchor;
@@ -53,6 +75,11 @@ namespace NPC
             this.animator = animator;
             this.ownerDamageReceiver = ownerDamageReceiver;
             this.actionState = actionState;
+            this.rootMotionController = rootMotionController;
+            this.navMeshController = navMeshController;
+            this.movementConfig = movementConfig;
+            this.statsController = statsController;
+            fullBodyLayerIndex = animator != null ? animator.GetLayerIndex("Full Body") : -1;
 
             animationEventReceiver?.Bind(this);
         }
@@ -61,10 +88,19 @@ namespace NPC
         {
             inventory.Changed.Subscribe(_ => RefreshWeaponInHand()).AddTo(disposables);
             RefreshWeaponInHand();
+            UpdateRootMotionAvailability();
+        }
+
+        public void Tick()
+        {
+            UpdateRootMotionAvailability();
+            ReleaseEvasionDirectionWhenFinished();
         }
 
         public void Dispose()
         {
+            ReleaseEvasionDirection();
+            rootMotionController?.SetRootMotionActive(this, false);
             EndCurrentWeaponDamageWindow();
             DestroyCurrentWeaponInstance();
             disposables.Dispose();
@@ -78,17 +114,23 @@ namespace NPC
         public void AttackStartedFromAnimationEvent() => actionState?.SetActionBlocked(true);
         public void BeginDamageWindowFromAnimationEvent() => BeginCurrentWeaponDamageWindow();
         public void EndDamageWindowFromAnimationEvent() => EndCurrentWeaponDamageWindow();
-        public void EnableDamageImmunityFromAnimationEvent() { }
-        public void DisableDamageImmunityFromAnimationEvent() { }
+        public void EnableDamageImmunityFromAnimationEvent() => ownerDamageReceiver?.SetWeaponDamageBlocked(true);
+        public void DisableDamageImmunityFromAnimationEvent() => ownerDamageReceiver?.SetWeaponDamageBlocked(false);
         public void LockMovementFromAnimationEvent() => actionState?.SetActionBlocked(true);
-        public void UnlockMovementFromAnimationEvent() => actionState?.SetActionBlocked(false);
+        public void UnlockMovementFromAnimationEvent()
+        {
+            actionState?.SetActionBlocked(false);
+            ReleaseEvasionDirection();
+        }
+
         public void AttackFinishedFromAnimationEvent()
         {
             EndCurrentWeaponDamageWindow();
             actionState?.SetActionBlocked(false);
+            ReleaseEvasionDirection();
         }
 
-        public void ResetAttackRequestFromAnimationEvent() => SetAttackRequested(false);
+        public void ResetAttackRequestFromAnimationEvent() => ClearAttackRequest();
 
         public bool HasWeaponInWeaponSlots =>
             inventory?.LeftWeaponSlot?.ItemConfig?.ItemType == ItemType.Weapon
@@ -143,7 +185,23 @@ namespace NPC
                 return false;
             }
 
-            SetAttackRequested(true);
+            SpendStamina(GetStaminaCost(stamina => stamina.LightAttackCost));
+            SetActionRequests(lightAttackRequested: true, heavyAttackRequested: false, dodgeRequested: false, rollRequested: false);
+            return true;
+        }
+
+        public bool RequestHeavyAttack()
+        {
+            // The player's Animator accepts a heavy attack during the same buffered combo window
+            // as a light attack. NPCs use that very window too, rather than inventing a separate
+            // combo system on top of the Animator.
+            if (!IsWeaponDrawn)
+            {
+                return false;
+            }
+
+            SpendStamina(GetStaminaCost(stamina => stamina.HeavyAttackCost));
+            SetActionRequests(lightAttackRequested: false, heavyAttackRequested: true, dodgeRequested: false, rollRequested: false);
             return true;
         }
 
@@ -154,9 +212,49 @@ namespace NPC
                 return false;
             }
 
-            SetAttackRequested(true);
+            SpendStamina(GetStaminaCost(stamina => stamina.LightAttackCost));
+            SetActionRequests(lightAttackRequested: true, heavyAttackRequested: false, dodgeRequested: false, rollRequested: false);
             return true;
         }
+
+        public bool RequestDodge(Vector3 worldDirection)
+        {
+            if (actionState?.IsActionBlocked == true || animator == null)
+            {
+                return false;
+            }
+
+            SpendStamina(GetStaminaCost(stamina => stamina.DodgeCost));
+            SetEvasionDirection(worldDirection);
+            SetActionRequests(lightAttackRequested: false, heavyAttackRequested: false, dodgeRequested: true, rollRequested: false);
+            return true;
+        }
+
+        public bool RequestRoll(Vector3 worldDirection)
+        {
+            if (actionState?.IsActionBlocked == true || animator == null)
+            {
+                return false;
+            }
+
+            SpendStamina(GetStaminaCost(stamina => stamina.RollCost));
+            SetEvasionDirection(worldDirection);
+            SetActionRequests(lightAttackRequested: false, heavyAttackRequested: false, dodgeRequested: false, rollRequested: true);
+            return true;
+        }
+
+        public float StaminaNormalized
+        {
+            get
+            {
+                var stamina = GetStamina();
+                return stamina == null || stamina.Max <= Mathf.Epsilon
+                    ? 0f
+                    : Mathf.Clamp01(stamina.Value.Value / stamina.Max);
+            }
+        }
+
+        public bool CanRequestEvasion => animator != null && actionState?.IsActionBlocked != true;
 
         public bool ConsumeAttackComboWindow()
         {
@@ -172,13 +270,14 @@ namespace NPC
         public void ClearAttackRequest()
         {
             hasAttackComboWindow = false;
-            SetAttackRequested(false);
+            SetActionRequests(lightAttackRequested: false, heavyAttackRequested: false, dodgeRequested: false, rollRequested: false);
         }
 
         public void InterruptByHitReaction()
         {
             EndCurrentWeaponDamageWindow();
             hasAttackComboWindow = false;
+            ReleaseEvasionDirection();
             if (animator == null)
             {
                 return;
@@ -186,7 +285,7 @@ namespace NPC
 
             animator.ResetTrigger(DrawWeaponRequestedParameterHash);
             animator.ResetTrigger(SheatheWeaponRequestedParameterHash);
-            SetAttackRequested(false);
+            ClearAttackRequest();
         }
 
         public bool TryGetCurrentWeaponSlot(out Inventory.Slot.SlotModel slot)
@@ -314,7 +413,7 @@ namespace NPC
 
             var weapon = currentWeaponInstance.GetComponentInChildren<Weapon>(true);
             activeDamageZone = weapon != null ? weapon.DamageZone : null;
-            activeDamageZone?.BeginDamageWindow(ownerDamageReceiver, currentWeaponItemConfig);
+            activeDamageZone?.BeginDamageWindow(ownerDamageReceiver, currentWeaponItemConfig, IsHeavyAttackDamageAnimationActive());
         }
 
         private void EndCurrentWeaponDamageWindow()
@@ -377,14 +476,178 @@ namespace NPC
             targetTransform.localRotation = Quaternion.Euler(attachment.LocalEulerAngles);
         }
 
-        private void SetAttackRequested(bool isRequested)
+        private void SetActionRequests(bool lightAttackRequested, bool heavyAttackRequested, bool dodgeRequested, bool rollRequested)
         {
             if (animator == null)
             {
                 return;
             }
 
-            animator.SetBool(AttackRequestedParameterHash, isRequested);
+            animator.SetBool(AttackRequestedParameterHash, lightAttackRequested);
+            animator.SetBool(HeavyAttackRequestedParameterHash, heavyAttackRequested);
+            animator.SetBool(DodgeRequestedParameterHash, dodgeRequested);
+            animator.SetBool(RollRequestedParameterHash, rollRequested);
+            // The player enables root motion as soon as its action is requested. Do the same
+            // for NPCs so the first displacement frame of Dodge/Roll is never discarded.
+            UpdateRootMotionAvailability();
+        }
+
+        private void SetEvasionDirection(Vector3 worldDirection)
+        {
+            if (animator == null)
+            {
+                return;
+            }
+
+            isEvasionDirectionLocked = true;
+            if (navMeshController != null)
+            {
+                navMeshController.LockEvasionDirection(worldDirection);
+                return;
+            }
+
+            worldDirection.y = 0f;
+            if (worldDirection.sqrMagnitude <= Mathf.Epsilon)
+            {
+                worldDirection = -animator.transform.forward;
+            }
+
+            var localDirection = animator.transform.InverseTransformDirection(worldDirection.normalized);
+            animator.SetFloat(DirectionXParameterHash, Mathf.Clamp(localDirection.x, -1f, 1f));
+            animator.SetFloat(DirectionYParameterHash, Mathf.Clamp(localDirection.z, -1f, 1f));
+        }
+
+        private bool IsHeavyAttackDamageAnimationActive()
+        {
+            if (animator == null || fullBodyLayerIndex < 0)
+            {
+                return false;
+            }
+
+            if (IsHeavyAttackState(animator.GetCurrentAnimatorStateInfo(fullBodyLayerIndex)))
+            {
+                return true;
+            }
+
+            return animator.IsInTransition(fullBodyLayerIndex)
+                   && IsHeavyAttackState(animator.GetNextAnimatorStateInfo(fullBodyLayerIndex));
+        }
+
+        private static bool IsHeavyAttackState(AnimatorStateInfo stateInfo)
+        {
+            return stateInfo.shortNameHash == HeavyAttackHitRootMotionStateHash
+                   || stateInfo.shortNameHash == HeavyAttackHitStateHash;
+        }
+
+        private void UpdateRootMotionAvailability()
+        {
+            if (animator == null || fullBodyLayerIndex < 0)
+            {
+                return;
+            }
+
+            var isRootMotionActive = IsCombatActionRequested()
+                                     || IsFullBodyActionState(animator.GetCurrentAnimatorStateInfo(fullBodyLayerIndex))
+                                     || (animator.IsInTransition(fullBodyLayerIndex)
+                                         && IsFullBodyActionState(animator.GetNextAnimatorStateInfo(fullBodyLayerIndex)));
+            rootMotionController?.SetRootMotionActive(this, isRootMotionActive, GetRootMotionMultiplier());
+        }
+
+        private float GetRootMotionMultiplier()
+        {
+            if (animator == null || fullBodyLayerIndex < 0)
+            {
+                return 1f;
+            }
+
+            var currentState = animator.GetCurrentAnimatorStateInfo(fullBodyLayerIndex);
+            var nextState = animator.IsInTransition(fullBodyLayerIndex)
+                ? animator.GetNextAnimatorStateInfo(fullBodyLayerIndex)
+                : default;
+            if (currentState.shortNameHash == RollStateHash || nextState.shortNameHash == RollStateHash)
+            {
+                return movementConfig != null ? movementConfig.RollRootMotionMultiplier : 3f;
+            }
+
+            return currentState.shortNameHash == DodgeStateHash || nextState.shortNameHash == DodgeStateHash
+                ? movementConfig != null ? movementConfig.DodgeRootMotionMultiplier : 2f
+                : 1f;
+        }
+
+        private static bool IsFullBodyActionState(AnimatorStateInfo stateInfo)
+        {
+            return stateInfo.shortNameHash != 0 && stateInfo.shortNameHash != EmptyStateHash;
+        }
+
+        private bool IsCombatActionRequested()
+        {
+            return animator != null
+                   && (animator.GetBool(AttackRequestedParameterHash)
+                       || animator.GetBool(HeavyAttackRequestedParameterHash)
+                       || animator.GetBool(DodgeRequestedParameterHash)
+                       || animator.GetBool(RollRequestedParameterHash));
+        }
+
+        private void ReleaseEvasionDirectionWhenFinished()
+        {
+            if (isEvasionDirectionLocked && !IsEvasionAnimationActive())
+            {
+                ReleaseEvasionDirection();
+            }
+        }
+
+        private bool IsEvasionAnimationActive()
+        {
+            if (animator == null || fullBodyLayerIndex < 0)
+            {
+                return false;
+            }
+
+            if (animator.GetBool(DodgeRequestedParameterHash)
+                || animator.GetBool(RollRequestedParameterHash))
+            {
+                return true;
+            }
+
+            var currentState = animator.GetCurrentAnimatorStateInfo(fullBodyLayerIndex);
+            if (currentState.shortNameHash == DodgeStateHash || currentState.shortNameHash == RollStateHash)
+            {
+                return true;
+            }
+
+            return animator.IsInTransition(fullBodyLayerIndex)
+                   && (animator.GetNextAnimatorStateInfo(fullBodyLayerIndex).shortNameHash == DodgeStateHash
+                       || animator.GetNextAnimatorStateInfo(fullBodyLayerIndex).shortNameHash == RollStateHash);
+        }
+
+        private void ReleaseEvasionDirection()
+        {
+            if (!isEvasionDirectionLocked)
+            {
+                return;
+            }
+
+            isEvasionDirectionLocked = false;
+            navMeshController?.ReleaseEvasionDirection();
+        }
+
+        private Stamina GetStamina()
+        {
+            return statsController?.GetStat(StatType.Stamina) as Stamina;
+        }
+
+        private float GetStaminaCost(Func<Stamina, float> selector)
+        {
+            var stamina = GetStamina();
+            return stamina != null && selector != null ? Mathf.Max(0f, selector(stamina)) : 0f;
+        }
+
+        private void SpendStamina(float amount)
+        {
+            if (amount > 0f)
+            {
+                statsController?.AddValue(StatType.Stamina, -amount, StatChangeSource.Combat);
+            }
         }
     }
 }

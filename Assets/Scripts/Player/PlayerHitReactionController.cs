@@ -19,6 +19,7 @@ namespace Player
             HitReactionConfig config,
             CharacterActionState actionState,
             CharacterRootMotionController rootMotionController,
+            CharacterDamageReceiver ownerDamageReceiver,
             Transform ownerTransform,
             Animator animator,
             ISubscriber<CharacterDamagedMessage> damagedSubscriber,
@@ -26,7 +27,7 @@ namespace Player
             PlayerAnimationController playerAnimationController,
             PlayerWeaponInHandController weaponInHandController,
             GameModesController gameModesController)
-            : base(config, actionState, rootMotionController, ownerTransform, animator, damagedSubscriber)
+            : base(config, actionState, rootMotionController, ownerDamageReceiver, ownerTransform, animator, damagedSubscriber)
         {
             this.playerMovement = playerMovement;
             this.playerAnimationController = playerAnimationController;

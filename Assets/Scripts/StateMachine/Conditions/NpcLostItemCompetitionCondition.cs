@@ -40,7 +40,7 @@ namespace StateMachine.Conditions
                 if (other == null
                  || other.gameObject == context.Owner
                  || other.TargetItem != targetItem
-                 || !vision.IsInView(other.transform.position))
+                 || !vision.IsInView(other.transform))
                 {
                     continue;
                 }
