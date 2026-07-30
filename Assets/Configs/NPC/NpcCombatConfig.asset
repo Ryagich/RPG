@@ -17,65 +17,69 @@ MonoBehaviour:
   <ApproachStoppingDistance>k__BackingField: 1.6
   <LastKnownReachedDistance>k__BackingField: 1.2
   <LookAtLastKnownDuration>k__BackingField: 2
-  <AttackRequestInterval>k__BackingField: 0.65
+  <AttackRequestInterval>k__BackingField: 0.8
   <TargetSearchRadius>k__BackingField: 18
   <AttackStateTimeout>k__BackingField: 3
   <AttackStartDistanceTolerance>k__BackingField: 0.25
-  <ComboAttackChance>k__BackingField: 0.55
+  <ComboAttackChance>k__BackingField: 0.4
   <MaxComboAttackRequests>k__BackingField: 2
   <ComboAttackInputDelay>k__BackingField: 0.18
   <ComboAttackInputInterval>k__BackingField: 0.22
   <DamageMemoryDuration>k__BackingField: 4
-  <PersonalSpaceDistance>k__BackingField: 1.05
-  <PersonalSpaceReleaseDistance>k__BackingField: 1.45
-  <SpacingRetreatCooldown>k__BackingField: 0.8
-  <MaxConsecutiveSpacingRetreats>k__BackingField: 1
-  <EvasionStateTimeout>k__BackingField: 1.35
-  <ApproachBurstBaseChance>k__BackingField: 0.4
+  <PersonalSpaceDistance>k__BackingField: 1.2
+  <PersonalSpaceReleaseDistance>k__BackingField: 1.6
+  <SpacingRetreatCooldown>k__BackingField: 0.55
+  <MaxConsecutiveSpacingRetreats>k__BackingField: 2
+  <EvasionStateTimeout>k__BackingField: 1.6
+  <ApproachBurstBaseChance>k__BackingField: 0.15
   <ApproachBurstCooldown>k__BackingField: 2.2
   <ApproachBurstDecisionInterval>k__BackingField: 0.8
   <ApproachBurstMinDistance>k__BackingField: 2.5
   <ApproachBurstMaxDistance>k__BackingField: 6.5
   <TargetRetreatSpeedThreshold>k__BackingField: 0.5
-  <InitialCircleChance>k__BackingField: 0.25
-  <PostAttackImmediateAttackWeight>k__BackingField: 0.45
-  <PostAttackStrafeWeight>k__BackingField: 0.25
-  <PostAttackBackstepWeight>k__BackingField: 0.2
-  <PostAttackCircleWeight>k__BackingField: 0.1
-  <PostAttackWaitWeight>k__BackingField: 0.12
-  <PostAttackKeepDistanceWeight>k__BackingField: 0.18
-  <AttackRepetitionPenalty>k__BackingField: 0.65
-  <MaxConsecutiveAttackDecisions>k__BackingField: 2
+  <InitialCircleChance>k__BackingField: 0.55
+  <PostAttackImmediateAttackWeight>k__BackingField: 0.22
+  <PostAttackStrafeWeight>k__BackingField: 0.58
+  <PostAttackBackstepWeight>k__BackingField: 0.42
+  <PostAttackCircleWeight>k__BackingField: 0.58
+  <PostAttackWaitWeight>k__BackingField: 0.14
+  <PostAttackKeepDistanceWeight>k__BackingField: 0.68
+  <AttackRepetitionPenalty>k__BackingField: 0.85
+  <MaxConsecutiveAttackDecisions>k__BackingField: 1
   <WaitMinDuration>k__BackingField: 0.35
-  <WaitMaxDuration>k__BackingField: 1.1
-  <KeepDistanceMinDuration>k__BackingField: 1.2
-  <KeepDistanceMaxDuration>k__BackingField: 2.4
-  <KeepDistanceMinRange>k__BackingField: 2.3
-  <KeepDistanceMaxRange>k__BackingField: 3.5
-  <KeepDistanceRepositionInterval>k__BackingField: 0.35
-  <KeepDistanceAttackDelay>k__BackingField: 0.35
-  <KeepDistanceStrafeChance>k__BackingField: 0.65
+  <WaitMaxDuration>k__BackingField: 0.85
+  <KeepDistanceMinDuration>k__BackingField: 1.8
+  <KeepDistanceMaxDuration>k__BackingField: 3.4
+  <KeepDistanceMinRange>k__BackingField: 2.7
+  <KeepDistanceMaxRange>k__BackingField: 4.3
+  <KeepDistanceRepositionInterval>k__BackingField: 0.25
+  <KeepDistanceAttackChance>k__BackingField: 0.48
+  <KeepDistanceBackstabAttackChance>k__BackingField: 0.86
+  <KeepDistanceBackstabMinAngle>k__BackingField: 115
+  <KeepDistanceStrafeChance>k__BackingField: 0.92
   <KeepDistanceRetreatAngle>k__BackingField: 35
   <CombatMoveReachedDistance>k__BackingField: 0.45
   <CombatMoveNavMeshSampleRadius>k__BackingField: 2
-  <CombatMoveStuckTimeout>k__BackingField: 0.75
+  <CombatMoveStuckTimeout>k__BackingField: 1.3
   <CombatMoveProgressDistance>k__BackingField: 0.08
-  <StrafeMinDistance>k__BackingField: 1.2
-  <StrafeMaxDistance>k__BackingField: 2.2
-  <BackstepMinDistance>k__BackingField: 1.2
-  <BackstepMaxDistance>k__BackingField: 2.4
-  <CircleMinRadius>k__BackingField: 2.2
-  <CircleMaxRadius>k__BackingField: 3.6
-  <CircleMinAngle>k__BackingField: 35
-  <CircleMaxAngle>k__BackingField: 75
+  <StrafeMinDistance>k__BackingField: 1.8
+  <StrafeMaxDistance>k__BackingField: 3.3
+  <BackstepMinDistance>k__BackingField: 1.6
+  <BackstepMaxDistance>k__BackingField: 3.2
+  <CircleMinRadius>k__BackingField: 2.8
+  <CircleMaxRadius>k__BackingField: 4.6
+  <CircleMinAngle>k__BackingField: 50
+  <CircleMaxAngle>k__BackingField: 125
   <MaxDirectAttackersPerTarget>k__BackingField: 4
   <DirectAttackSlotRadius>k__BackingField: 1.65
-  <QueueCircleMinRadius>k__BackingField: 3.8
-  <QueueCircleMaxRadius>k__BackingField: 5.4
+  <DirectAttackSlotReachedDistance>k__BackingField: 0.75
+  <QueueCircleMinRadius>k__BackingField: 3.2
+  <QueueCircleMaxRadius>k__BackingField: 4.8
   <QueueCircleMinAngle>k__BackingField: 25
   <QueueCircleMaxAngle>k__BackingField: 65
   <PreventFriendlyFire>k__BackingField: 1
-  <FriendlyFireLaneRadius>k__BackingField: 0.65
+  <FriendlyFireLaneRadius>k__BackingField: 0.85
+  <FriendlyFireIntentGraceDuration>k__BackingField: 3.5
   <TargetDownWaitDuration>k__BackingField: 2
   <AggressionNotificationDelay>k__BackingField: 1.2
   <AggressionNotificationRadius>k__BackingField: 12

@@ -21,6 +21,7 @@ namespace NPC
         private readonly float defaultSpeed;
 
         private bool isFacingLocked;
+        private bool isActionMovementLocked;
         private bool isEvasionDirectionLocked;
         private bool hasMoveRequest;
         private Vector2 evasionDirectionalInput;
@@ -44,6 +45,7 @@ namespace NPC
                                 && agent.desiredVelocity.sqrMagnitude > VelocityThreshold;
         public bool IsRunning => agent != null && agent.speed > defaultSpeed + VelocityThreshold;
         public bool IsFacingLocked => isFacingLocked;
+        public bool IsActionMovementLocked => isActionMovementLocked;
 
         public bool HasReachedDestination
         {
@@ -92,7 +94,7 @@ namespace NPC
             }
 
             agent.nextPosition = agent.transform.position;
-            if (agent.isStopped || agent.pathPending || !agent.hasPath)
+            if (isActionMovementLocked || agent.isStopped || agent.pathPending || !agent.hasPath)
             {
                 UpdateAnimator(Vector3.zero);
                 return;
@@ -118,7 +120,7 @@ namespace NPC
 
         public bool MoveTo(Vector3 destination, float sampleRadius = DefaultSampleRadius, float? stoppingDistance = null)
         {
-            if (!CanUseAgent())
+            if (isActionMovementLocked || !CanUseAgent())
             {
                 return false;
             }
@@ -222,7 +224,7 @@ namespace NPC
 
         public void Resume()
         {
-            if (CanUseAgent())
+            if (!isActionMovementLocked && CanUseAgent())
             {
                 agent.isStopped = false;
             }
@@ -231,6 +233,25 @@ namespace NPC
         public void SetFacingLocked(bool isLocked)
         {
             isFacingLocked = isLocked;
+        }
+
+        /// <summary>
+        /// Animation events own this lock. It stops navigation-driven displacement while keeping
+        /// Animator root motion available for attacks, dodges and rolls that intentionally move
+        /// the character.
+        /// </summary>
+        public void SetActionMovementLocked(bool isLocked)
+        {
+            if (isActionMovementLocked == isLocked)
+            {
+                return;
+            }
+
+            isActionMovementLocked = isLocked;
+            if (isLocked)
+            {
+                Stop();
+            }
         }
 
         /// <summary>

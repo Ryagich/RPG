@@ -11,14 +11,7 @@ namespace StateMachine.Conditions
         {
             var combat = context?.GetService<NpcCombatService>();
             combat?.RefreshTargetVisibility();
-            if (combat?.CanStartAttack != true)
-            {
-                return false;
-            }
-
-            context.TryGetValue<float>(NpcCombatStateKeys.KeepDistanceTimer, out var timer);
-            var delay = context.GetService<NpcCombatConfig>()?.KeepDistanceAttackDelay ?? 0.35f;
-            return timer >= delay;
+            return combat?.ShouldAttackWhileKeepingDistance() == true;
         }
     }
 }

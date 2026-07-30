@@ -50,10 +50,26 @@ namespace NPC
         private int consecutiveSpacingRetreats;
         private float approachBurstCooldown;
         private int consecutiveAttackDecisions;
+        private int keepDistanceOrbitSide;
+        private KeepDistanceRangeResponse keepDistanceRangeResponse;
+        private TargetLockTarget keepDistanceRangeResponseTarget;
+        // This is deliberately owned by the combat service as well as the weapon hit snapshot.
+        // A damage window can outlive a target switch or the target's death, and the recipient
+        // must still be able to ask the attacker what this swing was originally meant to hit.
+        private CharacterDamageReceiver recentAttackIntentTarget;
+        private bool recentAttackIntentWasHostile;
+        private float recentAttackIntentExpiryTime;
         private TargetLockTarget motionObservedTarget;
         private Vector3 previousTargetPosition;
         private bool hasPreviousTargetPosition;
         private float targetRetreatSpeed;
+
+        private enum KeepDistanceRangeResponse
+        {
+            None,
+            Attack,
+            Evade
+        }
 
         public NpcCombatService(
             Transform ownerTransform,
@@ -107,7 +123,14 @@ namespace NPC
             }
         }
 
-        public bool CanStartAttack => HasCombatTarget && HasClearAttackLane() && (IsTargetInAttackView || IsTargetInAttackRange);
+        // A target being in range is not enough in a group fight. The NPC must first occupy
+        // its own sector around that target, otherwise every pursuer begins swinging while
+        // converging through the same point.
+        public bool CanStartAttack => HasCombatTarget
+                                      && HasDirectCombatSlot()
+                                      && IsAtDirectCombatSlot()
+                                      && HasClearAttackLane()
+                                      && (IsTargetInAttackView || IsTargetInAttackRange);
         public bool HasWeaponReady => weaponController != null && weaponController.HasWeaponInWeaponSlots;
         public bool HasAnyWeaponAvailable => HasWeaponReady
                                              || inventory?.Items.Any(item => item?.ItemStack?.ItemConfig?.ItemType == ItemType.Weapon) == true;
@@ -192,6 +215,7 @@ namespace NPC
             initialCircleEvaluatedTarget = null;
             hasPendingDamageFleeRequest = false;
             consecutiveAttackDecisions = 0;
+            ResetKeepDistanceRangeResponse();
             ResetTargetMotion();
             HasLastKnownTargetPosition = false;
             LastKnownTargetPosition = default;
@@ -756,6 +780,16 @@ namespace NPC
             return target != null ? target.GetComponentInParent<DamageReceiverHost>()?.Receiver : null;
         }
 
+        private static NpcCombatService FindActiveService(CharacterDamageReceiver receiver)
+        {
+            if (receiver == null)
+            {
+                return null;
+            }
+
+            return ActiveServices.FirstOrDefault(service => service != null && service.ownerDamageReceiver == receiver);
+        }
+
         private static StatsController GetStatsController(CharacterDamageReceiver receiver)
         {
             var scope = receiver?.OwnerTransform?.GetComponentInParent<LifetimeScope>();
@@ -846,11 +880,17 @@ namespace NPC
                 return FinalizePostAttackDecision(NpcCombatDecision.Approach);
             }
 
-            if (!CanStartAttack)
+            // A participant without a direct sector must go through the approach/queue flow;
+            // it must not make close-range decisions as if it could attack through its allies.
+            if (!HasDirectCombatSlot() || !IsWithinPostAttackTacticalRange())
             {
                 return FinalizePostAttackDecision(NpcCombatDecision.Approach);
             }
 
+            // Being a few centimetres outside attack range or a moving target's slot is normal
+            // after a swing. Previously that immediately forced Approach and skipped every
+            // tactical weight below, which made combat look like an endless rush-and-hit loop.
+            var canAttackNow = CanStartAttack;
             var aggression = GetSituationalAggression();
             var caution = GetSituationalCaution();
             var unpredictability = GetProfileValue(profile => profile.Unpredictability, 0.35f);
@@ -860,17 +900,24 @@ namespace NPC
             var repetitionPenalty = combatConfig != null ? combatConfig.AttackRepetitionPenalty : 0.65f;
             var variationBoost = 1f + repeatedAttackProgress * (0.2f + Mathf.Clamp01(repetitionPenalty) * 0.45f);
 
-            var attackWeight = ScaleWeight(
-                combatConfig != null ? combatConfig.PostAttackImmediateAttackWeight : 0.45f,
-                (0.45f + aggression * 1.45f - caution * 0.35f)
-                * (1f - repeatedAttackProgress * Mathf.Clamp01(repetitionPenalty)));
+            var attackWeight = canAttackNow
+                ? ScaleWeight(
+                    combatConfig != null ? combatConfig.PostAttackImmediateAttackWeight : 0.45f,
+                    (0.45f + aggression * 1.45f - caution * 0.35f)
+                    * (1f - repeatedAttackProgress * Mathf.Clamp01(repetitionPenalty)))
+                : 0f;
             var strafeWeight = ScaleWeight(
                 combatConfig != null ? combatConfig.PostAttackStrafeWeight : 0.25f,
                 (0.55f + caution * 1.25f + unpredictability * 0.35f) * variationBoost);
             var retreatWeight = CanUseSpacingRetreat()
                 ? ScaleWeight(
                     combatConfig != null ? combatConfig.PostAttackBackstepWeight : 0.2f,
-                    (tooClose ? 2.8f + caution * 1.4f : 0.25f + caution * 0.5f) * variationBoost)
+                    // A cautious or unpredictable fighter may dodge/step out before being
+                    // body-blocked. The old near-zero non-overlap value made evasion almost
+                    // invisible unless characters were already clipping into each other.
+                    (tooClose
+                        ? 2.8f + caution * 1.4f
+                        : 0.6f + caution * 0.7f + unpredictability * 0.35f) * variationBoost)
                 : 0f;
             var evasionShare = CanUseSpacingEvasion()
                 ? Mathf.Lerp(0.3f, 0.7f, GetProfileValue(profile => profile.DodgePreference, 0.55f))
@@ -889,7 +936,7 @@ namespace NPC
             var totalWeight = attackWeight + strafeWeight + evasionWeight + backstepWeight + circleWeight + waitWeight + keepDistanceWeight;
             if (totalWeight <= 0f)
             {
-                return FinalizePostAttackDecision(NpcCombatDecision.Attack);
+                return FinalizePostAttackDecision(canAttackNow ? NpcCombatDecision.Attack : NpcCombatDecision.Approach);
             }
 
             var roll = UnityEngine.Random.Range(0f, totalWeight);
@@ -931,7 +978,22 @@ namespace NPC
 
             return FinalizePostAttackDecision(TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Circle)
                 ? NpcCombatDecision.Circle
-                : NpcCombatDecision.Attack);
+                : canAttackNow ? NpcCombatDecision.Attack : NpcCombatDecision.Approach);
+        }
+
+        private bool IsWithinPostAttackTacticalRange()
+        {
+            if (!HasCombatTarget || ownerTransform == null || CurrentTarget.transform == null)
+            {
+                return false;
+            }
+
+            var tacticalRange = Mathf.Max(
+                combatConfig != null ? combatConfig.CircleMaxRadius : 3.6f,
+                combatConfig != null ? combatConfig.KeepDistanceMaxRange : 3.5f,
+                combatConfig != null ? combatConfig.StrafeMaxDistance : 2.2f,
+                combatConfig != null ? combatConfig.DirectAttackSlotRadius : 1.65f) + 1f;
+            return PlanarDistance(ownerTransform.position, CurrentTarget.transform.position) <= tacticalRange;
         }
 
         private NpcCombatDecision FinalizePostAttackDecision(NpcCombatDecision decision)
@@ -984,17 +1046,106 @@ namespace NPC
 
         public bool ShouldQueueForCombatSlot()
         {
-            return HasCombatTarget && GetDirectAttackRank() >= GetMaxDirectAttackers();
+            return HasCombatTarget && GetDirectAttackRank() >= GetDirectSlotCount();
         }
 
         public bool HasDirectCombatSlot()
         {
-            return HasCombatTarget && GetDirectAttackRank() < GetMaxDirectAttackers();
+            return HasCombatTarget && GetDirectAttackRank() < GetDirectSlotCount();
         }
 
         public bool TrySelectQueueCircleDestination()
         {
             return TrySelectCombatManeuverDestination(NpcCombatManeuverKind.QueueCircle);
+        }
+
+        // Once a distance-holding NPC has let an enemy enter weapon range, it must make a
+        // clear tactical response. Caching the response prevents a new random roll every
+        // frame, which previously produced indecisive walking directly beside the target.
+        public bool ShouldAttackWhileKeepingDistance()
+        {
+            return GetKeepDistanceRangeResponse() == KeepDistanceRangeResponse.Attack;
+        }
+
+        public bool ShouldEvadeWhileKeepingDistance()
+        {
+            return GetKeepDistanceRangeResponse() == KeepDistanceRangeResponse.Evade;
+        }
+
+        private KeepDistanceRangeResponse GetKeepDistanceRangeResponse()
+        {
+            if (!HasCombatTarget || !IsTargetInAttackRange)
+            {
+                ResetKeepDistanceRangeResponse();
+                return KeepDistanceRangeResponse.None;
+            }
+
+            if (keepDistanceRangeResponseTarget == CurrentTarget
+                && keepDistanceRangeResponse != KeepDistanceRangeResponse.None)
+            {
+                return keepDistanceRangeResponse;
+            }
+
+            keepDistanceRangeResponseTarget = CurrentTarget;
+
+            // A friendly body in the attack lane or an unoccupied direct slot makes a swing
+            // unsafe. Do not continue to orbit at melee range: use an evasion to open space.
+            if (!CanStartAttack)
+            {
+                keepDistanceRangeResponse = CanUseSpacingEvasion()
+                    ? KeepDistanceRangeResponse.Evade
+                    : KeepDistanceRangeResponse.None;
+                return keepDistanceRangeResponse;
+            }
+
+            var attackChance = IsTargetExposedFromBehind()
+                ? (combatConfig != null ? combatConfig.KeepDistanceBackstabAttackChance : 0.85f)
+                : GetKeepDistanceAttackChance();
+
+            if (!CanUseSpacingEvasion() || UnityEngine.Random.value < Mathf.Clamp01(attackChance))
+            {
+                keepDistanceRangeResponse = KeepDistanceRangeResponse.Attack;
+                return keepDistanceRangeResponse;
+            }
+
+            keepDistanceRangeResponse = KeepDistanceRangeResponse.Evade;
+            return keepDistanceRangeResponse;
+        }
+
+        private float GetKeepDistanceAttackChance()
+        {
+            var baseChance = combatConfig != null ? combatConfig.KeepDistanceAttackChance : 0.48f;
+            var aggression = GetSituationalAggression();
+            var caution = GetSituationalCaution();
+            return Mathf.Clamp01(baseChance
+                                 + (aggression - 0.5f) * 0.42f
+                                 - (caution - 0.5f) * 0.35f);
+        }
+
+        private bool IsTargetExposedFromBehind()
+        {
+            if (!HasCombatTarget || ownerTransform == null || CurrentTarget.transform == null)
+            {
+                return false;
+            }
+
+            var fromTargetToOwner = ownerTransform.position - CurrentTarget.transform.position;
+            fromTargetToOwner.y = 0f;
+            var targetForward = CurrentTarget.transform.forward;
+            targetForward.y = 0f;
+            if (fromTargetToOwner.sqrMagnitude <= 0.0001f || targetForward.sqrMagnitude <= 0.0001f)
+            {
+                return false;
+            }
+
+            var minAngle = combatConfig != null ? combatConfig.KeepDistanceBackstabMinAngle : 115f;
+            return Vector3.Angle(targetForward.normalized, fromTargetToOwner.normalized) >= minAngle;
+        }
+
+        private void ResetKeepDistanceRangeResponse()
+        {
+            keepDistanceRangeResponse = KeepDistanceRangeResponse.None;
+            keepDistanceRangeResponseTarget = null;
         }
 
         public bool TrySelectKeepDistanceDestination()
@@ -1025,8 +1176,14 @@ namespace NPC
             var currentDistance = PlanarDistance(ownerPosition, targetPosition);
             var desiredRange = UnityEngine.Random.Range(minRange, maxRange);
             var direction = fromTarget;
+            // If a swing is unsafe and the NPC cannot dodge or roll (for example, because
+            // stamina is empty), the non-animated fallback must still open range. Strafing at
+            // the current distance would leave it walking beside an opponent in attack range.
+            var mustWalkOutOfAttackRange = IsTargetInAttackRange
+                                            && !CanStartAttack
+                                            && !CanUseSpacingEvasion();
 
-            if (currentDistance < minRange)
+            if (currentDistance < minRange || mustWalkOutOfAttackRange)
             {
                 var angle = combatConfig != null ? combatConfig.KeepDistanceRetreatAngle : 35f;
                 direction = Quaternion.Euler(0f, UnityEngine.Random.Range(-angle, angle), 0f) * fromTarget;
@@ -1037,9 +1194,14 @@ namespace NPC
                 var strafeChance = combatConfig != null ? combatConfig.KeepDistanceStrafeChance : 0.65f;
                 if (UnityEngine.Random.value < Mathf.Clamp01(strafeChance))
                 {
-                    var side = UnityEngine.Random.value < 0.5f ? -1f : 1f;
+                    // Keep one orbit direction for the whole distance-holding beat. Choosing a
+                    // random side on every reposition made the NPC reverse every few frames,
+                    // which reads as stopping and indecisive shuffling instead of circling.
+                    var side = keepDistanceOrbitSide != 0
+                        ? keepDistanceOrbitSide
+                        : UnityEngine.Random.value < 0.5f ? -1f : 1f;
                     var tangent = Vector3.Cross(Vector3.up, fromTarget).normalized * side;
-                    direction = (fromTarget * 0.35f + tangent).normalized;
+                    direction = (fromTarget * 0.15f + tangent).normalized;
                     desiredRange = Mathf.Clamp(currentDistance, minRange, maxRange);
                 }
             }
@@ -1056,6 +1218,18 @@ namespace NPC
             return true;
         }
 
+        public void BeginKeepDistanceOrbit()
+        {
+            keepDistanceOrbitSide = UnityEngine.Random.value < 0.5f ? -1 : 1;
+            ResetKeepDistanceRangeResponse();
+        }
+
+        public void EndKeepDistanceOrbit()
+        {
+            keepDistanceOrbitSide = 0;
+            ResetKeepDistanceRangeResponse();
+        }
+
         public bool TryGetApproachDestination(out Vector3 destination, out float stoppingDistance)
         {
             destination = default;
@@ -1065,18 +1239,13 @@ namespace NPC
                 return false;
             }
 
-            var rank = GetDirectAttackRank();
-            if (rank < 0 || rank >= GetMaxDirectAttackers())
+            if (!TryGetDirectCombatSlotPosition(out destination))
             {
-                destination = CurrentTarget.transform.position;
+                destination = BuildQueueCircleDestination();
+                stoppingDistance = combatConfig != null ? combatConfig.CombatMoveReachedDistance : 0.45f;
                 return true;
             }
 
-            var radius = combatConfig != null ? combatConfig.DirectAttackSlotRadius : 1.65f;
-            var slotCount = Mathf.Max(1, GetMaxDirectAttackers());
-            var angle = 360f / slotCount * rank;
-            var offset = Quaternion.Euler(0f, angle, 0f) * Vector3.forward * radius;
-            destination = CurrentTarget.transform.position + offset;
             stoppingDistance = combatConfig != null ? combatConfig.CombatMoveReachedDistance : 0.45f;
             return true;
         }
@@ -1129,7 +1298,13 @@ namespace NPC
             }
 
             var targetPosition = CurrentTarget.transform.position;
-            var fromTarget = ownerTransform.position - targetPosition;
+            if (!TryGetDirectCombatSlotPosition(out var slotPosition))
+            {
+                destination = BuildQueueCircleDestination();
+                return true;
+            }
+
+            var fromTarget = slotPosition - targetPosition;
             fromTarget.y = 0f;
             if (fromTarget.sqrMagnitude <= 0.0001f)
             {
@@ -1141,8 +1316,8 @@ namespace NPC
             var baseAngle = Mathf.Atan2(fromTarget.x, fromTarget.z) * Mathf.Rad2Deg;
             var radius = combatConfig != null ? combatConfig.DirectAttackSlotRadius : 1.65f;
             var sampleRadius = combatConfig != null ? combatConfig.CombatMoveNavMeshSampleRadius : 2f;
-            Span<float> angleOffsets = stackalloc[] { 45f, -45f, 90f, -90f, 135f, -135f, 180f, 0f };
-            Span<float> radiusMultipliers = stackalloc[] { 1f, 1.25f, 0.8f };
+            Span<float> angleOffsets = stackalloc[] { 0f, 20f, -20f, 40f, -40f, 65f, -65f };
+            Span<float> radiusMultipliers = stackalloc[] { 1f, 1.15f, 0.9f };
 
             foreach (var radiusMultiplier in radiusMultipliers)
             {
@@ -1171,8 +1346,13 @@ namespace NPC
                 return false;
             }
 
+            if (!TryGetDirectCombatSlotPosition(out var slotPosition))
+            {
+                return false;
+            }
+
             var targetPosition = CurrentTarget.transform.position;
-            var fromTarget = ownerTransform.position - targetPosition;
+            var fromTarget = slotPosition - targetPosition;
             fromTarget.y = 0f;
             if (fromTarget.sqrMagnitude <= 0.0001f)
             {
@@ -1294,12 +1474,12 @@ namespace NPC
 
         public bool RequestAttack()
         {
-            return HasClearAttackLane() && weaponController != null && weaponController.RequestAttack();
+            return TryRequestTargetedAttack(() => weaponController.RequestAttack());
         }
 
         public bool RequestHeavyAttack()
         {
-            return HasClearAttackLane() && weaponController != null && weaponController.RequestHeavyAttack();
+            return TryRequestTargetedAttack(() => weaponController.RequestHeavyAttack());
         }
 
         public bool ShouldUseHeavyAttack(bool isCombo)
@@ -1341,7 +1521,7 @@ namespace NPC
 
         public bool RequestComboAttack()
         {
-            return HasClearAttackLane() && weaponController != null && weaponController.RequestComboAttack();
+            return TryRequestTargetedAttack(() => weaponController.RequestComboAttack());
         }
 
         public bool TryRequestSpacingEvasion()
@@ -1387,6 +1567,8 @@ namespace NPC
         {
             if (approachBurstCooldown > 0f
              || !HasCombatTarget
+             || !HasDirectCombatSlot()
+             || GetTargetParticipants(CurrentTarget).Count > 1
              || !IsTargetVisible
              || ownerTransform == null
              || weaponController?.CanRequestEvasion != true
@@ -1449,6 +1631,9 @@ namespace NPC
         public void ClearAttackRequest()
         {
             weaponController?.ClearAttackRequest();
+            // Do not clear the intent here. The attack state may end before its animation event
+            // opens the weapon damage window. WeaponDamageZone consumes the snapshot exactly
+            // when that window opens, while failed requests clear it in TryRequestTargetedAttack.
         }
 
         public bool HasClearAttackLane()
@@ -1688,9 +1873,53 @@ namespace NPC
                                && service.HasCombatTarget
                                && service.CurrentTarget == target
                                && service.HasAnyWeaponAvailable)
-                .OrderBy(service => (service.ownerTransform.position - target.transform.position).sqrMagnitude)
-                .ThenBy(service => service.ownerTransform.GetInstanceID())
+                // Distance sorting made ranks change every frame while combatants moved. A
+                // stable order lets each participant retain one sector until the group changes.
+                .OrderBy(service => service.ownerTransform.GetInstanceID())
                 .ToList();
+        }
+
+        private int GetDirectSlotCount()
+        {
+            if (!HasCombatTarget)
+            {
+                return 0;
+            }
+
+            return Mathf.Min(GetMaxDirectAttackers(), GetTargetParticipants(CurrentTarget).Count);
+        }
+
+        private bool TryGetDirectCombatSlotPosition(out Vector3 position)
+        {
+            position = default;
+            if (!HasCombatTarget)
+            {
+                return false;
+            }
+
+            var rank = GetDirectAttackRank();
+            var slotCount = GetDirectSlotCount();
+            if (rank < 0 || rank >= slotCount)
+            {
+                return false;
+            }
+
+            var radius = combatConfig != null ? combatConfig.DirectAttackSlotRadius : 1.65f;
+            var angle = 360f / Mathf.Max(1, slotCount) * rank;
+            var offset = Quaternion.Euler(0f, angle, 0f) * Vector3.forward * radius;
+            position = CurrentTarget.transform.position + offset;
+            return true;
+        }
+
+        private bool IsAtDirectCombatSlot()
+        {
+            if (ownerTransform == null || !TryGetDirectCombatSlotPosition(out var slotPosition))
+            {
+                return false;
+            }
+
+            var reachedDistance = combatConfig != null ? combatConfig.DirectAttackSlotReachedDistance : 0.75f;
+            return PlanarDistance(ownerTransform.position, slotPosition) <= Mathf.Max(0.05f, reachedDistance);
         }
 
         private int GetMaxDirectAttackers()
@@ -1803,6 +2032,58 @@ namespace NPC
             return receiverTarget != null && IsEnemy(receiverTarget);
         }
 
+        private bool IsAccidentalNonHostileHit(CharacterDamagedMessage message)
+        {
+            if (message.Attacker == null || IsHostileTo(message.Attacker))
+            {
+                return false;
+            }
+
+            // A direct target is intentional even if a stale previous hostile intent still
+            // exists on the attacker. Check both the hit snapshot and the attacker's current
+            // target before accepting the "it was an accident" explanation.
+            if (message.IntendedTarget == ownerDamageReceiver)
+            {
+                return false;
+            }
+
+            var attackerCombat = FindActiveService(message.Attacker);
+            if (attackerCombat != null && attackerCombat.IsCurrentlyTargeting(ownerDamageReceiver))
+            {
+                return false;
+            }
+
+            // The snapshot is the exact attack-window intent. The service-level record is a
+            // fallback for a target dying/changing or a window that opened after its snapshot
+            // was consumed. In both cases a recent hostile swing aimed somewhere else is not
+            // grounds for two allies to become personal enemies.
+            return message.IntendedTargetWasHostile
+                   || attackerCombat != null && attackerCombat.HasRecentHostileAttackIntentAwayFrom(ownerDamageReceiver);
+        }
+
+        private bool IsCurrentlyTargeting(CharacterDamageReceiver receiver)
+        {
+            return receiver != null && FindDamageReceiver(CurrentTarget) == receiver;
+        }
+
+        private bool HasRecentHostileAttackIntentAwayFrom(CharacterDamageReceiver receiver)
+        {
+            return receiver != null
+                   && recentAttackIntentWasHostile
+                   && recentAttackIntentTarget != receiver
+                   && Time.time <= recentAttackIntentExpiryTime;
+        }
+
+        private void RememberRecentAttackIntent(CharacterDamageReceiver intendedTarget, bool targetsHostile)
+        {
+            recentAttackIntentTarget = intendedTarget;
+            recentAttackIntentWasHostile = targetsHostile;
+            var graceDuration = combatConfig != null ? combatConfig.FriendlyFireIntentGraceDuration : 3.5f;
+            recentAttackIntentExpiryTime = targetsHostile
+                ? Time.time + Mathf.Max(0.1f, graceDuration)
+                : 0f;
+        }
+
         private bool IsOwnerOfTarget(TargetLockTarget target)
         {
             if (target == null)
@@ -1852,6 +2133,7 @@ namespace NPC
             {
                 initialCircleEvaluatedTarget = null;
                 consecutiveAttackDecisions = 0;
+                ResetKeepDistanceRangeResponse();
                 ResetTargetMotion();
             }
 
@@ -1978,6 +2260,11 @@ namespace NPC
                 return;
             }
 
+            if (IsAccidentalNonHostileHit(message))
+            {
+                return;
+            }
+
             recentDamageTaken += message.FinalDamage;
             personalEnemies.Add(message.Attacker);
             var attackerTarget = FindTargetByReceiver(message.Attacker);
@@ -2018,6 +2305,26 @@ namespace NPC
             }
 
             return null;
+        }
+
+        private bool TryRequestTargetedAttack(Func<bool> requestAttack)
+        {
+            if (!HasClearAttackLane() || weaponController == null || requestAttack == null)
+            {
+                return false;
+            }
+
+            var intendedTarget = FindDamageReceiver(CurrentTarget);
+            var targetsHostile = CurrentTarget != null && IsEnemy(CurrentTarget);
+            ownerDamageReceiver?.SetWeaponAttackIntent(intendedTarget, targetsHostile);
+            if (requestAttack())
+            {
+                RememberRecentAttackIntent(intendedTarget, targetsHostile);
+                return true;
+            }
+
+            ownerDamageReceiver?.ClearWeaponAttackIntent();
+            return false;
         }
 
         private void FacePosition(Vector3 position)

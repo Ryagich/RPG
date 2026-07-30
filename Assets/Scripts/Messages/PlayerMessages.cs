@@ -21,6 +21,8 @@ namespace Messages
         public readonly GameObject Character;
         public readonly Transform CharacterTransform;
         public readonly CharacterDamageReceiver Attacker;
+        public readonly CharacterDamageReceiver IntendedTarget;
+        public readonly bool IntendedTargetWasHostile;
         public readonly ItemConfig WeaponConfig;
         public readonly DamageBodyPart BodyPart;
         public readonly float BaseDamage;
@@ -33,6 +35,8 @@ namespace Messages
             GameObject character,
             Transform characterTransform,
             CharacterDamageReceiver attacker,
+            CharacterDamageReceiver intendedTarget,
+            bool intendedTargetWasHostile,
             ItemConfig weaponConfig,
             DamageBodyPart bodyPart,
             float baseDamage,
@@ -44,6 +48,8 @@ namespace Messages
             Character = character;
             CharacterTransform = characterTransform;
             Attacker = attacker;
+            IntendedTarget = intendedTarget;
+            IntendedTargetWasHostile = intendedTargetWasHostile;
             WeaponConfig = weaponConfig;
             BodyPart = bodyPart;
             BaseDamage = baseDamage;

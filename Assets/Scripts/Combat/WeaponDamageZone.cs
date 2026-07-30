@@ -13,9 +13,11 @@ namespace Combat
         private readonly HashSet<CharacterDamageReceiver> hitReceivers = new();
         private readonly HashSet<WeaponHitReceiver> hitObjectReceivers = new();
         private CharacterDamageReceiver attacker;
+        private CharacterDamageReceiver intendedTarget;
         private ItemConfig weaponConfig;
         private bool isHeavyAttack;
         private bool isDamageWindowOpen;
+        private bool intendedTargetWasHostile;
 
         private void Awake()
         {
@@ -43,6 +45,9 @@ namespace Combat
             attacker = currentAttacker;
             weaponConfig = currentWeaponConfig;
             isHeavyAttack = useHeavyAttackDamage;
+            intendedTarget = null;
+            intendedTargetWasHostile = false;
+            attacker?.ConsumeWeaponAttackIntent(out intendedTarget, out intendedTargetWasHostile);
             hitReceivers.Clear();
             hitObjectReceivers.Clear();
             isDamageWindowOpen = attacker != null
@@ -54,8 +59,10 @@ namespace Combat
         {
             isDamageWindowOpen = false;
             attacker = null;
+            intendedTarget = null;
             weaponConfig = null;
             isHeavyAttack = false;
+            intendedTargetWasHostile = false;
             hitReceivers.Clear();
             hitObjectReceivers.Clear();
         }
@@ -73,6 +80,8 @@ namespace Combat
             var damage = weaponConfig.GetRandomWeaponDamage(isHeavyAttack);
             var hit = new WeaponHit(
                 attacker,
+                intendedTarget,
+                intendedTargetWasHostile,
                 weaponConfig,
                 damage,
                 other.ClosestPoint(transform.position),

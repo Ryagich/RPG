@@ -17,4 +17,4 @@ MonoBehaviour:
   relations:
   - leftFaction: {fileID: 11400000, guid: dc98ce5b51f108947b4b8e8bc61ffc22, type: 2}
     rightFaction: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
-    relation: 0
+    relation: -200

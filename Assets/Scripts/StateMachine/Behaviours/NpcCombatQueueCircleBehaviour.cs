@@ -40,6 +40,9 @@ namespace StateMachine.Behaviours
 
             if (!combat.HasCombatMoveDestination && !combat.TrySelectQueueCircleDestination())
             {
+                // Stay in the queue state and retry later when NavMesh changes, but never keep
+                // a stale path from a previous combat state if no queue point is currently valid.
+                nav.Stop();
                 return;
             }
 

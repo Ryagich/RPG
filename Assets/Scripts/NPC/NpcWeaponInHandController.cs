@@ -99,6 +99,7 @@ namespace NPC
 
         public void Dispose()
         {
+            navMeshController?.SetActionMovementLocked(false);
             ReleaseEvasionDirection();
             rootMotionController?.SetRootMotionActive(this, false);
             EndCurrentWeaponDamageWindow();
@@ -111,15 +112,25 @@ namespace NPC
         public void PutWeaponOnBeltFromAnimationEvent() => MoveCurrentWeapon(WeaponDisplayMode.Belt);
         public void BeginMoveWeaponToBeltFromAnimationEvent() => MoveCurrentWeapon(WeaponDisplayMode.Belt);
         public void HoldAttackReadyFromAnimationEvent() => hasAttackComboWindow = true;
-        public void AttackStartedFromAnimationEvent() => actionState?.SetActionBlocked(true);
+        public void AttackStartedFromAnimationEvent()
+        {
+            actionState?.SetActionBlocked(true);
+            navMeshController?.SetActionMovementLocked(true);
+        }
         public void BeginDamageWindowFromAnimationEvent() => BeginCurrentWeaponDamageWindow();
         public void EndDamageWindowFromAnimationEvent() => EndCurrentWeaponDamageWindow();
         public void EnableDamageImmunityFromAnimationEvent() => ownerDamageReceiver?.SetWeaponDamageBlocked(true);
         public void DisableDamageImmunityFromAnimationEvent() => ownerDamageReceiver?.SetWeaponDamageBlocked(false);
-        public void LockMovementFromAnimationEvent() => actionState?.SetActionBlocked(true);
+        public void LockMovementFromAnimationEvent()
+        {
+            actionState?.SetActionBlocked(true);
+            navMeshController?.SetActionMovementLocked(true);
+        }
+
         public void UnlockMovementFromAnimationEvent()
         {
             actionState?.SetActionBlocked(false);
+            navMeshController?.SetActionMovementLocked(false);
             ReleaseEvasionDirection();
         }
 
@@ -127,6 +138,7 @@ namespace NPC
         {
             EndCurrentWeaponDamageWindow();
             actionState?.SetActionBlocked(false);
+            navMeshController?.SetActionMovementLocked(false);
             ReleaseEvasionDirection();
         }
 
@@ -277,6 +289,8 @@ namespace NPC
         {
             EndCurrentWeaponDamageWindow();
             hasAttackComboWindow = false;
+            actionState?.SetActionBlocked(false);
+            navMeshController?.SetActionMovementLocked(false);
             ReleaseEvasionDirection();
             if (animator == null)
             {

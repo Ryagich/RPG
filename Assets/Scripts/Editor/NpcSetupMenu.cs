@@ -103,6 +103,7 @@ namespace EditorTools
         private const string CombatWaitToPostAttackDecisionTransitionPath = TransitionsFolderPath + "/NpcCombatWaitToPostAttackDecisionTransition.asset";
         private const string CombatKeepDistanceToTargetDownTransitionPath = TransitionsFolderPath + "/NpcCombatKeepDistanceToTargetDownTransition.asset";
         private const string CombatKeepDistanceToSearchLastKnownTransitionPath = TransitionsFolderPath + "/NpcCombatKeepDistanceToSearchLastKnownTransition.asset";
+        private const string CombatKeepDistanceToEvasionTransitionPath = TransitionsFolderPath + "/NpcCombatKeepDistanceToEvasionTransition.asset";
         private const string CombatKeepDistanceToAttackTransitionPath = TransitionsFolderPath + "/NpcCombatKeepDistanceToAttackTransition.asset";
         private const string CombatKeepDistanceToPostAttackDecisionTransitionPath = TransitionsFolderPath + "/NpcCombatKeepDistanceToPostAttackDecisionTransition.asset";
         private const string CombatQueueToTargetDownTransitionPath = TransitionsFolderPath + "/NpcCombatQueueToTargetDownTransition.asset";
@@ -283,6 +284,7 @@ namespace EditorTools
             var combatWaitToPostAttackDecisionTransition = LoadOrCreate<Transition>(CombatWaitToPostAttackDecisionTransitionPath);
             var combatKeepDistanceToTargetDownTransition = LoadOrCreate<Transition>(CombatKeepDistanceToTargetDownTransitionPath);
             var combatKeepDistanceToSearchLastKnownTransition = LoadOrCreate<Transition>(CombatKeepDistanceToSearchLastKnownTransitionPath);
+            var combatKeepDistanceToEvasionTransition = LoadOrCreate<Transition>(CombatKeepDistanceToEvasionTransitionPath);
             var combatKeepDistanceToAttackTransition = LoadOrCreate<Transition>(CombatKeepDistanceToAttackTransitionPath);
             var combatKeepDistanceToPostAttackDecisionTransition = LoadOrCreate<Transition>(CombatKeepDistanceToPostAttackDecisionTransitionPath);
             var combatQueueToTargetDownTransition = LoadOrCreate<Transition>(CombatQueueToTargetDownTransitionPath);
@@ -436,6 +438,7 @@ namespace EditorTools
             ConfigureTransition(combatWaitToPostAttackDecisionTransition, postAttackDecisionState, combatMoveCompletedCondition);
             ConfigureTransition(combatKeepDistanceToTargetDownTransition, combatTargetDownState, combatTargetDownCondition);
             ConfigureTransition(combatKeepDistanceToSearchLastKnownTransition, combatSearchLastKnownState, combatTargetLostCondition);
+            ConfigureTransition(combatKeepDistanceToEvasionTransition, combatEvasionState, postAttackDecisionEvasionCondition);
             ConfigureTransition(combatKeepDistanceToAttackTransition, combatAttackState, keepDistanceAttackReadyCondition);
             ConfigureTransition(combatKeepDistanceToPostAttackDecisionTransition, postAttackDecisionState, combatMoveCompletedCondition);
             ConfigureTransition(combatQueueToTargetDownTransition, combatTargetDownState, combatTargetDownCondition);
@@ -600,6 +603,7 @@ namespace EditorTools
                 anyToHitReactionTransition,
                 combatKeepDistanceToTargetDownTransition,
                 combatKeepDistanceToSearchLastKnownTransition,
+                combatKeepDistanceToEvasionTransition,
                 combatKeepDistanceToAttackTransition,
                 combatKeepDistanceToPostAttackDecisionTransition
             };

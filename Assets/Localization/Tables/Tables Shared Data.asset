@@ -145,6 +145,10 @@ MonoBehaviour:
     m_Key: Faction_Scarlet_Lions
     m_Metadata:
       m_Items: []
+  - m_Id: 40000000000000002
+    m_Key: Faction_Bandits
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

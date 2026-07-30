@@ -15,6 +15,8 @@ namespace Combat
         private readonly IPublisher<CharacterDamagedMessage> damagedPublisher;
         private bool isWeaponDamageBlocked;
         private bool isWeaponAttackSuppressed;
+        private CharacterDamageReceiver weaponAttackIntentTarget;
+        private bool weaponAttackIntentTargetsHostile;
 
         public CharacterDamageReceiver(
             Transform ownerTransform,
@@ -53,6 +55,36 @@ namespace Combat
 
         public bool IsWeaponAttackSuppressed => isWeaponAttackSuppressed;
 
+        /// <summary>
+        /// Records the intended target for the next weapon damage window. The intent is consumed
+        /// by <see cref="WeaponDamageZone"/> when the animation actually opens that window.
+        /// It deliberately survives an AI-state transition: the animator can open its damage
+        /// window after the state machine has already left the attack state.
+        /// </summary>
+        public void SetWeaponAttackIntent(CharacterDamageReceiver intendedTarget, bool targetsHostile)
+        {
+            weaponAttackIntentTarget = intendedTarget;
+            // Hostility is a fact captured when the attack was accepted. Do not derive it from
+            // the Unity object later: the intended enemy may die or be destroyed before this
+            // swing contacts an ally.
+            weaponAttackIntentTargetsHostile = targetsHostile;
+        }
+
+        public void ClearWeaponAttackIntent()
+        {
+            weaponAttackIntentTarget = null;
+            weaponAttackIntentTargetsHostile = false;
+        }
+
+        public void ConsumeWeaponAttackIntent(
+            out CharacterDamageReceiver intendedTarget,
+            out bool targetsHostile)
+        {
+            intendedTarget = weaponAttackIntentTarget;
+            targetsHostile = weaponAttackIntentTargetsHostile;
+            ClearWeaponAttackIntent();
+        }
+
         public void ReceiveHit(BodyHitbox hitbox, in WeaponHit hit)
         {
             if (isWeaponDamageBlocked || hitbox == null || hit.Damage <= 0f)
@@ -83,6 +115,8 @@ namespace Combat
                     ownerTransform.gameObject,
                     ownerTransform,
                     hit.Attacker,
+                    hit.IntendedTarget,
+                    hit.IntendedTargetWasHostile,
                     hit.WeaponConfig,
                     hitbox.BodyPart,
                     hit.Damage,

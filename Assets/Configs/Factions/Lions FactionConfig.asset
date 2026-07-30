@@ -10,19 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f5f3d26e9b64d24b84e1d0c11b9a101, type: 3}
-  m_Name: FactionConfig 1
+  m_Name: Lions FactionConfig
   m_EditorClassIdentifier: Assembly-CSharp::Factions.FactionConfig
   <Name>k__BackingField:
     m_TableReference:
-      m_TableCollectionName: Tables
+      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
-      m_KeyId: 0
-      m_Key: Null String
+      m_KeyId: 40000000000000001
+      m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  <Icon>k__BackingField: {fileID: 0}
+  <Icon>k__BackingField: {fileID: 21300000, guid: 483711f889ea8834ba993808b4e87740, type: 3}
   <CombatProfile>k__BackingField: {fileID: 11400000, guid: fc99f706b6784287877bc7263e0e144b, type: 2}
+  <CombatProfiles>k__BackingField:
+  - {fileID: 11400000, guid: 673d413f9df33004a8618f290335e095, type: 2}
+  - {fileID: 11400000, guid: 323b8085f34902c4198b8206e4893184, type: 2}
+  <ItemSetConfigs>k__BackingField:
+  - {fileID: 11400000, guid: f23b48b0dbc24c344866ef758eb60a0b, type: 2}
   references:
     version: 2
     RefIds: []

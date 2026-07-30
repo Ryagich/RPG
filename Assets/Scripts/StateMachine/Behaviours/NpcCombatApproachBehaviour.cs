@@ -61,7 +61,8 @@ namespace StateMachine.Behaviours
                 stoppingDistance = config != null ? config.ApproachStoppingDistance : 1.6f;
             }
 
-            if (nav.HasReachedDestination
+            if (combat.HasDirectCombatSlot()
+             && nav.HasReachedDestination
              && !combat.CanStartAttack
              && combat.TryGetCloserAttackApproachDestination(out var closerDestination, out var closerStoppingDistance))
             {
@@ -77,6 +78,22 @@ namespace StateMachine.Behaviours
             if (combat.TryGetAlternativeApproachDestination(out destination, out stoppingDistance)
              && nav.MoveTo(destination, stoppingDistance: stoppingDistance))
             {
+                return;
+            }
+
+            if (!combat.HasDirectCombatSlot())
+            {
+                // A participant without a close-combat sector must never fall back to the
+                // target's centre. Queue state will keep it circling outside until a slot opens.
+                if (combat.TrySelectQueueCircleDestination())
+                {
+                    nav.MoveTo(combat.CombatMoveDestination, stoppingDistance: config != null ? config.CombatMoveReachedDistance : 0.45f);
+                }
+                else
+                {
+                    nav.Stop();
+                }
+
                 return;
             }
 

@@ -150,6 +150,10 @@ MonoBehaviour:
     m_Localized: Silver Lions
     m_Metadata:
       m_Items: []
+  - m_Id: 40000000000000002
+    m_Localized: Bandits
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

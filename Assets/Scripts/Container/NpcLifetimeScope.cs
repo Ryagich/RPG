@@ -40,10 +40,11 @@ namespace Container
         [SerializeField, Min(0.1f)] private float dialogueInteractionRadius = 1.8f;
         [SerializeField, ReadOnlyInInspector] private float currentHp;
         [SerializeField, ReadOnlyInInspector] private string currentState = "Not Started";
+        private NpcCombatProfile assignedCombatProfile;
 
         public StateMachineGraph StateMachineGraph => stateMachineGraph;
         public FactionConfig Faction => faction;
-        public NpcCombatProfile CombatProfile => combatProfileOverride != null ? combatProfileOverride : faction?.CombatProfile;
+        public NpcCombatProfile CombatProfile => assignedCombatProfile ?? combatProfileOverride ?? faction?.CombatProfile;
         public bool CanTalk => canTalk;
         public float CurrentHp => currentHp;
         public string CurrentState => currentState;
@@ -56,6 +57,8 @@ namespace Container
 
         protected override void Configure(IContainerBuilder builder)
         {
+            assignedCombatProfile = combatProfileOverride ?? faction?.GetRandomCombatProfile();
+
             builder.RegisterComponentInHierarchy<CharacterController>().UnderTransform(transform).AsSelf();
             builder.RegisterComponentInHierarchy<Animator>().UnderTransform(transform).AsSelf();
 

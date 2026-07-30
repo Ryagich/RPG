@@ -56,12 +56,31 @@ namespace StateMachine.Behaviours
 
             if (NpcCombatMoveProgress.IsStuck(context, config))
             {
+                // A blocked strafe/backstep used to complete straight into Approach, undoing
+                // the tactical decision and causing another rush at the target. Fall back to a
+                // reachable arc first; only then give the decision graph another turn.
+                combat.ClearCombatMoveDestination();
+                NpcCombatMoveProgress.Reset(context);
+                if (combat.TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Circle)
+                 && nav.MoveTo(combat.CombatMoveDestination, stoppingDistance: reachedDistance))
+                {
+                    return;
+                }
+
                 nav.Stop();
                 context.SetValue(NpcCombatStateKeys.CombatMoveCompleted, true);
                 return;
             }
 
             if (nav.MoveTo(combat.CombatMoveDestination, stoppingDistance: reachedDistance))
+            {
+                return;
+            }
+
+            combat.ClearCombatMoveDestination();
+            NpcCombatMoveProgress.Reset(context);
+            if (combat.TrySelectCombatManeuverDestination(NpcCombatManeuverKind.Circle)
+             && nav.MoveTo(combat.CombatMoveDestination, stoppingDistance: reachedDistance))
             {
                 return;
             }

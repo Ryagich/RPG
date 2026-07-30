@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: deca0a02cad2c9c41bd15e2c41c6e131, type: 3}
+  m_Name: Bandit ItemSetConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemSetConfig
+  <ItemConfigs>k__BackingField:
+  - {fileID: 11400000, guid: 3cee32b716412e543944072d0c8ec678, type: 2}
+  - {fileID: 11400000, guid: 23c23432d42dcb94aa08ba2a24846f20, type: 2}
+  - {fileID: 11400000, guid: 380626b92d62afc429c238de0c404a36, type: 2}
+  - {fileID: 11400000, guid: 2258baa98d8babb45935c1dd43f46035, type: 2}
+  - {fileID: 11400000, guid: 57fd27856ab84da479b619a6557c7aed, type: 2}
+  - {fileID: 11400000, guid: 2404a33986f88b64f80699e91d7fd6d6, type: 2}
+  - {fileID: 11400000, guid: 55305e29786823f4286ed69fc1817911, type: 2}
+  - {fileID: 11400000, guid: b595ff8ec3a59cc4faaf7e067fb544cc, type: 2}

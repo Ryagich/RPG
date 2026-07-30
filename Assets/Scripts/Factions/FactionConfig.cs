@@ -12,10 +12,50 @@ namespace Factions
         [field: SerializeField] public LocalizedString Name { get; private set; } = new("Tables", "Null String");
         [field: SerializeField] public Sprite Icon { get; private set; }
         [field: Header("Combat AI")]
-        [field: Tooltip("Baseline combat preferences for faction NPCs. A specific NPC can override this in its lifetime scope.")]
+        [field: Tooltip("Fallback combat preferences. Used when the faction has no profiles in the randomized profile list.")]
         [field: SerializeField] public NpcCombatProfile CombatProfile { get; private set; }
+        [field: Tooltip("Combat profiles randomly assigned to newly created faction NPCs. A specific NPC can override its assigned profile in its lifetime scope.")]
+        [field: SerializeField] public List<NpcCombatProfile> CombatProfiles { get; private set; } = new();
         [field: Header("Initial Inventory")]
         [field: SerializeField] public List<ItemSetConfig> ItemSetConfigs { get; private set; } = new();
+
+        public NpcCombatProfile GetRandomCombatProfile()
+        {
+            if (CombatProfiles == null || CombatProfiles.Count == 0)
+            {
+                return CombatProfile;
+            }
+
+            var validProfileCount = 0;
+            foreach (var combatProfile in CombatProfiles)
+            {
+                if (combatProfile != null)
+                {
+                    validProfileCount++;
+                }
+            }
+
+            if (validProfileCount == 0)
+            {
+                return CombatProfile;
+            }
+
+            var selectedProfileIndex = Random.Range(0, validProfileCount);
+            foreach (var combatProfile in CombatProfiles)
+            {
+                if (combatProfile == null)
+                {
+                    continue;
+                }
+
+                if (selectedProfileIndex-- == 0)
+                {
+                    return combatProfile;
+                }
+            }
+
+            return CombatProfile;
+        }
 
         public ItemSetConfig GetRandomItemSetConfig()
         {
