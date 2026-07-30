@@ -2,6 +2,7 @@ using Combat;
 using Movement;
 using System;
 using UnityEngine;
+using VContainer;
 using VContainer.Unity;
 
 namespace NPC
@@ -13,19 +14,22 @@ namespace NPC
         private readonly NpcCombatService combatService;
         private readonly CharacterDamageReceiver ownerDamageReceiver;
         private readonly PlayerMovementConfig playerMovementConfig;
+        private readonly bool canTalk;
 
         public NpcDialogueController(
             Transform ownerTransform,
             NpcNavMeshController navMeshController,
             NpcCombatService combatService,
             CharacterDamageReceiver ownerDamageReceiver,
-            PlayerMovementConfig playerMovementConfig)
+            PlayerMovementConfig playerMovementConfig,
+            [Key("Can Talk")] bool canTalk)
         {
             this.ownerTransform = ownerTransform;
             this.navMeshController = navMeshController;
             this.combatService = combatService;
             this.ownerDamageReceiver = ownerDamageReceiver;
             this.playerMovementConfig = playerMovementConfig;
+            this.canTalk = canTalk;
         }
 
         public bool IsDialogueRequested { get; private set; }
@@ -35,6 +39,11 @@ namespace NPC
 
         public bool CanStartDialogue(LifetimeScope interactorScope)
         {
+            if (!canTalk)
+            {
+                return false;
+            }
+
             if (ownerDamageReceiver != null && !ownerDamageReceiver.IsAlive)
             {
                 return false;

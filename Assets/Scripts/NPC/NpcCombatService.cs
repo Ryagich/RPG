@@ -1762,7 +1762,8 @@ namespace NPC
                 return true;
             }
 
-            var targetFaction = target.GetComponentInParent<NpcLifetimeScope>()?.Faction;
+            var targetFaction = target.GetComponentInParent<NpcLifetimeScope>()?.Faction
+                                ?? target.GetComponentInParent<PlayerLifetimeScope>()?.Faction;
             var ownerFaction = ownerScope != null ? ownerScope.Faction : null;
             if (target.GetComponentInParent<PlayerLifetimeScope>() != null && targetFaction == null)
             {

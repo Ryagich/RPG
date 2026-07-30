@@ -141,6 +141,10 @@ MonoBehaviour:
     m_Key: Input_Roll
     m_Metadata:
       m_Items: []
+  - m_Id: 40000000000000001
+    m_Key: Faction_Scarlet_Lions
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

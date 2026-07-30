@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: deca0a02cad2c9c41bd15e2c41c6e131, type: 3}
+  m_Name: Lion ItemSetConfig 1
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemSetConfig
+  <ItemConfigs>k__BackingField:
+  - {fileID: 11400000, guid: 73ea64548fea63149b4a3df09fdbcd12, type: 2}
+  - {fileID: 11400000, guid: 1f2070e2260f08f44909266c93615ffd, type: 2}
+  - {fileID: 11400000, guid: 2e190bdb6772d0c4f99dafd0aa0f70f0, type: 2}
+  - {fileID: 11400000, guid: 4c62ef8ce74286846b40f1ac44ec3a58, type: 2}
+  - {fileID: 11400000, guid: 9c56ecfae42f7e840a6a9798122814c7, type: 2}
+  - {fileID: 11400000, guid: 971cfd05ecd9f284381201cdeee5f087, type: 2}

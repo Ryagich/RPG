@@ -1,8 +1,10 @@
 using CameraScripts;
 using Combat;
+using Factions;
 using Interactable;
 using Inventory;
 using Inventory.Inventories;
+using Inventory.Item;
 using Inventory.Looting;
 using Money;
 using Movement;
@@ -25,7 +27,13 @@ namespace Container
         [SerializeField] private CanvasLifetimeScope canvasLifetimeScope;
         [SerializeField] private Character.CharacterInfo characterInfo;
         [SerializeField] private InventoryConfig inventoryConfig;
+        [Header("Faction")]
+        [SerializeField] private FactionConfig faction;
+        [Header("Initial Inventory")]
+        [SerializeField] private ItemSetConfig itemSetConfig;
         [SerializeField, Min(0.1f)] private float corpseInteractionRadius = 1.8f;
+
+        public FactionConfig Faction => faction;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -52,6 +60,17 @@ namespace Container
             if (inventoryConfig != null)
             {
                 builder.RegisterInstance(inventoryConfig).AsSelf();
+            }
+
+            if (faction != null)
+            {
+                builder.RegisterInstance(faction).AsSelf();
+            }
+
+            if (itemSetConfig != null)
+            {
+                builder.RegisterInstance(itemSetConfig).AsSelf();
+                builder.RegisterEntryPoint<InitialInventoryItemSetApplier>().AsSelf();
             }
 
             var founder = gameObject.AddComponent<InteractableFounder>();

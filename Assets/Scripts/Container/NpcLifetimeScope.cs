@@ -3,6 +3,7 @@ using Dialogs.Graph;
 using Factions;
 using Inventory;
 using Inventory.Inventories;
+using Inventory.Item;
 using Inventory.Looting;
 using Money;
 using Movement;
@@ -26,9 +27,13 @@ namespace Container
 
         [SerializeField] private Character.CharacterInfo characterInfo;
         [SerializeField] private InventoryConfig inventoryConfig;
+        [SerializeField] private bool canTalk = true;
         [SerializeField] private DialogGraph dialog;
         [SerializeField] private StateMachineGraph stateMachineGraph;
         [SerializeField] private FactionConfig faction;
+        [Header("Initial Inventory")]
+        [Tooltip("If empty, this NPC randomly selects an item set from its faction.")]
+        [SerializeField] private ItemSetConfig itemSetConfigOverride;
         [Header("Combat AI")]
         [Tooltip("If empty, this NPC uses the combat profile assigned to its faction.")]
         [SerializeField] private NpcCombatProfile combatProfileOverride;
@@ -39,6 +44,7 @@ namespace Container
         public StateMachineGraph StateMachineGraph => stateMachineGraph;
         public FactionConfig Faction => faction;
         public NpcCombatProfile CombatProfile => combatProfileOverride != null ? combatProfileOverride : faction?.CombatProfile;
+        public bool CanTalk => canTalk;
         public float CurrentHp => currentHp;
         public string CurrentState => currentState;
 
@@ -81,6 +87,7 @@ namespace Container
 
             builder.RegisterInstance(transform);
             builder.RegisterInstance("NPC").Keyed("Scope ID");
+            builder.RegisterInstance(canTalk).Keyed("Can Talk");
             if (stateMachineGraph != null)
             {
                 builder.RegisterInstance(stateMachineGraph).AsSelf();
@@ -109,6 +116,13 @@ namespace Container
             if (faction != null)
             {
                 builder.RegisterInstance(faction).AsSelf();
+            }
+
+            var initialItemSetConfig = itemSetConfigOverride ?? faction?.GetRandomItemSetConfig();
+            if (initialItemSetConfig != null)
+            {
+                builder.RegisterInstance(initialItemSetConfig).AsSelf();
+                builder.RegisterEntryPoint<InitialInventoryItemSetApplier>().AsSelf();
             }
 
             var damageReceiverHost = GetComponent<DamageReceiverHost>() ?? gameObject.AddComponent<DamageReceiverHost>();
