@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: deca0a02cad2c9c41bd15e2c41c6e131, type: 3}
+  m_Name: Free Knights ItemSetConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemSetConfig
+  <ItemConfigs>k__BackingField:
+  - {fileID: 11400000, guid: de66a0138fa82814a842716f9cd9bd22, type: 2}
+  - {fileID: 11400000, guid: 6031dc19c25a3c54897d052be5d701a8, type: 2}
+  - {fileID: 11400000, guid: 486eafbd9f69ea9499644da1a912ba47, type: 2}
+  - {fileID: 11400000, guid: 2e190bdb6772d0c4f99dafd0aa0f70f0, type: 2}
+  - {fileID: 11400000, guid: 4c62ef8ce74286846b40f1ac44ec3a58, type: 2}
+  - {fileID: 11400000, guid: 55305e29786823f4286ed69fc1817911, type: 2}
+  - {fileID: 11400000, guid: b595ff8ec3a59cc4faaf7e067fb544cc, type: 2}

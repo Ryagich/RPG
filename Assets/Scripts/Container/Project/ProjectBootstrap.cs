@@ -7,7 +7,7 @@ namespace Container.Project
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Initialize()
         {
-            if (Object.FindAnyObjectByType<ProjectLifetimeScope>() != null)
+            if (ProjectLifetimeScope.Instance != null)
             {
                 return;
             }

@@ -44,9 +44,6 @@ namespace UI.Pages
         }
 
         public override PageType Type { get; } = PageType.Looting;
-        public static LootingPage Current { get; private set; }
-        public static IInventoryInteractionPage CurrentInteractionPage => Current;
-
         private readonly UIConfig uiConfig;
         private readonly StatsConfig statsConfig;
         private readonly StatFiller hpFiller;
@@ -62,6 +59,7 @@ namespace UI.Pages
         private readonly Canvas canvas;
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
+        private readonly UI.Inventory.InventoryInteractionContext interactionContext;
 
         private RectTransform contentRect = null!;
         private RectTransform sectionsLayoutRect = null!;
@@ -124,7 +122,8 @@ namespace UI.Pages
             Character.CharacterInfo playerCharacterInfo,
             LootingContext lootingContext,
             StatsController statsController,
-            IObjectResolver resolver)
+            IObjectResolver resolver,
+            UI.Inventory.InventoryInteractionContext interactionContext)
         {
             this.uiConfig = uiConfig;
             this.statsConfig = statsConfig;
@@ -140,13 +139,14 @@ namespace UI.Pages
             this.lootingContext = lootingContext;
             this.statsController = statsController;
             this.resolver = resolver;
+            this.interactionContext = interactionContext;
 
             canvasRect = canvas.GetComponent<RectTransform>();
         }
 
         public bool TryHandleMouseDown(MouseButtonType button, Vector2 screenPoint)
         {
-            if (Current != this || contentRect == null || playerInventory.HandSlot.Value?.ItemStack != null)
+            if (interactionContext.ActivePage != this || contentRect == null || playerInventory.HandSlot.Value?.ItemStack != null)
             {
                 return false;
             }
@@ -190,7 +190,7 @@ namespace UI.Pages
                 return;
             }
 
-            Current = this;
+            interactionContext.SetActivePage(this);
             contentRect = resolver.Instantiate(uiConfig.ContentPref, canvasRect);
             contentRect.name = $"{uiConfig.ContentPref.name} | {Type}";
             popupParentRect = contentRect;
@@ -548,7 +548,7 @@ namespace UI.Pages
                 return true;
             }
 
-            if (!InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out _)
+            if (!interactionContext.TryGetHoveredInventory(out var hoveredInventory, out _)
              || !TryGetSnappedPositionInInventoryGridLocal(screenPoint, hoveredInventory, out var snappedLocalPosition))
             {
                 return false;
@@ -909,7 +909,7 @@ namespace UI.Pages
 
         private void HandleHoverPopup()
         {
-            if (Current != this || contentRect == null)
+            if (interactionContext.ActivePage != this || contentRect == null)
             {
                 return;
             }
@@ -1504,7 +1504,7 @@ namespace UI.Pages
         private bool TryGetGridPopupTarget(out PopupTarget target)
         {
             target = null;
-            if (!InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out var hoveredTile)
+            if (!interactionContext.TryGetHoveredInventory(out var hoveredInventory, out var hoveredTile)
              || hoveredTile?.ItemInInventory?.ItemStack?.ItemConfig == null)
             {
                 return false;
@@ -1585,7 +1585,7 @@ namespace UI.Pages
             popupRect = null;
             popupContentRect = null;
             popupParentRect = null;
-            Current = null;
+            interactionContext.ClearActivePage(this);
         }
     }
 }

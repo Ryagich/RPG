@@ -8,11 +8,16 @@ namespace TargetLock
     {
         private readonly Transform ownerTransform;
         private readonly DamageReceiverHost ownerDamageReceiverHost;
+        private readonly INpcCombatRegistry combatRegistry;
 
-        public TargetLockTargetFilter(Transform ownerTransform, DamageReceiverHost ownerDamageReceiverHost)
+        public TargetLockTargetFilter(
+            Transform ownerTransform,
+            DamageReceiverHost ownerDamageReceiverHost,
+            INpcCombatRegistry combatRegistry)
         {
             this.ownerTransform = ownerTransform;
             this.ownerDamageReceiverHost = ownerDamageReceiverHost;
+            this.combatRegistry = combatRegistry;
         }
 
         public bool CanLock(TargetLockTarget target)
@@ -52,7 +57,7 @@ namespace TargetLock
         {
             var ownerReceiver = ownerDamageReceiverHost != null ? ownerDamageReceiverHost.Receiver : null;
             return ownerReceiver != null
-                && NpcCombatService.IsTargetHostileToReceiver(target, ownerReceiver);
+                && combatRegistry.IsTargetHostileToReceiver(target, ownerReceiver);
         }
     }
 }

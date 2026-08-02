@@ -67510,8 +67510,7 @@ MonoBehaviour:
     TypeName: 
   autoRun: 1
   autoInjectGameObjects: []
-  sceneCanvas: {fileID: 0}
-  canvasPrefab: {fileID: 0}
+  sceneCanvas: {fileID: 797861934}
 --- !u!4 &1768855687
 Transform:
   m_ObjectHideFlags: 0

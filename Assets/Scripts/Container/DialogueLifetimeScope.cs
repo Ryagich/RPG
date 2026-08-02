@@ -4,6 +4,7 @@ using Interactable;
 using Inventory;
 using Inventory.Inventories;
 using Money;
+using Quests.MapTargets;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -15,6 +16,7 @@ namespace Container
         [SerializeField] private Character.CharacterInfo characterInfo;
         [SerializeField] private DialogGraph dialog;
         [SerializeField] private InventoryConfig inventoryConfig;
+        [SerializeField] private QuestMapTarget questMapTarget;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -31,6 +33,11 @@ namespace Container
             if (inventoryConfig != null)
             {
                 builder.RegisterInstance(inventoryConfig).AsSelf();
+            }
+
+            if (questMapTarget != null)
+            {
+                builder.RegisterComponent(questMapTarget);
             }
 
             builder.Register(_ => new MoneyStorage(100), Lifetime.Scoped).AsSelf();

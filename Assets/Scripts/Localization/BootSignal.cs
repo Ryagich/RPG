@@ -2,16 +2,21 @@
 
 namespace Localization
 {
-    public static class BootSignal
+    /// <summary>
+    /// Project-lifetime signal that marks completion of the boot sequence.
+    /// </summary>
+    public sealed class BootCompletion
     {
-        private static readonly UniTaskCompletionSource completion = new();
+        private readonly UniTaskCompletionSource completion = new();
 
-        public static UniTask WaitAsync() => completion.Task;
+        public UniTask WaitAsync() => completion.Task;
 
-        public static void Signal()
+        public void Signal()
         {
             if (!completion.Task.Status.IsCompleted())
+            {
                 completion.TrySetResult();
+            }
         }
     }
 }

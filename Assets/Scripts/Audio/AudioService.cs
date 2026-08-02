@@ -112,8 +112,6 @@ namespace GameAudio
         private SourcePool footstepsPool;
         private AudioSource mainMenuMusicSource;
 
-        public static IAudioService Current { get; private set; }
-
         public AudioService(AudioConfig config, FootstepConfig footstepConfig)
         {
             this.config = config;
@@ -142,16 +140,10 @@ namespace GameAudio
                 ApplyDecibels(category, LoadDecibels(category));
             }
 
-            Current = this;
         }
 
         public void Dispose()
         {
-            if (ReferenceEquals(Current, this))
-            {
-                Current = null;
-            }
-
             if (root != null)
             {
                 UnityEngine.Object.Destroy(root);

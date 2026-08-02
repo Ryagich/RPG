@@ -6,6 +6,7 @@ using Input;
 using Interactable;
 using Inventory;
 using Localization;
+using Locations;
 using Loading;
 using Movement;
 using NPC;
@@ -25,7 +26,7 @@ namespace Container.Project
 {
     public class ProjectLifetimeScope : LifetimeScope
     {
-        private static ProjectLifetimeScope instance;
+        public static ProjectLifetimeScope Instance { get; private set; }
 
         [field: SerializeField] public InputConfig InputConfig { get; private set; }
         [field: SerializeField] public CameraConfig CameraConfig { get; private set; }
@@ -53,22 +54,22 @@ namespace Container.Project
 
         protected override void Awake()
         {
-            if (instance != null && instance != this)
+            if (Instance != null && Instance != this)
             {
                 Destroy(gameObject);
                 return;
             }
 
-            instance = this;
+            Instance = this;
             DontDestroyOnLoad(gameObject);
             base.Awake();
         }
 
         protected override void OnDestroy()
         {
-            if (instance == this)
+            if (Instance == this)
             {
-                instance = null;
+                Instance = null;
             }
 
             base.OnDestroy();
@@ -102,6 +103,8 @@ namespace Container.Project
             builder.RegisterInstance(AnimationEventSoundConfig).AsSelf();
             builder.RegisterEntryPoint<AudioService>(Lifetime.Singleton).As<IAudioService>().AsSelf();
             builder.Register<SceneLoadingService>(Lifetime.Singleton).AsSelf();
+            builder.Register<BootCompletion>(Lifetime.Singleton).AsSelf();
+            builder.Register<LocationTransitionContext>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<InputBindingOverridesBootstrap>();
 
             builder.RegisterEntryPoint<Bootloader>().AsSelf();

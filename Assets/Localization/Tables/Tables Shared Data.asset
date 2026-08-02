@@ -149,6 +149,18 @@ MonoBehaviour:
     m_Key: Faction_Bandits
     m_Metadata:
       m_Items: []
+  - m_Id: 50000000000000001
+    m_Key: Switch_Location_Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 50000000000000002
+    m_Key: Switch_Location_Yes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 50000000000000003
+    m_Key: Switch_Location_No
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

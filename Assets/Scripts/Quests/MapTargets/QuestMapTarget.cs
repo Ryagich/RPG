@@ -1,6 +1,7 @@
 using System;
 using Quests.Graph;
 using UnityEngine;
+using VContainer;
 
 namespace Quests.MapTargets
 {
@@ -10,21 +11,39 @@ namespace Quests.MapTargets
         [SerializeField] private QuestGraph questGraph;
         [SerializeField] private Transform targetTransform;
         [SerializeField, HideInInspector] private string targetId;
+        private IQuestMapTargetRegistry registry;
 
         public QuestGraph QuestGraph => questGraph;
         public Transform TargetTransform => targetTransform != null ? targetTransform : transform;
         public string TargetId => targetId;
 
+        [Inject]
+        public void Construct(IQuestMapTargetRegistry targetRegistry)
+        {
+            if (registry == targetRegistry)
+            {
+                return;
+            }
+
+            registry?.Unregister(this);
+            registry = targetRegistry;
+            if (isActiveAndEnabled)
+            {
+                registry.Register(this);
+            }
+        }
+
         private void OnEnable()
         {
-            QuestMapTargetRegistry.Register(this);
+            registry?.Register(this);
         }
 
         private void OnDisable()
         {
-            QuestMapTargetRegistry.Unregister(this);
+            registry?.Unregister(this);
         }
 
+#if UNITY_EDITOR
         private void Reset()
         {
             if (targetTransform == null)
@@ -74,5 +93,6 @@ namespace Quests.MapTargets
 
             return false;
         }
+#endif
     }
 }

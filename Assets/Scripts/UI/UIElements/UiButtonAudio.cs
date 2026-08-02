@@ -2,6 +2,7 @@ using GameAudio;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using VContainer;
 
 namespace UI.UIElements
 {
@@ -10,6 +11,13 @@ namespace UI.UIElements
     public sealed class UiButtonAudio : UIBehaviour, IPointerEnterHandler, IPointerClickHandler
     {
         private Button button;
+        private IAudioService audioService;
+
+        [Inject]
+        public void Construct(IAudioService service)
+        {
+            audioService = service;
+        }
 
         protected override void Awake()
         {
@@ -21,7 +29,7 @@ namespace UI.UIElements
         {
             if (button != null && button.IsInteractable())
             {
-                AudioService.Current?.PlayUiHover();
+                audioService?.PlayUiHover();
             }
         }
 
@@ -29,7 +37,7 @@ namespace UI.UIElements
         {
             if (button != null && button.IsInteractable())
             {
-                AudioService.Current?.PlayUiClick();
+                audioService?.PlayUiClick();
             }
         }
     }

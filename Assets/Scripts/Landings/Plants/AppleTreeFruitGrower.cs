@@ -5,6 +5,7 @@ using MessagePipe;
 using Messages;
 using Sounds;
 using UnityEngine;
+using VContainer;
 
 namespace Landings.Plants
 {
@@ -26,6 +27,13 @@ namespace Landings.Plants
         private float fallTimer;
         private float nextFallCheck;
         private GameObject appleVisualPrefab;
+        private IPublisher<PlaySoundMessage> playSoundPublisher;
+
+        [Inject]
+        public void Construct(IPublisher<PlaySoundMessage> publisher)
+        {
+            playSoundPublisher = publisher;
+        }
 
         private void Awake()
         {
@@ -208,15 +216,14 @@ namespace Landings.Plants
             return Random.Range(Mathf.Max(0.1f, interval.x), Mathf.Max(0.1f, interval.y));
         }
 
-        private static void PlaySound(SoundSettings settings, Vector3 position)
+        private void PlaySound(SoundSettings settings, Vector3 position)
         {
-            if (settings == null)
+            if (settings == null || playSoundPublisher == null)
             {
                 return;
             }
 
-            GlobalMessagePipe.GetPublisher<PlaySoundMessage>()
-                             .Publish(new PlaySoundMessage(settings, position, null));
+            playSoundPublisher.Publish(new PlaySoundMessage(settings, position, null));
         }
 
         private void PlayBreakSound()

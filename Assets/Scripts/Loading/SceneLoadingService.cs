@@ -5,8 +5,8 @@ namespace Loading
 {
     public sealed class SceneLoadingService
     {
-        private static string targetSceneName;
-        private static bool waitForInputBeforeActivation;
+        private string targetSceneName;
+        private bool waitForInputBeforeActivation;
 
         private readonly LoadSceneConfig config;
 
@@ -17,11 +17,7 @@ namespace Loading
 
         public string TargetSceneName => targetSceneName;
         public bool WaitForInputBeforeActivation => waitForInputBeforeActivation;
-        public bool HasPendingRequest => HasPendingLoadRequest;
-
-        public static string PendingTargetSceneName => targetSceneName;
-        public static bool PendingWaitForInputBeforeActivation => waitForInputBeforeActivation;
-        public static bool HasPendingLoadRequest => !string.IsNullOrWhiteSpace(targetSceneName);
+        public bool HasPendingRequest => !string.IsNullOrWhiteSpace(targetSceneName);
 
         public void Load(string targetSceneName)
         {
@@ -38,7 +34,7 @@ namespace Loading
             }
 
             var activeSceneName = SceneManager.GetActiveScene().name;
-            PrepareLoad(
+            PrepareDirectLoad(
                 targetSceneName,
                 activeSceneName == config.MenuSceneName && targetSceneName != config.MenuSceneName);
 
@@ -48,21 +44,11 @@ namespace Loading
 
         public void PrepareDirectLoad(string targetSceneName, bool waitForInputBeforeActivation)
         {
-            PrepareLoad(targetSceneName, waitForInputBeforeActivation);
-        }
-
-        public static void PrepareLoad(string targetSceneName, bool waitForInputBeforeActivation)
-        {
-            SceneLoadingService.targetSceneName = targetSceneName;
-            SceneLoadingService.waitForInputBeforeActivation = waitForInputBeforeActivation;
+            this.targetSceneName = targetSceneName;
+            this.waitForInputBeforeActivation = waitForInputBeforeActivation;
         }
 
         public void ClearRequest()
-        {
-            ClearPendingRequest();
-        }
-
-        public static void ClearPendingRequest()
         {
             targetSceneName = null;
             waitForInputBeforeActivation = false;

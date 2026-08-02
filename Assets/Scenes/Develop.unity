@@ -4404,6 +4404,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Container.Game.GameSceneBootstrapper
   gameScopePrefab: {fileID: 88207094466115628, guid: 01b3b82635921a042b7893487bda68f7, type: 3}
+  gameCamera: {fileID: 330585545}
+  levelScopes:
+  - {fileID: 1834779877}
+  - {fileID: 9141871603821371956}
 --- !u!4 &1363242808
 Transform:
   m_ObjectHideFlags: 0
@@ -5999,11 +6003,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Container.DialogueLifetimeScope
   parentReference:
     TypeName: Container.Game.GameLifetimeScope
-  autoRun: 1
+  autoRun: 0
   autoInjectGameObjects: []
   characterInfo: {fileID: 11400000, guid: 43718f9d5b35b6b4e9b9cef541377a63, type: 2}
   dialog: {fileID: 11400000, guid: 88d2c07937d080b4ba52468317585259, type: 2}
   inventoryConfig: {fileID: 0}
+  questMapTarget: {fileID: 1834779878}
 --- !u!114 &1834779878
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13086,7 +13091,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Container.ChestLifetimeScope
   parentReference:
     TypeName: Container.Game.GameLifetimeScope
-  autoRun: 1
+  autoRun: 0
   autoInjectGameObjects: []
   characterInfo: {fileID: 11400000, guid: 43718f9d5b35b6b4e9b9cef541377a63, type: 2}
   inventoryConfig: {fileID: 0}

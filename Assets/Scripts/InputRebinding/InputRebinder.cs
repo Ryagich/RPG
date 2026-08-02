@@ -129,15 +129,6 @@ public class InputRebinder : MonoBehaviour, IPointerEnterHandler
         }
     }
 
-    private static void SetActionMap(string mapName)
-    {
-        var playerInput = FindObjectsByType<PlayerInput>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-        if (playerInput.Length == 1)
-        {
-            playerInput[0].SwitchCurrentActionMap(mapName);
-        }
-    }
-
     private void RebindComplete()
     {
         UpdateText();
@@ -367,7 +358,6 @@ public class InputRebinder : MonoBehaviour, IPointerEnterHandler
         Entered?.Invoke();
     }
 }
-
 
 
 

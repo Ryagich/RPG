@@ -1,18 +1,69 @@
 ﻿using Inventory;
 using Inventory.Grid;
 using Inventory.Inventories;
+using UI.Pages;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using VContainer;
 
 namespace UI.Inventory
 {
+    public sealed class InventoryInteractionContext
+    {
+        public IInventoryInteractionPage ActivePage { get; private set; }
+        public TradePage ActiveTradePage => ActivePage as TradePage;
+
+        private IInventory hoveredInventory;
+        private Tile hoveredTile;
+
+        public void SetActivePage(IInventoryInteractionPage page)
+        {
+            ActivePage = page;
+        }
+
+        public void ClearActivePage(IInventoryInteractionPage page)
+        {
+            if (ActivePage == page)
+            {
+                ActivePage = null;
+                ClearHoveredInventory();
+            }
+        }
+
+        public void SetHoveredInventory(IInventory inventory, Tile tile)
+        {
+            hoveredInventory = inventory;
+            hoveredTile = tile;
+        }
+
+        public void ClearHoveredInventory(IInventory inventory = null, Tile tile = null)
+        {
+            if (inventory == null || (hoveredInventory == inventory && hoveredTile == tile))
+            {
+                hoveredInventory = null;
+                hoveredTile = null;
+            }
+        }
+
+        public bool TryGetHoveredInventory(out IInventory inventory, out Tile tile)
+        {
+            inventory = hoveredInventory;
+            tile = hoveredTile;
+            return inventory != null && tile != null;
+        }
+    }
+
     public class InventoryTilePointerHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
-        public static Tile HoveredTile { get; private set; }
-        public static IInventory HoveredInventory { get; private set; }
-
         public Tile Tile { get; private set; }
         public IInventory Inventory { get; private set; }
+        private InventoryInteractionContext interactionContext;
+
+        [Inject]
+        public void Construct(InventoryInteractionContext context)
+        {
+            interactionContext = context;
+        }
 
         public void Initialize(IInventory inventory, Tile tile)
         {
@@ -22,34 +73,17 @@ namespace UI.Inventory
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            HoveredInventory = Inventory;
-            HoveredTile = Tile;
-            Debug.Log(HoveredTile.Index);
+            interactionContext?.SetHoveredInventory(Inventory, Tile);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            if (HoveredInventory == Inventory && HoveredTile == Tile)
-            {
-                HoveredInventory = null;
-                HoveredTile = null;
-            }
+            interactionContext?.ClearHoveredInventory(Inventory, Tile);
         }
 
         private void OnDisable()
         {
-            if (HoveredInventory == Inventory && HoveredTile == Tile)
-            {
-                HoveredInventory = null;
-                HoveredTile = null;
-            }
-        }
-
-        public static bool TryGetHovered(out IInventory inventory, out Tile tile)
-        {
-            inventory = HoveredInventory;
-            tile = HoveredTile;
-            return inventory != null && tile != null;
+            interactionContext?.ClearHoveredInventory(Inventory, Tile);
         }
     }
 }

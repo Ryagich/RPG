@@ -233,6 +233,9 @@ namespace UI.Map
 
         private void CacheWorldBounds()
         {
+            // This is intentionally a one-time content query, not dependency resolution:
+            // the map derives its visible extents from every renderer in the current world scene.
+            // Runtime services and scene objects are still supplied through their scopes.
             Scene targetScene = playerTransform.gameObject.scene;
             Renderer[] renderers = FindObjectsByType<Renderer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
 

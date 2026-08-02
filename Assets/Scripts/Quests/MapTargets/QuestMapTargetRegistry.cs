@@ -5,12 +5,23 @@ using UnityEngine;
 
 namespace Quests.MapTargets
 {
-    public static class QuestMapTargetRegistry
+    public interface IQuestMapTargetRegistry
     {
-        private static readonly Dictionary<QuestGraph, Dictionary<string, QuestMapTarget>> sceneTargetsByQuest = new();
-        private static readonly Dictionary<QuestGraph, Dictionary<string, Transform>> scriptTargetsByQuest = new();
+        Transform GetTarget(QuestNodeData nodeData);
+        void SetScriptTarget(QuestGraph questGraph, string targetKey, Transform targetTransform);
+        void SetScriptTarget(QuestNodeData nodeData, Transform targetTransform);
+        void ClearScriptTarget(QuestGraph questGraph, string targetKey);
+        void ClearScriptTarget(QuestNodeData nodeData);
+        void Register(QuestMapTarget questMapTarget);
+        void Unregister(QuestMapTarget questMapTarget);
+    }
 
-        public static Transform GetTarget(QuestNodeData nodeData)
+    public sealed class QuestMapTargetRegistry : IQuestMapTargetRegistry
+    {
+        private readonly Dictionary<QuestGraph, Dictionary<string, QuestMapTarget>> sceneTargetsByQuest = new();
+        private readonly Dictionary<QuestGraph, Dictionary<string, Transform>> scriptTargetsByQuest = new();
+
+        public Transform GetTarget(QuestNodeData nodeData)
         {
             if (nodeData == null || nodeData.OwnerGraph == null)
             {
@@ -25,7 +36,7 @@ namespace Quests.MapTargets
             };
         }
 
-        public static void SetScriptTarget(QuestGraph questGraph, string targetKey, Transform targetTransform)
+        public void SetScriptTarget(QuestGraph questGraph, string targetKey, Transform targetTransform)
         {
             if (questGraph == null || string.IsNullOrWhiteSpace(targetKey))
             {
@@ -43,7 +54,7 @@ namespace Quests.MapTargets
             targets[targetKey] = targetTransform;
         }
 
-        public static void SetScriptTarget(QuestNodeData nodeData, Transform targetTransform)
+        public void SetScriptTarget(QuestNodeData nodeData, Transform targetTransform)
         {
             if (nodeData == null ||
                 nodeData.OwnerGraph == null ||
@@ -56,7 +67,7 @@ namespace Quests.MapTargets
             SetScriptTarget(nodeData.OwnerGraph, nodeData.ScriptMapTargetKey, targetTransform);
         }
 
-        public static void ClearScriptTarget(QuestGraph questGraph, string targetKey)
+        public void ClearScriptTarget(QuestGraph questGraph, string targetKey)
         {
             if (questGraph == null || string.IsNullOrWhiteSpace(targetKey))
             {
@@ -69,7 +80,7 @@ namespace Quests.MapTargets
             }
         }
 
-        public static void ClearScriptTarget(QuestNodeData nodeData)
+        public void ClearScriptTarget(QuestNodeData nodeData)
         {
             if (nodeData == null || nodeData.OwnerGraph == null || string.IsNullOrWhiteSpace(nodeData.ScriptMapTargetKey))
             {
@@ -79,7 +90,7 @@ namespace Quests.MapTargets
             ClearScriptTarget(nodeData.OwnerGraph, nodeData.ScriptMapTargetKey);
         }
 
-        public static void Register(QuestMapTarget questMapTarget)
+        public void Register(QuestMapTarget questMapTarget)
         {
             if (questMapTarget == null ||
                 questMapTarget.QuestGraph == null ||
@@ -92,7 +103,7 @@ namespace Quests.MapTargets
             targets[questMapTarget.TargetId] = questMapTarget;
         }
 
-        public static void Unregister(QuestMapTarget questMapTarget)
+        public void Unregister(QuestMapTarget questMapTarget)
         {
             if (questMapTarget == null ||
                 questMapTarget.QuestGraph == null ||
@@ -109,7 +120,7 @@ namespace Quests.MapTargets
             }
         }
 
-        private static Transform GetSceneTarget(QuestGraph questGraph, string targetId)
+        private Transform GetSceneTarget(QuestGraph questGraph, string targetId)
         {
             if (questGraph == null || string.IsNullOrWhiteSpace(targetId))
             {
@@ -127,7 +138,7 @@ namespace Quests.MapTargets
             return questMapTarget.TargetTransform;
         }
 
-        private static Transform GetScriptTarget(QuestGraph questGraph, string targetKey)
+        private Transform GetScriptTarget(QuestGraph questGraph, string targetKey)
         {
             if (questGraph == null || string.IsNullOrWhiteSpace(targetKey))
             {
@@ -149,7 +160,7 @@ namespace Quests.MapTargets
             return targetTransform;
         }
 
-        private static Dictionary<string, QuestMapTarget> GetOrCreateSceneTargets(QuestGraph questGraph)
+        private Dictionary<string, QuestMapTarget> GetOrCreateSceneTargets(QuestGraph questGraph)
         {
             if (!sceneTargetsByQuest.TryGetValue(questGraph, out Dictionary<string, QuestMapTarget> targets))
             {
@@ -160,7 +171,7 @@ namespace Quests.MapTargets
             return targets;
         }
 
-        private static Dictionary<string, Transform> GetOrCreateScriptTargets(QuestGraph questGraph)
+        private Dictionary<string, Transform> GetOrCreateScriptTargets(QuestGraph questGraph)
         {
             if (!scriptTargetsByQuest.TryGetValue(questGraph, out Dictionary<string, Transform> targets))
             {

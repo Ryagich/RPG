@@ -8,6 +8,7 @@ using MessagePipe;
 using Messages;
 using Sounds;
 using UnityEngine;
+using VContainer;
 
 namespace Landings.Fields
 {
@@ -23,6 +24,13 @@ namespace Landings.Fields
         [SerializeField] private Vector2 initialGrowDelay = new(0f, 0.5f);
 
         private readonly List<PlantSlot> slots = new();
+        private IPublisher<PlaySoundMessage> playSoundPublisher;
+
+        [Inject]
+        public void Construct(IPublisher<PlaySoundMessage> publisher)
+        {
+            playSoundPublisher = publisher;
+        }
 
         private void Awake()
         {
@@ -587,15 +595,14 @@ namespace Landings.Fields
             PlaySound(plantConfig?.ItemGivenSound?.SoundSettings, position);
         }
 
-        private static void PlaySound(SoundSettings settings, Vector3 position)
+        private void PlaySound(SoundSettings settings, Vector3 position)
         {
-            if (settings == null)
+            if (settings == null || playSoundPublisher == null)
             {
                 return;
             }
 
-            GlobalMessagePipe.GetPublisher<PlaySoundMessage>()
-                             .Publish(new PlaySoundMessage(settings, position, null));
+            playSoundPublisher.Publish(new PlaySoundMessage(settings, position, null));
         }
 
         private readonly struct PlantCandidate

@@ -32,14 +32,14 @@ namespace Landings.Plants
             (
                 Transform parent,
                 IObjectResolver resolver,
-                IPublisher<PlantHasGrownMessage> plantHasGrownPublisher
+                IPublisher<PlantHasGrownMessage> plantHasGrownPublisher,
+                IPublisher<PlaySoundMessage> playSoundPublisher
             )
         {
             this.parent = parent;
             this.resolver = resolver;
             this.plantHasGrownPublisher = plantHasGrownPublisher;
-            
-            globalPlaySoundPublisher = GlobalMessagePipe.GetPublisher<PlaySoundMessage>();
+            globalPlaySoundPublisher = playSoundPublisher;
         }
 
         public void StartGrow(PlantConfig config)

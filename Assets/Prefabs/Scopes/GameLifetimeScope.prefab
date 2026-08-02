@@ -47,7 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Container.Game.GameLifetimeScope
   parentReference:
     TypeName: 
-  autoRun: 1
+  autoRun: 0
   autoInjectGameObjects: []
   <PlayerPrefab>k__BackingField: {fileID: 1120601643445174355, guid: 236f164fb2d36f94e95d1daed2783364, type: 3}
 --- !u!114 &-6368494067338757447

@@ -19,6 +19,7 @@ namespace UI.Pages
         private readonly MapPage mapPage;
         private readonly QuestPage questPage;
         private readonly DeathPage deathPage;
+        private readonly SwitchLocationPage switchLocationPage;
 
         private BasePage currentPage;
         
@@ -34,6 +35,7 @@ namespace UI.Pages
                 MapPage mapPage,
                 QuestPage questPage,
                 DeathPage deathPage,
+                SwitchLocationPage switchLocationPage,
                 ISubscriber<GameModeChangedMessage> gameModeChangeSubscriber
             )
         {
@@ -47,6 +49,7 @@ namespace UI.Pages
             this.mapPage = mapPage;
             this.questPage = questPage;
             this.deathPage = deathPage;
+            this.switchLocationPage = switchLocationPage;
 
             gameModeChangeSubscriber.Subscribe(OnGameModeChanged);
         }
@@ -92,6 +95,9 @@ namespace UI.Pages
                 case GameMode.Death:
                     currentPage = deathPage;
                     break;
+                case GameMode.SwitchLocation:
+                    currentPage = switchLocationPage;
+                    break;
                 default:
                     currentPage = mainPage;
                     break;
@@ -121,6 +127,7 @@ namespace UI.Pages
         Map,
         Quest,
         Death,
+        SwitchLocation,
         MenuMain,
         MenuSettings,
         MenuSoundsSettings,

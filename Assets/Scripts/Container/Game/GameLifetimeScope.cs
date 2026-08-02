@@ -8,6 +8,11 @@ using VContainer;
 using VContainer.Unity;
 using Inventory.Looting;
 using GameAudio;
+using Locations;
+using NPC;
+using Quests.MapTargets;
+using TargetLock;
+using UI.Inventory;
 
 namespace Container.Game
 {
@@ -19,10 +24,29 @@ namespace Container.Game
 
         private PlayerLifetimeScope playerScope;
         private Transform globalSoundsRoot;
+        private VillageLocationSelector locationSelector;
+        private Camera gameCamera;
+
+        public void SetLocationSelector(VillageLocationSelector selector)
+        {
+            locationSelector = selector;
+        }
+
+        public void SetGameCamera(Camera camera)
+        {
+            gameCamera = camera;
+        }
 
         protected override void Configure(IContainerBuilder builder)
         {
-            builder.RegisterInstance(Camera.main).AsSelf();
+            if (gameCamera == null)
+            {
+                Debug.LogError("Game camera is not assigned to GameLifetimeScope.", this);
+            }
+            else
+            {
+                builder.RegisterInstance(gameCamera).AsSelf();
+            }
 
             // === MessagePipe ===
             var options = builder.RegisterMessagePipe();
@@ -48,17 +72,44 @@ namespace Container.Game
             builder.RegisterMessageBroker<ItemHolderFoundMessage>(options);
             builder.RegisterMessageBroker<ItemHolderLostMessage>(options);
             builder.RegisterMessageBroker<PlaySoundMessage>(options);
+
+            builder.Register<TargetLockTargetRegistry>(Lifetime.Singleton)
+                   .As<ITargetLockTargetRegistry>()
+                   .AsSelf();
+            builder.Register<NpcCombatRegistry>(Lifetime.Singleton)
+                   .As<INpcCombatRegistry>()
+                   .AsSelf();
+            builder.Register<QuestMapTargetRegistry>(Lifetime.Singleton)
+                   .As<IQuestMapTargetRegistry>()
+                   .AsSelf();
+            builder.Register<InventoryInteractionContext>(Lifetime.Singleton).AsSelf();
+
+            if (locationSelector != null)
+            {
+                builder.RegisterInstance(locationSelector);
+            }
+
+            builder.Register(
+                resolver => new LocationTransitionService(
+                    locationSelector,
+                    resolver.Resolve<LocationTransitionContext>()),
+                Lifetime.Singleton).AsSelf();
              
             // === InputHandler ===
             builder.Register<InputHandler>(Lifetime.Singleton).AsSelf().As<IStartable>();
 
             builder.RegisterBuildCallback(container =>
                                           {
-                                              GlobalMessagePipe.SetProvider(container.AsServiceProvider());
                                               globalSoundsRoot = CreateGlobalSoundsRoot();
                                               var audioService = container.Resolve<IAudioService>();
                                               audioService.SetWorldSoundParent(globalSoundsRoot);
+                                              var locationTransitions = container.Resolve<LocationTransitionService>();
+                                              locationTransitions.Initialize();
                                               playerScope = CreateChildFromPrefab(PlayerPrefab, _ => { });
+                                              if (locationTransitions.TryGetPlayerSpawn(out var spawnPose))
+                                              {
+                                                  PlacePlayerAtSpawn(playerScope, spawnPose);
+                                              }
                                               audioService.SetListenerTransform(playerScope.transform);
                                           });
             builder.Register<LootingContext>(Lifetime.Singleton).AsSelf();
@@ -73,6 +124,17 @@ namespace Container.Game
             var soundsRoot = new GameObject(GlobalSoundsRootName).transform;
             soundsRoot.SetParent(transform, false);
             return soundsRoot;
+        }
+
+        private static void PlacePlayerAtSpawn(PlayerLifetimeScope player, Pose spawnPose)
+        {
+            var controller = player.Container.Resolve<CharacterController>();
+            controller.enabled = false;
+
+            player.transform.SetPositionAndRotation(spawnPose.position, spawnPose.rotation);
+            Physics.SyncTransforms();
+
+            controller.enabled = true;
         }
     }
 }

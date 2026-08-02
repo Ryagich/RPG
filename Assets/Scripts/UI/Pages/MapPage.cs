@@ -4,6 +4,7 @@ using Localization;
 using MessagePipe;
 using Messages;
 using Quests;
+using Quests.MapTargets;
 using Stats;
 using UI.Configs;
 using UI.Map;
@@ -23,6 +24,7 @@ namespace UI.Pages
         private readonly MapConfig mapConfig;
         private readonly LocalizationConfig localizationConfig;
         private readonly QuestController questController;
+        private readonly IQuestMapTargetRegistry questMapTargetRegistry;
         private readonly Transform playerTransform;
         private readonly Animator playerAnimator;
         private readonly RectTransform canvasRect;
@@ -43,6 +45,7 @@ namespace UI.Pages
             MapConfig mapConfig,
             LocalizationConfig localizationConfig,
             QuestController questController,
+            IQuestMapTargetRegistry questMapTargetRegistry,
             Transform playerTransform,
             Animator playerAnimator,
             Canvas canvas,
@@ -53,6 +56,7 @@ namespace UI.Pages
             this.mapConfig = mapConfig;
             this.localizationConfig = localizationConfig;
             this.questController = questController;
+            this.questMapTargetRegistry = questMapTargetRegistry;
             this.playerTransform = playerTransform;
             this.playerAnimator = playerAnimator;
             this.resolver = resolver;
@@ -203,7 +207,7 @@ namespace UI.Pages
             QuestProgress currentQuest = questController.CurrentQuest;
             foreach (QuestProgress questProgress in questController.Progress)
             {
-                Transform mapTarget = questProgress?.CurrentNode?.MapTarget;
+                Transform mapTarget = questMapTargetRegistry.GetTarget(questProgress?.CurrentNode);
                 if (questProgress == null || mapTarget == null)
                 {
                     continue;

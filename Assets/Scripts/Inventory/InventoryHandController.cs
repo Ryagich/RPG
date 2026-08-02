@@ -34,6 +34,7 @@ namespace Inventory
         private readonly Transform playerTransform;
         private readonly Transform lookTransform;
         private readonly GameModesController gameModesController;
+        private readonly InventoryInteractionContext interactionContext;
         private bool backpackResizePendingAfterHandAction;
         private ItemStack backpackTakenFromSlot;
         private IInventory handSourceInventory;
@@ -51,6 +52,7 @@ namespace Inventory
             Transform playerTransform,
             Animator animator,
             GameModesController gameModesController,
+            InventoryInteractionContext interactionContext,
             ISubscriber<MouseDown> mouseDownSubscriber,
             ISubscriber<MouseUp> mouseUpSubscriber,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
@@ -62,6 +64,7 @@ namespace Inventory
             this.playerTransform = playerTransform;
             lookTransform = animator != null ? animator.transform : playerTransform;
             this.gameModesController = gameModesController;
+            this.interactionContext = interactionContext;
 
             playerInventory.Changed.Subscribe(_ => DropPendingOverflowItems());
             mouseDownSubscriber.Subscribe(OnMouseDown);
@@ -132,7 +135,7 @@ namespace Inventory
                 playerInventory.HandSourceInventory.Value = handSourceInventory;
                 playerInventory.HandSlot.Value = new SlotModel(slotItemStack.ItemConfig.ItemType, SlotStackLimitType.SingleItem, slotItemStack);
                 activeHandButton = message.Button;
-                TradePage.Current?.SetDragSource(handSourceInventory, handSourceSlot);
+                interactionContext.ActiveTradePage?.SetDragSource(handSourceInventory, handSourceSlot);
                 return;
             }
 
@@ -146,7 +149,7 @@ namespace Inventory
             playerInventory.HandSourceInventory.Value = handSourceInventory;
             playerInventory.HandSlot.Value = new SlotModel(itemInInventory.ItemConfig.ItemType, SlotStackLimitType.SingleItem, itemStack);
             activeHandButton = message.Button;
-            TradePage.Current?.SetDragSource(handSourceInventory, handSourceSlot);
+            interactionContext.ActiveTradePage?.SetDragSource(handSourceInventory, handSourceSlot);
         }
 
         private void OnMouseUp(MouseUp message)
@@ -209,11 +212,11 @@ namespace Inventory
                 return;
             }
 
-            if (LootingPage.Current != null
+            if (interactionPage is LootingPage lootingPage
              && pointer != null
-             && LootingPage.Current.IsInTargetSection(pointer.position.ReadValue()))
+             && lootingPage.IsInTargetSection(pointer.position.ReadValue()))
             {
-                var targetInventory = LootingPage.Current.GetTargetInventory();
+                var targetInventory = lootingPage.GetTargetInventory();
                 if (targetInventory != null && TryStoreOrDrop(itemStack, targetInventory.TryAdd(itemStack)))
                 {
                     return;
@@ -315,7 +318,7 @@ namespace Inventory
 
         private bool TryAddToHoveredTile(ItemStack itemStack)
         {
-            if (!InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out _))
+            if (!interactionContext.TryGetHoveredInventory(out var hoveredInventory, out _))
             {
                 return false;
             }
@@ -360,7 +363,7 @@ namespace Inventory
                 return false;
             }
 
-            TradePage.Current?.ConsumeSellOriginIfAny(itemStack, handSourceInventory);
+            interactionContext.ActiveTradePage?.ConsumeSellOriginIfAny(itemStack, handSourceInventory);
             ClearHand();
             return true;
         }
@@ -388,7 +391,7 @@ namespace Inventory
             activeHandButton = null;
             suppressNextRightMouseUp = false;
             playerInventory.HandSourceInventory.Value = null;
-            TradePage.Current?.ClearDragSource();
+            interactionContext.ActiveTradePage?.ClearDragSource();
             GetCurrentInteractionPage()?.ResetGrabOffset();
             equippedDefenseStatsChanger.ApplyDelayedRefresh();
             ProcessDelayedBackpackResize();
@@ -417,7 +420,7 @@ namespace Inventory
             return playerInventory.TryTakeFromSlot(slotModel, countToTake, out itemStack);
         }
 
-        private static bool TryTakeFromHoveredTile(
+        private bool TryTakeFromHoveredTile(
             MouseButtonType button,
             out IInventory hoveredInventory,
             out ItemInInventory itemInInventory,
@@ -426,7 +429,7 @@ namespace Inventory
             hoveredInventory = null;
             itemInInventory = null;
             itemStack = null;
-            if (!InventoryTilePointerHandler.TryGetHovered(out hoveredInventory, out var hoveredTile)
+            if (!interactionContext.TryGetHoveredInventory(out hoveredInventory, out var hoveredTile)
              || !hoveredInventory.TryGet(hoveredTile, out itemInInventory))
             {
                 hoveredInventory = null;
@@ -478,16 +481,16 @@ namespace Inventory
             interactionPage.ResetGrabOffset();
         }
 
-        private static IInventoryInteractionPage GetCurrentInteractionPage()
+        private IInventoryInteractionPage GetCurrentInteractionPage()
         {
-            return TradePage.CurrentInteractionPage ?? LootingPage.CurrentInteractionPage ?? InventoryPage.CurrentInteractionPage;
+            return interactionContext.ActivePage;
         }
 
         private bool CanAssignFastSlotFromCurrentSource()
         {
-            if (gameModesController.GameMode == GameMode.Trade && TradePage.Current != null)
+            if (gameModesController.GameMode == GameMode.Trade && interactionContext.ActiveTradePage != null)
             {
-                return TradePage.Current.CanMoveToPlayerSlot(handSourceInventory, handSourceSlot);
+                return interactionContext.ActiveTradePage.CanMoveToPlayerSlot(handSourceInventory, handSourceSlot);
             }
 
             return handSourceSlot != null || handSourceInventory == playerInventory;
@@ -515,7 +518,7 @@ namespace Inventory
 
         private bool HandleTradeMouseUp(ItemStack itemStack)
         {
-            var tradePage = TradePage.Current;
+            var tradePage = interactionContext.ActiveTradePage;
             var pointer = Pointer.current;
             if (tradePage == null || pointer == null)
             {
@@ -533,7 +536,7 @@ namespace Inventory
                 return true;
             }
 
-            if (InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out _)
+            if (interactionContext.TryGetHoveredInventory(out var hoveredInventory, out _)
              && tradePage.CanMoveToInventory(handSourceInventory, handSourceSlot, hoveredInventory))
             {
                 var previousCount = itemStack.Count;

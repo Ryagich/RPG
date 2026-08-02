@@ -1,11 +1,11 @@
 using System.Collections;
 using TMPro;
-using Container.Project;
 using Loading;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using VContainer;
 
 namespace UI.UIElements
 {
@@ -18,10 +18,18 @@ namespace UI.UIElements
         [field: SerializeField] public Image Fill { get; private set; }
 
         private LoadSceneConfig config;
+        private SceneLoadingService sceneLoadingService;
         private AsyncOperation loadOperation;
         private float animationTimer;
         private int animationFrameIndex;
         private bool isReadyToActivate;
+
+        [Inject]
+        public void Construct(LoadSceneConfig loadSceneConfig, SceneLoadingService loadingService)
+        {
+            config = loadSceneConfig;
+            sceneLoadingService = loadingService;
+        }
 
         private void Start()
         {
@@ -29,12 +37,17 @@ namespace UI.UIElements
             Cursor.lockState = CursorLockMode.Confined;
             Cursor.visible = true;
 
-            config = FindAnyObjectByType<ProjectLifetimeScope>()?.LoadSceneConfig;
+            if (config == null || sceneLoadingService == null)
+            {
+                Debug.LogError("LoadSceneUI was not initialized by LoadSceneLifetimeScope.", this);
+                return;
+            }
+
             ResetUi();
 
-            if (!SceneLoadingService.HasPendingLoadRequest)
+            if (!sceneLoadingService.HasPendingRequest)
             {
-                SceneLoadingService.PrepareLoad(config != null ? config.MenuSceneName : "Menu", false);
+                sceneLoadingService.PrepareDirectLoad(config.MenuSceneName, false);
             }
 
             StartCoroutine(StartLoadingAfterFirstFrame());
@@ -48,10 +61,10 @@ namespace UI.UIElements
 
         private void StartAsyncLoad()
         {
-            loadOperation = SceneManager.LoadSceneAsync(SceneLoadingService.PendingTargetSceneName);
+            loadOperation = SceneManager.LoadSceneAsync(sceneLoadingService.TargetSceneName);
             if (loadOperation == null)
             {
-                Debug.LogError($"Failed to start loading scene '{SceneLoadingService.PendingTargetSceneName}'.");
+                Debug.LogError($"Failed to start loading scene '{sceneLoadingService.TargetSceneName}'.");
                 return;
             }
 
@@ -80,7 +93,7 @@ namespace UI.UIElements
                 StopSimpleAnimation();
             }
 
-            if (!SceneLoadingService.PendingWaitForInputBeforeActivation)
+            if (!sceneLoadingService.WaitForInputBeforeActivation)
             {
                 ActivateLoadedScene();
                 return;
@@ -174,7 +187,7 @@ namespace UI.UIElements
 
         private void ActivateLoadedScene()
         {
-            SceneLoadingService.ClearPendingRequest();
+            sceneLoadingService.ClearRequest();
             loadOperation.allowSceneActivation = true;
         }
 

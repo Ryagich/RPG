@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Quests.MapTargets;
 using Quests.Graph;
 using UnityEngine;
 using UnityEngine.Localization;
@@ -39,7 +38,6 @@ namespace Quests.Graph.Model
         public LocalizedString Name => localizedName;
         public LocalizedString Description => localizedDescription;
         public Sprite Icon => icon;
-        public Transform MapTarget => QuestMapTargetRegistry.GetTarget(this);
         public QuestMapTargetSourceType MapTargetSource => mapTargetSource;
         public string SceneMapTargetId => sceneMapTargetId;
         public string ScriptMapTargetKey => scriptMapTargetKey;

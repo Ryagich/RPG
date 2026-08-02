@@ -53,9 +53,6 @@ namespace UI.Pages
         }
 
         public override PageType Type { get; } = PageType.Inventory;
-        public static InventoryPage Current { get; private set; }
-        public static IInventoryInteractionPage CurrentInteractionPage => Current;
-        
         private readonly UIConfig uiConfig;
         private readonly StatsConfig statsConfig;
         private readonly StatsController statsController;
@@ -72,6 +69,7 @@ namespace UI.Pages
         private readonly Canvas canvas;
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
+        private readonly UI.Inventory.InventoryInteractionContext interactionContext;
 
         private RectTransform contentRect = null!;
         private RectTransform sectionsLayoutRect = null!;
@@ -133,7 +131,8 @@ namespace UI.Pages
                 InventoryHandController inventoryHandController,
                 MoneyStorage playerMoneyStorage,
                 CharacterInfo characterInfo,
-                IObjectResolver resolver
+                IObjectResolver resolver,
+                UI.Inventory.InventoryInteractionContext interactionContext
             )
         {
             this.uiConfig = uiConfig;
@@ -151,13 +150,14 @@ namespace UI.Pages
             this.playerMoneyStorage = playerMoneyStorage;
             this.characterInfo = characterInfo;
             this.resolver = resolver;
+            this.interactionContext = interactionContext;
 
             canvasRect = canvas.GetComponent<RectTransform>();
         }
 
         public override void Draw()
         {
-            Current = this;
+            interactionContext.SetActivePage(this);
             contentRect = resolver.Instantiate(uiConfig.ContentPref, canvasRect);
             contentRect.name = $"{uiConfig.ContentPref.name} | {Type}";
             popupParentRect = contentRect;
@@ -305,7 +305,7 @@ namespace UI.Pages
 
         public bool TryHandleMouseDown(MouseButtonType button, Vector2 screenPoint)
         {
-            if (Current != this || contentRect == null || playerInventory.HandSlot.Value?.ItemStack != null)
+            if (interactionContext.ActivePage != this || contentRect == null || playerInventory.HandSlot.Value?.ItemStack != null)
             {
                 return false;
             }
@@ -895,12 +895,12 @@ namespace UI.Pages
             popupRect = null;
             popupContentRect = null;
             popupParentRect = null;
-            Current = null;
+            interactionContext.ClearActivePage(this);
         }
 
         private void HandleHoverPopup()
         {
-            if (Current != this || contentRect == null)
+            if (interactionContext.ActivePage != this || contentRect == null)
             {
                 return;
             }

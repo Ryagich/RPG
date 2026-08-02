@@ -23,14 +23,14 @@ namespace Landings.Plants
             (
                 Transform parent,
                 IObjectResolver resolver,
-                IPublisher<FruitHasGrown> fruitHasGrownPublisher
+                IPublisher<FruitHasGrown> fruitHasGrownPublisher,
+                IPublisher<PlaySoundMessage> playSoundPublisher
             )
         {
             this.parent = parent;
             this.resolver = resolver;
             this.fruitHasGrownPublisher = fruitHasGrownPublisher;
-            
-            globalPlaySoundPublisher = GlobalMessagePipe.GetPublisher<PlaySoundMessage>();
+            globalPlaySoundPublisher = playSoundPublisher;
         }
 
         public void SetPoints(List<Transform> points)

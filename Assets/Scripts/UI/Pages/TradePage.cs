@@ -482,9 +482,6 @@ namespace UI.Pages
         }
 
         public override PageType Type { get; } = PageType.Trade;
-        public static TradePage Current { get; private set; }
-        public static IInventoryInteractionPage CurrentInteractionPage => Current;
-
         private readonly UIConfig uiConfig;
         private readonly StatsConfig statsConfig;
         private readonly StatFiller hpFiller;
@@ -501,6 +498,7 @@ namespace UI.Pages
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
+        private readonly UI.Inventory.InventoryInteractionContext interactionContext;
 
         private RectTransform contentRect = null!;
         private RectTransform sectionsLayoutRect = null!;
@@ -571,7 +569,8 @@ namespace UI.Pages
             StatsController statsController,
             Canvas canvas,
             IObjectResolver resolver,
-            IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher)
+            IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
+            UI.Inventory.InventoryInteractionContext interactionContext)
         {
             this.uiConfig = uiConfig;
             this.statsConfig = statsConfig;
@@ -588,6 +587,7 @@ namespace UI.Pages
             this.canvas = canvas;
             this.resolver = resolver;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
+            this.interactionContext = interactionContext;
 
             canvasRect = canvas.GetComponent<RectTransform>();
         }
@@ -607,7 +607,7 @@ namespace UI.Pages
                 return;
             }
 
-            Current = this;
+            interactionContext.SetActivePage(this);
             playerSellInventory = new TradeSellInventory();
             targetSellInventory = new TradeSellInventory();
             playerSellOrigins.Clear();
@@ -724,7 +724,7 @@ namespace UI.Pages
 
         public bool TryHandleMouseDown(MouseButtonType button, Vector2 screenPoint)
         {
-            if (Current != this || contentRect == null || playerInventory.HandSlot.Value?.ItemStack != null)
+            if (interactionContext.ActivePage != this || contentRect == null || playerInventory.HandSlot.Value?.ItemStack != null)
             {
                 return false;
             }
@@ -825,7 +825,7 @@ namespace UI.Pages
             targetSellInventory = null;
             dragSourceInventory = null;
             dragSourceSlot = null;
-            Current = null;
+            interactionContext.ClearActivePage(this);
         }
 
         public bool TryCaptureGrabOffset(Vector2 screenPoint, out Vector2 handGrabOffset)
@@ -1393,7 +1393,7 @@ namespace UI.Pages
                 return true;
             }
 
-            if (!InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out _)
+            if (!interactionContext.TryGetHoveredInventory(out var hoveredInventory, out _)
              || !TryGetSnappedPositionInInventoryGridLocal(screenPoint, hoveredInventory, out var snappedLocalPosition))
             {
                 return false;
@@ -1563,7 +1563,7 @@ namespace UI.Pages
 
         private void HandleHoverPopup()
         {
-            if (Current != this || contentRect == null)
+            if (interactionContext.ActivePage != this || contentRect == null)
             {
                 return;
             }
@@ -2058,7 +2058,7 @@ namespace UI.Pages
         private bool TryGetGridPopupTarget(out PopupTarget target)
         {
             target = null;
-            if (!InventoryTilePointerHandler.TryGetHovered(out var hoveredInventory, out var hoveredTile)
+            if (!interactionContext.TryGetHoveredInventory(out var hoveredInventory, out var hoveredTile)
              || hoveredTile?.ItemInInventory?.ItemStack?.ItemConfig == null)
             {
                 return false;

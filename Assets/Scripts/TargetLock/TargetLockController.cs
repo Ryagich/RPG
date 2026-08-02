@@ -20,6 +20,7 @@ namespace TargetLock
         private readonly Transform playerTransform;
         private readonly Transform visualTransform;
         private readonly TargetLockTargetFilter targetFilter;
+        private readonly ITargetLockTargetRegistry targetRegistry;
         private readonly ISubscriber<TargetLockInputMessage> targetLockInputSubscriber;
         private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
         private readonly CompositeDisposable disposables = new();
@@ -34,6 +35,7 @@ namespace TargetLock
             Transform playerTransform,
             Animator animator,
             TargetLockTargetFilter targetFilter,
+            ITargetLockTargetRegistry targetRegistry,
             ISubscriber<TargetLockInputMessage> targetLockInputSubscriber,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
         {
@@ -43,6 +45,7 @@ namespace TargetLock
             this.playerTransform = playerTransform;
             visualTransform = animator != null ? animator.transform : playerTransform;
             this.targetFilter = targetFilter;
+            this.targetRegistry = targetRegistry;
             this.targetLockInputSubscriber = targetLockInputSubscriber;
             this.gameModeChangedSubscriber = gameModeChangedSubscriber;
         }
@@ -332,12 +335,9 @@ namespace TargetLock
 
         private List<TargetLockTarget> GetCandidates()
         {
-            var targets = UnityEngine.Object.FindObjectsByType<TargetLockTarget>(
-                FindObjectsInactive.Exclude,
-                FindObjectsSortMode.None);
-            var candidates = new List<TargetLockTarget>(targets.Length);
+            var candidates = new List<TargetLockTarget>(targetRegistry.Targets.Count);
 
-            foreach (var target in targets)
+            foreach (var target in targetRegistry.Targets)
             {
                 if (IsSearchCandidate(target))
                 {

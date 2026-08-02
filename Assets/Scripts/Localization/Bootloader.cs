@@ -13,6 +13,13 @@ namespace Localization
     // ReSharper disable once ClassNeverInstantiated.Global
     public class Bootloader : IStartable
     {
+        private readonly BootCompletion bootCompletion;
+
+        public Bootloader(BootCompletion bootCompletion)
+        {
+            this.bootCompletion = bootCompletion;
+        }
+
         public async void Start()
         {
             await StartAsync();
@@ -43,7 +50,7 @@ namespace Localization
                 YG2.saves.GameReadyMetricSend = true;
             }
             
-            BootSignal.Signal();
+            bootCompletion.Signal();
         }
     }
 }

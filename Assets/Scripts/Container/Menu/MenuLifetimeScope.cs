@@ -13,54 +13,27 @@ namespace Container.Menu
     public sealed class MenuLifetimeScope : LifetimeScope
     {
         [SerializeField] private Canvas sceneCanvas;
-        [SerializeField] private Canvas canvasPrefab;
 
         private Canvas canvas;
 
         protected override void Awake()
         {
-            var projectScope = Find<ProjectLifetimeScope>();
+            var projectScope = ProjectLifetimeScope.Instance;
             if (projectScope == null)
             {
                 Debug.LogError("ProjectLifetimeScope not found.");
                 return;
             }
 
-            canvas = GetCanvas();
+            canvas = sceneCanvas;
             if (canvas == null)
             {
-                Debug.LogError("Menu canvas is not assigned and no Canvas was found in the Menu scene.");
+                Debug.LogError("Menu canvas is not assigned.", this);
                 return;
             }
 
             parentReference.Object = projectScope;
             base.Awake();
-        }
-
-        private Canvas GetCanvas()
-        {
-            if (sceneCanvas != null)
-            {
-                return sceneCanvas;
-            }
-
-            var sceneCanvases = UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach (var sceneCanvasCandidate in sceneCanvases)
-            {
-                if (sceneCanvasCandidate.gameObject.scene == gameObject.scene)
-                {
-                    return sceneCanvasCandidate;
-                }
-            }
-
-            if (canvasPrefab == null)
-            {
-                return null;
-            }
-
-            var canvasInstance = Instantiate(canvasPrefab, transform);
-            canvasInstance.name = canvasPrefab.name;
-            return canvasInstance;
         }
 
         protected override void Configure(IContainerBuilder builder)

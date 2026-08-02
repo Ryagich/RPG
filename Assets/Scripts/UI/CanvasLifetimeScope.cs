@@ -17,6 +17,7 @@ namespace UI
             builder.Register<MainPage>(Lifetime.Singleton);
             builder.Register<PausePage>(Lifetime.Singleton);
             builder.Register<PauseSettingsPage>(Lifetime.Singleton);
+            builder.Register<SwitchLocationPage>(Lifetime.Singleton).AsSelf().As<System.IDisposable>();
             builder.RegisterEntryPoint<DeathPage>().AsSelf();
             builder.Register<DialoguePage>(Lifetime.Singleton);
             builder.RegisterEntryPoint<MapPage>().AsSelf();

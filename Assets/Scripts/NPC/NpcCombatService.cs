@@ -19,10 +19,65 @@ using VContainer.Unity;
 
 namespace NPC
 {
+    public interface INpcCombatRegistry
+    {
+        IReadOnlyCollection<NpcCombatService> Services { get; }
+        void Register(NpcCombatService service);
+        void Unregister(NpcCombatService service);
+        bool IsTargetHostileToReceiver(TargetLockTarget potentialHostile, CharacterDamageReceiver receiver);
+        NpcCombatService FindByReceiver(CharacterDamageReceiver receiver);
+    }
+
+    public sealed class NpcCombatRegistry : INpcCombatRegistry
+    {
+        private readonly HashSet<NpcCombatService> services = new();
+
+        public IReadOnlyCollection<NpcCombatService> Services => services;
+
+        public void Register(NpcCombatService service)
+        {
+            if (service != null)
+            {
+                services.Add(service);
+            }
+        }
+
+        public void Unregister(NpcCombatService service)
+        {
+            if (service != null)
+            {
+                services.Remove(service);
+            }
+        }
+
+        public bool IsTargetHostileToReceiver(TargetLockTarget potentialHostile, CharacterDamageReceiver receiver)
+        {
+            if (potentialHostile == null || receiver == null)
+            {
+                return false;
+            }
+
+            foreach (var service in services)
+            {
+                if (service != null && service.IsOwnerOfTarget(potentialHostile))
+                {
+                    return service.IsHostileToReceiver(receiver);
+                }
+            }
+
+            return false;
+        }
+
+        public NpcCombatService FindByReceiver(CharacterDamageReceiver receiver)
+        {
+            return receiver == null
+                ? null
+                : services.FirstOrDefault(service => service != null && service.OwnerDamageReceiver == receiver);
+        }
+    }
+
     public sealed class NpcCombatService : IStartable, ITickable, IDisposable
     {
-        private static readonly List<NpcCombatService> ActiveServices = new();
-
         private readonly Transform ownerTransform;
         private readonly NpcVision vision;
         private readonly NpcCombatConfig combatConfig;
@@ -33,6 +88,8 @@ namespace NPC
         private readonly NpcWeaponInHandController weaponController;
         private readonly NpcTargetLockController targetLockController;
         private readonly ICharacterHitReactionController hitReactionController;
+        private readonly ITargetLockTargetRegistry targetRegistry;
+        private readonly INpcCombatRegistry combatRegistry;
         private readonly ISubscriber<CharacterDamagedMessage> damagedSubscriber;
         private readonly CompositeDisposable disposables = new();
         private readonly HashSet<CharacterDamageReceiver> personalEnemies = new();
@@ -82,6 +139,8 @@ namespace NPC
             NpcWeaponInHandController weaponController,
             NpcTargetLockController targetLockController,
             ICharacterHitReactionController hitReactionController,
+            ITargetLockTargetRegistry targetRegistry,
+            INpcCombatRegistry combatRegistry,
             ISubscriber<CharacterDamagedMessage> damagedSubscriber)
         {
             this.ownerTransform = ownerTransform;
@@ -94,10 +153,13 @@ namespace NPC
             this.weaponController = weaponController;
             this.targetLockController = targetLockController;
             this.hitReactionController = hitReactionController;
+            this.targetRegistry = targetRegistry;
+            this.combatRegistry = combatRegistry;
             this.damagedSubscriber = damagedSubscriber;
         }
 
         public TargetLockTarget CurrentTarget { get; private set; }
+        public CharacterDamageReceiver OwnerDamageReceiver => ownerDamageReceiver;
         public Vector3 LastKnownTargetPosition { get; private set; }
         public Vector3 FleeDestination { get; private set; }
         public Vector3 CombatMoveDestination { get; private set; }
@@ -141,28 +203,6 @@ namespace NPC
             && PlanarDistance(ownerTransform.position, CurrentTarget.transform.position) <= GetPersonalSpaceDistance();
         public float StaminaNormalized => weaponController != null ? weaponController.StaminaNormalized : 0f;
 
-        public static bool IsTargetHostileToReceiver(TargetLockTarget potentialHostile, CharacterDamageReceiver receiver)
-        {
-            if (potentialHostile == null || receiver == null)
-            {
-                return false;
-            }
-
-            foreach (var service in ActiveServices.ToArray())
-            {
-                if (service == null
-                 || service.ownerTransform == null
-                 || !service.IsOwnerOfTarget(potentialHostile))
-                {
-                    continue;
-                }
-
-                return service.IsHostileTo(receiver);
-            }
-
-            return false;
-        }
-
         public bool IsHostileToReceiver(CharacterDamageReceiver receiver)
         {
             return IsHostileTo(receiver);
@@ -171,10 +211,7 @@ namespace NPC
         public void Start()
         {
             ownerScope = ownerTransform != null ? ownerTransform.GetComponent<NpcLifetimeScope>() : null;
-            if (!ActiveServices.Contains(this))
-            {
-                ActiveServices.Add(this);
-            }
+            combatRegistry.Register(this);
 
             damagedSubscriber.Subscribe(OnCharacterDamaged).AddTo(disposables);
         }
@@ -187,7 +224,7 @@ namespace NPC
 
         public void Dispose()
         {
-            ActiveServices.Remove(this);
+            combatRegistry.Unregister(this);
             disposables.Dispose();
         }
 
@@ -780,14 +817,9 @@ namespace NPC
             return target != null ? target.GetComponentInParent<DamageReceiverHost>()?.Receiver : null;
         }
 
-        private static NpcCombatService FindActiveService(CharacterDamageReceiver receiver)
+        private NpcCombatService FindActiveService(CharacterDamageReceiver receiver)
         {
-            if (receiver == null)
-            {
-                return null;
-            }
-
-            return ActiveServices.FirstOrDefault(service => service != null && service.ownerDamageReceiver == receiver);
+            return combatRegistry.FindByReceiver(receiver);
         }
 
         private static StatsController GetStatsController(CharacterDamageReceiver receiver)
@@ -1424,7 +1456,7 @@ namespace NPC
             TargetLockTarget bestTarget = null;
             var bestDistanceSqr = float.PositiveInfinity;
 
-            foreach (var other in ActiveServices.ToArray())
+            foreach (var other in combatRegistry.Services.ToArray())
             {
                 if (other == null || other == this || other.ownerTransform == null || !other.HasCombatTarget)
                 {
@@ -1658,7 +1690,7 @@ namespace NPC
             var laneRadius = combatConfig.FriendlyFireLaneRadius;
             var laneRadiusSqr = laneRadius * laneRadius;
 
-            foreach (var other in ActiveServices.ToArray())
+            foreach (var other in combatRegistry.Services.ToArray())
             {
                 if (other == null || other == this || other.ownerTransform == null)
                 {
@@ -1867,7 +1899,7 @@ namespace NPC
 
         private List<NpcCombatService> GetTargetParticipants(TargetLockTarget target)
         {
-            return ActiveServices
+            return combatRegistry.Services
                 .Where(service => service != null
                                && service.ownerTransform != null
                                && service.HasCombatTarget
@@ -1939,15 +1971,12 @@ namespace NPC
                 return null;
             }
 
-            var targets = UnityEngine.Object.FindObjectsByType<TargetLockTarget>(
-                FindObjectsInactive.Exclude,
-                FindObjectsSortMode.None);
             TargetLockTarget bestTarget = null;
             var bestDistanceSqr = float.PositiveInfinity;
             var maxDistance = combatConfig != null ? combatConfig.TargetSearchRadius : 18f;
             var maxDistanceSqr = maxDistance * maxDistance;
 
-            foreach (var target in targets)
+            foreach (var target in targetRegistry.Targets)
             {
                 if (target == null || !target.IsTargetable || !IsTargetAlive(target) || target.transform == ownerTransform)
                 {
@@ -2084,7 +2113,7 @@ namespace NPC
                 : 0f;
         }
 
-        private bool IsOwnerOfTarget(TargetLockTarget target)
+        internal bool IsOwnerOfTarget(TargetLockTarget target)
         {
             if (target == null)
             {
@@ -2201,7 +2230,7 @@ namespace NPC
 
             var radius = combatConfig != null ? combatConfig.AggressionNotificationRadius : 12f;
             var radiusSqr = radius * radius;
-            foreach (var other in ActiveServices.ToArray())
+            foreach (var other in combatRegistry.Services.ToArray())
             {
                 if (other == null || other == this || other.ownerTransform == null)
                 {
@@ -2285,26 +2314,9 @@ namespace NPC
 
         private static TargetLockTarget FindTargetByReceiver(CharacterDamageReceiver receiver)
         {
-            var targetFromOwner = receiver?.OwnerTransform != null
+            return receiver?.OwnerTransform != null
                 ? receiver.OwnerTransform.GetComponentInParent<TargetLockTarget>()
                 : null;
-            if (targetFromOwner != null)
-            {
-                return targetFromOwner;
-            }
-
-            var hosts = UnityEngine.Object.FindObjectsByType<DamageReceiverHost>(
-                FindObjectsInactive.Exclude,
-                FindObjectsSortMode.None);
-            foreach (var host in hosts)
-            {
-                if (host != null && host.Receiver == receiver)
-                {
-                    return host.GetComponentInParent<TargetLockTarget>();
-                }
-            }
-
-            return null;
         }
 
         private bool TryRequestTargetedAttack(Func<bool> requestAttack)
