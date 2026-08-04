@@ -132,5 +132,6 @@ namespace UI.Pages
         MenuSettings,
         MenuSoundsSettings,
         MenuGameplaySettings,
+        OpeningSlides,
     }
 }

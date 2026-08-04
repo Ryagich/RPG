@@ -161,6 +161,50 @@ MonoBehaviour:
     m_Key: Switch_Location_No
     m_Metadata:
       m_Items: []
+  - m_Id: 60000000000000001
+    m_Key: Opening_Slides_Next
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000002
+    m_Key: Opening_Slides_Skip
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000010
+    m_Key: Opening_Slide_01
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000011
+    m_Key: Opening_Slide_02
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000012
+    m_Key: Opening_Slide_03
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000013
+    m_Key: Opening_Slide_04
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000014
+    m_Key: Opening_Slide_05
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000015
+    m_Key: Opening_Slide_06
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000016
+    m_Key: Opening_Slide_07
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000017
+    m_Key: Opening_Slide_08
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000018
+    m_Key: Opening_Slide_09
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

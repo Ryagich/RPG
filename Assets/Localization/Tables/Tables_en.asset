@@ -166,6 +166,120 @@ MonoBehaviour:
     m_Localized: No
     m_Metadata:
       m_Items: []
+  - m_Id: 60000000000000001
+    m_Localized: "Next slide \u2014 any key"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000002
+    m_Localized: "Hold Space \u2014 skip"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000010
+    m_Localized: 'That empire fell so long ago that even its name has come down to
+      us in dozens of different spellings.
+
+      Yet its roads still bind the kingdoms
+      of today. Tribute is carried across its bridges, banners change above its fortresses,
+      and its stones prove older than any ruling dynasty.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000011
+    m_Localized: "Several kingdoms remain of the former empire \u2014 and each considers
+      itself its rightful heir.\nAt court, different genealogies are kept. In temples,
+      different chronicles are read. On old maps, the same lands belong to several
+      crowns at once.\nWithin a human lifetime, the borders here change more than
+      once.\nThe banners above the outposts change \u2014 and so do the words used
+      to explain the next war."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000012
+    m_Localized: 'War is always given a noble name: ancient right, a violated oath,
+      the honor of the crown.
+
+      But its price is not paid at court. People and
+      horses are taken from villages, grain from households, iron from workshops.
+
+      Victory
+      gives the lords more land and tribute. Defeat brings new levies.
+
+      A peace
+      treaty redraws the borders. The bill for the war remains the same.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000013
+    m_Localized: 'The last war was declared with ceremony. Prayer services were held
+      in the temples, royal charters were read in the squares, and sacred relics
+      were raised over the army.
+
+      A month later, the first sick were carried
+      to the rear.
+
+      By summer, the plague was already moving ahead of the regiments.
+      The campaign continued.
+
+      At the city gates, they stopped not enemy armies,
+      but their own. By autumn, reports counted not captured fortresses but deserted
+      settlements.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000014
+    m_Localized: 'The roads that had outlived the ancient empire and hundreds of
+      wars fell silent in a single winter.
+
+      At the checkpoints, they no longer
+      asked your name or your business, but where you had come from and where you
+      had slept. The gates were shut before sunset; those who arrived late were left
+      outside the walls.
+
+      Caravans were turned back, letters were burned unopened,
+      and inns stood empty.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000015
+    m_Localized: "Then the forests changed.\nBirds fell silent. Beasts left their
+      familiar trails, and horses stopped before empty clearings, refusing to go
+      further \u2014 neither whip nor rein could move them.\nPeople began to disappear.
+      Some returned a few days later \u2014 silent, with a stranger's gaze. Others
+      never returned at all.\nBy the end of winter, scribes once again wrote in their
+      reports a word long relegated to fairy tales: monsters."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000016
+    m_Localized: 'Fear quickly found its interpreters.
+
+      From the pulpits, the
+      plague was proclaimed a punishment from heaven; in royal charters, an infection
+      brought by the enemy''s hand.
+
+      Physicians begged that the dead not be
+      burned before examination. Priests demanded fire before nightfall.
+
+      The
+      knightly orders went out along the old roads and into forest thickets. From
+      some expeditions, only the horses returned.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000017
+    m_Localized: 'Where no cure could be found, they found those to blame.
+
+      First
+      they took the newcomers and the destitute. Then nonhumans, heretics, and folk
+      healers.
+
+      Marks were placed on doors, names were read out in the squares,
+      and whole households vanished overnight.
+
+      The plague did not recede.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 60000000000000018
+    m_Localized: 'Before long, the town by the old road sealed its gates.
+
+      The
+      surrounding villages were left without trade or protection. Inns stood empty,
+      and bandits claimed the forest roads.'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

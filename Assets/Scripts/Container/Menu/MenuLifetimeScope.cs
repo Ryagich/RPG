@@ -39,6 +39,7 @@ namespace Container.Menu
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterInstance(canvas).As<Canvas>();
+            builder.RegisterEntryPoint<OpeningSlidesPage>().AsSelf();
             builder.Register<MenuMainPage>(Lifetime.Singleton);
             builder.Register<MenuSettingsPage>(Lifetime.Singleton);
             builder.Register<MenuSoundsSettingsPage>(Lifetime.Singleton);
@@ -58,6 +59,7 @@ namespace Container.Menu
         private readonly MenuSoundsSettingsPage soundsSettingsPage;
         private readonly MenuGameplaySettingsPage gameplaySettingsPage;
         private readonly IAudioService audioService;
+        private readonly OpeningSlidesPage openingSlidesPage;
         private BasePage currentPage;
 
         public MenuController(
@@ -66,6 +68,7 @@ namespace Container.Menu
             MenuSettingsPage bindingsSettingsPage,
             MenuSoundsSettingsPage soundsSettingsPage,
             MenuGameplaySettingsPage gameplaySettingsPage,
+            OpeningSlidesPage openingSlidesPage,
             IAudioService audioService)
         {
             this.sceneLoadingService = sceneLoadingService;
@@ -73,6 +76,7 @@ namespace Container.Menu
             this.bindingsSettingsPage = bindingsSettingsPage;
             this.soundsSettingsPage = soundsSettingsPage;
             this.gameplaySettingsPage = gameplaySettingsPage;
+            this.openingSlidesPage = openingSlidesPage;
             this.audioService = audioService;
         }
 
@@ -89,7 +93,15 @@ namespace Container.Menu
             SubscribeSettingsPage(bindingsSettingsPage);
             SubscribeSettingsPage(soundsSettingsPage);
             SubscribeSettingsPage(gameplaySettingsPage);
-            ShowMain();
+            openingSlidesPage.Completed += ShowMain;
+            if (OpeningSlidesPage.ShouldShowAtApplicationStart)
+            {
+                ShowPage(openingSlidesPage);
+            }
+            else
+            {
+                ShowMain();
+            }
         }
 
         public void Dispose()
@@ -100,6 +112,7 @@ namespace Container.Menu
             UnsubscribeSettingsPage(bindingsSettingsPage);
             UnsubscribeSettingsPage(soundsSettingsPage);
             UnsubscribeSettingsPage(gameplaySettingsPage);
+            openingSlidesPage.Completed -= ShowMain;
             currentPage?.Hide();
             currentPage = null;
             audioService.StopMainMenuMusic();

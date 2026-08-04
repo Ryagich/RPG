@@ -26,6 +26,7 @@ MonoBehaviour:
   <DialogueContainer>k__BackingField: {fileID: 677269434685781985, guid: 17f8d839d3036af499c4ab29d41ad950, type: 3}
   <PauseMenu>k__BackingField: {fileID: 8794213445826204213, guid: 80bddbcce88a11e4bbf184fefee5499c, type: 3}
   <MenuUI>k__BackingField: {fileID: 3420270240661638511, guid: 37e41ce379a75a541affa1f7e407121c, type: 3}
+  <OpeningSlidesConfig>k__BackingField: {fileID: 11400000, guid: 3e6506e45729456e9f2e82371a09faee, type: 2}
   <LeftMenuShadowGradient>k__BackingField: {fileID: 60428061725942149, guid: 899dbfd8ccb5b8b42b1006e890039c90, type: 3}
   <Bindings>k__BackingField: {fileID: 4753608789851655901, guid: 5575f6eaade79a14eb283f60795e5f07, type: 3}
   <SoundSettings>k__BackingField: {fileID: 3230026426908643272, guid: 7ae44df1a29fcbc4588857b5fdf6911b, type: 3}

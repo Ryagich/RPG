@@ -1,0 +1,121 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d676a03bd264c7a95ab2fe20924ebac, type: 3}
+  m_Name: Opening Slides Config
+  m_EditorClassIdentifier: Assembly-CSharp::UI.Configs.OpeningSlidesConfig
+  <ViewPrefab>k__BackingField: {fileID: 7200000000000000002, guid: a72fc2853f614eb4fad4af75d4795d9f, type: 3}
+  <Slides>k__BackingField:
+  - <Image>k__BackingField: {fileID: 21300000, guid: 3e667a46d8b9a5640a19c45a38387a90, type: 3}
+    <VoiceOver>k__BackingField: {fileID: 8300000, guid: 0afc849f7affbae4c99d885a9f4eaff6, type: 3}
+    <Text>k__BackingField:
+      m_TableReference:
+        m_TableCollectionName: Tables
+      m_TableEntryReference:
+        m_KeyId: 60000000000000010
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+  - <Image>k__BackingField: {fileID: 21300000, guid: 69347956dc00c7648b652d3b00a6567b, type: 3}
+    <VoiceOver>k__BackingField: {fileID: 8300000, guid: e87a16f3729d8da42a4af79b64142c33, type: 3}
+    <Text>k__BackingField:
+      m_TableReference:
+        m_TableCollectionName: Tables
+      m_TableEntryReference:
+        m_KeyId: 60000000000000011
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+  - <Image>k__BackingField: {fileID: 21300000, guid: e61307a9f18b1af4c88c129994ac4b52, type: 3}
+    <VoiceOver>k__BackingField: {fileID: 8300000, guid: 417cf27298cc3a0469c64dc2977036f1, type: 3}
+    <Text>k__BackingField:
+      m_TableReference:
+        m_TableCollectionName: Tables
+      m_TableEntryReference:
+        m_KeyId: 60000000000000012
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+  - <Image>k__BackingField: {fileID: 21300000, guid: 47c6ccc1436e9c34cb0de56142e6cb39, type: 3}
+    <VoiceOver>k__BackingField: {fileID: 8300000, guid: 4bd2d9e5dc184444fb5e422f2054d66b, type: 3}
+    <Text>k__BackingField:
+      m_TableReference:
+        m_TableCollectionName: Tables
+      m_TableEntryReference:
+        m_KeyId: 60000000000000013
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+  - <Image>k__BackingField: {fileID: 21300000, guid: 984f56fb3cb44b54b8767917e500992c, type: 3}
+    <VoiceOver>k__BackingField: {fileID: 8300000, guid: 8ddc005165d54a843afeb77028577f09, type: 3}
+    <Text>k__BackingField:
+      m_TableReference:
+        m_TableCollectionName: Tables
+      m_TableEntryReference:
+        m_KeyId: 60000000000000014
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+  - <Image>k__BackingField: {fileID: 21300000, guid: 6fab76261cd9f2547961777756d25432, type: 3}
+    <VoiceOver>k__BackingField: {fileID: 8300000, guid: 806594446cb59a542a7605cd8bf62899, type: 3}
+    <Text>k__BackingField:
+      m_TableReference:
+        m_TableCollectionName: Tables
+      m_TableEntryReference:
+        m_KeyId: 60000000000000015
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+  - <Image>k__BackingField: {fileID: 21300000, guid: 4ab43e67d4341ef4f9aa97ae02a7735f, type: 3}
+    <VoiceOver>k__BackingField: {fileID: 8300000, guid: 03d4858f52c7cee449f06b1d61d44864, type: 3}
+    <Text>k__BackingField:
+      m_TableReference:
+        m_TableCollectionName: Tables
+      m_TableEntryReference:
+        m_KeyId: 60000000000000016
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+  - <Image>k__BackingField: {fileID: 21300000, guid: 1678119ec2aa3d744be2afa9727a900a, type: 3}
+    <VoiceOver>k__BackingField: {fileID: 8300000, guid: 30aab87acce25e346bade53bab665d0d, type: 3}
+    <Text>k__BackingField:
+      m_TableReference:
+        m_TableCollectionName: Tables
+      m_TableEntryReference:
+        m_KeyId: 60000000000000017
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+  - <Image>k__BackingField: {fileID: 21300000, guid: 55f1cee0cfbf31147bd3fc014a19f2f6, type: 3}
+    <VoiceOver>k__BackingField: {fileID: 8300000, guid: 1dc1a728b96182b46ac48dd90678e016, type: 3}
+    <Text>k__BackingField:
+      m_TableReference:
+        m_TableCollectionName: Tables
+      m_TableEntryReference:
+        m_KeyId: 60000000000000018
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+  <InitialHintsShowTime>k__BackingField: 3
+  <HoldSpaceToSkipTime>k__BackingField: 1.5
+  <AutoAdvanceDelay>k__BackingField: 2
+  references:
+    version: 2
+    RefIds: []

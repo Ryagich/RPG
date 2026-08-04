@@ -28,6 +28,7 @@ namespace UI.Configs
         [field: SerializeField] public DialogueContainer DialogueContainer { get; private set; }
         [field: SerializeField] public PauseMenu PauseMenu { get; private set; }
         [field: SerializeField] public MenuUI MenuUI { get; private set; }
+        [field: SerializeField] public OpeningSlidesConfig OpeningSlidesConfig { get; private set; }
         [field: SerializeField] public RectTransform LeftMenuShadowGradient { get; private set; }
         [field: SerializeField] public RectTransform Bindings { get; private set; }
         [field: SerializeField] public SoundSettingsPageUI SoundSettings { get; private set; }
