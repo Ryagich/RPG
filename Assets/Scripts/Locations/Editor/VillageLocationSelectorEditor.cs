@@ -15,6 +15,7 @@ namespace Locations.Editor
             serializedObject.Update();
 
             var locationsProperty = serializedObject.FindProperty("locations");
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("navMeshSurface"));
             DrawFirstSessionFields();
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Locations", EditorStyles.boldLabel);

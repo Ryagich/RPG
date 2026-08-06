@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Container;
+using Unity.AI.Navigation;
 using UnityEngine;
 
 namespace Locations
@@ -10,11 +11,14 @@ namespace Locations
     public sealed class VillageLocationSelector : MonoBehaviour
     {
         [SerializeField] private List<VillageLocationDefinition> locations = new();
+        [Header("Navigation")]
+        [SerializeField] private NavMeshSurface navMeshSurface;
         [Header("First game session")]
         [SerializeField] private string defaultLocationId;
         [SerializeField] private Transform defaultPlayerTransform;
 
         public IReadOnlyList<VillageLocationDefinition> Locations => locations;
+        public NavMeshSurface NavMeshSurface => navMeshSurface;
         public string DefaultLocationId => defaultLocationId;
         public Transform DefaultPlayerTransform => defaultPlayerTransform;
 
@@ -109,6 +113,7 @@ namespace Locations
 
             ConfigureTransitionTriggers(currentLocation);
             DeactivateObjectsExclusiveToInactiveLocations(requiredObjects);
+            BuildNavMesh();
             transitionContext.Clear();
         }
 
@@ -241,6 +246,17 @@ namespace Locations
                     locationObject.SetActive(false);
                 }
             }
+        }
+
+        private void BuildNavMesh()
+        {
+            if (selector.NavMeshSurface == null)
+            {
+                Debug.LogError("NavMeshSurface is not assigned to VillageLocationSelector.", selector);
+                return;
+            }
+
+            selector.NavMeshSurface.BuildNavMesh();
         }
 
         private static bool IsCoveredByActiveLocation(
