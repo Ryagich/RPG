@@ -2106,6 +2106,8 @@ namespace Dialogs.Graph.Editor
             phraseObject.Update();
 
             SerializedProperty textProperty = phraseObject.FindProperty("text");
+            SerializedProperty isForcedDialoguePhraseProperty = phraseObject.FindProperty("isForcedDialoguePhrase");
+            SerializedProperty restoresExitAbilityProperty = phraseObject.FindProperty("restoresExitAbility");
             SerializedProperty isQuestPhraseProperty = phraseObject.FindProperty("isQuestPhrase");
             SerializedProperty questAnswerProperty = phraseObject.FindProperty("questAnswer");
             SerializedProperty answersProperty = phraseObject.FindProperty("answers");
@@ -2119,6 +2121,39 @@ namespace Dialogs.Graph.Editor
             if (textProperty != null)
             {
                 DrawLocalizedStringSelector(textProperty, "Phrase");
+            }
+
+            if (isForcedDialoguePhraseProperty != null)
+            {
+                EditorGUILayout.Space(4f);
+                EditorGUILayout.PropertyField(isForcedDialoguePhraseProperty, new GUIContent("Forced Dialogue Phrase"));
+
+                if (isForcedDialoguePhraseProperty.boolValue)
+                {
+                    if (restoresExitAbilityProperty != null)
+                    {
+                        restoresExitAbilityProperty.boolValue = false;
+                    }
+                }
+                else if (restoresExitAbilityProperty != null)
+                {
+                    bool canRestoreExitAbility = currentGraph.CanRestoreExitAbility(phrase);
+                    if (!canRestoreExitAbility)
+                    {
+                        restoresExitAbilityProperty.boolValue = false;
+                    }
+
+                    EditorGUI.BeginDisabledGroup(!canRestoreExitAbility);
+                    EditorGUILayout.PropertyField(restoresExitAbilityProperty, new GUIContent("Restores Ability To Exit"));
+                    EditorGUI.EndDisabledGroup();
+
+                    if (!canRestoreExitAbility)
+                    {
+                        EditorGUILayout.HelpBox(
+                            "This option is available only on a branch after a forced dialogue phrase, before exit has already been restored.",
+                            MessageType.Info);
+                    }
+                }
             }
 
             if (isQuestPhraseProperty != null)

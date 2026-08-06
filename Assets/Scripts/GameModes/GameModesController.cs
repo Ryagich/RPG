@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Dialogue;
 using MessagePipe;
 using Messages;
 using UnityEngine;
@@ -12,16 +13,19 @@ namespace GameModes
         public GameMode GameMode { get; private set; } = GameMode.Game;
 
         private readonly IPublisher<GameModeChangedMessage> gameModeChangedPublisher;
+        private readonly DialogueContext dialogueContext;
         private readonly Stack<GameMode> navigationHistory = new();
 
         public GameModesController(
             IPublisher<GameModeChangedMessage> gameModeChangedPublisher,
+            DialogueContext dialogueContext,
             ISubscriber<ChangeGameModeRequest> openPageRequestSubscriber,
             ISubscriber<InventoryInputMessage> inventoryInputSubscriber,
             ISubscriber<MapInputMessage> mapInputSubscriber,
             ISubscriber<PauseInputMessage> pauseInputSubscriber)
         {
             this.gameModeChangedPublisher = gameModeChangedPublisher;
+            this.dialogueContext = dialogueContext;
 
             openPageRequestSubscriber.Subscribe(ChangeGameMode);
             inventoryInputSubscriber.Subscribe(OnInventoryInput);
@@ -38,6 +42,11 @@ namespace GameModes
         private void ChangeGameMode(ChangeGameModeRequest msg)
         {
             if (GameMode == GameMode.Death)
+            {
+                return;
+            }
+
+            if (msg.Mode == GameMode.Game && dialogueContext.IsForcedDialogue && !dialogueContext.CanExitDialogue)
             {
                 return;
             }
@@ -89,6 +98,11 @@ namespace GameModes
         private void OnPauseInput(PauseInputMessage _)
         {
             if (GameMode == GameMode.Death)
+            {
+                return;
+            }
+
+            if (GameMode == GameMode.Dialogue && dialogueContext.IsForcedDialogue && !dialogueContext.CanExitDialogue)
             {
                 return;
             }

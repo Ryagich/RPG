@@ -24,6 +24,7 @@ namespace Container
     public class NpcLifetimeScope : LifetimeScope
     {
         private const string DialogueZoneName = "Dialogue Interactable Zone";
+        private const string ForcedDialogueInteractableKey = "Forced Dialogue Interactable";
 
         [SerializeField] private Character.CharacterInfo characterInfo;
         [SerializeField] private InventoryConfig inventoryConfig;
@@ -38,6 +39,7 @@ namespace Container
         [Tooltip("If empty, this NPC uses the combat profile assigned to its faction.")]
         [SerializeField] private NpcCombatProfile combatProfileOverride;
         [SerializeField, Min(0.1f)] private float dialogueInteractionRadius = 1.8f;
+        [SerializeField] private Interactable.Interactable forcedDialogueInteractable;
         [SerializeField, ReadOnlyInInspector] private float currentHp;
         [SerializeField, ReadOnlyInInspector] private string currentState = "Not Started";
         private NpcCombatProfile assignedCombatProfile;
@@ -83,6 +85,7 @@ namespace Container
             var dialogueAvailability = GetComponent<NpcDialogueAvailability>() ?? gameObject.AddComponent<NpcDialogueAvailability>();
             builder.RegisterComponent(dialogueAvailability).AsSelf();
             EnsureDialogueInteractionZone();
+            bool hasForcedDialogueZone = RegisterForcedDialogueZone(builder);
             var navMeshAgent = GetComponent<NavMeshAgent>() ?? gameObject.AddComponent<NavMeshAgent>();
             builder.RegisterComponent(navMeshAgent).AsSelf();
             builder.RegisterEntryPoint<NpcNavMeshController>().AsSelf().As<IStaminaMovementState>();
@@ -173,6 +176,10 @@ namespace Container
                    .As<System.IDisposable>();
             builder.Register<NpcDialogueController>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<NpcDialogueInteractableLogic>().AsSelf();
+            if (hasForcedDialogueZone)
+            {
+                builder.RegisterEntryPoint<NpcForcedDialogueInteractableLogic>().AsSelf();
+            }
             builder.Register<EquippedWeaponDropService>(Lifetime.Scoped).AsSelf();
             builder.Register(_ => new MoneyStorage(0), Lifetime.Scoped).AsSelf();
             builder.Register<QuestController>(Lifetime.Scoped).AsSelf();
@@ -205,6 +212,30 @@ namespace Container
             trigger.isTrigger = true;
             trigger.center = Vector3.zero;
             trigger.radius = dialogueInteractionRadius;
+        }
+
+        private bool RegisterForcedDialogueZone(IContainerBuilder builder)
+        {
+            if (forcedDialogueInteractable == null)
+            {
+                Debug.LogError(
+                    $"{nameof(NpcLifetimeScope)} on {name} requires a reference to Forced Dialogue Interactable Zone.",
+                    this);
+                return false;
+            }
+
+            var forcedDialogueAvailability = forcedDialogueInteractable.GetComponent<NpcForcedDialogueAvailability>();
+            if (forcedDialogueAvailability == null)
+            {
+                Debug.LogError(
+                    $"{nameof(forcedDialogueInteractable)} on {name} requires {nameof(NpcForcedDialogueAvailability)}.",
+                    forcedDialogueInteractable);
+                return false;
+            }
+
+            builder.RegisterInstance(forcedDialogueInteractable).Keyed(ForcedDialogueInteractableKey);
+            builder.RegisterComponent(forcedDialogueAvailability).AsSelf();
+            return true;
         }
     }
 }

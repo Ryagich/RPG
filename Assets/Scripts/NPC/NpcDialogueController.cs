@@ -39,6 +39,11 @@ namespace NPC
 
         public bool CanStartDialogue(LifetimeScope interactorScope)
         {
+            if (IsDialogueRequested)
+            {
+                return false;
+            }
+
             if (!canTalk)
             {
                 return false;

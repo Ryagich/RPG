@@ -18,6 +18,7 @@ namespace EditorTools
     public static class NpcSetupMenu
     {
         private const string MenuPath = "Tools/RPG/NPC/Create Base NPC Assets";
+        private const string UpdateDialogueZonesMenuPath = "Tools/RPG/NPC/Update Dialogue Zones";
         private const string SetupNavMeshMenuPath = "Tools/RPG/NPC/Setup NavMesh For Active Scene";
         private const string StateMachineFolderPath = "Assets/StateMachines/NPC";
         private const string StatesFolderPath = StateMachineFolderPath + "/States";
@@ -669,6 +670,47 @@ namespace EditorTools
             Debug.Log($"Created base NPC assets: {GraphPath}, {NpcPrefabPath}");
         }
 
+        [MenuItem(UpdateDialogueZonesMenuPath)]
+        public static void UpdateNpcDialogueZones()
+        {
+            ClearInspectorSelectionBeforePrefabContentsEdit();
+
+            var root = PrefabUtility.LoadPrefabContents(NpcPrefabPath);
+            if (root == null)
+            {
+                Debug.LogError($"Cannot load NPC prefab: {NpcPrefabPath}");
+                return;
+            }
+
+            try
+            {
+                var npcScope = root.GetComponent<NpcLifetimeScope>();
+                if (npcScope == null)
+                {
+                    Debug.LogError($"{NpcPrefabPath} has no {nameof(NpcLifetimeScope)} component.");
+                    return;
+                }
+
+                var forcedDialogueInteractable = ConfigureNpcDialogueZone(root);
+                var npcScopeObject = new SerializedObject(npcScope);
+                var forcedDialogueInteractableProperty = npcScopeObject.FindProperty("forcedDialogueInteractable");
+                if (forcedDialogueInteractableProperty == null)
+                {
+                    Debug.LogError($"{nameof(NpcLifetimeScope)} does not expose the forced dialogue zone reference.");
+                    return;
+                }
+
+                forcedDialogueInteractableProperty.objectReferenceValue = forcedDialogueInteractable;
+                npcScopeObject.ApplyModifiedPropertiesWithoutUndo();
+                PrefabUtility.SaveAsPrefabAsset(root, NpcPrefabPath);
+                Debug.Log($"Updated dialogue zones in {NpcPrefabPath}");
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(root);
+            }
+        }
+
         private static T LoadOrCreate<T>(string path) where T : ScriptableObject
         {
             var asset = AssetDatabase.LoadAssetAtPath<T>(path);
@@ -847,7 +889,14 @@ namespace EditorTools
                 }
 
                 ConfigureNpcNavMeshAgent(navMeshAgent);
-                ConfigureNpcDialogueZone(root);
+                var forcedDialogueInteractable = ConfigureNpcDialogueZone(root);
+                npcScopeObject.Update();
+                var forcedDialogueInteractableProperty = npcScopeObject.FindProperty("forcedDialogueInteractable");
+                if (forcedDialogueInteractableProperty != null)
+                {
+                    forcedDialogueInteractableProperty.objectReferenceValue = forcedDialogueInteractable;
+                    npcScopeObject.ApplyModifiedPropertiesWithoutUndo();
+                }
 
                 MoveComponentAfterTransform(npcScope);
 
@@ -946,9 +995,10 @@ namespace EditorTools
             agent.autoBraking = true;
         }
 
-        private static void ConfigureNpcDialogueZone(GameObject root)
+        private static Interactable.Interactable ConfigureNpcDialogueZone(GameObject root)
         {
             const string dialogueZoneName = "Dialogue Interactable Zone";
+            const string forcedDialogueZoneName = "Forced Dialogue Interactable Zone";
             var zoneTransform = root.transform.Find(dialogueZoneName);
             if (zoneTransform == null)
             {
@@ -976,6 +1026,43 @@ namespace EditorTools
             trigger.isTrigger = true;
             trigger.center = Vector3.zero;
             trigger.radius = 1.8f;
+
+            var forcedZoneTransform = root.transform.Find(forcedDialogueZoneName);
+            if (forcedZoneTransform == null)
+            {
+                var forcedZoneObject = new GameObject(forcedDialogueZoneName);
+                forcedZoneTransform = forcedZoneObject.transform;
+                forcedZoneTransform.SetParent(root.transform, false);
+            }
+
+            forcedZoneTransform.localPosition = new Vector3(0f, 1f, 0f);
+            forcedZoneTransform.localRotation = Quaternion.identity;
+            forcedZoneTransform.localScale = Vector3.one;
+            if (interactableLayer >= 0)
+            {
+                forcedZoneTransform.gameObject.layer = interactableLayer;
+            }
+
+            var forcedTrigger = forcedZoneTransform.GetComponent<SphereCollider>();
+            if (forcedTrigger == null)
+            {
+                forcedTrigger = forcedZoneTransform.gameObject.AddComponent<SphereCollider>();
+            }
+
+            forcedTrigger.isTrigger = true;
+            forcedTrigger.center = Vector3.zero;
+            forcedTrigger.radius = 3.5f;
+
+            var forcedInteractable = forcedZoneTransform.GetComponent<Interactable.Interactable>()
+                                     ?? forcedZoneTransform.gameObject.AddComponent<Interactable.Interactable>();
+            forcedInteractable.InteractionMode = Interactable.InteractionMode.Automatic;
+
+            if (forcedZoneTransform.GetComponent<NpcForcedDialogueAvailability>() == null)
+            {
+                forcedZoneTransform.gameObject.AddComponent<NpcForcedDialogueAvailability>();
+            }
+
+            return forcedInteractable;
         }
 
         private static void EnsureFolder(string folderPath)

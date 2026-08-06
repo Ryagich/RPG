@@ -1,4 +1,5 @@
 using Dialogue;
+using Dialogs.Graph;
 using Dialogs.Graph.Model;
 using GameModes;
 using Inventory.Inventories;
@@ -127,7 +128,7 @@ namespace UI.Pages
             ClearContent(dialogueContainer.DialogueContent);
             ClearContent(dialogueContainer.AnswerContent);
 
-            var entryPhrase = dialogueContext.CurrentDialog?.EntryPhrase;
+            var entryPhrase = dialogueContext.CurrentPhrase;
             if (entryPhrase == null)
             {
                 return;
@@ -245,6 +246,7 @@ namespace UI.Pages
 
             if (answer.NextPhrase != null)
             {
+                dialogueContext.SetCurrentPhrase(answer.NextPhrase);
                 AddPhrase(
                     GetCharacterName(dialogueContext.CurrentTargetCharacterInfo, dialogueContext.CurrentTarget?.name),
                     answer.NextPhrase.Text.GetLocalizedStringCached());
@@ -257,82 +259,12 @@ namespace UI.Pages
 
         private bool AreConditionsSatisfied(bool hasConditions, System.Collections.Generic.IReadOnlyList<DialogAnswerCondition> conditions)
         {
-            if (!hasConditions || conditions == null)
-            {
-                return true;
-            }
-
-            var simulatedMoney = playerMoneyStorage.CurrentMoney.Value;
-            var simulatedItems = new System.Collections.Generic.Dictionary<global::Inventory.Item.ItemConfig, int>();
-
-            foreach (var condition in conditions)
-            {
-                if (condition == null)
-                {
-                    continue;
-                }
-
-                switch (condition.Type)
-                {
-                    case DialogAnswerConditionType.GiveMoney:
-                        simulatedMoney += Mathf.Abs(condition.MoneyAmount);
-                        break;
-                    case DialogAnswerConditionType.TakeMoney:
-                    {
-                        var moneyAmount = Mathf.Abs(condition.MoneyAmount);
-                        if (simulatedMoney < moneyAmount)
-                        {
-                            return false;
-                        }
-
-                        simulatedMoney -= moneyAmount;
-                        break;
-                    }
-                    case DialogAnswerConditionType.TakeMoneyMax:
-                        simulatedMoney = Mathf.Max(0, simulatedMoney - Mathf.Abs(condition.MoneyAmount));
-                        break;
-                    case DialogAnswerConditionType.TakeItemIfHas:
-                    {
-                        if (condition.ItemConfig == null)
-                        {
-                            return false;
-                        }
-
-                        var requiredCount = Mathf.Abs(condition.ItemCount);
-                        if (!simulatedItems.TryGetValue(condition.ItemConfig, out var currentCount))
-                        {
-                            currentCount = playerInventory.GetInventoryItemCount(condition.ItemConfig);
-                        }
-
-                        if (currentCount < requiredCount)
-                        {
-                            return false;
-                        }
-
-                        simulatedItems[condition.ItemConfig] = currentCount - requiredCount;
-                        break;
-                    }
-                    case DialogAnswerConditionType.CheckQuestStep:
-                    case DialogAnswerConditionType.DoQuestStep:
-                        if (!questController.CanExecuteTransition(condition.QuestGraph, condition.QuestTransition))
-                        {
-                            return false;
-                        }
-
-                        break;
-                    case DialogAnswerConditionType.AddQuest:
-                        break;
-                    case DialogAnswerConditionType.DoQuestEnd:
-                        if (!questController.CanCompleteNode(condition.QuestGraph, condition.QuestNode))
-                        {
-                            return false;
-                        }
-
-                        break;
-                }
-            }
-
-            return true;
+            return DialogueAnswerAvailability.AreConditionsSatisfied(
+                hasConditions,
+                conditions,
+                playerInventory,
+                playerMoneyStorage,
+                questController);
         }
 
         private bool TryExecuteConditions(

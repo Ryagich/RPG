@@ -1,3 +1,4 @@
+using Dialogue;
 using GameModes;
 using MessagePipe;
 using Messages;
@@ -26,6 +27,7 @@ namespace Input
         private readonly IPublisher<FastSlotInputMessage> fastSlotInputPublisher;
         private readonly IPublisher<WeaponSlotInputMessage> weaponSlotInputPublisher;
         private readonly GameModesController gameModesController;
+        private readonly DialogueContext dialogueContext;
         private readonly ISubscriber<PlayerDiedMessage> playerDiedSubscriber;
 
         private Vector2 currentMoveDirection;
@@ -50,6 +52,7 @@ namespace Input
                 IPublisher<FastSlotInputMessage> fastSlotInputPublisher,
                 IPublisher<WeaponSlotInputMessage> weaponSlotInputPublisher,
                 GameModesController gameModesController,
+                DialogueContext dialogueContext,
                 ISubscriber<PlayerDiedMessage> playerDiedSubscriber
             )
         {
@@ -69,6 +72,7 @@ namespace Input
             this.fastSlotInputPublisher = fastSlotInputPublisher;
             this.weaponSlotInputPublisher = weaponSlotInputPublisher;
             this.gameModesController = gameModesController;
+            this.dialogueContext = dialogueContext;
             this.playerDiedSubscriber = playerDiedSubscriber;
         }
 
@@ -142,6 +146,13 @@ namespace Input
                     interactableInputPublisher.Publish(new());
                     return;
                 case GameMode.Dialogue:
+                    if (!dialogueContext.CanExitDialogue)
+                    {
+                        return;
+                    }
+
+                    changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Game));
+                    return;
                 case GameMode.Looting:
                     changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Game));
                     return;
