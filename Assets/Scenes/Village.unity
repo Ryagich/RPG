@@ -21361,7 +21361,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: canTalk
@@ -31596,7 +31596,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: canTalk
@@ -38985,7 +38985,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: faction
@@ -58428,11 +58428,11 @@ Transform:
   m_GameObject: {fileID: 1303929980}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 49.6, y: 0.45, z: 34.2}
-  m_LocalScale: {x: 0.100000046, y: 0.1, z: 0.100000046}
+  m_LocalPosition: {x: -94, y: 0.148, z: -173.9}
+  m_LocalScale: {x: 0.100000106, y: 0.1, z: 0.100000106}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1688609507}
+  m_Father: {fileID: 1446435361}
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!65 &1303929982
 BoxCollider:
@@ -65150,6 +65150,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1303929981}
   - {fileID: 1499879340}
   - {fileID: 2131850046}
   - {fileID: 960669635}
@@ -77763,7 +77764,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1303929981}
   - {fileID: 74953328}
   - {fileID: 69743700}
   - {fileID: 1535390796}
@@ -96720,7 +96720,7 @@ MonoBehaviour:
       triggerZone: {fileID: 992979313}
       targetLocationId: Tavern
       targetTransitionId: To Castle
-  defaultLocationId: Village
+  defaultLocationId: Castle
   defaultPlayerTransform: {fileID: 1303929981}
 --- !u!4 &2077356446
 Transform:
