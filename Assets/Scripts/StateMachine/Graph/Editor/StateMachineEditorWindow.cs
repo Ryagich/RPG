@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using EditorTools;
 using StateMachine.Graph.Model;
 using UnityEditor;
 using UnityEngine;
@@ -25,9 +26,15 @@ namespace StateMachine.Graph.Editor
         private string transitionsFolderPath;
         private readonly Dictionary<Transition, Vector2> transitionAnchorPositions = new();
         private readonly Dictionary<Node, Rect> nodeRects = new();
+        private readonly Dictionary<State, Node> stateToNodeLookup = new();
+        private readonly Dictionary<Transition, CachedConnectionRoute> connectionRouteCache = new();
+        private readonly HashSet<Node> graphNodeSet = new();
+        private readonly List<Node> staleNodeRects = new();
 
         private bool isSelectingTargetNode;
         private bool isControlsPanelExpanded = true;
+        private bool graphStructureDirty = true;
+        private int connectionLayoutVersion;
         private Transition pendingTransition;
         private Node sourceNodeForSelection;
         private Node activeConnectionNode;
@@ -74,6 +81,8 @@ namespace StateMachine.Graph.Editor
 
         private void HandleProjectChanged()
         {
+            graphStructureDirty = true;
+            InvalidateConnectionRouteCache();
             Repaint();
         }
 
@@ -306,6 +315,7 @@ namespace StateMachine.Graph.Editor
             }
 
             EnsureGraphNodes();
+            graphStructureDirty = true;
         }
 
         private void CreateNewState()
@@ -374,13 +384,19 @@ namespace StateMachine.Graph.Editor
 
         private void DrawGraphArea()
         {
-            CleanupGraph();
+            if (graphStructureDirty)
+            {
+                CleanupGraph();
+                graphStructureDirty = false;
+            }
+
+            SynchronizeNodeRects();
             transitionAnchorPositions.Clear();
-            nodeRects.Clear();
 
             Event currentEvent = Event.current;
             HandleZoom(currentEvent);
             HandlePan(currentEvent);
+            Rect visibleGraphRect = GraphEditorCanvasUtility.GetVisibleGraphRect(position, panOffset, zoom);
 
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.ExpandHeight(true));
             GUI.EndClip();
@@ -391,7 +407,14 @@ namespace StateMachine.Graph.Editor
             Matrix4x4 oldMatrix = GUI.matrix;
             GUI.matrix = Matrix4x4.TRS(panOffset, Quaternion.identity, Vector3.one * zoom);
 
-            DrawBackgroundGrid(new Rect(0f, 0f, WorkspaceWidth, WorkspaceHeight));
+            if (currentEvent.type == EventType.Repaint)
+            {
+                GraphEditorCanvasUtility.DrawBackgroundGrid(
+                    visibleGraphRect,
+                    CanvasBackgroundColor,
+                    MinorGridColor,
+                    MajorGridColor);
+            }
 
             EditorGUI.BeginDisabledGroup(isSelectingTargetNode);
             BeginWindows();
@@ -399,15 +422,28 @@ namespace StateMachine.Graph.Editor
             for (int i = 0; i < currentGraph.Nodes.Count; i++)
             {
                 Node node = currentGraph.Nodes[i];
-                Rect rect = new Rect(node.Position, NodeSize);
+                if (node == null || !nodeRects.TryGetValue(node, out Rect rect))
+                {
+                    continue;
+                }
+
+                if (!GraphEditorCanvasUtility.IsAtLeastPartiallyVisible(rect, visibleGraphRect))
+                {
+                    continue;
+                }
 
                 Color previousColor = GUI.color;
                 GUI.color = GetNodeTint(node);
+                Rect previousRect = rect;
                 rect = GUILayout.Window(i, rect, _ => DrawNodeWindow(node), GetNodeTitle(node), NodeWindowStyle);
                 GUI.color = previousColor;
 
                 nodeRects[node] = rect;
                 node.Position = rect.position;
+                if (!RectApproximatelyEqual(previousRect, rect))
+                {
+                    InvalidateConnectionRouteCache();
+                }
             }
 
             EndWindows();
@@ -416,14 +452,75 @@ namespace StateMachine.Graph.Editor
 
             if (currentEvent.type == EventType.Repaint)
             {
-                DrawNodeMarkers();
+                DrawNodeMarkers(visibleGraphRect);
                 DrawConnections();
             }
 
-            DrawTargetSelectionOverlay();
+            DrawTargetSelectionOverlay(visibleGraphRect);
 
             GUI.matrix = oldMatrix;
             EditorGUILayout.EndScrollView();
+        }
+
+        private void SynchronizeNodeRects()
+        {
+            graphNodeSet.Clear();
+            staleNodeRects.Clear();
+            stateToNodeLookup.Clear();
+            bool layoutChanged = false;
+
+            foreach (Node node in currentGraph.Nodes)
+            {
+                if (node == null)
+                {
+                    continue;
+                }
+
+                graphNodeSet.Add(node);
+                if (node.State != null)
+                {
+                    stateToNodeLookup[node.State] = node;
+                }
+
+                if (!nodeRects.TryGetValue(node, out Rect rect))
+                {
+                    nodeRects[node] = new Rect(node.Position, NodeSize);
+                    layoutChanged = true;
+                    continue;
+                }
+
+                if (rect.position != node.Position)
+                {
+                    rect.position = node.Position;
+                    nodeRects[node] = rect;
+                    layoutChanged = true;
+                }
+            }
+
+            foreach (Node node in nodeRects.Keys)
+            {
+                if (!graphNodeSet.Contains(node))
+                {
+                    staleNodeRects.Add(node);
+                }
+            }
+
+            foreach (Node node in staleNodeRects)
+            {
+                nodeRects.Remove(node);
+                layoutChanged = true;
+            }
+
+            if (layoutChanged)
+            {
+                InvalidateConnectionRouteCache();
+            }
+        }
+
+        private void InvalidateConnectionRouteCache()
+        {
+            connectionRouteCache.Clear();
+            connectionLayoutVersion++;
         }
 
         private void CleanupGraph()
@@ -491,16 +588,22 @@ namespace StateMachine.Graph.Editor
             Repaint();
         }
 
-        private void DrawNodeMarkers()
+        private void DrawNodeMarkers(Rect visibleGraphRect)
         {
-            foreach (Node node in currentGraph.Nodes)
+            foreach (KeyValuePair<Node, Rect> pair in nodeRects)
             {
+                Node node = pair.Key;
                 if (node.State == null)
                 {
                     continue;
                 }
 
-                Rect badgeRect = new Rect(node.Position.x + 6f, node.Position.y + 6f, 18f, 18f);
+                if (!GraphEditorCanvasUtility.IsAtLeastPartiallyVisible(pair.Value, visibleGraphRect))
+                {
+                    continue;
+                }
+
+                Rect badgeRect = new Rect(pair.Value.x + 6f, pair.Value.y + 6f, 18f, 18f);
                 Color previous = GUI.backgroundColor;
 
                 if (IsStartNode(node))
@@ -539,8 +642,7 @@ namespace StateMachine.Graph.Editor
                         continue;
                     }
 
-                    Node targetNode = currentGraph.Nodes.FirstOrDefault(n => n.State == transition.TargetState);
-                    if (targetNode == null)
+                    if (!stateToNodeLookup.TryGetValue(transition.TargetState, out Node targetNode))
                     {
                         continue;
                     }
@@ -558,13 +660,38 @@ namespace StateMachine.Graph.Editor
                     }
 
                     Handles.color = GetConnectionColor(node, targetNode);
-                    Vector2[] routePoints = BuildConnectionRoute(startPos, sourceRect, targetRect, nodeRects.Values);
+                    Vector2[] routePoints = GetOrBuildConnectionRoute(transition, startPos, sourceRect, targetRect);
                     DrawSmoothedConnection(routePoints);
                     DrawConnectionArrow(routePoints);
                 }
             }
 
             Handles.EndGUI();
+        }
+
+        private Vector2[] GetOrBuildConnectionRoute(
+            Transition transition,
+            Vector2 startPos,
+            Rect sourceRect,
+            Rect targetRect)
+        {
+            if (connectionRouteCache.TryGetValue(transition, out CachedConnectionRoute cachedRoute) &&
+                cachedRoute.LayoutVersion == connectionLayoutVersion &&
+                ApproximatelyEqual(cachedRoute.StartPos, startPos) &&
+                RectApproximatelyEqual(cachedRoute.SourceRect, sourceRect) &&
+                RectApproximatelyEqual(cachedRoute.TargetRect, targetRect))
+            {
+                return cachedRoute.RoutePoints;
+            }
+
+            Vector2[] routePoints = BuildConnectionRoute(startPos, sourceRect, targetRect, nodeRects.Values);
+            connectionRouteCache[transition] = new CachedConnectionRoute(
+                connectionLayoutVersion,
+                startPos,
+                sourceRect,
+                targetRect,
+                routePoints);
+            return routePoints;
         }
 
         private void HandleConnectionHighlightSelection(Event currentEvent)
@@ -1096,6 +1223,32 @@ namespace StateMachine.Graph.Editor
             return Mathf.Approximately(a.x, b.x) && Mathf.Approximately(a.y, b.y);
         }
 
+        private static bool RectApproximatelyEqual(Rect a, Rect b)
+        {
+            return Mathf.Approximately(a.x, b.x) &&
+                   Mathf.Approximately(a.y, b.y) &&
+                   Mathf.Approximately(a.width, b.width) &&
+                   Mathf.Approximately(a.height, b.height);
+        }
+
+        private readonly struct CachedConnectionRoute
+        {
+            public CachedConnectionRoute(int layoutVersion, Vector2 startPos, Rect sourceRect, Rect targetRect, Vector2[] routePoints)
+            {
+                LayoutVersion = layoutVersion;
+                StartPos = startPos;
+                SourceRect = sourceRect;
+                TargetRect = targetRect;
+                RoutePoints = routePoints;
+            }
+
+            public int LayoutVersion { get; }
+            public Vector2 StartPos { get; }
+            public Rect SourceRect { get; }
+            public Rect TargetRect { get; }
+            public Vector2[] RoutePoints { get; }
+        }
+
         private readonly struct ConnectionPort
         {
             public ConnectionPort(Vector2 edgePoint, Vector2 outerPoint)
@@ -1108,7 +1261,7 @@ namespace StateMachine.Graph.Editor
             public Vector2 OuterPoint { get; }
         }
 
-        private void DrawTargetSelectionOverlay()
+        private void DrawTargetSelectionOverlay(Rect visibleGraphRect)
         {
             if (!isSelectingTargetNode || pendingTransition == null)
             {
@@ -1124,7 +1277,8 @@ namespace StateMachine.Graph.Editor
                     continue;
                 }
 
-                if (!nodeRects.TryGetValue(node, out Rect rect))
+                if (!nodeRects.TryGetValue(node, out Rect rect) ||
+                    !GraphEditorCanvasUtility.IsAtLeastPartiallyVisible(rect, visibleGraphRect))
                 {
                     continue;
                 }
@@ -1810,7 +1964,7 @@ namespace StateMachine.Graph.Editor
             }
         }
 
-        private static void MarkDirty(UnityEngine.Object target)
+        private void MarkDirty(UnityEngine.Object target)
         {
             if (target == null)
             {
@@ -1818,43 +1972,7 @@ namespace StateMachine.Graph.Editor
             }
 
             EditorUtility.SetDirty(target);
-        }
-
-        private void DrawBackgroundGrid(Rect rect)
-        {
-            Color minorColor = MinorGridColor;
-            Color majorColor = MajorGridColor;
-
-            float gridSpacing = 20f * zoom;
-            float majorStep = gridSpacing * 5f;
-            Vector2 offset = new Vector2(panOffset.x % gridSpacing, panOffset.y % gridSpacing);
-
-            EditorGUI.DrawRect(rect, CanvasBackgroundColor);
-            Handles.BeginGUI();
-
-            Handles.color = minorColor;
-            for (float x = rect.xMin + offset.x; x < rect.xMax; x += gridSpacing)
-            {
-                Handles.DrawLine(new Vector3(x, rect.yMin, 0f), new Vector3(x, rect.yMax, 0f));
-            }
-
-            for (float y = rect.yMin + offset.y; y < rect.yMax; y += gridSpacing)
-            {
-                Handles.DrawLine(new Vector3(rect.xMin, y, 0f), new Vector3(rect.xMax, y, 0f));
-            }
-
-            Handles.color = majorColor;
-            for (float x = rect.xMin + offset.x; x < rect.xMax; x += majorStep)
-            {
-                Handles.DrawLine(new Vector3(x, rect.yMin, 0f), new Vector3(x, rect.yMax, 0f));
-            }
-
-            for (float y = rect.yMin + offset.y; y < rect.yMax; y += majorStep)
-            {
-                Handles.DrawLine(new Vector3(rect.xMin, y, 0f), new Vector3(rect.xMax, y, 0f));
-            }
-
-            Handles.EndGUI();
+            InvalidateConnectionRouteCache();
         }
 
         private string GetThemeToggleLabel()
@@ -1895,7 +2013,7 @@ namespace StateMachine.Graph.Editor
 
         private void ApplyThemeEditorStyleTextOverrides()
         {
-            if (!useLightTheme)
+            if (!useLightTheme || Event.current.type != EventType.Repaint)
             {
                 return;
             }

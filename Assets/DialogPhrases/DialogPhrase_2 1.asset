@@ -21,6 +21,8 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
+  isForcedDialoguePhrase: 0
+  restoresExitAbility: 0
   isQuestPhrase: 0
   questAnswer:
     text:
@@ -45,7 +47,7 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    nextPhrase: {fileID: 11400000, guid: 0b27e148cfe1383478b196a431665b30, type: 2}
+    nextPhrase: {fileID: 11400000, guid: c413cf71eec541f4dabd6e56083bda37, type: 2}
     hasConditions: 0
     conditions: []
   - text:

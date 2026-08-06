@@ -19,6 +19,7 @@ namespace EditorTools
         private const float RowHeight = 22f;
 
         private readonly List<FactionConfig> factions = new();
+        private readonly Dictionary<FactionConfig, string> factionDisplayNameCache = new();
         private FactionRelationsConfig relationsConfig;
         private Vector2 relationsScroll;
 
@@ -32,9 +33,15 @@ namespace EditorTools
 
         private void OnEnable()
         {
+            EditorApplication.projectChanged += HandleProjectChanged;
             relationsConfig = FindFirstRelationsConfig();
             RefreshFactions();
             SyncRelations();
+        }
+
+        private void OnDisable()
+        {
+            EditorApplication.projectChanged -= HandleProjectChanged;
         }
 
         private void OnGUI()
@@ -118,7 +125,6 @@ namespace EditorTools
         {
             EditorGUILayout.LabelField("Base Relations", EditorStyles.boldLabel);
 
-            relationsScroll = EditorGUILayout.BeginScrollView(relationsScroll, GUILayout.MinHeight(260f));
             using (new EditorGUILayout.HorizontalScope())
             {
                 DrawHeaderCell("Faction", FactionColumnWidth);
@@ -126,35 +132,58 @@ namespace EditorTools
                 DrawHeaderCell("Faction", FactionColumnWidth);
             }
 
-            EditorGUI.BeginChangeCheck();
-            foreach (var entry in relationsConfig.Relations.Where(entry => entry != null))
+            IReadOnlyList<FactionRelationEntry> relations = relationsConfig.Relations;
+            float contentWidth = FactionColumnWidth * 2f + RelationColumnWidth;
+            Rect scrollRect = GUILayoutUtility.GetRect(
+                contentWidth,
+                10000f,
+                GUILayout.ExpandWidth(true),
+                GUILayout.MinHeight(260f),
+                GUILayout.ExpandHeight(true));
+            float contentHeight = Mathf.Max(scrollRect.height, relations.Count * RowHeight);
+            Rect contentRect = new Rect(0f, 0f, contentWidth, contentHeight);
+            relationsScroll = GUI.BeginScrollView(scrollRect, relationsScroll, contentRect);
+
+            int firstVisibleRow = Mathf.Clamp(Mathf.FloorToInt(relationsScroll.y / RowHeight), 0, Mathf.Max(0, relations.Count - 1));
+            int visibleRowCount = Mathf.CeilToInt(scrollRect.height / RowHeight) + 2;
+            int lastVisibleRow = Mathf.Min(relations.Count, firstVisibleRow + visibleRowCount);
+            bool relationChanged = false;
+            for (int relationIndex = firstVisibleRow; relationIndex < lastVisibleRow; relationIndex++)
             {
-                var leftFaction = entry.LeftFaction;
-                var rightFaction = entry.RightFaction;
-
-                using (new EditorGUILayout.HorizontalScope(GUILayout.Height(RowHeight)))
+                FactionRelationEntry entry = relations[relationIndex];
+                if (entry == null)
                 {
-                    EditorGUILayout.SelectableLabel(GetFactionDisplayName(leftFaction), EditorStyles.label, GUILayout.Width(FactionColumnWidth), GUILayout.Height(RowHeight));
-
-                    var value = entry.Relation;
-                    var nextValue = EditorGUILayout.IntField(value, GUILayout.Width(RelationColumnWidth), GUILayout.Height(RowHeight));
-                    if (nextValue != value)
-                    {
-                        Undo.RecordObject(relationsConfig, "Change Faction Relation");
-                        relationsConfig.SetRelation(leftFaction, rightFaction, nextValue);
-                        EditorUtility.SetDirty(relationsConfig);
-                    }
-
-                    EditorGUILayout.SelectableLabel(GetFactionDisplayName(rightFaction), EditorStyles.label, GUILayout.Width(FactionColumnWidth), GUILayout.Height(RowHeight));
+                    continue;
                 }
+
+                FactionConfig leftFaction = entry.LeftFaction;
+                FactionConfig rightFaction = entry.RightFaction;
+                float rowY = relationIndex * RowHeight;
+                Rect leftRect = new Rect(0f, rowY, FactionColumnWidth, RowHeight);
+                Rect valueRect = new Rect(FactionColumnWidth, rowY, RelationColumnWidth, RowHeight);
+                Rect rightRect = new Rect(FactionColumnWidth + RelationColumnWidth, rowY, FactionColumnWidth, RowHeight);
+
+                EditorGUI.SelectableLabel(leftRect, GetFactionDisplayName(leftFaction), EditorStyles.label);
+
+                int value = entry.Relation;
+                int nextValue = EditorGUI.IntField(valueRect, value);
+                if (nextValue != value)
+                {
+                    Undo.RecordObject(relationsConfig, "Change Faction Relation");
+                    relationsConfig.SetRelation(leftFaction, rightFaction, nextValue);
+                    EditorUtility.SetDirty(relationsConfig);
+                    relationChanged = true;
+                }
+
+                EditorGUI.SelectableLabel(rightRect, GetFactionDisplayName(rightFaction), EditorStyles.label);
             }
 
-            if (EditorGUI.EndChangeCheck())
+            GUI.EndScrollView();
+
+            if (relationChanged)
             {
                 AssetDatabase.SaveAssets();
             }
-
-            EditorGUILayout.EndScrollView();
         }
 
         private static void DrawHeaderCell(string text, float width)
@@ -166,6 +195,7 @@ namespace EditorTools
         {
             factions.Clear();
             factions.AddRange(FindAllFactions());
+            factionDisplayNameCache.Clear();
         }
 
         private void SyncRelations()
@@ -194,16 +224,23 @@ namespace EditorTools
                 .ToList();
         }
 
-        private static string GetFactionDisplayName(FactionConfig faction)
+        private string GetFactionDisplayName(FactionConfig faction)
         {
             if (faction == null)
             {
                 return "Missing faction";
             }
 
+            if (factionDisplayNameCache.TryGetValue(faction, out string displayName))
+            {
+                return displayName;
+            }
+
             var factionObject = new SerializedObject(faction);
             var nameProperty = factionObject.FindProperty("<Name>k__BackingField");
-            return GetLocalizedStringDisplayName(nameProperty, faction.name);
+            displayName = GetLocalizedStringDisplayName(nameProperty, faction.name);
+            factionDisplayNameCache[faction] = displayName;
+            return displayName;
         }
 
         private static string GetLocalizedStringDisplayName(SerializedProperty localizedStringProperty, string fallbackName)
@@ -257,22 +294,7 @@ namespace EditorTools
 
         private static StringTableCollection ResolveCollection(string serializedTableReference)
         {
-            if (string.IsNullOrWhiteSpace(serializedTableReference))
-            {
-                return null;
-            }
-
-            foreach (var collection in LocalizationEditorSettings.GetStringTableCollections())
-            {
-                var guidReference = $"GUID:{collection.SharedData.TableCollectionNameGuid:N}";
-                if (string.Equals(serializedTableReference, guidReference, System.StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(serializedTableReference, collection.TableCollectionName, System.StringComparison.Ordinal))
-                {
-                    return collection;
-                }
-            }
-
-            return null;
+            return GraphEditorLocalizationCache.ResolveStringTableCollection(serializedTableReference);
         }
 
         private static SharedTableData.SharedTableEntry ResolveEntry(
@@ -301,26 +323,13 @@ namespace EditorTools
 
         private static string GetLocalizedValue(StringTableCollection collection, long entryId, string localeCode)
         {
-            if (collection == null || entryId == 0 || string.IsNullOrWhiteSpace(localeCode))
-            {
-                return string.Empty;
-            }
+            return GraphEditorLocalizationCache.GetLocalizedValue(collection, entryId, localeCode);
+        }
 
-            foreach (var table in collection.StringTables)
-            {
-                if (table == null || table.LocaleIdentifier.Code != localeCode)
-                {
-                    continue;
-                }
-
-                var entry = table.GetEntry(entryId);
-                if (entry != null && !string.IsNullOrWhiteSpace(entry.LocalizedValue))
-                {
-                    return entry.LocalizedValue;
-                }
-            }
-
-            return string.Empty;
+        private void HandleProjectChanged()
+        {
+            factionDisplayNameCache.Clear();
+            Repaint();
         }
 
         private static FactionRelationsConfig FindFirstRelationsConfig()

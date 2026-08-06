@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Dialogs.Graph.Model;
+using EditorTools;
 using Quests.Editor;
 using Quests.Graph;
 using Quests.Graph.Model;
@@ -37,14 +38,21 @@ namespace Dialogs.Graph.Editor
         private string phrasesFolderPath;
         private readonly Dictionary<DialogAnswer, Vector2> answerAnchorPositions = new();
         private readonly Dictionary<DialogNode, Rect> nodeRects = new();
+        private readonly HashSet<DialogNode> graphNodeSet = new();
+        private readonly List<DialogNode> staleNodeRects = new();
         private readonly Dictionary<DialogPhrase, DialogNode> phraseToNodeLookup = new();
         private readonly HashSet<DialogPhrase> orphanPhrases = new();
         private readonly Dictionary<DialogPhrase, string> phraseDisplayNameCache = new();
+        private readonly Dictionary<DialogPhrase, bool> restoreExitAbilityCache = new();
+        private readonly HashSet<DialogPhrase> phrasesWithDirtyLayout = new();
+        private readonly HashSet<DialogPhrase> phrasesAwaitingRepaintAfterLayout = new();
+        private readonly GUIContent localizedPreviewContent = new();
         private readonly Dictionary<string, bool> answerFoldoutStates = new();
         private bool graphCachesDirty = true;
         private bool graphStructureDirty = true;
         private readonly Dictionary<DialogAnswer, CachedConnectionRoute> connectionRouteCache = new();
-        private int cachedConnectionLayoutHash;
+        private readonly List<Rect> connectionObstacleRects = new();
+        private int connectionLayoutVersion;
 
         private static System.Collections.ObjectModel.ReadOnlyCollection<StringTableCollection> cachedStringTableCollections;
         private static string[] cachedStringTableOptions;
@@ -425,10 +433,11 @@ namespace Dialogs.Graph.Editor
                 RebuildGraphCaches();
             }
 
+            SynchronizeNodeRects();
             answerAnchorPositions.Clear();
-            nodeRects.Clear();
             HandleZoom(currentEvent);
             HandlePan(currentEvent);
+            Rect visibleGraphRect = GraphEditorCanvasUtility.GetVisibleGraphRect(position, panOffset, zoom);
 
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.ExpandHeight(true));
             GUI.EndClip();
@@ -441,7 +450,11 @@ namespace Dialogs.Graph.Editor
 
             if (currentEvent.type == EventType.Repaint)
             {
-                DrawBackgroundGrid(new Rect(0f, 0f, WorkspaceWidth, WorkspaceHeight));
+                GraphEditorCanvasUtility.DrawBackgroundGrid(
+                    visibleGraphRect,
+                    CanvasBackgroundColor,
+                    MinorGridColor,
+                    MajorGridColor);
             }
 
             BeginWindows();
@@ -449,15 +462,46 @@ namespace Dialogs.Graph.Editor
             for (int i = 0; i < currentGraph.Nodes.Count; i++)
             {
                 DialogNode node = currentGraph.Nodes[i];
-                Rect rect = new Rect(node.Position, new Vector2(DialogNodeWidth, 220f));
+                if (node == null || !nodeRects.TryGetValue(node, out Rect rect))
+                {
+                    continue;
+                }
+
+                if (!GraphEditorCanvasUtility.IsAtLeastPartiallyVisible(rect, visibleGraphRect))
+                {
+                    continue;
+                }
 
                 Color previousColor = GUI.color;
                 GUI.color = GetNodeTint(node);
+                Rect previousRect = rect;
+                bool shouldRecalculateLayout = phrasesWithDirtyLayout.Contains(node.Phrase);
+                if (shouldRecalculateLayout)
+                {
+                    rect.height = 0f;
+                }
+
                 rect = GUILayout.Window(i, rect, _ => DrawNodeWindow(node), GetNodeTitle(node), NodeWindowStyle);
                 GUI.color = previousColor;
 
                 nodeRects[node] = rect;
                 node.Position = rect.position;
+                if (!RectApproximatelyEqual(previousRect, rect))
+                {
+                    InvalidateConnectionRouteCache();
+                }
+
+                // Keep the reset through the subsequent Repaint: Layout calculates the natural
+                // size and Repaint returns it, including when a node has just become smaller.
+                if (shouldRecalculateLayout && currentEvent.type == EventType.Layout)
+                {
+                    phrasesAwaitingRepaintAfterLayout.Add(node.Phrase);
+                }
+                else if (shouldRecalculateLayout && currentEvent.type == EventType.Repaint &&
+                         phrasesAwaitingRepaintAfterLayout.Remove(node.Phrase))
+                {
+                    phrasesWithDirtyLayout.Remove(node.Phrase);
+                }
             }
 
             EndWindows();
@@ -465,14 +509,63 @@ namespace Dialogs.Graph.Editor
 
             if (currentEvent.type == EventType.Repaint)
             {
-                DrawNodeMarkers();
+                DrawNodeMarkers(visibleGraphRect);
                 DrawConnections();
             }
 
-            DrawTargetSelectionOverlay();
+            DrawTargetSelectionOverlay(visibleGraphRect);
 
             GUI.matrix = oldMatrix;
             EditorGUILayout.EndScrollView();
+        }
+
+        private void SynchronizeNodeRects()
+        {
+            graphNodeSet.Clear();
+            staleNodeRects.Clear();
+            bool layoutChanged = false;
+
+            foreach (DialogNode node in currentGraph.Nodes)
+            {
+                if (node == null)
+                {
+                    continue;
+                }
+
+                graphNodeSet.Add(node);
+                if (!nodeRects.TryGetValue(node, out Rect rect))
+                {
+                    nodeRects[node] = new Rect(node.Position, new Vector2(DialogNodeWidth, 220f));
+                    layoutChanged = true;
+                    continue;
+                }
+
+                if (!ApproximatelyEqual(rect.position, node.Position))
+                {
+                    rect.position = node.Position;
+                    nodeRects[node] = rect;
+                    layoutChanged = true;
+                }
+            }
+
+            foreach (DialogNode node in nodeRects.Keys)
+            {
+                if (!graphNodeSet.Contains(node))
+                {
+                    staleNodeRects.Add(node);
+                }
+            }
+
+            foreach (DialogNode node in staleNodeRects)
+            {
+                nodeRects.Remove(node);
+                layoutChanged = true;
+            }
+
+            if (layoutChanged)
+            {
+                InvalidateConnectionRouteCache();
+            }
         }
 
         private void CleanupGraph()
@@ -568,6 +661,9 @@ namespace Dialogs.Graph.Editor
             phraseToNodeLookup.Clear();
             orphanPhrases.Clear();
             phraseDisplayNameCache.Clear();
+            restoreExitAbilityCache.Clear();
+            phrasesWithDirtyLayout.Clear();
+            phrasesAwaitingRepaintAfterLayout.Clear();
             graphCachesDirty = true;
             InvalidateConnectionRouteCache();
         }
@@ -581,7 +677,7 @@ namespace Dialogs.Graph.Editor
         private void InvalidateConnectionRouteCache()
         {
             connectionRouteCache.Clear();
-            cachedConnectionLayoutHash = 0;
+            connectionLayoutVersion++;
         }
 
         private static void InvalidateStaticEditorCaches()
@@ -632,12 +728,12 @@ namespace Dialogs.Graph.Editor
             Repaint();
         }
 
-        private void DrawNodeMarkers()
+        private void DrawNodeMarkers(Rect visibleGraphRect)
         {
             foreach (KeyValuePair<DialogNode, Rect> pair in nodeRects)
             {
                 DialogNode node = pair.Key;
-                if (node.Phrase == null)
+                if (node.Phrase == null || !GraphEditorCanvasUtility.IsAtLeastPartiallyVisible(pair.Value, visibleGraphRect))
                 {
                     continue;
                 }
@@ -680,8 +776,7 @@ namespace Dialogs.Graph.Editor
                         continue;
                     }
 
-                    DialogNode targetNode = currentGraph.Nodes.FirstOrDefault(n => n.Phrase == answer.NextPhrase);
-                    if (targetNode == null)
+                    if (!phraseToNodeLookup.TryGetValue(answer.NextPhrase, out DialogNode targetNode))
                     {
                         continue;
                     }
@@ -700,15 +795,14 @@ namespace Dialogs.Graph.Editor
 
                     Handles.color = GetConnectionColor(node, targetNode);
                     Vector2 endPos = GetNearestSideCenter(targetRect, startPos);
-                    (Vector2 startTangent, Vector2 endTangent) = ResolveConnectionTangents(
+                    (Vector2 startTangent, Vector2 endTangent) = GetOrBuildConnectionTangents(
+                        answer,
                         startPos,
                         endPos,
                         sourceRect,
                         targetRect,
-                        nodeRects
-                            .Where(item => item.Key != node && item.Key != targetNode)
-                            .Select(item => ExpandRect(item.Value, 8f))
-                            .ToList());
+                        node,
+                        targetNode);
 
                     Handles.DrawBezier(startPos, endPos, startTangent, endTangent, Handles.color, null, 3f);
                     DrawConnectionArrow(endPos, endPos - endTangent);
@@ -756,53 +850,52 @@ namespace Dialogs.Graph.Editor
             return PrimaryConnectionColor;
         }
 
-        private int ComputeConnectionLayoutHash()
-        {
-            unchecked
-            {
-                int hash = 17;
-                foreach (KeyValuePair<DialogNode, Rect> pair in nodeRects.OrderBy(item => item.Key.Phrase != null ? item.Key.Phrase.GetInstanceID() : 0))
-                {
-                    Rect rect = pair.Value;
-                    hash = hash * 31 + Mathf.RoundToInt(rect.x * 10f);
-                    hash = hash * 31 + Mathf.RoundToInt(rect.y * 10f);
-                    hash = hash * 31 + Mathf.RoundToInt(rect.width * 10f);
-                    hash = hash * 31 + Mathf.RoundToInt(rect.height * 10f);
-                }
-
-                return hash;
-            }
-        }
-
-        private Vector2[] GetOrBuildConnectionRoute(
+        private (Vector2 StartTangent, Vector2 EndTangent) GetOrBuildConnectionTangents(
             DialogAnswer answer,
             Vector2 startPos,
+            Vector2 endPos,
             Rect sourceRect,
             Rect targetRect,
-            IReadOnlyList<Rect> expandedNodeRects)
+            DialogNode sourceNode,
+            DialogNode targetNode)
         {
             if (answer != null &&
                 connectionRouteCache.TryGetValue(answer, out CachedConnectionRoute cachedRoute) &&
-                cachedRoute.LayoutHash == cachedConnectionLayoutHash &&
+                cachedRoute.LayoutVersion == connectionLayoutVersion &&
                 ApproximatelyEqual(cachedRoute.StartPos, startPos) &&
                 RectApproximatelyEqual(cachedRoute.SourceRect, sourceRect) &&
                 RectApproximatelyEqual(cachedRoute.TargetRect, targetRect))
             {
-                return cachedRoute.RoutePoints;
+                return (cachedRoute.StartTangent, cachedRoute.EndTangent);
             }
 
-            Vector2[] routePoints = BuildConnectionRoute(startPos, sourceRect, targetRect, expandedNodeRects);
+            connectionObstacleRects.Clear();
+            foreach (KeyValuePair<DialogNode, Rect> pair in nodeRects)
+            {
+                if (pair.Key != sourceNode && pair.Key != targetNode)
+                {
+                    connectionObstacleRects.Add(ExpandRect(pair.Value, 8f));
+                }
+            }
+
+            (Vector2 startTangent, Vector2 endTangent) = ResolveConnectionTangents(
+                startPos,
+                endPos,
+                sourceRect,
+                targetRect,
+                connectionObstacleRects);
             if (answer != null)
             {
                 connectionRouteCache[answer] = new CachedConnectionRoute(
-                    cachedConnectionLayoutHash,
+                    connectionLayoutVersion,
                     startPos,
                     sourceRect,
                     targetRect,
-                    routePoints);
+                    startTangent,
+                    endTangent);
             }
 
-            return routePoints;
+            return (startTangent, endTangent);
         }
 
         private static Vector2[] BuildConnectionRoute(Vector2 startPos, Rect sourceRect, Rect targetRect, IReadOnlyList<Rect> expandedNodeRects)
@@ -1681,10 +1774,24 @@ namespace Dialogs.Graph.Editor
             {
                 Entries = entries;
                 Options = options;
+                IndicesById = new Dictionary<long, int>(entries.Count);
+                IndicesByKey = new Dictionary<string, int>(entries.Count, StringComparer.Ordinal);
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    SharedTableData.SharedTableEntry entry = entries[i];
+                    int optionIndex = i + 1;
+                    IndicesById[entry.Id] = optionIndex;
+                    if (!string.IsNullOrEmpty(entry.Key))
+                    {
+                        IndicesByKey[entry.Key] = optionIndex;
+                    }
+                }
             }
 
             public IReadOnlyList<SharedTableData.SharedTableEntry> Entries { get; }
             public string[] Options { get; }
+            public Dictionary<long, int> IndicesById { get; }
+            public Dictionary<string, int> IndicesByKey { get; }
         }
 
         private sealed class LocalizedEntrySelectorWindow : EditorWindow
@@ -1707,6 +1814,10 @@ namespace Dialogs.Graph.Editor
             private string searchText = string.Empty;
             private bool focusSearchField = true;
             [NonSerialized] private SearchField searchField;
+            [NonSerialized] private readonly List<int> filteredEntryIndices = new();
+            [NonSerialized] private string appliedSearchText;
+
+            private const float EntryRowHeight = 20f;
 
             private void Initialize(
                 UnityEngine.Object targetObject,
@@ -1726,6 +1837,7 @@ namespace Dialogs.Graph.Editor
                 searchText = string.Empty;
                 scrollPosition = Vector2.zero;
                 EnsureSearchField();
+                RebuildFilteredEntries();
             }
 
             private Vector2 InitialSize
@@ -1740,6 +1852,7 @@ namespace Dialogs.Graph.Editor
             private void OnEnable()
             {
                 EnsureSearchField();
+                RebuildFilteredEntries();
             }
 
             private void OnGUI()
@@ -1753,7 +1866,15 @@ namespace Dialogs.Graph.Editor
                 }
 
                 EditorGUILayout.LabelField("Select Entry", EditorStyles.boldLabel);
-                searchText = searchField.OnGUI(EditorGUILayout.GetControlRect(), searchText);
+                string updatedSearchText = searchField.OnGUI(EditorGUILayout.GetControlRect(), searchText);
+                if (!string.Equals(searchText, updatedSearchText, StringComparison.Ordinal))
+                {
+                    searchText = updatedSearchText;
+                    scrollPosition = Vector2.zero;
+                    RebuildFilteredEntries();
+                }
+
+                EnsureFilteredEntries();
                 EditorGUILayout.Space(4f);
 
                 if (GUILayout.Button("<None>", selectedIndex < 0 ? EditorStyles.miniButtonMid : EditorStyles.miniButton))
@@ -1764,33 +1885,13 @@ namespace Dialogs.Graph.Editor
                 }
 
                 EditorGUILayout.Space(4f);
-                scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
-
-                bool hasVisibleEntries = false;
-                for (int i = 0; i < entries.Count; i++)
-                {
-                    EntryOption entry = entries[i];
-                    if (!MatchesSearch(entry, searchText))
-                    {
-                        continue;
-                    }
-
-                    hasVisibleEntries = true;
-                    GUIStyle style = i == selectedIndex ? EditorStyles.miniButtonMid : EditorStyles.miniButton;
-                    if (GUILayout.Button(entry.Key, style))
-                    {
-                        ApplyEntrySelectionToObject(targetObject, keyIdPropertyPath, keyPropertyPath, entries, i + 1);
-                        Close();
-                        GUIUtility.ExitGUI();
-                    }
-                }
-
-                if (!hasVisibleEntries)
+                if (filteredEntryIndices.Count == 0)
                 {
                     EditorGUILayout.HelpBox("No entries found.", MessageType.Info);
+                    return;
                 }
 
-                EditorGUILayout.EndScrollView();
+                DrawVirtualizedEntryList();
             }
 
             public static void Show(
@@ -1830,6 +1931,61 @@ namespace Dialogs.Graph.Editor
                 searchField ??= new SearchField();
             }
 
+            private void EnsureFilteredEntries()
+            {
+                if (!string.Equals(appliedSearchText, searchText, StringComparison.Ordinal))
+                {
+                    RebuildFilteredEntries();
+                }
+            }
+
+            private void RebuildFilteredEntries()
+            {
+                filteredEntryIndices.Clear();
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    if (MatchesSearch(entries[i], searchText))
+                    {
+                        filteredEntryIndices.Add(i);
+                    }
+                }
+
+                appliedSearchText = searchText;
+            }
+
+            private void DrawVirtualizedEntryList()
+            {
+                Rect scrollRect = GUILayoutUtility.GetRect(
+                    1f,
+                    10000f,
+                    GUILayout.ExpandWidth(true),
+                    GUILayout.ExpandHeight(true),
+                    GUILayout.MinHeight(64f));
+                float contentWidth = Mathf.Max(1f, scrollRect.width - GUI.skin.verticalScrollbar.fixedWidth);
+                float contentHeight = Mathf.Max(scrollRect.height, filteredEntryIndices.Count * EntryRowHeight);
+                Rect contentRect = new Rect(0f, 0f, contentWidth, contentHeight);
+                scrollPosition = GUI.BeginScrollView(scrollRect, scrollPosition, contentRect);
+
+                int firstVisibleIndex = Mathf.Clamp(Mathf.FloorToInt(scrollPosition.y / EntryRowHeight), 0, filteredEntryIndices.Count - 1);
+                int visibleCount = Mathf.CeilToInt(scrollRect.height / EntryRowHeight) + 2;
+                int lastVisibleIndex = Mathf.Min(filteredEntryIndices.Count, firstVisibleIndex + visibleCount);
+                for (int filteredIndex = firstVisibleIndex; filteredIndex < lastVisibleIndex; filteredIndex++)
+                {
+                    int entryIndex = filteredEntryIndices[filteredIndex];
+                    EntryOption entry = entries[entryIndex];
+                    Rect entryRect = new Rect(0f, filteredIndex * EntryRowHeight, contentWidth, EntryRowHeight);
+                    GUIStyle style = entryIndex == selectedIndex ? EditorStyles.miniButtonMid : EditorStyles.miniButton;
+                    if (GUI.Button(entryRect, entry.Key, style))
+                    {
+                        ApplyEntrySelectionToObject(targetObject, keyIdPropertyPath, keyPropertyPath, entries, entryIndex + 1);
+                        Close();
+                        GUIUtility.ExitGUI();
+                    }
+                }
+
+                GUI.EndScrollView();
+            }
+
             private static bool MatchesSearch(EntryOption entry, string searchText)
             {
                 if (string.IsNullOrWhiteSpace(searchText))
@@ -1858,20 +2014,28 @@ namespace Dialogs.Graph.Editor
 
         private readonly struct CachedConnectionRoute
         {
-            public CachedConnectionRoute(int layoutHash, Vector2 startPos, Rect sourceRect, Rect targetRect, Vector2[] routePoints)
+            public CachedConnectionRoute(
+                int layoutVersion,
+                Vector2 startPos,
+                Rect sourceRect,
+                Rect targetRect,
+                Vector2 startTangent,
+                Vector2 endTangent)
             {
-                LayoutHash = layoutHash;
+                LayoutVersion = layoutVersion;
                 StartPos = startPos;
                 SourceRect = sourceRect;
                 TargetRect = targetRect;
-                RoutePoints = routePoints;
+                StartTangent = startTangent;
+                EndTangent = endTangent;
             }
 
-            public int LayoutHash { get; }
+            public int LayoutVersion { get; }
             public Vector2 StartPos { get; }
             public Rect SourceRect { get; }
             public Rect TargetRect { get; }
-            public Vector2[] RoutePoints { get; }
+            public Vector2 StartTangent { get; }
+            public Vector2 EndTangent { get; }
         }
 
         private readonly struct ConnectionPort
@@ -1886,7 +2050,7 @@ namespace Dialogs.Graph.Editor
             public Vector2 OuterPoint { get; }
         }
 
-        private void DrawTargetSelectionOverlay()
+        private void DrawTargetSelectionOverlay(Rect visibleGraphRect)
         {
             if (!isSelectingTargetPhrase || pendingAnswer == null)
             {
@@ -1903,7 +2067,8 @@ namespace Dialogs.Graph.Editor
                     continue;
                 }
 
-                if (!nodeRects.TryGetValue(node, out Rect rect))
+                if (!nodeRects.TryGetValue(node, out Rect rect) ||
+                    !GraphEditorCanvasUtility.IsAtLeastPartiallyVisible(rect, visibleGraphRect))
                 {
                     continue;
                 }
@@ -2000,7 +2165,7 @@ namespace Dialogs.Graph.Editor
             }
 
             EditorGUI.BeginChangeCheck();
-            List<EditorStyleTextOverride> objectFieldOverrides = useLightTheme
+            List<EditorStyleTextOverride> objectFieldOverrides = useLightTheme && Event.current.type == EventType.Repaint
                 ? CreateTemporaryObjectFieldTextOverrides(Color.white)
                 : null;
             DialogPhrase newPhrase;
@@ -2137,7 +2302,7 @@ namespace Dialogs.Graph.Editor
                 }
                 else if (restoresExitAbilityProperty != null)
                 {
-                    bool canRestoreExitAbility = currentGraph.CanRestoreExitAbility(phrase);
+                    bool canRestoreExitAbility = CanRestoreExitAbility(phrase);
                     if (!canRestoreExitAbility)
                     {
                         restoresExitAbilityProperty.boolValue = false;
@@ -2211,6 +2376,7 @@ namespace Dialogs.Graph.Editor
                 {
                     SetAnswerFoldoutState(foldoutKey, newExpanded);
                     isExpanded = newExpanded;
+                    InvalidateNodeLayout(phrase);
                 }
 
                 GUILayout.Label(statusLabel, CenteredMiniLabelStyle, GUILayout.Width(110f));
@@ -2301,12 +2467,14 @@ namespace Dialogs.Graph.Editor
             {
                 answersProperty.arraySize++;
                 ClearAnswerFoldoutStates(phrase);
+                InvalidateNodeLayout(phrase);
             }
 
             if (removeAnswerIndex >= 0)
             {
                 answersProperty.DeleteArrayElementAtIndex(removeAnswerIndex);
                 ClearAnswerFoldoutStates(phrase);
+                InvalidateNodeLayout(phrase);
             }
 
             if (phraseObject.hasModifiedProperties)
@@ -2315,6 +2483,7 @@ namespace Dialogs.Graph.Editor
                 MarkDirty(phrase);
                 InvalidatePhraseDisplayName(phrase);
                 InvalidateGraphCaches();
+                InvalidateNodeLayout(phrase);
             }
         }
 
@@ -2385,13 +2554,41 @@ namespace Dialogs.Graph.Editor
                 return isExpanded;
             }
 
-            answerFoldoutStates[foldoutKey] = true;
-            return true;
+            answerFoldoutStates[foldoutKey] = false;
+            return false;
+        }
+
+        private bool CanRestoreExitAbility(DialogPhrase phrase)
+        {
+            if (phrase == null || currentGraph == null)
+            {
+                return false;
+            }
+
+            if (!restoreExitAbilityCache.TryGetValue(phrase, out bool canRestoreExitAbility))
+            {
+                canRestoreExitAbility = currentGraph.CanRestoreExitAbility(phrase);
+                restoreExitAbilityCache[phrase] = canRestoreExitAbility;
+            }
+
+            return canRestoreExitAbility;
         }
 
         private void SetAnswerFoldoutState(string foldoutKey, bool isExpanded)
         {
             answerFoldoutStates[foldoutKey] = isExpanded;
+        }
+
+        private void InvalidateNodeLayout(DialogPhrase phrase)
+        {
+            if (phrase == null)
+            {
+                return;
+            }
+
+            phrasesWithDirtyLayout.Add(phrase);
+            phrasesAwaitingRepaintAfterLayout.Remove(phrase);
+            Repaint();
         }
 
         private void ClearAnswerFoldoutStates(DialogPhrase phrase)
@@ -3218,7 +3415,7 @@ namespace Dialogs.Graph.Editor
             StringTableCollection selectedCollection = collections[selectedCollectionIndex - 1];
             CachedLocalizedEntryOptions entryOptions = GetCachedLocalizedEntryOptions(selectedCollection);
 
-            int selectedEntryIndex = GetSelectedEntryIndex(entryOptions.Entries, keyIdProperty.longValue, keyProperty.stringValue);
+            int selectedEntryIndex = GetSelectedEntryIndex(entryOptions, keyIdProperty.longValue, keyProperty.stringValue);
             string currentEntryLabel = selectedEntryIndex > 0 && selectedEntryIndex < entryOptions.Options.Length
                 ? entryOptions.Options[selectedEntryIndex]
                 : "<None>";
@@ -3269,13 +3466,11 @@ namespace Dialogs.Graph.Editor
 
             EditorGUILayout.LabelField("RU Preview", MiniBoldLabelStyle);
 
-            GUIStyle previewStyle = new GUIStyle(PreviewLabelStyle)
-            {
-                wordWrap = true
-            };
+            GUIStyle previewStyle = PreviewLabelStyle;
 
             float width = LocalizedPreviewWidth;
-            float height = Mathf.Max(LocalizedPreviewMinHeight, previewStyle.CalcHeight(new GUIContent(previewText), width));
+            localizedPreviewContent.text = previewText;
+            float height = Mathf.Max(LocalizedPreviewMinHeight, previewStyle.CalcHeight(localizedPreviewContent, width));
 
             EditorGUILayout.BeginVertical(
                 useLightTheme ? HelpBoxStyle : EditorStyles.helpBox,
@@ -3319,22 +3514,7 @@ namespace Dialogs.Graph.Editor
 
         private static StringTableCollection ResolveStringTableCollection(string serializedTableReference)
         {
-            if (string.IsNullOrWhiteSpace(serializedTableReference))
-            {
-                return null;
-            }
-
-            foreach (StringTableCollection collection in GetCachedStringTableCollections())
-            {
-                string guidReference = $"GUID:{collection.SharedData.TableCollectionNameGuid:N}";
-                if (string.Equals(serializedTableReference, guidReference, StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(serializedTableReference, collection.TableCollectionName, StringComparison.Ordinal))
-                {
-                    return collection;
-                }
-            }
-
-            return null;
+            return GraphEditorLocalizationCache.ResolveStringTableCollection(serializedTableReference);
         }
 
         private static SharedTableData.SharedTableEntry ResolveSharedTableEntry(
@@ -3366,31 +3546,12 @@ namespace Dialogs.Graph.Editor
 
         private static string GetLocalizedValue(StringTableCollection collection, long entryId, string localeCode)
         {
-            if (collection == null || entryId == 0 || string.IsNullOrWhiteSpace(localeCode))
-            {
-                return string.Empty;
-            }
-
-            foreach (StringTable table in collection.StringTables)
-            {
-                if (table == null || table.LocaleIdentifier.Code != localeCode)
-                {
-                    continue;
-                }
-
-                StringTableEntry entry = table.GetEntry(entryId);
-                if (entry != null && !string.IsNullOrWhiteSpace(entry.LocalizedValue))
-                {
-                    return entry.LocalizedValue;
-                }
-            }
-
-            return string.Empty;
+            return GraphEditorLocalizationCache.GetLocalizedValue(collection, entryId, localeCode);
         }
 
         private static System.Collections.ObjectModel.ReadOnlyCollection<StringTableCollection> GetCachedStringTableCollections()
         {
-            cachedStringTableCollections ??= LocalizationEditorSettings.GetStringTableCollections();
+            cachedStringTableCollections ??= GraphEditorLocalizationCache.GetStringTableCollections();
             return cachedStringTableCollections;
         }
 
@@ -3444,28 +3605,16 @@ namespace Dialogs.Graph.Editor
             return cachedOptions;
         }
 
-        private static int GetSelectedEntryIndex(IReadOnlyList<SharedTableData.SharedTableEntry> entries, long keyId, string keyName)
+        private static int GetSelectedEntryIndex(CachedLocalizedEntryOptions entryOptions, long keyId, string keyName)
         {
-            if (keyId != 0)
+            if (keyId != 0 && entryOptions.IndicesById.TryGetValue(keyId, out int indexById))
             {
-                for (int i = 0; i < entries.Count; i++)
-                {
-                    if (entries[i].Id == keyId)
-                    {
-                        return i + 1;
-                    }
-                }
+                return indexById;
             }
 
-            if (!string.IsNullOrEmpty(keyName))
+            if (!string.IsNullOrEmpty(keyName) && entryOptions.IndicesByKey.TryGetValue(keyName, out int indexByKey))
             {
-                for (int i = 0; i < entries.Count; i++)
-                {
-                    if (string.Equals(entries[i].Key, keyName, StringComparison.Ordinal))
-                    {
-                        return i + 1;
-                    }
-                }
+                return indexByKey;
             }
 
             return 0;
@@ -3973,7 +4122,7 @@ namespace Dialogs.Graph.Editor
             }
         }
 
-        private static void MarkDirty(UnityEngine.Object target)
+        private void MarkDirty(UnityEngine.Object target)
         {
             if (target == null)
             {
@@ -3981,48 +4130,7 @@ namespace Dialogs.Graph.Editor
             }
 
             EditorUtility.SetDirty(target);
-        }
-
-        private void DrawBackgroundGrid(Rect rect)
-        {
-            if (Event.current.type != EventType.Repaint)
-            {
-                return;
-            }
-
-            Color minorColor = MinorGridColor;
-            Color majorColor = MajorGridColor;
-
-            float gridSpacing = 20f * zoom;
-            float majorStep = gridSpacing * 5f;
-            Vector2 offset = new Vector2(panOffset.x % gridSpacing, panOffset.y % gridSpacing);
-
-            EditorGUI.DrawRect(rect, CanvasBackgroundColor);
-            Handles.BeginGUI();
-
-            Handles.color = minorColor;
-            for (float x = rect.xMin + offset.x; x < rect.xMax; x += gridSpacing)
-            {
-                Handles.DrawLine(new Vector3(x, rect.yMin, 0f), new Vector3(x, rect.yMax, 0f));
-            }
-
-            for (float y = rect.yMin + offset.y; y < rect.yMax; y += gridSpacing)
-            {
-                Handles.DrawLine(new Vector3(rect.xMin, y, 0f), new Vector3(rect.xMax, y, 0f));
-            }
-
-            Handles.color = majorColor;
-            for (float x = rect.xMin + offset.x; x < rect.xMax; x += majorStep)
-            {
-                Handles.DrawLine(new Vector3(x, rect.yMin, 0f), new Vector3(x, rect.yMax, 0f));
-            }
-
-            for (float y = rect.yMin + offset.y; y < rect.yMax; y += majorStep)
-            {
-                Handles.DrawLine(new Vector3(rect.xMin, y, 0f), new Vector3(rect.xMax, y, 0f));
-            }
-
-            Handles.EndGUI();
+            InvalidateGraphCaches();
         }
 
         private string GetThemeToggleLabel()
@@ -4063,7 +4171,7 @@ namespace Dialogs.Graph.Editor
 
         private void ApplyThemeEditorStyleTextOverrides()
         {
-            if (!useLightTheme)
+            if (!useLightTheme || Event.current.type != EventType.Repaint)
             {
                 return;
             }
@@ -4399,7 +4507,9 @@ namespace Dialogs.Graph.Editor
             Rect fieldRect = EditorGUI.PrefixLabel(totalRect, new GUIContent(label), LabelStyle);
             List<EditorStyleTextOverride> temporaryOverrides = null;
 
-            if (useLightTheme && property.propertyType == SerializedPropertyType.ObjectReference)
+            if (useLightTheme &&
+                Event.current.type == EventType.Repaint &&
+                property.propertyType == SerializedPropertyType.ObjectReference)
             {
                 temporaryOverrides = CreateTemporaryObjectFieldTextOverrides(Color.white);
             }

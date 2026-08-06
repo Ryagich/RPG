@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using EditorTools;
 using Quests.Editor;
 using Quests.MapTargets;
 using Quests.Graph.Model;
@@ -35,6 +36,12 @@ namespace Quests.Graph.Editor
         private string transitionsFolderPath;
         private readonly Dictionary<QuestTransition, Vector2> transitionAnchorPositions = new();
         private readonly Dictionary<QuestNode, Rect> nodeRects = new();
+        private readonly Dictionary<QuestNodeData, QuestNode> nodeDataToNodeLookup = new();
+        private readonly Dictionary<QuestTransition, CachedConnectionTangents> connectionTangentsCache = new();
+        private readonly List<Rect> connectionObstacleRects = new();
+        private readonly GUIContent localizedPreviewContent = new();
+        private readonly HashSet<QuestNode> graphNodeSet = new();
+        private readonly List<QuestNode> staleNodeRects = new();
         private readonly Dictionary<string, bool> transitionFoldoutStates = new();
         private static System.Collections.ObjectModel.ReadOnlyCollection<StringTableCollection> cachedStringTableCollections;
         private static string[] cachedStringTableOptions;
@@ -42,6 +49,8 @@ namespace Quests.Graph.Editor
 
         private bool isSelectingTargetNode;
         private bool isControlsPanelExpanded = true;
+        private bool graphStructureDirty = true;
+        private int connectionLayoutVersion;
         private QuestTransition pendingTransition;
         private QuestNode sourceNodeForSelection;
         private QuestNode activeConnectionNode;
@@ -354,6 +363,7 @@ namespace Quests.Graph.Editor
 
             EnsureGraphNodes();
             ClaimUnownedNodes();
+            graphStructureDirty = true;
         }
 
         private void CreateNewNode()
@@ -426,13 +436,19 @@ namespace Quests.Graph.Editor
 
         private void DrawGraphArea()
         {
-            CleanupGraph();
+            if (graphStructureDirty)
+            {
+                CleanupGraph();
+                graphStructureDirty = false;
+            }
+
+            SynchronizeNodeRects();
             transitionAnchorPositions.Clear();
-            nodeRects.Clear();
 
             Event currentEvent = Event.current;
             HandleZoom(currentEvent);
             HandlePan(currentEvent);
+            Rect visibleGraphRect = GraphEditorCanvasUtility.GetVisibleGraphRect(position, panOffset, zoom);
 
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.ExpandHeight(true));
             GUI.EndClip();
@@ -445,7 +461,11 @@ namespace Quests.Graph.Editor
 
             if (currentEvent.type == EventType.Repaint)
             {
-                DrawBackgroundGrid(new Rect(0f, 0f, WorkspaceWidth, WorkspaceHeight));
+                GraphEditorCanvasUtility.DrawBackgroundGrid(
+                    visibleGraphRect,
+                    CanvasBackgroundColor,
+                    MinorGridColor,
+                    MajorGridColor);
             }
 
             BeginWindows();
@@ -453,15 +473,28 @@ namespace Quests.Graph.Editor
             for (int i = 0; i < currentGraph.Nodes.Count; i++)
             {
                 QuestNode node = currentGraph.Nodes[i];
-                Rect rect = new Rect(node.Position, NodeSize);
+                if (node == null || !nodeRects.TryGetValue(node, out Rect rect))
+                {
+                    continue;
+                }
+
+                if (!GraphEditorCanvasUtility.IsAtLeastPartiallyVisible(rect, visibleGraphRect))
+                {
+                    continue;
+                }
 
                 Color previousColor = GUI.color;
                 GUI.color = GetNodeTint(node);
+                Rect previousRect = rect;
                 rect = GUILayout.Window(i, rect, _ => DrawNodeWindow(node), GetNodeTitle(node), NodeWindowStyle);
                 GUI.color = previousColor;
 
                 nodeRects[node] = rect;
                 node.Position = rect.position;
+                if (!RectApproximatelyEqual(previousRect, rect))
+                {
+                    InvalidateConnectionRouteCache();
+                }
             }
 
             EndWindows();
@@ -469,14 +502,75 @@ namespace Quests.Graph.Editor
 
             if (currentEvent.type == EventType.Repaint)
             {
-                DrawNodeMarkers();
+                DrawNodeMarkers(visibleGraphRect);
                 DrawConnections();
             }
 
-            DrawTargetSelectionOverlay();
+            DrawTargetSelectionOverlay(visibleGraphRect);
 
             GUI.matrix = oldMatrix;
             EditorGUILayout.EndScrollView();
+        }
+
+        private void SynchronizeNodeRects()
+        {
+            graphNodeSet.Clear();
+            staleNodeRects.Clear();
+            nodeDataToNodeLookup.Clear();
+            bool layoutChanged = false;
+
+            foreach (QuestNode node in currentGraph.Nodes)
+            {
+                if (node == null)
+                {
+                    continue;
+                }
+
+                graphNodeSet.Add(node);
+                if (node.NodeData != null)
+                {
+                    nodeDataToNodeLookup[node.NodeData] = node;
+                }
+
+                if (!nodeRects.TryGetValue(node, out Rect rect))
+                {
+                    nodeRects[node] = new Rect(node.Position, NodeSize);
+                    layoutChanged = true;
+                    continue;
+                }
+
+                if (rect.position != node.Position)
+                {
+                    rect.position = node.Position;
+                    nodeRects[node] = rect;
+                    layoutChanged = true;
+                }
+            }
+
+            foreach (QuestNode node in nodeRects.Keys)
+            {
+                if (!graphNodeSet.Contains(node))
+                {
+                    staleNodeRects.Add(node);
+                }
+            }
+
+            foreach (QuestNode node in staleNodeRects)
+            {
+                nodeRects.Remove(node);
+                layoutChanged = true;
+            }
+
+            if (layoutChanged)
+            {
+                InvalidateConnectionRouteCache();
+            }
+        }
+
+        private void InvalidateConnectionRouteCache()
+        {
+            connectionTangentsCache.Clear();
+            connectionLayoutVersion++;
         }
 
         private void CleanupGraph()
@@ -543,16 +637,22 @@ namespace Quests.Graph.Editor
             Repaint();
         }
 
-        private void DrawNodeMarkers()
+        private void DrawNodeMarkers(Rect visibleGraphRect)
         {
-            foreach (QuestNode node in currentGraph.Nodes)
+            foreach (KeyValuePair<QuestNode, Rect> pair in nodeRects)
             {
+                QuestNode node = pair.Key;
                 if (node.NodeData == null)
                 {
                     continue;
                 }
 
-                Rect badgeRect = new Rect(node.Position.x + 6f, node.Position.y + 6f, 18f, 18f);
+                if (!GraphEditorCanvasUtility.IsAtLeastPartiallyVisible(pair.Value, visibleGraphRect))
+                {
+                    continue;
+                }
+
+                Rect badgeRect = new Rect(pair.Value.x + 6f, pair.Value.y + 6f, 18f, 18f);
                 Color previous = GUI.backgroundColor;
 
                 if (IsStartNode(node))
@@ -592,8 +692,7 @@ namespace Quests.Graph.Editor
                         continue;
                     }
 
-                    QuestNode targetNode = currentGraph.Nodes.FirstOrDefault(n => n.NodeData == transition.TargetNode);
-                    if (targetNode == null)
+                    if (!nodeDataToNodeLookup.TryGetValue(transition.TargetNode, out QuestNode targetNode))
                     {
                         continue;
                     }
@@ -609,15 +708,14 @@ namespace Quests.Graph.Editor
                     Vector2 endPos = GetNearestSideCenter(targetRect, startPos);
 
                     Handles.color = GetConnectionColor(node, targetNode);
-                    (Vector2 startTangent, Vector2 endTangent) = ResolveConnectionTangents(
+                    (Vector2 startTangent, Vector2 endTangent) = GetOrBuildConnectionTangents(
+                        transition,
                         startPos,
                         endPos,
                         sourceRect,
                         targetRect,
-                        nodeRects
-                            .Where(item => item.Key != node && item.Key != targetNode)
-                            .Select(item => ExpandRect(item.Value, 8f))
-                            .ToList());
+                        node,
+                        targetNode);
 
                     Handles.DrawBezier(startPos, endPos, startTangent, endTangent, Handles.color, null, 4.5f);
                     DrawConnectionArrow(endPos, endPos - endTangent);
@@ -625,6 +723,50 @@ namespace Quests.Graph.Editor
             }
 
             Handles.EndGUI();
+        }
+
+        private (Vector2 StartTangent, Vector2 EndTangent) GetOrBuildConnectionTangents(
+            QuestTransition transition,
+            Vector2 startPos,
+            Vector2 endPos,
+            Rect sourceRect,
+            Rect targetRect,
+            QuestNode sourceNode,
+            QuestNode targetNode)
+        {
+            if (connectionTangentsCache.TryGetValue(transition, out CachedConnectionTangents cachedTangents) &&
+                cachedTangents.LayoutVersion == connectionLayoutVersion &&
+                ApproximatelyEqual(cachedTangents.StartPos, startPos) &&
+                RectApproximatelyEqual(cachedTangents.SourceRect, sourceRect) &&
+                RectApproximatelyEqual(cachedTangents.TargetRect, targetRect))
+            {
+                return (cachedTangents.StartTangent, cachedTangents.EndTangent);
+            }
+
+            connectionObstacleRects.Clear();
+            foreach (KeyValuePair<QuestNode, Rect> pair in nodeRects)
+            {
+                if (pair.Key != sourceNode && pair.Key != targetNode)
+                {
+                    connectionObstacleRects.Add(ExpandRect(pair.Value, 8f));
+                }
+            }
+
+            (Vector2 startTangent, Vector2 endTangent) = ResolveConnectionTangents(
+                startPos,
+                endPos,
+                sourceRect,
+                targetRect,
+                connectionObstacleRects);
+            connectionTangentsCache[transition] = new CachedConnectionTangents(
+                connectionLayoutVersion,
+                startPos,
+                sourceRect,
+                targetRect,
+                startTangent,
+                endTangent);
+
+            return (startTangent, endTangent);
         }
 
         private void HandleConnectionHighlightSelection(Event currentEvent)
@@ -665,7 +807,7 @@ namespace Quests.Graph.Editor
             return PrimaryConnectionColor;
         }
 
-        private void DrawTargetSelectionOverlay()
+        private void DrawTargetSelectionOverlay(Rect visibleGraphRect)
         {
             if (!isSelectingTargetNode || pendingTransition == null)
             {
@@ -682,7 +824,8 @@ namespace Quests.Graph.Editor
                     continue;
                 }
 
-                if (!nodeRects.TryGetValue(node, out Rect rect))
+                if (!nodeRects.TryGetValue(node, out Rect rect) ||
+                    !GraphEditorCanvasUtility.IsAtLeastPartiallyVisible(rect, visibleGraphRect))
                 {
                     continue;
                 }
@@ -1917,7 +2060,7 @@ namespace Quests.Graph.Editor
             }
         }
 
-        private static void MarkDirty(UnityEngine.Object target)
+        private void MarkDirty(UnityEngine.Object target)
         {
             if (target == null)
             {
@@ -1925,6 +2068,7 @@ namespace Quests.Graph.Editor
             }
 
             EditorUtility.SetDirty(target);
+            InvalidateConnectionRouteCache();
         }
 
         private Vector2 GetGraphMousePosition(Vector2 mousePosition)
@@ -2274,6 +2418,14 @@ namespace Quests.Graph.Editor
             return Mathf.Approximately(a.x, b.x) && Mathf.Approximately(a.y, b.y);
         }
 
+        private static bool RectApproximatelyEqual(Rect a, Rect b)
+        {
+            return Mathf.Approximately(a.x, b.x) &&
+                   Mathf.Approximately(a.y, b.y) &&
+                   Mathf.Approximately(a.width, b.width) &&
+                   Mathf.Approximately(a.height, b.height);
+        }
+
         private float DrawLocalizedFieldArea(float x, float y, float width, SerializedProperty property, string label)
         {
             float areaHeight = GetLocalizedFieldAreaHeight(property);
@@ -2283,7 +2435,7 @@ namespace Quests.Graph.Editor
             return y + areaHeight + 6f;
         }
 
-        private static float GetLocalizedFieldAreaHeight(SerializedProperty localizedStringProperty)
+        private float GetLocalizedFieldAreaHeight(SerializedProperty localizedStringProperty)
         {
             const float baseHeight = 78f;
 
@@ -2293,14 +2445,12 @@ namespace Quests.Graph.Editor
                 return baseHeight;
             }
 
-            GUIStyle previewStyle = new GUIStyle(GUI.skin.label)
-            {
-                wordWrap = true
-            };
+            GUIStyle previewStyle = PreviewLabelStyle;
+            localizedPreviewContent.text = previewText;
 
             float previewHeight = Mathf.Max(
                 LocalizedPreviewMinHeight,
-                previewStyle.CalcHeight(new GUIContent(previewText), LocalizedPreviewWidth));
+                previewStyle.CalcHeight(localizedPreviewContent, LocalizedPreviewWidth));
 
             return baseHeight + 24f + previewHeight;
         }
@@ -2315,6 +2465,8 @@ namespace Quests.Graph.Editor
         private void HandleProjectChanged()
         {
             InvalidateStaticEditorCaches();
+            InvalidateConnectionRouteCache();
+            graphStructureDirty = true;
             Repaint();
         }
 
@@ -2370,7 +2522,7 @@ namespace Quests.Graph.Editor
             StringTableCollection selectedCollection = collections[selectedCollectionIndex - 1];
             CachedLocalizedEntryOptions entryOptions = GetCachedLocalizedEntryOptions(selectedCollection);
 
-            int selectedEntryIndex = GetSelectedEntryIndex(entryOptions.Entries, keyIdProperty.longValue, keyProperty.stringValue);
+            int selectedEntryIndex = GetSelectedEntryIndex(entryOptions, keyIdProperty.longValue, keyProperty.stringValue);
             string currentEntryLabel = selectedEntryIndex > 0 && selectedEntryIndex < entryOptions.Options.Length
                 ? entryOptions.Options[selectedEntryIndex]
                 : "<None>";
@@ -2435,28 +2587,16 @@ namespace Quests.Graph.Editor
             return 0;
         }
 
-        private static int GetSelectedEntryIndex(IReadOnlyList<SharedTableData.SharedTableEntry> entries, long keyId, string keyName)
+        private static int GetSelectedEntryIndex(CachedLocalizedEntryOptions entryOptions, long keyId, string keyName)
         {
-            if (keyId != 0)
+            if (keyId != 0 && entryOptions.IndicesById.TryGetValue(keyId, out int indexById))
             {
-                for (int i = 0; i < entries.Count; i++)
-                {
-                    if (entries[i].Id == keyId)
-                    {
-                        return i + 1;
-                    }
-                }
+                return indexById;
             }
 
-            if (!string.IsNullOrEmpty(keyName))
+            if (!string.IsNullOrEmpty(keyName) && entryOptions.IndicesByKey.TryGetValue(keyName, out int indexByKey))
             {
-                for (int i = 0; i < entries.Count; i++)
-                {
-                    if (string.Equals(entries[i].Key, keyName, System.StringComparison.Ordinal))
-                    {
-                        return i + 1;
-                    }
-                }
+                return indexByKey;
             }
 
             return 0;
@@ -2730,13 +2870,11 @@ namespace Quests.Graph.Editor
 
             EditorGUILayout.LabelField("RU Preview", MiniBoldLabelStyle);
 
-            GUIStyle previewStyle = new GUIStyle(PreviewLabelStyle)
-            {
-                wordWrap = true
-            };
+            GUIStyle previewStyle = PreviewLabelStyle;
 
             float width = LocalizedPreviewWidth;
-            float height = Mathf.Max(LocalizedPreviewMinHeight, previewStyle.CalcHeight(new GUIContent(previewText), width));
+            localizedPreviewContent.text = previewText;
+            float height = Mathf.Max(LocalizedPreviewMinHeight, previewStyle.CalcHeight(localizedPreviewContent, width));
 
             EditorGUILayout.BeginVertical(
                 useLightTheme ? HelpBoxStyle : EditorStyles.helpBox,
@@ -2780,22 +2918,7 @@ namespace Quests.Graph.Editor
 
         private static StringTableCollection ResolveStringTableCollection(string serializedTableReference)
         {
-            if (string.IsNullOrWhiteSpace(serializedTableReference))
-            {
-                return null;
-            }
-
-            foreach (StringTableCollection collection in GetCachedStringTableCollections())
-            {
-                string guidReference = $"GUID:{collection.SharedData.TableCollectionNameGuid:N}";
-                if (string.Equals(serializedTableReference, guidReference, System.StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(serializedTableReference, collection.TableCollectionName, System.StringComparison.Ordinal))
-                {
-                    return collection;
-                }
-            }
-
-            return null;
+            return GraphEditorLocalizationCache.ResolveStringTableCollection(serializedTableReference);
         }
 
         private static SharedTableData.SharedTableEntry ResolveSharedTableEntry(
@@ -2827,31 +2950,12 @@ namespace Quests.Graph.Editor
 
         private static string GetLocalizedValue(StringTableCollection collection, long entryId, string localeCode)
         {
-            if (collection == null || entryId == 0 || string.IsNullOrWhiteSpace(localeCode))
-            {
-                return string.Empty;
-            }
-
-            foreach (StringTable table in collection.StringTables)
-            {
-                if (table == null || table.LocaleIdentifier.Code != localeCode)
-                {
-                    continue;
-                }
-
-                StringTableEntry entry = table.GetEntry(entryId);
-                if (entry != null && !string.IsNullOrWhiteSpace(entry.LocalizedValue))
-                {
-                    return entry.LocalizedValue;
-                }
-            }
-
-            return string.Empty;
+            return GraphEditorLocalizationCache.GetLocalizedValue(collection, entryId, localeCode);
         }
 
         private static System.Collections.ObjectModel.ReadOnlyCollection<StringTableCollection> GetCachedStringTableCollections()
         {
-            cachedStringTableCollections ??= LocalizationEditorSettings.GetStringTableCollections();
+            cachedStringTableCollections ??= GraphEditorLocalizationCache.GetStringTableCollections();
             return cachedStringTableCollections;
         }
 
@@ -2905,6 +3009,32 @@ namespace Quests.Graph.Editor
             return cachedOptions;
         }
 
+        private readonly struct CachedConnectionTangents
+        {
+            public CachedConnectionTangents(
+                int layoutVersion,
+                Vector2 startPos,
+                Rect sourceRect,
+                Rect targetRect,
+                Vector2 startTangent,
+                Vector2 endTangent)
+            {
+                LayoutVersion = layoutVersion;
+                StartPos = startPos;
+                SourceRect = sourceRect;
+                TargetRect = targetRect;
+                StartTangent = startTangent;
+                EndTangent = endTangent;
+            }
+
+            public int LayoutVersion { get; }
+            public Vector2 StartPos { get; }
+            public Rect SourceRect { get; }
+            public Rect TargetRect { get; }
+            public Vector2 StartTangent { get; }
+            public Vector2 EndTangent { get; }
+        }
+
         private readonly struct CachedLocalizedEntryOptions
         {
             public static CachedLocalizedEntryOptions Empty { get; } =
@@ -2914,10 +3044,24 @@ namespace Quests.Graph.Editor
             {
                 Entries = entries;
                 Options = options;
+                IndicesById = new Dictionary<long, int>(entries.Count);
+                IndicesByKey = new Dictionary<string, int>(entries.Count, System.StringComparer.Ordinal);
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    SharedTableData.SharedTableEntry entry = entries[i];
+                    int optionIndex = i + 1;
+                    IndicesById[entry.Id] = optionIndex;
+                    if (!string.IsNullOrEmpty(entry.Key))
+                    {
+                        IndicesByKey[entry.Key] = optionIndex;
+                    }
+                }
             }
 
             public IReadOnlyList<SharedTableData.SharedTableEntry> Entries { get; }
             public string[] Options { get; }
+            public Dictionary<long, int> IndicesById { get; }
+            public Dictionary<string, int> IndicesByKey { get; }
         }
 
         private sealed class LocalizedEntrySelectorWindow : EditorWindow
@@ -2940,6 +3084,10 @@ namespace Quests.Graph.Editor
             private string searchText = string.Empty;
             private bool focusSearchField = true;
             [System.NonSerialized] private SearchField searchField;
+            [System.NonSerialized] private readonly List<int> filteredEntryIndices = new();
+            [System.NonSerialized] private string appliedSearchText;
+
+            private const float EntryRowHeight = 20f;
 
             private void Initialize(
                 UnityEngine.Object targetObject,
@@ -2959,6 +3107,7 @@ namespace Quests.Graph.Editor
                 searchText = string.Empty;
                 scrollPosition = Vector2.zero;
                 EnsureSearchField();
+                RebuildFilteredEntries();
             }
 
             private Vector2 InitialSize
@@ -2973,6 +3122,7 @@ namespace Quests.Graph.Editor
             private void OnEnable()
             {
                 EnsureSearchField();
+                RebuildFilteredEntries();
             }
 
             private void OnGUI()
@@ -2986,7 +3136,15 @@ namespace Quests.Graph.Editor
                 }
 
                 EditorGUILayout.LabelField("Select Entry", EditorStyles.boldLabel);
-                searchText = searchField.OnGUI(EditorGUILayout.GetControlRect(), searchText);
+                string updatedSearchText = searchField.OnGUI(EditorGUILayout.GetControlRect(), searchText);
+                if (!string.Equals(searchText, updatedSearchText, System.StringComparison.Ordinal))
+                {
+                    searchText = updatedSearchText;
+                    scrollPosition = Vector2.zero;
+                    RebuildFilteredEntries();
+                }
+
+                EnsureFilteredEntries();
                 EditorGUILayout.Space(4f);
 
                 if (GUILayout.Button("<None>", selectedIndex < 0 ? EditorStyles.miniButtonMid : EditorStyles.miniButton))
@@ -2997,33 +3155,13 @@ namespace Quests.Graph.Editor
                 }
 
                 EditorGUILayout.Space(4f);
-                scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
-
-                bool hasVisibleEntries = false;
-                for (int i = 0; i < entries.Count; i++)
-                {
-                    EntryOption entry = entries[i];
-                    if (!MatchesSearch(entry, searchText))
-                    {
-                        continue;
-                    }
-
-                    hasVisibleEntries = true;
-                    GUIStyle style = i == selectedIndex ? EditorStyles.miniButtonMid : EditorStyles.miniButton;
-                    if (GUILayout.Button(entry.Key, style))
-                    {
-                        ApplyEntrySelectionToObject(targetObject, keyIdPropertyPath, keyPropertyPath, entries, i + 1);
-                        Close();
-                        GUIUtility.ExitGUI();
-                    }
-                }
-
-                if (!hasVisibleEntries)
+                if (filteredEntryIndices.Count == 0)
                 {
                     EditorGUILayout.HelpBox("No entries found.", MessageType.Info);
+                    return;
                 }
 
-                EditorGUILayout.EndScrollView();
+                DrawVirtualizedEntryList();
             }
 
             public static void Show(
@@ -3063,6 +3201,61 @@ namespace Quests.Graph.Editor
                 searchField ??= new SearchField();
             }
 
+            private void EnsureFilteredEntries()
+            {
+                if (!string.Equals(appliedSearchText, searchText, System.StringComparison.Ordinal))
+                {
+                    RebuildFilteredEntries();
+                }
+            }
+
+            private void RebuildFilteredEntries()
+            {
+                filteredEntryIndices.Clear();
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    if (MatchesSearch(entries[i], searchText))
+                    {
+                        filteredEntryIndices.Add(i);
+                    }
+                }
+
+                appliedSearchText = searchText;
+            }
+
+            private void DrawVirtualizedEntryList()
+            {
+                Rect scrollRect = GUILayoutUtility.GetRect(
+                    1f,
+                    10000f,
+                    GUILayout.ExpandWidth(true),
+                    GUILayout.ExpandHeight(true),
+                    GUILayout.MinHeight(64f));
+                float contentWidth = Mathf.Max(1f, scrollRect.width - GUI.skin.verticalScrollbar.fixedWidth);
+                float contentHeight = Mathf.Max(scrollRect.height, filteredEntryIndices.Count * EntryRowHeight);
+                Rect contentRect = new Rect(0f, 0f, contentWidth, contentHeight);
+                scrollPosition = GUI.BeginScrollView(scrollRect, scrollPosition, contentRect);
+
+                int firstVisibleIndex = Mathf.Clamp(Mathf.FloorToInt(scrollPosition.y / EntryRowHeight), 0, filteredEntryIndices.Count - 1);
+                int visibleCount = Mathf.CeilToInt(scrollRect.height / EntryRowHeight) + 2;
+                int lastVisibleIndex = Mathf.Min(filteredEntryIndices.Count, firstVisibleIndex + visibleCount);
+                for (int filteredIndex = firstVisibleIndex; filteredIndex < lastVisibleIndex; filteredIndex++)
+                {
+                    int entryIndex = filteredEntryIndices[filteredIndex];
+                    EntryOption entry = entries[entryIndex];
+                    Rect entryRect = new Rect(0f, filteredIndex * EntryRowHeight, contentWidth, EntryRowHeight);
+                    GUIStyle style = entryIndex == selectedIndex ? EditorStyles.miniButtonMid : EditorStyles.miniButton;
+                    if (GUI.Button(entryRect, entry.Key, style))
+                    {
+                        ApplyEntrySelectionToObject(targetObject, keyIdPropertyPath, keyPropertyPath, entries, entryIndex + 1);
+                        Close();
+                        GUIUtility.ExitGUI();
+                    }
+                }
+
+                GUI.EndScrollView();
+            }
+
             private static bool MatchesSearch(EntryOption entry, string searchText)
             {
                 if (string.IsNullOrWhiteSpace(searchText))
@@ -3087,18 +3280,6 @@ namespace Quests.Graph.Editor
 
                 return new Rect(screenPoint.x + 12f, screenPoint.y + 12f, 1f, 1f);
             }
-        }
-
-        private void DrawBackgroundGrid(Rect rect)
-        {
-            Handles.BeginGUI();
-
-            EditorGUI.DrawRect(rect, CanvasBackgroundColor);
-
-            DrawGridLines(rect, 20f, MinorGridColor);
-            DrawGridLines(rect, 100f, MajorGridColor);
-
-            Handles.EndGUI();
         }
 
         private string GetThemeToggleLabel()
@@ -3139,7 +3320,7 @@ namespace Quests.Graph.Editor
 
         private void ApplyThemeEditorStyleTextOverrides()
         {
-            if (!useLightTheme)
+            if (!useLightTheme || Event.current.type != EventType.Repaint)
             {
                 return;
             }
@@ -3700,19 +3881,5 @@ namespace Quests.Graph.Editor
                 : new Color(0f, 0.75f, 0.20f, isHovered ? 0.45f : 0.25f);
         }
 
-        private void DrawGridLines(Rect rect, float spacing, Color color)
-        {
-            Handles.color = color;
-
-            for (float x = rect.xMin; x <= rect.xMax; x += spacing)
-            {
-                Handles.DrawLine(new Vector3(x, rect.yMin), new Vector3(x, rect.yMax));
-            }
-
-            for (float y = rect.yMin; y <= rect.yMax; y += spacing)
-            {
-                Handles.DrawLine(new Vector3(rect.xMin, y), new Vector3(rect.xMax, y));
-            }
-        }
     }
 }

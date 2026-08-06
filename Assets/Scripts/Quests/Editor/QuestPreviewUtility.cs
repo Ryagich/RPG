@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using Quests.Graph;
 using Quests.Graph.Model;
+using EditorTools;
 using UnityEditor;
 using UnityEditor.Localization;
 using UnityEngine;
@@ -10,6 +12,13 @@ namespace Quests.Editor
     public static class QuestPreviewUtility
     {
         private const string PreferredPreviewLocale = "ru";
+        private static readonly Dictionary<QuestNodeData, SerializedObject> serializedNodeObjects = new();
+        private static readonly Dictionary<QuestGraph, SerializedObject> serializedGraphObjects = new();
+
+        static QuestPreviewUtility()
+        {
+            EditorApplication.projectChanged += InvalidateCaches;
+        }
 
         public static string GetNodeEditorTitle(QuestNodeData nodeData)
         {
@@ -25,7 +34,7 @@ namespace Quests.Editor
                 return "Quest Node";
             }
 
-            SerializedObject nodeObject = new SerializedObject(nodeData);
+            SerializedObject nodeObject = GetSerializedNodeObject(nodeData);
             SerializedProperty localizedNameProperty = nodeObject.FindProperty("localizedName");
             return GetLocalizedStringDisplayName(localizedNameProperty, nodeData.name);
         }
@@ -37,7 +46,7 @@ namespace Quests.Editor
                 return string.Empty;
             }
 
-            SerializedObject nodeObject = new SerializedObject(nodeData);
+            SerializedObject nodeObject = GetSerializedNodeObject(nodeData);
             SerializedProperty localizedDescriptionProperty = nodeObject.FindProperty("localizedDescription");
             return GetLocalizedStringPreviewValue(localizedDescriptionProperty);
         }
@@ -49,7 +58,7 @@ namespace Quests.Editor
                 return "Quest";
             }
 
-            SerializedObject graphObject = new SerializedObject(questGraph);
+            SerializedObject graphObject = GetSerializedGraphObject(questGraph);
             SerializedProperty titleProperty = graphObject.FindProperty("title");
             return GetLocalizedStringDisplayName(titleProperty, questGraph.name);
         }
@@ -61,7 +70,7 @@ namespace Quests.Editor
                 return string.Empty;
             }
 
-            SerializedObject graphObject = new SerializedObject(questGraph);
+            SerializedObject graphObject = GetSerializedGraphObject(questGraph);
             SerializedProperty descriptionProperty = graphObject.FindProperty("description");
             return GetLocalizedStringDisplayName(descriptionProperty, questGraph.name);
         }
@@ -100,10 +109,7 @@ namespace Quests.Editor
                 return;
             }
 
-            QuestNode ownerNode = questGraph.Nodes.Find(node =>
-                node?.NodeData != null &&
-                node.NodeData.Transitions != null &&
-                node.NodeData.Transitions.Contains(transition));
+            QuestNode ownerNode = FindTransitionOwner(questGraph, transition);
 
             string sourceName = ownerNode?.NodeData != null
                 ? GetNodeEditorTitle(ownerNode.NodeData)
@@ -202,22 +208,7 @@ namespace Quests.Editor
 
         private static StringTableCollection ResolveCollection(string serializedTableReference)
         {
-            if (string.IsNullOrWhiteSpace(serializedTableReference))
-            {
-                return null;
-            }
-
-            foreach (StringTableCollection collection in LocalizationEditorSettings.GetStringTableCollections())
-            {
-                string guidReference = $"GUID:{collection.SharedData.TableCollectionNameGuid:N}";
-                if (string.Equals(serializedTableReference, guidReference, System.StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(serializedTableReference, collection.TableCollectionName, System.StringComparison.Ordinal))
-                {
-                    return collection;
-                }
-            }
-
-            return null;
+            return GraphEditorLocalizationCache.ResolveStringTableCollection(serializedTableReference);
         }
 
         private static SharedTableData.SharedTableEntry ResolveEntry(
@@ -249,26 +240,55 @@ namespace Quests.Editor
 
         private static string GetLocalizedValue(StringTableCollection collection, long entryId, string localeCode)
         {
-            if (collection == null || entryId == 0 || string.IsNullOrWhiteSpace(localeCode))
+            return GraphEditorLocalizationCache.GetLocalizedValue(collection, entryId, localeCode);
+        }
+
+        private static SerializedObject GetSerializedNodeObject(QuestNodeData nodeData)
+        {
+            if (!serializedNodeObjects.TryGetValue(nodeData, out SerializedObject nodeObject))
             {
-                return string.Empty;
+                nodeObject = new SerializedObject(nodeData);
+                serializedNodeObjects[nodeData] = nodeObject;
             }
 
-            foreach (StringTable table in collection.StringTables)
-            {
-                if (table == null || table.LocaleIdentifier.Code != localeCode)
-                {
-                    continue;
-                }
+            nodeObject.Update();
+            return nodeObject;
+        }
 
-                StringTableEntry entry = table.GetEntry(entryId);
-                if (entry != null && !string.IsNullOrWhiteSpace(entry.LocalizedValue))
+        private static SerializedObject GetSerializedGraphObject(QuestGraph questGraph)
+        {
+            if (!serializedGraphObjects.TryGetValue(questGraph, out SerializedObject graphObject))
+            {
+                graphObject = new SerializedObject(questGraph);
+                serializedGraphObjects[questGraph] = graphObject;
+            }
+
+            graphObject.Update();
+            return graphObject;
+        }
+
+        private static QuestNode FindTransitionOwner(QuestGraph questGraph, QuestTransition transition)
+        {
+            if (questGraph?.Nodes == null)
+            {
+                return null;
+            }
+
+            foreach (QuestNode node in questGraph.Nodes)
+            {
+                if (node?.NodeData?.Transitions != null && node.NodeData.Transitions.Contains(transition))
                 {
-                    return entry.LocalizedValue;
+                    return node;
                 }
             }
 
-            return string.Empty;
+            return null;
+        }
+
+        private static void InvalidateCaches()
+        {
+            serializedNodeObjects.Clear();
+            serializedGraphObjects.Clear();
         }
 
         private static void DrawPreviewCard(string header, Sprite sprite, string title, string description)
