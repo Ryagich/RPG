@@ -8,6 +8,7 @@ using Inventory.Inventories;
 using MessagePipe;
 using Messages;
 using Money;
+using VContainer;
 using VContainer.Unity;
 
 namespace Container.Dialogue
@@ -32,8 +33,8 @@ namespace Container.Dialogue
                 MoneyStorage moneyStorage,
                 DialogueContext dialogueContext,
                 IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
-                DialogGraph dialog = null,
-                FactionConfig faction = null
+                IObjectResolver resolver,
+                DialogGraph dialog = null
             )
         {
             this.interactable = interactable;
@@ -41,7 +42,7 @@ namespace Container.Dialogue
             this.dialog = dialog;
             this.inventory = inventory;
             this.moneyStorage = moneyStorage;
-            this.faction = faction;
+            faction = resolver.TryResolve<FactionConfig>(out var resolvedFaction) ? resolvedFaction : null;
             this.dialogueContext = dialogueContext;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
         }

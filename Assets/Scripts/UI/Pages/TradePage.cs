@@ -567,7 +567,6 @@ namespace UI.Pages
             InventoryHandController inventoryHandController,
             MoneyStorage playerMoneyStorage,
             Character.CharacterInfo playerCharacterInfo,
-            FactionConfig playerFaction,
             DialogueContext dialogueContext,
             StatsController statsController,
             Canvas canvas,
@@ -585,7 +584,7 @@ namespace UI.Pages
             this.inventoryHandController = inventoryHandController;
             this.playerMoneyStorage = playerMoneyStorage;
             this.playerCharacterInfo = playerCharacterInfo;
-            this.playerFaction = playerFaction;
+            playerFaction = resolver.TryResolve<FactionConfig>(out var resolvedFaction) ? resolvedFaction : null;
             this.dialogueContext = dialogueContext;
             this.statsController = statsController;
             this.canvas = canvas;

@@ -122,7 +122,6 @@ namespace UI.Pages
             InventoryHandController inventoryHandController,
             MoneyStorage playerMoneyStorage,
             Character.CharacterInfo playerCharacterInfo,
-            FactionConfig playerFaction,
             LootingContext lootingContext,
             StatsController statsController,
             IObjectResolver resolver,
@@ -138,7 +137,7 @@ namespace UI.Pages
             this.playerInventory = playerInventory;
             this.inventoryHandController = inventoryHandController;
             this.playerCharacterInfo = playerCharacterInfo;
-            this.playerFaction = playerFaction;
+            playerFaction = resolver.TryResolve<FactionConfig>(out var resolvedFaction) ? resolvedFaction : null;
             this.playerMoneyStorage = playerMoneyStorage;
             this.lootingContext = lootingContext;
             this.statsController = statsController;

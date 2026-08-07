@@ -9,6 +9,7 @@ using Inventory.Looting;
 using MessagePipe;
 using Messages;
 using Money;
+using VContainer;
 using VContainer.Unity;
 
 namespace NPC
@@ -37,9 +38,9 @@ namespace NPC
             LootingContext lootingContext,
             CorpseLootController corpseLootController,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
+            IObjectResolver resolver,
             CharacterInfo characterInfo = null,
-            DialogGraph dialog = null,
-            FactionConfig faction = null)
+            DialogGraph dialog = null)
         {
             this.interactable = interactable;
             this.dialogueController = dialogueController;
@@ -47,7 +48,7 @@ namespace NPC
             this.dialog = dialog;
             this.inventory = inventory;
             this.moneyStorage = moneyStorage;
-            this.faction = faction;
+            faction = resolver.TryResolve<FactionConfig>(out var resolvedFaction) ? resolvedFaction : null;
             this.dialogueContext = dialogueContext;
             this.lootingContext = lootingContext;
             this.corpseLootController = corpseLootController;

@@ -4,6 +4,7 @@ using GameModes;
 using Factions;
 using MessagePipe;
 using Messages;
+using VContainer;
 using VContainer.Unity;
 
 namespace Inventory.Looting
@@ -23,13 +24,13 @@ namespace Inventory.Looting
             CorpseLootController corpseLootController,
             LootingContext lootingContext,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
-            CharacterInfo characterInfo = null,
-            FactionConfig faction = null)
+            IObjectResolver resolver,
+            CharacterInfo characterInfo = null)
         {
             this.interactable = interactable;
             this.corpseLootController = corpseLootController;
             this.characterInfo = characterInfo;
-            this.faction = faction;
+            faction = resolver.TryResolve<FactionConfig>(out var resolvedFaction) ? resolvedFaction : null;
             this.lootingContext = lootingContext;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
         }

@@ -38,9 +38,9 @@ namespace NPC
             DialogueContext dialogueContext,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber,
+            IObjectResolver resolver,
             CharacterInfo characterInfo = null,
-            DialogGraph dialog = null,
-            FactionConfig faction = null)
+            DialogGraph dialog = null)
         {
             this.interactable = interactable;
             this.availability = availability;
@@ -49,7 +49,7 @@ namespace NPC
             this.dialog = dialog;
             this.inventory = inventory;
             this.moneyStorage = moneyStorage;
-            this.faction = faction;
+            faction = resolver.TryResolve<FactionConfig>(out var resolvedFaction) ? resolvedFaction : null;
             this.dialogueContext = dialogueContext;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
             this.gameModeChangedSubscriber = gameModeChangedSubscriber;

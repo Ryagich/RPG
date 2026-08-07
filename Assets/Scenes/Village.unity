@@ -65165,8 +65165,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1386644273}
   - {fileID: 2046846329}
+  - {fileID: 1386644273}
   - {fileID: 809415762}
   - {fileID: 1207266196}
   - {fileID: 1303929981}
@@ -95068,7 +95068,7 @@ PrefabInstance:
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: faction
       value: 
-      objectReference: {fileID: 11400000, guid: dc98ce5b51f108947b4b8e8bc61ffc22, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: characterInfo
       value: 
@@ -96786,7 +96786,6 @@ MonoBehaviour:
     - {fileID: 1480134518}
     - {fileID: 305908272}
     - {fileID: 489757759}
-    - {fileID: 1421701349}
     transitions:
     - id: To Forest
       playerSpawnTransform: {fileID: 925995766}
@@ -96814,6 +96813,7 @@ MonoBehaviour:
     - {fileID: 176557187}
     - {fileID: 2130047750}
     - {fileID: 1446435360}
+    - {fileID: 1421701349}
     transitions:
     - id: To River
       playerSpawnTransform: {fileID: 107016734}

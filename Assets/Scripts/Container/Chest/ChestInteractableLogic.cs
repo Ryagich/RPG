@@ -6,6 +6,7 @@ using Inventory.Inventories;
 using Inventory.Looting;
 using MessagePipe;
 using Messages;
+using VContainer;
 using VContainer.Unity;
 
 namespace Container.Chest
@@ -27,13 +28,13 @@ namespace Container.Chest
                 CharacterInfo characterInfo,
                 LootingContext lootingContext,
                 IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
-                FactionConfig faction = null
+                IObjectResolver resolver
             )
         {
             this.interactable = interactable;
             this.chestInventory = chestInventory;
             this.characterInfo = characterInfo;
-            this.faction = faction;
+            faction = resolver.TryResolve<FactionConfig>(out var resolvedFaction) ? resolvedFaction : null;
             this.lootingContext = lootingContext;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
         }
