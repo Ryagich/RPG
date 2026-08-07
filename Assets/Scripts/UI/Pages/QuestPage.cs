@@ -451,21 +451,27 @@ namespace UI.Pages
             }
 
             description ??= string.Empty;
-            if (descriptionText.text == description)
-            {
-                return;
-            }
-
             descriptionText.text = description;
             Canvas.ForceUpdateCanvases();
 
-            float width = descriptionText.rectTransform.rect.width;
+            float width = descriptionContent.rect.width;
             float height = width > 0f
                 ? Mathf.Ceil(descriptionText.GetPreferredValues(descriptionText.text, width, 0f).y)
                 : 0f;
-            descriptionText.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
+
             descriptionContent.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
+            RectTransform textRect = descriptionText.rectTransform;
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = Vector2.zero;
+            textRect.offsetMax = Vector2.zero;
+
             LayoutRebuilder.ForceRebuildLayoutImmediate(descriptionContent);
+            Canvas.ForceUpdateCanvases();
+            if (descriptionScroll != null)
+            {
+                descriptionScroll.verticalNormalizedPosition = 1f;
+            }
         }
 
         private void ToggleShowCompletedTasks()
