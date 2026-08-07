@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cab1eab763ecf6f4c96f41d14656eb42, type: 3}
+  m_Name: Oswin - First Reaction
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.Model.DialogPhrase
+  text:
+    m_TableReference:
+      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+    m_TableEntryReference:
+      m_KeyId: 54301381586882561
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  isForcedDialoguePhrase: 0
+  restoresExitAbility: 0
+  isQuestPhrase: 0
+  questAnswer:
+    text:
+      m_TableReference:
+        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 0}
+    hasConditions: 0
+    conditions: []
+  answers:
+  - text:
+      m_TableReference:
+        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+      m_TableEntryReference:
+        m_KeyId: 54301381586882562
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 11400000, guid: ed01baf1a23623a42948cdeca285199c, type: 2}
+    hasConditions: 0
+    conditions: []
+  - text:
+      m_TableReference:
+        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+      m_TableEntryReference:
+        m_KeyId: 54301381586882563
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 11400000, guid: 84b4c6f98670cd64c9005cd2a3fff849, type: 2}
+    hasConditions: 0
+    conditions: []
+  - text:
+      m_TableReference:
+        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+      m_TableEntryReference:
+        m_KeyId: 54301381586882564
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 11400000, guid: 418e8925686b947458970b16b01b0e44, type: 2}
+    hasConditions: 0
+    conditions: []
+  references:
+    version: 2
+    RefIds: []

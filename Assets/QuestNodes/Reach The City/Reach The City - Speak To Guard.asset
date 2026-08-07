@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8790978157e23cc4186df7e90601f3fa, type: 3}
+  m_Name: Reach The City - Speak To Guard
+  m_EditorClassIdentifier: Assembly-CSharp::Quests.Graph.Model.QuestNodeData
+  editorTitle: "\u0428\u0430\u0433 1 \u2014 \u0413\u043B\u0430\u0432\u0430 \u0441\u0442\u0440\u0430\u0436\u0438"
+  localizedName:
+    m_TableReference:
+      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+    m_TableEntryReference:
+      m_KeyId: 54301381582688257
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  localizedDescription:
+    m_TableReference:
+      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+    m_TableEntryReference:
+      m_KeyId: 54301381582688258
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  icon: {fileID: 0}
+  mapTargetSource: 1
+  sceneMapTargetId: city-guard-captain-reach-the-city
+  scriptMapTargetKey: 
+  ownerGraph: {fileID: 11400000, guid: a55b3d8e42960da47bb27f0695f75776, type: 2}
+  hasAvailabilityRequirements: 0
+  availabilityRequirements: []
+  hasCompletionResults: 0
+  completionResults: []
+  transitions:
+  - {fileID: 11400000, guid: 687b6bab474c9d04da1b12d1e942850c, type: 2}
+  references:
+    version: 2
+    RefIds: []

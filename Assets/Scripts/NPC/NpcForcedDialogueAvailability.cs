@@ -58,7 +58,14 @@ namespace NPC
 
             PlayerInventory playerInventory = interactorScope.Container.Resolve<PlayerInventory>();
             MoneyStorage playerMoneyStorage = interactorScope.Container.Resolve<MoneyStorage>();
-            QuestController questController = interactorScope.Container.Resolve<QuestController>();
+            // The dialogue UI owns the canonical quest controller used by the quest journal
+            // and its notifications. A forced dialogue must test the same instance; otherwise
+            // the trigger and the journal can observe different quest states.
+            QuestController questController = dialogueContext.PlayerQuestController;
+            if (questController == null)
+            {
+                return false;
+            }
 
             return dialog.TryGetActiveForcedPhrase(
                 answer => DialogueAnswerAvailability.AreConditionsSatisfied(

@@ -209,6 +209,162 @@ MonoBehaviour:
     m_Key: Character_Oswin_Name
     m_Metadata:
       m_Items: []
+  - m_Id: 54301381431693312
+    m_Key: ReachCity_Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688256
+    m_Key: ReachCity_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688257
+    m_Key: ReachCity_Stage1_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688258
+    m_Key: ReachCity_Stage1_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688259
+    m_Key: ReachCity_Stage2_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688260
+    m_Key: ReachCity_Stage2_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688261
+    m_Key: Character_City_Guard_Captain_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688262
+    m_Key: Oswin_Normal_Entry
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688263
+    m_Key: Oswin_Normal_Answer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688264
+    m_Key: Oswin_Normal_Reply
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688265
+    m_Key: Oswin_Forced_Entry
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688266
+    m_Key: Oswin_Forced_Quest_Answer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882560
+    m_Key: Oswin_Forced_Answer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882561
+    m_Key: Oswin_First_Reaction
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882562
+    m_Key: Oswin_Wait_Question
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882563
+    m_Key: Oswin_Detour_Question
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882564
+    m_Key: Oswin_Rumour_Question
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882565
+    m_Key: Oswin_Wait_Reply
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882566
+    m_Key: Oswin_Detour_Reply
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882567
+    m_Key: Oswin_Rumour_Reply
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882568
+    m_Key: Oswin_To_Plan
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882569
+    m_Key: Oswin_Plan
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882570
+    m_Key: Oswin_Accept_Quest
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882571
+    m_Key: Oswin_Conclusion
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882572
+    m_Key: Guard_Normal_Entry
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882573
+    m_Key: Guard_Normal_Answer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882574
+    m_Key: Guard_Normal_Reply
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882575
+    m_Key: Guard_Quest_Entry
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882576
+    m_Key: Guard_Quest_Answer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882577
+    m_Key: Guard_Illness_Question
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882578
+    m_Key: Guard_Order_Question
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882579
+    m_Key: Guard_Bribe_Question
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882580
+    m_Key: Guard_Illness_Reply
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882581
+    m_Key: Guard_Order_Reply
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882582
+    m_Key: Guard_Bribe_Reply
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882583
+    m_Key: Guard_To_Answer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882584
+    m_Key: Guard_Answer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882585
+    m_Key: Guard_Accept_Answer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882586
+    m_Key: Guard_Conclusion
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

@@ -91,6 +91,13 @@ namespace Dialogs.Graph
                         }
 
                         break;
+                    case DialogAnswerConditionType.AddQuest:
+                        if (!questController.CanAddQuest(condition.QuestGraph))
+                        {
+                            return false;
+                        }
+
+                        break;
                 }
             }
 

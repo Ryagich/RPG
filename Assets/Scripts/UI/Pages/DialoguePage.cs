@@ -69,6 +69,7 @@ namespace UI.Pages
             this.playerInventory = playerInventory;
             this.playerMoneyStorage = playerMoneyStorage;
             this.questController = questController;
+            dialogueContext.SetPlayerQuestController(questController);
             this.localizationConfig = localizationConfig;
             this.resolver = resolver;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;

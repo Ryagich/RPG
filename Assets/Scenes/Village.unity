@@ -757,19 +757,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4234462567562958, guid: 5d42ad4d961622744969e55de6f5270b, type: 3}
   m_PrefabInstance: {fileID: 3103736}
   m_PrefabAsset: {fileID: 0}
---- !u!134 &4433019
-PhysicsMaterial:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  serializedVersion: 2
-  m_DynamicFriction: 0.6
-  m_StaticFriction: 0.6
-  m_Bounciness: 0
-  m_FrictionCombine: 0
-  m_BounceCombine: 0
 --- !u!1001 &5922245
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1174,19 +1161,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4234462567562958, guid: 5d42ad4d961622744969e55de6f5270b, type: 3}
   m_PrefabInstance: {fileID: 10261355}
   m_PrefabAsset: {fileID: 0}
---- !u!134 &12676828
-PhysicsMaterial:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  serializedVersion: 2
-  m_DynamicFriction: 0.6
-  m_StaticFriction: 0.6
-  m_Bounciness: 0
-  m_FrictionCombine: 0
-  m_BounceCombine: 0
 --- !u!1001 &15805843
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5052,6 +5026,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4234462567562958, guid: 5d42ad4d961622744969e55de6f5270b, type: 3}
   m_PrefabInstance: {fileID: 108009875}
   m_PrefabAsset: {fileID: 0}
+--- !u!134 &108260549
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ' (Instance)'
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
 --- !u!1001 &109385931
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8142,19 +8129,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4016175119630732, guid: a191aaa06ae9bb044be515a674fd12dd, type: 3}
   m_PrefabInstance: {fileID: 192418372}
   m_PrefabAsset: {fileID: 0}
---- !u!134 &192908577
-PhysicsMaterial:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  serializedVersion: 2
-  m_DynamicFriction: 0.6
-  m_StaticFriction: 0.6
-  m_Bounciness: 0
-  m_FrictionCombine: 0
-  m_BounceCombine: 0
 --- !u!1001 &195345017
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21310,11 +21284,11 @@ PrefabInstance:
     - target: {fileID: 1029115330142763011, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_Material
       value: 
-      objectReference: {fileID: 192908577}
+      objectReference: {fileID: 1992162206}
     - target: {fileID: 1444182756704375305, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_Material
       value: 
-      objectReference: {fileID: 4433019}
+      objectReference: {fileID: 923711663}
     - target: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -60.947556
@@ -38939,11 +38913,11 @@ PrefabInstance:
     - target: {fileID: 1029115330142763011, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_Material
       value: 
-      objectReference: {fileID: 12676828}
+      objectReference: {fileID: 1638790592}
     - target: {fileID: 1444182756704375305, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_Material
       value: 
-      objectReference: {fileID: 1411395001}
+      objectReference: {fileID: 1835672468}
     - target: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -65.00755
@@ -38993,9 +38967,17 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: a04b43cb3ccf8b24cbb5d73f50f12745, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: dc98ce5b51f108947b4b8e8bc61ffc22, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: characterInfo
+      value: 
+      objectReference: {fileID: 11400000, guid: 196f8163839348241bb580e814b3d7c2, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: itemSetConfigOverride
       value: 
@@ -39003,8 +38985,16 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1207266197}
   m_SourcePrefab: {fileID: 100100000, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+--- !u!1 &828593852 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+  m_PrefabInstance: {fileID: 828593851}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &830511460
 GameObject:
   m_ObjectHideFlags: 0
@@ -42116,6 +42106,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4678561276071904, guid: 0ea34df2a10c42b40be8e877acda2f65, type: 3}
   m_PrefabInstance: {fileID: 921803556}
   m_PrefabAsset: {fileID: 0}
+--- !u!134 &923711663
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ' (Instance)'
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
 --- !u!1 &925995765
 GameObject:
   m_ObjectHideFlags: 0
@@ -52177,6 +52180,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4234462567562958, guid: 5d42ad4d961622744969e55de6f5270b, type: 3}
   m_PrefabInstance: {fileID: 1156486186}
   m_PrefabAsset: {fileID: 0}
+--- !u!134 &1157300021
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ' (Instance)'
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
 --- !u!1001 &1157681283
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -54164,6 +54180,21 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
   m_PrefabInstance: {fileID: 828593851}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1207266197
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 828593852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13de18f9f7762c34c86f0dedb3275b89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Quests.MapTargets.QuestMapTarget
+  questGraph: {fileID: 11400000, guid: a55b3d8e42960da47bb27f0695f75776, type: 2}
+  targetTransform: {fileID: 1207266196}
+  targetId: city-guard-captain-reach-the-city
 --- !u!1001 &1208080564
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -55894,6 +55925,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4614316209816462, guid: b0039c0b258967342bdb96afc637b6cb, type: 3}
   m_PrefabInstance: {fileID: 1256452625}
   m_PrefabAsset: {fileID: 0}
+--- !u!134 &1257705566
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
 --- !u!1001 &1258954460
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -63609,19 +63653,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4504849390039104, guid: 8d1ce240eb99f7c4b98252fb7bd0d6b9, type: 3}
   m_PrefabInstance: {fileID: 1409565005}
   m_PrefabAsset: {fileID: 0}
---- !u!134 &1411395001
-PhysicsMaterial:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  serializedVersion: 2
-  m_DynamicFriction: 0.6
-  m_StaticFriction: 0.6
-  m_Bounciness: 0
-  m_FrictionCombine: 0
-  m_BounceCombine: 0
 --- !u!1001 &1413514683
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -75668,6 +75699,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4671726007428194, guid: 08fbd81b18b8c4949b0f5b250596657a, type: 3}
   m_PrefabInstance: {fileID: 2120000144}
   m_PrefabAsset: {fileID: 0}
+--- !u!134 &1638790592
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ' (Instance)'
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
 --- !u!1001 &1640701484
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -85580,6 +85624,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4234462567562958, guid: 5d42ad4d961622744969e55de6f5270b, type: 3}
   m_PrefabInstance: {fileID: 1835468121}
   m_PrefabAsset: {fileID: 0}
+--- !u!134 &1835672468
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ' (Instance)'
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
 --- !u!1001 &1837725884
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -92190,6 +92247,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4964424962946834, guid: 90fa62bf4789200429e0e6e2ab56780f, type: 3}
   m_PrefabInstance: {fileID: 1989603353}
   m_PrefabAsset: {fileID: 0}
+--- !u!134 &1992162206
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ' (Instance)'
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
 --- !u!1001 &1993043437
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -95008,11 +95078,15 @@ PrefabInstance:
     - target: {fileID: 1029115330142763011, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_Material
       value: 
-      objectReference: {fileID: 192908577}
+      objectReference: {fileID: 108260549}
     - target: {fileID: 1444182756704375305, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_Material
       value: 
-      objectReference: {fileID: 4433019}
+      objectReference: {fileID: 1157300021}
+    - target: {fileID: 3027034391871998601, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 1257705566}
     - target: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -102.27
@@ -95062,8 +95136,12 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: e63f25576b6f29b489116d85284be19c, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: canTalk
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: faction

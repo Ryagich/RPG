@@ -284,6 +284,177 @@ MonoBehaviour:
     m_Localized: Oswin
     m_Metadata:
       m_Items: []
+  - m_Id: 54301381431693312
+    m_Localized: Reach the City
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688256
+    m_Localized: The old city's gates are closed, but answers and shelter may lie
+      beyond them.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688257
+    m_Localized: Speak to the captain of the city guard
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688258
+    m_Localized: Learn from the captain of the city guard why the gates are closed.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688259
+    m_Localized: Find a way into the city
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688260
+    m_Localized: The city is sealed because of an epidemic. Find another way inside.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688261
+    m_Localized: City Guard Captain
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688262
+    m_Localized: Have you counted how many spears they have yet?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688263
+    m_Localized: No. Should I?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688264
+    m_Localized: No. There are plenty without counting.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688265
+    m_Localized: Well. The city. I was starting to think we would never see it.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381582688266
+    m_Localized: Oswin wants to discuss the closed gate.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882560
+    m_Localized: We saw it. So what? The gate is locked.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882561
+    m_Localized: I see it. And the guards are looking at us as if we brought the
+      plague in our pockets.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882562
+    m_Localized: Maybe we should wait until morning?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882563
+    m_Localized: Should we go around the city?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882564
+    m_Localized: Did you hear anything on the road?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882565
+    m_Localized: We can. But in the morning they will be the same people with the
+      same order. I would not bet on a miracle.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882566
+    m_Localized: Through the forest? Then we will hit another checkpoint and tell
+      the whole story again. Exactly what I want after a road like this.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882567
+    m_Localized: At the crossing, they were talking about sick people. One driver
+      swore a man in his cart died before noon. Another said the council made it
+      all up. So everyone knows for certain, and no one knows anything.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882568
+    m_Localized: So what do we do?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882569
+    m_Localized: Talk to the guard captain. Not like you are talking to a gate. Talk
+      to a person. Ask what is happening, who they let through, who they do not.
+      If there is any loophole in that order, he will know it.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882570
+    m_Localized: All right. I will talk to him.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882571
+    m_Localized: Talk to him. I will stand here and pretend not to notice the spears.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882572
+    m_Localized: Hey. Step away from the portcullis.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882573
+    m_Localized: I am only looking.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882574
+    m_Localized: Look from farther away. It makes me feel better.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882575
+    m_Localized: Into the city? I can see that. Why?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882576
+    m_Localized: I need to get into the city.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882577
+    m_Localized: Why did you close the gate?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882578
+    m_Localized: Who gave the order?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882579
+    m_Localized: Maybe we can make a deal?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882580
+    m_Localized: 'Because people in the city are falling on their feet. First in
+      the lower district, then at the port. The healers say it is contagion. The
+      council says quarantine. I say: stay back.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882581
+    m_Localized: The council. They sit behind the wall, we stand on this side. Very
+      convenient arrangement.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882582
+    m_Localized: With whom? Me? Do not make me laugh. I would have to answer for
+      you afterward. And I do not feel like touching coin right now, if you understand.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882583
+    m_Localized: So you will not let me in?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882584
+    m_Localized: Not through the gate. We let no one in and no one out until the
+      healers understand this. I do not know what kind of sickness it is. Honestly,
+      I do not want to know.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882585
+    m_Localized: I understand. I will look for another way.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882586
+    m_Localized: Look. Just do not try the wall by my post. Then I will have to shoot,
+      and I already have enough work.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

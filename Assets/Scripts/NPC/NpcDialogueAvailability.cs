@@ -21,8 +21,17 @@ namespace NPC
 
         public bool IsInteractableAvailable(LifetimeScope interactorScope)
         {
-            return corpseLootController?.IsLootable == true
-                || dialogueController != null && dialogueController.CanStartDialogue(interactorScope);
+            if (corpseLootController?.IsLootable == true)
+            {
+                return true;
+            }
+
+            // A manual interaction remains active while its dialogue is open. Without this,
+            // CanStartDialogue returns false immediately after TryBeginDialogue, the player
+            // interaction controller treats the NPC as out of range, and closes the dialogue
+            // again on the next physics tick.
+            return dialogueController != null &&
+                   (dialogueController.IsDialogueRequested || dialogueController.CanStartDialogue(interactorScope));
         }
     }
 }

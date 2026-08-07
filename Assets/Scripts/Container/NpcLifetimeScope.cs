@@ -10,6 +10,7 @@ using Movement;
 using NPC;
 using Player;
 using Quests;
+using Quests.MapTargets;
 using StateMachine.Graph;
 using Stats;
 using TargetLock;
@@ -84,6 +85,12 @@ namespace Container
             builder.RegisterComponent(interactable).AsSelf();
             var dialogueAvailability = GetComponent<NpcDialogueAvailability>() ?? gameObject.AddComponent<NpcDialogueAvailability>();
             builder.RegisterComponent(dialogueAvailability).AsSelf();
+            var questMapTarget = GetComponent<QuestMapTarget>();
+            if (questMapTarget != null)
+            {
+                builder.RegisterComponent(questMapTarget).AsSelf();
+            }
+
             EnsureDialogueInteractionZone();
             bool hasForcedDialogueZone = RegisterForcedDialogueZone(builder);
             var navMeshAgent = GetComponent<NavMeshAgent>() ?? gameObject.AddComponent<NavMeshAgent>();

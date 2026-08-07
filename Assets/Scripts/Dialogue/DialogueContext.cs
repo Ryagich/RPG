@@ -5,6 +5,7 @@ using Factions;
 using Interactable;
 using Inventory.Inventories;
 using Money;
+using Quests;
 
 namespace Dialogue
 {
@@ -17,6 +18,7 @@ namespace Dialogue
         public DialogPhrase CurrentPhrase { get; private set; }
         public IInventory CurrentTargetInventory { get; private set; }
         public MoneyStorage CurrentTargetMoneyStorage { get; private set; }
+        public QuestController PlayerQuestController { get; private set; }
         public bool IsForcedDialogue { get; private set; }
         public bool CanExitDialogue { get; private set; } = true;
 
@@ -39,6 +41,11 @@ namespace Dialogue
             CurrentTargetMoneyStorage = moneyStorage;
             IsForcedDialogue = isForcedDialogue;
             CanExitDialogue = !isForcedDialogue;
+        }
+
+        public void SetPlayerQuestController(QuestController questController)
+        {
+            PlayerQuestController = questController;
         }
 
         public void SetCurrentPhrase(DialogPhrase phrase)

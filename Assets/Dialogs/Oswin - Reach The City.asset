@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f017ef0dab3961d4d9cc460c84f52c76, type: 3}
+  m_Name: Oswin - Reach The City
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.DialogGraph
+  Nodes:
+  - Position: {x: 360, y: 220}
+    Phrase: {fileID: 11400000, guid: 89886865c12e7c147a89adf0209b7542, type: 2}
+  - Position: {x: 750, y: 220}
+    Phrase: {fileID: 11400000, guid: fdf5f3a75796e764cbec3538fca8fa82, type: 2}
+  - Position: {x: 1140, y: 220}
+    Phrase: {fileID: 11400000, guid: c210a700284447e4387ab5c930ff8061, type: 2}
+  - Position: {x: 360, y: 490}
+    Phrase: {fileID: 11400000, guid: d53841bbdab339c4e8149780b8218f86, type: 2}
+  - Position: {x: 750, y: 490}
+    Phrase: {fileID: 11400000, guid: ed01baf1a23623a42948cdeca285199c, type: 2}
+  - Position: {x: 1140, y: 490}
+    Phrase: {fileID: 11400000, guid: 84b4c6f98670cd64c9005cd2a3fff849, type: 2}
+  - Position: {x: 360, y: 760}
+    Phrase: {fileID: 11400000, guid: 418e8925686b947458970b16b01b0e44, type: 2}
+  - Position: {x: 750, y: 760}
+    Phrase: {fileID: 11400000, guid: fc12f69144998f64a8faa019f51803c0, type: 2}
+  - Position: {x: 1140, y: 760}
+    Phrase: {fileID: 11400000, guid: ad4f5e69153bc6043ab341bf09adbddb, type: 2}
+  <EntryPhrase>k__BackingField: {fileID: 11400000, guid: 89886865c12e7c147a89adf0209b7542, type: 2}

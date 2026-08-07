@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f017ef0dab3961d4d9cc460c84f52c76, type: 3}
+  m_Name: City Guard Captain - Reach The City
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.DialogGraph
+  Nodes:
+  - Position: {x: 360, y: 220}
+    Phrase: {fileID: 11400000, guid: 42ce98afdc7180544a7aa9b29ea678e7, type: 2}
+  - Position: {x: 750, y: 220}
+    Phrase: {fileID: 11400000, guid: ab22210ad7b38a74eb6637026263ec7d, type: 2}
+  - Position: {x: 1140, y: 220}
+    Phrase: {fileID: 11400000, guid: df4e5796eb77e13469934038ead2492e, type: 2}
+  - Position: {x: 360, y: 490}
+    Phrase: {fileID: 11400000, guid: d4dd6b7b88cc6e741bdd2cace3e72225, type: 2}
+  - Position: {x: 750, y: 490}
+    Phrase: {fileID: 11400000, guid: 8d89ec4eabd3f694da5a7ac31ea03bae, type: 2}
+  - Position: {x: 1140, y: 490}
+    Phrase: {fileID: 11400000, guid: cf85348406a609540ab40df25c234f7b, type: 2}
+  - Position: {x: 360, y: 760}
+    Phrase: {fileID: 11400000, guid: 72ae282a11425034586307e37c12174a, type: 2}
+  - Position: {x: 750, y: 760}
+    Phrase: {fileID: 11400000, guid: 08458c1cf3e13964c854b95a85087170, type: 2}
+  <EntryPhrase>k__BackingField: {fileID: 11400000, guid: 42ce98afdc7180544a7aa9b29ea678e7, type: 2}
