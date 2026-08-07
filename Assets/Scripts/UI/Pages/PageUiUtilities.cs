@@ -2,6 +2,7 @@
 using System.Globalization;
 using Colors;
 using Combat;
+using Factions;
 using Inventory.Item;
 using Inventory.Inventories;
 using Inventory.Slot;
@@ -59,16 +60,28 @@ namespace UI.Pages
             FillStatHolder(slotsViewContainer.MagicDefenseStat, statsController.GetStat(StatType.MagicDefense));
         }
 
-        public static void FillInfoAboutPlayer(InfoAboutPlayer infoAboutPlayer, Character.CharacterInfo currentCharacterInfo, MoneyStorage moneyStorage)
+        public static void FillInfoAboutPlayer(
+            InfoAboutPlayer infoAboutPlayer,
+            Character.CharacterInfo currentCharacterInfo,
+            MoneyStorage moneyStorage,
+            FactionConfig faction)
         {
-            if (infoAboutPlayer == null || currentCharacterInfo == null)
+            if (infoAboutPlayer == null)
+            {
+                return;
+            }
+
+            infoAboutPlayer.Group.text = faction == null
+                ? "---"
+                : faction.Name.GetLocalizedStringCached();
+
+            if (currentCharacterInfo == null)
             {
                 return;
             }
 
             infoAboutPlayer.Photo.sprite = currentCharacterInfo.Photo;
             infoAboutPlayer.Name.text = currentCharacterInfo.Name.GetLocalizedStringCached();
-            infoAboutPlayer.Group.text = currentCharacterInfo.Fraction.GetLocalizedStringCached();
             if (infoAboutPlayer.Money != null)
             {
                 infoAboutPlayer.Money.text = moneyStorage == null

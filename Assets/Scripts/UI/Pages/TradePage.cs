@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Colors;
+using Factions;
 using Dialogue;
 using GameModes;
 using Inventory;
@@ -492,6 +493,7 @@ namespace UI.Pages
         private readonly InventoryHandController inventoryHandController;
         private readonly MoneyStorage playerMoneyStorage;
         private readonly Character.CharacterInfo playerCharacterInfo;
+        private readonly FactionConfig playerFaction;
         private readonly DialogueContext dialogueContext;
         private readonly StatsController statsController;
         private readonly Canvas canvas;
@@ -565,6 +567,7 @@ namespace UI.Pages
             InventoryHandController inventoryHandController,
             MoneyStorage playerMoneyStorage,
             Character.CharacterInfo playerCharacterInfo,
+            FactionConfig playerFaction,
             DialogueContext dialogueContext,
             StatsController statsController,
             Canvas canvas,
@@ -582,6 +585,7 @@ namespace UI.Pages
             this.inventoryHandController = inventoryHandController;
             this.playerMoneyStorage = playerMoneyStorage;
             this.playerCharacterInfo = playerCharacterInfo;
+            this.playerFaction = playerFaction;
             this.dialogueContext = dialogueContext;
             this.statsController = statsController;
             this.canvas = canvas;
@@ -631,14 +635,14 @@ namespace UI.Pages
             leftSellInfo = GetRequiredComponentInChildren<SellInfo>(leftRect, "left trade inventory");
             targetSellInventoryView = GetRequiredInventoryView(leftRect, "Sell Inventory");
             targetInventoryView = GetRequiredInventoryView(leftRect, "Inventory In Trade");
-            PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, dialogueContext.CurrentTargetCharacterInfo, dialogueContext.CurrentTargetMoneyStorage);
+            PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, dialogueContext.CurrentTargetCharacterInfo, dialogueContext.CurrentTargetMoneyStorage, dialogueContext.CurrentTargetFaction);
 
             rightInfoAboutPlayer = GetRequiredComponentInChildren<InfoAboutPlayer>(rightRect, "right trade inventory");
             rightInfoAboutInventory = GetRequiredComponentInChildren<InfoAboutInventory>(rightRect, "right trade inventory");
             rightSellInfo = GetRequiredComponentInChildren<SellInfo>(rightRect, "right trade inventory");
             playerSellInventoryView = GetRequiredInventoryView(rightRect, "Sell Inventory");
             playerInventoryView = GetRequiredInventoryView(rightRect, "Inventory In Trade");
-            PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo, playerMoneyStorage);
+            PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo, playerMoneyStorage, playerFaction);
 
             inventoryViews.Clear();
             inventoryViews[playerInventory] = playerInventoryView;
@@ -1173,8 +1177,8 @@ namespace UI.Pages
 
         private void UpdatePlayersInfo()
         {
-            PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo, playerMoneyStorage);
-            PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, dialogueContext.CurrentTargetCharacterInfo, dialogueContext.CurrentTargetMoneyStorage);
+            PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo, playerMoneyStorage, playerFaction);
+            PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, dialogueContext.CurrentTargetCharacterInfo, dialogueContext.CurrentTargetMoneyStorage, dialogueContext.CurrentTargetFaction);
         }
 
         private void UpdateTradeButtonsState()

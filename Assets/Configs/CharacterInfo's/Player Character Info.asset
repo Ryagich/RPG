@@ -21,15 +21,6 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  <Fraction>k__BackingField:
-    m_TableReference:
-      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
-    m_TableEntryReference:
-      m_KeyId: 7531326545838080
-      m_Key: 
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
   <Photo>k__BackingField: {fileID: 21300000, guid: 919c26403d4491942b8573871036d991, type: 3}
   references:
     version: 2

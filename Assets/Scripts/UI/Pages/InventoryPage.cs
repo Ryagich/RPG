@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Colors;
 using System;
+using Factions;
 using Inventory;
 using Inventory.Grid;
 using Inventory.Inventories;
@@ -66,6 +67,7 @@ namespace UI.Pages
         private readonly InventoryHandController inventoryHandController;
         private readonly MoneyStorage playerMoneyStorage;
         private readonly CharacterInfo characterInfo;
+        private readonly FactionConfig playerFaction;
         private readonly Canvas canvas;
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
@@ -131,6 +133,7 @@ namespace UI.Pages
                 InventoryHandController inventoryHandController,
                 MoneyStorage playerMoneyStorage,
                 CharacterInfo characterInfo,
+                FactionConfig playerFaction,
                 IObjectResolver resolver,
                 UI.Inventory.InventoryInteractionContext interactionContext
             )
@@ -149,6 +152,7 @@ namespace UI.Pages
             this.inventoryHandController = inventoryHandController;
             this.playerMoneyStorage = playerMoneyStorage;
             this.characterInfo = characterInfo;
+            this.playerFaction = playerFaction;
             this.resolver = resolver;
             this.interactionContext = interactionContext;
 
@@ -177,7 +181,7 @@ namespace UI.Pages
             infoAboutInventory = rightPlayerInventory.InfoAboutInventory;
             inventoryView = rightPlayerInventory.InventoryView;
             inventoryScrollRect = inventoryView.GetComponent<ScrollRect>();
-            PageUiUtilities.FillInfoAboutPlayer(infoAboutPlayer, characterInfo, playerMoneyStorage);
+            PageUiUtilities.FillInfoAboutPlayer(infoAboutPlayer, characterInfo, playerMoneyStorage, playerFaction);
             
             DrawTiles();
 
@@ -270,7 +274,7 @@ namespace UI.Pages
 
         private void UpdatePlayerInfo()
         {
-            PageUiUtilities.FillInfoAboutPlayer(infoAboutPlayer, characterInfo, playerMoneyStorage);
+            PageUiUtilities.FillInfoAboutPlayer(infoAboutPlayer, characterInfo, playerMoneyStorage, playerFaction);
         }
 
         private void UpdateInventoryInfo()

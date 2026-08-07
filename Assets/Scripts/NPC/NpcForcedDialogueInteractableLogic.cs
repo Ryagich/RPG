@@ -3,6 +3,7 @@ using Character;
 using Dialogue;
 using Dialogs.Graph;
 using Dialogs.Graph.Model;
+using Factions;
 using GameModes;
 using Inventory.Inventories;
 using MessagePipe;
@@ -22,6 +23,7 @@ namespace NPC
         private readonly DialogGraph dialog;
         private readonly IInventory inventory;
         private readonly MoneyStorage moneyStorage;
+        private readonly FactionConfig faction;
         private readonly DialogueContext dialogueContext;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
         private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
@@ -37,7 +39,8 @@ namespace NPC
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber,
             CharacterInfo characterInfo = null,
-            DialogGraph dialog = null)
+            DialogGraph dialog = null,
+            FactionConfig faction = null)
         {
             this.interactable = interactable;
             this.availability = availability;
@@ -46,6 +49,7 @@ namespace NPC
             this.dialog = dialog;
             this.inventory = inventory;
             this.moneyStorage = moneyStorage;
+            this.faction = faction;
             this.dialogueContext = dialogueContext;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
             this.gameModeChangedSubscriber = gameModeChangedSubscriber;
@@ -92,7 +96,8 @@ namespace NPC
                 inventory,
                 moneyStorage,
                 forcedPhrase,
-                true);
+                true,
+                faction);
             availability.SuppressUntilZoneExit();
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Dialogue));
         }

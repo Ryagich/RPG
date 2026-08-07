@@ -205,6 +205,10 @@ MonoBehaviour:
     m_Key: Opening_Slide_09
     m_Metadata:
       m_Items: []
+  - m_Id: 70000000000000001
+    m_Key: Character_Oswin_Name
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

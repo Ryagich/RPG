@@ -7,7 +7,6 @@ namespace Character
     public class CharacterInfo : ScriptableObject
     {
         [field: SerializeField] public LocalizedString Name { get; private set; }
-        [field: SerializeField] public LocalizedString Fraction { get; private set; }
         [field: SerializeField] public Sprite Photo { get; private set; }
     }
 }

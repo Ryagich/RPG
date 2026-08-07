@@ -1,6 +1,7 @@
 using System;
 using Character;
 using GameModes;
+using Factions;
 using MessagePipe;
 using Messages;
 using VContainer.Unity;
@@ -12,6 +13,7 @@ namespace Inventory.Looting
         private readonly Interactable.Interactable interactable;
         private readonly CorpseLootController corpseLootController;
         private readonly CharacterInfo characterInfo;
+        private readonly FactionConfig faction;
         private readonly LootingContext lootingContext;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
         private bool isLootingInteractionActive;
@@ -21,11 +23,13 @@ namespace Inventory.Looting
             CorpseLootController corpseLootController,
             LootingContext lootingContext,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
-            CharacterInfo characterInfo = null)
+            CharacterInfo characterInfo = null,
+            FactionConfig faction = null)
         {
             this.interactable = interactable;
             this.corpseLootController = corpseLootController;
             this.characterInfo = characterInfo;
+            this.faction = faction;
             this.lootingContext = lootingContext;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
         }
@@ -52,7 +56,7 @@ namespace Inventory.Looting
             }
 
             isLootingInteractionActive = true;
-            lootingContext.SetTarget(corpseLootController.LootInventory, characterInfo);
+            lootingContext.SetTarget(corpseLootController.LootInventory, characterInfo, faction: faction);
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Looting));
         }
 

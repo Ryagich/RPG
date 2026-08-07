@@ -280,6 +280,10 @@ MonoBehaviour:
       and bandits claimed the forest roads.'
     m_Metadata:
       m_Items: []
+  - m_Id: 70000000000000001
+    m_Localized: Oswin
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

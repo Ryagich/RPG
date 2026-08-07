@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Colors;
+using Factions;
 using Inventory;
 using Inventory.Grid;
 using Inventory.Inventories;
@@ -54,6 +55,7 @@ namespace UI.Pages
         private readonly InventoryHandController inventoryHandController;
         private readonly MoneyStorage playerMoneyStorage;
         private readonly Character.CharacterInfo playerCharacterInfo;
+        private readonly FactionConfig playerFaction;
         private readonly LootingContext lootingContext;
         private readonly StatsController statsController;
         private readonly Canvas canvas;
@@ -120,6 +122,7 @@ namespace UI.Pages
             InventoryHandController inventoryHandController,
             MoneyStorage playerMoneyStorage,
             Character.CharacterInfo playerCharacterInfo,
+            FactionConfig playerFaction,
             LootingContext lootingContext,
             StatsController statsController,
             IObjectResolver resolver,
@@ -135,6 +138,7 @@ namespace UI.Pages
             this.playerInventory = playerInventory;
             this.inventoryHandController = inventoryHandController;
             this.playerCharacterInfo = playerCharacterInfo;
+            this.playerFaction = playerFaction;
             this.playerMoneyStorage = playerMoneyStorage;
             this.lootingContext = lootingContext;
             this.statsController = statsController;
@@ -209,12 +213,12 @@ namespace UI.Pages
             rightInfoAboutPlayer = rightPlayerInventory.InfoAboutPlayer;
             rightInfoAboutInventory = rightPlayerInventory.InfoAboutInventory;
             playerInventoryView = rightPlayerInventory.InventoryView;
-            PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo, playerMoneyStorage);
+            PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo, playerMoneyStorage, playerFaction);
 
             leftInfoAboutPlayer = leftAnotherInventory.InfoAboutPlayer;
             leftInfoAboutInventory = leftAnotherInventory.InfoAboutInventory;
             targetInventoryView = leftAnotherInventory.InventoryView;
-            PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, lootingContext.CurrentTargetCharacterInfo, lootingContext.CurrentTargetMoneyStorage);
+            PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, lootingContext.CurrentTargetCharacterInfo, lootingContext.CurrentTargetMoneyStorage, lootingContext.CurrentTargetFaction);
 
             inventoryViews.Clear();
             inventoryViews[playerInventory] = playerInventoryView;
@@ -287,8 +291,8 @@ namespace UI.Pages
 
         private void UpdatePlayersInfo()
         {
-            PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo, playerMoneyStorage);
-            PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, lootingContext.CurrentTargetCharacterInfo, lootingContext.CurrentTargetMoneyStorage);
+            PageUiUtilities.FillInfoAboutPlayer(rightInfoAboutPlayer, playerCharacterInfo, playerMoneyStorage, playerFaction);
+            PageUiUtilities.FillInfoAboutPlayer(leftInfoAboutPlayer, lootingContext.CurrentTargetCharacterInfo, lootingContext.CurrentTargetMoneyStorage, lootingContext.CurrentTargetFaction);
         }
 
         private void UpdateInventoryInfo()

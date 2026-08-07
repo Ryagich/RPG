@@ -2,6 +2,7 @@ using System;
 using Character;
 using Dialogue;
 using Dialogs.Graph;
+using Factions;
 using GameModes;
 using Inventory.Inventories;
 using MessagePipe;
@@ -19,6 +20,7 @@ namespace Container.Dialogue
         private readonly DialogGraph dialog;
         private readonly IInventory inventory;
         private readonly MoneyStorage moneyStorage;
+        private readonly FactionConfig faction;
         private readonly DialogueContext dialogueContext;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
 
@@ -30,7 +32,8 @@ namespace Container.Dialogue
                 MoneyStorage moneyStorage,
                 DialogueContext dialogueContext,
                 IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
-                DialogGraph dialog = null
+                DialogGraph dialog = null,
+                FactionConfig faction = null
             )
         {
             this.interactable = interactable;
@@ -38,6 +41,7 @@ namespace Container.Dialogue
             this.dialog = dialog;
             this.inventory = inventory;
             this.moneyStorage = moneyStorage;
+            this.faction = faction;
             this.dialogueContext = dialogueContext;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
         }
@@ -58,7 +62,7 @@ namespace Container.Dialogue
 
         private void OnInteracted(LifetimeScope _)
         {
-            dialogueContext.SetTarget(interactable, characterInfo, dialog, inventory, moneyStorage);
+            dialogueContext.SetTarget(interactable, characterInfo, dialog, inventory, moneyStorage, faction: faction);
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Dialogue));
         }
 

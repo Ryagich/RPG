@@ -1,6 +1,7 @@
 using Character;
 using Dialogs.Graph;
 using Dialogs.Graph.Model;
+using Factions;
 using Interactable;
 using Inventory.Inventories;
 using Money;
@@ -11,6 +12,7 @@ namespace Dialogue
     {
         public Interactable.Interactable CurrentTarget { get; private set; }
         public CharacterInfo CurrentTargetCharacterInfo { get; private set; }
+        public FactionConfig CurrentTargetFaction { get; private set; }
         public DialogGraph CurrentDialog { get; private set; }
         public DialogPhrase CurrentPhrase { get; private set; }
         public IInventory CurrentTargetInventory { get; private set; }
@@ -25,10 +27,12 @@ namespace Dialogue
             IInventory inventory = null,
             MoneyStorage moneyStorage = null,
             DialogPhrase initialPhrase = null,
-            bool isForcedDialogue = false)
+            bool isForcedDialogue = false,
+            FactionConfig faction = null)
         {
             CurrentTarget = target;
             CurrentTargetCharacterInfo = characterInfo;
+            CurrentTargetFaction = faction;
             CurrentDialog = dialog;
             CurrentPhrase = initialPhrase ?? dialog?.EntryPhrase;
             CurrentTargetInventory = inventory;
@@ -50,6 +54,7 @@ namespace Dialogue
         {
             CurrentTarget = null;
             CurrentTargetCharacterInfo = null;
+            CurrentTargetFaction = null;
             CurrentDialog = null;
             CurrentPhrase = null;
             CurrentTargetInventory = null;

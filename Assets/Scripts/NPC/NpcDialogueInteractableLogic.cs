@@ -2,6 +2,7 @@ using System;
 using Character;
 using Dialogue;
 using Dialogs.Graph;
+using Factions;
 using GameModes;
 using Inventory.Inventories;
 using Inventory.Looting;
@@ -20,6 +21,7 @@ namespace NPC
         private readonly DialogGraph dialog;
         private readonly IInventory inventory;
         private readonly MoneyStorage moneyStorage;
+        private readonly FactionConfig faction;
         private readonly DialogueContext dialogueContext;
         private readonly LootingContext lootingContext;
         private readonly CorpseLootController corpseLootController;
@@ -36,7 +38,8 @@ namespace NPC
             CorpseLootController corpseLootController,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
             CharacterInfo characterInfo = null,
-            DialogGraph dialog = null)
+            DialogGraph dialog = null,
+            FactionConfig faction = null)
         {
             this.interactable = interactable;
             this.dialogueController = dialogueController;
@@ -44,6 +47,7 @@ namespace NPC
             this.dialog = dialog;
             this.inventory = inventory;
             this.moneyStorage = moneyStorage;
+            this.faction = faction;
             this.dialogueContext = dialogueContext;
             this.lootingContext = lootingContext;
             this.corpseLootController = corpseLootController;
@@ -71,7 +75,7 @@ namespace NPC
             if (corpseLootController?.IsLootable == true && corpseLootController.LootInventory != null)
             {
                 isLootingInteractionActive = true;
-                lootingContext.SetTarget(corpseLootController.LootInventory, characterInfo);
+                lootingContext.SetTarget(corpseLootController.LootInventory, characterInfo, faction: faction);
                 changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Looting));
                 return;
             }
@@ -81,7 +85,7 @@ namespace NPC
                 return;
             }
 
-            dialogueContext.SetTarget(interactable, characterInfo, dialog, inventory, moneyStorage);
+            dialogueContext.SetTarget(interactable, characterInfo, dialog, inventory, moneyStorage, faction: faction);
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Dialogue));
         }
 
