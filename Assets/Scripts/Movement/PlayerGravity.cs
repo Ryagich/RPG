@@ -26,7 +26,7 @@ namespace Movement
 
         public void FixedTick()
         {
-            if (controller == null || !controller.enabled)
+            if (controller == null || !controller.enabled || !controller.gameObject.activeInHierarchy)
             {
                 return;
             }

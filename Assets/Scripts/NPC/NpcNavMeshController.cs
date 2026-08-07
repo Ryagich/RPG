@@ -37,13 +37,12 @@ namespace NPC
             defaultSpeed = agent != null ? agent.speed : 0f;
         }
 
-        public Vector3 Velocity => agent != null ? agent.velocity : Vector3.zero;
-        public bool HasPath => agent != null && agent.enabled && agent.hasPath;
-        public bool IsMoving => agent != null
-                                && agent.enabled
+        public Vector3 Velocity => IsAgentActiveAndOnNavMesh ? agent.velocity : Vector3.zero;
+        public bool HasPath => IsAgentActiveAndOnNavMesh && agent.hasPath;
+        public bool IsMoving => IsAgentActiveAndOnNavMesh
                                 && !agent.isStopped
                                 && agent.desiredVelocity.sqrMagnitude > VelocityThreshold;
-        public bool IsRunning => agent != null && agent.speed > defaultSpeed + VelocityThreshold;
+        public bool IsRunning => IsAgentActiveAndOnNavMesh && agent.speed > defaultSpeed + VelocityThreshold;
         public bool IsFacingLocked => isFacingLocked;
         public bool IsActionMovementLocked => isActionMovementLocked;
 
@@ -51,7 +50,7 @@ namespace NPC
         {
             get
             {
-                if (agent == null || !agent.enabled || !agent.isOnNavMesh || agent.pathPending)
+                if (!IsAgentActiveAndOnNavMesh || agent.pathPending)
                 {
                     return false;
                 }
@@ -62,7 +61,7 @@ namespace NPC
 
         public void Start()
         {
-            if (agent == null)
+            if (!IsAgentActive)
             {
                 return;
             }
@@ -81,9 +80,11 @@ namespace NPC
 
         public void Tick()
         {
-            if (agent == null || !agent.enabled || characterController == null || !characterController.enabled)
+            if (!IsAgentActive
+                || characterController == null
+                || !characterController.enabled
+                || !characterController.gameObject.activeInHierarchy)
             {
-                UpdateAnimator(Vector3.zero);
                 return;
             }
 
@@ -197,16 +198,14 @@ namespace NPC
 
         public void Stop()
         {
-            if (agent == null || !agent.enabled)
+            if (!IsAgentActiveAndOnNavMesh)
             {
+                ClearMoveRequest();
                 return;
             }
 
-            if (agent.isOnNavMesh)
-            {
-                agent.ResetPath();
-                agent.isStopped = true;
-            }
+            agent.ResetPath();
+            agent.isStopped = true;
 
             ClearMoveRequest();
             UpdateAnimator(Vector3.zero);
@@ -306,7 +305,7 @@ namespace NPC
 
         public bool WarpToNearestNavMesh(Vector3 position, float sampleRadius = DefaultSampleRadius)
         {
-            if (agent == null || !agent.enabled)
+            if (!IsAgentActive)
             {
                 return false;
             }
@@ -323,7 +322,7 @@ namespace NPC
 
         private bool CanUseAgent()
         {
-            if (agent == null || !agent.enabled)
+            if (!IsAgentActive)
             {
                 return false;
             }
@@ -333,7 +332,11 @@ namespace NPC
 
         private bool CanReuseCurrentPath(Vector3 destination, float stoppingDistance)
         {
-            if (!hasMoveRequest || agent == null || agent.pathPending || !agent.hasPath || agent.isStopped)
+            if (!hasMoveRequest
+                || !IsAgentActiveAndOnNavMesh
+                || agent.pathPending
+                || !agent.hasPath
+                || agent.isStopped)
             {
                 return false;
             }
@@ -350,6 +353,14 @@ namespace NPC
             lastRequestedDestination = default;
             lastRequestedStoppingDistance = default;
         }
+
+        private bool IsAgentActive =>
+            agent != null
+            && agent.isActiveAndEnabled;
+
+        private bool IsAgentActiveAndOnNavMesh =>
+            IsAgentActive
+            && agent.isOnNavMesh;
 
         private Vector3 GetFacingDirection(Vector3 fallbackDirection)
         {
