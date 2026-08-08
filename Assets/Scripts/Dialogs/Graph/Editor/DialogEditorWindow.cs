@@ -11,8 +11,10 @@ using Quests.Graph.Model;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEditor.Localization;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.Localization.Tables;
+using UnityEngine.UIElements;
 
 namespace Dialogs.Graph.Editor
 {
@@ -92,11 +94,38 @@ namespace Dialogs.Graph.Editor
         private float zoom = 1f;
         private Vector2 panOffset = Vector2.zero;
         private bool useLightTheme;
+        private DialogToolkitCanvas toolkitCanvas;
+        private IMGUIContainer toolkitControls;
+        private bool toolkitUiActive;
 
         [MenuItem("Tools/Dialog Editor")]
         public static void Open()
         {
             GetWindow<DialogEditorWindow>("Dialog Editor");
+        }
+
+        private void CreateGUI()
+        {
+            toolkitUiActive = true;
+            rootVisualElement.Clear();
+            rootVisualElement.style.flexGrow = 1f;
+            rootVisualElement.style.backgroundColor = WindowBackgroundColor;
+
+            toolkitCanvas = new DialogToolkitCanvas(this);
+            rootVisualElement.Add(toolkitCanvas);
+
+            toolkitControls = new IMGUIContainer(DrawToolkitControls)
+            {
+                name = "dialog-editor-controls"
+            };
+            toolkitControls.style.position = Position.Absolute;
+            toolkitControls.style.left = 0f;
+            toolkitControls.style.top = 0f;
+            toolkitControls.style.width = OverlayPanelWidth;
+            toolkitControls.style.bottom = 0f;
+            rootVisualElement.Add(toolkitControls);
+
+            toolkitCanvas.RebuildNow();
         }
 
         private void OnEnable()
@@ -110,10 +139,18 @@ namespace Dialogs.Graph.Editor
         private void OnDisable()
         {
             EditorApplication.projectChanged -= HandleProjectChanged;
+            toolkitUiActive = false;
+            toolkitCanvas = null;
+            toolkitControls = null;
         }
 
         private void OnGUI()
         {
+            if (toolkitUiActive)
+            {
+                return;
+            }
+
             Color previousBackgroundColor = GUI.backgroundColor;
             Color previousContentColor = GUI.contentColor;
             GUISkin previousSkin = GUI.skin;
@@ -142,6 +179,70 @@ namespace Dialogs.Graph.Editor
                 GUI.backgroundColor = previousBackgroundColor;
                 GUI.contentColor = previousContentColor;
             }
+        }
+
+        private void DrawToolkitControls()
+        {
+            Color previousBackgroundColor = GUI.backgroundColor;
+            Color previousContentColor = GUI.contentColor;
+            GUISkin previousSkin = GUI.skin;
+
+            try
+            {
+                ApplyThemeGuiColors();
+                ApplyThemeSkin();
+                ApplyThemeEditorStyleTextOverrides();
+                DrawControlsOverlay();
+            }
+            finally
+            {
+                RestoreThemeEditorStyleTextOverrides();
+                GUI.skin = previousSkin;
+                GUI.backgroundColor = previousBackgroundColor;
+                GUI.contentColor = previousContentColor;
+            }
+        }
+
+        private void DrawToolkitNode(DialogNode node)
+        {
+            Color previousBackgroundColor = GUI.backgroundColor;
+            Color previousContentColor = GUI.contentColor;
+            GUISkin previousSkin = GUI.skin;
+
+            try
+            {
+                ApplyThemeGuiColors();
+                ApplyThemeSkin();
+                ApplyThemeEditorStyleTextOverrides();
+                DrawNodeWindow(node, false);
+            }
+            finally
+            {
+                RestoreThemeEditorStyleTextOverrides();
+                GUI.skin = previousSkin;
+                GUI.backgroundColor = previousBackgroundColor;
+                GUI.contentColor = previousContentColor;
+            }
+        }
+
+        private void RefreshToolkitCanvas(bool rebuild = false)
+        {
+            if (toolkitCanvas == null)
+            {
+                return;
+            }
+
+            if (rebuild)
+            {
+                toolkitCanvas.RequestRebuild();
+            }
+            else
+            {
+                toolkitCanvas.RefreshGraphAppearance();
+            }
+
+            toolkitControls?.MarkDirtyRepaint();
+            rootVisualElement.style.backgroundColor = WindowBackgroundColor;
         }
 
         private void DrawEmptyState()
@@ -226,6 +327,7 @@ namespace Dialogs.Graph.Editor
             {
                 useLightTheme = !useLightTheme;
                 EditorPrefs.SetBool(ThemeKey, useLightTheme);
+                RefreshToolkitCanvas();
                 Repaint();
             }
 
@@ -666,12 +768,14 @@ namespace Dialogs.Graph.Editor
             phrasesAwaitingRepaintAfterLayout.Clear();
             graphCachesDirty = true;
             InvalidateConnectionRouteCache();
+            RefreshToolkitCanvas();
         }
 
         private void InvalidateGraphStructure()
         {
             graphStructureDirty = true;
             InvalidateGraphCaches();
+            RefreshToolkitCanvas(true);
         }
 
         private void InvalidateConnectionRouteCache()
@@ -694,6 +798,7 @@ namespace Dialogs.Graph.Editor
         {
             InvalidateGraphStructure();
             InvalidateStaticEditorCaches();
+            RefreshToolkitCanvas(true);
             Repaint();
         }
 
@@ -1816,6 +1921,8 @@ namespace Dialogs.Graph.Editor
             [NonSerialized] private SearchField searchField;
             [NonSerialized] private readonly List<int> filteredEntryIndices = new();
             [NonSerialized] private string appliedSearchText;
+            [NonSerialized] private ListView toolkitEntryList;
+            [NonSerialized] private bool toolkitUiActive;
 
             private const float EntryRowHeight = 20f;
 
@@ -1838,6 +1945,7 @@ namespace Dialogs.Graph.Editor
                 scrollPosition = Vector2.zero;
                 EnsureSearchField();
                 RebuildFilteredEntries();
+                RebuildToolkitUi();
             }
 
             private Vector2 InitialSize
@@ -1855,8 +1963,19 @@ namespace Dialogs.Graph.Editor
                 RebuildFilteredEntries();
             }
 
+            private void CreateGUI()
+            {
+                toolkitUiActive = true;
+                RebuildToolkitUi();
+            }
+
             private void OnGUI()
             {
+                if (toolkitUiActive)
+                {
+                    return;
+                }
+
                 EnsureSearchField();
 
                 if (focusSearchField)
@@ -1894,6 +2013,95 @@ namespace Dialogs.Graph.Editor
                 DrawVirtualizedEntryList();
             }
 
+            private void RebuildToolkitUi()
+            {
+                if (!toolkitUiActive)
+                {
+                    return;
+                }
+
+                rootVisualElement.Clear();
+                rootVisualElement.style.paddingLeft = 7f;
+                rootVisualElement.style.paddingRight = 7f;
+                rootVisualElement.style.paddingTop = 7f;
+                rootVisualElement.style.paddingBottom = 7f;
+
+                var title = new Label("Select Entry");
+                title.style.unityFontStyleAndWeight = FontStyle.Bold;
+                title.style.marginBottom = 4f;
+                rootVisualElement.Add(title);
+
+                var search = new ToolbarSearchField { value = searchText ?? string.Empty };
+                search.RegisterValueChangedCallback(evt =>
+                {
+                    if (string.Equals(searchText, evt.newValue, StringComparison.Ordinal))
+                    {
+                        return;
+                    }
+
+                    searchText = evt.newValue;
+                    RebuildFilteredEntries();
+                    toolkitEntryList?.RefreshItems();
+                });
+                rootVisualElement.Add(search);
+
+                var noneButton = new Button(() =>
+                {
+                    ApplyEntrySelectionToObject(targetObject, keyIdPropertyPath, keyPropertyPath, entries, 0);
+                    Close();
+                })
+                {
+                    text = "<None>"
+                };
+                noneButton.style.marginTop = 4f;
+                noneButton.style.marginBottom = 4f;
+                rootVisualElement.Add(noneButton);
+
+                toolkitEntryList = new ListView
+                {
+                    fixedItemHeight = EntryRowHeight,
+                    virtualizationMethod = CollectionVirtualizationMethod.FixedHeight,
+                    selectionType = SelectionType.None,
+                    itemsSource = filteredEntryIndices
+                };
+                toolkitEntryList.style.flexGrow = 1f;
+                toolkitEntryList.style.minHeight = 64f;
+                toolkitEntryList.makeItem = () =>
+                {
+                    var button = new Button();
+                    button.style.height = EntryRowHeight;
+                    button.style.unityTextAlign = TextAnchor.MiddleLeft;
+                    button.RegisterCallback<ClickEvent>(evt =>
+                    {
+                        if (evt.currentTarget is not Button entryButton || entryButton.userData is not int entryIndex)
+                        {
+                            return;
+                        }
+
+                        ApplyEntrySelectionToObject(targetObject, keyIdPropertyPath, keyPropertyPath, entries, entryIndex + 1);
+                        Close();
+                    });
+                    return button;
+                };
+                toolkitEntryList.bindItem = (element, index) =>
+                {
+                    int entryIndex = filteredEntryIndices[index];
+                    var button = (Button)element;
+                    button.text = entries[entryIndex].Key;
+                    button.userData = entryIndex;
+                    button.style.backgroundColor = entryIndex == selectedIndex
+                        ? new Color(0.28f, 0.42f, 0.58f, 0.85f)
+                        : StyleKeyword.Null;
+                };
+                rootVisualElement.Add(toolkitEntryList);
+
+                if (focusSearchField)
+                {
+                    rootVisualElement.schedule.Execute(() => search.Focus()).ExecuteLater(0);
+                    focusSearchField = false;
+                }
+            }
+
             public static void Show(
                 Rect activatorRect,
                 UnityEngine.Object targetObject,
@@ -1920,6 +2128,7 @@ namespace Dialogs.Graph.Editor
 
             private void OnDestroy()
             {
+                toolkitUiActive = false;
                 if (activeWindow == this)
                 {
                     activeWindow = null;
@@ -2009,6 +2218,729 @@ namespace Dialogs.Graph.Editor
                 }
 
                 return new Rect(screenPoint.x + 12f, screenPoint.y + 12f, 1f, 1f);
+            }
+        }
+
+        private sealed class DialogToolkitCanvas : VisualElement
+        {
+            private const float NodeHeaderHeight = 24f;
+
+            private readonly DialogEditorWindow owner;
+            private readonly VisualElement graphContent;
+            private readonly Label emptyState;
+            private readonly Dictionary<DialogNode, DialogToolkitNodeElement> nodeElements = new();
+            private readonly Dictionary<DialogAnswer, DialogToolkitConnectionElement> connectionElements = new();
+            private DialogNode draggedNode;
+            private bool rebuildScheduled;
+            private bool isPanning;
+            private int panPointerId = -1;
+            private Vector2 panStartPointer;
+            private Vector2 panStartOffset;
+
+            public DialogToolkitCanvas(DialogEditorWindow owner)
+            {
+                this.owner = owner;
+                name = "dialog-toolkit-canvas";
+                style.flexGrow = 1f;
+                style.overflow = Overflow.Hidden;
+                style.backgroundColor = owner.CanvasBackgroundColor;
+
+                graphContent = new VisualElement
+                {
+                    name = "dialog-toolkit-graph-content"
+                };
+                graphContent.style.position = Position.Absolute;
+                graphContent.style.width = WorkspaceWidth;
+                graphContent.style.height = WorkspaceHeight;
+                graphContent.style.transformOrigin = new TransformOrigin(0f, 0f, 0f);
+                hierarchy.Add(graphContent);
+
+                emptyState = new Label("Create or load a dialog graph.")
+                {
+                    name = "dialog-toolkit-empty-state"
+                };
+                emptyState.style.position = Position.Absolute;
+                emptyState.style.left = 18f;
+                emptyState.style.top = 18f;
+                emptyState.style.paddingLeft = 10f;
+                emptyState.style.paddingRight = 10f;
+                emptyState.style.paddingTop = 8f;
+                emptyState.style.paddingBottom = 8f;
+                emptyState.style.borderTopWidth = 1f;
+                emptyState.style.borderBottomWidth = 1f;
+                emptyState.style.borderLeftWidth = 1f;
+                emptyState.style.borderRightWidth = 1f;
+                hierarchy.Add(emptyState);
+
+                RegisterCallback<PointerDownEvent>(HandlePointerDown);
+                RegisterCallback<PointerMoveEvent>(HandlePointerMove);
+                RegisterCallback<PointerUpEvent>(HandlePointerUp);
+                RegisterCallback<PointerCaptureOutEvent>(HandlePointerCaptureOut);
+                RegisterCallback<WheelEvent>(HandleWheel);
+                ApplyViewTransform();
+            }
+
+            public bool IsDraggingNode(DialogNode node)
+            {
+                return draggedNode == node;
+            }
+
+            public float OwnerZoom => owner.zoom;
+            public bool OwnerIsSelectingTarget => owner.isSelectingTargetPhrase;
+            public Color OwnerPanelBackgroundColor => owner.PanelBackgroundColor;
+            public Color OwnerMinorGridColor => owner.MinorGridColor;
+            public Color OwnerSelectionBorderColor => owner.GetSelectionOverlayColor(false);
+
+            public void OwnerDrawNode(DialogNode node)
+            {
+                owner.DrawToolkitNode(node);
+            }
+
+            public void OwnerDeleteNode(DialogNode node)
+            {
+                owner.DeleteNode(node, false);
+            }
+
+            public string OwnerGetNodeTitle(DialogNode node)
+            {
+                return owner.GetNodeTitle(node);
+            }
+
+            public Color OwnerGetNodeTint(DialogNode node)
+            {
+                return owner.GetNodeTint(node);
+            }
+
+            public bool OwnerTryGetNodeRect(DialogNode node, out Rect rect)
+            {
+                return owner.nodeRects.TryGetValue(node, out rect);
+            }
+
+            public Color OwnerGetConnectionColor(DialogNode sourceNode, DialogNode targetNode)
+            {
+                return owner.GetConnectionColor(sourceNode, targetNode);
+            }
+
+            public (Vector2 StartTangent, Vector2 EndTangent) OwnerGetConnectionTangents(
+                DialogAnswer answer,
+                Vector2 startPos,
+                Vector2 endPos,
+                Rect sourceRect,
+                Rect targetRect,
+                DialogNode sourceNode,
+                DialogNode targetNode)
+            {
+                return owner.GetOrBuildConnectionTangents(
+                    answer,
+                    startPos,
+                    endPos,
+                    sourceRect,
+                    targetRect,
+                    sourceNode,
+                    targetNode);
+            }
+
+            public void RebuildNow()
+            {
+                rebuildScheduled = false;
+                graphContent.Clear();
+                nodeElements.Clear();
+                connectionElements.Clear();
+                owner.nodeRects.Clear();
+
+                if (owner.currentGraph == null)
+                {
+                    emptyState.style.display = DisplayStyle.Flex;
+                    RefreshGraphAppearance();
+                    return;
+                }
+
+                if (owner.graphStructureDirty)
+                {
+                    owner.CleanupGraph();
+                    owner.graphStructureDirty = false;
+                }
+
+                if (owner.graphCachesDirty)
+                {
+                    owner.RebuildGraphCaches();
+                }
+
+                emptyState.style.display = DisplayStyle.None;
+                graphContent.Add(new DialogToolkitGridElement(owner));
+
+                foreach (DialogNode node in owner.currentGraph.Nodes)
+                {
+                    if (node == null)
+                    {
+                        continue;
+                    }
+
+                    var nodeElement = new DialogToolkitNodeElement(this, node);
+                    nodeElements[node] = nodeElement;
+                    graphContent.Add(nodeElement);
+                    owner.nodeRects[node] = new Rect(node.Position, new Vector2(DialogNodeWidth, 220f));
+                }
+
+                foreach (DialogNode sourceNode in owner.currentGraph.Nodes)
+                {
+                    if (sourceNode?.Phrase == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (DialogAnswer answer in sourceNode.Phrase.Answers)
+                    {
+                        if (answer?.NextPhrase == null ||
+                            !owner.phraseToNodeLookup.TryGetValue(answer.NextPhrase, out DialogNode targetNode))
+                        {
+                            continue;
+                        }
+
+                        var connectionElement = new DialogToolkitConnectionElement(this, sourceNode, targetNode, answer);
+                        connectionElements[answer] = connectionElement;
+                        graphContent.Insert(1, connectionElement);
+                    }
+                }
+
+                ApplyViewTransform();
+                RefreshGraphAppearance();
+            }
+
+            public void RequestRebuild()
+            {
+                if (rebuildScheduled)
+                {
+                    return;
+                }
+
+                rebuildScheduled = true;
+                schedule.Execute(RebuildNow).ExecuteLater(0);
+            }
+
+            public void RefreshGraphAppearance()
+            {
+                style.backgroundColor = owner.CanvasBackgroundColor;
+                emptyState.style.backgroundColor = owner.PanelBackgroundColor;
+                emptyState.style.color = owner.ControlContentColor;
+                emptyState.style.borderTopColor = owner.MinorGridColor;
+                emptyState.style.borderBottomColor = owner.MinorGridColor;
+                emptyState.style.borderLeftColor = owner.MinorGridColor;
+                emptyState.style.borderRightColor = owner.MinorGridColor;
+
+                foreach (DialogToolkitNodeElement nodeElement in nodeElements.Values)
+                {
+                    nodeElement.RefreshAppearance();
+                }
+
+                RefreshConnections();
+                RefreshTargetSelection();
+            }
+
+            public void RefreshTargetSelection()
+            {
+                foreach (DialogToolkitNodeElement nodeElement in nodeElements.Values)
+                {
+                    nodeElement.RefreshTargetSelection();
+                }
+            }
+
+            public void NotifyNodeGeometryChanged(DialogToolkitNodeElement nodeElement)
+            {
+                if (!nodeElements.ContainsKey(nodeElement.Node))
+                {
+                    return;
+                }
+
+                owner.nodeRects[nodeElement.Node] = nodeElement.GetGraphRect();
+                RefreshConnectionsFor(nodeElement.Node);
+            }
+
+            public void BeginNodeDrag(DialogToolkitNodeElement nodeElement, PointerDownEvent evt)
+            {
+                if (owner.isSelectingTargetPhrase)
+                {
+                    return;
+                }
+
+                draggedNode = nodeElement.Node;
+                SelectNode(nodeElement.Node);
+                nodeElement.BeginDrag(evt);
+            }
+
+            public void MoveNode(DialogToolkitNodeElement nodeElement, Vector2 graphPosition)
+            {
+                if (draggedNode != nodeElement.Node)
+                {
+                    return;
+                }
+
+                nodeElement.Node.Position = ClampNodePosition(graphPosition);
+                nodeElement.SetGraphPosition(nodeElement.Node.Position);
+                owner.nodeRects[nodeElement.Node] = nodeElement.GetGraphRect();
+                RefreshConnectionsFor(nodeElement.Node);
+            }
+
+            public void EndNodeDrag(DialogToolkitNodeElement nodeElement)
+            {
+                if (draggedNode != nodeElement.Node)
+                {
+                    return;
+                }
+
+                draggedNode = null;
+                owner.nodeRects[nodeElement.Node] = nodeElement.GetGraphRect();
+                owner.MarkDirty(owner.currentGraph);
+                RefreshConnectionsFor(nodeElement.Node);
+            }
+
+            private void SelectNode(DialogNode node)
+            {
+                if (owner.activeConnectionNode == node)
+                {
+                    return;
+                }
+
+                owner.activeConnectionNode = node;
+                RefreshConnections();
+            }
+
+            private void RefreshConnectionsFor(DialogNode node)
+            {
+                foreach (DialogToolkitConnectionElement connectionElement in connectionElements.Values)
+                {
+                    if (connectionElement.IsConnectedTo(node))
+                    {
+                        connectionElement.MarkDirtyRepaint();
+                    }
+                }
+            }
+
+            private void RefreshConnections()
+            {
+                foreach (DialogToolkitConnectionElement connectionElement in connectionElements.Values)
+                {
+                    connectionElement.MarkDirtyRepaint();
+                }
+            }
+
+            private void HandlePointerDown(PointerDownEvent evt)
+            {
+                if (evt.button == 0 && (evt.target == this || evt.target == graphContent))
+                {
+                    if (owner.activeConnectionNode != null)
+                    {
+                        owner.activeConnectionNode = null;
+                        RefreshConnections();
+                    }
+
+                    return;
+                }
+
+                if (evt.button != 1 || isPanning)
+                {
+                    return;
+                }
+
+                isPanning = true;
+                panPointerId = evt.pointerId;
+                panStartPointer = evt.position;
+                panStartOffset = owner.panOffset;
+                this.CapturePointer(evt.pointerId);
+                evt.StopPropagation();
+            }
+
+            private void HandlePointerMove(PointerMoveEvent evt)
+            {
+                if (!isPanning || evt.pointerId != panPointerId || !this.HasPointerCapture(evt.pointerId))
+                {
+                    return;
+                }
+
+                Vector2 pointerPosition = new Vector2(evt.position.x, evt.position.y);
+                owner.panOffset = panStartOffset + (pointerPosition - panStartPointer);
+                owner.ClampPanToWorkspace(WorkspaceWidth, WorkspaceHeight);
+                ApplyViewTransform();
+                evt.StopPropagation();
+            }
+
+            private void HandlePointerUp(PointerUpEvent evt)
+            {
+                EndPan(evt.pointerId);
+            }
+
+            private void HandlePointerCaptureOut(PointerCaptureOutEvent evt)
+            {
+                EndPan(evt.pointerId);
+            }
+
+            private void EndPan(int pointerId)
+            {
+                if (!isPanning || pointerId != panPointerId)
+                {
+                    return;
+                }
+
+                if (this.HasPointerCapture(pointerId))
+                {
+                    this.ReleasePointer(pointerId);
+                }
+
+                isPanning = false;
+                panPointerId = -1;
+            }
+
+            private void HandleWheel(WheelEvent evt)
+            {
+                float zoomDelta = -evt.delta.y * 0.05f;
+                float oldZoom = owner.zoom;
+                float newZoom = Mathf.Clamp(owner.zoom + zoomDelta, ZoomMin, ZoomMax);
+                if (Mathf.Approximately(oldZoom, newZoom))
+                {
+                    return;
+                }
+
+                Vector2 graphPoint = (evt.mousePosition - owner.panOffset) / oldZoom;
+                owner.zoom = newZoom;
+                owner.panOffset = evt.mousePosition - graphPoint * newZoom;
+                owner.ClampPanToWorkspace(WorkspaceWidth, WorkspaceHeight);
+                ApplyViewTransform();
+                evt.StopPropagation();
+            }
+
+            private void ApplyViewTransform()
+            {
+                graphContent.style.left = owner.panOffset.x;
+                graphContent.style.top = owner.panOffset.y;
+                graphContent.style.scale = new Scale(new Vector2(owner.zoom, owner.zoom));
+            }
+
+            private static Vector2 ClampNodePosition(Vector2 position)
+            {
+                return new Vector2(
+                    Mathf.Clamp(position.x, 0f, WorkspaceWidth - DialogNodeWidth),
+                    Mathf.Clamp(position.y, 0f, WorkspaceHeight - NodeHeaderHeight));
+            }
+        }
+
+        private sealed class DialogToolkitNodeElement : VisualElement
+        {
+            private readonly DialogToolkitCanvas canvas;
+            private readonly VisualElement header;
+            private readonly Label title;
+            private readonly IMGUIContainer content;
+            private int dragPointerId = -1;
+            private Vector2 dragStartPointer;
+            private Vector2 dragStartPosition;
+
+            public DialogToolkitNodeElement(DialogToolkitCanvas canvas, DialogNode node)
+            {
+                this.canvas = canvas;
+                Node = node;
+                name = "dialog-toolkit-node";
+                style.position = Position.Absolute;
+                style.left = node.Position.x;
+                style.top = node.Position.y;
+                style.width = DialogNodeWidth;
+                style.minHeight = 80f;
+                style.flexDirection = FlexDirection.Column;
+                style.borderTopWidth = 1f;
+                style.borderBottomWidth = 1f;
+                style.borderLeftWidth = 1f;
+                style.borderRightWidth = 1f;
+                style.borderTopLeftRadius = 4f;
+                style.borderTopRightRadius = 4f;
+                style.borderBottomLeftRadius = 4f;
+                style.borderBottomRightRadius = 4f;
+
+                header = new VisualElement
+                {
+                    name = "dialog-toolkit-node-header"
+                };
+                header.style.height = 24f;
+                header.style.flexDirection = FlexDirection.Row;
+                header.style.alignItems = Align.Center;
+                header.style.paddingLeft = 7f;
+                header.style.paddingRight = 3f;
+                header.style.borderTopLeftRadius = 3f;
+                header.style.borderTopRightRadius = 3f;
+                hierarchy.Add(header);
+
+                title = new Label
+                {
+                    name = "dialog-toolkit-node-title"
+                };
+                title.style.flexGrow = 1f;
+                title.style.unityFontStyleAndWeight = FontStyle.Bold;
+                title.style.whiteSpace = WhiteSpace.NoWrap;
+                title.style.overflow = Overflow.Hidden;
+                title.style.textOverflow = TextOverflow.Ellipsis;
+                header.Add(title);
+
+                var removeButton = new Button(() => canvas.OwnerDeleteNode(Node))
+                {
+                    text = "×",
+                    name = "dialog-toolkit-node-remove"
+                };
+                removeButton.style.width = 20f;
+                removeButton.style.height = 18f;
+                removeButton.style.paddingLeft = 0f;
+                removeButton.style.paddingRight = 0f;
+                header.Add(removeButton);
+
+                content = new IMGUIContainer(() => canvas.OwnerDrawNode(Node))
+                {
+                    name = "dialog-toolkit-node-content"
+                };
+                content.style.flexGrow = 1f;
+                content.style.paddingLeft = 5f;
+                content.style.paddingRight = 5f;
+                content.style.paddingBottom = 5f;
+                hierarchy.Add(content);
+
+                header.RegisterCallback<PointerDownEvent>(HandleHeaderPointerDown);
+                header.RegisterCallback<PointerMoveEvent>(HandleHeaderPointerMove);
+                header.RegisterCallback<PointerUpEvent>(HandleHeaderPointerUp);
+                header.RegisterCallback<PointerCaptureOutEvent>(HandleHeaderPointerCaptureOut);
+                RegisterCallback<GeometryChangedEvent>(_ => canvas.NotifyNodeGeometryChanged(this));
+                RefreshAppearance();
+            }
+
+            public DialogNode Node { get; }
+
+            public Rect GetGraphRect()
+            {
+                float width = layout.width > 0f ? layout.width : DialogNodeWidth;
+                float height = layout.height > 0f ? layout.height : 220f;
+                return new Rect(Node.Position, new Vector2(width, height));
+            }
+
+            public void SetGraphPosition(Vector2 position)
+            {
+                style.left = position.x;
+                style.top = position.y;
+            }
+
+            public void RefreshAppearance()
+            {
+                title.text = canvas.OwnerGetNodeTitle(Node);
+                Color tint = canvas.OwnerGetNodeTint(Node);
+                header.style.backgroundColor = tint;
+                header.style.color = Color.black;
+                style.backgroundColor = canvas.OwnerPanelBackgroundColor;
+                style.borderTopColor = canvas.OwnerMinorGridColor;
+                style.borderBottomColor = canvas.OwnerMinorGridColor;
+                style.borderLeftColor = canvas.OwnerMinorGridColor;
+                style.borderRightColor = canvas.OwnerMinorGridColor;
+                content.MarkDirtyRepaint();
+            }
+
+            public void RefreshTargetSelection()
+            {
+                if (!canvas.OwnerIsSelectingTarget)
+                {
+                    style.opacity = 1f;
+                    Color defaultBorderColor = canvas.OwnerMinorGridColor;
+                    style.borderTopColor = defaultBorderColor;
+                    style.borderBottomColor = defaultBorderColor;
+                    style.borderLeftColor = defaultBorderColor;
+                    style.borderRightColor = defaultBorderColor;
+                    return;
+                }
+
+                style.opacity = Node.Phrase == null ? 0.45f : 1f;
+                Color selectionBorderColor = canvas.OwnerSelectionBorderColor;
+                style.borderTopColor = selectionBorderColor;
+                style.borderBottomColor = selectionBorderColor;
+                style.borderLeftColor = selectionBorderColor;
+                style.borderRightColor = selectionBorderColor;
+            }
+
+            public void BeginDrag(PointerDownEvent evt)
+            {
+                dragPointerId = evt.pointerId;
+                dragStartPointer = evt.position;
+                dragStartPosition = Node.Position;
+                header.CapturePointer(evt.pointerId);
+            }
+
+            private void HandleHeaderPointerDown(PointerDownEvent evt)
+            {
+                if (evt.button != 0 || evt.target is Button)
+                {
+                    return;
+                }
+
+                canvas.BeginNodeDrag(this, evt);
+                evt.StopPropagation();
+            }
+
+            private void HandleHeaderPointerMove(PointerMoveEvent evt)
+            {
+                if (evt.pointerId != dragPointerId || !header.HasPointerCapture(evt.pointerId))
+                {
+                    return;
+                }
+
+                Vector2 pointerPosition = new Vector2(evt.position.x, evt.position.y);
+                Vector2 graphPosition = dragStartPosition + (pointerPosition - dragStartPointer) / canvas.OwnerZoom;
+                canvas.MoveNode(this, graphPosition);
+                evt.StopPropagation();
+            }
+
+            private void HandleHeaderPointerUp(PointerUpEvent evt)
+            {
+                EndDrag(evt.pointerId);
+                evt.StopPropagation();
+            }
+
+            private void HandleHeaderPointerCaptureOut(PointerCaptureOutEvent evt)
+            {
+                EndDrag(evt.pointerId);
+            }
+
+            private void EndDrag(int pointerId)
+            {
+                if (pointerId != dragPointerId)
+                {
+                    return;
+                }
+
+                if (header.HasPointerCapture(pointerId))
+                {
+                    header.ReleasePointer(pointerId);
+                }
+
+                dragPointerId = -1;
+                canvas.EndNodeDrag(this);
+            }
+        }
+
+        private sealed class DialogToolkitConnectionElement : VisualElement
+        {
+            private readonly DialogToolkitCanvas canvas;
+            private readonly DialogNode sourceNode;
+            private readonly DialogNode targetNode;
+            private readonly DialogAnswer answer;
+
+            public DialogToolkitConnectionElement(
+                DialogToolkitCanvas canvas,
+                DialogNode sourceNode,
+                DialogNode targetNode,
+                DialogAnswer answer)
+            {
+                this.canvas = canvas;
+                this.sourceNode = sourceNode;
+                this.targetNode = targetNode;
+                this.answer = answer;
+                name = "dialog-toolkit-connection";
+                pickingMode = PickingMode.Ignore;
+                style.position = Position.Absolute;
+                style.left = 0f;
+                style.top = 0f;
+                style.width = WorkspaceWidth;
+                style.height = WorkspaceHeight;
+                generateVisualContent += DrawConnection;
+            }
+
+            public bool IsConnectedTo(DialogNode node)
+            {
+                return sourceNode == node || targetNode == node;
+            }
+
+            private void DrawConnection(MeshGenerationContext context)
+            {
+                if (!canvas.OwnerTryGetNodeRect(sourceNode, out Rect sourceRect) ||
+                    !canvas.OwnerTryGetNodeRect(targetNode, out Rect targetRect))
+                {
+                    return;
+                }
+
+                Vector2 startPos = new Vector2(sourceRect.xMax - 12f, sourceRect.center.y);
+                Vector2 endPos = DialogEditorWindow.GetNearestSideCenter(targetRect, startPos);
+                Vector2 endDirection = DialogEditorWindow.GetConnectionDirectionForRectPoint(targetRect, endPos);
+                Vector2 startTangent = startPos + Vector2.right * 60f;
+                Vector2 endTangent = endPos + endDirection * 60f;
+
+                if (!canvas.IsDraggingNode(sourceNode) && !canvas.IsDraggingNode(targetNode))
+                {
+                    (startTangent, endTangent) = canvas.OwnerGetConnectionTangents(
+                        answer,
+                        startPos,
+                        endPos,
+                        sourceRect,
+                        targetRect,
+                        sourceNode,
+                        targetNode);
+                }
+
+                Color color = canvas.OwnerGetConnectionColor(sourceNode, targetNode);
+                Painter2D painter = context.painter2D;
+                painter.strokeColor = color;
+                painter.lineWidth = 3f;
+                painter.BeginPath();
+                painter.MoveTo(startPos);
+                painter.BezierCurveTo(startTangent, endTangent, endPos);
+                painter.Stroke();
+
+                Vector2 direction = endPos - endTangent;
+                Vector2 normalizedDirection = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.right;
+                Vector2 right = new Vector2(-normalizedDirection.y, normalizedDirection.x);
+                Vector2 arrowBase = endPos - normalizedDirection * 18f;
+                painter.fillColor = color;
+                painter.BeginPath();
+                painter.MoveTo(endPos);
+                painter.LineTo(arrowBase + right * 7.5f);
+                painter.LineTo(arrowBase - right * 7.5f);
+                painter.ClosePath();
+                painter.Fill();
+            }
+        }
+
+        private sealed class DialogToolkitGridElement : VisualElement
+        {
+            private readonly DialogEditorWindow owner;
+
+            public DialogToolkitGridElement(DialogEditorWindow owner)
+            {
+                this.owner = owner;
+                name = "dialog-toolkit-grid";
+                pickingMode = PickingMode.Ignore;
+                style.position = Position.Absolute;
+                style.left = 0f;
+                style.top = 0f;
+                style.width = WorkspaceWidth;
+                style.height = WorkspaceHeight;
+                generateVisualContent += DrawGrid;
+            }
+
+            private void DrawGrid(MeshGenerationContext context)
+            {
+                Painter2D painter = context.painter2D;
+                DrawGridLines(painter, 40f, owner.MinorGridColor, 1f);
+                DrawGridLines(painter, 200f, owner.MajorGridColor, 1.4f);
+            }
+
+            private static void DrawGridLines(Painter2D painter, float step, Color color, float width)
+            {
+                painter.strokeColor = color;
+                painter.lineWidth = width;
+
+                for (float x = 0f; x <= WorkspaceWidth; x += step)
+                {
+                    painter.BeginPath();
+                    painter.MoveTo(new Vector2(x, 0f));
+                    painter.LineTo(new Vector2(x, WorkspaceHeight));
+                    painter.Stroke();
+                }
+
+                for (float y = 0f; y <= WorkspaceHeight; y += step)
+                {
+                    painter.BeginPath();
+                    painter.MoveTo(new Vector2(0f, y));
+                    painter.LineTo(new Vector2(WorkspaceWidth, y));
+                    painter.Stroke();
+                }
             }
         }
 
@@ -2138,7 +3070,7 @@ namespace Dialogs.Graph.Editor
             }
         }
 
-        private void DrawNodeWindow(DialogNode node)
+        private void DrawNodeWindow(DialogNode node, bool allowWindowDrag = true)
         {
             if (TryHandleTargetPhraseSelection(node))
             {
@@ -2151,13 +3083,14 @@ namespace Dialogs.Graph.Editor
                 activeConnectionNode != node)
             {
                 activeConnectionNode = node;
+                RefreshToolkitCanvas();
                 Repaint();
             }
 
             EditorGUI.BeginDisabledGroup(isSelectingTargetPhrase);
 
             Rect removeButtonRect = new Rect(298f, 5f, 16f, 16f);
-            if (DrawMiniButton(removeButtonRect, "x"))
+            if (allowWindowDrag && DrawMiniButton(removeButtonRect, "x"))
             {
                 DeleteNode(node);
                 EditorGUI.EndDisabledGroup();
@@ -2207,7 +3140,11 @@ namespace Dialogs.Graph.Editor
             if (node.Phrase == null)
             {
                 EditorGUILayout.HelpBox("No phrase assigned.", MessageType.Warning);
-                GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+                if (allowWindowDrag)
+                {
+                    GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+                }
+
                 EditorGUI.EndDisabledGroup();
                 return;
             }
@@ -2236,7 +3173,10 @@ namespace Dialogs.Graph.Editor
             }
 
             EditorGUI.EndDisabledGroup();
-            GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+            if (allowWindowDrag)
+            {
+                GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+            }
         }
 
         private bool TryHandleTargetPhraseSelection(DialogNode node)
@@ -2416,6 +3356,7 @@ namespace Dialogs.Graph.Editor
                     isSelectingTargetPhrase = true;
                     pendingAnswer = phrase.Answers[i];
                     sourcePhraseForSelection = phrase;
+                    toolkitCanvas?.RefreshTargetSelection();
                 }
 
                 if (isExpanded)
@@ -3888,7 +4829,7 @@ namespace Dialogs.Graph.Editor
             #endif
         }
 
-        private void DeleteNode(DialogNode node)
+        private void DeleteNode(DialogNode node, bool exitGui = true)
         {
             if (activeConnectionNode == node)
             {
@@ -3922,7 +4863,10 @@ namespace Dialogs.Graph.Editor
             InvalidateGraphStructure();
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            GUIUtility.ExitGUI();
+            if (exitGui)
+            {
+                GUIUtility.ExitGUI();
+            }
         }
 
         private void RemovePhraseReferences(DialogPhrase phrase)
@@ -4125,6 +5069,7 @@ namespace Dialogs.Graph.Editor
             isSelectingTargetPhrase = false;
             pendingAnswer = null;
             sourcePhraseForSelection = null;
+            toolkitCanvas?.RefreshTargetSelection();
 
             if (repaint)
             {

@@ -9,12 +9,14 @@ using Quests.Graph.Model;
 using UnityEditor.IMGUI.Controls;
 using UnityEditor;
 using UnityEditor.Localization;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.Localization.Tables;
+using UnityEngine.UIElements;
 
 namespace Quests.Graph.Editor
 {
-    public class QuestEditorWindow : EditorWindow
+    public class QuestEditorWindow : EditorWindow, IRetainedGraphCanvasHost<QuestNode, QuestTransition>
     {
         private const string PreferredPreviewLocale = "ru";
         private const string NodesPathKey = "QuestEditor_NodesPath";
@@ -80,11 +82,38 @@ namespace Quests.Graph.Editor
         private float zoom = 1f;
         private Vector2 panOffset = Vector2.zero;
         private bool useLightTheme;
+        private RetainedGraphCanvas<QuestNode, QuestTransition> toolkitCanvas;
+        private IMGUIContainer toolkitControls;
+        private bool toolkitUiActive;
 
         [MenuItem("Tools/Quest Editor")]
         public static void Open()
         {
             GetWindow<QuestEditorWindow>("Quest Editor");
+        }
+
+        private void CreateGUI()
+        {
+            toolkitUiActive = true;
+            rootVisualElement.Clear();
+            rootVisualElement.style.flexGrow = 1f;
+            rootVisualElement.style.backgroundColor = WindowBackgroundColor;
+
+            toolkitCanvas = new RetainedGraphCanvas<QuestNode, QuestTransition>(this);
+            rootVisualElement.Add(toolkitCanvas);
+
+            toolkitControls = new IMGUIContainer(DrawToolkitControls)
+            {
+                name = "quest-editor-controls"
+            };
+            toolkitControls.style.position = Position.Absolute;
+            toolkitControls.style.left = 0f;
+            toolkitControls.style.top = 0f;
+            toolkitControls.style.width = OverlayPanelWidth;
+            toolkitControls.style.bottom = 0f;
+            rootVisualElement.Add(toolkitControls);
+
+            toolkitCanvas.RebuildNow();
         }
 
         private void OnEnable()
@@ -98,10 +127,18 @@ namespace Quests.Graph.Editor
         private void OnDisable()
         {
             EditorApplication.projectChanged -= HandleProjectChanged;
+            toolkitUiActive = false;
+            toolkitCanvas = null;
+            toolkitControls = null;
         }
 
         private void OnGUI()
         {
+            if (toolkitUiActive)
+            {
+                return;
+            }
+
             Color previousBackgroundColor = GUI.backgroundColor;
             Color previousContentColor = GUI.contentColor;
             GUISkin previousSkin = GUI.skin;
@@ -131,6 +168,277 @@ namespace Quests.Graph.Editor
                 GUI.backgroundColor = previousBackgroundColor;
                 GUI.contentColor = previousContentColor;
             }
+        }
+
+        private void DrawToolkitControls()
+        {
+            Color previousBackgroundColor = GUI.backgroundColor;
+            Color previousContentColor = GUI.contentColor;
+            GUISkin previousSkin = GUI.skin;
+
+            try
+            {
+                ApplyThemeGuiColors();
+                ApplyThemeSkin();
+                ApplyThemeEditorStyleTextOverrides();
+                DrawControlsOverlay();
+            }
+            finally
+            {
+                RestoreThemeEditorStyleTextOverrides();
+                GUI.skin = previousSkin;
+                GUI.backgroundColor = previousBackgroundColor;
+                GUI.contentColor = previousContentColor;
+            }
+        }
+
+        private void DrawToolkitNode(QuestNode node)
+        {
+            Color previousBackgroundColor = GUI.backgroundColor;
+            Color previousContentColor = GUI.contentColor;
+            GUISkin previousSkin = GUI.skin;
+
+            try
+            {
+                ApplyThemeGuiColors();
+                ApplyThemeSkin();
+                ApplyThemeEditorStyleTextOverrides();
+                DrawNodeWindow(node, false);
+            }
+            finally
+            {
+                RestoreThemeEditorStyleTextOverrides();
+                GUI.skin = previousSkin;
+                GUI.backgroundColor = previousBackgroundColor;
+                GUI.contentColor = previousContentColor;
+            }
+        }
+
+        private void RefreshToolkitCanvas(bool rebuild = false)
+        {
+            if (toolkitCanvas == null)
+            {
+                return;
+            }
+
+            if (rebuild)
+            {
+                toolkitCanvas.RequestRebuild();
+            }
+            else
+            {
+                toolkitCanvas.RefreshGraphAppearance();
+            }
+
+            toolkitControls?.MarkDirtyRepaint();
+            rootVisualElement.style.backgroundColor = WindowBackgroundColor;
+        }
+
+        string IRetainedGraphCanvasHost<QuestNode, QuestTransition>.RetainedGraphEmptyStateMessage =>
+            "Create or load a quest graph.";
+
+        bool IRetainedGraphCanvasHost<QuestNode, QuestTransition>.RetainedGraphHasGraph => currentGraph != null;
+        Vector2 IRetainedGraphCanvasHost<QuestNode, QuestTransition>.RetainedGraphNodeSize => NodeSize;
+
+        float IRetainedGraphCanvasHost<QuestNode, QuestTransition>.RetainedGraphZoom
+        {
+            get => zoom;
+            set => zoom = value;
+        }
+
+        Vector2 IRetainedGraphCanvasHost<QuestNode, QuestTransition>.RetainedGraphPanOffset
+        {
+            get => panOffset;
+            set => panOffset = value;
+        }
+
+        bool IRetainedGraphCanvasHost<QuestNode, QuestTransition>.RetainedGraphIsSelectingTarget => isSelectingTargetNode;
+        Color IRetainedGraphCanvasHost<QuestNode, QuestTransition>.RetainedGraphCanvasColor => CanvasBackgroundColor;
+        Color IRetainedGraphCanvasHost<QuestNode, QuestTransition>.RetainedGraphPanelColor => PanelBackgroundColor;
+        Color IRetainedGraphCanvasHost<QuestNode, QuestTransition>.RetainedGraphMinorGridColor => MinorGridColor;
+        Color IRetainedGraphCanvasHost<QuestNode, QuestTransition>.RetainedGraphMajorGridColor => MajorGridColor;
+        Color IRetainedGraphCanvasHost<QuestNode, QuestTransition>.RetainedGraphTargetBorderColor => GetSelectionOverlayColor(false);
+
+        void IRetainedGraphCanvasHost<QuestNode, QuestTransition>.PrepareRetainedGraph()
+        {
+            if (currentGraph == null)
+            {
+                return;
+            }
+
+            if (graphStructureDirty)
+            {
+                CleanupGraph();
+                graphStructureDirty = false;
+            }
+
+            EnsureGraphNodes();
+            SynchronizeNodeRects();
+        }
+
+        void IRetainedGraphCanvasHost<QuestNode, QuestTransition>.ClearRetainedNodeRects()
+        {
+            nodeRects.Clear();
+            nodeDataToNodeLookup.Clear();
+        }
+
+        IEnumerable<QuestNode> IRetainedGraphCanvasHost<QuestNode, QuestTransition>.GetRetainedGraphNodes()
+        {
+            return currentGraph?.Nodes ?? Enumerable.Empty<QuestNode>();
+        }
+
+        IEnumerable<RetainedGraphConnection<QuestNode, QuestTransition>>
+            IRetainedGraphCanvasHost<QuestNode, QuestTransition>.GetRetainedGraphConnections()
+        {
+            if (currentGraph == null)
+            {
+                yield break;
+            }
+
+            foreach (QuestNode sourceNode in currentGraph.Nodes)
+            {
+                if (sourceNode?.NodeData == null)
+                {
+                    continue;
+                }
+
+                EnsureCollections(sourceNode.NodeData);
+                foreach (QuestTransition transition in sourceNode.NodeData.Transitions)
+                {
+                    if (transition?.TargetNode == null ||
+                        !nodeDataToNodeLookup.TryGetValue(transition.TargetNode, out QuestNode targetNode))
+                    {
+                        continue;
+                    }
+
+                    yield return new RetainedGraphConnection<QuestNode, QuestTransition>(
+                        sourceNode,
+                        targetNode,
+                        transition);
+                }
+            }
+        }
+
+        Vector2 IRetainedGraphCanvasHost<QuestNode, QuestTransition>.GetRetainedNodePosition(QuestNode node)
+        {
+            return node.Position;
+        }
+
+        void IRetainedGraphCanvasHost<QuestNode, QuestTransition>.SetRetainedNodePosition(QuestNode node, Vector2 position)
+        {
+            node.Position = position;
+        }
+
+        void IRetainedGraphCanvasHost<QuestNode, QuestTransition>.SetRetainedNodeRect(QuestNode node, Rect rect)
+        {
+            nodeRects[node] = rect;
+        }
+
+        string IRetainedGraphCanvasHost<QuestNode, QuestTransition>.GetRetainedNodeTitle(QuestNode node)
+        {
+            return GetNodeTitle(node);
+        }
+
+        Color IRetainedGraphCanvasHost<QuestNode, QuestTransition>.GetRetainedNodeTint(QuestNode node)
+        {
+            return GetNodeTint(node);
+        }
+
+        bool IRetainedGraphCanvasHost<QuestNode, QuestTransition>.IsRetainedNodeTargetable(QuestNode node)
+        {
+            return node != null && node != sourceNodeForSelection && node.NodeData != null;
+        }
+
+        void IRetainedGraphCanvasHost<QuestNode, QuestTransition>.DrawRetainedNode(QuestNode node)
+        {
+            DrawToolkitNode(node);
+        }
+
+        void IRetainedGraphCanvasHost<QuestNode, QuestTransition>.DeleteRetainedNode(QuestNode node)
+        {
+            DeleteNode(node, false);
+        }
+
+        void IRetainedGraphCanvasHost<QuestNode, QuestTransition>.SelectRetainedNode(QuestNode node)
+        {
+            activeConnectionNode = node;
+        }
+
+        void IRetainedGraphCanvasHost<QuestNode, QuestTransition>.ClearRetainedNodeSelection()
+        {
+            activeConnectionNode = null;
+        }
+
+        bool IRetainedGraphCanvasHost<QuestNode, QuestTransition>.TrySelectRetainedTarget(QuestNode node)
+        {
+            if (!isSelectingTargetNode || pendingTransition == null ||
+                node == null || node == sourceNodeForSelection || node.NodeData == null)
+            {
+                return false;
+            }
+
+            pendingTransition.SetTargetNode(node.NodeData);
+            MarkDirty(pendingTransition);
+            CancelTargetSelection(false);
+            return true;
+        }
+
+        void IRetainedGraphCanvasHost<QuestNode, QuestTransition>.MarkRetainedGraphDirty()
+        {
+            MarkDirty(currentGraph);
+        }
+
+        void IRetainedGraphCanvasHost<QuestNode, QuestTransition>.ClampRetainedGraphPan(float workspaceWidth, float workspaceHeight)
+        {
+            ClampPanToWorkspace(workspaceWidth, workspaceHeight);
+        }
+
+        void IRetainedGraphCanvasHost<QuestNode, QuestTransition>.DrawRetainedConnection(
+            Painter2D painter,
+            QuestTransition transition,
+            QuestNode sourceNode,
+            QuestNode targetNode,
+            Rect sourceRect,
+            Rect targetRect,
+            bool isDragging)
+        {
+            Vector2 startPosition = new(sourceRect.xMax - 12f, sourceRect.center.y);
+            Vector2 endPosition = GetNearestSideCenter(targetRect, startPosition);
+            Vector2 endDirection = GetConnectionDirectionForRectPoint(targetRect, endPosition);
+            Vector2 startTangent = startPosition + Vector2.right * 60f;
+            Vector2 endTangent = endPosition + endDirection * 60f;
+
+            if (!isDragging)
+            {
+                (startTangent, endTangent) = GetOrBuildConnectionTangents(
+                    transition,
+                    startPosition,
+                    endPosition,
+                    sourceRect,
+                    targetRect,
+                    sourceNode,
+                    targetNode);
+            }
+
+            Color color = GetConnectionColor(sourceNode, targetNode);
+            painter.strokeColor = color;
+            painter.lineWidth = 4.5f;
+            painter.BeginPath();
+            painter.MoveTo(startPosition);
+            painter.BezierCurveTo(startTangent, endTangent, endPosition);
+            painter.Stroke();
+
+            Vector2 direction = endPosition - endTangent;
+            Vector2 normalizedDirection = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.right;
+            Vector2 right = new(-normalizedDirection.y, normalizedDirection.x);
+            Vector2 arrowBase = endPosition - normalizedDirection * 18f;
+            painter.fillColor = color;
+            painter.BeginPath();
+            painter.MoveTo(endPosition);
+            painter.LineTo(arrowBase + right * 7.5f);
+            painter.LineTo(arrowBase - right * 7.5f);
+            painter.ClosePath();
+            painter.Fill();
         }
 
         private void DrawEmptyState()
@@ -343,6 +651,7 @@ namespace Quests.Graph.Editor
         {
             currentGraph = CreateInstance<QuestGraph>();
             ProjectWindowUtil.CreateAsset(currentGraph, "NewQuestGraph.asset");
+            RefreshToolkitCanvas(true);
         }
 
         private void LoadGraph()
@@ -364,6 +673,7 @@ namespace Quests.Graph.Editor
             EnsureGraphNodes();
             ClaimUnownedNodes();
             graphStructureDirty = true;
+            RefreshToolkitCanvas(true);
         }
 
         private void CreateNewNode()
@@ -405,6 +715,7 @@ namespace Quests.Graph.Editor
             currentGraph.Nodes.Add(newNode);
             MarkDirty(currentGraph);
             MarkDirty(nodeData);
+            RefreshToolkitCanvas(true);
 
             EditorGUIUtility.PingObject(nodeData);
             Selection.activeObject = nodeData;
@@ -858,7 +1169,7 @@ namespace Quests.Graph.Editor
             Handles.EndGUI();
         }
 
-        private void DrawNodeWindow(QuestNode node)
+        private void DrawNodeWindow(QuestNode node, bool allowWindowDrag = true)
         {
             if (TryHandleTargetNodeSelection(node))
             {
@@ -871,13 +1182,14 @@ namespace Quests.Graph.Editor
                 activeConnectionNode != node)
             {
                 activeConnectionNode = node;
+                RefreshToolkitCanvas();
                 Repaint();
             }
 
             EditorGUI.BeginDisabledGroup(isSelectingTargetNode);
 
             Rect removeButtonRect = new Rect(298f, 5f, 16f, 16f);
-            if (DrawMiniButton(removeButtonRect, "x"))
+            if (allowWindowDrag && DrawMiniButton(removeButtonRect, "x"))
             {
                 DeleteNode(node);
                 EditorGUI.EndDisabledGroup();
@@ -910,13 +1222,18 @@ namespace Quests.Graph.Editor
                     AssignNodeToCurrentGraph(newNodeData);
                     ReleaseNodeOwnershipIfUnused(oldNodeData);
                     MarkDirty(currentGraph);
+                    RefreshToolkitCanvas(true);
                 }
             }
 
             if (node.NodeData == null)
             {
                 EditorGUILayout.HelpBox("No quest node asset assigned.", MessageType.Warning);
-                GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+                if (allowWindowDrag)
+                {
+                    GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+                }
+
                 EditorGUI.EndDisabledGroup();
                 return;
             }
@@ -928,7 +1245,11 @@ namespace Quests.Graph.Editor
                 EditorGUILayout.HelpBox(
                     $"This node belongs to quest \"{node.NodeData.OwnerGraph.name}\" and cannot be edited here.",
                     MessageType.Error);
-                GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+                if (allowWindowDrag)
+                {
+                    GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+                }
+
                 EditorGUI.EndDisabledGroup();
                 return;
             }
@@ -952,7 +1273,10 @@ namespace Quests.Graph.Editor
             }
 
             EditorGUI.EndDisabledGroup();
-            GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+            if (allowWindowDrag)
+            {
+                GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+            }
         }
 
         private bool TryHandleTargetNodeSelection(QuestNode node)
@@ -1053,6 +1377,7 @@ namespace Quests.Graph.Editor
                     isSelectingTargetNode = true;
                     pendingTransition = transition;
                     sourceNodeForSelection = ownerNode;
+                    RefreshToolkitCanvas();
                 }
 
                 if (isExpanded)
@@ -1218,7 +1543,7 @@ namespace Quests.Graph.Editor
             GUIUtility.ExitGUI();
         }
 
-        private void DeleteNode(QuestNode node)
+        private void DeleteNode(QuestNode node, bool exitGui = true)
         {
             bool shouldDeleteNodeAsset = node.NodeData != null &&
                                          EditorUtility.DisplayDialog(
@@ -1252,7 +1577,11 @@ namespace Quests.Graph.Editor
             MarkDirty(currentGraph);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            GUIUtility.ExitGUI();
+            RefreshToolkitCanvas(true);
+            if (exitGui)
+            {
+                GUIUtility.ExitGUI();
+            }
         }
 
         private void RemoveNodeReferences(QuestNodeData nodeData)
@@ -1392,6 +1721,7 @@ namespace Quests.Graph.Editor
             currentGraph.Nodes.RemoveAt(index);
             currentGraph.Nodes.Insert(0, node);
             MarkDirty(currentGraph);
+            RefreshToolkitCanvas();
         }
 
         private Color GetNodeTint(QuestNode node)
@@ -1739,6 +2069,7 @@ namespace Quests.Graph.Editor
 
             if (repaint)
             {
+                RefreshToolkitCanvas();
                 Repaint();
             }
         }
@@ -2467,6 +2798,7 @@ namespace Quests.Graph.Editor
             InvalidateStaticEditorCaches();
             InvalidateConnectionRouteCache();
             graphStructureDirty = true;
+            RefreshToolkitCanvas(true);
             Repaint();
         }
 
@@ -3086,6 +3418,8 @@ namespace Quests.Graph.Editor
             [System.NonSerialized] private SearchField searchField;
             [System.NonSerialized] private readonly List<int> filteredEntryIndices = new();
             [System.NonSerialized] private string appliedSearchText;
+            [System.NonSerialized] private ListView toolkitEntryList;
+            [System.NonSerialized] private bool toolkitUiActive;
 
             private const float EntryRowHeight = 20f;
 
@@ -3108,6 +3442,7 @@ namespace Quests.Graph.Editor
                 scrollPosition = Vector2.zero;
                 EnsureSearchField();
                 RebuildFilteredEntries();
+                RebuildToolkitUi();
             }
 
             private Vector2 InitialSize
@@ -3125,8 +3460,19 @@ namespace Quests.Graph.Editor
                 RebuildFilteredEntries();
             }
 
+            private void CreateGUI()
+            {
+                toolkitUiActive = true;
+                RebuildToolkitUi();
+            }
+
             private void OnGUI()
             {
+                if (toolkitUiActive)
+                {
+                    return;
+                }
+
                 EnsureSearchField();
 
                 if (focusSearchField)
@@ -3164,6 +3510,95 @@ namespace Quests.Graph.Editor
                 DrawVirtualizedEntryList();
             }
 
+            private void RebuildToolkitUi()
+            {
+                if (!toolkitUiActive)
+                {
+                    return;
+                }
+
+                rootVisualElement.Clear();
+                rootVisualElement.style.paddingLeft = 7f;
+                rootVisualElement.style.paddingRight = 7f;
+                rootVisualElement.style.paddingTop = 7f;
+                rootVisualElement.style.paddingBottom = 7f;
+
+                var title = new Label("Select Entry");
+                title.style.unityFontStyleAndWeight = FontStyle.Bold;
+                title.style.marginBottom = 4f;
+                rootVisualElement.Add(title);
+
+                var search = new ToolbarSearchField { value = searchText ?? string.Empty };
+                search.RegisterValueChangedCallback(evt =>
+                {
+                    if (string.Equals(searchText, evt.newValue, System.StringComparison.Ordinal))
+                    {
+                        return;
+                    }
+
+                    searchText = evt.newValue;
+                    RebuildFilteredEntries();
+                    toolkitEntryList?.RefreshItems();
+                });
+                rootVisualElement.Add(search);
+
+                var noneButton = new Button(() =>
+                {
+                    ApplyEntrySelectionToObject(targetObject, keyIdPropertyPath, keyPropertyPath, entries, 0);
+                    Close();
+                })
+                {
+                    text = "<None>"
+                };
+                noneButton.style.marginTop = 4f;
+                noneButton.style.marginBottom = 4f;
+                rootVisualElement.Add(noneButton);
+
+                toolkitEntryList = new ListView
+                {
+                    fixedItemHeight = EntryRowHeight,
+                    virtualizationMethod = CollectionVirtualizationMethod.FixedHeight,
+                    selectionType = SelectionType.None,
+                    itemsSource = filteredEntryIndices
+                };
+                toolkitEntryList.style.flexGrow = 1f;
+                toolkitEntryList.style.minHeight = 64f;
+                toolkitEntryList.makeItem = () =>
+                {
+                    var button = new Button();
+                    button.style.height = EntryRowHeight;
+                    button.style.unityTextAlign = TextAnchor.MiddleLeft;
+                    button.RegisterCallback<ClickEvent>(evt =>
+                    {
+                        if (evt.currentTarget is not Button entryButton || entryButton.userData is not int entryIndex)
+                        {
+                            return;
+                        }
+
+                        ApplyEntrySelectionToObject(targetObject, keyIdPropertyPath, keyPropertyPath, entries, entryIndex + 1);
+                        Close();
+                    });
+                    return button;
+                };
+                toolkitEntryList.bindItem = (element, index) =>
+                {
+                    int entryIndex = filteredEntryIndices[index];
+                    var button = (Button)element;
+                    button.text = entries[entryIndex].Key;
+                    button.userData = entryIndex;
+                    button.style.backgroundColor = entryIndex == selectedIndex
+                        ? new Color(0.28f, 0.42f, 0.58f, 0.85f)
+                        : StyleKeyword.Null;
+                };
+                rootVisualElement.Add(toolkitEntryList);
+
+                if (focusSearchField)
+                {
+                    rootVisualElement.schedule.Execute(() => search.Focus()).ExecuteLater(0);
+                    focusSearchField = false;
+                }
+            }
+
             public static void Show(
                 Rect activatorRect,
                 UnityEngine.Object targetObject,
@@ -3190,6 +3625,7 @@ namespace Quests.Graph.Editor
 
             private void OnDestroy()
             {
+                toolkitUiActive = false;
                 if (activeWindow == this)
                 {
                     activeWindow = null;

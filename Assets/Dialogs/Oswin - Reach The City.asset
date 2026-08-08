@@ -13,22 +13,22 @@ MonoBehaviour:
   m_Name: Oswin - Reach The City
   m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.DialogGraph
   Nodes:
-  - Position: {x: 360, y: 220}
+  - Position: {x: 1014.08386, y: 33.680687}
     Phrase: {fileID: 11400000, guid: 89886865c12e7c147a89adf0209b7542, type: 2}
-  - Position: {x: 750, y: 220}
+  - Position: {x: 1383.4707, y: 31.484617}
     Phrase: {fileID: 11400000, guid: fdf5f3a75796e764cbec3538fca8fa82, type: 2}
-  - Position: {x: 1140, y: 220}
+  - Position: {x: 1708.5713, y: 210.4762}
     Phrase: {fileID: 11400000, guid: c210a700284447e4387ab5c930ff8061, type: 2}
-  - Position: {x: 360, y: 490}
+  - Position: {x: 1017.703, y: 543.8376}
     Phrase: {fileID: 11400000, guid: d53841bbdab339c4e8149780b8218f86, type: 2}
-  - Position: {x: 750, y: 490}
+  - Position: {x: 1378.3118, y: 476.49353}
     Phrase: {fileID: 11400000, guid: ed01baf1a23623a42948cdeca285199c, type: 2}
-  - Position: {x: 1140, y: 490}
+  - Position: {x: 1014.62195, y: 1387.7588}
     Phrase: {fileID: 11400000, guid: 84b4c6f98670cd64c9005cd2a3fff849, type: 2}
-  - Position: {x: 360, y: 760}
+  - Position: {x: 1014.2297, y: 999.38367}
     Phrase: {fileID: 11400000, guid: 418e8925686b947458970b16b01b0e44, type: 2}
-  - Position: {x: 750, y: 760}
+  - Position: {x: 1357.3949, y: 852.7172}
     Phrase: {fileID: 11400000, guid: fc12f69144998f64a8faa019f51803c0, type: 2}
-  - Position: {x: 1140, y: 760}
+  - Position: {x: 1372.9406, y: 1292.9409}
     Phrase: {fileID: 11400000, guid: ad4f5e69153bc6043ab341bf09adbddb, type: 2}
   <EntryPhrase>k__BackingField: {fileID: 11400000, guid: 89886865c12e7c147a89adf0209b7542, type: 2}

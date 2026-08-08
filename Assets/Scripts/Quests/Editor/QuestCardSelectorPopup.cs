@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Quests.Editor
 {
@@ -21,12 +22,20 @@ namespace Quests.Editor
         private string header;
         private List<Entry> entries = new();
         private Vector2 scrollPosition;
+        private bool toolkitUiActive;
 
         private void Initialize(string header, List<Entry> entries)
         {
             this.header = header;
             this.entries = entries ?? new List<Entry>();
             scrollPosition = Vector2.zero;
+            RebuildToolkitUi();
+        }
+
+        private void CreateGUI()
+        {
+            toolkitUiActive = true;
+            RebuildToolkitUi();
         }
 
         private Vector2 InitialSize
@@ -40,6 +49,11 @@ namespace Quests.Editor
 
         private void OnGUI()
         {
+            if (toolkitUiActive)
+            {
+                return;
+            }
+
             EditorGUILayout.LabelField(header, EditorStyles.boldLabel);
             EditorGUILayout.Space(4f);
 
@@ -50,6 +64,82 @@ namespace Quests.Editor
             }
 
             EditorGUILayout.EndScrollView();
+        }
+
+        private void RebuildToolkitUi()
+        {
+            if (!toolkitUiActive)
+            {
+                return;
+            }
+
+            rootVisualElement.Clear();
+            rootVisualElement.style.paddingLeft = 7f;
+            rootVisualElement.style.paddingRight = 7f;
+            rootVisualElement.style.paddingTop = 7f;
+            rootVisualElement.style.paddingBottom = 7f;
+
+            var title = new Label(header ?? string.Empty);
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            title.style.marginBottom = 5f;
+            rootVisualElement.Add(title);
+
+            var scrollView = new ScrollView(ScrollViewMode.Vertical);
+            scrollView.style.flexGrow = 1f;
+            foreach (Entry entry in entries)
+            {
+                scrollView.Add(CreateToolkitEntry(entry));
+            }
+
+            rootVisualElement.Add(scrollView);
+        }
+
+        private Button CreateToolkitEntry(Entry entry)
+        {
+            var button = new Button(() =>
+            {
+                entry.OnSelect?.Invoke();
+                Close();
+            });
+            button.style.height = 72f;
+            button.style.marginBottom = 4f;
+            button.style.paddingLeft = 8f;
+            button.style.paddingRight = 8f;
+            button.style.paddingTop = 8f;
+            button.style.paddingBottom = 8f;
+            button.style.flexDirection = FlexDirection.Row;
+            button.style.backgroundColor = entry.IsSelected
+                ? new Color(0.28f, 0.42f, 0.58f, 0.85f)
+                : new Color(0.22f, 0.22f, 0.22f, 1f);
+
+            var image = new Image
+            {
+                sprite = entry.Sprite,
+                scaleMode = ScaleMode.ScaleToFit
+            };
+            image.style.width = 56f;
+            image.style.minWidth = 56f;
+            image.style.height = 56f;
+            image.style.backgroundColor = new Color(0.16f, 0.16f, 0.16f, 1f);
+            button.Add(image);
+
+            var textContainer = new VisualElement();
+            textContainer.style.flexGrow = 1f;
+            textContainer.style.marginLeft = 8f;
+            textContainer.style.flexDirection = FlexDirection.Column;
+            var entryTitle = new Label(entry.Title ?? string.Empty);
+            entryTitle.style.unityFontStyleAndWeight = FontStyle.Bold;
+            entryTitle.style.whiteSpace = WhiteSpace.NoWrap;
+            entryTitle.style.overflow = Overflow.Hidden;
+            entryTitle.style.textOverflow = TextOverflow.Ellipsis;
+            textContainer.Add(entryTitle);
+            var subtitle = new Label(entry.Subtitle ?? string.Empty);
+            subtitle.style.whiteSpace = WhiteSpace.Normal;
+            subtitle.style.fontSize = 10f;
+            subtitle.style.opacity = 0.82f;
+            textContainer.Add(subtitle);
+            button.Add(textContainer);
+            return button;
         }
 
         public static void Show(Rect activatorRect, string header, List<Entry> entries)
@@ -101,6 +191,7 @@ namespace Quests.Editor
 
         private void OnDestroy()
         {
+            toolkitUiActive = false;
             if (activeWindow == this)
             {
                 activeWindow = null;

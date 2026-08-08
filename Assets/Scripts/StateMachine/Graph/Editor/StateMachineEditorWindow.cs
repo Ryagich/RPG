@@ -5,10 +5,11 @@ using EditorTools;
 using StateMachine.Graph.Model;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace StateMachine.Graph.Editor
 {
-    public class StateMachineEditorWindow : EditorWindow
+    public class StateMachineEditorWindow : EditorWindow, IRetainedGraphCanvasHost<Node, Transition>
     {
         private const string StatesPathKey = "StateMachineEditor_StatesPath";
         private const string TransitionsPathKey = "StateMachineEditor_TransitionsPath";
@@ -59,11 +60,38 @@ namespace StateMachine.Graph.Editor
         private float zoom = 1f;
         private Vector2 panOffset = Vector2.zero;
         private bool useLightTheme;
+        private RetainedGraphCanvas<Node, Transition> toolkitCanvas;
+        private IMGUIContainer toolkitControls;
+        private bool toolkitUiActive;
 
         [MenuItem("Tools/State Machine Editor")]
         public static void Open()
         {
             GetWindow<StateMachineEditorWindow>("State Machine Editor");
+        }
+
+        private void CreateGUI()
+        {
+            toolkitUiActive = true;
+            rootVisualElement.Clear();
+            rootVisualElement.style.flexGrow = 1f;
+            rootVisualElement.style.backgroundColor = WindowBackgroundColor;
+
+            toolkitCanvas = new RetainedGraphCanvas<Node, Transition>(this);
+            rootVisualElement.Add(toolkitCanvas);
+
+            toolkitControls = new IMGUIContainer(DrawToolkitControls)
+            {
+                name = "state-machine-editor-controls"
+            };
+            toolkitControls.style.position = Position.Absolute;
+            toolkitControls.style.left = 0f;
+            toolkitControls.style.top = 0f;
+            toolkitControls.style.width = OverlayPanelWidth;
+            toolkitControls.style.bottom = 0f;
+            rootVisualElement.Add(toolkitControls);
+
+            toolkitCanvas.RebuildNow();
         }
 
         private void OnEnable()
@@ -77,17 +105,26 @@ namespace StateMachine.Graph.Editor
         private void OnDisable()
         {
             EditorApplication.projectChanged -= HandleProjectChanged;
+            toolkitUiActive = false;
+            toolkitCanvas = null;
+            toolkitControls = null;
         }
 
         private void HandleProjectChanged()
         {
             graphStructureDirty = true;
             InvalidateConnectionRouteCache();
+            RefreshToolkitCanvas(true);
             Repaint();
         }
 
         private void OnGUI()
         {
+            if (toolkitUiActive)
+            {
+                return;
+            }
+
             Color previousBackgroundColor = GUI.backgroundColor;
             Color previousContentColor = GUI.contentColor;
             GUISkin previousSkin = GUI.skin;
@@ -117,6 +154,279 @@ namespace StateMachine.Graph.Editor
                 GUI.backgroundColor = previousBackgroundColor;
                 GUI.contentColor = previousContentColor;
             }
+        }
+
+        private void DrawToolkitControls()
+        {
+            Color previousBackgroundColor = GUI.backgroundColor;
+            Color previousContentColor = GUI.contentColor;
+            GUISkin previousSkin = GUI.skin;
+
+            try
+            {
+                ApplyThemeGuiColors();
+                ApplyThemeSkin();
+                ApplyThemeEditorStyleTextOverrides();
+                DrawControlsOverlay();
+            }
+            finally
+            {
+                RestoreThemeEditorStyleTextOverrides();
+                GUI.skin = previousSkin;
+                GUI.backgroundColor = previousBackgroundColor;
+                GUI.contentColor = previousContentColor;
+            }
+        }
+
+        private void DrawToolkitNode(Node node)
+        {
+            Color previousBackgroundColor = GUI.backgroundColor;
+            Color previousContentColor = GUI.contentColor;
+            GUISkin previousSkin = GUI.skin;
+
+            try
+            {
+                ApplyThemeGuiColors();
+                ApplyThemeSkin();
+                ApplyThemeEditorStyleTextOverrides();
+                DrawNodeWindow(node, false);
+            }
+            finally
+            {
+                RestoreThemeEditorStyleTextOverrides();
+                GUI.skin = previousSkin;
+                GUI.backgroundColor = previousBackgroundColor;
+                GUI.contentColor = previousContentColor;
+            }
+        }
+
+        private void RefreshToolkitCanvas(bool rebuild = false)
+        {
+            if (toolkitCanvas == null)
+            {
+                return;
+            }
+
+            if (rebuild)
+            {
+                toolkitCanvas.RequestRebuild();
+            }
+            else
+            {
+                toolkitCanvas.RefreshGraphAppearance();
+            }
+
+            toolkitControls?.MarkDirtyRepaint();
+            rootVisualElement.style.backgroundColor = WindowBackgroundColor;
+        }
+
+        string IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphEmptyStateMessage =>
+            "Create or load a state machine graph.";
+
+        bool IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphHasGraph => currentGraph != null;
+        Vector2 IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphNodeSize => NodeSize;
+
+        float IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphZoom
+        {
+            get => zoom;
+            set => zoom = value;
+        }
+
+        Vector2 IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphPanOffset
+        {
+            get => panOffset;
+            set => panOffset = value;
+        }
+
+        bool IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphIsSelectingTarget => isSelectingTargetNode;
+        Color IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphCanvasColor => CanvasBackgroundColor;
+        Color IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphPanelColor => PanelBackgroundColor;
+        Color IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphMinorGridColor => MinorGridColor;
+        Color IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphMajorGridColor => MajorGridColor;
+        Color IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphTargetBorderColor => GetSelectionOverlayColor(false);
+
+        void IRetainedGraphCanvasHost<Node, Transition>.PrepareRetainedGraph()
+        {
+            if (currentGraph == null)
+            {
+                return;
+            }
+
+            if (graphStructureDirty)
+            {
+                CleanupGraph();
+                graphStructureDirty = false;
+            }
+
+            EnsureGraphNodes();
+            SynchronizeNodeRects();
+        }
+
+        void IRetainedGraphCanvasHost<Node, Transition>.ClearRetainedNodeRects()
+        {
+            nodeRects.Clear();
+            stateToNodeLookup.Clear();
+        }
+
+        IEnumerable<Node> IRetainedGraphCanvasHost<Node, Transition>.GetRetainedGraphNodes()
+        {
+            return currentGraph?.Nodes ?? Enumerable.Empty<Node>();
+        }
+
+        IEnumerable<RetainedGraphConnection<Node, Transition>>
+            IRetainedGraphCanvasHost<Node, Transition>.GetRetainedGraphConnections()
+        {
+            if (currentGraph == null)
+            {
+                yield break;
+            }
+
+            foreach (Node sourceNode in currentGraph.Nodes)
+            {
+                if (sourceNode?.State == null)
+                {
+                    continue;
+                }
+
+                EnsureCollections(sourceNode.State);
+                foreach (Transition transition in sourceNode.State.Transitions)
+                {
+                    if (transition?.TargetState == null ||
+                        !stateToNodeLookup.TryGetValue(transition.TargetState, out Node targetNode))
+                    {
+                        continue;
+                    }
+
+                    yield return new RetainedGraphConnection<Node, Transition>(sourceNode, targetNode, transition);
+                }
+            }
+        }
+
+        Vector2 IRetainedGraphCanvasHost<Node, Transition>.GetRetainedNodePosition(Node node)
+        {
+            return node.Position;
+        }
+
+        void IRetainedGraphCanvasHost<Node, Transition>.SetRetainedNodePosition(Node node, Vector2 position)
+        {
+            node.Position = position;
+        }
+
+        void IRetainedGraphCanvasHost<Node, Transition>.SetRetainedNodeRect(Node node, Rect rect)
+        {
+            nodeRects[node] = rect;
+        }
+
+        string IRetainedGraphCanvasHost<Node, Transition>.GetRetainedNodeTitle(Node node)
+        {
+            return GetNodeTitle(node);
+        }
+
+        Color IRetainedGraphCanvasHost<Node, Transition>.GetRetainedNodeTint(Node node)
+        {
+            return GetNodeTint(node);
+        }
+
+        bool IRetainedGraphCanvasHost<Node, Transition>.IsRetainedNodeTargetable(Node node)
+        {
+            return node != null && node != sourceNodeForSelection && node.State != null;
+        }
+
+        void IRetainedGraphCanvasHost<Node, Transition>.DrawRetainedNode(Node node)
+        {
+            DrawToolkitNode(node);
+        }
+
+        void IRetainedGraphCanvasHost<Node, Transition>.DeleteRetainedNode(Node node)
+        {
+            DeleteNode(node, false);
+        }
+
+        void IRetainedGraphCanvasHost<Node, Transition>.SelectRetainedNode(Node node)
+        {
+            activeConnectionNode = node;
+        }
+
+        void IRetainedGraphCanvasHost<Node, Transition>.ClearRetainedNodeSelection()
+        {
+            activeConnectionNode = null;
+        }
+
+        bool IRetainedGraphCanvasHost<Node, Transition>.TrySelectRetainedTarget(Node node)
+        {
+            if (!isSelectingTargetNode || pendingTransition == null ||
+                node == null || node == sourceNodeForSelection || node.State == null)
+            {
+                return false;
+            }
+
+            pendingTransition.TargetState = node.State;
+            MarkDirty(pendingTransition);
+            CancelTargetSelection(false);
+            return true;
+        }
+
+        void IRetainedGraphCanvasHost<Node, Transition>.MarkRetainedGraphDirty()
+        {
+            MarkDirty(currentGraph);
+        }
+
+        void IRetainedGraphCanvasHost<Node, Transition>.ClampRetainedGraphPan(float workspaceWidth, float workspaceHeight)
+        {
+            ClampPanToWorkspace(workspaceWidth, workspaceHeight);
+        }
+
+        void IRetainedGraphCanvasHost<Node, Transition>.DrawRetainedConnection(
+            Painter2D painter,
+            Transition transition,
+            Node sourceNode,
+            Node targetNode,
+            Rect sourceRect,
+            Rect targetRect,
+            bool isDragging)
+        {
+            Vector2 startPosition = new(sourceRect.xMax - 12f, sourceRect.center.y);
+            Vector2[] routePoints;
+
+            if (isDragging)
+            {
+                Vector2 endPosition = targetRect.center;
+                routePoints = new[] { startPosition, endPosition };
+            }
+            else
+            {
+                routePoints = GetOrBuildConnectionRoute(transition, startPosition, sourceRect, targetRect);
+            }
+
+            if (routePoints == null || routePoints.Length < 2)
+            {
+                return;
+            }
+
+            Color color = GetConnectionColor(sourceNode, targetNode);
+            painter.strokeColor = color;
+            painter.lineWidth = 4f;
+            painter.BeginPath();
+            painter.MoveTo(routePoints[0]);
+            for (int index = 1; index < routePoints.Length; index++)
+            {
+                painter.LineTo(routePoints[index]);
+            }
+
+            painter.Stroke();
+
+            Vector2 end = routePoints[routePoints.Length - 1];
+            Vector2 direction = end - routePoints[routePoints.Length - 2];
+            Vector2 normalizedDirection = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.right;
+            Vector2 right = new(-normalizedDirection.y, normalizedDirection.x);
+            Vector2 arrowBase = end - normalizedDirection * 18f;
+            painter.fillColor = color;
+            painter.BeginPath();
+            painter.MoveTo(end);
+            painter.LineTo(arrowBase + right * 7.5f);
+            painter.LineTo(arrowBase - right * 7.5f);
+            painter.ClosePath();
+            painter.Fill();
         }
 
         private void DrawEmptyState()
@@ -296,6 +606,7 @@ namespace StateMachine.Graph.Editor
         {
             currentGraph = CreateInstance<StateMachineGraph>();
             ProjectWindowUtil.CreateAsset(currentGraph, "NewStateMachineGraph.asset");
+            RefreshToolkitCanvas(true);
         }
 
         private void LoadGraph()
@@ -316,6 +627,7 @@ namespace StateMachine.Graph.Editor
 
             EnsureGraphNodes();
             graphStructureDirty = true;
+            RefreshToolkitCanvas(true);
         }
 
         private void CreateNewState()
@@ -353,6 +665,7 @@ namespace StateMachine.Graph.Editor
 
             currentGraph.Nodes.Add(newNode);
             MarkDirty(currentGraph);
+            RefreshToolkitCanvas(true);
 
             EditorGUIUtility.PingObject(state);
             Selection.activeObject = state;
@@ -1340,7 +1653,7 @@ namespace StateMachine.Graph.Editor
             }
         }
 
-        private void DrawNodeWindow(Node node)
+        private void DrawNodeWindow(Node node, bool allowWindowDrag = true)
         {
             if (!isSelectingTargetNode &&
                 Event.current.rawType == EventType.MouseDown &&
@@ -1348,13 +1661,14 @@ namespace StateMachine.Graph.Editor
                 activeConnectionNode != node)
             {
                 activeConnectionNode = node;
+                RefreshToolkitCanvas();
                 Repaint();
             }
 
             EditorGUI.BeginDisabledGroup(isSelectingTargetNode);
 
             Rect removeButtonRect = new Rect(298f, 5f, 16f, 16f);
-            if (DrawMiniButton(removeButtonRect, "x"))
+            if (allowWindowDrag && DrawMiniButton(removeButtonRect, "x"))
             {
                 DeleteNode(node);
                 EditorGUI.EndDisabledGroup();
@@ -1377,13 +1691,18 @@ namespace StateMachine.Graph.Editor
                     ReplaceStateReferences(node.State, newState);
                     node.State = newState;
                     MarkDirty(currentGraph);
+                    RefreshToolkitCanvas(true);
                 }
             }
 
             if (node.State == null)
             {
                 EditorGUILayout.HelpBox("No state assigned.", MessageType.Warning);
-                GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+                if (allowWindowDrag)
+                {
+                    GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+                }
+
                 EditorGUI.EndDisabledGroup();
                 return;
             }
@@ -1404,7 +1723,10 @@ namespace StateMachine.Graph.Editor
             }
 
             EditorGUI.EndDisabledGroup();
-            GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+            if (allowWindowDrag)
+            {
+                GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+            }
         }
 
         private void DrawStateEditor(State state, Node ownerNode)
@@ -1539,6 +1861,7 @@ namespace StateMachine.Graph.Editor
                     isSelectingTargetNode = true;
                     pendingTransition = transition;
                     sourceNodeForSelection = ownerNode;
+                    RefreshToolkitCanvas();
                 }
 
                 EditorGUILayout.EndHorizontal();
@@ -1732,7 +2055,7 @@ namespace StateMachine.Graph.Editor
             GUIUtility.ExitGUI();
         }
 
-        private void DeleteNode(Node node)
+        private void DeleteNode(Node node, bool exitGui = true)
         {
             bool shouldDeleteStateAsset = node.State != null &&
                                           EditorUtility.DisplayDialog(
@@ -1761,7 +2084,11 @@ namespace StateMachine.Graph.Editor
             MarkDirty(currentGraph);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            GUIUtility.ExitGUI();
+            RefreshToolkitCanvas(true);
+            if (exitGui)
+            {
+                GUIUtility.ExitGUI();
+            }
         }
 
         private void RemoveStateReferences(State state)
@@ -1901,6 +2228,7 @@ namespace StateMachine.Graph.Editor
             currentGraph.Nodes.RemoveAt(index);
             currentGraph.Nodes.Insert(0, node);
             MarkDirty(currentGraph);
+            RefreshToolkitCanvas();
         }
 
         private Color GetNodeTint(Node node)
@@ -1942,6 +2270,7 @@ namespace StateMachine.Graph.Editor
 
             if (repaint)
             {
+                RefreshToolkitCanvas();
                 Repaint();
             }
         }

@@ -15,6 +15,12 @@ MonoBehaviour:
   hostileBelowRelation: -50
   friendlyAboveRelation: 50
   relations:
+  - leftFaction: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
+    rightFaction: {fileID: 11400000, guid: b0d1d20fc010f724ab3a4a56bd0ff239, type: 2}
+    relation: 0
+  - leftFaction: {fileID: 11400000, guid: b0d1d20fc010f724ab3a4a56bd0ff239, type: 2}
+    rightFaction: {fileID: 11400000, guid: dc98ce5b51f108947b4b8e8bc61ffc22, type: 2}
+    relation: 0
   - leftFaction: {fileID: 11400000, guid: dc98ce5b51f108947b4b8e8bc61ffc22, type: 2}
     rightFaction: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
     relation: -200

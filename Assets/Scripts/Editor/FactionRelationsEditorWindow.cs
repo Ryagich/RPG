@@ -3,8 +3,10 @@ using System.Linq;
 using Factions;
 using UnityEditor;
 using UnityEditor.Localization;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.Localization.Tables;
+using UnityEngine.UIElements;
 
 namespace EditorTools
 {
@@ -22,6 +24,7 @@ namespace EditorTools
         private readonly Dictionary<FactionConfig, string> factionDisplayNameCache = new();
         private FactionRelationsConfig relationsConfig;
         private Vector2 relationsScroll;
+        private bool toolkitUiActive;
 
         [MenuItem(MenuPath)]
         public static void Open()
@@ -39,13 +42,25 @@ namespace EditorTools
             SyncRelations();
         }
 
+        private void CreateGUI()
+        {
+            toolkitUiActive = true;
+            RebuildToolkitUi();
+        }
+
         private void OnDisable()
         {
             EditorApplication.projectChanged -= HandleProjectChanged;
+            toolkitUiActive = false;
         }
 
         private void OnGUI()
         {
+            if (toolkitUiActive)
+            {
+                return;
+            }
+
             DrawToolbar();
             EditorGUILayout.Space(6f);
 
@@ -64,6 +79,197 @@ namespace EditorTools
             DrawRelationThresholds();
             EditorGUILayout.Space(8f);
             DrawRelationsTable();
+        }
+
+        private void RebuildToolkitUi()
+        {
+            if (!toolkitUiActive)
+            {
+                return;
+            }
+
+            rootVisualElement.Clear();
+            rootVisualElement.style.paddingLeft = 8f;
+            rootVisualElement.style.paddingRight = 8f;
+            rootVisualElement.style.paddingTop = 6f;
+            rootVisualElement.style.paddingBottom = 8f;
+
+            var toolbar = new VisualElement();
+            toolbar.style.flexDirection = FlexDirection.Row;
+            toolbar.style.marginBottom = 6f;
+            var configField = new ObjectField
+            {
+                objectType = typeof(FactionRelationsConfig),
+                value = relationsConfig
+            };
+            configField.style.minWidth = 220f;
+            configField.RegisterValueChangedCallback(evt =>
+            {
+                relationsConfig = evt.newValue as FactionRelationsConfig;
+                SyncRelations();
+                RebuildToolkitUi();
+            });
+            toolbar.Add(configField);
+            toolbar.Add(CreateToolbarButton("Create Config", () =>
+            {
+                relationsConfig = CreateRelationsConfig();
+                SyncRelations();
+                RebuildToolkitUi();
+            }));
+            toolbar.Add(CreateToolbarButton("Find Config", () =>
+            {
+                relationsConfig = FindFirstRelationsConfig();
+                SyncRelations();
+                RebuildToolkitUi();
+            }));
+            toolbar.Add(CreateToolbarButton("Refresh", () =>
+            {
+                RefreshFactions();
+                SyncRelations();
+                RebuildToolkitUi();
+            }));
+            toolbar.Add(CreateToolbarButton("Create Faction", () =>
+            {
+                CreateFaction();
+                RefreshFactions();
+                SyncRelations();
+                RebuildToolkitUi();
+            }));
+            rootVisualElement.Add(toolbar);
+
+            if (relationsConfig == null)
+            {
+                rootVisualElement.Add(CreateHelpLabel(
+                    "Create or assign a FactionRelationsConfig to edit faction relations."));
+                return;
+            }
+
+            if (factions.Count == 0)
+            {
+                rootVisualElement.Add(CreateHelpLabel(
+                    "No FactionConfig assets found. Create factions in Assets/Configs/Factions."));
+                return;
+            }
+
+            rootVisualElement.Add(CreateToolkitSectionLabel("Relation Thresholds"));
+            rootVisualElement.Add(CreateThresholdField("Hostile Below", "hostileBelowRelation"));
+            rootVisualElement.Add(CreateThresholdField("Friendly Above", "friendlyAboveRelation"));
+            rootVisualElement.Add(CreateToolkitSectionLabel("Base Relations"));
+
+            var header = new VisualElement();
+            header.style.flexDirection = FlexDirection.Row;
+            header.Add(CreateTableLabel("Faction", FactionColumnWidth, true));
+            header.Add(CreateTableLabel("Relation", RelationColumnWidth, true));
+            header.Add(CreateTableLabel("Faction", FactionColumnWidth, true));
+            rootVisualElement.Add(header);
+
+            var scrollView = new ScrollView(ScrollViewMode.VerticalAndHorizontal);
+            scrollView.style.flexGrow = 1f;
+            scrollView.style.minHeight = 260f;
+            scrollView.contentContainer.style.minWidth = FactionColumnWidth * 2f + RelationColumnWidth;
+
+            foreach (FactionRelationEntry entry in relationsConfig.Relations)
+            {
+                if (entry == null)
+                {
+                    continue;
+                }
+
+                scrollView.Add(CreateToolkitRelationRow(entry));
+            }
+
+            rootVisualElement.Add(scrollView);
+        }
+
+        private Button CreateToolbarButton(string label, System.Action action)
+        {
+            var button = new Button(action) { text = label };
+            return button;
+        }
+
+        private static Label CreateHelpLabel(string text)
+        {
+            var label = new Label(text);
+            label.style.marginTop = 8f;
+            label.style.whiteSpace = WhiteSpace.Normal;
+            return label;
+        }
+
+        private static Label CreateToolkitSectionLabel(string text)
+        {
+            var label = new Label(text);
+            label.style.marginTop = 10f;
+            label.style.marginBottom = 3f;
+            label.style.unityFontStyleAndWeight = FontStyle.Bold;
+            return label;
+        }
+
+        private IntegerField CreateThresholdField(string label, string propertyName)
+        {
+            var serializedConfig = new SerializedObject(relationsConfig);
+            SerializedProperty property = serializedConfig.FindProperty(propertyName);
+            var field = new IntegerField(label) { value = property?.intValue ?? 0 };
+            field.style.maxWidth = 330f;
+            field.RegisterValueChangedCallback(evt =>
+            {
+                if (property == null || evt.newValue == property.intValue)
+                {
+                    return;
+                }
+
+                Undo.RecordObject(relationsConfig, $"Change {label}");
+                property.intValue = evt.newValue;
+                serializedConfig.ApplyModifiedProperties();
+                EditorUtility.SetDirty(relationsConfig);
+                AssetDatabase.SaveAssets();
+            });
+            return field;
+        }
+
+        private VisualElement CreateToolkitRelationRow(FactionRelationEntry entry)
+        {
+            var row = new VisualElement();
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.height = RowHeight;
+            row.Add(CreateTableLabel(GetFactionDisplayName(entry.LeftFaction), FactionColumnWidth, false));
+
+            var field = new IntegerField { value = entry.Relation };
+            field.style.width = RelationColumnWidth;
+            field.style.minWidth = RelationColumnWidth;
+            field.style.height = RowHeight;
+            field.RegisterValueChangedCallback(evt =>
+            {
+                if (evt.newValue == entry.Relation)
+                {
+                    return;
+                }
+
+                Undo.RecordObject(relationsConfig, "Change Faction Relation");
+                relationsConfig.SetRelation(entry.LeftFaction, entry.RightFaction, evt.newValue);
+                EditorUtility.SetDirty(relationsConfig);
+                AssetDatabase.SaveAssets();
+            });
+            row.Add(field);
+            row.Add(CreateTableLabel(GetFactionDisplayName(entry.RightFaction), FactionColumnWidth, false));
+            return row;
+        }
+
+        private static Label CreateTableLabel(string text, float width, bool bold)
+        {
+            var label = new Label(text);
+            label.style.width = width;
+            label.style.minWidth = width;
+            label.style.height = RowHeight;
+            label.style.paddingTop = 2f;
+            label.style.whiteSpace = WhiteSpace.NoWrap;
+            label.style.overflow = Overflow.Hidden;
+            label.style.textOverflow = TextOverflow.Ellipsis;
+            if (bold)
+            {
+                label.style.unityFontStyleAndWeight = FontStyle.Bold;
+            }
+
+            return label;
         }
 
         private void DrawToolbar()
@@ -329,6 +535,9 @@ namespace EditorTools
         private void HandleProjectChanged()
         {
             factionDisplayNameCache.Clear();
+            RefreshFactions();
+            SyncRelations();
+            RebuildToolkitUi();
             Repaint();
         }
 
