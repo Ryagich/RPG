@@ -27,6 +27,7 @@ namespace Dialogs.Graph
             out DialogPhrase forcedPhrase)
         {
             forcedPhrase = null;
+            int bestPriority = int.MaxValue;
 
             if (Nodes != null)
             {
@@ -41,13 +42,26 @@ namespace Dialogs.Graph
                     DialogAnswer entryAnswer = phrase.QuestAnswer;
                     if (entryAnswer != null && (isAnswerAvailable == null || isAnswerAvailable(entryAnswer)))
                     {
-                        forcedPhrase = phrase;
-                        return true;
+                        // Lower values take precedence. Equal priorities deliberately keep
+                        // graph order, so existing dialogs with the default priority retain
+                        // their current behaviour.
+                        if (forcedPhrase == null || phrase.ForcedDialoguePriority < bestPriority)
+                        {
+                            forcedPhrase = phrase;
+                            bestPriority = phrase.ForcedDialoguePriority;
+                        }
                     }
                 }
             }
 
-            if (EntryPhrase != null && EntryPhrase.IsForcedDialoguePhrase)
+            if (forcedPhrase != null)
+            {
+                return true;
+            }
+
+            // A forced entry without quest conditions is always available. Quest phrases
+            // must only be selected through the loop above, where their conditions are checked.
+            if (EntryPhrase != null && EntryPhrase.IsForcedDialoguePhrase && !EntryPhrase.IsQuestPhrase)
             {
                 forcedPhrase = EntryPhrase;
                 return true;

@@ -9,6 +9,7 @@ namespace Dialogs.Graph.Model
     {
         [SerializeField] private LocalizedString text = new();
         [SerializeField] private bool isForcedDialoguePhrase;
+        [SerializeField, Min(0)] private int forcedDialoguePriority;
         [SerializeField] private bool restoresExitAbility;
         [SerializeField] private bool isQuestPhrase;
         [SerializeField] private DialogAnswer questAnswer = new();
@@ -16,6 +17,7 @@ namespace Dialogs.Graph.Model
 
         public LocalizedString Text => text;
         public bool IsForcedDialoguePhrase => isForcedDialoguePhrase;
+        public int ForcedDialoguePriority => forcedDialoguePriority;
         public bool RestoresExitAbility => restoresExitAbility;
         public bool IsQuestPhrase => isQuestPhrase;
         public DialogAnswer QuestAnswer => questAnswer;

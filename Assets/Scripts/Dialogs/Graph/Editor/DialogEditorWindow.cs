@@ -2272,6 +2272,7 @@ namespace Dialogs.Graph.Editor
 
             SerializedProperty textProperty = phraseObject.FindProperty("text");
             SerializedProperty isForcedDialoguePhraseProperty = phraseObject.FindProperty("isForcedDialoguePhrase");
+            SerializedProperty forcedDialoguePriorityProperty = phraseObject.FindProperty("forcedDialoguePriority");
             SerializedProperty restoresExitAbilityProperty = phraseObject.FindProperty("restoresExitAbility");
             SerializedProperty isQuestPhraseProperty = phraseObject.FindProperty("isQuestPhrase");
             SerializedProperty questAnswerProperty = phraseObject.FindProperty("questAnswer");
@@ -2295,6 +2296,15 @@ namespace Dialogs.Graph.Editor
 
                 if (isForcedDialoguePhraseProperty.boolValue)
                 {
+                    if (forcedDialoguePriorityProperty != null)
+                    {
+                        EditorGUILayout.PropertyField(
+                            forcedDialoguePriorityProperty,
+                            new GUIContent(
+                                "Priority",
+                                "When several forced dialogue phrases are available, the phrase with the lower value starts first. Equal priorities keep graph order."));
+                    }
+
                     if (restoresExitAbilityProperty != null)
                     {
                         restoresExitAbilityProperty.boolValue = false;
