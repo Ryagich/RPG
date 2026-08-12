@@ -1,5 +1,6 @@
 using System;
 using Character;
+using Container;
 using Dialogue;
 using Dialogs.Graph;
 using Dialogs.Graph.Model;
@@ -83,23 +84,7 @@ namespace NPC
 
         private void OnInteracted(LifetimeScope interactorScope)
         {
-            if (!availability.TryGetForcedPhrase(interactorScope, out DialogPhrase forcedPhrase) ||
-                !dialogueController.TryBeginDialogue(interactorScope))
-            {
-                return;
-            }
-
-            dialogueContext.SetTarget(
-                interactable,
-                characterInfo,
-                dialog,
-                inventory,
-                moneyStorage,
-                forcedPhrase,
-                true,
-                faction);
-            availability.SuppressUntilZoneExit();
-            changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Dialogue));
+            TryOpenForcedDialogue(interactorScope);
         }
 
         private void OnEndInteracted(LifetimeScope _)
@@ -124,8 +109,41 @@ namespace NPC
                 return;
             }
 
+            bool continueForcedDialogue = dialogueContext.ContinueForcedDialogueAfterExit;
             dialogueContext.Clear();
             dialogueController.EndDialogue();
+
+            if (!continueForcedDialogue)
+            {
+                return;
+            }
+
+            // The NPC state machine completes its dialogue exit after this game-mode event.
+            // Only unlock the trigger here; the player's normal automatic interaction opens
+            // the next forced phrase on the following physics tick.
+            availability.AllowImmediateNextDialogue();
+        }
+
+        private bool TryOpenForcedDialogue(LifetimeScope interactorScope)
+        {
+            if (!availability.TryGetForcedPhrase(interactorScope, out DialogPhrase forcedPhrase) ||
+                !dialogueController.TryBeginDialogue(interactorScope))
+            {
+                return false;
+            }
+
+            dialogueContext.SetTarget(
+                interactable,
+                characterInfo,
+                dialog,
+                inventory,
+                moneyStorage,
+                forcedPhrase,
+                true,
+                faction);
+            availability.SuppressUntilZoneExit();
+            changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Dialogue));
+            return true;
         }
 
         private void OnDialogueInterrupted()

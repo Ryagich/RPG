@@ -156,6 +156,15 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
+  <DialogueFarewell>k__BackingField:
+    m_TableReference:
+      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+    m_TableEntryReference:
+      m_KeyId: 71000000000000002
+      m_Key:
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   references:
     version: 2
     RefIds: []

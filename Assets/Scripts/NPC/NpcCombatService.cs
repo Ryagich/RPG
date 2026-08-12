@@ -90,6 +90,7 @@ namespace NPC
         private readonly ICharacterHitReactionController hitReactionController;
         private readonly ITargetLockTargetRegistry targetRegistry;
         private readonly INpcCombatRegistry combatRegistry;
+        private readonly INonLethalCombatSessionRegistry nonLethalCombatSessions;
         private readonly ISubscriber<CharacterDamagedMessage> damagedSubscriber;
         private readonly CompositeDisposable disposables = new();
         private readonly HashSet<CharacterDamageReceiver> personalEnemies = new();
@@ -141,6 +142,7 @@ namespace NPC
             ICharacterHitReactionController hitReactionController,
             ITargetLockTargetRegistry targetRegistry,
             INpcCombatRegistry combatRegistry,
+            INonLethalCombatSessionRegistry nonLethalCombatSessions,
             ISubscriber<CharacterDamagedMessage> damagedSubscriber)
         {
             this.ownerTransform = ownerTransform;
@@ -155,6 +157,7 @@ namespace NPC
             this.hitReactionController = hitReactionController;
             this.targetRegistry = targetRegistry;
             this.combatRegistry = combatRegistry;
+            this.nonLethalCombatSessions = nonLethalCombatSessions;
             this.damagedSubscriber = damagedSubscriber;
         }
 
@@ -2015,6 +2018,11 @@ namespace NPC
             }
 
             var damageReceiver = target.GetComponentInParent<DamageReceiverHost>()?.Receiver;
+            if (nonLethalCombatSessions.ArePaired(ownerDamageReceiver, damageReceiver))
+            {
+                return true;
+            }
+
             if (damageReceiver != null && personalEnemies.Contains(damageReceiver))
             {
                 return true;
@@ -2172,7 +2180,7 @@ namespace NPC
                 HasLastKnownTargetPosition = true;
             }
 
-            if (target != null && target != previousTarget)
+            if (target != null && target != previousTarget && !IsNonLethalSessionTarget(target))
             {
                 ScheduleAggressionNotification(target);
             }
@@ -2289,6 +2297,11 @@ namespace NPC
                 return;
             }
 
+            if (nonLethalCombatSessions.ArePaired(ownerDamageReceiver, message.Attacker))
+            {
+                return;
+            }
+
             if (IsAccidentalNonHostileHit(message))
             {
                 return;
@@ -2317,6 +2330,12 @@ namespace NPC
             return receiver?.OwnerTransform != null
                 ? receiver.OwnerTransform.GetComponentInParent<TargetLockTarget>()
                 : null;
+        }
+
+        private bool IsNonLethalSessionTarget(TargetLockTarget target)
+        {
+            var receiver = FindDamageReceiver(target);
+            return nonLethalCombatSessions.ArePaired(ownerDamageReceiver, receiver);
         }
 
         private bool TryRequestTargetedAttack(Func<bool> requestAttack)

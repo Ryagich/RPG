@@ -21,6 +21,14 @@ namespace Messages
             Interactable = interactable;
         }
     }
+
+    /// <summary>
+    /// Signals that the player has been relocated. Interaction sensing clears its previous
+    /// zone state; Unity then repopulates it through the normal trigger lifecycle.
+    /// </summary>
+    public readonly struct PlayerRelocatedMessage
+    {
+    }
     
     public readonly struct ItemHolderFoundMessage
     {

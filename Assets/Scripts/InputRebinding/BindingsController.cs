@@ -31,12 +31,15 @@ public class BindingsController : MonoBehaviour
 
     private const string DodgeActionName = "Dodge";
     private const string RollActionName = "Roll";
+    private const string LessonSkipActionName = "LessonSkip";
     private const string EvasionLocalizationTable = "Tables";
     private const string DodgeLocalizationKey = "Input_Dodge";
     private const string RollLocalizationKey = "Input_Roll";
+    private const string LessonSkipLocalizationKey = "Input_LessonSkip";
 
     private InputRebinder dodgeRebinder;
     private InputRebinder rollRebinder;
+    private InputRebinder lessonSkipRebinder;
 
     private void Awake()
     {
@@ -45,7 +48,7 @@ public class BindingsController : MonoBehaviour
         _settingsButtons = _settingsCanvas != null
             ? _settingsCanvas.GetComponentsInChildren<Button>().ToList()
             : new List<Button>();
-        CreateEvasionBindingButtons();
+        CreateCombatBindingButtons();
         _buttons = GetComponentsInChildren<Button>().ToList();
         foreach (var button in _buttons)
         {
@@ -62,7 +65,7 @@ public class BindingsController : MonoBehaviour
 
         InitializeMouseSensitivitySlider();
         LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
-        UpdateEvasionBindingDisplayNames();
+        UpdateCombatBindingDisplayNames();
     }
 
     private void OnDestroy()
@@ -77,16 +80,17 @@ public class BindingsController : MonoBehaviour
 
     private void OnSelectedLocaleChanged(Locale _)
     {
-        UpdateEvasionBindingDisplayNames();
+        UpdateCombatBindingDisplayNames();
     }
 
-    private void CreateEvasionBindingButtons()
+    private void CreateCombatBindingButtons()
     {
-        dodgeRebinder = CreateEvasionBindingButton(DodgeActionName, transformAfter: null);
-        rollRebinder = CreateEvasionBindingButton(RollActionName, dodgeRebinder?.transform);
+        dodgeRebinder = CreateBindingButton(DodgeActionName, transformAfter: null);
+        rollRebinder = CreateBindingButton(RollActionName, dodgeRebinder?.transform);
+        lessonSkipRebinder = CreateBindingButton(LessonSkipActionName, rollRebinder?.transform);
     }
 
-    private InputRebinder CreateEvasionBindingButton(string actionName, Transform transformAfter)
+    private InputRebinder CreateBindingButton(string actionName, Transform transformAfter)
     {
         var existingBinding = GetComponentsInChildren<InputRebinder>(true)
             .FirstOrDefault(rebinder => rebinder.ActionName == actionName);
@@ -123,13 +127,14 @@ public class BindingsController : MonoBehaviour
         return rebinder;
     }
 
-    private void UpdateEvasionBindingDisplayNames()
+    private void UpdateCombatBindingDisplayNames()
     {
-        UpdateEvasionBindingDisplayName(dodgeRebinder, DodgeLocalizationKey);
-        UpdateEvasionBindingDisplayName(rollRebinder, RollLocalizationKey);
+        UpdateBindingDisplayName(dodgeRebinder, DodgeLocalizationKey);
+        UpdateBindingDisplayName(rollRebinder, RollLocalizationKey);
+        UpdateBindingDisplayName(lessonSkipRebinder, LessonSkipLocalizationKey);
     }
 
-    private async void UpdateEvasionBindingDisplayName(InputRebinder rebinder, string localizationKey)
+    private async void UpdateBindingDisplayName(InputRebinder rebinder, string localizationKey)
     {
         if (rebinder == null)
         {

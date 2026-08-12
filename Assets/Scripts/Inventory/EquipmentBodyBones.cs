@@ -6,17 +6,8 @@ namespace Inventory
 {
     public class CharacterVisualRoot : MonoBehaviour
     {
-        [SerializeField] private CharacterDefaultVisualConfig defaultVisualConfig;
-
         private readonly Dictionary<BodyPart, Dictionary<string, List<CharacterBodyPartVisual>>> visualsByBodyPart = new();
         private bool isCacheBuilt;
-
-        public CharacterDefaultVisualConfig DefaultVisualConfig => defaultVisualConfig;
-
-        private void Awake()
-        {
-            ApplyDefaultVisuals();
-        }
 
         public bool HasVisual(BodyPart bodyPart, string visualName)
         {
@@ -89,30 +80,6 @@ namespace Inventory
             // If there is no selected visual name for a body part,
             // this body part should stay empty.
             return !string.IsNullOrWhiteSpace(targetVisualName) && visualName == targetVisualName;
-        }
-
-        private void ApplyDefaultVisuals()
-        {
-            if (defaultVisualConfig == null)
-            {
-                ApplyVisuals(new Dictionary<BodyPart, string>());
-                return;
-            }
-
-            var defaultVisualsByBodyPart = new Dictionary<BodyPart, string>();
-            foreach (var visual in defaultVisualConfig.DefaultVisuals)
-            {
-                if (visual == null || visual.BodyPart == BodyPart.None)
-                {
-                    continue;
-                }
-
-                defaultVisualsByBodyPart[visual.BodyPart] = string.IsNullOrWhiteSpace(visual.VisualName)
-                    ? string.Empty
-                    : visual.VisualName;
-            }
-
-            ApplyVisuals(defaultVisualsByBodyPart);
         }
 
         private void OnValidate()

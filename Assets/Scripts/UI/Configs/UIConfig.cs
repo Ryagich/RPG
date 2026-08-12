@@ -39,6 +39,7 @@ namespace UI.Configs
         [field: SerializeField] public BlinkingTextConfig ClickTextBlinkingConfig { get; private set; }
         [field: SerializeField] public RectTransform QuestNotification { get; private set; }
         [field: SerializeField] public QuestNotificationConfig QuestNotificationConfig { get; private set; }
+        [field: SerializeField] public LessonPageHolder LessonPage { get; private set; }
         
         //Trade
         [field: SerializeField] public GameObject LeftAnotherInventoryInTrade { get; private set; }

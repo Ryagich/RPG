@@ -22,6 +22,7 @@ namespace UI
             builder.Register<DialoguePage>(Lifetime.Singleton);
             builder.RegisterEntryPoint<MapPage>().AsSelf();
             builder.RegisterEntryPoint<QuestPage>().AsSelf();
+            builder.RegisterEntryPoint<LessonPage>().AsSelf();
             
             builder.RegisterEntryPoint<TradePage>().AsSelf();
             builder.RegisterEntryPoint<InventoryPage>().AsSelf();

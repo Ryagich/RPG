@@ -108,6 +108,9 @@ namespace CameraScripts
             return cameraMovement.GetPlanarRotation();
         }
 
+        /// <summary>True once the gameplay camera has reached its current follow pose.</summary>
+        public bool IsGameplaySettled => cameraMovement.IsSettled();
+
         private void OnGameModeChanged(GameModeChangedMessage msg)
         {
             cameraMovement.SetLookInputEnabled(msg.GameMode is GameMode.Game or GameMode.Death);

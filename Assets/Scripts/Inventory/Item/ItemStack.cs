@@ -9,12 +9,14 @@ namespace Inventory.Item
         public ItemConfig ItemConfig;
         public int Count;
         public bool IsRotated;
+        public string RuntimeTag { get; }
 
-        public ItemStack(ItemConfig itemConfig, int count = 1, bool isRotated = false)
+        public ItemStack(ItemConfig itemConfig, int count = 1, bool isRotated = false, string runtimeTag = null)
         {
             ItemConfig = itemConfig;
             Count = Math.Max(1, count);
             IsRotated = isRotated;
+            RuntimeTag = runtimeTag;
         }
 
         public int MaxStack => ItemConfig?.MaxStack ?? 1;
@@ -28,7 +30,12 @@ namespace Inventory.Item
         {
             // Rotation affects only the grid footprint of the stack already placed in an inventory.
             // It must not prevent merging counts for the same item type into an existing partial stack.
-            return other != null && ItemConfig != null && ItemConfig == other.ItemConfig;
+            // Session-owned stacks must never merge with an identical player-owned item:
+            // otherwise their provenance would be lost and cleanup could remove player loot.
+            return other != null
+                   && ItemConfig != null
+                   && ItemConfig == other.ItemConfig
+                   && string.Equals(RuntimeTag, other.RuntimeTag, StringComparison.Ordinal);
         }
 
         public bool CanRotate()
@@ -48,7 +55,7 @@ namespace Inventory.Item
 
         public ItemStack Clone()
         {
-            return ItemConfig == null ? null : new ItemStack(ItemConfig, Count, IsRotated);
+            return ItemConfig == null ? null : new ItemStack(ItemConfig, Count, IsRotated, RuntimeTag);
         }
 
         private Vector2Int GetRotatedSize(Vector2Int size)

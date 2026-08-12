@@ -18,16 +18,19 @@ namespace NPC
         private NpcDialogueController dialogueController;
         private DialogueContext dialogueContext;
         private DialogGraph dialog;
+        private DialogueRuntimeFlagRegistry runtimeFlags;
         private bool isSuppressedUntilZoneExit;
 
         [Inject]
         public void Construct(
             NpcDialogueController dialogueController,
             DialogueContext dialogueContext,
+            DialogueRuntimeFlagRegistry runtimeFlags,
             DialogGraph dialog = null)
         {
             this.dialogueController = dialogueController;
             this.dialogueContext = dialogueContext;
+            this.runtimeFlags = runtimeFlags;
             this.dialog = dialog;
         }
 
@@ -42,6 +45,11 @@ namespace NPC
         }
 
         public void NotifyInteractorLeftZone()
+        {
+            isSuppressedUntilZoneExit = false;
+        }
+
+        public void AllowImmediateNextDialogue()
         {
             isSuppressedUntilZoneExit = false;
         }
@@ -73,7 +81,8 @@ namespace NPC
                     answer.Conditions,
                     playerInventory,
                     playerMoneyStorage,
-                    questController),
+                    questController,
+                    runtimeFlags),
                 out forcedPhrase);
         }
     }

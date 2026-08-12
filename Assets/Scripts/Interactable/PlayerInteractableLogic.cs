@@ -39,6 +39,7 @@ namespace Interactable
                 ISubscriber<string, InteractableMessage> interactableSubscriber,
                 ISubscriber<string, InteractableEndMessage> interactableEndSubscriber,
                 ISubscriber<InteractableInputMessage> interactableInputSubscriber,
+                ISubscriber<PlayerRelocatedMessage> playerRelocatedSubscriber,
                 ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber
             )
         {
@@ -48,6 +49,7 @@ namespace Interactable
             interactableSubscriber.Subscribe(scopeID, Add).AddTo(disposables);
             interactableEndSubscriber.Subscribe(scopeID, Remove).AddTo(disposables);
             interactableInputSubscriber.Subscribe(Interact).AddTo(disposables);
+            playerRelocatedSubscriber.Subscribe(_ => ResetNearbyInteractables()).AddTo(disposables);
             gameModeChangedSubscriber.Subscribe(OnGameModeChanged).AddTo(disposables);
         }
         
@@ -146,6 +148,21 @@ namespace Interactable
             {
                 EndAllManualInteractions();
             }
+        }
+
+        private void ResetNearbyInteractables()
+        {
+            foreach (var interactable in nearbyInteractables.ToArray())
+            {
+                if (interactable != null)
+                {
+                    Remove(new InteractableEndMessage(interactable));
+                }
+            }
+
+            nearbyInteractables.Clear();
+            t = 0f;
+            manualT = 0f;
         }
 
         private void EndAllManualInteractions()

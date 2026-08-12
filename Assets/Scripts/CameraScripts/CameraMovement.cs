@@ -121,6 +121,26 @@ namespace CameraScripts
             return Quaternion.Euler(0f, yaw, 0f);
         }
 
+        public bool IsSettled(float positionTolerance = 0.03f, float rotationTolerance = 0.5f)
+        {
+            if (!isInitialized || target == null)
+            {
+                return false;
+            }
+
+            var pivotPosition = GetPivotPosition();
+            var desiredRotation = Quaternion.Euler(pitch, yaw, 0f);
+            var shoulderOffset = GetShoulderWorldOffset();
+            var shoulderPivotPosition = pivotPosition + shoulderOffset;
+            var desiredPosition = ResolveCollision(
+                shoulderPivotPosition,
+                shoulderPivotPosition + desiredRotation * GetCameraOffset());
+            var desiredLookRotation = GetLookRotation(GetLookPoint(pivotPosition, shoulderOffset), desiredPosition);
+
+            return Vector3.Distance(cameraTransform.position, desiredPosition) <= positionTolerance
+                   && Quaternion.Angle(cameraTransform.rotation, desiredLookRotation) <= rotationTolerance;
+        }
+
         private void EnsureInitialized()
         {
             if (isInitialized || target == null)

@@ -70,6 +70,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "LessonSkip",
+                    "type": "Button",
+                    "id": "c5a7c277-7a7c-4c03-9693-8c2ebeb0d7b2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Run",
                     "type": "Button",
                     "id": "af691b04-99d2-4e73-b19c-97cad1a0cf92",
@@ -324,6 +333,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Roll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c53ce72b-b1ac-4e6e-bcb4-d8aac8439ad3",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LessonSkip",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

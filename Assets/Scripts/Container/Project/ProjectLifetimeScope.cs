@@ -20,7 +20,9 @@ using VContainer;
 using VContainer.Unity;
 
 using Combat;
+using Dialogue;
 using GameAudio;
+using Training;
 
 namespace Container.Project
 {
@@ -51,6 +53,7 @@ namespace Container.Project
         [field: SerializeField] public AudioConfig AudioConfig { get; private set; }
         [field: SerializeField] public FootstepConfig FootstepConfig { get; private set; }
         [field: SerializeField] public AnimationEventSoundConfig AnimationEventSoundConfig { get; private set; }
+        [field: SerializeField] public LessonConfig LessonConfig { get; private set; }
 
         protected override void Awake()
         {
@@ -101,10 +104,12 @@ namespace Container.Project
             builder.RegisterInstance(AudioConfig).AsSelf();
             builder.RegisterInstance(FootstepConfig).AsSelf();
             builder.RegisterInstance(AnimationEventSoundConfig).AsSelf();
+            builder.RegisterInstance(LessonConfig).AsSelf();
             builder.RegisterEntryPoint<AudioService>(Lifetime.Singleton).As<IAudioService>().AsSelf();
             builder.Register<SceneLoadingService>(Lifetime.Singleton).AsSelf();
             builder.Register<BootCompletion>(Lifetime.Singleton).AsSelf();
             builder.Register<LocationTransitionContext>(Lifetime.Singleton).AsSelf();
+            builder.Register<DialogueRuntimeFlagRegistry>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<InputBindingOverridesBootstrap>();
 
             builder.RegisterEntryPoint<Bootloader>().AsSelf();

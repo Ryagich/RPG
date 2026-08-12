@@ -70,6 +70,7 @@ namespace UI.Pages
         private readonly IObjectResolver resolver;
         private readonly QuestNotificationService questNotifications;
         private readonly QuestController questController;
+        private readonly QuestObjectiveOverrideContext questObjectiveOverride;
         private readonly CompositeDisposable drawDisposables = new();
         private readonly Dictionary<StatType, StatVisibilityState> statVisibilityStates = new();
         private readonly Dictionary<FastSlotModel, StatVisibilityState> fastSlotVisibilityStates = new();
@@ -118,6 +119,7 @@ namespace UI.Pages
                 IObjectResolver resolver,
                 QuestNotificationService questNotifications,
                 QuestController questController,
+                QuestObjectiveOverrideContext questObjectiveOverride,
                 ISubscriber<ShowStatsInputMessage> showStatsInputSubscriber,
                 ISubscriber<FastSlotInputMessage> fastSlotInputSubscriber
             )
@@ -135,12 +137,14 @@ namespace UI.Pages
             this.itemHolderInteractableLogic = itemHolderInteractableLogic;
             this.questNotifications = questNotifications;
             this.questController = questController;
+            this.questObjectiveOverride = questObjectiveOverride;
 
             canvasRect = canvas.GetComponent<RectTransform>();
 
             showStatsInputSubscriber.Subscribe(OnShowStatsInputChanged);
             fastSlotInputSubscriber.Subscribe(OnFastSlotInput);
             questController.Changed += OnQuestChanged;
+            questObjectiveOverride.Changed += OnQuestObjectiveOverrideChanged;
         }
 
         public override void Draw()
@@ -581,6 +585,11 @@ namespace UI.Pages
             ApplyQuestDescriptionAlpha();
         }
 
+        private void OnQuestObjectiveOverrideChanged()
+        {
+            OnQuestChanged(default);
+        }
+
         private void InitializeVisibilityState()
         {
             statVisibilityStates.Clear();
@@ -881,6 +890,12 @@ namespace UI.Pages
             {
                 questDescriptionHolder.SetContent(string.Empty, string.Empty);
                 return false;
+            }
+
+            if (questObjectiveOverride.AppliesTo(currentQuest.QuestGraph))
+            {
+                questDescriptionHolder.SetContent(questObjectiveOverride.Title ?? string.Empty, questObjectiveOverride.Description ?? string.Empty);
+                return true;
             }
 
             string localizedTitle = currentQuest.QuestGraph.Title.GetLocalizedStringCached();

@@ -365,6 +365,194 @@ MonoBehaviour:
     m_Key: Guard_Conclusion
     m_Metadata:
       m_Items: []
+  - m_Id: 54301381586882587
+    m_Key: Oswin_Training_Forced_Entry
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882588
+    m_Key: Oswin_Training_Quest_Answer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882589
+    m_Key: Oswin_Training_Decline
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882590
+    m_Key: Oswin_Training_Accept
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882591
+    m_Key: Oswin_Training_Accept_Reply
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882592
+    m_Key: Oswin_Arrival_Travel_Answer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882593
+    m_Key: Oswin_Arrival_Gates_Answer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882594
+    m_Key: Oswin_Arrival_Travel_Reply
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882595
+    m_Key: Oswin_Arrival_Gates_Reply
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882596
+    m_Key: Oswin_Arrival_Travel_Followup
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882597
+    m_Key: Oswin_Arrival_Gates_Followup
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54301381586882598
+    m_Key: Oswin_Training_Proposal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000001
+    m_Key: Lesson_Skip_Hide
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000010
+    m_Key: Lesson_Combat_Introduction
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000011
+    m_Key: Lesson_Enemy_Vision
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000012
+    m_Key: Lesson_Dodge
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000013
+    m_Key: Lesson_Weapon_Attacks
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000014
+    m_Key: Lesson_Roll
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000015
+    m_Key: Lesson_Stamina
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000016
+    m_Key: Lesson_Stamina_Load
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000017
+    m_Key: Lesson_Final_Sparring
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000020
+    m_Key: Lesson_Objective_Introduction
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000021
+    m_Key: Lesson_Objective_Enemy_Vision
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000022
+    m_Key: Lesson_Objective_Dodge
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000023
+    m_Key: Lesson_Objective_Weapon_Attacks
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000024
+    m_Key: Lesson_Objective_Roll
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000025
+    m_Key: Lesson_Objective_Stamina
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000026
+    m_Key: Lesson_Objective_Stamina_Load
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000027
+    m_Key: Lesson_Objective_Final_Sparring
+    m_Metadata:
+      m_Items: []
+  - m_Id: 71000000000000002
+    m_Key: Dialogue_Farewell
+    m_Metadata:
+      m_Items: []
+  - m_Id: 72000000000000001
+    m_Key: Oswin_Training_Draw_A
+    m_Metadata:
+      m_Items: []
+  - m_Id: 72000000000000002
+    m_Key: Oswin_Training_Draw_B
+    m_Metadata:
+      m_Items: []
+  - m_Id: 72000000000000003
+    m_Key: Oswin_Training_Draw_C
+    m_Metadata:
+      m_Items: []
+  - m_Id: 72000000000000004
+    m_Key: Oswin_Training_Player_Won_A
+    m_Metadata:
+      m_Items: []
+  - m_Id: 72000000000000005
+    m_Key: Oswin_Training_Player_Won_B
+    m_Metadata:
+      m_Items: []
+  - m_Id: 72000000000000006
+    m_Key: Oswin_Training_Player_Won_C
+    m_Metadata:
+      m_Items: []
+  - m_Id: 72000000000000007
+    m_Key: Oswin_Training_Oswin_Won_A
+    m_Metadata:
+      m_Items: []
+  - m_Id: 72000000000000008
+    m_Key: Oswin_Training_Oswin_Won_B
+    m_Metadata:
+      m_Items: []
+  - m_Id: 72000000000000009
+    m_Key: Oswin_Training_Oswin_Won_C
+    m_Metadata:
+      m_Items: []
+  - m_Id: 72000000000000010
+    m_Key: Dialogue_Acknowledgement
+    m_Metadata:
+      m_Items: []
+  - m_Id: 73000000000000001
+    m_Key: Oswin_Practice_Entry_Answer
+    m_Metadata:
+      m_Items: []
+  - m_Id: 73000000000000002
+    m_Key: Oswin_Practice_Choice
+    m_Metadata:
+      m_Items: []
+  - m_Id: 73000000000000003
+    m_Key: Oswin_Practice_Sparring
+    m_Metadata:
+      m_Items: []
+  - m_Id: 73000000000000004
+    m_Key: Oswin_Practice_Tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 73000000000000005
+    m_Key: Oswin_Practice_Evasion
+    m_Metadata:
+      m_Items: []
+  - m_Id: 74000000000000001
+    m_Key: Evasion_Practice_Objective
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30000000000000003
+    m_Key: Input_LessonSkip
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

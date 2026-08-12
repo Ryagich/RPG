@@ -27,11 +27,12 @@ namespace Localization
             await tablesTask;
             var tables = tablesTask.Result;
 
+            Cache.Clear();
             foreach (var table in tables)
             {
                 foreach (var entry in table)
                 {
-                    Cache.TryAdd(entry.Key, entry.Value.LocalizedValue);
+                    Cache[entry.Key] = entry.Value.LocalizedValue;
                 }
             }
         }
@@ -49,9 +50,21 @@ namespace Localization
                 return string.Empty;
             }
 
-            return Cache.TryGetValue(keyId, out string localizedValue)
-                ? localizedValue
-                : string.Empty;
+            if (Cache.TryGetValue(keyId, out string localizedValue))
+            {
+                return localizedValue;
+            }
+
+            // New localized entries can appear while the editor is running. In that case
+            // the startup cache has no value yet, but the localization database can still
+            // resolve the string synchronously. Cache the successful lookup for subsequent UI.
+            localizedValue = localizedString.GetLocalizedString();
+            if (!string.IsNullOrEmpty(localizedValue))
+            {
+                Cache[keyId] = localizedValue;
+            }
+
+            return localizedValue ?? string.Empty;
         }
 
         private static bool HasTableAndEntry(LocalizedString localizedString)

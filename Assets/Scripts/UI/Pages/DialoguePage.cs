@@ -35,9 +35,12 @@ namespace UI.Pages
         private readonly MoneyStorage playerMoneyStorage;
         private readonly QuestController questController;
         private readonly LocalizationConfig localizationConfig;
+        private readonly DialogueRuntimeFlagRegistry runtimeFlags;
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
+        private readonly IPublisher<DialogueExitRequestedMessage> dialogueExitRequestedPublisher;
+        private readonly IPublisher<DialogueGameplayEventRaisedMessage> dialogueGameplayEventPublisher;
 
         private RectTransform contentRect;
         private DialogueContainer dialogueContainer;
@@ -56,9 +59,12 @@ namespace UI.Pages
             MoneyStorage playerMoneyStorage,
             QuestController questController,
             LocalizationConfig localizationConfig,
+            DialogueRuntimeFlagRegistry runtimeFlags,
             Canvas canvas,
             IObjectResolver resolver,
-            IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher)
+            IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
+            IPublisher<DialogueExitRequestedMessage> dialogueExitRequestedPublisher,
+            IPublisher<DialogueGameplayEventRaisedMessage> dialogueGameplayEventPublisher)
         {
             this.uiConfig = uiConfig;
             this.statsConfig = statsConfig;
@@ -71,8 +77,11 @@ namespace UI.Pages
             this.questController = questController;
             dialogueContext.SetPlayerQuestController(questController);
             this.localizationConfig = localizationConfig;
+            this.runtimeFlags = runtimeFlags;
             this.resolver = resolver;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
+            this.dialogueExitRequestedPublisher = dialogueExitRequestedPublisher;
+            this.dialogueGameplayEventPublisher = dialogueGameplayEventPublisher;
 
             canvasRect = canvas.GetComponent<RectTransform>();
         }
@@ -139,6 +148,8 @@ namespace UI.Pages
                 GetCharacterName(dialogueContext.CurrentTargetCharacterInfo, dialogueContext.CurrentTarget?.name),
                 entryPhrase.Text.GetLocalizedStringCached());
 
+            PublishGameplayEvents(entryPhrase.GameplayEvents);
+
             ShowAnswers(entryPhrase);
         }
 
@@ -163,6 +174,22 @@ namespace UI.Pages
                 if (answerText != null)
                 {
                     answerText.text = $"{visibleAnswerIndex}. {answer.Text}";
+
+                    var answerLayout = answerButton.GetComponent<LayoutElement>();
+                    if (answerLayout == null)
+                    {
+                        answerLayout = answerButton.gameObject.AddComponent<LayoutElement>();
+                    }
+
+                    // The outer layout has not yet assigned a width to the newly created
+                    // button. Calculate against the known final content width instead.
+                    var contentWidth = dialogueContainer.AnswerContent.rect.width;
+                    var requiredHeight = Mathf.Max(
+                        answerText.GetPreferredValues(answerText.text, contentWidth, 0f).y + 8f,
+                        40f);
+                    answerLayout.preferredHeight = requiredHeight;
+                    answerButton.GetComponent<RectTransform>()
+                        .SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, requiredHeight);
                 }
 
                 answerButton.onClick.AddListener(() => SelectAnswer(answer));
@@ -192,6 +219,9 @@ namespace UI.Pages
                 visibleAnswers.Add(new DisplayedAnswerData(
                     answer.Text.GetLocalizedStringCached(),
                     answer.NextPhrase,
+                    answer.ForceExitAfterAnswer,
+                    answer.ContinueForcedDialogueAfterExit,
+                    answer.GameplayEvents,
                     answer.HasConditions,
                     answer.Conditions));
             }
@@ -216,8 +246,26 @@ namespace UI.Pages
                 visibleAnswers.Add(new DisplayedAnswerData(
                     questAnswer.Text.GetLocalizedStringCached(),
                     questPhrase,
+                    false,
+                    true,
+                    questAnswer.GameplayEvents,
                     questAnswer.HasConditions,
                     questAnswer.Conditions));
+            }
+
+            // The farewell is a navigation action owned by the dialogue UI. It is shown
+            // only at the root of a regular conversation, never inside a dialogue branch
+            // or a forced conversation whose exit has not been explicitly restored.
+            if (currentDialog.IsEntryPhrase(phrase) && dialogueContext.CanExitDialogue)
+            {
+                visibleAnswers.Add(new DisplayedAnswerData(
+                    localizationConfig.DialogueFarewell.GetLocalizedStringCached(),
+                    null,
+                    true,
+                    true,
+                    null,
+                    false,
+                    null));
             }
 
             return visibleAnswers;
@@ -225,7 +273,7 @@ namespace UI.Pages
 
         private void SelectAnswer(DisplayedAnswerData answer)
         {
-            if (string.IsNullOrWhiteSpace(answer.Text) && answer.NextPhrase == null)
+            if (string.IsNullOrWhiteSpace(answer.Text) && answer.NextPhrase == null && !answer.ForceExitAfterAnswer)
             {
                 return;
             }
@@ -255,6 +303,24 @@ namespace UI.Pages
 
             AddNotifications(deferredNotifications);
 
+            if (answer.ForceExitAfterAnswer)
+            {
+                dialogueExitRequestedPublisher.Publish(
+                    new DialogueExitRequestedMessage(answer.ContinueForcedDialogueAfterExit));
+            }
+
+            PublishGameplayEvents(answer.GameplayEvents);
+
+            if (answer.NextPhrase != null)
+            {
+                PublishGameplayEvents(answer.NextPhrase.GameplayEvents);
+            }
+
+            if (answer.ForceExitAfterAnswer)
+            {
+                return;
+            }
+
             ShowAnswers(answer.NextPhrase);
         }
 
@@ -265,7 +331,24 @@ namespace UI.Pages
                 conditions,
                 playerInventory,
                 playerMoneyStorage,
-                questController);
+                questController,
+                runtimeFlags);
+        }
+
+        private void PublishGameplayEvents(System.Collections.Generic.IReadOnlyList<DialogueGameplayEvent> events)
+        {
+            if (events == null)
+            {
+                return;
+            }
+
+            foreach (var gameplayEvent in events)
+            {
+                if (gameplayEvent != null)
+                {
+                    dialogueGameplayEventPublisher.Publish(new DialogueGameplayEventRaisedMessage(gameplayEvent));
+                }
+            }
         }
 
         private bool TryExecuteConditions(
@@ -355,6 +438,12 @@ namespace UI.Pages
                         }
 
                         deferredNotifications.Add(CreateQuestNotification(QuestNotificationType.Completed, condition.QuestGraph));
+                        break;
+                    case DialogAnswerConditionType.ClearRuntimeFlag:
+                        runtimeFlags?.Deactivate(condition.RuntimeFlag);
+                        break;
+                    case DialogAnswerConditionType.SetRuntimeFlag:
+                        runtimeFlags?.Activate(condition.RuntimeFlag);
                         break;
                 }
             }
@@ -540,17 +629,26 @@ namespace UI.Pages
         {
             public readonly string Text;
             public readonly DialogPhrase NextPhrase;
+            public readonly bool ForceExitAfterAnswer;
+            public readonly bool ContinueForcedDialogueAfterExit;
+            public readonly System.Collections.Generic.IReadOnlyList<DialogueGameplayEvent> GameplayEvents;
             public readonly bool HasConditions;
             public readonly System.Collections.Generic.IReadOnlyList<DialogAnswerCondition> Conditions;
 
             public DisplayedAnswerData(
                 string text,
                 DialogPhrase nextPhrase,
+                bool forceExitAfterAnswer,
+                bool continueForcedDialogueAfterExit,
+                System.Collections.Generic.IReadOnlyList<DialogueGameplayEvent> gameplayEvents,
                 bool hasConditions,
                 System.Collections.Generic.IReadOnlyList<DialogAnswerCondition> conditions)
             {
                 Text = text ?? string.Empty;
                 NextPhrase = nextPhrase;
+                ForceExitAfterAnswer = forceExitAfterAnswer && nextPhrase == null;
+                ContinueForcedDialogueAfterExit = continueForcedDialogueAfterExit;
+                GameplayEvents = gameplayEvents;
                 HasConditions = hasConditions;
                 Conditions = conditions;
             }

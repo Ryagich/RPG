@@ -18,6 +18,7 @@ namespace UI.Pages
         private readonly TradePage tradePage;
         private readonly MapPage mapPage;
         private readonly QuestPage questPage;
+        private readonly LessonPage lessonPage;
         private readonly DeathPage deathPage;
         private readonly SwitchLocationPage switchLocationPage;
 
@@ -34,6 +35,7 @@ namespace UI.Pages
                 TradePage tradePage,
                 MapPage mapPage,
                 QuestPage questPage,
+                LessonPage lessonPage,
                 DeathPage deathPage,
                 SwitchLocationPage switchLocationPage,
                 ISubscriber<GameModeChangedMessage> gameModeChangeSubscriber
@@ -48,6 +50,7 @@ namespace UI.Pages
             this.tradePage = tradePage;
             this.mapPage = mapPage;
             this.questPage = questPage;
+            this.lessonPage = lessonPage;
             this.deathPage = deathPage;
             this.switchLocationPage = switchLocationPage;
 
@@ -92,6 +95,9 @@ namespace UI.Pages
                 case GameMode.Quest:
                     currentPage = questPage;
                     break;
+                case GameMode.Lesson:
+                    currentPage = lessonPage;
+                    break;
                 case GameMode.Death:
                     currentPage = deathPage;
                     break;
@@ -126,6 +132,7 @@ namespace UI.Pages
         Trade,
         Map,
         Quest,
+        Lesson,
         Death,
         SwitchLocation,
         MenuMain,

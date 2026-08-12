@@ -4,6 +4,7 @@ using Inventory.Inventories;
 using Money;
 using Quests;
 using UnityEngine;
+using Dialogue;
 
 namespace Dialogs.Graph
 {
@@ -14,7 +15,8 @@ namespace Dialogs.Graph
             IReadOnlyList<DialogAnswerCondition> conditions,
             PlayerInventory playerInventory,
             MoneyStorage playerMoneyStorage,
-            QuestController questController)
+            QuestController questController,
+            DialogueRuntimeFlagRegistry runtimeFlags = null)
         {
             if (!hasConditions || conditions == null)
             {
@@ -97,6 +99,24 @@ namespace Dialogs.Graph
                             return false;
                         }
 
+                        break;
+                    case DialogAnswerConditionType.RequireRuntimeFlag:
+                        if (runtimeFlags == null || !runtimeFlags.IsActive(condition.RuntimeFlag))
+                        {
+                            return false;
+                        }
+
+                        break;
+                    case DialogAnswerConditionType.ClearRuntimeFlag:
+                        break;
+                    case DialogAnswerConditionType.RequireInactiveRuntimeFlag:
+                        if (runtimeFlags == null || runtimeFlags.IsActive(condition.RuntimeFlag))
+                        {
+                            return false;
+                        }
+
+                        break;
+                    case DialogAnswerConditionType.SetRuntimeFlag:
                         break;
                 }
             }

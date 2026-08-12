@@ -256,6 +256,64 @@ namespace Inventory.Inventories
             return consumedCount;
         }
 
+        /// <summary>
+        /// Removes only stacks issued for a runtime-owned session. Unlike removal by item
+        /// config this cannot take an identical item that belonged to the player beforehand.
+        /// </summary>
+        public int RemoveRuntimeTaggedItems(string runtimeTag)
+        {
+            if (string.IsNullOrWhiteSpace(runtimeTag))
+            {
+                return 0;
+            }
+
+            var removedCount = 0;
+            foreach (ItemInInventory item in Items.ToList())
+            {
+                if (item?.ItemStack?.RuntimeTag != runtimeTag)
+                {
+                    continue;
+                }
+
+                removedCount += item.ItemStack.Count;
+                foreach (Tile tile in Tiles.tiles)
+                {
+                    if (tile.ItemInInventory == item)
+                    {
+                        tile.SetItem(null);
+                    }
+                }
+
+                Items.Remove(item);
+            }
+
+            foreach (SlotModel slot in GetSlots())
+            {
+                if (slot?.ItemStack?.RuntimeTag != runtimeTag)
+                {
+                    continue;
+                }
+
+                removedCount += slot.ItemStack.Count;
+                slot.ItemStack = null;
+                HandleSlotItemChanged(slot);
+            }
+
+            SlotModel handSlot = HandSlot.Value;
+            if (HandSourceInventory.Value == this && handSlot?.ItemStack?.RuntimeTag == runtimeTag)
+            {
+                removedCount += handSlot.ItemStack.Count;
+                HandSlot.Value = new SlotModel(handSlot.ItemType, handSlot.StackLimitType, null);
+            }
+
+            if (removedCount > 0)
+            {
+                NotifyChanged();
+            }
+
+            return removedCount;
+        }
+
         public bool TryFindFirstItem(ItemConfig itemConfig, out ItemInInventory itemInInventory)
         {
             itemInInventory = itemConfig == null
@@ -330,7 +388,7 @@ namespace Inventory.Inventories
             while (remainingStack.Count > 0 && TryFindFreeItemTiles(Tiles, remainingStack.Size, out var itemTiles))
             {
                 var countToPlace = Mathf.Min(remainingStack.Count, remainingStack.MaxStack);
-                AddItem(new ItemStack(remainingStack.ItemConfig, countToPlace, remainingStack.IsRotated), itemTiles);
+                AddItem(new ItemStack(remainingStack.ItemConfig, countToPlace, remainingStack.IsRotated, remainingStack.RuntimeTag), itemTiles);
                 remainingStack.Count -= countToPlace;
                 changed = true;
             }
@@ -355,7 +413,7 @@ namespace Inventory.Inventories
             while (remainingStack.Count > 0)
             {
                 var countToPlace = Mathf.Min(remainingStack.Count, remainingStack.MaxStack);
-                var stackToPlace = new ItemStack(remainingStack.ItemConfig, countToPlace, remainingStack.IsRotated);
+                var stackToPlace = new ItemStack(remainingStack.ItemConfig, countToPlace, remainingStack.IsRotated, remainingStack.RuntimeTag);
                 if (!TryBuildGridWithAdditionalItem(GetCurrentInventorySize(), stackToPlace, out var rebuiltTiles, out var rebuiltItems))
                 {
                     break;
@@ -537,10 +595,10 @@ namespace Inventory.Inventories
             if (slot.ItemStack == null)
             {
                 var emptySlotMaxStack = slot.GetMaxStack(newItemStack.ItemConfig);
-                slot.ItemStack = new ItemStack(newItemStack.ItemConfig, Mathf.Min(newItemStack.Count, emptySlotMaxStack), newItemStack.IsRotated);
+                slot.ItemStack = new ItemStack(newItemStack.ItemConfig, Mathf.Min(newItemStack.Count, emptySlotMaxStack), newItemStack.IsRotated, newItemStack.RuntimeTag);
                 if (newItemStack.Count > slot.ItemStack.Count)
                 {
-                    remainderStack = new ItemStack(newItemStack.ItemConfig, newItemStack.Count - slot.ItemStack.Count, newItemStack.IsRotated);
+                    remainderStack = new ItemStack(newItemStack.ItemConfig, newItemStack.Count - slot.ItemStack.Count, newItemStack.IsRotated, newItemStack.RuntimeTag);
                 }
 
                 HandleSlotItemChanged(slot);
@@ -562,7 +620,7 @@ namespace Inventory.Inventories
                 slot.ItemStack.Count += movedCount;
                 if (movedCount < newItemStack.Count)
                 {
-                    remainderStack = new ItemStack(newItemStack.ItemConfig, newItemStack.Count - movedCount, newItemStack.IsRotated);
+                    remainderStack = new ItemStack(newItemStack.ItemConfig, newItemStack.Count - movedCount, newItemStack.IsRotated, newItemStack.RuntimeTag);
                 }
 
                 NotifyChanged();
@@ -572,10 +630,10 @@ namespace Inventory.Inventories
             replacedStack = slot.ItemStack;
             var slotMaxStack = slot.GetMaxStack(newItemStack.ItemConfig);
             var countToPlace = Mathf.Min(newItemStack.Count, slotMaxStack);
-            slot.ItemStack = new ItemStack(newItemStack.ItemConfig, countToPlace, newItemStack.IsRotated);
+            slot.ItemStack = new ItemStack(newItemStack.ItemConfig, countToPlace, newItemStack.IsRotated, newItemStack.RuntimeTag);
             if (newItemStack.Count > countToPlace)
             {
-                remainderStack = new ItemStack(newItemStack.ItemConfig, newItemStack.Count - countToPlace, newItemStack.IsRotated);
+                remainderStack = new ItemStack(newItemStack.ItemConfig, newItemStack.Count - countToPlace, newItemStack.IsRotated, newItemStack.RuntimeTag);
             }
 
             HandleSlotItemChanged(slot);
@@ -618,7 +676,7 @@ namespace Inventory.Inventories
             }
 
             var countToPlace = Mathf.Min(remainingStack.Count, remainingStack.MaxStack);
-            AddItem(new ItemStack(remainingStack.ItemConfig, countToPlace, remainingStack.IsRotated), itemTiles);
+            AddItem(new ItemStack(remainingStack.ItemConfig, countToPlace, remainingStack.IsRotated, remainingStack.RuntimeTag), itemTiles);
             remainingStack.Count -= countToPlace;
             NotifyChanged();
             return remainingStack.Count > 0 ? remainingStack : null;

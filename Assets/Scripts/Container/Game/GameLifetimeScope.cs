@@ -1,4 +1,5 @@
 ﻿using Dialogue;
+using Combat;
 using GameModes;
 using Input;
 using MessagePipe;
@@ -10,9 +11,11 @@ using Inventory.Looting;
 using GameAudio;
 using Locations;
 using NPC;
+using Quests;
 using Quests.MapTargets;
 using TargetLock;
 using UI.Inventory;
+using Training;
 
 namespace Container.Game
 {
@@ -60,15 +63,24 @@ namespace Container.Game
             builder.RegisterMessageBroker<MouseUp>(options);
             builder.RegisterMessageBroker<DodgeInputMessage>(options);
             builder.RegisterMessageBroker<RollInputMessage>(options);
+            builder.RegisterMessageBroker<LessonSkipInputMessage>(options);
+            builder.RegisterMessageBroker<LessonEvasionInputMessage>(options);
+            builder.RegisterMessageBroker<LessonAttackInputMessage>(options);
+            builder.RegisterMessageBroker<PlayerEvasionCompletedMessage>(options);
+            builder.RegisterMessageBroker<NpcAttackStartedMessage>(options);
+            builder.RegisterMessageBroker<WeaponSheathedMessage>(options);
             builder.RegisterMessageBroker<ShowStatsInputMessage>(options);
             builder.RegisterMessageBroker<FastSlotInputMessage>(options);
             builder.RegisterMessageBroker<WeaponSlotInputMessage>(options);
             builder.RegisterMessageBroker<ChangeGameModeRequest>(options);
             builder.RegisterMessageBroker<GameModeChangedMessage>(options);
+            builder.RegisterMessageBroker<DialogueExitRequestedMessage>(options);
+            builder.RegisterMessageBroker<DialogueGameplayEventRaisedMessage>(options);
             builder.RegisterMessageBroker<PlayerDiedMessage>(options);
             builder.RegisterMessageBroker<CharacterDamagedMessage>(options);
             builder.RegisterMessageBroker<InteractableMessage>(options);
             builder.RegisterMessageBroker<InteractableEndMessage>(options);
+            builder.RegisterMessageBroker<PlayerRelocatedMessage>(options);
             builder.RegisterMessageBroker<ItemHolderFoundMessage>(options);
             builder.RegisterMessageBroker<ItemHolderLostMessage>(options);
             builder.RegisterMessageBroker<PlaySoundMessage>(options);
@@ -79,10 +91,16 @@ namespace Container.Game
             builder.Register<NpcCombatRegistry>(Lifetime.Singleton)
                    .As<INpcCombatRegistry>()
                    .AsSelf();
+            builder.Register<NonLethalCombatSessionRegistry>(Lifetime.Singleton)
+                   .As<INonLethalCombatSessionRegistry>()
+                   .AsSelf();
             builder.Register<QuestMapTargetRegistry>(Lifetime.Singleton)
                    .As<IQuestMapTargetRegistry>()
                    .AsSelf();
             builder.Register<InventoryInteractionContext>(Lifetime.Singleton).AsSelf();
+            builder.Register<LessonPresentationContext>(Lifetime.Singleton).AsSelf();
+            builder.Register<QuestSelectionLock>(Lifetime.Singleton).AsSelf();
+            builder.Register<QuestObjectiveOverrideContext>(Lifetime.Singleton).AsSelf();
 
             if (locationSelector != null)
             {
@@ -114,6 +132,7 @@ namespace Container.Game
                                           });
             builder.Register<LootingContext>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueContext>(Lifetime.Singleton).AsSelf();
+            builder.RegisterEntryPoint<DialogueExitController>().AsSelf();
             builder.Register<Player.PlayerDeathState>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<GameModesController>().AsSelf();
             builder.RegisterEntryPoint<SoundMessagePlayer>().AsSelf();

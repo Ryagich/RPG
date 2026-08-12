@@ -145,6 +145,7 @@ MonoBehaviour:
   autoInjectGameObjects: []
   characterInfo: {fileID: 11400000, guid: 3e00ca4ee5487f047ba759a296c3372a, type: 2}
   inventoryConfig: {fileID: 0}
+  defaultVisualConfig: {fileID: 11400000, guid: d06f3e2d4c1b7256a789abcdef012345, type: 2}
   canTalk: 1
   dialog: {fileID: 11400000, guid: 88d2c07937d080b4ba52468317585259, type: 2}
   stateMachineGraph: {fileID: 11400000, guid: 9fef677537be06b4e8a00a17d5132a30, type: 2}
@@ -206,7 +207,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3d6e4f5a2b78901cdef23456789abcd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterVisualRoot
-  defaultVisualConfig: {fileID: 11400000, guid: d06f3e2d4c1b7256a789abcdef012345, type: 2}
 --- !u!114 &3241865951239593748
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -114,18 +114,16 @@ namespace Combat
                 return;
             }
 
-            var localDelta = sourceAnimator.deltaPosition;
-            localDelta.y = 0f;
+            // Animator provides root motion as a world-space delta. CharacterController.Move
+            // accepts the same coordinate space, so applying a visual parent's transform here
+            // would rotate the displacement a second time.
+            var worldDelta = sourceAnimator.deltaPosition;
+            worldDelta.y = 0f;
 
-            if (localDelta.sqrMagnitude <= RootMotionThreshold)
+            if (worldDelta.sqrMagnitude <= RootMotionThreshold)
             {
                 return;
             }
-
-            var worldDelta = sourceAnimator.transform.parent != null
-                ? sourceAnimator.transform.parent.TransformVector(localDelta)
-                : localDelta;
-            worldDelta.y = 0f;
 
             characterController.Move(worldDelta * GetActivePositionMultiplier());
         }

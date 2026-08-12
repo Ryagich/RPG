@@ -12,6 +12,7 @@ namespace Combat
         private readonly Transform ownerTransform;
         private readonly StatsController statsController;
         private readonly PlayerInventory playerInventory;
+        private readonly INonLethalCombatSessionRegistry nonLethalCombatSessions;
         private readonly IPublisher<CharacterDamagedMessage> damagedPublisher;
         private bool isWeaponDamageBlocked;
         private bool isWeaponAttackSuppressed;
@@ -22,11 +23,13 @@ namespace Combat
             Transform ownerTransform,
             StatsController statsController,
             PlayerInventory playerInventory,
+            INonLethalCombatSessionRegistry nonLethalCombatSessions,
             IPublisher<CharacterDamagedMessage> damagedPublisher)
         {
             this.ownerTransform = ownerTransform;
             this.statsController = statsController;
             this.playerInventory = playerInventory;
+            this.nonLethalCombatSessions = nonLethalCombatSessions;
             this.damagedPublisher = damagedPublisher;
         }
 
@@ -95,6 +98,7 @@ namespace Combat
             var bodyMultiplier = Mathf.Max(0f, hitbox.DamageMultiplier);
             var physicalDefense = PhysicalDefenseCalculator.ResolveProtection(playerInventory, hitbox.BodyPart);
             var mitigatedDamage = hit.Damage * bodyMultiplier * (1f - physicalDefense);
+            mitigatedDamage = nonLethalCombatSessions.ClampIncomingWeaponDamage(this, mitigatedDamage);
 
             if (mitigatedDamage <= 0f)
             {

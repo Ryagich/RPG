@@ -27,6 +27,8 @@ namespace Container
         [SerializeField] private CanvasLifetimeScope canvasLifetimeScope;
         [SerializeField] private Character.CharacterInfo characterInfo;
         [SerializeField] private InventoryConfig inventoryConfig;
+        [Header("Visuals")]
+        [SerializeField] private CharacterDefaultVisualConfig defaultVisualConfig;
         [Header("Faction")]
         [SerializeField] private FactionConfig faction;
         [Header("Initial Inventory")]
@@ -60,6 +62,11 @@ namespace Container
             if (inventoryConfig != null)
             {
                 builder.RegisterInstance(inventoryConfig).AsSelf();
+            }
+
+            if (defaultVisualConfig != null)
+            {
+                builder.RegisterInstance(defaultVisualConfig).AsSelf();
             }
 
             if (faction != null)

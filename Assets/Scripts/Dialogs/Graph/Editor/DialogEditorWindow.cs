@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Dialogs.Graph.Model;
+using Dialogue;
 using EditorTools;
 using Quests.Editor;
 using Quests.Graph;
@@ -3216,6 +3217,8 @@ namespace Dialogs.Graph.Editor
             SerializedProperty restoresExitAbilityProperty = phraseObject.FindProperty("restoresExitAbility");
             SerializedProperty isQuestPhraseProperty = phraseObject.FindProperty("isQuestPhrase");
             SerializedProperty questAnswerProperty = phraseObject.FindProperty("questAnswer");
+            SerializedProperty hasGameplayEventsProperty = phraseObject.FindProperty("hasGameplayEvents");
+            SerializedProperty gameplayEventsProperty = phraseObject.FindProperty("gameplayEvents");
             SerializedProperty answersProperty = phraseObject.FindProperty("answers");
 
             if (answersProperty == null)
@@ -3282,6 +3285,8 @@ namespace Dialogs.Graph.Editor
                 }
             }
 
+            DrawGameplayEvents(hasGameplayEventsProperty, gameplayEventsProperty);
+
             EditorGUILayout.Space(4f);
             EditorGUILayout.LabelField("Answers", MiniBoldLabelStyle);
 
@@ -3293,19 +3298,39 @@ namespace Dialogs.Graph.Editor
                 SerializedProperty answerProperty = answersProperty.GetArrayElementAtIndex(i);
                 SerializedProperty answerTextProperty = answerProperty.FindPropertyRelative("text");
                 SerializedProperty nextPhraseProperty = answerProperty.FindPropertyRelative("nextPhrase");
+                SerializedProperty forceExitAfterAnswerProperty = answerProperty.FindPropertyRelative("forceExitAfterAnswer");
+                SerializedProperty continueForcedDialogueAfterExitProperty = answerProperty.FindPropertyRelative("continueForcedDialogueAfterExit");
+                SerializedProperty hasGameplayEventsForAnswerProperty = answerProperty.FindPropertyRelative("hasGameplayEvents");
+                SerializedProperty gameplayEventsForAnswerProperty = answerProperty.FindPropertyRelative("gameplayEvents");
                 SerializedProperty hasConditionsProperty = answerProperty.FindPropertyRelative("hasConditions");
                 SerializedProperty conditionsProperty = answerProperty.FindPropertyRelative("conditions");
-                DialogAnswer answer = i < phrase.Answers.Count ? phrase.Answers[i] : null;
-                DialogPhrase nextPhrase = answer?.NextPhrase;
+                DialogPhrase nextPhrase = nextPhraseProperty?.objectReferenceValue as DialogPhrase;
 
-                bool missingLink = nextPhrase == null;
+                bool forceExitAfterAnswer = forceExitAfterAnswerProperty != null &&
+                                            forceExitAfterAnswerProperty.boolValue &&
+                                            nextPhrase == null;
+                if (nextPhrase != null && forceExitAfterAnswerProperty?.boolValue == true)
+                {
+                    forceExitAfterAnswerProperty.boolValue = false;
+                }
+
+                bool missingLink = nextPhrase == null && !forceExitAfterAnswer;
                 bool targetOutsideGraph = nextPhrase != null && !ContainsPhrase(nextPhrase);
                 bool hasConditions = hasConditionsProperty != null && hasConditionsProperty.boolValue;
                 int conditionCount = conditionsProperty?.arraySize ?? 0;
                 string foldoutKey = GetAnswerFoldoutKey(phrase, i);
                 bool isExpanded = GetAnswerFoldoutState(foldoutKey);
-                Color accentColor = GetAnswerAccentColor(missingLink, targetOutsideGraph, hasConditions);
-                string statusLabel = GetAnswerStatusLabel(missingLink, targetOutsideGraph, hasConditions, conditionCount);
+                Color accentColor = GetAnswerAccentColor(
+                    missingLink,
+                    forceExitAfterAnswer,
+                    targetOutsideGraph,
+                    hasConditions);
+                string statusLabel = GetAnswerStatusLabel(
+                    missingLink,
+                    forceExitAfterAnswer,
+                    targetOutsideGraph,
+                    hasConditions,
+                    conditionCount);
 
                 EditorGUILayout.BeginHorizontal(HelpBoxStyle);
 
@@ -3385,14 +3410,35 @@ namespace Dialogs.Graph.Editor
                         DrawPropertyFieldWithCustomLabel(nextPhraseProperty, "Next Phrase");
                     }
 
-                    if (missingLink)
+                    bool hasNextPhrase = nextPhraseProperty?.objectReferenceValue != null;
+                    if (hasNextPhrase && forceExitAfterAnswerProperty?.boolValue == true)
+                    {
+                        forceExitAfterAnswerProperty.boolValue = false;
+                    }
+                    else if (!hasNextPhrase && forceExitAfterAnswerProperty != null)
+                    {
+                        EditorGUILayout.PropertyField(
+                            forceExitAfterAnswerProperty,
+                            new GUIContent("Force Exit After Player Answer"));
+
+                        if (forceExitAfterAnswerProperty.boolValue && continueForcedDialogueAfterExitProperty != null)
+                        {
+                            EditorGUILayout.PropertyField(
+                                continueForcedDialogueAfterExitProperty,
+                                new GUIContent("Continue Forced Dialogue After Exit"));
+                        }
+                    }
+
+                    if (!hasNextPhrase && forceExitAfterAnswerProperty?.boolValue != true)
                     {
                         EditorGUILayout.HelpBox("Next phrase is not assigned for this answer.", MessageType.Error);
                     }
-                    else if (targetOutsideGraph)
+                    else if (hasNextPhrase && targetOutsideGraph)
                     {
                         EditorGUILayout.HelpBox("Target phrase is not added to the current dialog graph.", MessageType.Warning);
                     }
+
+                    DrawGameplayEvents(hasGameplayEventsForAnswerProperty, gameplayEventsForAnswerProperty);
                 }
                 else
                 {
@@ -3447,6 +3493,8 @@ namespace Dialogs.Graph.Editor
             }
 
             SerializedProperty answerTextProperty = questAnswerProperty.FindPropertyRelative("text");
+            SerializedProperty hasGameplayEventsProperty = questAnswerProperty.FindPropertyRelative("hasGameplayEvents");
+            SerializedProperty gameplayEventsProperty = questAnswerProperty.FindPropertyRelative("gameplayEvents");
             SerializedProperty hasConditionsProperty = questAnswerProperty.FindPropertyRelative("hasConditions");
             SerializedProperty conditionsProperty = questAnswerProperty.FindPropertyRelative("conditions");
 
@@ -3463,6 +3511,8 @@ namespace Dialogs.Graph.Editor
                 hasConditionsProperty,
                 conditionsProperty,
                 "Answer Text");
+
+            DrawGameplayEvents(hasGameplayEventsProperty, gameplayEventsProperty);
 
             EditorGUILayout.EndVertical();
         }
@@ -3491,6 +3541,26 @@ namespace Dialogs.Graph.Editor
 
             DrawDialogAnswerConditions(conditionsProperty);
             DrawAnswerQuestLinksSummary(conditionsProperty);
+        }
+
+        private static void DrawGameplayEvents(
+            SerializedProperty hasGameplayEventsProperty,
+            SerializedProperty gameplayEventsProperty)
+        {
+            if (hasGameplayEventsProperty == null)
+            {
+                return;
+            }
+
+            EditorGUILayout.Space(3f);
+            EditorGUILayout.PropertyField(
+                hasGameplayEventsProperty,
+                new GUIContent("Gameplay Events", "Publishes the selected typed gameplay events after this phrase or answer is shown."));
+
+            if (hasGameplayEventsProperty.boolValue && gameplayEventsProperty != null)
+            {
+                EditorGUILayout.PropertyField(gameplayEventsProperty, new GUIContent("Events"), true);
+            }
         }
 
         private string GetAnswerFoldoutKey(DialogPhrase phrase, int answerIndex)
@@ -3560,11 +3630,20 @@ namespace Dialogs.Graph.Editor
             }
         }
 
-        private Color GetAnswerAccentColor(bool missingLink, bool targetOutsideGraph, bool hasConditions)
+        private Color GetAnswerAccentColor(
+            bool missingLink,
+            bool forceExitAfterAnswer,
+            bool targetOutsideGraph,
+            bool hasConditions)
         {
             if (missingLink)
             {
                 return DangerAccentColor;
+            }
+
+            if (forceExitAfterAnswer)
+            {
+                return RewardAccentColor;
             }
 
             if (targetOutsideGraph)
@@ -3580,11 +3659,21 @@ namespace Dialogs.Graph.Editor
             return RewardAccentColor;
         }
 
-        private static string GetAnswerStatusLabel(bool missingLink, bool targetOutsideGraph, bool hasConditions, int conditionCount)
+        private static string GetAnswerStatusLabel(
+            bool missingLink,
+            bool forceExitAfterAnswer,
+            bool targetOutsideGraph,
+            bool hasConditions,
+            int conditionCount)
         {
             if (missingLink)
             {
                 return "Missing Next";
+            }
+
+            if (forceExitAfterAnswer)
+            {
+                return "Exit Dialogue";
             }
 
             if (targetOutsideGraph)
@@ -3647,6 +3736,7 @@ namespace Dialogs.Graph.Editor
                 SerializedProperty questSourceNodeProperty = conditionProperty.FindPropertyRelative("questSourceNode");
                 SerializedProperty questTransitionProperty = conditionProperty.FindPropertyRelative("questTransition");
                 SerializedProperty questNodeProperty = conditionProperty.FindPropertyRelative("questNode");
+                SerializedProperty runtimeFlagProperty = conditionProperty.FindPropertyRelative("runtimeFlag");
                 DialogAnswerConditionType conditionType = (DialogAnswerConditionType)typeProperty.enumValueIndex;
                 Color accentColor = GetConditionAccentColor(conditionType);
                 string conditionTitle = GetConditionTitle(typeProperty);
@@ -3704,6 +3794,12 @@ namespace Dialogs.Graph.Editor
                         break;
                     case DialogAnswerConditionType.DoQuestEnd:
                         DrawTerminalQuestNodeSelector(conditionsProperty, i, questGraphProperty, questNodeProperty);
+                        break;
+                    case DialogAnswerConditionType.RequireRuntimeFlag:
+                    case DialogAnswerConditionType.ClearRuntimeFlag:
+                    case DialogAnswerConditionType.RequireInactiveRuntimeFlag:
+                    case DialogAnswerConditionType.SetRuntimeFlag:
+                        DrawPropertyFieldWithCustomLabel(runtimeFlagProperty, "Runtime flag");
                         break;
                 }
 
@@ -3768,12 +3864,14 @@ namespace Dialogs.Graph.Editor
             SerializedProperty questSourceNodeProperty = conditionProperty.FindPropertyRelative("questSourceNode");
             SerializedProperty questTransitionProperty = conditionProperty.FindPropertyRelative("questTransition");
             SerializedProperty questNodeProperty = conditionProperty.FindPropertyRelative("questNode");
+            SerializedProperty runtimeFlagProperty = conditionProperty.FindPropertyRelative("runtimeFlag");
 
             DialogAnswerConditionType type = (DialogAnswerConditionType)typeProperty.enumValueIndex;
             QuestGraph questGraph = questGraphProperty.objectReferenceValue as QuestGraph;
             QuestNodeData questSourceNode = questSourceNodeProperty.objectReferenceValue as QuestNodeData;
             QuestTransition transition = questTransitionProperty.objectReferenceValue as QuestTransition;
             QuestNodeData questNode = questNodeProperty.objectReferenceValue as QuestNodeData;
+            DialogueRuntimeFlag runtimeFlag = runtimeFlagProperty.objectReferenceValue as DialogueRuntimeFlag;
 
             return type switch
             {
@@ -3785,6 +3883,14 @@ namespace Dialogs.Graph.Editor
                     $"Execute Transition -> {QuestPreviewUtility.GetQuestDisplayName(questGraph)}: {GetQuestTransitionLabel(questGraph, questSourceNode, transition)}",
                 DialogAnswerConditionType.DoQuestEnd when questGraph != null && questNode != null =>
                     $"Execute Final Node -> {QuestPreviewUtility.GetQuestDisplayName(questGraph)}: {QuestPreviewUtility.GetNodeDisplayName(questNode)}",
+                DialogAnswerConditionType.RequireRuntimeFlag when runtimeFlag != null =>
+                    $"Require Runtime Flag -> {runtimeFlag.name}",
+                DialogAnswerConditionType.ClearRuntimeFlag when runtimeFlag != null =>
+                    $"Clear Runtime Flag -> {runtimeFlag.name}",
+                DialogAnswerConditionType.RequireInactiveRuntimeFlag when runtimeFlag != null =>
+                    $"Require Inactive Runtime Flag -> {runtimeFlag.name}",
+                DialogAnswerConditionType.SetRuntimeFlag when runtimeFlag != null =>
+                    $"Set Runtime Flag -> {runtimeFlag.name}",
                 _ => null
             };
         }

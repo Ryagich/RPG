@@ -14,6 +14,9 @@ namespace NPC
 {
     public sealed class NpcWeaponInHandController : IWeaponAnimationEventHandler, IEquippedWeaponVisual, IStartable, ITickable, IDisposable
     {
+        private const string WeaponAnimationLayerName = "Weapon Handling";
+        private const string SheatheWeaponStatePath = "Weapon Handling.SheatheWeapon";
+
         private static readonly int DrawWeaponRequestedParameterHash = Animator.StringToHash("MoveWeaponInHand");
         private static readonly int SheatheWeaponRequestedParameterHash = Animator.StringToHash("MoveWeaponInBelt");
         private static readonly int AttackRequestedParameterHash = Animator.StringToHash("Attack");
@@ -27,6 +30,7 @@ namespace NPC
         private static readonly int HeavyAttackHitStateHash = Animator.StringToHash("A_Attack_HeavyCombo01B_Hit_Sword");
         private static readonly int DodgeStateHash = Animator.StringToHash("Dodge Tree");
         private static readonly int RollStateHash = Animator.StringToHash("Dodge RollTree");
+        private static readonly int SheatheWeaponStateHash = Animator.StringToHash(SheatheWeaponStatePath);
 
         private enum WeaponDisplayMode
         {
@@ -45,17 +49,24 @@ namespace NPC
         private readonly NpcNavMeshController navMeshController;
         private readonly PlayerMovementConfig movementConfig;
         private readonly StatsController statsController;
+        private readonly MessagePipe.IPublisher<Messages.NpcAttackStartedMessage> attackStartedPublisher;
+        private readonly MessagePipe.IPublisher<Messages.WeaponSheathedMessage> weaponSheathedPublisher;
         private readonly CompositeDisposable disposables = new();
 
         private GameObject currentWeaponInstance;
         private ItemConfig currentWeaponItemConfig;
         private WeaponDamageZone activeDamageZone;
         private bool isWeaponDrawn;
+        private bool isSheatheAnimationInProgress;
+        private bool hasEnteredSheatheAnimationState;
         private bool hasAttackComboWindow;
+        private bool isAttackInProgress;
+        private bool isAttackStartNotificationPending;
         private bool isEvasionDirectionLocked;
         private int currentRenderedSlotIndex;
         private WeaponDisplayMode currentDisplayMode;
         private readonly int fullBodyLayerIndex;
+        private readonly int weaponAnimationLayerIndex;
 
         public NpcWeaponInHandController(
             PlayerInventory inventory,
@@ -67,7 +78,9 @@ namespace NPC
             CharacterRootMotionController rootMotionController,
             NpcNavMeshController navMeshController,
             PlayerMovementConfig movementConfig,
-            StatsController statsController)
+            StatsController statsController,
+            MessagePipe.IPublisher<Messages.NpcAttackStartedMessage> attackStartedPublisher,
+            MessagePipe.IPublisher<Messages.WeaponSheathedMessage> weaponSheathedPublisher)
         {
             this.inventory = inventory;
             this.handAnchor = handAnchor;
@@ -79,7 +92,10 @@ namespace NPC
             this.navMeshController = navMeshController;
             this.movementConfig = movementConfig;
             this.statsController = statsController;
+            this.attackStartedPublisher = attackStartedPublisher;
+            this.weaponSheathedPublisher = weaponSheathedPublisher;
             fullBodyLayerIndex = animator != null ? animator.GetLayerIndex("Full Body") : -1;
+            weaponAnimationLayerIndex = animator != null ? animator.GetLayerIndex(WeaponAnimationLayerName) : -1;
 
             animationEventReceiver?.Bind(this);
         }
@@ -94,7 +110,9 @@ namespace NPC
         public void Tick()
         {
             UpdateRootMotionAvailability();
+            UpdateAttackProgress();
             ReleaseEvasionDirectionWhenFinished();
+            SynchronizeSheatheCompletionWithAnimatorState();
         }
 
         public void Dispose()
@@ -109,14 +127,15 @@ namespace NPC
 
         public void TakeWeaponInHandFromAnimationEvent() => MoveCurrentWeapon(WeaponDisplayMode.RightHand);
         public void BeginMoveWeaponToRightHandFromAnimationEvent() => MoveCurrentWeapon(WeaponDisplayMode.RightHand);
-        public void PutWeaponOnBeltFromAnimationEvent() => MoveCurrentWeapon(WeaponDisplayMode.Belt);
+        public void PutWeaponOnBeltFromAnimationEvent()
+        {
+            MoveCurrentWeapon(WeaponDisplayMode.Belt);
+            CompleteSheatheAnimation();
+            weaponSheathedPublisher?.Publish(new Messages.WeaponSheathedMessage(ownerDamageReceiver?.OwnerTransform));
+        }
         public void BeginMoveWeaponToBeltFromAnimationEvent() => MoveCurrentWeapon(WeaponDisplayMode.Belt);
         public void HoldAttackReadyFromAnimationEvent() => hasAttackComboWindow = true;
-        public void AttackStartedFromAnimationEvent()
-        {
-            actionState?.SetActionBlocked(true);
-            navMeshController?.SetActionMovementLocked(true);
-        }
+        public void AttackStartedFromAnimationEvent() => BeginAttack();
         public void BeginDamageWindowFromAnimationEvent() => BeginCurrentWeaponDamageWindow();
         public void EndDamageWindowFromAnimationEvent() => EndCurrentWeaponDamageWindow();
         public void EnableDamageImmunityFromAnimationEvent() => ownerDamageReceiver?.SetWeaponDamageBlocked(true);
@@ -136,19 +155,39 @@ namespace NPC
 
         public void AttackFinishedFromAnimationEvent()
         {
+            isAttackStartNotificationPending = false;
+            isAttackInProgress = false;
             EndCurrentWeaponDamageWindow();
             actionState?.SetActionBlocked(false);
             navMeshController?.SetActionMovementLocked(false);
             ReleaseEvasionDirection();
         }
 
-        public void ResetAttackRequestFromAnimationEvent() => ClearAttackRequest();
+        public void ResetAttackRequestFromAnimationEvent()
+        {
+            // All equipped attack clips reset their Animator request at time zero. They do not
+            // all expose the optional AttackStarted event, so this is the reliable clip-owned
+            // boundary for announcing that an accepted NPC attack has actually begun.
+            if (isAttackStartNotificationPending)
+            {
+                BeginAttack();
+            }
+
+            ClearAttackRequest();
+        }
 
         public bool HasWeaponInWeaponSlots =>
             inventory?.LeftWeaponSlot?.ItemConfig?.ItemType == ItemType.Weapon
          || inventory?.RightWeaponSlot?.ItemConfig?.ItemType == ItemType.Weapon;
 
         public bool IsWeaponDrawn => isWeaponDrawn && currentDisplayMode == WeaponDisplayMode.RightHand && currentWeaponItemConfig != null;
+        public bool IsWeaponSheathed => !isSheatheAnimationInProgress
+                                       && !isWeaponDrawn
+                                       && currentDisplayMode != WeaponDisplayMode.RightHand;
+        public bool IsAttackInProgress => isAttackInProgress;
+        public bool CanStartWeaponSheathing => IsWeaponSheathed
+                                              || (!isSheatheAnimationInProgress
+                                                  && !IsFullBodyActionAnimationActive());
 
         public bool RequestDrawWeapon()
         {
@@ -163,6 +202,7 @@ namespace NPC
             }
 
             isWeaponDrawn = true;
+            CompleteSheatheAnimation();
             if (animator != null)
             {
                 animator.ResetTrigger(SheatheWeaponRequestedParameterHash);
@@ -180,7 +220,12 @@ namespace NPC
                 return;
             }
 
+            bool requiresSheatheAnimation = isWeaponDrawn || currentDisplayMode == WeaponDisplayMode.RightHand;
             isWeaponDrawn = false;
+            isSheatheAnimationInProgress = requiresSheatheAnimation
+                                         && animator != null
+                                         && weaponAnimationLayerIndex >= 0;
+            hasEnteredSheatheAnimationState = false;
             if (animator != null)
             {
                 animator.ResetTrigger(DrawWeaponRequestedParameterHash);
@@ -188,6 +233,48 @@ namespace NPC
             }
 
             RefreshWeaponInHand();
+        }
+
+        private void SynchronizeSheatheCompletionWithAnimatorState()
+        {
+            if (!isSheatheAnimationInProgress)
+            {
+                return;
+            }
+
+            if (IsSheatheWeaponAnimationStateActive())
+            {
+                hasEnteredSheatheAnimationState = true;
+                return;
+            }
+
+            if (hasEnteredSheatheAnimationState)
+            {
+                CompleteSheatheAnimation();
+                weaponSheathedPublisher?.Publish(new Messages.WeaponSheathedMessage(ownerDamageReceiver?.OwnerTransform));
+            }
+        }
+
+        private bool IsSheatheWeaponAnimationStateActive()
+        {
+            if (animator == null || weaponAnimationLayerIndex < 0)
+            {
+                return false;
+            }
+
+            if (animator.GetCurrentAnimatorStateInfo(weaponAnimationLayerIndex).fullPathHash == SheatheWeaponStateHash)
+            {
+                return true;
+            }
+
+            return animator.IsInTransition(weaponAnimationLayerIndex)
+                   && animator.GetNextAnimatorStateInfo(weaponAnimationLayerIndex).fullPathHash == SheatheWeaponStateHash;
+        }
+
+        private void CompleteSheatheAnimation()
+        {
+            isSheatheAnimationInProgress = false;
+            hasEnteredSheatheAnimationState = false;
         }
 
         public bool RequestAttack()
@@ -198,6 +285,7 @@ namespace NPC
             }
 
             SpendStamina(GetStaminaCost(stamina => stamina.LightAttackCost));
+            QueueAttackStartNotification();
             SetActionRequests(lightAttackRequested: true, heavyAttackRequested: false, dodgeRequested: false, rollRequested: false);
             return true;
         }
@@ -213,6 +301,7 @@ namespace NPC
             }
 
             SpendStamina(GetStaminaCost(stamina => stamina.HeavyAttackCost));
+            QueueAttackStartNotification();
             SetActionRequests(lightAttackRequested: false, heavyAttackRequested: true, dodgeRequested: false, rollRequested: false);
             return true;
         }
@@ -225,6 +314,7 @@ namespace NPC
             }
 
             SpendStamina(GetStaminaCost(stamina => stamina.LightAttackCost));
+            QueueAttackStartNotification();
             SetActionRequests(lightAttackRequested: true, heavyAttackRequested: false, dodgeRequested: false, rollRequested: false);
             return true;
         }
@@ -282,6 +372,7 @@ namespace NPC
         public void ClearAttackRequest()
         {
             hasAttackComboWindow = false;
+            isAttackStartNotificationPending = false;
             SetActionRequests(lightAttackRequested: false, heavyAttackRequested: false, dodgeRequested: false, rollRequested: false);
         }
 
@@ -504,6 +595,53 @@ namespace NPC
             // The player enables root motion as soon as its action is requested. Do the same
             // for NPCs so the first displacement frame of Dodge/Roll is never discarded.
             UpdateRootMotionAvailability();
+        }
+
+        private void QueueAttackStartNotification()
+        {
+            if (!isAttackInProgress)
+            {
+                isAttackStartNotificationPending = true;
+            }
+        }
+
+        private void UpdateAttackProgress()
+        {
+            var isActionAnimationActive = IsFullBodyActionAnimationActive();
+            if (isAttackInProgress && !isActionAnimationActive)
+            {
+                isAttackInProgress = false;
+            }
+        }
+
+        private void BeginAttack()
+        {
+            isAttackStartNotificationPending = false;
+            if (isAttackInProgress)
+            {
+                return;
+            }
+
+            isAttackInProgress = true;
+            actionState?.SetActionBlocked(true);
+            navMeshController?.SetActionMovementLocked(true);
+            attackStartedPublisher?.Publish(new Messages.NpcAttackStartedMessage(ownerDamageReceiver?.OwnerTransform));
+        }
+
+        private bool IsFullBodyActionAnimationActive()
+        {
+            if (animator == null || fullBodyLayerIndex < 0)
+            {
+                return false;
+            }
+
+            if (IsFullBodyActionState(animator.GetCurrentAnimatorStateInfo(fullBodyLayerIndex)))
+            {
+                return true;
+            }
+
+            return animator.IsInTransition(fullBodyLayerIndex)
+                   && IsFullBodyActionState(animator.GetNextAnimatorStateInfo(fullBodyLayerIndex));
         }
 
         private void SetEvasionDirection(Vector3 worldDirection)

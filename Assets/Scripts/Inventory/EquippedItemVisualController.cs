@@ -13,6 +13,7 @@ namespace Inventory
     {
         private readonly PlayerInventory playerInventory;
         private readonly CharacterVisualRoot characterVisualRoot;
+        private readonly CharacterDefaultVisualConfig defaultVisualConfig;
         private readonly IDisposable inventoryChangedSubscription;
         private readonly HashSet<string> missingBindingWarnings = new();
         private readonly System.Collections.Generic.Dictionary<BodyPart, string> desiredVisualsByBodyPart = new();
@@ -26,10 +27,14 @@ namespace Inventory
         private ItemConfig lastHipsItemConfig;
         private ItemConfig lastBackpackItemConfig;
 
-        public EquippedItemVisualController(PlayerInventory playerInventory, CharacterVisualRoot characterVisualRoot)
+        public EquippedItemVisualController(
+            PlayerInventory playerInventory,
+            CharacterVisualRoot characterVisualRoot,
+            CharacterDefaultVisualConfig defaultVisualConfig = null)
         {
             this.playerInventory = playerInventory;
             this.characterVisualRoot = characterVisualRoot;
+            this.defaultVisualConfig = defaultVisualConfig;
             inventoryChangedSubscription = playerInventory.Changed.Subscribe(_ => RefreshVisuals());
         }
 
@@ -82,7 +87,6 @@ namespace Inventory
 
         private void ApplyDefaultVisuals()
         {
-            var defaultVisualConfig = characterVisualRoot.DefaultVisualConfig;
             if (defaultVisualConfig == null)
             {
                 return;

@@ -21,6 +21,7 @@ namespace Quests
     {
         private readonly PlayerInventory playerInventory;
         private readonly MoneyStorage moneyStorage;
+        private readonly QuestSelectionLock questSelectionLock;
         private readonly Dictionary<QuestGraph, QuestProgress> progressByQuest = new();
         private readonly List<QuestProgress> progress = new();
 
@@ -42,10 +43,14 @@ namespace Quests
         }
         public event System.Action<QuestChangeInfo> Changed;
 
-        public QuestController(PlayerInventory playerInventory, MoneyStorage moneyStorage)
+        public QuestController(
+            PlayerInventory playerInventory,
+            MoneyStorage moneyStorage,
+            QuestSelectionLock questSelectionLock)
         {
             this.playerInventory = playerInventory;
             this.moneyStorage = moneyStorage;
+            this.questSelectionLock = questSelectionLock;
         }
 
         public bool HasQuest(QuestGraph questGraph)
@@ -120,6 +125,11 @@ namespace Quests
 
         public bool TrySetCurrentQuest(QuestGraph questGraph)
         {
+            if (questSelectionLock?.IsLocked == true)
+            {
+                return false;
+            }
+
             if (!TryGetActiveProgress(questGraph, out QuestProgress questProgress))
             {
                 return false;
@@ -133,6 +143,26 @@ namespace Quests
 
             progress.RemoveAt(currentIndex);
             progress.Insert(0, questProgress);
+            Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Updated, questGraph));
+            return true;
+        }
+
+        /// <summary>
+        /// Advances a runtime-controlled objective without inventing a fake graph transition.
+        /// This supports temporary training and challenge quests while retaining normal authored
+        /// transitions for narrative quests.
+        /// </summary>
+        public bool TrySetCurrentNode(QuestGraph questGraph, QuestNodeData nodeData)
+        {
+            if (!TryGetActiveProgress(questGraph, out var questProgress)
+                || nodeData == null
+                || !questGraph.ContainsNode(nodeData)
+                || questProgress.CurrentNode == nodeData)
+            {
+                return false;
+            }
+
+            questProgress.SetCurrentNode(nodeData);
             Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Updated, questGraph));
             return true;
         }
@@ -202,6 +232,15 @@ namespace Quests
 
             QuestProgress questProgress = progressByQuest[questGraph];
             questProgress.Complete(nodeData);
+
+            if (!questGraph.KeepCompletedInJournal)
+            {
+                // Publish the completion after removing transient progress. Notification services
+                // can still show completion, while no completed entry remains in the journal.
+                progressByQuest.Remove(questGraph);
+                progress.Remove(questProgress);
+            }
+
             Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Completed, questGraph));
             return true;
         }

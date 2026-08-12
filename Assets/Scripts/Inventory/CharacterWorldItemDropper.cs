@@ -34,7 +34,7 @@ namespace Inventory
             forward.Normalize();
             var spawnPosition = ownerTransform.position + forward * DropForwardOffset + Vector3.up * DropUpOffset;
             var itemHolder = Object.Instantiate(itemStack.ItemConfig.HandPrefab, spawnPosition, Quaternion.identity);
-            itemHolder.SetCount(itemStack.Count);
+            itemHolder.Initialize(itemStack.ItemConfig, itemStack.Count, itemStack.RuntimeTag);
             itemHolder.CanInteractable = true;
 
             if (itemHolder.TryGetComponent<Rigidbody>(out var rigidbody))
@@ -52,7 +52,7 @@ namespace Inventory
             }
 
             var itemHolder = Object.Instantiate(itemStack.ItemConfig.HandPrefab, position, rotation);
-            itemHolder.SetCount(itemStack.Count);
+            itemHolder.Initialize(itemStack.ItemConfig, itemStack.Count, itemStack.RuntimeTag);
             itemHolder.CanInteractable = true;
         }
     }

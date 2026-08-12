@@ -22,5 +22,6 @@ namespace Localization
         [field: SerializeField] public LocalizedString QuestsTitle { get; private set; }
         [field: SerializeField] public LocalizedString ActiveQuestsOnly { get; private set; }
         [field: SerializeField] public LocalizedString AllQuests { get; private set; }
+        [field: SerializeField] public LocalizedString DialogueFarewell { get; private set; }
     }
 }

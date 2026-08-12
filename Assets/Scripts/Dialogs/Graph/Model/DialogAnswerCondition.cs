@@ -15,7 +15,11 @@ namespace Dialogs.Graph.Model
         CheckQuestStep = 4,
         AddQuest = 5,
         DoQuestStep = 6,
-        DoQuestEnd = 7
+        DoQuestEnd = 7,
+        RequireRuntimeFlag = 8,
+        ClearRuntimeFlag = 9,
+        RequireInactiveRuntimeFlag = 10,
+        SetRuntimeFlag = 11
     }
 
     [Serializable]
@@ -29,6 +33,7 @@ namespace Dialogs.Graph.Model
         [SerializeField] private QuestNodeData questSourceNode;
         [SerializeField] private QuestTransition questTransition;
         [SerializeField] private QuestNodeData questNode;
+        [SerializeField] private Dialogue.DialogueRuntimeFlag runtimeFlag;
 
         public DialogAnswerConditionType Type => type;
         public int MoneyAmount => moneyAmount;
@@ -38,5 +43,6 @@ namespace Dialogs.Graph.Model
         public QuestNodeData QuestSourceNode => questSourceNode;
         public QuestTransition QuestTransition => questTransition;
         public QuestNodeData QuestNode => questNode;
+        public Dialogue.DialogueRuntimeFlag RuntimeFlag => runtimeFlag;
     }
 }

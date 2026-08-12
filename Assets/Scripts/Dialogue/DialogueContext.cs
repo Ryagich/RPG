@@ -21,6 +21,7 @@ namespace Dialogue
         public QuestController PlayerQuestController { get; private set; }
         public bool IsForcedDialogue { get; private set; }
         public bool CanExitDialogue { get; private set; } = true;
+        public bool ContinueForcedDialogueAfterExit { get; private set; } = true;
 
         public void SetTarget(
             Interactable.Interactable target,
@@ -57,6 +58,18 @@ namespace Dialogue
             }
         }
 
+        public bool TryForceExit(bool continueForcedDialogueAfterExit)
+        {
+            if (CurrentTarget == null)
+            {
+                return false;
+            }
+
+            CanExitDialogue = true;
+            ContinueForcedDialogueAfterExit = continueForcedDialogueAfterExit;
+            return true;
+        }
+
         public void Clear()
         {
             CurrentTarget = null;
@@ -68,6 +81,7 @@ namespace Dialogue
             CurrentTargetMoneyStorage = null;
             IsForcedDialogue = false;
             CanExitDialogue = true;
+            ContinueForcedDialogueAfterExit = true;
         }
     }
 }

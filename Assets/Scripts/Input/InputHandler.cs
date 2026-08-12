@@ -21,6 +21,9 @@ namespace Input
         private readonly IPublisher<MouseUp> mouseUp;
         private readonly IPublisher<DodgeInputMessage> dodgeInputPublisher;
         private readonly IPublisher<RollInputMessage> rollInputPublisher;
+        private readonly IPublisher<LessonSkipInputMessage> lessonSkipInputPublisher;
+        private readonly IPublisher<LessonEvasionInputMessage> lessonEvasionInputPublisher;
+        private readonly IPublisher<LessonAttackInputMessage> lessonAttackInputPublisher;
         private readonly IPublisher<PauseInputMessage> pauseInputPublisher;
         private readonly IPublisher<TargetLockInputMessage> targetLockInputPublisher;
         private readonly IPublisher<ShowStatsInputMessage> showStatsInputPublisher;
@@ -46,6 +49,9 @@ namespace Input
                 IPublisher<MouseUp> mouseUp,
                 IPublisher<DodgeInputMessage> dodgeInputPublisher,
                 IPublisher<RollInputMessage> rollInputPublisher,
+                IPublisher<LessonSkipInputMessage> lessonSkipInputPublisher,
+                IPublisher<LessonEvasionInputMessage> lessonEvasionInputPublisher,
+                IPublisher<LessonAttackInputMessage> lessonAttackInputPublisher,
                 IPublisher<PauseInputMessage> pauseInputPublisher,
                 IPublisher<TargetLockInputMessage> targetLockInputPublisher,
                 IPublisher<ShowStatsInputMessage> showStatsInputPublisher,
@@ -66,6 +72,9 @@ namespace Input
             this.mouseUp = mouseUp;
             this.dodgeInputPublisher = dodgeInputPublisher;
             this.rollInputPublisher = rollInputPublisher;
+            this.lessonSkipInputPublisher = lessonSkipInputPublisher;
+            this.lessonEvasionInputPublisher = lessonEvasionInputPublisher;
+            this.lessonAttackInputPublisher = lessonAttackInputPublisher;
             this.pauseInputPublisher = pauseInputPublisher;
             this.targetLockInputPublisher = targetLockInputPublisher;
             this.showStatsInputPublisher = showStatsInputPublisher;
@@ -91,6 +100,7 @@ namespace Input
             inputConfig.RightClick.action.canceled += RightMouseUp;
             inputConfig.Dodge.action.started += Dodge;
             inputConfig.Roll.action.started += Roll;
+            SubscribeLessonSkipAction();
             inputConfig.FastSlot1.action.started += _ => PublishFastSlot(1);
             inputConfig.FastSlot2.action.started += _ => PublishFastSlot(2);
             inputConfig.FastSlot3.action.started += _ => PublishFastSlot(3);
@@ -191,6 +201,12 @@ namespace Input
                 return;
             }
 
+            if (gameModesController.GameMode == GameMode.Lesson)
+            {
+                lessonAttackInputPublisher.Publish(new LessonAttackInputMessage(MouseButtonType.Left));
+                return;
+            }
+
             mouseDown.Publish(new(MouseButtonType.Left));
         }
 
@@ -211,6 +227,12 @@ namespace Input
                 return;
             }
 
+            if (gameModesController.GameMode == GameMode.Lesson)
+            {
+                lessonAttackInputPublisher.Publish(new LessonAttackInputMessage(MouseButtonType.Right));
+                return;
+            }
+
             mouseDown.Publish(new(MouseButtonType.Right));
         }
 
@@ -226,18 +248,55 @@ namespace Input
 
         private void Dodge(InputAction.CallbackContext context)
         {
-            if (!isPlayerDead)
+            if (isPlayerDead)
             {
-                dodgeInputPublisher.Publish(new DodgeInputMessage());
+                return;
             }
+
+            if (gameModesController.GameMode == GameMode.Lesson)
+            {
+                lessonEvasionInputPublisher.Publish(new LessonEvasionInputMessage(LessonEvasionAction.Dodge));
+                return;
+            }
+
+            dodgeInputPublisher.Publish(new DodgeInputMessage());
         }
 
         private void Roll(InputAction.CallbackContext context)
         {
-            if (!isPlayerDead)
+            if (isPlayerDead)
             {
-                rollInputPublisher.Publish(new RollInputMessage());
+                return;
             }
+
+            if (gameModesController.GameMode == GameMode.Lesson)
+            {
+                lessonEvasionInputPublisher.Publish(new LessonEvasionInputMessage(LessonEvasionAction.Roll));
+                return;
+            }
+
+            rollInputPublisher.Publish(new RollInputMessage());
+        }
+
+        private void SkipLesson(InputAction.CallbackContext context)
+        {
+            if (!isPlayerDead && gameModesController.GameMode == GameMode.Lesson)
+            {
+                lessonSkipInputPublisher.Publish(new LessonSkipInputMessage());
+            }
+        }
+
+        private void SubscribeLessonSkipAction()
+        {
+            var lessonSkipAction = inputConfig.LessonSkip?.action;
+
+            if (lessonSkipAction == null)
+            {
+                Debug.LogError("LessonSkip input action is not configured.");
+                return;
+            }
+
+            lessonSkipAction.started += SkipLesson;
         }
 
         private void ShowStatsPressed(InputAction.CallbackContext context)
@@ -292,6 +351,12 @@ namespace Input
         {
             if (isPlayerDead)
             {
+                return;
+            }
+
+            if (gameModesController.GameMode == GameMode.Lesson)
+            {
+                lessonSkipInputPublisher.Publish(new LessonSkipInputMessage());
                 return;
             }
 

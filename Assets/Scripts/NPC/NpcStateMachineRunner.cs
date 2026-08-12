@@ -38,6 +38,21 @@ namespace NPC
 
         private RuntimeStateMachine stateMachine;
         private Container.NpcLifetimeScope npcScope;
+        private bool isExternallyControlled;
+
+        /// <summary>
+        /// Temporarily gives an owning gameplay session control of this NPC. The normal graph is
+        /// preserved and resumes unchanged once control is released.
+        /// </summary>
+        public void SetExternalControl(bool isControlled)
+        {
+            isExternallyControlled = isControlled;
+            if (isControlled)
+            {
+                navMeshController?.Stop();
+                combatService?.ClearAttackRequest();
+            }
+        }
 
         public NpcStateMachineRunner(
             StateMachineGraph stateMachineGraph,
@@ -128,6 +143,12 @@ namespace NPC
 
         public void Tick()
         {
+            if (isExternallyControlled)
+            {
+                UpdateRuntimeDebugInfo();
+                return;
+            }
+
             stateMachine?.Tick(Time.deltaTime);
             UpdateRuntimeDebugInfo();
         }

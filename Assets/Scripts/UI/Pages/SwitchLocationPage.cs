@@ -18,6 +18,7 @@ namespace UI.Pages
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
+        private readonly IPublisher<PlayerRelocatedMessage> playerRelocatedPublisher;
         private readonly SceneLoadingService sceneLoadingService;
         private readonly LocationTransitionService locationTransitions;
         private readonly Transform playerTransform;
@@ -35,6 +36,7 @@ namespace UI.Pages
             Canvas canvas,
             IObjectResolver resolver,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
+            IPublisher<PlayerRelocatedMessage> playerRelocatedPublisher,
             SceneLoadingService sceneLoadingService,
             LocationTransitionService locationTransitions,
             Transform playerTransform,
@@ -43,6 +45,7 @@ namespace UI.Pages
             this.uiConfig = uiConfig;
             this.resolver = resolver;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
+            this.playerRelocatedPublisher = playerRelocatedPublisher;
             this.sceneLoadingService = sceneLoadingService;
             this.locationTransitions = locationTransitions;
             this.playerTransform = playerTransform;
@@ -154,10 +157,12 @@ namespace UI.Pages
             if (transition.PlayerSpawnTransform != null)
             {
                 PlacePlayer(playerTransform, playerController, transition.PlayerSpawnTransform.position, transition.PlayerSpawnTransform.rotation);
+                playerRelocatedPublisher.Publish(new PlayerRelocatedMessage());
             }
             else
             {
                 TryMovePlayerAwayFromTransition(playerTransform, playerController, transition.TriggerZone);
+                playerRelocatedPublisher.Publish(new PlayerRelocatedMessage());
             }
 
             ReturnToGame();

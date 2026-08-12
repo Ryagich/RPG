@@ -59,6 +59,19 @@ namespace Combat
             damageSubscription?.Dispose();
         }
 
+        public void CancelReaction()
+        {
+            if (!IsReacting)
+            {
+                return;
+            }
+
+            reactionTimer = 0f;
+            cooldownTimer = 0f;
+            damageSamples.Clear();
+            EndReaction();
+        }
+
         public void Tick()
         {
             var deltaTime = Time.deltaTime;
@@ -132,6 +145,7 @@ namespace Combat
 
         private void EndReaction()
         {
+            reactionTimer = 0f;
             rootMotionController?.SetRootMotionActive(this, false);
             actionState.SetActionBlocked(false);
             ownerDamageReceiver?.SetWeaponAttackSuppressed(false);

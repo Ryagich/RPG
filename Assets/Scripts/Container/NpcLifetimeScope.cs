@@ -29,9 +29,13 @@ namespace Container
 
         [SerializeField] private Character.CharacterInfo characterInfo;
         [SerializeField] private InventoryConfig inventoryConfig;
+        [Header("Visuals")]
+        [SerializeField] private CharacterDefaultVisualConfig defaultVisualConfig;
+        [Header("Dialogue")]
         [SerializeField] private bool canTalk = true;
         [SerializeField] private DialogGraph dialog;
         [SerializeField] private StateMachineGraph stateMachineGraph;
+        [Header("Faction")]
         [SerializeField] private FactionConfig faction;
         [Header("Initial Inventory")]
         [Tooltip("If empty, this NPC randomly selects an item set from its faction.")]
@@ -124,6 +128,11 @@ namespace Container
             if (inventoryConfig != null)
             {
                 builder.RegisterInstance(inventoryConfig).AsSelf();
+            }
+
+            if (defaultVisualConfig != null)
+            {
+                builder.RegisterInstance(defaultVisualConfig).AsSelf();
             }
 
             if (faction != null)

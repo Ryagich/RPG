@@ -9,17 +9,19 @@ namespace Inventory.Item
 
         [field: SerializeField] public ItemConfig Config { get; private set; } = null!;
         [field: SerializeField, Min(1)] public int Count { get; private set; } = 1;
+        public string RuntimeTag { get; private set; }
 
         public bool CanInteractable = true;
 
         public ItemStack GetItemStack()
         {
-            return Config == null ? null : new ItemStack(Config, Count);
+            return Config == null ? null : new ItemStack(Config, Count, runtimeTag: RuntimeTag);
         }
 
-        public void Initialize(ItemConfig config, int count = 1)
+        public void Initialize(ItemConfig config, int count = 1, string runtimeTag = null)
         {
             Config = config;
+            RuntimeTag = runtimeTag;
             SetCount(count);
         }
 

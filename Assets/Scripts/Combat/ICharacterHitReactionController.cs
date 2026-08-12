@@ -6,5 +6,6 @@ namespace Combat
     {
         bool IsReacting { get; }
         void RegisterDamage(float damage, Vector3 hitPoint);
+        void CancelReaction();
     }
 }

@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd8aa668e44a9644fa3bb8f03b7724ca, type: 3}
+  m_Name: Combat Training
+  m_EditorClassIdentifier: Assembly-CSharp::Quests.Graph.QuestGraph
+  title:
+    m_TableReference:
+      m_TableCollectionName: Tables
+    m_TableEntryReference:
+      m_KeyId: 71000000000000020
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  description:
+    m_TableReference:
+      m_TableCollectionName: Tables
+    m_TableEntryReference:
+      m_KeyId: 71000000000000020
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  icon: {fileID: 0}
+  keepCompletedInJournal: 0
+  Nodes:
+  - Position: {x: 0, y: 0}
+    NodeData: {fileID: 11400000, guid: c83bf65b11cd97c4ebdb7c94f5f6080f, type: 2}
+  - Position: {x: 0, y: 0}
+    NodeData: {fileID: 11400000, guid: 3890c687c3523f24c9b824f263a53a0a, type: 2}
+  - Position: {x: 0, y: 0}
+    NodeData: {fileID: 11400000, guid: e2dc2c13b8f5b3f489b9aa3dc8680230, type: 2}
+  - Position: {x: 0, y: 0}
+    NodeData: {fileID: 11400000, guid: aba6d5b2287d8fc46be5fe657ff40a51, type: 2}
+  - Position: {x: 0, y: 0}
+    NodeData: {fileID: 11400000, guid: 23129213808c4c644ae033ca61d84485, type: 2}
+  - Position: {x: 0, y: 0}
+    NodeData: {fileID: 11400000, guid: c50fcda6d0c9ede4286e93adf5a49a44, type: 2}
+  - Position: {x: 0, y: 0}
+    NodeData: {fileID: 11400000, guid: e4c08361c1b8fc6409f996b99a5d681f, type: 2}
+  - Position: {x: 0, y: 0}
+    NodeData: {fileID: 11400000, guid: 2b443b8bdaefcb04ebac8ca571a4f50a, type: 2}
+  references:
+    version: 2
+    RefIds: []

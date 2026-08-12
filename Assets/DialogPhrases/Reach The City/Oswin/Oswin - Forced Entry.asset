@@ -22,6 +22,7 @@ MonoBehaviour:
     m_WaitForCompletion: 0
     m_LocalVariables: []
   isForcedDialoguePhrase: 1
+  forcedDialoguePriority: 1
   restoresExitAbility: 0
   isQuestPhrase: 1
   questAnswer:
@@ -56,6 +57,21 @@ MonoBehaviour:
       m_WaitForCompletion: 0
       m_LocalVariables: []
     nextPhrase: {fileID: 11400000, guid: d53841bbdab339c4e8149780b8218f86, type: 2}
+    hasConditions: 0
+    conditions: []
+  - text:
+      m_TableReference:
+        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+      m_TableEntryReference:
+        m_KeyId: 73000000000000001
+        m_Key:
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 11400000, guid: 063173afea30fb84a9fa3b0f9ea773fc, type: 2}
+    forceExitAfterAnswer: 0
+    hasGameplayEvents: 0
+    gameplayEvents: []
     hasConditions: 0
     conditions: []
   references:
