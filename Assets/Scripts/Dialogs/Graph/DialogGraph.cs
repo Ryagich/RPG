@@ -22,6 +22,16 @@ namespace Dialogs.Graph
             return EntryPhrase == phrase;
         }
 
+        /// <summary>
+        /// Determines whether a phrase is a regular conversation choice point. Along with the
+        /// graph entry, a phrase that restores exit after a forced line returns the player to
+        /// the same choice context: quest branches and the system farewell become available.
+        /// </summary>
+        public bool IsRegularChoicePoint(DialogPhrase phrase)
+        {
+            return IsEntryPhrase(phrase) || (phrase != null && phrase.RestoresExitAbility);
+        }
+
         public bool TryGetActiveForcedPhrase(
             Func<DialogAnswer, bool> isAnswerAvailable,
             out DialogPhrase forcedPhrase)

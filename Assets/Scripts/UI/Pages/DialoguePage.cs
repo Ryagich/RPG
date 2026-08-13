@@ -243,62 +243,77 @@ namespace UI.Pages
             }
 
             var currentDialog = dialogueContext.CurrentDialog;
-            if (currentDialog == null || !currentDialog.IsEntryPhrase(phrase))
+            bool isRegularChoicePoint = currentDialog != null && currentDialog.IsRegularChoicePoint(phrase);
+            if (isRegularChoicePoint)
             {
-                return visibleAnswers;
-            }
-
-            foreach (var questPhrase in currentDialog.GetQuestPhrases())
-            {
-                var questAnswer = questPhrase?.QuestAnswer;
-                bool isAvailable = questPhrase != null && questAnswer != null &&
-                                   AreConditionsSatisfied(questAnswer.HasConditions, questAnswer.Conditions);
-                if (questPhrase != null && questAnswer != null)
+                foreach (var questPhrase in currentDialog.GetQuestPhrases())
                 {
-                    DialogueFlowTrace.AnswerEvaluated(
-                        phrase,
-                        $"regular-quest-answer:{questPhrase.name}",
+                    var questAnswer = questPhrase?.QuestAnswer;
+                    bool isAvailable = questPhrase != null && questAnswer != null &&
+                                       AreConditionsSatisfied(questAnswer.HasConditions, questAnswer.Conditions);
+                    if (questPhrase != null && questAnswer != null)
+                    {
+                        DialogueFlowTrace.AnswerEvaluated(
+                            phrase,
+                            $"regular-quest-answer:{questPhrase.name}",
+                            questAnswer.Text.GetLocalizedStringCached(),
+                            questPhrase,
+                            isAvailable,
+                            false,
+                            questAnswer.Conditions);
+                    }
+
+                    if (questPhrase == null ||
+                        questAnswer == null ||
+                        visibleAnswers.Exists(visibleAnswer => visibleAnswer.NextPhrase == questPhrase) ||
+                        !isAvailable)
+                    {
+                        continue;
+                    }
+
+                    visibleAnswers.Add(new DisplayedAnswerData(
                         questAnswer.Text.GetLocalizedStringCached(),
                         questPhrase,
-                        isAvailable,
                         false,
-                        questAnswer.Conditions);
+                        true,
+                        questAnswer.GameplayEvents,
+                        questAnswer.HasConditions,
+                        questAnswer.Conditions));
                 }
-
-                if (questPhrase == null ||
-                    questAnswer == null ||
-                    visibleAnswers.Exists(visibleAnswer => visibleAnswer.NextPhrase == questPhrase) ||
-                    !isAvailable)
-                {
-                    continue;
-                }
-
-                visibleAnswers.Add(new DisplayedAnswerData(
-                    questAnswer.Text.GetLocalizedStringCached(),
-                    questPhrase,
-                    false,
-                    true,
-                    questAnswer.GameplayEvents,
-                    questAnswer.HasConditions,
-                    questAnswer.Conditions));
             }
 
             // The farewell is a navigation action owned by the dialogue UI. It is shown
-            // only at the root of a regular conversation, never inside a dialogue branch
-            // or a forced conversation whose exit has not been explicitly restored.
-            if (currentDialog.IsEntryPhrase(phrase) && dialogueContext.CanExitDialogue)
+            // at regular choice points and as the safe fallback for a terminal phrase with no
+            // available answers. It never needs an authored graph connection.
+            if (dialogueContext.CanExitDialogue && (isRegularChoicePoint || visibleAnswers.Count == 0))
             {
-                visibleAnswers.Add(new DisplayedAnswerData(
-                    localizationConfig.DialogueFarewell.GetLocalizedStringCached(),
-                    null,
-                    true,
-                    true,
-                    null,
-                    false,
-                    null));
+                AddFarewellAnswer(visibleAnswers, phrase);
             }
 
             return visibleAnswers;
+        }
+
+        private void AddFarewellAnswer(
+            System.Collections.Generic.List<DisplayedAnswerData> visibleAnswers,
+            DialogPhrase phrase)
+        {
+            string farewellText = localizationConfig.DialogueFarewell.GetLocalizedStringCached();
+            DialogueFlowTrace.AnswerEvaluated(
+                phrase,
+                "system-farewell",
+                farewellText,
+                null,
+                true,
+                true,
+                null);
+            visibleAnswers.Add(new DisplayedAnswerData(
+                farewellText,
+                null,
+                true,
+                true,
+                null,
+                false,
+                null));
         }
 
         private void SelectAnswer(DisplayedAnswerData answer)
