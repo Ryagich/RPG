@@ -77,7 +77,8 @@ namespace Training
         [SerializeField] private DialogueGameplayEvent startEvasionPracticeEvent;
         [Header("Temporary quest")]
         [SerializeField] private QuestGraph combatTrainingQuest;
-        [SerializeField] private QuestNodeData[] combatTrainingQuestNodes;
+        [SerializeField] private QuestNodeData combatTrainingActionsNode;
+        [SerializeField] private QuestNodeData combatTrainingSparringNode;
         [Header("Training equipment")]
         [SerializeField] private ItemConfig temporaryTrainingWeapon;
         [SerializeField] private QuestGraph evasionPracticeQuest;
@@ -486,6 +487,7 @@ namespace Training
                     state = TrainingState.WaitingFinalLessonDismiss;
                     break;
                 case TrainingState.WaitingFinalLessonDismiss when lessonId == LessonId.FinalSparring:
+                    SetTutorialQuestStage(combatTrainingSparringNode);
                     ResumeGameplay();
                     opponentStateMachine?.SetExternalControl(false);
                     sparringElapsedSeconds = 0f;
@@ -615,13 +617,18 @@ namespace Training
                 {
                     evasionAttemptWasHit = true;
                 }
-                if (message.CharacterTransform == playerScope?.transform || message.CharacterTransform == spawnedOpponent?.transform)
+                if (message.CharacterTransform == playerScope?.transform)
                 {
-                    if (playerDamageReceiver?.CurrentHp <= 1f || opponentDamageReceiver?.CurrentHp <= 1f)
+                    if (playerDamageReceiver?.CurrentHp <= 1f)
                     {
-                        BeginEnding(playerDamageReceiver?.CurrentHp <= 1f
-                            ? SessionOutcome.OpponentWon
-                            : SessionOutcome.PlayerWon);
+                        BeginEnding(SessionOutcome.OpponentWon);
+                    }
+                }
+                else if (message.CharacterTransform == spawnedOpponent?.transform)
+                {
+                    if (opponentDamageReceiver?.CurrentHp <= 1f)
+                    {
+                        BeginEnding(SessionOutcome.PlayerWon);
                     }
                 }
 
@@ -839,7 +846,6 @@ namespace Training
             }
 
             lessonContext.Show(lesson);
-            SetTutorialQuestStage(lessonId);
             lessonSkipAvailableAt = Time.unscaledTime + Mathf.Max(0f, lessonConfig.SkipTextShowDelay);
             gameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Lesson));
         }
@@ -857,30 +863,21 @@ namespace Training
             }
 
             playerQuestController.TrySetCurrentQuest(combatTrainingQuest);
+            SetTutorialQuestStage(combatTrainingActionsNode);
             questSelectionLock?.Lock();
         }
 
-        private void SetTutorialQuestStage(LessonId lessonId)
+        private void SetTutorialQuestStage(QuestNodeData node)
         {
             if (sessionKind != SessionKind.Tutorial
                 || combatTrainingQuest == null
                 || playerQuestController == null
-                || combatTrainingQuestNodes == null)
+                || node == null)
             {
                 return;
             }
 
-            int index = (int)lessonId;
-            if (index < 0 || index >= combatTrainingQuestNodes.Length)
-            {
-                return;
-            }
-
-            QuestNodeData node = combatTrainingQuestNodes[index];
-            if (node != null)
-            {
-                playerQuestController.TrySetCurrentNode(combatTrainingQuest, node);
-            }
+            playerQuestController.TrySetCurrentNode(combatTrainingQuest, node);
         }
 
         private void CompleteTutorialQuestIfNeeded()
@@ -890,10 +887,13 @@ namespace Training
                 return;
             }
 
-            QuestNodeData currentNode = playerQuestController.GetCurrentNode(combatTrainingQuest);
-            if (currentNode != null)
+            if (sessionOutcome == SessionOutcome.PlayerWon && combatTrainingSparringNode != null)
             {
-                playerQuestController.TryCompleteNode(combatTrainingQuest, currentNode);
+                playerQuestController.TryCompleteNode(combatTrainingQuest, combatTrainingSparringNode);
+            }
+            else
+            {
+                playerQuestController.TryFailQuest(combatTrainingQuest);
             }
 
             questSelectionLock?.Unlock();

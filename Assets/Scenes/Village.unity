@@ -98472,15 +98472,8 @@ MonoBehaviour:
   startSparringEvent: {fileID: 11400000, guid: 37fba261fc100aa488f9e96bb35dd82d, type: 2}
   startEvasionPracticeEvent: {fileID: 11400000, guid: 62e0f83edc56b314984fc515ac5bc691, type: 2}
   combatTrainingQuest: {fileID: 11400000, guid: a06794fe0abe71e4b8878b51344c97b7, type: 2}
-  combatTrainingQuestNodes:
-  - {fileID: 11400000, guid: c83bf65b11cd97c4ebdb7c94f5f6080f, type: 2}
-  - {fileID: 11400000, guid: 3890c687c3523f24c9b824f263a53a0a, type: 2}
-  - {fileID: 11400000, guid: e2dc2c13b8f5b3f489b9aa3dc8680230, type: 2}
-  - {fileID: 11400000, guid: aba6d5b2287d8fc46be5fe657ff40a51, type: 2}
-  - {fileID: 11400000, guid: 23129213808c4c644ae033ca61d84485, type: 2}
-  - {fileID: 11400000, guid: c50fcda6d0c9ede4286e93adf5a49a44, type: 2}
-  - {fileID: 11400000, guid: e4c08361c1b8fc6409f996b99a5d681f, type: 2}
-  - {fileID: 11400000, guid: 2b443b8bdaefcb04ebac8ca571a4f50a, type: 2}
+  combatTrainingActionsNode: {fileID: 11400000, guid: c83bf65b11cd97c4ebdb7c94f5f6080f, type: 2}
+  combatTrainingSparringNode: {fileID: 11400000, guid: 2b443b8bdaefcb04ebac8ca571a4f50a, type: 2}
   temporaryTrainingWeapon: {fileID: 11400000, guid: b595ff8ec3a59cc4faaf7e067fb544cc, type: 2}
   evasionPracticeQuest: {fileID: 11400000, guid: d1ab2bca7751df4469e759372a0958dc, type: 2}
   evasionPracticeQuestNode: {fileID: 11400000, guid: 44fbf3d514b99bf41b1b138d2ff6f0b1, type: 2}

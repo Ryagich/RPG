@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8790978157e23cc4186df7e90601f3fa, type: 3}
   m_Name: Combat Training - 8
   m_EditorClassIdentifier: Assembly-CSharp::Quests.Graph.Model.QuestNodeData
-  editorTitle: Sparring
+  editorTitle: Defeat Oswin
   localizedName:
     m_TableReference:
       m_TableCollectionName: Tables
     m_TableEntryReference:
-      m_KeyId: 71000000000000024
+      m_KeyId: 74000000000000008
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
@@ -26,7 +26,7 @@ MonoBehaviour:
     m_TableReference:
       m_TableCollectionName: Tables
     m_TableEntryReference:
-      m_KeyId: 71000000000000024
+      m_KeyId: 74000000000000009
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0

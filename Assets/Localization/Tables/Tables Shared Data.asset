@@ -557,6 +557,30 @@ MonoBehaviour:
     m_Key: Evasion_Practice_Description
     m_Metadata:
       m_Items: []
+  - m_Id: 74000000000000004
+    m_Key: Combat_Training_Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 74000000000000005
+    m_Key: Combat_Training_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 74000000000000006
+    m_Key: Combat_Training_Actions_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 74000000000000007
+    m_Key: Combat_Training_Actions_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 74000000000000008
+    m_Key: Combat_Training_Defeat_Oswin_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 74000000000000009
+    m_Key: Combat_Training_Defeat_Oswin_Description
+    m_Metadata:
+      m_Items: []
   - m_Id: 30000000000000003
     m_Key: Input_LessonSkip
     m_Metadata:

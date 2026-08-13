@@ -658,6 +658,30 @@ MonoBehaviour:
     m_Localized: "Evade Oswin's attacks using dodges and rolls."
     m_Metadata:
       m_Items: []
+  - m_Id: 74000000000000004
+    m_Localized: "Complete the training"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 74000000000000005
+    m_Localized: "Oswin is leading a practice bout. Learn the fundamentals to act with confidence in a real fight."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 74000000000000006
+    m_Localized: "Learn all actions"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 74000000000000007
+    m_Localized: "Master a fighter's basic actions: assess the situation, dodge, attack, roll, and manage stamina."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 74000000000000008
+    m_Localized: "Defeat Oswin"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 74000000000000009
+    m_Localized: "Use the techniques you have learned in the practice bout and defeat Oswin."
+    m_Metadata:
+      m_Items: []
   - m_Id: 30000000000000003
     m_Localized: "Skip lesson"
     m_Metadata:
