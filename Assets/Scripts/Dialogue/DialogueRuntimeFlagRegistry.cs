@@ -17,6 +17,7 @@ namespace Dialogue
             if (flag != null)
             {
                 activeFlags.Add(flag);
+                DialogueFlowTrace.RuntimeFlagChanged("activate", flag);
             }
         }
 
@@ -25,6 +26,7 @@ namespace Dialogue
             if (flag != null)
             {
                 activeFlags.Remove(flag);
+                DialogueFlowTrace.RuntimeFlagChanged("deactivate", flag);
             }
         }
 

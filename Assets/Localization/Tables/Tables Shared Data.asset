@@ -549,6 +549,14 @@ MonoBehaviour:
     m_Key: Evasion_Practice_Objective
     m_Metadata:
       m_Items: []
+  - m_Id: 74000000000000002
+    m_Key: Evasion_Practice_Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 74000000000000003
+    m_Key: Evasion_Practice_Description
+    m_Metadata:
+      m_Items: []
   - m_Id: 30000000000000003
     m_Key: Input_LessonSkip
     m_Metadata:

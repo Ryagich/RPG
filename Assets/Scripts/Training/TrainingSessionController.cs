@@ -92,8 +92,6 @@ namespace Training
         private IDisposable lessonSkipSubscription;
         private IDisposable lessonEvasionInputSubscription;
         private IDisposable lessonAttackInputSubscription;
-        private IDisposable dodgeSubscription;
-        private IDisposable rollSubscription;
         private IDisposable evasionCompletedSubscription;
         private IDisposable opponentAttackStartedSubscription;
         private IDisposable damagedSubscription;
@@ -101,6 +99,7 @@ namespace Training
         private LessonPresentationContext lessonContext;
         private QuestSelectionLock questSelectionLock;
         private QuestObjectiveOverrideContext questObjectiveOverride;
+        private DialogueContext dialogueContext;
         private DialogueRuntimeFlagRegistry dialogueRuntimeFlags;
         private IPublisher<ChangeGameModeRequest> gameModeRequestPublisher;
         private IPublisher<PlayerRelocatedMessage> playerRelocatedPublisher;
@@ -151,6 +150,8 @@ namespace Training
         private int evasionPracticeCount;
         private bool evasionAttemptPending;
         private bool evasionAttemptWasHit;
+        private bool evasionAttemptActionCompleted;
+        private bool evasionPracticeSucceeded;
         private float lessonSkipAvailableAt;
 
         [Inject]
@@ -159,8 +160,6 @@ namespace Training
             ISubscriber<LessonSkipInputMessage> lessonSkipSubscriber,
             ISubscriber<LessonEvasionInputMessage> lessonEvasionInputSubscriber,
             ISubscriber<LessonAttackInputMessage> lessonAttackInputSubscriber,
-            ISubscriber<DodgeInputMessage> dodgeSubscriber,
-            ISubscriber<RollInputMessage> rollSubscriber,
             ISubscriber<PlayerEvasionCompletedMessage> evasionCompletedSubscriber,
             ISubscriber<NpcAttackStartedMessage> opponentAttackStartedSubscriber,
             ISubscriber<CharacterDamagedMessage> damagedSubscriber,
@@ -168,6 +167,7 @@ namespace Training
             LessonPresentationContext lessonContext,
             QuestSelectionLock questSelectionLock,
             QuestObjectiveOverrideContext questObjectiveOverride,
+            DialogueContext dialogueContext,
             DialogueRuntimeFlagRegistry dialogueRuntimeFlags,
             IPublisher<ChangeGameModeRequest> gameModeRequestPublisher,
             IPublisher<PlayerRelocatedMessage> playerRelocatedPublisher,
@@ -185,10 +185,6 @@ namespace Training
             lessonEvasionInputSubscription = lessonEvasionInputSubscriber.Subscribe(OnLessonEvasionInput);
             lessonAttackInputSubscription?.Dispose();
             lessonAttackInputSubscription = lessonAttackInputSubscriber.Subscribe(OnLessonAttackInput);
-            dodgeSubscription?.Dispose();
-            dodgeSubscription = dodgeSubscriber.Subscribe(OnGameplayDodgeInput);
-            rollSubscription?.Dispose();
-            rollSubscription = rollSubscriber.Subscribe(OnGameplayRollInput);
             evasionCompletedSubscription?.Dispose();
             evasionCompletedSubscription = evasionCompletedSubscriber.Subscribe(OnEvasionCompleted);
             opponentAttackStartedSubscription?.Dispose();
@@ -199,6 +195,7 @@ namespace Training
             this.lessonContext = lessonContext;
             this.questSelectionLock = questSelectionLock;
             this.questObjectiveOverride = questObjectiveOverride;
+            this.dialogueContext = dialogueContext;
             this.dialogueRuntimeFlags = dialogueRuntimeFlags;
             this.gameModeRequestPublisher = gameModeRequestPublisher;
             this.playerRelocatedPublisher = playerRelocatedPublisher;
@@ -215,8 +212,6 @@ namespace Training
             lessonSkipSubscription?.Dispose();
             lessonEvasionInputSubscription?.Dispose();
             lessonAttackInputSubscription?.Dispose();
-            dodgeSubscription?.Dispose();
-            rollSubscription?.Dispose();
             evasionCompletedSubscription?.Dispose();
             opponentAttackStartedSubscription?.Dispose();
             damagedSubscription?.Dispose();
@@ -272,6 +267,12 @@ namespace Training
                     ShowStaminaLessonWhenPlayerRollCompletes();
                     break;
                 case TrainingState.Sparring:
+                    TryCompleteEvasionPracticeAttempt();
+                    if (state != TrainingState.Sparring)
+                    {
+                        break;
+                    }
+
                     sparringElapsedSeconds += Time.deltaTime;
                     if (sparringElapsedSeconds >= sparringDurationSeconds)
                     {
@@ -307,17 +308,26 @@ namespace Training
 
         private void StartSession(SessionKind kind)
         {
-            playerScope = FindFirstObjectByType<PlayerLifetimeScope>();
-            if (playerScope == null || playerSpawnPoint == null || opponentSpawnPoint == null || sparringOpponentPrefab == null)
+            PlayerLifetimeScope sessionPlayerScope = FindFirstObjectByType<PlayerLifetimeScope>();
+            if (sessionPlayerScope == null || playerSpawnPoint == null || opponentSpawnPoint == null || sparringOpponentPrefab == null)
             {
                 Debug.LogWarning("Combat training cannot start: arena or player dependencies are not configured.", this);
                 return;
             }
 
+            ResetParticipantReferences();
+            playerScope = sessionPlayerScope;
             isActive = true;
             sessionKind = kind;
             sessionOutcome = SessionOutcome.None;
             opponentHpBeforeRequiredAttack = float.NaN;
+            ResetEvasionPracticeState();
+            playerQuestController = dialogueContext?.PlayerQuestController;
+            if (kind == SessionKind.EvasionPractice)
+            {
+                BeginEvasionPracticeQuestIfNeeded();
+                RefreshEvasionPracticeObjective();
+            }
             ClearOutcomeDialogueFlags();
             returnPose = new Pose(playerScope.transform.position, playerScope.transform.rotation);
             PlacePlayer(playerScope);
@@ -371,7 +381,7 @@ namespace Training
             playerWeapon = playerScope.Container.Resolve<PlayerWeaponInHandController>();
             cameraMotor = playerScope.Container.Resolve<CameraMotor>();
             playerStats = playerScope.Container.Resolve<StatsController>();
-            playerQuestController = playerScope.Container.Resolve<QuestController>();
+            playerQuestController = dialogueContext?.PlayerQuestController;
             playerInventory = playerScope.Container.Resolve<PlayerInventory>();
             opponentStats = opponentScope.Container.Resolve<StatsController>();
             playerAnimator = playerScope.Container.Resolve<Animator>();
@@ -389,8 +399,6 @@ namespace Training
             EnsureTrainingWeapon();
 
             BeginTutorialQuestIfNeeded();
-            BeginEvasionPracticeQuestIfNeeded();
-
             if (state == TrainingState.Sparring)
             {
                 opponentStateMachine?.SetExternalControl(false);
@@ -486,16 +494,6 @@ namespace Training
             }
         }
 
-        private void OnGameplayDodgeInput(DodgeInputMessage _)
-        {
-            BeginEvasionPracticeAttemptIfEligible();
-        }
-
-        private void OnGameplayRollInput(RollInputMessage _)
-        {
-            BeginEvasionPracticeAttemptIfEligible();
-        }
-
         private void OnLessonEvasionInput(LessonEvasionInputMessage message)
         {
             switch (message.Action)
@@ -545,7 +543,18 @@ namespace Training
 
         private void OnOpponentAttackStarted(NpcAttackStartedMessage message)
         {
-            if (state != TrainingState.WaitingDodgeSwing || message.CharacterTransform != spawnedOpponent?.transform)
+            if (message.CharacterTransform != spawnedOpponent?.transform)
+            {
+                return;
+            }
+
+            if (sessionKind == SessionKind.EvasionPractice && state == TrainingState.Sparring)
+            {
+                BeginEvasionPracticeAttemptIfEligible();
+                return;
+            }
+
+            if (state != TrainingState.WaitingDodgeSwing)
             {
                 return;
             }
@@ -558,7 +567,7 @@ namespace Training
         {
             if (sessionKind == SessionKind.EvasionPractice && state == TrainingState.Sparring)
             {
-                CompleteEvasionPracticeAttempt();
+                MarkEvasionPracticeActionCompleted();
                 return;
             }
 
@@ -608,10 +617,7 @@ namespace Training
                 }
                 if (message.CharacterTransform == playerScope?.transform || message.CharacterTransform == spawnedOpponent?.transform)
                 {
-                    // Evasion practice is a timed drill rather than a duel: non-lethal combat
-                    // still protects both participants, but reaching one HP must not end it.
-                    if (sessionKind != SessionKind.EvasionPractice
-                        && (playerDamageReceiver?.CurrentHp <= 1f || opponentDamageReceiver?.CurrentHp <= 1f))
+                    if (playerDamageReceiver?.CurrentHp <= 1f || opponentDamageReceiver?.CurrentHp <= 1f)
                     {
                         BeginEnding(playerDamageReceiver?.CurrentHp <= 1f
                             ? SessionOutcome.OpponentWon
@@ -900,12 +906,11 @@ namespace Training
                 return;
             }
 
-            evasionPracticeCount = 0;
-            evasionAttemptPending = false;
-            evasionAttemptWasHit = false;
-            if (!playerQuestController.HasQuest(evasionPracticeQuest))
+            if (!playerQuestController.HasQuest(evasionPracticeQuest)
+                && !playerQuestController.TryAddQuest(evasionPracticeQuest))
             {
-                playerQuestController.TryAddQuest(evasionPracticeQuest);
+                Debug.LogError("Evasion practice could not create its temporary quest.", this);
+                return;
             }
 
             playerQuestController.TrySetCurrentQuest(evasionPracticeQuest);
@@ -922,7 +927,14 @@ namespace Training
 
             if (playerQuestController.HasQuest(evasionPracticeQuest))
             {
-                playerQuestController.TryRemoveQuest(evasionPracticeQuest);
+                if (evasionPracticeSucceeded && evasionPracticeQuestNode != null)
+                {
+                    playerQuestController.TryCompleteNode(evasionPracticeQuest, evasionPracticeQuestNode);
+                }
+                else
+                {
+                    playerQuestController.TryFailQuest(evasionPracticeQuest);
+                }
             }
 
             questObjectiveOverride?.Clear(evasionPracticeQuest);
@@ -934,6 +946,7 @@ namespace Training
             if (sessionKind != SessionKind.EvasionPractice
                 || state != TrainingState.Sparring
                 || evasionPracticeCount >= evasionPracticeTarget
+                || evasionAttemptPending
                 || opponentWeapon?.IsAttackInProgress != true
                 || playerScope == null
                 || spawnedOpponent == null)
@@ -949,30 +962,43 @@ namespace Training
 
             evasionAttemptPending = true;
             evasionAttemptWasHit = false;
+            evasionAttemptActionCompleted = false;
         }
 
-        private void CompleteEvasionPracticeAttempt()
+        private void MarkEvasionPracticeActionCompleted()
         {
             if (!evasionAttemptPending)
             {
                 return;
             }
 
+            evasionAttemptActionCompleted = true;
+        }
+
+        private void TryCompleteEvasionPracticeAttempt()
+        {
+            if (!evasionAttemptPending || opponentWeapon?.IsAttackInProgress == true)
+            {
+                return;
+            }
+
             evasionAttemptPending = false;
-            if (evasionAttemptWasHit || evasionPracticeCount >= evasionPracticeTarget)
+            if (evasionAttemptWasHit
+                || !evasionAttemptActionCompleted
+                || evasionPracticeCount >= evasionPracticeTarget)
             {
                 return;
             }
 
             evasionPracticeCount++;
             RefreshEvasionPracticeObjective();
-            if (evasionPracticeCount < evasionPracticeTarget || evasionPracticeQuest == null || evasionPracticeQuestNode == null)
+            if (evasionPracticeCount < evasionPracticeTarget)
             {
                 return;
             }
 
-            playerQuestController?.TryCompleteNode(evasionPracticeQuest, evasionPracticeQuestNode);
-            questObjectiveOverride?.Clear(evasionPracticeQuest);
+            evasionPracticeSucceeded = true;
+            BeginEnding();
         }
 
         private void RefreshEvasionPracticeObjective()
@@ -982,13 +1008,23 @@ namespace Training
                 return;
             }
 
+            string objective = string.Format(
+                lessonConfig.EvasionPracticeObjective.GetLocalizedStringCached(),
+                evasionPracticeCount,
+                evasionPracticeTarget);
             questObjectiveOverride?.Set(
                 evasionPracticeQuest,
-                string.Empty,
-                string.Format(
-                    lessonConfig.EvasionPracticeObjective.GetLocalizedStringCached(),
-                    evasionPracticeCount,
-                    evasionPracticeTarget));
+                objective,
+                string.Empty);
+        }
+
+        private void ResetEvasionPracticeState()
+        {
+            evasionPracticeCount = 0;
+            evasionAttemptPending = false;
+            evasionAttemptWasHit = false;
+            evasionAttemptActionCompleted = false;
+            evasionPracticeSucceeded = false;
         }
 
         private void ClearOutcomeDialogueFlags()
@@ -1108,6 +1144,30 @@ namespace Training
             }
 
             temporaryWeaponRuntimeTag = null;
+        }
+
+        private void ResetParticipantReferences()
+        {
+            playerDamageReceiver = null;
+            opponentDamageReceiver = null;
+            playerHitReaction = null;
+            opponentHitReaction = null;
+            playerActionState = null;
+            opponentActionState = null;
+            playerTarget = null;
+            opponentVision = null;
+            opponentNavigation = null;
+            opponentWeapon = null;
+            opponentStateMachine = null;
+            playerWeapon = null;
+            cameraMotor = null;
+            playerStats = null;
+            opponentStats = null;
+            playerQuestController = null;
+            playerInventory = null;
+            playerAnimator = null;
+            opponentAnimator = null;
+            opponentScope = null;
         }
 
         private void ResumeGameplay()

@@ -39,6 +39,8 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: 90b888b6ff5c4dd28472f0447ab685e3, type: 2}
   - Position: {x: 1085.494, y: 555.6412}
     Phrase: {fileID: 11400000, guid: fafbb4087f0c49b8abe6a6849bedb713, type: 2}
+  - Position: {x: 1085.494, y: 1045.6412}
+    Phrase: {fileID: 11400000, guid: c210a700284447e4387ab5c930ff8061, type: 2}
   - Position: {x: 1640, y: 1550}
     Phrase: {fileID: 11400000, guid: b6145b1d00575ac4fabaf380599616da, type: 2}
   - Position: {x: 1640, y: 1790}

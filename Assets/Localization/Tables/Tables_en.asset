@@ -650,6 +650,14 @@ MonoBehaviour:
     m_Localized: "Evade Oswin's attacks successfully: {0}/{1}"
     m_Metadata:
       m_Items: []
+  - m_Id: 74000000000000002
+    m_Localized: "Evasion Training"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 74000000000000003
+    m_Localized: "Evade Oswin's attacks using dodges and rolls."
+    m_Metadata:
+      m_Items: []
   - m_Id: 30000000000000003
     m_Localized: "Skip lesson"
     m_Metadata:

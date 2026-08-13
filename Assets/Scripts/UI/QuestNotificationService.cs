@@ -15,6 +15,7 @@ namespace UI
         private readonly QuestNotificationConfig config;
         private readonly LocalizationConfig localization;
         private readonly QuestController quests;
+        private readonly QuestObjectiveOverrideContext questObjectiveOverride;
         private readonly Queue<QuestChangeInfo> queue = new();
         private readonly Dictionary<Quests.Graph.QuestGraph, QuestState> knownStates = new();
         private QuestChangeInfo? current;
@@ -29,11 +30,16 @@ namespace UI
             public QuestState(Quests.Graph.Model.QuestNodeData node, bool completed) { Node = node; Completed = completed; }
         }
 
-        public QuestNotificationService(QuestController quests, UIConfig uiConfig, LocalizationConfig localization)
+        public QuestNotificationService(
+            QuestController quests,
+            UIConfig uiConfig,
+            LocalizationConfig localization,
+            QuestObjectiveOverrideContext questObjectiveOverride)
         {
             this.quests = quests;
             config = uiConfig != null ? uiConfig.QuestNotificationConfig : null;
             this.localization = localization;
+            this.questObjectiveOverride = questObjectiveOverride;
             quests.Changed += Enqueue;
             CaptureCurrentStates();
         }
@@ -183,8 +189,17 @@ namespace UI
             _ => string.Empty
         };
 
-        private static string GetQuestName(Quests.Graph.QuestGraph quest) =>
-            quest == null ? string.Empty : quest.Title.GetLocalizedStringCached();
+        private string GetQuestName(Quests.Graph.QuestGraph quest)
+        {
+            if (questObjectiveOverride != null
+                && questObjectiveOverride.AppliesTo(quest)
+                && !string.IsNullOrWhiteSpace(questObjectiveOverride.Title))
+            {
+                return questObjectiveOverride.Title;
+            }
+
+            return quest == null ? string.Empty : quest.Title.GetLocalizedStringCached();
+        }
 
         public void Dispose()
         {

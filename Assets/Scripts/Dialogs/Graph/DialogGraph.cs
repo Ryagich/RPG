@@ -54,20 +54,7 @@ namespace Dialogs.Graph
                 }
             }
 
-            if (forcedPhrase != null)
-            {
-                return true;
-            }
-
-            // A forced entry without quest conditions is always available. Quest phrases
-            // must only be selected through the loop above, where their conditions are checked.
-            if (EntryPhrase != null && EntryPhrase.IsForcedDialoguePhrase && !EntryPhrase.IsQuestPhrase)
-            {
-                forcedPhrase = EntryPhrase;
-                return true;
-            }
-
-            return false;
+            return forcedPhrase != null;
         }
 
         public bool CanRestoreExitAbility(DialogPhrase phrase)
@@ -108,7 +95,7 @@ namespace Dialogs.Graph
             foreach (DialogNode node in Nodes)
             {
                 DialogPhrase phrase = node?.Phrase;
-                if (phrase == null || !phrase.IsQuestPhrase || IsEntryPhrase(phrase))
+                if (phrase == null || !phrase.IsQuestPhrase || phrase.IsForcedDialoguePhrase || IsEntryPhrase(phrase))
                 {
                     continue;
                 }

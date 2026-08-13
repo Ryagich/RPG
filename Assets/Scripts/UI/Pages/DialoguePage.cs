@@ -144,11 +144,13 @@ namespace UI.Pages
                 return;
             }
 
+            DialogueFlowTrace.PhraseChanged(null, entryPhrase, dialogueContext.CanExitDialogue);
+
             AddPhrase(
                 GetCharacterName(dialogueContext.CurrentTargetCharacterInfo, dialogueContext.CurrentTarget?.name),
                 entryPhrase.Text.GetLocalizedStringCached());
 
-            PublishGameplayEvents(entryPhrase.GameplayEvents);
+            PublishGameplayEvents(entryPhrase.GameplayEvents, $"entry:{entryPhrase.name}");
 
             ShowAnswers(entryPhrase);
         }
@@ -211,7 +213,21 @@ namespace UI.Pages
             for (var i = 0; i < phrase.Answers.Count; i++)
             {
                 var answer = phrase.Answers[i];
-                if (answer == null || !AreConditionsSatisfied(answer.HasConditions, answer.Conditions))
+                if (answer == null)
+                {
+                    continue;
+                }
+
+                bool isAvailable = AreConditionsSatisfied(answer.HasConditions, answer.Conditions);
+                DialogueFlowTrace.AnswerEvaluated(
+                    phrase,
+                    "phrase-answer",
+                    answer.Text.GetLocalizedStringCached(),
+                    answer.NextPhrase,
+                    isAvailable,
+                    answer.ForceExitAfterAnswer,
+                    answer.Conditions);
+                if (!isAvailable)
                 {
                     continue;
                 }
@@ -235,10 +251,24 @@ namespace UI.Pages
             foreach (var questPhrase in currentDialog.GetQuestPhrases())
             {
                 var questAnswer = questPhrase?.QuestAnswer;
+                bool isAvailable = questPhrase != null && questAnswer != null &&
+                                   AreConditionsSatisfied(questAnswer.HasConditions, questAnswer.Conditions);
+                if (questPhrase != null && questAnswer != null)
+                {
+                    DialogueFlowTrace.AnswerEvaluated(
+                        phrase,
+                        $"regular-quest-answer:{questPhrase.name}",
+                        questAnswer.Text.GetLocalizedStringCached(),
+                        questPhrase,
+                        isAvailable,
+                        false,
+                        questAnswer.Conditions);
+                }
+
                 if (questPhrase == null ||
                     questAnswer == null ||
                     visibleAnswers.Exists(visibleAnswer => visibleAnswer.NextPhrase == questPhrase) ||
-                    !AreConditionsSatisfied(questAnswer.HasConditions, questAnswer.Conditions))
+                    !isAvailable)
                 {
                     continue;
                 }
@@ -278,12 +308,21 @@ namespace UI.Pages
                 return;
             }
 
+            DialogueFlowTrace.AnswerSelected(
+                dialogueContext.CurrentPhrase,
+                answer.Text,
+                answer.NextPhrase,
+                answer.ForceExitAfterAnswer,
+                answer.ContinueForcedDialogueAfterExit,
+                answer.Conditions);
+
             if (!TryExecuteConditions(
                     answer.HasConditions,
                     answer.Conditions,
                     out var immediateNotifications,
                     out var deferredNotifications))
             {
+                DialogueFlowTrace.AnswerRejected(answer.Text, answer.Conditions);
                 return;
             }
 
@@ -309,11 +348,11 @@ namespace UI.Pages
                     new DialogueExitRequestedMessage(answer.ContinueForcedDialogueAfterExit));
             }
 
-            PublishGameplayEvents(answer.GameplayEvents);
+            PublishGameplayEvents(answer.GameplayEvents, $"answer:{dialogueContext.CurrentPhrase?.name}");
 
             if (answer.NextPhrase != null)
             {
-                PublishGameplayEvents(answer.NextPhrase.GameplayEvents);
+                PublishGameplayEvents(answer.NextPhrase.GameplayEvents, $"next-phrase:{answer.NextPhrase.name}");
             }
 
             if (answer.ForceExitAfterAnswer)
@@ -335,7 +374,9 @@ namespace UI.Pages
                 runtimeFlags);
         }
 
-        private void PublishGameplayEvents(System.Collections.Generic.IReadOnlyList<DialogueGameplayEvent> events)
+        private void PublishGameplayEvents(
+            System.Collections.Generic.IReadOnlyList<DialogueGameplayEvent> events,
+            string source)
         {
             if (events == null)
             {
@@ -346,6 +387,7 @@ namespace UI.Pages
             {
                 if (gameplayEvent != null)
                 {
+                    DialogueFlowTrace.GameplayEventPublished(gameplayEvent, source);
                     dialogueGameplayEventPublisher.Publish(new DialogueGameplayEventRaisedMessage(gameplayEvent));
                 }
             }
@@ -379,6 +421,7 @@ namespace UI.Pages
                         var amount = Mathf.Abs(condition.MoneyAmount);
                         playerMoneyStorage.Add(amount);
                         deferredNotifications.Add(CreateMoneyNotification(localizationConfig.MoneyReceived.GetLocalizedStringCached(), amount));
+                        DialogueFlowTrace.ConditionApplied(condition);
                         break;
                     }
                     case DialogAnswerConditionType.TakeMoney:
@@ -390,12 +433,14 @@ namespace UI.Pages
                         }
 
                         immediateNotifications.Add(CreateMoneyNotification(localizationConfig.MoneyLost.GetLocalizedStringCached(), amount));
+                        DialogueFlowTrace.ConditionApplied(condition);
                         break;
                     }
                     case DialogAnswerConditionType.TakeMoneyMax:
                     {
                         var amount = playerMoneyStorage.SpendUpTo(Mathf.Abs(condition.MoneyAmount));
                         immediateNotifications.Add(CreateMoneyNotification(localizationConfig.MoneyLost.GetLocalizedStringCached(), amount));
+                        DialogueFlowTrace.ConditionApplied(condition);
                         break;
                     }
                     case DialogAnswerConditionType.TakeItemIfHas:
@@ -407,6 +452,7 @@ namespace UI.Pages
                         }
 
                         immediateNotifications.Add(CreateItemNotification(localizationConfig.ItemLost.GetLocalizedStringCached(), condition.ItemConfig, itemCount));
+                        DialogueFlowTrace.ConditionApplied(condition);
                         break;
                     }
                     case DialogAnswerConditionType.CheckQuestStep:
@@ -415,6 +461,7 @@ namespace UI.Pages
                             return false;
                         }
 
+                        DialogueFlowTrace.ConditionApplied(condition);
                         break;
                     case DialogAnswerConditionType.AddQuest:
                         if (questController.TryAddQuest(condition.QuestGraph))
@@ -422,6 +469,7 @@ namespace UI.Pages
                             deferredNotifications.Add(CreateQuestNotification(QuestNotificationType.New, condition.QuestGraph));
                         }
 
+                        DialogueFlowTrace.ConditionApplied(condition);
                         break;
                     case DialogAnswerConditionType.DoQuestStep:
                         if (!questController.TryExecuteTransition(condition.QuestGraph, condition.QuestTransition))
@@ -430,6 +478,7 @@ namespace UI.Pages
                         }
 
                         deferredNotifications.Add(CreateQuestNotification(QuestNotificationType.Update, condition.QuestGraph));
+                        DialogueFlowTrace.ConditionApplied(condition);
                         break;
                     case DialogAnswerConditionType.DoQuestEnd:
                         if (!questController.TryCompleteNode(condition.QuestGraph, condition.QuestNode))
@@ -438,12 +487,15 @@ namespace UI.Pages
                         }
 
                         deferredNotifications.Add(CreateQuestNotification(QuestNotificationType.Completed, condition.QuestGraph));
+                        DialogueFlowTrace.ConditionApplied(condition);
                         break;
                     case DialogAnswerConditionType.ClearRuntimeFlag:
                         runtimeFlags?.Deactivate(condition.RuntimeFlag);
+                        DialogueFlowTrace.ConditionApplied(condition);
                         break;
                     case DialogAnswerConditionType.SetRuntimeFlag:
                         runtimeFlags?.Activate(condition.RuntimeFlag);
+                        DialogueFlowTrace.ConditionApplied(condition);
                         break;
                 }
             }

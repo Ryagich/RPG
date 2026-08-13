@@ -797,6 +797,14 @@ MonoBehaviour:
     m_Localized: "Успешно уклонитесь от атак Освина: {0}/{1}"
     m_Metadata:
       m_Items: []
+  - m_Id: 74000000000000002
+    m_Localized: "Тренировка уклонения"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 74000000000000003
+    m_Localized: "Уклоняйтесь от атак Освина, используя увороты и кувырки."
+    m_Metadata:
+      m_Items: []
   - m_Id: 30000000000000003
     m_Localized: "Пропустить урок"
     m_Metadata:

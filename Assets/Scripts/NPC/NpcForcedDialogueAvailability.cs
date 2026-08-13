@@ -42,16 +42,19 @@ namespace NPC
         public void SuppressUntilZoneExit()
         {
             isSuppressedUntilZoneExit = true;
+            DialogueFlowTrace.ForcedZoneState("suppressed-until-exit");
         }
 
         public void NotifyInteractorLeftZone()
         {
             isSuppressedUntilZoneExit = false;
+            DialogueFlowTrace.ForcedZoneState("interactor-left-zone");
         }
 
         public void AllowImmediateNextDialogue()
         {
             isSuppressedUntilZoneExit = false;
+            DialogueFlowTrace.ForcedZoneState("immediate-next-dialogue-allowed");
         }
 
         public bool TryGetForcedPhrase(LifetimeScope interactorScope, out DialogPhrase forcedPhrase)
@@ -75,15 +78,31 @@ namespace NPC
                 return false;
             }
 
-            return dialog.TryGetActiveForcedPhrase(
-                answer => DialogueAnswerAvailability.AreConditionsSatisfied(
-                    answer.HasConditions,
-                    answer.Conditions,
-                    playerInventory,
-                    playerMoneyStorage,
-                    questController,
-                    runtimeFlags),
-                out forcedPhrase);
+            if (!dialog.TryGetActiveForcedPhrase(
+                    answer => DialogueAnswerAvailability.AreConditionsSatisfied(
+                        answer.HasConditions,
+                        answer.Conditions,
+                        playerInventory,
+                        playerMoneyStorage,
+                        questController,
+                        runtimeFlags),
+                    out forcedPhrase))
+            {
+                return false;
+            }
+
+            // This availability belongs to the automatic forced-dialogue zone.  A graph's
+            // regular entry phrase is valid only for the manual NPC interaction, even when
+            // it is the only currently available phrase.
+            if (forcedPhrase == null || !forcedPhrase.IsForcedDialoguePhrase)
+            {
+                DialogueFlowTrace.ForcedZoneState(
+                    $"rejected-non-forced-phrase; phrase='{forcedPhrase?.name ?? "<none>"}'");
+                forcedPhrase = null;
+                return false;
+            }
+
+            return true;
         }
     }
 }

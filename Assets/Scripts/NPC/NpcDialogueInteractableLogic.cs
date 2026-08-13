@@ -73,6 +73,7 @@ namespace NPC
 
         private void OnInteracted(LifetimeScope interactorScope)
         {
+            DialogueFlowTrace.NormalDialogueInteraction("interacted", interactable);
             if (corpseLootController?.IsLootable == true && corpseLootController.LootInventory != null)
             {
                 isLootingInteractionActive = true;
@@ -83,15 +84,18 @@ namespace NPC
 
             if (!dialogueController.TryBeginDialogue(interactorScope))
             {
+                DialogueFlowTrace.NormalDialogueInteraction("begin-rejected", interactable);
                 return;
             }
 
+            DialogueFlowTrace.NormalDialogueInteraction("begin-accepted", interactable);
             dialogueContext.SetTarget(interactable, characterInfo, dialog, inventory, moneyStorage, faction: faction);
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Dialogue));
         }
 
         private void OnEndInteracted(LifetimeScope _)
         {
+            DialogueFlowTrace.NormalDialogueInteraction("end-interacted", interactable);
             if (isLootingInteractionActive)
             {
                 if (lootingContext.CurrentTargetInventory == corpseLootController?.LootInventory)
@@ -115,6 +119,7 @@ namespace NPC
 
         private void OnDialogueInterrupted()
         {
+            DialogueFlowTrace.NormalDialogueInteraction("dialogue-interrupted", interactable);
             if (dialogueContext.CurrentTarget == interactable)
             {
                 dialogueContext.Clear();

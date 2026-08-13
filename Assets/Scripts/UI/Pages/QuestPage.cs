@@ -52,6 +52,7 @@ namespace UI.Pages
         private readonly UIConfig uiConfig;
         private readonly LocalizationConfig localizationConfig;
         private readonly QuestController questController;
+        private readonly QuestObjectiveOverrideContext questObjectiveOverride;
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
@@ -81,6 +82,7 @@ namespace UI.Pages
             UIConfig uiConfig,
             LocalizationConfig localizationConfig,
             QuestController questController,
+            QuestObjectiveOverrideContext questObjectiveOverride,
             Canvas canvas,
             IObjectResolver resolver,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher)
@@ -88,6 +90,7 @@ namespace UI.Pages
             this.uiConfig = uiConfig;
             this.localizationConfig = localizationConfig;
             this.questController = questController;
+            this.questObjectiveOverride = questObjectiveOverride;
             this.resolver = resolver;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
             canvasRect = canvas.GetComponent<RectTransform>();
@@ -150,6 +153,10 @@ namespace UI.Pages
 
             selectedQuest = questController.CurrentQuest;
             questController.Changed += OnQuestChanged;
+            if (questObjectiveOverride != null)
+            {
+                questObjectiveOverride.Changed += OnQuestObjectiveOverrideChanged;
+            }
             RefreshQuestList();
             ShowDefaultQuestDetails();
         }
@@ -159,6 +166,11 @@ namespace UI.Pages
             if (questController != null)
             {
                 questController.Changed -= OnQuestChanged;
+            }
+
+            if (questObjectiveOverride != null)
+            {
+                questObjectiveOverride.Changed -= OnQuestObjectiveOverrideChanged;
             }
 
             if (title != null)
@@ -419,7 +431,7 @@ namespace UI.Pages
             TMP_Text taskText = taskItem.Text;
             if (taskText != null)
             {
-                taskText.text = node.Name.GetLocalizedStringCached();
+                taskText.text = GetTaskTitle(questProgress, node);
                 ResizeListItemToText(taskRect, taskText);
             }
 
@@ -441,6 +453,19 @@ namespace UI.Pages
             }
 
             taskBindings.Add(new TaskBinding(taskRect, questProgress, node, isCompleted));
+        }
+
+        private string GetTaskTitle(QuestProgress questProgress, QuestNodeData node)
+        {
+            if (questObjectiveOverride != null
+                && questObjectiveOverride.AppliesTo(questProgress?.QuestGraph)
+                && node == questProgress.CurrentNode
+                && !string.IsNullOrWhiteSpace(questObjectiveOverride.Title))
+            {
+                return questObjectiveOverride.Title;
+            }
+
+            return node.Name.GetLocalizedStringCached();
         }
 
         private void SetDescription(string description)
@@ -510,6 +535,11 @@ namespace UI.Pages
             displayedQuest = null;
             RefreshQuestList();
             ShowDefaultQuestDetails();
+        }
+
+        private void OnQuestObjectiveOverrideChanged()
+        {
+            OnQuestChanged(default);
         }
 
         private QuestBinding FindQuestAt(Vector2 screenPoint)

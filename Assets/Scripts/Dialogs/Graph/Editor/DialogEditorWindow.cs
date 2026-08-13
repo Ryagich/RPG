@@ -2438,6 +2438,20 @@ namespace Dialogs.Graph.Editor
                 RefreshTargetSelection();
             }
 
+            public void InvalidateNodeLayout(DialogPhrase phrase)
+            {
+                if (phrase == null || !owner.phraseToNodeLookup.TryGetValue(phrase, out DialogNode node) ||
+                    !nodeElements.TryGetValue(node, out DialogToolkitNodeElement nodeElement))
+                {
+                    return;
+                }
+
+                // A foldout changes an IMGUI container's desired height. A repaint alone does
+                // not notify its UI Toolkit host, leaving later answers clipped until another
+                // unrelated layout pass occurs.
+                nodeElement.MarkContentLayoutDirty();
+            }
+
             public void RefreshTargetSelection()
             {
                 foreach (DialogToolkitNodeElement nodeElement in nodeElements.Values)
@@ -2720,6 +2734,12 @@ namespace Dialogs.Graph.Editor
             {
                 style.left = position.x;
                 style.top = position.y;
+            }
+
+            public void MarkContentLayoutDirty()
+            {
+                content.MarkDirtyLayout();
+                content.MarkDirtyRepaint();
             }
 
             public void RefreshAppearance()
@@ -3609,6 +3629,7 @@ namespace Dialogs.Graph.Editor
 
             phrasesWithDirtyLayout.Add(phrase);
             phrasesAwaitingRepaintAfterLayout.Remove(phrase);
+            toolkitCanvas?.InvalidateNodeLayout(phrase);
             Repaint();
         }
 

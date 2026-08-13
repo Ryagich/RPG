@@ -89,6 +89,7 @@ namespace NPC
 
         private void OnEndInteracted(LifetimeScope _)
         {
+            DialogueFlowTrace.ForcedZoneState("end-interacted", interactable);
             availability.NotifyInteractorLeftZone();
 
             if (dialogueContext.CurrentTarget != interactable || !dialogueContext.CanExitDialogue)
@@ -110,6 +111,9 @@ namespace NPC
             }
 
             bool continueForcedDialogue = dialogueContext.ContinueForcedDialogueAfterExit;
+            DialogueFlowTrace.ForcedZoneState(
+                $"forced-exit-complete; continueForced={continueForcedDialogue}",
+                interactable);
             dialogueContext.Clear();
             dialogueController.EndDialogue();
 
@@ -126,8 +130,13 @@ namespace NPC
 
         private bool TryOpenForcedDialogue(LifetimeScope interactorScope)
         {
-            if (!availability.TryGetForcedPhrase(interactorScope, out DialogPhrase forcedPhrase) ||
-                !dialogueController.TryBeginDialogue(interactorScope))
+            if (!availability.TryGetForcedPhrase(interactorScope, out DialogPhrase forcedPhrase))
+            {
+                return false;
+            }
+
+            DialogueFlowTrace.ForcedPhraseSelected(forcedPhrase);
+            if (!dialogueController.TryBeginDialogue(interactorScope))
             {
                 return false;
             }
@@ -153,6 +162,7 @@ namespace NPC
                 return;
             }
 
+            DialogueFlowTrace.ForcedZoneState("dialogue-interrupted", interactable);
             dialogueContext.Clear();
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Game));
         }

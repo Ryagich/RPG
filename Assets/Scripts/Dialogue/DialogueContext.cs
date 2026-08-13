@@ -42,6 +42,7 @@ namespace Dialogue
             CurrentTargetMoneyStorage = moneyStorage;
             IsForcedDialogue = isForcedDialogue;
             CanExitDialogue = !isForcedDialogue;
+            DialogueFlowTrace.ContextOpened(CurrentTarget, CurrentDialog, CurrentPhrase, IsForcedDialogue);
         }
 
         public void SetPlayerQuestController(QuestController questController)
@@ -51,11 +52,14 @@ namespace Dialogue
 
         public void SetCurrentPhrase(DialogPhrase phrase)
         {
+            DialogPhrase previousPhrase = CurrentPhrase;
             CurrentPhrase = phrase;
             if (phrase != null && phrase.RestoresExitAbility)
             {
                 CanExitDialogue = true;
             }
+
+            DialogueFlowTrace.PhraseChanged(previousPhrase, CurrentPhrase, CanExitDialogue);
         }
 
         public bool TryForceExit(bool continueForcedDialogueAfterExit)
@@ -67,11 +71,19 @@ namespace Dialogue
 
             CanExitDialogue = true;
             ContinueForcedDialogueAfterExit = continueForcedDialogueAfterExit;
+            DialogueFlowTrace.ExitRequested(continueForcedDialogueAfterExit);
             return true;
         }
 
         public void Clear()
         {
+            DialogueFlowTrace.ContextCleared(
+                CurrentTarget,
+                CurrentDialog,
+                CurrentPhrase,
+                IsForcedDialogue,
+                CanExitDialogue,
+                "DialogueContext.Clear");
             CurrentTarget = null;
             CurrentTargetCharacterInfo = null;
             CurrentTargetFaction = null;
