@@ -10,29 +10,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cab1eab763ecf6f4c96f41d14656eb42, type: 3}
-  m_Name: Oswin - Training Forced Entry
+  m_Name: Oswin - Return To Conversation
   m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.Model.DialogPhrase
   text:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
-      m_KeyId: 54301381586882587
-      m_Key: 
+      m_KeyId: 75000000000000038
+      m_Key:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
   alternativeTexts: []
-  isForcedDialoguePhrase: 1
+  isForcedDialoguePhrase: 0
   forcedDialoguePriority: 0
   restoresExitAbility: 0
-  isQuestPhrase: 1
+  isQuestPhrase: 0
   questAnswer:
     text:
       m_TableReference:
-        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+        m_TableCollectionName:
       m_TableEntryReference:
-        m_KeyId: 54301381586882588
-        m_Key: 
+        m_KeyId: 0
+        m_Key:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
@@ -41,38 +41,38 @@ MonoBehaviour:
     continueForcedDialogueAfterExit: 1
     hasGameplayEvents: 0
     gameplayEvents: []
-    hasConditions: 1
-    conditions:
-    - type: 5
-      moneyAmount: 0
-      itemConfig: {fileID: 0}
-      itemCount: 1
-      questGraph: {fileID: 11400000, guid: a55b3d8e42960da47bb27f0695f75776, type: 2}
-      questSourceNode: {fileID: 0}
-      questTransition: {fileID: 0}
-      questNode: {fileID: 0}
-      runtimeFlag: {fileID: 0}
-    - type: 10
-      moneyAmount: 0
-      itemConfig: {fileID: 0}
-      itemCount: 1
-      questGraph: {fileID: 0}
-      questSourceNode: {fileID: 0}
-      questTransition: {fileID: 0}
-      questNode: {fileID: 0}
-      runtimeFlag: {fileID: 11400000, guid: 8eab4a2dac3444d8b26ac5bcec855f65, type: 2}
+    hasConditions: 0
+    conditions: []
   isConversationTopic: 0
   conversationAnswer:
     text:
       m_TableReference:
-        m_TableCollectionName: 
+        m_TableCollectionName:
       m_TableEntryReference:
         m_KeyId: 0
-        m_Key: 
+        m_Key:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
     nextPhrase: {fileID: 0}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 0
+    conditions: []
+  isConversationReturnAction: 1
+  conversationReturnAnswer:
+    text:
+      m_TableReference:
+        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+      m_TableEntryReference:
+        m_KeyId: 75000000000000038
+        m_Key:
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 11400000, guid: 89886865c12e7c147a89adf0209b7542, type: 2}
     forceExitAfterAnswer: 0
     continueForcedDialogueAfterExit: 1
     hasGameplayEvents: 0
@@ -81,39 +81,5 @@ MonoBehaviour:
     conditions: []
   hasGameplayEvents: 0
   gameplayEvents: []
-  answers:
-  - text:
-      m_TableReference:
-        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
-      m_TableEntryReference:
-        m_KeyId: 54301381586882592
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    nextPhrase: {fileID: 11400000, guid: 693418dbdbc94bc0997f6f47bc4f326d, type: 2}
-    forceExitAfterAnswer: 0
-    continueForcedDialogueAfterExit: 1
-    hasGameplayEvents: 0
-    gameplayEvents: []
-    hasConditions: 0
-    conditions: []
-  - text:
-      m_TableReference:
-        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
-      m_TableEntryReference:
-        m_KeyId: 54301381586882593
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
-    nextPhrase: {fileID: 11400000, guid: 90b888b6ff5c4dd28472f0447ab685e3, type: 2}
-    forceExitAfterAnswer: 0
-    continueForcedDialogueAfterExit: 1
-    hasGameplayEvents: 0
-    gameplayEvents: []
-    hasConditions: 0
-    conditions: []
-  references:
-    version: 2
-    RefIds: []
+  answers: []
+  references: {version: 2, RefIds: []}

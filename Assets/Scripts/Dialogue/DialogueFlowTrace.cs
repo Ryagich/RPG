@@ -22,25 +22,33 @@ namespace Dialogue
             Interactable.Interactable target,
             DialogGraph dialog,
             DialogPhrase phrase,
+            string phraseText,
             bool isForcedDialogue)
         {
             Log($"OPEN mode={(isForcedDialogue ? "forced" : "normal")}; target='{ObjectName(target)}'; " +
-                $"dialog='{ObjectName(dialog)}'; {DescribePhrase(phrase)}");
+                $"dialog='{ObjectName(dialog)}'; {DescribePhrase(phrase, phraseText)}");
         }
 
         [Conditional("UNITY_EDITOR")]
         [Conditional("DEVELOPMENT_BUILD")]
-        public static void PhraseChanged(DialogPhrase previous, DialogPhrase current, bool canExitDialogue)
+        public static void PhraseChanged(
+            DialogPhrase previous,
+            string previousPhraseText,
+            DialogPhrase current,
+            string currentPhraseText,
+            bool canExitDialogue)
         {
-            Log($"PHRASE previous={DescribePhrase(previous)}; current={DescribePhrase(current)}; " +
+            Log($"PHRASE previous={DescribePhrase(previous, previousPhraseText)}; " +
+                $"current={DescribePhrase(current, currentPhraseText)}; " +
                 $"canExit={canExitDialogue}");
         }
 
         [Conditional("UNITY_EDITOR")]
         [Conditional("DEVELOPMENT_BUILD")]
-        public static void ForcedPhraseSelected(DialogPhrase phrase)
+        public static void ForcedPhraseSelected(DialogPhrase phrase, string phraseText)
         {
-            Log($"FORCED_SELECTED {DescribePhrase(phrase)}; entryConditions={DescribeConditions(phrase?.QuestAnswer?.Conditions)}");
+            Log($"FORCED_SELECTED {DescribePhrase(phrase, phraseText)}; " +
+                $"entryConditions={DescribeConditions(phrase?.QuestAnswer?.Conditions)}");
         }
 
         [Conditional("UNITY_EDITOR")]
@@ -129,12 +137,13 @@ namespace Dialogue
             Interactable.Interactable target,
             DialogGraph dialog,
             DialogPhrase phrase,
+            string phraseText,
             bool isForcedDialogue,
             bool canExitDialogue,
             string reason)
         {
             Log($"CLEAR reason={reason}; mode={(isForcedDialogue ? "forced" : "normal")}; " +
-                $"target='{ObjectName(target)}'; dialog='{ObjectName(dialog)}'; {DescribePhrase(phrase)}; " +
+                $"target='{ObjectName(target)}'; dialog='{ObjectName(dialog)}'; {DescribePhrase(phrase, phraseText)}; " +
                 $"canExit={canExitDialogue}");
         }
 
@@ -143,16 +152,18 @@ namespace Dialogue
             UnityEngine.Debug.Log($"{Prefix} {message}");
         }
 
-        private static string DescribePhrase(DialogPhrase phrase)
+        private static string DescribePhrase(DialogPhrase phrase, string resolvedText = null)
         {
             if (phrase == null)
             {
                 return "phrase=<none>";
             }
 
-            return $"phrase='{phrase.name}' text=\"{phrase.Text.GetLocalizedStringCached()}\" " +
+            string phraseText = resolvedText ?? phrase.Text.GetLocalizedStringCached();
+            return $"phrase='{phrase.name}' text=\"{phraseText}\" " +
                    $"forced={phrase.IsForcedDialoguePhrase} priority={phrase.ForcedDialoguePriority} " +
-                   $"questPhrase={phrase.IsQuestPhrase} restoresExit={phrase.RestoresExitAbility}";
+                   $"questPhrase={phrase.IsQuestPhrase} conversationTopic={phrase.IsConversationTopic} " +
+                   $"restoresExit={phrase.RestoresExitAbility}";
         }
 
         private static string DescribeConditions(IReadOnlyList<DialogAnswerCondition> conditions)

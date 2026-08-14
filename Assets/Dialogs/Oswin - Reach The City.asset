@@ -61,4 +61,38 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: 548fd35aff0bc65458f9b61f3a863c67, type: 2}
   - Position: {x: 640, y: 1090}
     Phrase: {fileID: 11400000, guid: 063173afea30fb84a9fa3b0f9ea773fc, type: 2}
+  - Position: {x: 2600, y: 440}
+    Phrase: {fileID: 11400000, guid: a1000000000000000000000000000001, type: 2}
+  - Position: {x: 3000, y: 120}
+    Phrase: {fileID: 11400000, guid: a1000000000000000000000000000002, type: 2}
+  - Position: {x: 3400, y: 20}
+    Phrase: {fileID: 11400000, guid: a1000000000000000000000000000003, type: 2}
+  - Position: {x: 3400, y: 260}
+    Phrase: {fileID: 11400000, guid: a1000000000000000000000000000004, type: 2}
+  - Position: {x: 3000, y: 520}
+    Phrase: {fileID: 11400000, guid: a1000000000000000000000000000005, type: 2}
+  - Position: {x: 3400, y: 500}
+    Phrase: {fileID: 11400000, guid: a1000000000000000000000000000006, type: 2}
+  - Position: {x: 3400, y: 740}
+    Phrase: {fileID: 11400000, guid: a1000000000000000000000000000007, type: 2}
+  - Position: {x: 3000, y: 920}
+    Phrase: {fileID: 11400000, guid: a1000000000000000000000000000008, type: 2}
+  - Position: {x: 3400, y: 980}
+    Phrase: {fileID: 11400000, guid: a1000000000000000000000000000009, type: 2}
+  - Position: {x: 3400, y: 1220}
+    Phrase: {fileID: 11400000, guid: a100000000000000000000000000000a, type: 2}
+  - Position: {x: 3000, y: 1320}
+    Phrase: {fileID: 11400000, guid: a100000000000000000000000000000b, type: 2}
+  - Position: {x: 3400, y: 1420}
+    Phrase: {fileID: 11400000, guid: a100000000000000000000000000000c, type: 2}
+  - Position: {x: 3400, y: 1660}
+    Phrase: {fileID: 11400000, guid: a100000000000000000000000000000d, type: 2}
+  - Position: {x: 3000, y: 1840}
+    Phrase: {fileID: 11400000, guid: a100000000000000000000000000000e, type: 2}
+  - Position: {x: 3400, y: 1900}
+    Phrase: {fileID: 11400000, guid: a100000000000000000000000000000f, type: 2}
+  - Position: {x: 3000, y: 2240}
+    Phrase: {fileID: 11400000, guid: e53170a118bd4a5f8d3eb58f3dd830bc, type: 2}
+  - Position: {x: 3000, y: 2460}
+    Phrase: {fileID: 11400000, guid: 5caafbdc75e943f2a59bca1bbbf9a2c1, type: 2}
   <EntryPhrase>k__BackingField: {fileID: 11400000, guid: 89886865c12e7c147a89adf0209b7542, type: 2}

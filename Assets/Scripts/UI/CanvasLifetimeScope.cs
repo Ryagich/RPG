@@ -3,6 +3,8 @@ using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
+using Dialogue;
+
 namespace UI
 {
     public class CanvasLifetimeScope : LifetimeScope
@@ -13,6 +15,7 @@ namespace UI
         {
             builder.RegisterInstance(Canvas).As<Canvas>();
             builder.RegisterEntryPoint<QuestNotificationService>(Lifetime.Singleton).AsSelf();
+            builder.Register<DialogueAnswerProvider>(Lifetime.Singleton).AsSelf();
 
             builder.Register<MainPage>(Lifetime.Singleton);
             builder.Register<PausePage>(Lifetime.Singleton);

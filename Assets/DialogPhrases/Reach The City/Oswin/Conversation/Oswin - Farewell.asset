@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cab1eab763ecf6f4c96f41d14656eb42, type: 3}
-  m_Name: Oswin - Training Accepted
+  m_Name: Oswin - Farewell
   m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.Model.DialogPhrase
   text:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
-      m_KeyId: 54301381586882591
+      m_KeyId: 71000000000000002
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
@@ -27,15 +27,7 @@ MonoBehaviour:
   restoresExitAbility: 0
   isQuestPhrase: 0
   questAnswer:
-    text:
-      m_TableReference:
-        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
-      m_TableEntryReference:
-        m_KeyId: 0
-        m_Key: 
-      m_FallbackState: 0
-      m_WaitForCompletion: 0
-      m_LocalVariables: []
+    text: {m_TableReference: {m_TableCollectionName: }, m_TableEntryReference: {m_KeyId: 0, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
     nextPhrase: {fileID: 0}
     forceExitAfterAnswer: 0
     continueForcedDialogueAfterExit: 1
@@ -45,17 +37,37 @@ MonoBehaviour:
     conditions: []
   isConversationTopic: 0
   conversationAnswer:
+    text: {m_TableReference: {m_TableCollectionName: }, m_TableEntryReference: {m_KeyId: 0, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 0}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 0
+    conditions: []
+  isConversationReturnAction: 0
+  conversationReturnAnswer:
+    text: {m_TableReference: {m_TableCollectionName: }, m_TableEntryReference: {m_KeyId: 0, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 0}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 0
+    conditions: []
+  isDialogueExitAction: 1
+  dialogueExitAnswer:
     text:
       m_TableReference:
-        m_TableCollectionName: 
+        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
       m_TableEntryReference:
-        m_KeyId: 0
+        m_KeyId: 71000000000000002
         m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
     nextPhrase: {fileID: 0}
-    forceExitAfterAnswer: 0
+    forceExitAfterAnswer: 1
     continueForcedDialogueAfterExit: 1
     hasGameplayEvents: 0
     gameplayEvents: []
@@ -64,6 +76,4 @@ MonoBehaviour:
   hasGameplayEvents: 0
   gameplayEvents: []
   answers: []
-  references:
-    version: 2
-    RefIds: []
+  references: {version: 2, RefIds: []}

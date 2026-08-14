@@ -646,6 +646,10 @@ MonoBehaviour:
     m_Localized: "Practice dodges and rolls."
     m_Metadata:
       m_Items: []
+  - m_Id: 73000000000000006
+    m_Localized: "I have changed my mind."
+    m_Metadata:
+      m_Items: []
   - m_Id: 74000000000000001
     m_Localized: "Evade Oswin's attacks successfully: {0}/{1}"
     m_Metadata:
@@ -686,6 +690,117 @@ MonoBehaviour:
     m_Localized: "Skip lesson"
     m_Metadata:
       m_Items: []
+  - m_Id: 75000000000000001
+    m_Localized: "There is something I would like to ask you."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000002
+    m_Localized: "What is it you want to know?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000003
+    m_Localized: "Speak. I am listening."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000004
+    m_Localized: "Well? What is on your mind?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000005
+    m_Localized: "Ask, before my patience runs out."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000006
+    m_Localized: "Yes, yes. Out with it."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000007
+    m_Localized: "What can you tell me about the forest?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000008
+    m_Localized: "The forest itself is unchanged. Trees stand, birds sing when they please. It is the road beneath them that has died. By sundown, wagons once raced each other and travelers fought over a place by the fire. Now you may walk half a day and find only prints in the mud. Not every print is one you want to study."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000009
+    m_Localized: "Have bandits driven everyone away?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000010
+    m_Localized: "In part. A bandit is a simple trouble: hungry, greedy, with a knife. You can avoid him, bribe him, or meet him steel in hand. Yet even they do not linger in that forest now. I found one of their camps: fire drowned, pot abandoned, and the sentry watching the trees instead of the road. So it is not only travelers who are afraid."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000011
+    m_Localized: "What do you mean, it feels watched?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000012
+    m_Localized: "I do not know, and that makes it worse. No rustle, no tracks, no smoke between the trunks. You walk on, then suddenly know someone has stopped behind you. Turn around: moss, roots, branches. A wolf is more honest; see its teeth and you know what to do. The forest only listens. I do not go there after sunset."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000013
+    m_Localized: "How is the tavern here?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000014
+    m_Localized: "It was a good tavern. When the road lived, folk argued over prices by morning, gods by night, and someone always slept face-down on a table by dawn. Now the hall has room to spare. You can hear a spoon strike a bowl. Still, the landlady keeps the fire and scrubs the tables as though caravans will return tomorrow. Stubborn woman. Places like that stand on stubbornness."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000015
+    m_Localized: "Is the food truly that good?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000016
+    m_Localized: "If you do not ask where the meat in the stew comes from, it is very good. Her bread is hot, she does not spare the onions, and one bowl puts thoughts of tomorrow back into a man. These days that is worth a coin. Do not praise her too loudly, though. She will pretend not to hear, then give you another helping."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000017
+    m_Localized: "Why is it empty now?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000018
+    m_Localized: "Because the road no longer feeds it. A traveler rides when work, shelter, or at least a market waits ahead. When all that waits are rumors, shut gates, and people with knives, he stays home. It is not the tavern's fault. The world has no mind for mugs and songs just now."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000019
+    m_Localized: "What is happening at the river?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000020
+    m_Localized: "By day it is only a river: shallows, reeds, dragonflies above the water. At dusk it changes. Reeds stir against the wind, rings spread where no fish should be. They say something water-born has taken to it. It does not come to shore by daylight—perhaps it hates the sun. At night, I would not even rinse my flask there."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000021
+    m_Localized: "Is the river still worth visiting?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000022
+    m_Localized: "If you have a reason. Bloodblossom grows by the shallows. It looks plain enough, but closes a wound better than many costly salves. Gather it in the morning, while you can see the riverbed. Do not reach for every flower: keep one eye on the water. The river tolerates the careful. Others are searched for downstream."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000023
+    m_Localized: "Who lives in the village downstream?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000024
+    m_Localized: "People say nonhumans. People say many things after seeing smoke over strange roofs and a boat without a lamp. I have not been there, so I will not lie to you. Fishermen rarely go below that bend and come back with no catch, but whole. If you go, do not begin by asking who they are or how they differ from us. Say hello first. Sometimes that is enough to come back again."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000025
+    m_Localized: "Tell me about the village by the road."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000026
+    m_Localized: "Nothing special at first glance: crooked fences, gardens, children barefoot until the cold comes. But it stood on the road, so it lived. One traveler bought oats, another mended a wheel, a third paid for a bed at the tavern. They left coins behind, and the village turned another day. While the road was full of people, there were folk there to argue, haggle, and make plans."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000027
+    m_Localized: "Does everything there depend on the tavern?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000028
+    m_Localized: "Not on the tavern alone—on all that turned around it. The smith shod horses, the miller ground flour, widows washed strangers' linen, boys ran after wagons. One traveler buys a mug, another pays for a repair, and ten people find supper on the table. Without the road it is no longer a village by the highway, only a handful of yards grown crowded with their own troubles."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000029
+    m_Localized: "What has become of it now?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000030
+    m_Localized: "I cannot say. Someone once came from there every day: grain, salt, or simply a tongue in need of wagging. Now, no one. Maybe they have barred their doors and are waiting it out. Maybe there is no one left to ride. I do not like guessing. Guesses do not make roads safer, and they do not keep people alive."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000031
+    m_Localized: "What do you think of the city?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000032
+    m_Localized: "From afar, a city always looks like salvation: walls, roofs, smoke from chimneys. You think food and order wait behind the gate. Come closer, and there is a queue, spears, and the guards' faces. Inside there is work, a market, a healer. There are also other people's laws and folk who profit from your fear. Still, I would choose a city over a night in the forest. Walls have honest teeth."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000033
+    m_Localized: "Why will they not open the gates?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000034
+    m_Localized: "If I had that answer, I would not be freezing beneath these walls with the rest of them. A city closes its gates when it fears what is coming for it, or what has already entered. The guards are silent. When armed folk fall silent, watch their hands, not their mouths. These hold their spears as though trouble might come from either side."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000036
+    m_Localized: "I will ask about something else."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000037
+    m_Localized: "Thank you. I should go."
+    m_Metadata: {m_Items: []}
+  - m_Id: 75000000000000038
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
   references:
     version: 2
     RefIds: []

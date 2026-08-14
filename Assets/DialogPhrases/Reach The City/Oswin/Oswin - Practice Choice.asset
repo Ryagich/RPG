@@ -31,7 +31,7 @@ MonoBehaviour:
         m_TableCollectionName: 
       m_TableEntryReference:
         m_KeyId: 0
-        m_Key: 
+        m_Key:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
@@ -93,6 +93,22 @@ MonoBehaviour:
     hasGameplayEvents: 1
     gameplayEvents:
     - {fileID: 11400000, guid: 62e0f83edc56b314984fc515ac5bc691, type: 2}
+    hasConditions: 0
+    conditions: []
+  - text:
+      m_TableReference:
+        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+      m_TableEntryReference:
+        m_KeyId: 73000000000000006
+        m_Key:
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 11400000, guid: c210a700284447e4387ab5c930ff8061, type: 2}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 0
+    hasGameplayEvents: 0
+    gameplayEvents: []
     hasConditions: 0
     conditions: []
   references:

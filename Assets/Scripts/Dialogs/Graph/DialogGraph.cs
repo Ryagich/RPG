@@ -25,7 +25,7 @@ namespace Dialogs.Graph
         /// <summary>
         /// Determines whether a phrase is a regular conversation choice point. Along with the
         /// graph entry, a phrase that restores exit after a forced line returns the player to
-        /// the same choice context: quest branches and the system farewell become available.
+        /// the same choice context: quest branches and authored navigation actions become available.
         /// </summary>
         public bool IsRegularChoicePoint(DialogPhrase phrase)
         {
@@ -95,7 +95,12 @@ namespace Dialogs.Graph
             return false;
         }
 
-        public IEnumerable<DialogPhrase> GetQuestPhrases()
+        /// <summary>
+        /// Returns authored branches offered from a regular conversation choice point. Quest
+        /// branches and ordinary topics share the same answer lifecycle but retain distinct
+        /// authoring data and visual treatment in the editor.
+        /// </summary>
+        public IEnumerable<DialogPhrase> GetRegularChoicePhrases()
         {
             if (Nodes == null)
             {
@@ -105,13 +110,120 @@ namespace Dialogs.Graph
             foreach (DialogNode node in Nodes)
             {
                 DialogPhrase phrase = node?.Phrase;
-                if (phrase == null || !phrase.IsQuestPhrase || phrase.IsForcedDialoguePhrase || IsEntryPhrase(phrase))
+                if (phrase == null ||
+                    (!phrase.IsQuestPhrase && !phrase.IsConversationTopic) ||
+                    phrase.IsConversationReturnAction ||
+                    phrase.IsDialogueExitAction ||
+                    phrase.IsForcedDialoguePhrase ||
+                    IsEntryPhrase(phrase))
                 {
                     continue;
                 }
 
                 yield return phrase;
             }
+        }
+
+        /// <summary>
+        /// Returns navigation actions that lead out of a reusable conversation topic branch.
+        /// The graph owns both the action and its conditions; the UI only inserts it when the
+        /// current phrase is reachable from a conversation topic.
+        /// </summary>
+        public IEnumerable<DialogPhrase> GetConversationReturnPhrases(DialogPhrase currentPhrase)
+        {
+            if (!IsConversationBranchPhrase(currentPhrase) || Nodes == null)
+            {
+                yield break;
+            }
+
+            foreach (DialogNode node in Nodes)
+            {
+                DialogPhrase phrase = node?.Phrase;
+                if (phrase == null ||
+                    !phrase.IsConversationReturnAction ||
+                    phrase.IsDialogueExitAction ||
+                    phrase.IsForcedDialoguePhrase ||
+                    IsEntryPhrase(phrase))
+                {
+                    continue;
+                }
+
+                yield return phrase;
+            }
+        }
+
+        /// <summary>
+        /// Returns authored dialogue exit actions. Their placement is resolved by the dialogue
+        /// application service, which preserves the regular-choice and terminal fallback rules.
+        /// </summary>
+        public IEnumerable<DialogPhrase> GetDialogueExitPhrases()
+        {
+            if (Nodes == null)
+            {
+                yield break;
+            }
+
+            foreach (DialogNode node in Nodes)
+            {
+                DialogPhrase phrase = node?.Phrase;
+                if (phrase == null ||
+                    !phrase.IsDialogueExitAction ||
+                    phrase.IsConversationReturnAction ||
+                    phrase.IsForcedDialoguePhrase ||
+                    IsEntryPhrase(phrase))
+                {
+                    continue;
+                }
+
+                yield return phrase;
+            }
+        }
+
+        private bool IsConversationBranchPhrase(DialogPhrase phrase)
+        {
+            if (phrase == null || Nodes == null)
+            {
+                return false;
+            }
+
+            foreach (DialogNode node in Nodes)
+            {
+                DialogPhrase topicPhrase = node?.Phrase;
+                if (topicPhrase != null &&
+                    topicPhrase.IsConversationTopic &&
+                    CanReachPhrase(topicPhrase, phrase, new HashSet<DialogPhrase>()))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool CanReachPhrase(
+            DialogPhrase currentPhrase,
+            DialogPhrase targetPhrase,
+            ISet<DialogPhrase> visited)
+        {
+            if (currentPhrase == null || !visited.Add(currentPhrase))
+            {
+                return false;
+            }
+
+            if (currentPhrase == targetPhrase)
+            {
+                return true;
+            }
+
+            foreach (DialogAnswer answer in currentPhrase.Answers)
+            {
+                if (CanReachPhrase(answer?.NextPhrase, targetPhrase, visited))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool CanReachBeforeExitIsRestored(

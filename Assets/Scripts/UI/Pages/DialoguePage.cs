@@ -30,6 +30,7 @@ namespace UI.Pages
         private readonly StatsController statsController;
         private readonly StatFiller hpFiller;
         private readonly DialogueContext dialogueContext;
+        private readonly DialogueAnswerProvider dialogueAnswerProvider;
         private readonly CharacterInfo playerCharacterInfo;
         private readonly PlayerInventory playerInventory;
         private readonly MoneyStorage playerMoneyStorage;
@@ -54,6 +55,7 @@ namespace UI.Pages
             StatsController statsController,
             StatFillers statFillers,
             DialogueContext dialogueContext,
+            DialogueAnswerProvider dialogueAnswerProvider,
             CharacterInfo playerCharacterInfo,
             PlayerInventory playerInventory,
             MoneyStorage playerMoneyStorage,
@@ -71,6 +73,7 @@ namespace UI.Pages
             this.statsController = statsController;
             hpFiller = statFillers.Get(StatType.Hp);
             this.dialogueContext = dialogueContext;
+            this.dialogueAnswerProvider = dialogueAnswerProvider;
             this.playerCharacterInfo = playerCharacterInfo;
             this.playerInventory = playerInventory;
             this.playerMoneyStorage = playerMoneyStorage;
@@ -144,11 +147,16 @@ namespace UI.Pages
                 return;
             }
 
-            DialogueFlowTrace.PhraseChanged(null, entryPhrase, dialogueContext.CanExitDialogue);
+            DialogueFlowTrace.PhraseChanged(
+                null,
+                null,
+                entryPhrase,
+                dialogueContext.CurrentPhraseText,
+                dialogueContext.CanExitDialogue);
 
             AddPhrase(
                 GetCharacterName(dialogueContext.CurrentTargetCharacterInfo, dialogueContext.CurrentTarget?.name),
-                entryPhrase.Text.GetLocalizedStringCached());
+                dialogueContext.CurrentPhraseText);
 
             PublishGameplayEvents(entryPhrase.GameplayEvents, $"entry:{entryPhrase.name}");
 
@@ -164,7 +172,7 @@ namespace UI.Pages
                 return;
             }
 
-            var visibleAnswers = BuildVisibleAnswers(phrase);
+            var visibleAnswers = dialogueAnswerProvider.GetVisibleAnswers(phrase);
             for (var i = 0; i < visibleAnswers.Count; i++)
             {
                 var answer = visibleAnswers[i];
@@ -201,122 +209,7 @@ namespace UI.Pages
             ScrollToTop(dialogueContainer.AnswerScroll);
         }
 
-        private System.Collections.Generic.List<DisplayedAnswerData> BuildVisibleAnswers(DialogPhrase phrase)
-        {
-            var visibleAnswers = new System.Collections.Generic.List<DisplayedAnswerData>();
-
-            if (phrase == null)
-            {
-                return visibleAnswers;
-            }
-
-            for (var i = 0; i < phrase.Answers.Count; i++)
-            {
-                var answer = phrase.Answers[i];
-                if (answer == null)
-                {
-                    continue;
-                }
-
-                bool isAvailable = AreConditionsSatisfied(answer.HasConditions, answer.Conditions);
-                DialogueFlowTrace.AnswerEvaluated(
-                    phrase,
-                    "phrase-answer",
-                    answer.Text.GetLocalizedStringCached(),
-                    answer.NextPhrase,
-                    isAvailable,
-                    answer.ForceExitAfterAnswer,
-                    answer.Conditions);
-                if (!isAvailable)
-                {
-                    continue;
-                }
-
-                visibleAnswers.Add(new DisplayedAnswerData(
-                    answer.Text.GetLocalizedStringCached(),
-                    answer.NextPhrase,
-                    answer.ForceExitAfterAnswer,
-                    answer.ContinueForcedDialogueAfterExit,
-                    answer.GameplayEvents,
-                    answer.HasConditions,
-                    answer.Conditions));
-            }
-
-            var currentDialog = dialogueContext.CurrentDialog;
-            bool isRegularChoicePoint = currentDialog != null && currentDialog.IsRegularChoicePoint(phrase);
-            if (isRegularChoicePoint)
-            {
-                foreach (var questPhrase in currentDialog.GetQuestPhrases())
-                {
-                    var questAnswer = questPhrase?.QuestAnswer;
-                    bool isAvailable = questPhrase != null && questAnswer != null &&
-                                       AreConditionsSatisfied(questAnswer.HasConditions, questAnswer.Conditions);
-                    if (questPhrase != null && questAnswer != null)
-                    {
-                        DialogueFlowTrace.AnswerEvaluated(
-                            phrase,
-                            $"regular-quest-answer:{questPhrase.name}",
-                            questAnswer.Text.GetLocalizedStringCached(),
-                            questPhrase,
-                            isAvailable,
-                            false,
-                            questAnswer.Conditions);
-                    }
-
-                    if (questPhrase == null ||
-                        questAnswer == null ||
-                        visibleAnswers.Exists(visibleAnswer => visibleAnswer.NextPhrase == questPhrase) ||
-                        !isAvailable)
-                    {
-                        continue;
-                    }
-
-                    visibleAnswers.Add(new DisplayedAnswerData(
-                        questAnswer.Text.GetLocalizedStringCached(),
-                        questPhrase,
-                        false,
-                        true,
-                        questAnswer.GameplayEvents,
-                        questAnswer.HasConditions,
-                        questAnswer.Conditions));
-                }
-            }
-
-            // The farewell is a navigation action owned by the dialogue UI. It is shown
-            // at regular choice points and as the safe fallback for a terminal phrase with no
-            // available answers. It never needs an authored graph connection.
-            if (dialogueContext.CanExitDialogue && (isRegularChoicePoint || visibleAnswers.Count == 0))
-            {
-                AddFarewellAnswer(visibleAnswers, phrase);
-            }
-
-            return visibleAnswers;
-        }
-
-        private void AddFarewellAnswer(
-            System.Collections.Generic.List<DisplayedAnswerData> visibleAnswers,
-            DialogPhrase phrase)
-        {
-            string farewellText = localizationConfig.DialogueFarewell.GetLocalizedStringCached();
-            DialogueFlowTrace.AnswerEvaluated(
-                phrase,
-                "system-farewell",
-                farewellText,
-                null,
-                true,
-                true,
-                null);
-            visibleAnswers.Add(new DisplayedAnswerData(
-                farewellText,
-                null,
-                true,
-                true,
-                null,
-                false,
-                null));
-        }
-
-        private void SelectAnswer(DisplayedAnswerData answer)
+        private void SelectAnswer(DialogueAnswerOption answer)
         {
             if (string.IsNullOrWhiteSpace(answer.Text) && answer.NextPhrase == null && !answer.ForceExitAfterAnswer)
             {
@@ -352,7 +245,7 @@ namespace UI.Pages
                 dialogueContext.SetCurrentPhrase(answer.NextPhrase);
                 AddPhrase(
                     GetCharacterName(dialogueContext.CurrentTargetCharacterInfo, dialogueContext.CurrentTarget?.name),
-                    answer.NextPhrase.Text.GetLocalizedStringCached());
+                    dialogueContext.CurrentPhraseText);
             }
 
             AddNotifications(deferredNotifications);
@@ -689,35 +582,6 @@ namespace UI.Pages
                 Name = name ?? string.Empty;
                 Description = description ?? string.Empty;
                 Icon = icon;
-            }
-        }
-
-        private readonly struct DisplayedAnswerData
-        {
-            public readonly string Text;
-            public readonly DialogPhrase NextPhrase;
-            public readonly bool ForceExitAfterAnswer;
-            public readonly bool ContinueForcedDialogueAfterExit;
-            public readonly System.Collections.Generic.IReadOnlyList<DialogueGameplayEvent> GameplayEvents;
-            public readonly bool HasConditions;
-            public readonly System.Collections.Generic.IReadOnlyList<DialogAnswerCondition> Conditions;
-
-            public DisplayedAnswerData(
-                string text,
-                DialogPhrase nextPhrase,
-                bool forceExitAfterAnswer,
-                bool continueForcedDialogueAfterExit,
-                System.Collections.Generic.IReadOnlyList<DialogueGameplayEvent> gameplayEvents,
-                bool hasConditions,
-                System.Collections.Generic.IReadOnlyList<DialogAnswerCondition> conditions)
-            {
-                Text = text ?? string.Empty;
-                NextPhrase = nextPhrase;
-                ForceExitAfterAnswer = forceExitAfterAnswer && nextPhrase == null;
-                ContinueForcedDialogueAfterExit = continueForcedDialogueAfterExit;
-                GameplayEvents = gameplayEvents;
-                HasConditions = hasConditions;
-                Conditions = conditions;
             }
         }
 

@@ -135,7 +135,6 @@ namespace NPC
                 return false;
             }
 
-            DialogueFlowTrace.ForcedPhraseSelected(forcedPhrase);
             if (!dialogueController.TryBeginDialogue(interactorScope))
             {
                 return false;
@@ -150,6 +149,7 @@ namespace NPC
                 forcedPhrase,
                 true,
                 faction);
+            DialogueFlowTrace.ForcedPhraseSelected(forcedPhrase, dialogueContext.CurrentPhraseText);
             availability.SuppressUntilZoneExit();
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Dialogue));
             return true;

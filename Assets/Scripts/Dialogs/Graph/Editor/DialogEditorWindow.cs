@@ -744,7 +744,12 @@ namespace Dialogs.Graph.Editor
 
             foreach (DialogNode node in currentGraph.Nodes)
             {
-                if (node?.Phrase == null || currentGraph.IsEntryPhrase(node.Phrase) || node.Phrase.IsQuestPhrase)
+                if (node?.Phrase == null ||
+                    currentGraph.IsEntryPhrase(node.Phrase) ||
+                    node.Phrase.IsQuestPhrase ||
+                    node.Phrase.IsConversationTopic ||
+                    node.Phrase.IsConversationReturnAction ||
+                    node.Phrase.IsDialogueExitAction)
                 {
                     continue;
                 }
@@ -3179,10 +3184,16 @@ namespace Dialogs.Graph.Editor
                 InvalidateGraphCaches();
             }
 
-            if (node.Phrase.IsQuestPhrase)
+            if (node.Phrase.IsQuestPhrase || node.Phrase.IsConversationTopic || node.Phrase.IsConversationReturnAction || node.Phrase.IsDialogueExitAction)
             {
                 EditorGUILayout.HelpBox(
-                    "Quest phrase appears as an answer on the start phrase and does not require incoming links.",
+                    node.Phrase.IsQuestPhrase
+                        ? "Quest phrase appears as an answer at regular conversation choice points and does not require incoming links."
+                        : node.Phrase.IsConversationTopic
+                            ? "Conversation topic appears as an answer at regular conversation choice points and does not require incoming links."
+                            : node.Phrase.IsConversationReturnAction
+                                ? "Conversation return action appears automatically inside conversation topic branches when its conditions are satisfied and does not require incoming links."
+                                : "Dialogue exit action appears automatically at regular choice points and as the safe exit from terminal phrases when its conditions are satisfied and does not require incoming links.",
                     MessageType.Info);
             }
 
@@ -3232,11 +3243,18 @@ namespace Dialogs.Graph.Editor
             phraseObject.Update();
 
             SerializedProperty textProperty = phraseObject.FindProperty("text");
+            SerializedProperty alternativeTextsProperty = phraseObject.FindProperty("alternativeTexts");
             SerializedProperty isForcedDialoguePhraseProperty = phraseObject.FindProperty("isForcedDialoguePhrase");
             SerializedProperty forcedDialoguePriorityProperty = phraseObject.FindProperty("forcedDialoguePriority");
             SerializedProperty restoresExitAbilityProperty = phraseObject.FindProperty("restoresExitAbility");
             SerializedProperty isQuestPhraseProperty = phraseObject.FindProperty("isQuestPhrase");
             SerializedProperty questAnswerProperty = phraseObject.FindProperty("questAnswer");
+            SerializedProperty isConversationTopicProperty = phraseObject.FindProperty("isConversationTopic");
+            SerializedProperty conversationAnswerProperty = phraseObject.FindProperty("conversationAnswer");
+            SerializedProperty isConversationReturnActionProperty = phraseObject.FindProperty("isConversationReturnAction");
+            SerializedProperty conversationReturnAnswerProperty = phraseObject.FindProperty("conversationReturnAnswer");
+            SerializedProperty isDialogueExitActionProperty = phraseObject.FindProperty("isDialogueExitAction");
+            SerializedProperty dialogueExitAnswerProperty = phraseObject.FindProperty("dialogueExitAnswer");
             SerializedProperty hasGameplayEventsProperty = phraseObject.FindProperty("hasGameplayEvents");
             SerializedProperty gameplayEventsProperty = phraseObject.FindProperty("gameplayEvents");
             SerializedProperty answersProperty = phraseObject.FindProperty("answers");
@@ -3251,6 +3269,8 @@ namespace Dialogs.Graph.Editor
             {
                 DrawLocalizedStringSelector(textProperty, "Phrase");
             }
+
+            DrawAlternativePhraseTexts(alternativeTextsProperty);
 
             if (isForcedDialoguePhraseProperty != null)
             {
@@ -3301,7 +3321,112 @@ namespace Dialogs.Graph.Editor
 
                 if (isQuestPhraseProperty.boolValue)
                 {
+                    if (isConversationTopicProperty != null)
+                    {
+                        isConversationTopicProperty.boolValue = false;
+                    }
+
+                    if (isConversationReturnActionProperty != null)
+                    {
+                        isConversationReturnActionProperty.boolValue = false;
+                    }
+
+                    if (isDialogueExitActionProperty != null)
+                    {
+                        isDialogueExitActionProperty.boolValue = false;
+                    }
+
                     DrawQuestPhraseSettings(questAnswerProperty);
+                }
+            }
+
+            if (isConversationTopicProperty != null)
+            {
+                EditorGUILayout.Space(4f);
+                if (isQuestPhraseProperty?.boolValue == true || isConversationReturnActionProperty?.boolValue == true || isDialogueExitActionProperty?.boolValue == true)
+                {
+                    isConversationTopicProperty.boolValue = false;
+                }
+
+                EditorGUI.BeginDisabledGroup(
+                    isQuestPhraseProperty?.boolValue == true || isConversationReturnActionProperty?.boolValue == true || isDialogueExitActionProperty?.boolValue == true);
+                EditorGUILayout.PropertyField(
+                    isConversationTopicProperty,
+                    new GUIContent(
+                        "Conversation Topic",
+                        "Shows this phrase as a reusable topic answer at every regular conversation choice point."));
+                EditorGUI.EndDisabledGroup();
+
+                if (isConversationTopicProperty.boolValue)
+                {
+                    DrawConversationTopicSettings(conversationAnswerProperty);
+                }
+            }
+
+            if (isConversationReturnActionProperty != null)
+            {
+                EditorGUILayout.Space(4f);
+                if (isConversationReturnActionProperty.boolValue)
+                {
+                    if (isQuestPhraseProperty != null)
+                    {
+                        isQuestPhraseProperty.boolValue = false;
+                    }
+
+                    if (isConversationTopicProperty != null)
+                    {
+                        isConversationTopicProperty.boolValue = false;
+                    }
+                }
+
+                EditorGUI.BeginDisabledGroup(
+                    isQuestPhraseProperty?.boolValue == true || isConversationTopicProperty?.boolValue == true || isDialogueExitActionProperty?.boolValue == true);
+                EditorGUILayout.PropertyField(
+                    isConversationReturnActionProperty,
+                    new GUIContent(
+                        "Conversation Return Action",
+                        "Adds this answer automatically to phrases within a reusable conversation topic branch when its conditions are satisfied."));
+                EditorGUI.EndDisabledGroup();
+
+                if (isConversationReturnActionProperty.boolValue)
+                {
+                    DrawConversationReturnActionSettings(conversationReturnAnswerProperty);
+                }
+            }
+
+            if (isDialogueExitActionProperty != null)
+            {
+                EditorGUILayout.Space(4f);
+                if (isDialogueExitActionProperty.boolValue)
+                {
+                    if (isQuestPhraseProperty != null)
+                    {
+                        isQuestPhraseProperty.boolValue = false;
+                    }
+
+                    if (isConversationTopicProperty != null)
+                    {
+                        isConversationTopicProperty.boolValue = false;
+                    }
+
+                    if (isConversationReturnActionProperty != null)
+                    {
+                        isConversationReturnActionProperty.boolValue = false;
+                    }
+                }
+
+                EditorGUI.BeginDisabledGroup(
+                    isQuestPhraseProperty?.boolValue == true || isConversationTopicProperty?.boolValue == true || isConversationReturnActionProperty?.boolValue == true);
+                EditorGUILayout.PropertyField(
+                    isDialogueExitActionProperty,
+                    new GUIContent(
+                        "Dialogue Exit Action",
+                        "Adds this answer automatically at regular choice points and when a phrase would otherwise have no available answer."));
+                EditorGUI.EndDisabledGroup();
+
+                if (isDialogueExitActionProperty.boolValue)
+                {
+                    DrawDialogueExitActionSettings(dialogueExitAnswerProperty);
                 }
             }
 
@@ -3502,6 +3627,124 @@ namespace Dialogs.Graph.Editor
                 InvalidateGraphCaches();
                 InvalidateNodeLayout(phrase);
             }
+        }
+
+        private void DrawAlternativePhraseTexts(SerializedProperty alternativeTextsProperty)
+        {
+            if (alternativeTextsProperty == null)
+            {
+                return;
+            }
+
+            EditorGUILayout.Space(3f);
+            EditorGUILayout.LabelField("Random Text Variants", MiniBoldLabelStyle);
+            EditorGUILayout.BeginVertical(HelpBoxStyle);
+            EditorGUILayout.LabelField(
+                "One of the main phrase or these variants is chosen once whenever the phrase is shown.",
+                WordWrappedMiniLabelStyle);
+
+            int removeIndex = -1;
+            for (int i = 0; i < alternativeTextsProperty.arraySize; i++)
+            {
+                EditorGUILayout.BeginHorizontal();
+                DrawLocalizedStringSelector(alternativeTextsProperty.GetArrayElementAtIndex(i), $"Variant {i + 1}");
+                if (DrawMiniButton("X", GUILayout.Width(22f)))
+                {
+                    removeIndex = i;
+                }
+
+                EditorGUILayout.EndHorizontal();
+            }
+
+            if (DrawButton("+ Add Text Variant"))
+            {
+                alternativeTextsProperty.arraySize++;
+            }
+
+            if (removeIndex >= 0)
+            {
+                alternativeTextsProperty.DeleteArrayElementAtIndex(removeIndex);
+            }
+
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawConversationTopicSettings(SerializedProperty conversationAnswerProperty)
+        {
+            if (conversationAnswerProperty == null)
+            {
+                EditorGUILayout.HelpBox("Conversation topic answer property was not found.", MessageType.Error);
+                return;
+            }
+
+            SerializedProperty answerTextProperty = conversationAnswerProperty.FindPropertyRelative("text");
+            SerializedProperty hasGameplayEventsProperty = conversationAnswerProperty.FindPropertyRelative("hasGameplayEvents");
+            SerializedProperty gameplayEventsProperty = conversationAnswerProperty.FindPropertyRelative("gameplayEvents");
+            SerializedProperty hasConditionsProperty = conversationAnswerProperty.FindPropertyRelative("hasConditions");
+            SerializedProperty conditionsProperty = conversationAnswerProperty.FindPropertyRelative("conditions");
+
+            EditorGUILayout.Space(2f);
+            EditorGUILayout.BeginVertical(HelpBoxStyle);
+            EditorGUILayout.LabelField(
+                "This answer is shown alongside quest branches whenever the player is free to choose a conversation topic.",
+                WordWrappedMiniLabelStyle);
+            DrawAnswerDetails(answerTextProperty, hasConditionsProperty, conditionsProperty, "Topic Answer");
+            DrawGameplayEvents(hasGameplayEventsProperty, gameplayEventsProperty);
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawConversationReturnActionSettings(SerializedProperty returnAnswerProperty)
+        {
+            if (returnAnswerProperty == null)
+            {
+                EditorGUILayout.HelpBox("Conversation return answer property was not found.", MessageType.Error);
+                return;
+            }
+
+            SerializedProperty answerTextProperty = returnAnswerProperty.FindPropertyRelative("text");
+            SerializedProperty nextPhraseProperty = returnAnswerProperty.FindPropertyRelative("nextPhrase");
+            SerializedProperty hasConditionsProperty = returnAnswerProperty.FindPropertyRelative("hasConditions");
+            SerializedProperty conditionsProperty = returnAnswerProperty.FindPropertyRelative("conditions");
+
+            EditorGUILayout.Space(2f);
+            EditorGUILayout.BeginVertical(HelpBoxStyle);
+            EditorGUILayout.LabelField(
+                "This answer is shown automatically on every phrase reachable from a conversation topic when its conditions are satisfied.",
+                WordWrappedMiniLabelStyle);
+            DrawAnswerDetails(answerTextProperty, hasConditionsProperty, conditionsProperty, "Return Answer");
+            EditorGUILayout.PropertyField(
+                nextPhraseProperty,
+                new GUIContent("Return Target", "The phrase shown after the player leaves the conversation topic branch."));
+            EditorGUILayout.EndVertical();
+        }
+
+        private void DrawDialogueExitActionSettings(SerializedProperty exitAnswerProperty)
+        {
+            if (exitAnswerProperty == null)
+            {
+                EditorGUILayout.HelpBox("Dialogue exit answer property was not found.", MessageType.Error);
+                return;
+            }
+
+            SerializedProperty answerTextProperty = exitAnswerProperty.FindPropertyRelative("text");
+            SerializedProperty hasConditionsProperty = exitAnswerProperty.FindPropertyRelative("hasConditions");
+            SerializedProperty conditionsProperty = exitAnswerProperty.FindPropertyRelative("conditions");
+            SerializedProperty continueForcedDialogueAfterExitProperty = exitAnswerProperty.FindPropertyRelative("continueForcedDialogueAfterExit");
+
+            EditorGUILayout.Space(2f);
+            EditorGUILayout.BeginVertical(HelpBoxStyle);
+            EditorGUILayout.LabelField(
+                "This answer ends the dialogue through the normal dialogue-exit lifecycle. It is added automatically at regular choice points and when no other answer is available.",
+                WordWrappedMiniLabelStyle);
+            DrawAnswerDetails(answerTextProperty, hasConditionsProperty, conditionsProperty, "Exit Answer");
+            if (continueForcedDialogueAfterExitProperty != null)
+            {
+                EditorGUILayout.PropertyField(
+                    continueForcedDialogueAfterExitProperty,
+                    new GUIContent("Continue Forced Dialogue After Exit"));
+            }
+
+            EditorGUILayout.EndVertical();
         }
 
         private void DrawQuestPhraseSettings(SerializedProperty questAnswerProperty)
@@ -5057,6 +5300,21 @@ namespace Dialogs.Graph.Editor
                     }
                 }
 
+                foreach (DialogAnswer navigationAnswer in new[]
+                         {
+                             node.Phrase.QuestAnswer,
+                             node.Phrase.ConversationAnswer,
+                             node.Phrase.ConversationReturnAnswer,
+                             node.Phrase.DialogueExitAnswer
+                         })
+                {
+                    if (navigationAnswer != null && navigationAnswer.NextPhrase == oldPhrase)
+                    {
+                        navigationAnswer.SetNextPhrase(newPhrase);
+                        phraseChanged = true;
+                    }
+                }
+
                 if (phraseChanged)
                 {
                     MarkDirty(node.Phrase);
@@ -5094,6 +5352,21 @@ namespace Dialogs.Graph.Editor
                 return QuestNodeTint;
             }
 
+            if (node.Phrase.IsConversationTopic)
+            {
+                return new Color(0.72f, 0.86f, 0.76f);
+            }
+
+            if (node.Phrase.IsConversationReturnAction)
+            {
+                return new Color(0.76f, 0.82f, 0.94f);
+            }
+
+            if (node.Phrase.IsDialogueExitAction)
+            {
+                return new Color(0.94f, 0.76f, 0.76f);
+            }
+
             if (IsOrphanPhrase(node.Phrase))
             {
                 return OrphanNodeTint;
@@ -5118,6 +5391,21 @@ namespace Dialogs.Graph.Editor
             if (node.Phrase.IsQuestPhrase)
             {
                 prefix += "[Quest] ";
+            }
+
+            if (node.Phrase.IsConversationTopic)
+            {
+                prefix += "[Topic] ";
+            }
+
+            if (node.Phrase.IsConversationReturnAction)
+            {
+                prefix += "[Return] ";
+            }
+
+            if (node.Phrase.IsDialogueExitAction)
+            {
+                prefix += "[Exit] ";
             }
 
             return prefix + GetCachedPhraseDisplayName(node.Phrase);
