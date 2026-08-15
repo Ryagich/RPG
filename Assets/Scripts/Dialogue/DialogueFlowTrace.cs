@@ -200,7 +200,7 @@ namespace Dialogue
                     DialogAnswerConditionType.TakeMoneyMax => $"{condition.Type}(money={condition.MoneyAmount})",
                 DialogAnswerConditionType.TakeItemIfHas =>
                     $"{condition.Type}(item={ObjectName(condition.ItemConfig)}, count={condition.ItemCount})",
-                DialogAnswerConditionType.AddQuest or DialogAnswerConditionType.CheckQuestStep or
+                DialogAnswerConditionType.AddQuest or DialogAnswerConditionType.CanAddQuest or DialogAnswerConditionType.CheckQuestStep or
                     DialogAnswerConditionType.DoQuestStep or DialogAnswerConditionType.DoQuestEnd =>
                     $"{condition.Type}(quest={ObjectName(condition.QuestGraph)}, node={ObjectName(condition.QuestNode)}, " +
                     $"sourceNode={ObjectName(condition.QuestSourceNode)}, transition={ObjectName(condition.QuestTransition)})",

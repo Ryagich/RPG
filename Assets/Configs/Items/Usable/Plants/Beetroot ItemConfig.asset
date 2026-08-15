@@ -19,19 +19,19 @@ MonoBehaviour:
   <Icon>k__BackingField: {fileID: 21300000, guid: c783cfc2a3fe28e42af049353c08fcbb, type: 3}
   <Name>k__BackingField:
     m_TableReference:
-      m_TableCollectionName: Tables
+      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
-      m_KeyId: 0
-      m_Key: Null String
+      m_KeyId: 83000000000000003
+      m_Key:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
   <Description>k__BackingField:
     m_TableReference:
-      m_TableCollectionName: Tables
+      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
-      m_KeyId: 0
-      m_Key: Null String
+      m_KeyId: 83000000000000004
+      m_Key:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []

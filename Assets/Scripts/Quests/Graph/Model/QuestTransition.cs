@@ -13,12 +13,14 @@ namespace Quests.Graph.Model
         [SerializeField] private List<QuestResourceEntry> conditions = new();
         [SerializeField] private bool hasResults;
         [SerializeField] private List<QuestResourceEntry> results = new();
+        [SerializeField] private bool executeAutomaticallyWhenAvailable;
 
         public QuestNodeData TargetNode => targetNode;
         public bool HasConditions => hasConditions;
         public List<QuestResourceEntry> Conditions => conditions;
         public bool HasResults => hasResults;
         public List<QuestResourceEntry> Results => results;
+        public bool ExecuteAutomaticallyWhenAvailable => executeAutomaticallyWhenAvailable;
 
         public void SetTargetNode(QuestNodeData nodeData)
         {

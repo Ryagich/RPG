@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cab1eab763ecf6f4c96f41d14656eb42, type: 3}
+  m_Name: Guard Captain - Ask About Surroundings
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.Model.DialogPhrase
+  text: {m_TableReference: {m_TableCollectionName: 'GUID:bf30f5dd6628f424e86623c160908482'}, m_TableEntryReference: {m_KeyId: 77000000000000002, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+  alternativeTexts: []
+  isForcedDialoguePhrase: 0
+  forcedDialoguePriority: 0
+  restoresExitAbility: 0
+  isQuestPhrase: 0
+  isConversationTopic: 1
+  conversationAnswer: {text: {m_TableReference: {m_TableCollectionName: 'GUID:bf30f5dd6628f424e86623c160908482'}, m_TableEntryReference: {m_KeyId: 77000000000000001, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}, nextPhrase: {fileID: 0}, hasConditions: 0, conditions: []}
+  isConversationReturnAction: 0
+  isDialogueExitAction: 0
+  answers:
+  - text: {m_TableReference: {m_TableCollectionName: 'GUID:bf30f5dd6628f424e86623c160908482'}, m_TableEntryReference: {m_KeyId: 77000000000000003, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: ebbb75f640814d178d94fc2fefa43973, type: 2}
+    hasConditions: 0
+    conditions: []
+  - text: {m_TableReference: {m_TableCollectionName: 'GUID:bf30f5dd6628f424e86623c160908482'}, m_TableEntryReference: {m_KeyId: 77000000000000007, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: a74db969b30b4f22bc476259c4e23640, type: 2}
+    hasConditions: 0
+    conditions: []
+  - text: {m_TableReference: {m_TableCollectionName: 'GUID:bf30f5dd6628f424e86623c160908482'}, m_TableEntryReference: {m_KeyId: 77000000000000011, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: 3bfe214afdce49c0a0d6ad417ad52722, type: 2}
+    hasConditions: 0
+    conditions: []
+  - text: {m_TableReference: {m_TableCollectionName: 'GUID:bf30f5dd6628f424e86623c160908482'}, m_TableEntryReference: {m_KeyId: 77000000000000015, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: 144bff53106348469bd5706f6b98da95, type: 2}
+    hasConditions: 0
+    conditions: []
+  - text: {m_TableReference: {m_TableCollectionName: 'GUID:bf30f5dd6628f424e86623c160908482'}, m_TableEntryReference: {m_KeyId: 77000000000000019, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: 4f93324c0c9b4f38a29d8717344cc670, type: 2}
+    hasConditions: 0
+    conditions: []
+  - text: {m_TableReference: {m_TableCollectionName: 'GUID:bf30f5dd6628f424e86623c160908482'}, m_TableEntryReference: {m_KeyId: 78000000000000026, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: b200000000000000000000000000000a, type: 2}
+    hasConditions: 0
+    conditions: []
+  references: {version: 2, RefIds: []}

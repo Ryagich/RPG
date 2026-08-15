@@ -59,7 +59,7 @@ MonoBehaviour:
   inventoryConfig: {fileID: 0}
   defaultVisualConfig: {fileID: 11400000, guid: d06f3e2d4c1b7256a789abcdef012345, type: 2}
   faction: {fileID: 0}
-  itemSetConfig: {fileID: 11400000, guid: adbff949038a5de4fa9428f0a9e5ed1d, type: 2}
+  itemSetConfig: {fileID: 11400000, guid: b4813f0f05057d94690c04ed980b855f, type: 2}
   corpseInteractionRadius: 1.8
 --- !u!143 &8919774632917513484
 CharacterController:

@@ -95,4 +95,18 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: e53170a118bd4a5f8d3eb58f3dd830bc, type: 2}
   - Position: {x: 3000, y: 2460}
     Phrase: {fileID: 11400000, guid: 5caafbdc75e943f2a59bca1bbbf9a2c1, type: 2}
+  - Position: {x: 2600, y: 2700}
+    Phrase: {fileID: 11400000, guid: e1000000000000000000000000000001, type: 2}
+  - Position: {x: 3000, y: 2700}
+    Phrase: {fileID: 11400000, guid: e1000000000000000000000000000002, type: 2}
+  - Position: {x: 3400, y: 2700}
+    Phrase: {fileID: 11400000, guid: e1000000000000000000000000000003, type: 2}
+  - Position: {x: 3000, y: 3000}
+    Phrase: {fileID: 11400000, guid: e1000000000000000000000000000004, type: 2}
+  - Position: {x: 3400, y: 3000}
+    Phrase: {fileID: 11400000, guid: e1000000000000000000000000000005, type: 2}
+  - Position: {x: 2600, y: 3200}
+    Phrase: {fileID: 11400000, guid: e1000000000000000000000000000007, type: 2}
+  - Position: {x: 3000, y: 3200}
+    Phrase: {fileID: 11400000, guid: e1000000000000000000000000000006, type: 2}
   <EntryPhrase>k__BackingField: {fileID: 11400000, guid: 89886865c12e7c147a89adf0209b7542, type: 2}

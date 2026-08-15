@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Inventory.Inventories;
 using Inventory.Item;
 using Money;
@@ -203,6 +204,34 @@ namespace Quests
             questProgress.SetCurrentNode(transition.TargetNode);
             Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Updated, questGraph));
             return true;
+        }
+
+        /// <summary>
+        /// Advances one authored automatic transition whose resource requirements are now met.
+        /// A single transition per evaluation prevents a malformed graph from looping forever;
+        /// the lifecycle service reevaluates after the emitted quest-change event.
+        /// </summary>
+        public bool TryExecuteAvailableAutomaticTransition()
+        {
+            foreach (QuestProgress questProgress in progress.ToArray())
+            {
+                if (questProgress is { IsCompleted: true } || questProgress.CurrentNode?.Transitions == null)
+                {
+                    continue;
+                }
+
+                foreach (QuestTransition transition in questProgress.CurrentNode.Transitions)
+                {
+                    if (transition != null &&
+                        transition.ExecuteAutomaticallyWhenAvailable &&
+                        TryExecuteTransition(questProgress.QuestGraph, transition))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         public bool CanCompleteNode(QuestGraph questGraph, QuestNodeData nodeData)

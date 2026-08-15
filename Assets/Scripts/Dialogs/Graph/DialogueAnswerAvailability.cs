@@ -94,6 +94,7 @@ namespace Dialogs.Graph
 
                         break;
                     case DialogAnswerConditionType.AddQuest:
+                    case DialogAnswerConditionType.CanAddQuest:
                         if (!questController.CanAddQuest(condition.QuestGraph))
                         {
                             return false;

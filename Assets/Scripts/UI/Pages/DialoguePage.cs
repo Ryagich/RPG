@@ -379,6 +379,14 @@ namespace UI.Pages
 
                         DialogueFlowTrace.ConditionApplied(condition);
                         break;
+                    case DialogAnswerConditionType.CanAddQuest:
+                        if (!questController.CanAddQuest(condition.QuestGraph))
+                        {
+                            return false;
+                        }
+
+                        DialogueFlowTrace.ConditionApplied(condition);
+                        break;
                     case DialogAnswerConditionType.DoQuestStep:
                         if (!questController.TryExecuteTransition(condition.QuestGraph, condition.QuestTransition))
                         {

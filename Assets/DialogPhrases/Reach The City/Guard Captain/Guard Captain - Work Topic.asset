@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cab1eab763ecf6f4c96f41d14656eb42, type: 3}
+  m_Name: Guard Captain - Work Topic
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.Model.DialogPhrase
+  text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 78000000000000002, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+  alternativeTexts: []
+  isForcedDialoguePhrase: 0
+  forcedDialoguePriority: 0
+  restoresExitAbility: 0
+  isQuestPhrase: 0
+  questAnswer: {text: {m_TableReference: {m_TableCollectionName: }, m_TableEntryReference: {m_KeyId: 0, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}, nextPhrase: {fileID: 0}, forceExitAfterAnswer: 0, continueForcedDialogueAfterExit: 1, hasGameplayEvents: 0, gameplayEvents: [], hasConditions: 0, conditions: []}
+  isConversationTopic: 1
+  conversationAnswer: {text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 78000000000000001, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}, nextPhrase: {fileID: 0}, forceExitAfterAnswer: 0, continueForcedDialogueAfterExit: 1, hasGameplayEvents: 0, gameplayEvents: [], hasConditions: 0, conditions: []}
+  isConversationReturnAction: 0
+  conversationReturnAnswer: {text: {m_TableReference: {m_TableCollectionName: }, m_TableEntryReference: {m_KeyId: 0, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}, nextPhrase: {fileID: 0}, forceExitAfterAnswer: 0, continueForcedDialogueAfterExit: 1, hasGameplayEvents: 0, gameplayEvents: [], hasConditions: 0, conditions: []}
+  isDialogueExitAction: 0
+  dialogueExitAnswer: {text: {m_TableReference: {m_TableCollectionName: }, m_TableEntryReference: {m_KeyId: 0, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}, nextPhrase: {fileID: 0}, forceExitAfterAnswer: 0, continueForcedDialogueAfterExit: 1, hasGameplayEvents: 0, gameplayEvents: [], hasConditions: 0, conditions: []}
+  hasGameplayEvents: 0
+  gameplayEvents: []
+  answers:
+  - text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 78000000000000003, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: b2000000000000000000000000000002, type: 2}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 1
+    conditions:
+    - type: 12
+      moneyAmount: 0
+      itemConfig: {fileID: 0}
+      itemCount: 1
+      questGraph: {fileID: 11400000, guid: b3000000000000000000000000000001, type: 2}
+      questSourceNode: {fileID: 0}
+      questTransition: {fileID: 0}
+      questNode: {fileID: 0}
+      runtimeFlag: {fileID: 0}
+  - text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 78000000000000011, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: b2000000000000000000000000000006, type: 2}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 1
+    conditions:
+    - type: 12
+      moneyAmount: 0
+      itemConfig: {fileID: 0}
+      itemCount: 1
+      questGraph: {fileID: 11400000, guid: b3000000000000000000000000000002, type: 2}
+      questSourceNode: {fileID: 0}
+      questTransition: {fileID: 0}
+      questNode: {fileID: 0}
+      runtimeFlag: {fileID: 0}

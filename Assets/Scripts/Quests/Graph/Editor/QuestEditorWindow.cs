@@ -2093,6 +2093,7 @@ namespace Quests.Graph.Editor
             SerializedProperty conditionsProperty = transitionObject.FindProperty("conditions");
             SerializedProperty hasResultsProperty = transitionObject.FindProperty("hasResults");
             SerializedProperty resultsProperty = transitionObject.FindProperty("results");
+            SerializedProperty executeAutomaticallyWhenAvailableProperty = transitionObject.FindProperty("executeAutomaticallyWhenAvailable");
 
             if (hasConditionsProperty != null && conditionsProperty != null)
             {
@@ -2110,6 +2111,15 @@ namespace Quests.Graph.Editor
                 {
                     DrawQuestResourceEntries(resultsProperty, "Rewards/Penalties");
                 }
+            }
+
+            if (executeAutomaticallyWhenAvailableProperty != null)
+            {
+                EditorGUILayout.PropertyField(
+                    executeAutomaticallyWhenAvailableProperty,
+                    new GUIContent(
+                        "Advance Automatically When Available",
+                        "Executes this transition when its resource conditions become satisfied, without a dialogue selection."));
             }
 
             if (transitionObject.hasModifiedProperties)

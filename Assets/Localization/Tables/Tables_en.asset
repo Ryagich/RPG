@@ -801,6 +801,906 @@ MonoBehaviour:
   - m_Id: 75000000000000038
     m_Localized: "Return to the conversation."
     m_Metadata: {m_Items: []}
-  references:
+  - m_Id: 76000000000000001
+    m_Localized: "Do you have work for me?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000002
+    m_Localized: "There is always work to be done. First tell me what you have in mind."
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000003
+    m_Localized: "What is the simple request?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000004
+    m_Localized: "Apples. Not pies, not a barrel of cider—just apples. Ten. On the road, a sour apple clears the head better than half the advice in the world."
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000005
+    m_Localized: "All right. I will bring you ten apples."
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000006
+    m_Localized: "Good. Do not strip the last tree by somebody's house—I need apples, not another quarrel."
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000007
+    m_Localized: "And what is the matter with the man?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000008
+    m_Localized: "A smith used to live in the village, an old acquaintance. His hands are heavy and his tongue heavier, but he is dependable. I have had no word from him for a long while. Visit him if the road opens."
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000009
+    m_Localized: "All right. I will look for the smith."
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000010
+    m_Localized: "Tell him Oswin still remembers who shod his horse on credit. He will understand. If he pretends not to, he is alive and as stubborn as ever."
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000011
+    m_Localized: "I brought the apples. Exactly ten."
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000012
+    m_Localized: "Let me see... Good ones. Not a king's table, perhaps, but on the road even this feels like wealth. Thank you."
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000013
+    m_Localized: "Apples for Oswin"
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000014
+    m_Localized: "Oswin asked for ten apples."
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000015
+    m_Localized: "Gather ten apples"
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000016
+    m_Localized: "Gather ten apples for Oswin."
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000017
+    m_Localized: "Bring the apples to Oswin"
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000018
+    m_Localized: "You have ten apples. Return to Oswin."
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000019
+    m_Localized: "Oswin's old acquaintance"
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000020
+    m_Localized: "Oswin asks you to visit his acquaintance, a smith in the village."
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000021
+    m_Localized: "Find the smith"
+    m_Metadata: {m_Items: []}
+  - m_Id: 76000000000000022
+    m_Localized: "Reach the village and find the smith Oswin mentioned."
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000001
+    m_Localized: "What is going on around here?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000002
+    m_Localized: "Damp, empty roads, and folk who decided the law left with the travelers. Ask if you are not just filling the air."
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000003
+    m_Localized: "What is in the forest?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000004
+    m_Localized: "A forest is a forest. Only now a man with a bow hears you before a beast does. We led two men out not long ago: stepped off the road for a moment, then shouting and running. Found one. The forest kept the other."
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000005
+    m_Localized: "So there are bandits?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000006
+    m_Localized: "There are. They wait by the old forest road, where you cannot turn a cart around. They jump out, yell, spook the horse—and while you work out what happened, your purse is gone. Go alone only when you must. Not far, either."
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000007
+    m_Localized: "And the river?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000008
+    m_Localized: "The ford is quiet in daylight. At night, I cannot say. Saw the water buck like someone rolled a log in it. Then a boatman ran from the bank and left his oar behind. Big man, too."
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000009
+    m_Localized: "Can I cross it?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000010
+    m_Localized: "You can. In daylight, at the shallows, and without a suit of iron on you. Go into the reeds for herbs, keep your eyes open. A smart person reaches the bank first, then counts the flowers."
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000011
+    m_Localized: "What about the tavern?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000012
+    m_Localized: "Roof does not leak, stew is hot, and the owner remembers your change. That is enough. It used to roar by night; the watch cursed it. Quieter now. Better that way: a drunk with a knife is the same trouble, only he sings first."
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000013
+    m_Localized: "Why is it nearly empty?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000014
+    m_Localized: "Because the road is empty. Travelers are not fools: hear about beasts, bandits, and closed gates, and they turn off early. Without them, the tavern lives off locals. Locals do not have coin every night."
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000015
+    m_Localized: "What of the village by the road?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000016
+    m_Localized: "It was a decent village. Hardworking folk, mean enough to stop strangers climbing into their gardens. The road fed them: a broken cart meant work, a traveler stopping meant bread. Now there is neither."
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000017
+    m_Localized: "Is it safe to go there?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000018
+    m_Localized: "On the road, nowhere is safe. If you mean the people, do not walk into another man's yard with your hands in your pockets and act like a lord; they will speak to you. What it is like now, I cannot say. No one has come from there in a while."
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000019
+    m_Localized: "What is happening in the city?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000020
+    m_Localized: "The city has orders. People inside are dropping, healers are whispering, and the council has locked itself away. We hold the gate out here and listen to folk call us bastards. Rotten work, but someone has to do it."
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000021
+    m_Localized: "When will the gates open?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 77000000000000022
+    m_Localized: "When those above say so. I am no councilman, healer, or seer. My job is keeping folk out until the sickness decides the walls are too tight for it. I do not like it either."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000001
+    m_Localized: "Do you have any work?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000002
+    m_Localized: "I do. No heroics promised: mostly mud, other people's troubles, and a road that tries to charge you twice."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000003
+    m_Localized: "What happened at the mill?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000004
+    m_Localized: "The miller used to stop by the gate every few days: haggled over salt, cursed the prices, brought flour. He has been missing for two days. Men on watch grow sour quickly without fresh bread. Go and find out what is happening."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000005
+    m_Localized: "Why do you not go yourself?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000006
+    m_Localized: "Because all we have are watches. We are short-handed: one man is sick, two cannot leave the night shift, and a fourth has stood at the gate for two days. I was about to go to the mill myself - silence like this is more than a delay. Then you appeared. Find out what happened, and I will see you are rewarded."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000007
+    m_Localized: "All right. I will go to the mill."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000009
+    m_Localized: "Good. Do not play the hero: first see whether anyone is there, then decide whether to go inside. Return with what you learn."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000011
+    m_Localized: "What is the matter at the tavern?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000012
+    m_Localized: "The tavern on the road used to live by its noise. No one has come from there for a long while, not even for salt. The owner and his daughter kept the place well; if they are quiet, either trouble found them or they barred the door in fear. Go in and see whether they are all right."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000013
+    m_Localized: "Is this a guard matter or a personal one?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000014
+    m_Localized: "Both. An empty tavern on the road is a bad sign for everyone. And the owner's daughter... she knows how to keep her head above trouble. I would like to know whether she still can. Do not carry her more worries. Just find out how they are."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000015
+    m_Localized: "I will stop by the tavern and ask around."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000016
+    m_Localized: "Thank you. Do not demand an account from them as if they were soldiers. See what you can, speak to them as people, and come back with word."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000018
+    m_Localized: "The Mill Is Silent"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000019
+    m_Localized: "The captain of the city guard asks you to learn why the miller has not appeared at the gate for two days."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000020
+    m_Localized: "Check the mill"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000021
+    m_Localized: "Reach the mill and learn what happened to the miller."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000022
+    m_Localized: "News from the Tavern"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000023
+    m_Localized: "The captain of the city guard asks you to learn whether the tavern owner and his daughter are safe."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000024
+    m_Localized: "Visit the tavern"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000025
+    m_Localized: "Reach the tavern on the road and learn what is happening there."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000026
+    m_Localized: "And you? Tell me about yourself."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000027
+    m_Localized: "Me? A ditch, if we are being honest. I was left by the road as a boy. First I begged from yards, then I took what was left lying about. Not because I had a taste for it - an empty belly persuades better than any clever man."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000028
+    m_Localized: "And how did you end up in the guard?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000029
+    m_Localized: "I grew up and learned I was a poor thief, and I was tired of running from a stick. Then things went bad: roads emptied, people ran short. They took anyone who could hold a spear and not run on the first night. I stayed. The work is rotten, but I do it right. I do not take what is not mine, I do not kick the weak, I keep my word. That is all I have to my name."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000030
+    m_Localized: "Leather Traveller's Doublet"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000031
+    m_Localized: "A doublet of plain tanned leather, worn over a shirt for travel and work. It will not make anyone a soldier, but it keeps wet grass, straps, and road dust from ruining the clothes beneath. Any tanner can mend its seams, and scuffs are no disgrace on leather like this. Such things are valued not for finery, but because one can put them on again in the morning and keep going."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000032
+    m_Localized: "Chaperon with a Red Feather"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000033
+    m_Localized: "A chaperon for someone who spends the day in the wind but does not wish to hide their face beneath a hood. The red feather is a noticeable yet inexpensive attempt to look like a person of standing; everything else about it serves the road. It leaves its wearer free to listen, speak, and look about, which matters more on a journey than fashion. It would not do for a reception, but at a gate, market, or in the saddle it surprises no one."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000034
+    m_Localized: "Traveller's Trousers"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000035
+    m_Localized: "Trousers made for work, not for a chest. Their sturdy cloth and loose cut let the wearer sit in the saddle, haul crates, or stand watch for hours. Knees and seams matter more here than a pattern: the garment will be washed often, dried by a fire, and mended in haste. A good owner does not leave trousers like these idle; they are worn down to the last patch."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000036
+    m_Localized: "Wrapped Boots"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000037
+    m_Localized: "A pair of rough leather boots for anyone who measures the road on foot. Their tall shafts keep mud and thorns away from the clothes, while dense soles endure stones, gravel, and roots. No one spares them: they are dried by the fire, rubbed with grease, and sent back into the rain. While the soles hold, the boots honestly earn their price."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000038
+    m_Localized: "Quilted Bracers"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000039
+    m_Localized: "Simple forearm protection for times when the hands must remain free. Quilted cloth softens a glancing blow, keeps a shield strap from chafing, and protects the arms from rough work; leather fastenings keep the bracers from slipping. They are no replacement for full plate gauntlets, but neither do they cost like a knight's gear. Such things are worn not for appearance, but when the day may end in scraped skin or a fight."
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000040
+    m_Localized: "Longsword with a Brass Guard"
+    m_Metadata: {m_Items: []}
+  - m_Id: 78000000000000041
+    m_Localized: "A well-balanced sword made by a skilled but uncelebrated smith. The blade answers readily in the hand, its brass guard bears no ostentatious carving, and the pommel is set so the weapon does not dip forward in a strike. Every coin of its price pays for steel and workmanship, not a famous name. Lesser nobles and people in office choose such weapons: they need a dependable blade for years, not an heirloom for a ceremonial belt. With proper care, it will outlast more than one owner."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000001
+    m_Localized: "Leather Shoulder Strap"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000002
+    m_Localized: "A broad leather strap runs from shoulder to belt over a shirt. It keeps a back load steady, and its oil-darkened seams are easy to mend on the road."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000003
+    m_Localized: "Strapped Travel Vest"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000004
+    m_Localized: "This short vest of heavy leather is made from overlapping pieces and drawn tight with straps. It is not elegant, but it stays in place when its wearer bends over goods or climbs a slope."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000005
+    m_Localized: "Cross-Laced Leather Vest"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000006
+    m_Localized: "A leather vest over a light shirt is tightened across the chest with broad crossed straps. Its fit can be adjusted without a tailor, while the straps take most of the road dust and scratches."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000007
+    m_Localized: "Double-Breasted Leather Vest"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000008
+    m_Localized: "A fitted leather vest with two rows of fasteners and pale trim is sewn more neatly than common road wear. It looks proper over a clean shirt, and worn edges can still be renewed with wax after long use."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000009
+    m_Localized: "Wrap-Front Work Tunic"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000010
+    m_Localized: "A light tunic with a wrapped front, broad sash, and leather strap. Its loose cut does not hinder a reach for tools, while the sash keeps the cloth from catching on everything nearby."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000011
+    m_Localized: "Travel Jacket with Shoulder Strap"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000012
+    m_Localized: "A brown travel jacket is worn over a white shirt and held with belts. The diagonal strap steadies a load, while the firm waist belt keeps the fronts from opening in the wind."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000013
+    m_Localized: "Shirt with Travel Strap"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000014
+    m_Localized: "A light shirt with a dark breast panel, shoulder strap, and belt looks modest but orderly. It suits someone who does not dress as a warrior yet likes to keep necessities close at hand."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000015
+    m_Localized: "Tunic with a Pale Shoulder Strap"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000016
+    m_Localized: "A brown tunic with a broad pale shoulder strap and narrow trim at the hem. Its material tolerates road dust and is ready for use again after drying by the fire."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000017
+    m_Localized: "Tunic with Crossed Straps"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000018
+    m_Localized: "A light tunic sits beneath two broad leather straps that cross at the chest. They hold the clothing closer to the body and keep a travelling load's straps from slipping off the shoulders."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000019
+    m_Localized: "Wrap-Front Vest"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000020
+    m_Localized: "A muted green vest has a wrapped front, broad sash, and dark shoulder trim. Its overlapping layers resist the wind and suggest clothing repaired rather than replaced after a season."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000021
+    m_Localized: "Patterned Travel Mantle"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000022
+    m_Localized: "A loose mantle has dark trim, a pale geometric pattern, and a strap over one shoulder. The pattern remains visible through road dust, while the strap fastens the garment closer when the weather turns."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000023
+    m_Localized: "Leather Shoulder Mantle"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000024
+    m_Localized: "A short leather mantle covers the shoulders and upper chest without impeding the arms. Side fasteners and a broad belt keep it secure over a plain shirt on the road or at work."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000025
+    m_Localized: "Buckle-Fastened Travel Jacket"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000026
+    m_Localized: "A grey travel jacket closes with two broad straps and another belt at the waist. Its buckles are left visible, so they can be checked and tightened without taking the garment off."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000027
+    m_Localized: "Open-Front Vest"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000028
+    m_Localized: "A dark vest with an open front, pale trim, and broad belt gathers at the waist. The open front leaves room for a shirt or light protection beneath, and the garment is not too precious for ordinary work."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000029
+    m_Localized: "Reinforced Panel Vest"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000030
+    m_Localized: "A fitted vest is assembled from dark and light panels crossed by firm reinforcing bands. They preserve its shape after long wear, so the price pays for fit and service life rather than shine."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000031
+    m_Localized: "Plain Work Shirt"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000032
+    m_Localized: "A loose grey shirt with a leather belt and short shoulder straps leaves the back unrestricted. Work marks show quickly, but it is easy to wash, dry, and wear again the next morning."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000033
+    m_Localized: "Tunic with a Blue Sash"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000034
+    m_Localized: "An understated tunic has a diagonal leather strap and broad blue sash. The strap eases one shoulder, while the dense waist cloth protects the garment from a belt's constant rubbing."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000035
+    m_Localized: "Layered Tunic"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000036
+    m_Localized: "A light tunic of overlapping layers has a high collar and dark chest panel. Its outer cloth protects the shirt beneath from wind and dust, while the folds keep it neat without ornament."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000037
+    m_Localized: "Tunic with Crossed Shoulder Straps"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000038
+    m_Localized: "A light tunic bears broad brown straps that meet at the chest. They hold the front panels and spread the weight of a back load; its darkened hem speaks of regular travel."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000039
+    m_Localized: "Light Shirt with a Broad Belt"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000040
+    m_Localized: "A light linen shirt with short shoulder straps and a broad leather belt leaves the arms free. The belt conveniently carries a purse, sheath, or small tool instead of dragging at pockets."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000041
+    m_Localized: "Travel Mantle with Broad Strap"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000042
+    m_Localized: "A layered mantle with a broad leather strap and dark breast cloth gathers several fabrics into one outer garment. Shoulders are covered, the fastener is close at hand, and the waist stays free for quick departures."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000043
+    m_Localized: "Mantle with a Beast Head"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000044
+    m_Localized: "A pale mantle with a large beast head at the chest and simple leather belt catches the eye at once. Its cut remains practical: a hunting memory to some, and a sign of life beyond city walls to others."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000045
+    m_Localized: "Plain Sleeveless Tunic"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000046
+    m_Localized: "A straight light tunic with narrow dark neck trim and a broad belt needs little care. Open shoulders suit warm work, while its long hem keeps dust off the clothing beneath."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000047
+    m_Localized: "High-Collared Layered Jacket"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000048
+    m_Localized: "A light layered jacket with a high collar and dark trim is closely gathered at the chest. Its panels stay neat on a damp day and suggest an owner who values order without needless luxury."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000049
+    m_Localized: "Mantle with Shoulder Panels"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000050
+    m_Localized: "A light mantle with dense shoulder panels and broad cloth bands covers the upper body without heavy sleeves. Its plain waist fastening shows that it was made for regular wear, not a formal reception."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000051
+    m_Localized: "Travel Shirt with Wrapped Strap"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000052
+    m_Localized: "A light travel shirt with dark cloth over one shoulder and a broad leather strap is assembled from easily replaced parts. Bands of fabric beneath the straps protect the shirt from rubbing and add warmth in cool weather."
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000053
+    m_Localized: "Open Leather Jacket"
+    m_Metadata: {m_Items: []}
+  - m_Id: 79000000000000054
+    m_Localized: "A short leather jacket is worn open over a light shirt and drawn together at the chest with thin ties. Its open front does not constrain breathing, while dense fronts shelter the shoulders from wind on an ordinary day on foot."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000001
+    m_Localized: "Three-Panel Hip Mantle"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000002
+    m_Localized: "Three dense panels meet at the belt and cover the hips over the main clothing. Pale patches at their ends make the piece more visible, but its purpose is simple: the cloth takes dirt and rubbing before they reach the trousers."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000003
+    m_Localized: "Trousers with Side Panels"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000004
+    m_Localized: "Dark trousers are fitted with pale side panels and narrow thigh straps. The pieces cover the areas that rub most and make the garment look more orderly than an ordinary work pair."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000005
+    m_Localized: "Trousers with Long Side Flaps"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000006
+    m_Localized: "Straight dark trousers are covered at the sides by long pale flaps, with a leather strap fixed at one thigh. The cut leaves the stride free without exposing the clothing entirely to wind and road dirt."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000007
+    m_Localized: "Split Hip Mantle"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000008
+    m_Localized: "A long pale mantle opens at the front and sides, leaving the dark trousers beneath visible. Held by a belt, it gives outer clothing length without the weight of a solid skirt."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000009
+    m_Localized: "Long Open Mantle"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000010
+    m_Localized: "A light open mantle nearly covers the trousers and is held by a narrow thigh strap. Its fronts part easily while walking, and pale trim keeps it from becoming a featureless road rag."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000011
+    m_Localized: "Short Mantle with Shoulder Strap"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000012
+    m_Localized: "A short light mantle is gathered above the trousers and crossed by a broad leather strap. The strap holds the panels in place and provides a useful point for securing a small load."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000013
+    m_Localized: "Side Panels with Pale Trim"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000014
+    m_Localized: "Two dark panels at the sides of the trousers are edged in pale cloth and part with each step. It lightly covers the legs without collecting as much dirt as a long mantle."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000015
+    m_Localized: "Plain Hip Skirt"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000016
+    m_Localized: "A plain brown hip skirt without fasteners or trim. It can be worn over any trousers, and its even cut is easier to mend than elaborate pieces with straps and panels."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000017
+    m_Localized: "Split Travel Skirt"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000018
+    m_Localized: "A long brown skirt opens at the front, keeping the legs free for walking. Pale edge trim and a side strap give it more neatness than road wear usually receives."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000019
+    m_Localized: "Asymmetrical Mantle with Patterned Panel"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000020
+    m_Localized: "A long mantle almost fully covers one thigh while leaving the other in a short panel. A dark patterned insert shows beneath it, not as parade decoration but to keep the garment recognisable among similar ones."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000021
+    m_Localized: "Short Side Flaps"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000022
+    m_Localized: "Pale side flaps lie over wide dark trousers and end above the knee. They add a layer in cool weather without hindering movement where a long skirt would catch on the ground."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000023
+    m_Localized: "Striped Hip Mantle"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000024
+    m_Localized: "Long side panels frame dark central cloth and meet in a pointed apron. Pale trim and a subdued pattern make the piece noticeable while keeping it fit for everyday wear."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000025
+    m_Localized: "Trousers with Thigh Panels"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000026
+    m_Localized: "Dark trousers are reinforced with large brown side panels at the thighs and held by straps. This cut suits work where clothing constantly rubs against a saddle, bench, or heavy load."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000027
+    m_Localized: "Plain Dark Trousers"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000028
+    m_Localized: "Wide dark trousers without straps, inserts, or showy trim. Their value is a straightforward cut: nothing pulls, rattles, or demands a rare replacement clasp."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000029
+    m_Localized: "Mantle with Leg Bands"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000030
+    m_Localized: "A light layered mantle falls in a pointed panel between the legs, while pale bands are fixed around the trousers. The details hold the cloth closer to the body and keep it from bunching during long walks."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000031
+    m_Localized: "Layered Apron with Side Flaps"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000032
+    m_Localized: "A light apron with a dark geometric pattern covers the front of the hips, while broad side panels sweep back. It looks more involved than a simple skirt, yet its seams and fastenings remain visible and easy to repair."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000033
+    m_Localized: "Patterned Short Skirt"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000034
+    m_Localized: "A short dark skirt with a repeating geometric pattern sits over plain trousers. It barely hinders a stride and adds visual interest without heavy embroidery or costly trim."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000035
+    m_Localized: "Split Apron"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000036
+    m_Localized: "A brown apron hangs from the waist in a pointed panel and leaves the trousers free at the sides. Dense side pieces cover the hips without turning the outfit into a long, awkward skirt."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000037
+    m_Localized: "Hip Panel with Apron"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000038
+    m_Localized: "A pale apron is fixed between dark side panels and covers the front of the hips. Contrasting layers separate the working parts of the clothing, so the belt can be tightened without disturbing the main cloth."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000039
+    m_Localized: "Long Apron with Side Panels"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000040
+    m_Localized: "A narrow brown apron with pale trim falls almost to the knees, while light side panels protect the hips. Belts gather the piece at the waist, and it looks made for frequent rather than careful wear."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000041
+    m_Localized: "Trousers with a Side Panel"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000042
+    m_Localized: "Dark trousers are fitted with one pale side panel secured by a thigh strap. The asymmetry is practical: protection and an extra layer sit only where they are actually needed."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000043
+    m_Localized: "Hip Guard with Front Panel"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000044
+    m_Localized: "A long front panel of pale edging and dense brown cloth is supported by a broad piece at the belt. It shields the front of the hips from straps and gear while staying narrow enough for a free stride."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000045
+    m_Localized: "Long Waist Apron"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000046
+    m_Localized: "A broad brown panel with pale trim hangs from the belt almost to the knees. Simple in shape, it lengthens the silhouette and keeps splashes, dust, and constant rubbing off the trousers."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000047
+    m_Localized: "Striped Hip Skirt"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000048
+    m_Localized: "A light hip skirt is made from broad vertical panels and drawn in by two dark belts. Even strips of cloth hold its shape, while the belts allow adjustment without elaborate lacing."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000049
+    m_Localized: "Mantle with Dark Front Insert"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000050
+    m_Localized: "A brown mantle parts at the sides around a pale front insert with dark edging. Short slits keep the knees free, making it suited to walking rather than merely standing still."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000051
+    m_Localized: "Striped Mantle with Pendants"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000052
+    m_Localized: "Long pale panels are crossed by brown stripes, and three small pendants hang above the trousers. They enliven the belt without impeding movement or turning the whole garment into heavy ornament."
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000053
+    m_Localized: "Long Mantle with Triple Fringe"
+    m_Metadata: {m_Items: []}
+  - m_Id: 80000000000000054
+    m_Localized: "Long striped panels frame the hips, while three pointed pendants hang above the trousers. The fringe is noticeable in motion but stays above the knees and does not hinder travel."
+    m_Metadata: {m_Items: []}
+  - m_Id: 81000000000000001
+    m_Localized: "Mass-Produced Sword"
+    m_Metadata: {m_Items: []}
+  - m_Id: 81000000000000002
+    m_Localized: "A plain production-forged sword with a straight blade, broad crossguard, and leather grip. It is made in large batches to a single pattern, keeping the price low; for that price, it is an honest choice. The steel leaves no room for fine work, and its balance will not please a practiced fencer: the hand tires sooner in a long fight. Still, the blade is soundly assembled, takes an edge well enough, and does the job for which it is bought. It is chosen by people who need a real weapon now rather than years of saving for a master's work."
+    m_Metadata: {m_Items: []}
+  - m_Id: 82000000000000001
+    m_Localized: "Bracers with Diamond Studs"
+    m_Metadata: {m_Items: []}
+  - m_Id: 82000000000000002
+    m_Localized: "Pale layered bracers cover the forearms, while brown leather sections are held by straps and marked with diamond-shaped studs. Their assembled cut leaves the elbows free and allows a damaged strap to be replaced without taking the whole piece apart."
+    m_Metadata: {m_Items: []}
+  - m_Id: 82000000000000003
+    m_Localized: "Long Dark Gloves"
+    m_Metadata: {m_Items: []}
+  - m_Id: 82000000000000004
+    m_Localized: "Long dark gloves cover the hands and part of the forearms while leaving the fingers normally mobile. Their simple cut protects against dirt, straps, and cold iron without making work with small objects a misery."
+    m_Metadata: {m_Items: []}
+  - m_Id: 82000000000000005
+    m_Localized: "Leather Mitts with Pale Wraps"
+    m_Metadata: {m_Items: []}
+  - m_Id: 82000000000000006
+    m_Localized: "Brown leather mitts are finished with pale wrist wraps and two diamond studs on the back of each hand. They look sturdier than common gloves and stay secure where a wearer must often pull a strap or grip a handle."
+    m_Metadata: {m_Items: []}
+  - m_Id: 82000000000000007
+    m_Localized: "High Greaves with Pale Plates"
+    m_Metadata: {m_Items: []}
+  - m_Id: 82000000000000008
+    m_Localized: "High greaves combine a dark base, pale shin plates, and dense foot sections. The pointed edge protects the front of the leg, while the simple transition into the footwear avoids the need for a separate elaborate clasp."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000001
+    m_Localized: "Red Apple"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000002
+    m_Localized: "A large apple with firm skin and a short stem. It is valued less for refinement than for the little sweetness, moisture, and vigour it gives on the road; orchard keepers say a good apple should crunch before a traveller has time to complain about the journey. Keep it at the top of a bag, for bruises darken it faster than they spoil its taste."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000003
+    m_Localized: "Beetroot"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000004
+    m_Localized: "A dark-red root pulled from the earth with its coarse greens still attached. It does not quench thirst as generously as fresh fruit, but keeps well in cool storage and gives strength after a lean road. Cooks value its mild sweetness, while washerwomen dislike the juice that stains fingers and cloth."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000005
+    m_Localized: "Broccoli"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000006
+    m_Localized: "A dense green head on a pale stalk, cut before its small buds open. It looks unusual among travelling stores, yet does not wilt on the first day and gives the body more than its modest flavour promises. Old gardeners plant it at the edge of a bed; they say the colder the night, the more honest its bitterness becomes."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000007
+    m_Localized: "Carrot"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000008
+    m_Localized: "A long orange root with short green tops and a trace of soil at its base. It does not leak in a bag, needs no fire, and survives travel better than tender fruit, so people often shove one into a pocket before leaving without a thought. The sweeter the root, the more carefully it is hidden from horses and children."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000009
+    m_Localized: "Red Tomato"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000010
+    m_Localized: "A ripe tomato, heavy with juice and still held by a short green stem. It quickly returns moisture to a weary traveller, but takes rough treatment badly: put it at the bottom of a bag and you get a red stain instead of provisions. Markets sell them early, before the sun can make the skin slack."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000011
+    m_Localized: "Chamomile"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000012
+    m_Localized: "White chamomile heads with yellow centres are gathered in dry weather before the petals brown. Field herbalists dry them for a mild infusion and count it as first help for fatigue, unease, and small roadside troubles; it restores a little strength rather than replacing proper treatment. Old notes call it the quiet herb: it works no miracles, but is seldom unwanted in a bag."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000013
+    m_Localized: "Red Chrysanthemums"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000014
+    m_Localized: "Dense reddish chrysanthemum heads remain on the stem longer than many field flowers. Their sharp scent turns away some insects, and crushed petals are used in travelling poultices for tired skin and shallow scrapes; this accounts for the flower's noticeable restorative effect. A fresh branch is not tossed into a pot without thought: to herbalists it is medicinal material, not common greens."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000015
+    m_Localized: "Larkspur"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000016
+    m_Localized: "Its tall stem of cool purple flowers can be seen from far away, but must be handled with care. Herbals list larkspur as strong and dangerous material: a knowledgeable healer uses only a small prepared portion in an external mixture that can restore strength after a bruise. Chewing the flower or throwing it into travel tea is a habit for which the foolish pay with their health."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000017
+    m_Localized: "Yellow Lupine"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000018
+    m_Localized: "A slender lupine raises yellow flowers one above another over broad leaves. Apothecaries value it only after careful preparation: a properly made extract goes into strong external compounds and explains why the plant noticeably aids recovery. Lupine is neither eaten raw nor brewed as tea; its bitterness is a warning, not a flavour."
+    m_Metadata: {m_Items: []}
+  - m_Id: 84000000000000001
+    m_Localized: "Travelling Pack with Blanket"
+    m_Metadata: {m_Items: []}
+  - m_Id: 84000000000000002
+    m_Localized: "A roomy olive pack of sturdy cloth: a rolled blanket is strapped to its upper frame, with extra bundles secured at the sides and bottom. Broad leather straps run over the entire load and keep it from coming apart on the trail. This is the pack for a long road, when a traveller must carry their own night shelter and capacity matters more than comfort in a narrow alley."
+    m_Metadata: {m_Items: []}
+  - m_Id: 84000000000000003
+    m_Localized: "Buckle-Fastened Road Pack"
+    m_Metadata: {m_Items: []}
+  - m_Id: 84000000000000004
+    m_Localized: "A tidy rectangular pack of sturdy cloth, closed by two broad leather straps. Each bears a pale metal buckle; the side flaps hold their shape and shield the contents from road dust. The piece looks modest, but its seams are even: it is chosen by those who carry supplies every day and prefer straps that outlast fine words."
+    m_Metadata: {m_Items: []}
+  - m_Id: 85000000000000001
+    m_Localized: "Beaked Mask"
+    m_Metadata: {m_Items: []}
+  - m_Id: 85000000000000002
+    m_Localized: "This dark face mask is assembled into an extended wedge, its long central projection reaching below the chin. Pale hexagonal rims frame the eye openings, while side plates embrace the cheekbones. It makes no attempt to appear friendly — its silhouette is far too easy to remember."
+    m_Metadata: {m_Items: []}
+  - m_Id: 85000000000000003
+    m_Localized: "Brown Face Guard"
+    m_Metadata: {m_Items: []}
+  - m_Id: 85000000000000004
+    m_Localized: "This faceted brown guard covers the brow, bridge of the nose, cheeks, and chin, leaving the centre of the face open. Its long side sections meet at a lower point, while the ribs hold its severe shape. Equipment for someone who must see and speak without offering their face first."
+    m_Metadata: {m_Items: []}
+  - m_Id: 85000000000000005
+    m_Localized: "Pale Face Guard"
+    m_Metadata: {m_Items: []}
+  - m_Id: 85000000000000006
+    m_Localized: "An open face guard of pale plates edged in cool grey. A sharp projection over the nose, high cheek pieces, and a cut at the chin gather the face into a severe silhouette. It sits better beside closely fitted gear than fine clothing."
+    m_Metadata: {m_Items: []}
+  - m_Id: 85000000000000007
+    m_Localized: "Dark Closed Mask"
+    m_Metadata: {m_Items: []}
+  - m_Id: 85000000000000008
+    m_Localized: "A dark mask with a broad upper plate and a clean, faceted front, narrowing into a heavy wedge below. At a distance, only its layered form and closed silhouette remain, with no shine or needless marks. There is no theatrical threat in it, which makes it all the more unpleasant."
+    m_Metadata: {m_Items: []}
+  - m_Id: 85000000000000009
+    m_Localized: "Brown Closed Mask"
+    m_Metadata: {m_Items: []}
+  - m_Id: 85000000000000010
+    m_Localized: "A closed mask in a warm brown tone, with a softened upper edge and a heavy central panel. Its side facets narrow it toward the chin, so the piece looks composed rather than bulky. Work without polish or carving: valued because it needs no explanation for why it was worn."
+    m_Metadata: {m_Items: []}
+  - m_Id: 86000000000000001
+    m_Localized: "Piebald Cap with Ribbons"
+    m_Metadata: {m_Items: []}
+  - m_Id: 86000000000000002
+    m_Localized: "This low, piebald cap is assembled from broad bands of dark, ochre, and pale colour; long ribbons with uneven ends fall from its rim. From afar it looks almost cheerful, yet its shape is not festive — it is more like the sort of thing worn after everything else has already frayed."
+    m_Metadata: {m_Items: []}
+  - m_Id: 86000000000000003
+    m_Localized: "Wide-Brimmed Road Hat"
+    m_Metadata: {m_Items: []}
+  - m_Id: 86000000000000004
+    m_Localized: "Its broad, nearly flat brim extends in a clean circle, while a high crown rises above it beneath a dark band. Grey-brown facets neither argue with road dust nor draw the eye. Such a hat is easy to recognize in a market and hard to remember the next day."
+    m_Metadata: {m_Items: []}
+  - m_Id: 86000000000000005
+    m_Localized: "Cap with a Red Feather"
+    m_Metadata: {m_Items: []}
+  - m_Id: 86000000000000006
+    m_Localized: "A low pale cap with an ochre band and a long red feather secured at the side by a small pale loop. Its soft rounded form does not compete with the feather, only gives it room. The decoration is noticeable without shouting: one look is enough to find its wearer in a crowd."
+    m_Metadata: {m_Items: []}
+  - m_Id: 86000000000000007
+    m_Localized: "Pale Crown with a Stone"
+    m_Metadata: {m_Items: []}
+  - m_Id: 86000000000000008
+    m_Localized: "A low pale crown with straight points, openwork side gaps, and a dark-red stone above the brow. Pale facets gather around a broad ochre base, so the piece looks ceremonial without seeming fragile. It is worn openly; such a mark is not hidden beneath a hood."
+    m_Metadata: {m_Items: []}
+  - m_Id: 86000000000000009
+    m_Localized: "Tall Cap with a Red Feather"
+    m_Metadata: {m_Items: []}
+  - m_Id: 86000000000000010
+    m_Localized: "An elongated cap with a warm ochre centre, pale edging, and grey side facets. A long red feather is fixed at the temple, rising higher than the cap itself and changing its silhouette as the wearer moves. The piece is dressy yet restrained, with no needless pendants or gilding."
+    m_Metadata: {m_Items: []}
+  - m_Id: 87000000000000001
+    m_Localized: "Cap with a Red Feather and Brooch"
+    m_Metadata: {m_Items: []}
+  - m_Id: 87000000000000002
+    m_Localized: "This pale cap is built from broad bands and gathered at the brow by a dark double band. A red feather and a faceted pale-green brooch are fixed above it, with narrow plates spreading below. The ornaments are visible but form one reserved device; the piece does not try to make its wearer seem wealthier than they are."
+    m_Metadata: {m_Items: []}
+  - m_Id: 87000000000000003
+    m_Localized: "Brown Hat with a Red Feather"
+    m_Metadata: {m_Items: []}
+  - m_Id: 87000000000000004
+    m_Localized: "Broad brown brims sit low around a tall crown, which is encircled by a muted ochre band. A red feather rises from behind the crown, giving this dark road-worn piece its single bright note. The hat keeps its silhouette even after everything else its owner wears has long since collected dust."
+    m_Metadata: {m_Items: []}
+  - m_Id: 87000000000000005
+    m_Localized: "Dark Blue Hat with a Buckle"
+    m_Metadata: {m_Items: []}
+  - m_Id: 87000000000000006
+    m_Localized: "Dark-blue brims spread in a broad, even circle, while a brown strap draws tight around the high crown. A large pale square buckle closes it at the front: plain in form, yet too prominent to be an accident. It is a stern, composed hat, remembered for its buckle rather than any display."
+    m_Metadata: {m_Items: []}
+  - m_Id: 87000000000000007
+    m_Localized: "Brown Hat with Sloping Brims"
+    m_Metadata: {m_Items: []}
+  - m_Id: 87000000000000008
+    m_Localized: "Its long brown brims lift and run to one side, making the hat look stretched and swift rather than round. A broad ochre band rests at the high crown, with a short red feather showing behind it. The uneven silhouette is deliberate: it makes the piece recognizable without burdening it with badges or shine."
+    m_Metadata: {m_Items: []}
+  - m_Id: 87000000000000009
+    m_Localized: "Hat with a Dark Feather and Brooch"
+    m_Metadata: {m_Items: []}
+  - m_Id: 87000000000000010
+    m_Localized: "A pale striped crown sits over broad grey-brown brims, drawn together by a dark band. At the front, a faceted pale-green brooch with spreading plates holds the arrangement, while a long dark feather rises at the side. The colours are restrained, but the trim asks for care in every detail; this is more than a simple guard against weather."
+    m_Metadata: {m_Items: []}
+  - m_Id: 88000000000000001
+    m_Localized: "Closed Hood with a White Band"
+    m_Metadata: {m_Items: []}
+  - m_Id: 88000000000000002
+    m_Localized: "A tall sand-brown hood surrounds the head and face, narrowing below into a heavy faceted front. A dark-blue insert lies over the eyes, crossed by a straight white band. It conceals its wearer almost completely, yet its lines remain plain and clear, with no affected finery."
+    m_Metadata: {m_Items: []}
+  - m_Id: 88000000000000003
+    m_Localized: "Pale Helmet with a Dark Visor"
+    m_Metadata: {m_Items: []}
+  - m_Id: 88000000000000004
+    m_Localized: "A pale domed upper piece overhangs a dark face panel and a broad lower surround marked by an uneven pattern. A short straight tab descends from the rim, dividing the front above the face. The contrast between the light crown and deep-blue face makes its silhouette stern and closed, even without further ornament."
+    m_Metadata: {m_Items: []}
+  - m_Id: 88000000000000005
+    m_Localized: "Wide-Brimmed Hat with a Drape"
+    m_Metadata: {m_Items: []}
+  - m_Id: 88000000000000006
+    m_Localized: "Broad brown brims project sharply to either side and dip slightly at their edges, casting a deep shadow over the face. Beneath them sit a high crown and falling side sections that gather the headpiece around the cheeks and neck. Its plain palette and weighty folds make it look chosen for shelter, not display."
+    m_Metadata: {m_Items: []}
+  - m_Id: 88000000000000007
+    m_Localized: "Pale Hood with Long Ends"
+    m_Metadata: {m_Items: []}
+  - m_Id: 88000000000000008
+    m_Localized: "This pale headpiece is assembled from sharp overlapping folds: one long strip rises above the crown, while others fall at the sides below the shoulders. Its front forms a narrow slanting opening, and dark edging sets off the rims and ends. The piece looks intricate not through extravagance, but because every fold keeps its own direction."
+    m_Metadata: {m_Items: []}
+  - m_Id: 88000000000000009
+    m_Localized: "Brown Closed Hood"
+    m_Metadata: {m_Items: []}
+  - m_Id: 88000000000000010
+    m_Localized: "A broad brown cowl traces the head in a dense outer contour and descends into a heavy collar at the neck. The face is left in a deep oval opening; several sloping facets meet above it, while a dark inner edge shows below. Nothing is superfluous: the whole form serves a closed, composed silhouette."
+    m_Metadata: {m_Items: []}
+  - m_Id: 89000000000000001
+    m_Localized: "Brown Hood with an Angular Visor"
+    m_Metadata: {m_Items: []}
+  - m_Id: 89000000000000002
+    m_Localized: "This dense brown hood projects forward in a short angular visor and gathers around the face in large broken panels. Its sides descend toward the collar, leaving a deep dark gap at the chin. There is no trim to distract from the form: the whole piece is built from straight facets and heavy volume."
+    m_Metadata: {m_Items: []}
+  - m_Id: 89000000000000003
+    m_Localized: "Brown Hood with a Projecting Visor"
+    m_Metadata: {m_Items: []}
+  - m_Id: 89000000000000004
+    m_Localized: "This brown hood sits low and deep: its broad upper edge projects clearly over the face and casts a shadow. A long side panel descends in one clean slope, while the lower part meets in a heavy border at the neck. Its calm, closed silhouette is held by a precise cut rather than ornament."
+    m_Metadata: {m_Items: []}
+  - m_Id: 89000000000000005
+    m_Localized: "Brown Hood with a Face Panel"
+    m_Metadata: {m_Items: []}
+  - m_Id: 89000000000000006
+    m_Localized: "A broad upper portion hangs above the face in a wedge-shaped projection, supported at the sides by tall even bands. Below rests a faceted panel built from planes that meet at the centre; it preserves a human outline while making it harder. The hood looks composed and almost motionless, as if its form had been considered to the final fold."
+    m_Metadata: {m_Items: []}
+  - m_Id: 89000000000000007
+    m_Localized: "Bear Mask with a Hood"
+    m_Metadata: {m_Items: []}
+  - m_Id: 89000000000000008
+    m_Localized: "A rough brown mask follows the heavy head of a bear: small ears rise over a broad brow, a black nose projects far ahead, and pale teeth show through its slightly open mouth. Long side pieces fall from the head into a hood. Its force lies not in beauty but in a recognizable animal silhouette, difficult to mistake for anything human."
+    m_Metadata: {m_Items: []}
+  - m_Id: 89000000000000009
+    m_Localized: "Wolf Mask with a Hood"
+    m_Metadata: {m_Items: []}
+  - m_Id: 89000000000000010
+    m_Localized: "A grey mask forms a long wolf muzzle with tall ears, narrow eye sockets, and a cold blue nose. Pale teeth remain visible beneath the raised upper lip, while its lower pieces wrap head and neck in broad folds. Clean grey facets make the animal figure look watchful and hostile, without turning it theatrical."
+    m_Metadata: {m_Items: []}
+  - m_Id: 90000000000000001
+    m_Localized: "Dark Patterned Closed Headpiece"
+    m_Metadata: {m_Items: []}
+  - m_Id: 90000000000000002
+    m_Localized: "This dark headpiece closely surrounds head, face, and neck, leaving a deep narrow shadow at the front instead of an open gap. Its surface is divided into broad blue-grey bands with a repeating stepped pattern; the rows run evenly and emphasize its heavy vertical silhouette. It is restrained in colour, yet too closed to be forgotten."
+    m_Metadata: {m_Items: []}
+  - m_Id: 90000000000000003
+    m_Localized: "Brown Hood with Long Panels"
+    m_Metadata: {m_Items: []}
+  - m_Id: 90000000000000004
+    m_Localized: "A simple brown hood is gathered into a high rounded top with a deep opening for the face. Long straight panels fall from the temples and back of the head almost to the shoulders; their even edges keep the silhouette long and calm. It carries no decoration, but reads as a whole considered piece rather than a cloak thrown over the head by chance."
+    m_Metadata: {m_Items: []}
+  - m_Id: 91000000000000001
+    m_Localized: "Closed Helmet with a Diamond Plate"
+    m_Metadata: {m_Items: []}
+  - m_Id: 91000000000000002
+    m_Localized: "This pale closed helmet is shaped into a severe wedge. A large diamond plate with dark edging rests over the brow; below it, narrow vertical viewing slits stand on either side of the nose. Its broad lower edge follows the chin and finishes the piece in a steady, weighty line."
+    m_Metadata: {m_Items: []}
+  - m_Id: 91000000000000003
+    m_Localized: "Closed Helmet with Double Rows of Slits"
+    m_Metadata: {m_Items: []}
+  - m_Id: 91000000000000004
+    m_Localized: "On this helmet, a pale domed top is separated from the face by a thin dark gap. Two rows of vertical slits run one above the other: the upper row keeps the view open, while the lower breaks up the broad front panel and keeps it from looking blank. Its plain geometry is made for a clear, composed silhouette rather than ornament."
+    m_Metadata: {m_Items: []}
+  - m_Id: 91000000000000005
+    m_Localized: "Closed Helmet with a Tall Crest"
+    m_Metadata: {m_Items: []}
+  - m_Id: 91000000000000006
+    m_Localized: "A tall pointed crest rises from brow to crown, giving this helmet a sharp, almost tower-like profile. A narrow horizontal gap runs beneath it, while long vertical openings cut the lower section. Heavy side plates meet at the angle of the chin, so the whole volume appears dense and whole."
+    m_Metadata: {m_Items: []}
+  - m_Id: 91000000000000007
+    m_Localized: "Closed Helmet with a High Crown"
+    m_Metadata: {m_Items: []}
+  - m_Id: 91000000000000008
+    m_Localized: "The helmet's tall pale crown is framed by a dark band and settles gently into a narrow face section. Four vertical viewing slits flank the central plate, with a broad faceted collar continuing beneath. Unlike a crested helm, this piece has no projecting ridge; its form is carried by a clean drawn line from crown to chin."
+    m_Metadata: {m_Items: []}
+  - m_Id: 92000000000000001
+    m_Localized: "Closed Helmet with a Grilled Visor"
+    m_Metadata: {m_Items: []}
+  - m_Id: 92000000000000002
+    m_Localized: "A pale domed top rests on two dark posts at the edges of a narrow eye slit. Below, the face is cut into a close vertical grill, while a central strip falls from the bridge of the nose to a broad pointed chin. The helmet is built heavily and evenly: each line carries into the next without a chance break."
+    m_Metadata: {m_Items: []}
+  - m_Id: 92000000000000003
+    m_Localized: "Closed Helmet with a Cross Plate"
+    m_Metadata: {m_Items: []}
+  - m_Id: 92000000000000004
+    m_Localized: "A broad dark plate crosses the front: a horizontal band divides the upper helm, while a long vertical bar runs from brow to chin. Large rectangular eye openings remain on either side, with several smaller angular holes below. This hard cross-shaped arrangement makes the helmet visible even from afar."
+    m_Metadata: {m_Items: []}
+  - m_Id: 92000000000000005
+    m_Localized: "Closed Helmet with Side Slits"
+    m_Metadata: {m_Items: []}
+  - m_Id: 92000000000000006
+    m_Localized: "A broad central plate runs from the low crown to the chin almost without interruption. Two deep narrow slits frame the face far at the sides, widening at the cheeks; their dark edges stress the strict symmetry. The helmet is nearly without outward detail, so the form of every plate reads with particular clarity."
+    m_Metadata: {m_Items: []}
+  - m_Id: 92000000000000007
+    m_Localized: "Closed Helmet with Angular Slits"
+    m_Metadata: {m_Items: []}
+  - m_Id: 92000000000000008
+    m_Localized: "A low pale crown is separated from the face by a thin horizontal gap and dark edging. Four angular openings sit symmetrically in the lower face panel, two on either side of the central nose projection. The helmet looks whole but not blank: rare slits break its smooth front with precise dark marks."
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000001
+    m_Localized: "Closed Helmet with a Separate Crown"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000002
+    m_Localized: "A low pale crown is divided from the face by a narrow dark gap, making the helmet appear built from two heavy tiers. The broad upper rim of the face panel spreads outward before narrowing into a long pointed chin. Its restrained form is carried by that separation: it does not decorate the helmet, but makes its silhouette easy to recognize."
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000003
+    m_Localized: "Closed Helmet with a Central Dark Bar"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000004
+    m_Localized: "A broad dark bar runs down the centre of this pale helmet: from a small upper plate, across the bridge of the nose, to the lower edge of the chin. A dark band of eye slits crosses it, while two long openings remain in the lower face on either side of the vertical. The layout gathers smooth plates into a stern, confident pattern."
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000005
+    m_Localized: "Closed Helmet with Diagonal Panels"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000006
+    m_Localized: "The pale face is cut through by broad diagonal panels in warm brown and cool grey. The same slanting lines continue across the domed top and broad lower collar, never breaking into chance patches. A narrow dark gap lies between crown and face, while four vertical slits retain the familiar stern rhythm of the front panel."
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000007
+    m_Localized: "Closed Helmet with Angular Openings"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000008
+    m_Localized: "A broad pale face plate is dotted with small angular openings, set in pairs from the temples down to the lower edge. A low dark crown rises above it, and a broad faceted collar gathers the form below. The many gaps do not turn the piece into a pattern; they remain sparse dark marks on an even pale surface."
+    m_Metadata: {m_Items: []}
+ references:
     version: 2
     RefIds: []

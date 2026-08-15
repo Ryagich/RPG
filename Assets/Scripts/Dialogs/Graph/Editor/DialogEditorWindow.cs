@@ -4053,6 +4053,7 @@ namespace Dialogs.Graph.Editor
                             questTransitionProperty);
                         break;
                     case DialogAnswerConditionType.AddQuest:
+                    case DialogAnswerConditionType.CanAddQuest:
                         DrawQuestGraphSelector(conditionsProperty, i, questGraphProperty);
                         QuestPreviewUtility.DrawQuestGraphPreview(questGraphProperty.objectReferenceValue as QuestGraph, "Quest");
                         break;
@@ -4141,6 +4142,8 @@ namespace Dialogs.Graph.Editor
             {
                 DialogAnswerConditionType.AddQuest when questGraph != null =>
                     $"Add Quest -> {QuestPreviewUtility.GetQuestDisplayName(questGraph)}",
+                DialogAnswerConditionType.CanAddQuest when questGraph != null =>
+                    $"Require Addable Quest -> {QuestPreviewUtility.GetQuestDisplayName(questGraph)}",
                 DialogAnswerConditionType.CheckQuestStep when questGraph != null && transition != null =>
                     $"Check Transition -> {QuestPreviewUtility.GetQuestDisplayName(questGraph)}: {GetQuestTransitionLabel(questGraph, questSourceNode, transition)}",
                 DialogAnswerConditionType.DoQuestStep when questGraph != null && transition != null =>
