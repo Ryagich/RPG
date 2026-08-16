@@ -3,7 +3,6 @@ using DG.Tweening;
 using Quests;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace UI.Map
@@ -24,9 +23,6 @@ namespace UI.Map
 
     public class MapScrollController : MonoBehaviour
     {
-        private const float MinBoundsSize = 1f;
-        private const float FallbackWorldSize = 100f;
-
         private ScrollRect mapScroll = null!;
         private RectTransform viewport = null!;
         private RectTransform content = null!;
@@ -37,7 +33,6 @@ namespace UI.Map
         private Transform lookTransform = null!;
         private MapConfig mapConfig = null!;
         private Camera eventCamera;
-        private Bounds worldBounds;
         private Vector2 baseContentSize;
         private float currentZoom = 1f;
         private bool isInitialized;
@@ -73,7 +68,6 @@ namespace UI.Map
 
             ConfigureScrollRect();
             ConfigureContentTransform();
-            CacheWorldBounds();
             RecalculateBaseContentSize();
 
             currentZoom = Mathf.Clamp(currentZoom, mapConfig.MinZoom, mapConfig.MaxZoom);
@@ -229,63 +223,6 @@ namespace UI.Map
                 characterIconRect.anchorMin = new Vector2(0f, 1f);
                 characterIconRect.anchorMax = new Vector2(0f, 1f);
             }
-        }
-
-        private void CacheWorldBounds()
-        {
-            // This is intentionally a one-time content query, not dependency resolution:
-            // the map derives its visible extents from every renderer in the current world scene.
-            // Runtime services and scene objects are still supplied through their scopes.
-            Scene targetScene = playerTransform.gameObject.scene;
-            Renderer[] renderers = FindObjectsByType<Renderer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-
-            var hasBounds = false;
-            Bounds bounds = default;
-
-            foreach (Renderer renderer in renderers)
-            {
-                if (renderer == null || !renderer.enabled)
-                {
-                    continue;
-                }
-
-                GameObject gameObject = renderer.gameObject;
-                if (!gameObject.scene.IsValid() || gameObject.scene != targetScene)
-                {
-                    continue;
-                }
-
-                if (renderer.transform.IsChildOf(playerTransform) || gameObject.CompareTag("EditorOnly"))
-                {
-                    continue;
-                }
-
-                if (!hasBounds)
-                {
-                    bounds = renderer.bounds;
-                    hasBounds = true;
-                    continue;
-                }
-
-                bounds.Encapsulate(renderer.bounds);
-            }
-
-            if (!hasBounds)
-            {
-                bounds = new Bounds(playerTransform.position, new Vector3(FallbackWorldSize, 0f, FallbackWorldSize));
-            }
-
-            if (bounds.size.x < MinBoundsSize)
-            {
-                bounds.Expand(new Vector3(MinBoundsSize - bounds.size.x, 0f, 0f));
-            }
-
-            if (bounds.size.z < MinBoundsSize)
-            {
-                bounds.Expand(new Vector3(0f, 0f, MinBoundsSize - bounds.size.z));
-            }
-
-            worldBounds = bounds;
         }
 
         private void RecalculateBaseContentSize()
@@ -450,14 +387,10 @@ namespace UI.Map
                 return;
             }
 
-            Vector3 playerPosition = playerTransform.position;
-            float normalizedX = Mathf.InverseLerp(worldBounds.min.x, worldBounds.max.x, playerPosition.x);
-            float normalizedZ = Mathf.InverseLerp(worldBounds.min.z, worldBounds.max.z, playerPosition.z);
-            Vector2 contentSize = content.rect.size;
-
-            characterIconRect.anchoredPosition = new Vector2(
-                normalizedX * contentSize.x,
-                -((1f - normalizedZ) * contentSize.y));
+            if (TryGetMapContentPointForWorldTarget(playerTransform.position, out Vector2 characterPosition))
+            {
+                characterIconRect.anchoredPosition = characterPosition;
+            }
 
             if (characterIcon.Direction == null)
             {
@@ -491,7 +424,6 @@ namespace UI.Map
                 return;
             }
 
-            Vector2 contentSize = content.rect.size;
             for (var i = questIcons.Count - 1; i >= 0; i--)
             {
                 QuestIconBinding questIcon = questIcons[i];
@@ -509,13 +441,10 @@ namespace UI.Map
 
                 questIcon.RectTransform.gameObject.SetActive(true);
 
-                Vector3 targetPosition = questIcon.TargetTransform.position;
-                float normalizedX = Mathf.InverseLerp(worldBounds.min.x, worldBounds.max.x, targetPosition.x);
-                float normalizedZ = Mathf.InverseLerp(worldBounds.min.z, worldBounds.max.z, targetPosition.z);
-
-                questIcon.RectTransform.anchoredPosition = new Vector2(
-                    normalizedX * contentSize.x,
-                    -((1f - normalizedZ) * contentSize.y));
+                if (TryGetMapContentPointForWorldTarget(questIcon.TargetTransform.position, out Vector2 questPosition))
+                {
+                    questIcon.RectTransform.anchoredPosition = questPosition;
+                }
             }
         }
 
@@ -546,18 +475,39 @@ namespace UI.Map
                 return false;
             }
 
-            float normalizedX = Mathf.InverseLerp(worldBounds.min.x, worldBounds.max.x, worldPosition.x);
-            float normalizedZ = Mathf.InverseLerp(worldBounds.min.z, worldBounds.max.z, worldPosition.z);
-            Vector2 contentSize = content.rect.size;
+            if (!TryGetMapContentPointForWorldTarget(worldPosition, out Vector2 mapContentPoint))
+            {
+                return false;
+            }
+
             Vector2 viewportSize = viewport.rect.size;
-
-            Vector2 anchoredTargetPosition = new Vector2(
-                normalizedX * contentSize.x,
-                -((1f - normalizedZ) * contentSize.y));
-
             targetContentPosition = new Vector2(
-                viewportSize.x * 0.5f - anchoredTargetPosition.x,
-                -anchoredTargetPosition.y - viewportSize.y * 0.5f);
+                viewportSize.x * 0.5f - mapContentPoint.x,
+                -mapContentPoint.y - viewportSize.y * 0.5f);
+
+            return true;
+        }
+
+        private bool TryGetMapContentPointForWorldTarget(Vector3 worldPosition, out Vector2 mapContentPoint)
+        {
+            mapContentPoint = Vector2.zero;
+            if (content == null || mapConfig == null)
+            {
+                return false;
+            }
+
+            if (!mapConfig.TryProjectWorldPosition(worldPosition, out Vector2 viewportPosition))
+            {
+                return false;
+            }
+
+            viewportPosition = new Vector2(
+                Mathf.Clamp01(viewportPosition.x),
+                Mathf.Clamp01(viewportPosition.y));
+            Vector2 contentSize = content.rect.size;
+            mapContentPoint = new Vector2(
+                viewportPosition.x * contentSize.x,
+                -((1f - viewportPosition.y) * contentSize.y));
 
             return true;
         }

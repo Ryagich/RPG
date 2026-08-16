@@ -15,3 +15,8 @@ MonoBehaviour:
   <ZoomSpeed>k__BackingField: 0.2
   <MinZoom>k__BackingField: 1.5
   <MaxZoom>k__BackingField: 5
+  <FocusMoveDuration>k__BackingField: 0.4
+  <CaptureCameraPosition>k__BackingField: {x: -12, y: 270, z: -85}
+  <CaptureCameraEulerAngles>k__BackingField: {x: 90, y: 0, z: -25}
+  <CaptureVerticalFieldOfView>k__BackingField: 60
+  <CaptureAspectRatio>k__BackingField: 1.7777778

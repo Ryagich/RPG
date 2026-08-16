@@ -15,6 +15,12 @@ namespace Locations.Editor
             serializedObject.Update();
 
             var locationsProperty = serializedObject.FindProperty("locations");
+            EditorGUILayout.LabelField("Scene startup", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(
+                serializedObject.FindProperty("objectsToDestroyOnSceneStart"),
+                new GUIContent("Objects to destroy on scene start"),
+                true);
+            EditorGUILayout.Space();
             EditorGUILayout.PropertyField(serializedObject.FindProperty("navMeshSurface"));
             DrawFirstSessionFields();
             EditorGUILayout.Space();

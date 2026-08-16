@@ -11,6 +11,8 @@ namespace Locations
     public sealed class VillageLocationSelector : MonoBehaviour
     {
         [SerializeField] private List<VillageLocationDefinition> locations = new();
+        [Header("Scene startup")]
+        [SerializeField] private List<GameObject> objectsToDestroyOnSceneStart = new();
         [Header("Navigation")]
         [SerializeField] private NavMeshSurface navMeshSurface;
         [Header("First game session")]
@@ -18,6 +20,7 @@ namespace Locations
         [SerializeField] private Transform defaultPlayerTransform;
 
         public IReadOnlyList<VillageLocationDefinition> Locations => locations;
+        public IReadOnlyList<GameObject> ObjectsToDestroyOnSceneStart => objectsToDestroyOnSceneStart;
         public NavMeshSurface NavMeshSurface => navMeshSurface;
         public string DefaultLocationId => defaultLocationId;
         public Transform DefaultPlayerTransform => defaultPlayerTransform;
@@ -106,6 +109,7 @@ namespace Locations
             }
 
             var requiredObjects = new HashSet<GameObject>(currentLocation.RequiredObjects.Where(item => item != null));
+            DestroyObjectsExcludedFromCurrentLocation(requiredObjects);
             foreach (var requiredObject in requiredObjects)
             {
                 requiredObject.SetActive(true);
@@ -245,6 +249,19 @@ namespace Locations
 
                     locationObject.SetActive(false);
                 }
+            }
+        }
+
+        private void DestroyObjectsExcludedFromCurrentLocation(HashSet<GameObject> activeLocationObjects)
+        {
+            foreach (var objectToDestroy in selector.ObjectsToDestroyOnSceneStart)
+            {
+                if (objectToDestroy == null || IsCoveredByActiveLocation(objectToDestroy, activeLocationObjects))
+                {
+                    continue;
+                }
+
+                UnityEngine.Object.Destroy(objectToDestroy);
             }
         }
 
