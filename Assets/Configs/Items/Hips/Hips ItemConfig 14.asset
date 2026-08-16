@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
   <Id>k__BackingField: Hips ItemConfig 14
   <Price>k__BackingField: 1
-  <Weight>k__BackingField: 2.12
+  <Weight>k__BackingField: 1.1
   <MaxStack>k__BackingField: 1
   <Icon>k__BackingField: {fileID: 21300000, guid: 8f0941c46321cba41a2f4947b9e43240, type: 3}
   <Name>k__BackingField:

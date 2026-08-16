@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.BackpackItemConfig
   <Id>k__BackingField: Backpack Item Config ID Test 1
   <Price>k__BackingField: 12
-  <Weight>k__BackingField: 2.1
+  <Weight>k__BackingField: 2.3
   <MaxStack>k__BackingField: 1
   <Icon>k__BackingField: {fileID: 21300000, guid: 47c3e2302157a814d85e6a8cae8d621e, type: 3}
   <Name>k__BackingField:

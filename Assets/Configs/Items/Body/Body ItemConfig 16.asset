@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
   <Id>k__BackingField: Body ItemConfig 16
   <Price>k__BackingField: 1
-  <Weight>k__BackingField: 2.4
+  <Weight>k__BackingField: 9
   <MaxStack>k__BackingField: 1
   <Icon>k__BackingField: {fileID: 21300000, guid: aee293e9a9a58f14693f436848b475b5, type: 3}
   <Name>k__BackingField:
@@ -31,7 +31,7 @@ MonoBehaviour:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
       m_KeyId: 79000000000000030
-      m_Key:
+      m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
@@ -40,6 +40,8 @@ MonoBehaviour:
   <SizeInInventory>k__BackingField: {x: 200, y: 155}
   <ItemType>k__BackingField: 4
   weaponInHandPrefab: {fileID: 0}
+  weaponDamageRange: {x: 9, y: 11}
+  heavyWeaponDamageRange: {x: 9, y: 11}
   rightHandWeaponAttachment:
     localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
