@@ -1804,8 +1804,8 @@ namespace UI.Pages
             }
 
             statsGroup.anchoredPosition = hasPrimaryStat
-                ? new Vector2(statsGroup.anchoredPosition.x, -410f)
-                : new Vector2(statsGroup.anchoredPosition.x, -400f);
+                ? new Vector2(statsGroup.anchoredPosition.x, -340f)
+                : new Vector2(statsGroup.anchoredPosition.x, -250f);
             statsGroup.sizeDelta = hasPrimaryStat
                 ? new Vector2(statsGroup.sizeDelta.x, 220f)
                 : new Vector2(statsGroup.sizeDelta.x, 420f);
@@ -2023,7 +2023,7 @@ namespace UI.Pages
             var valueHeight = value != null && value.rect.height > 0f ? value.rect.height : 80f;
             var descriptionBottom = Mathf.Abs(statsGroup.anchoredPosition.y) + statsGroupHeight;
             var hasPrimaryStat = HasActiveFantasyWarriorPrimaryStat(popupRect);
-            var fixedBottomArea = valueHeight + (hasPrimaryStat ? 92f : 8f);
+            var fixedBottomArea = valueHeight + 92f;
             var minimumHeight = descriptionBottom + fixedBottomArea;
             var requiredHeight = Mathf.Clamp(minimumHeight, hasPrimaryStat ? 560f : 0f, 980f);
             popupRect.sizeDelta = new Vector2(popupRect.sizeDelta.x, requiredHeight);
