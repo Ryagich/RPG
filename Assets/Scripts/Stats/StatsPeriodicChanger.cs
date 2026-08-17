@@ -13,16 +13,21 @@ namespace Stats
 
         private readonly StatsConfig statsConfig;
         private readonly StatsController statsController;
+        private readonly IAdditionalStatsPeriodicDrainPolicy additionalStatsPeriodicDrainPolicy;
         private readonly System.IDisposable hpChangeSubscription;
 
         private float elapsedTime;
         private float hpRegenBlockedRemainingTime;
         private bool isStarted;
 
-        public StatsPeriodicChanger(StatsConfig statsConfig, StatsController statsController)
+        public StatsPeriodicChanger(
+            StatsConfig statsConfig,
+            StatsController statsController,
+            IAdditionalStatsPeriodicDrainPolicy additionalStatsPeriodicDrainPolicy)
         {
             this.statsConfig = statsConfig;
             this.statsController = statsController;
+            this.additionalStatsPeriodicDrainPolicy = additionalStatsPeriodicDrainPolicy;
             hpChangeSubscription = statsController.Changed.Subscribe(changeInfo => OnStatChanged(changeInfo));
         }
 
@@ -59,8 +64,11 @@ namespace Stats
 
         private void ApplyPeriodicChanges()
         {
-            ApplyPeriodicChange(StatType.Water);
-            ApplyPeriodicChange(StatType.Food);
+            if (additionalStatsPeriodicDrainPolicy.IsEnabled)
+            {
+                ApplyPeriodicChange(StatType.Water);
+                ApplyPeriodicChange(StatType.Food);
+            }
 
             ApplyHpPeriodicChange();
             ApplyEmptyAdditionalStatDamage();
@@ -159,6 +167,21 @@ namespace Stats
         public void Dispose()
         {
             hpChangeSubscription.Dispose();
+        }
+    }
+
+    public interface IAdditionalStatsPeriodicDrainPolicy
+    {
+        bool IsEnabled { get; }
+    }
+
+    public sealed class AdditionalStatsPeriodicDrainPolicy : IAdditionalStatsPeriodicDrainPolicy
+    {
+        public bool IsEnabled { get; }
+
+        public AdditionalStatsPeriodicDrainPolicy(bool isEnabled)
+        {
+            IsEnabled = isEnabled;
         }
     }
 }

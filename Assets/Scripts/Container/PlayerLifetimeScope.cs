@@ -105,6 +105,7 @@ namespace Container
             builder.RegisterEntryPoint<ItemHolderInteractableLogic>().AsSelf();
             builder.Register<StatsController>(Lifetime.Singleton).AsSelf();
             builder.Register<StatFillers>(Lifetime.Singleton).AsSelf();
+            builder.RegisterInstance(new AdditionalStatsPeriodicDrainPolicy(true)).As<IAdditionalStatsPeriodicDrainPolicy>();
             builder.RegisterEntryPoint<StatsPeriodicChanger>().AsSelf();
             builder.RegisterEntryPoint<StaminaPeriodicChanger>().AsSelf();
             builder.RegisterEntryPoint<StaminaMovementChanger>().AsSelf();

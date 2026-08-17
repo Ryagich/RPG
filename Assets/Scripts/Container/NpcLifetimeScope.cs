@@ -37,6 +37,9 @@ namespace Container
         [SerializeField] private StateMachineGraph stateMachineGraph;
         [Header("Faction")]
         [SerializeField] private FactionConfig faction;
+        [Header("Stats")]
+        [Tooltip("When enabled, water and food decrease periodically like they do for the player.")]
+        [SerializeField] private bool consumeAdditionalStatsOverTime;
         [Header("Initial Inventory")]
         [Tooltip("If empty, this NPC randomly selects an item set from its faction.")]
         [SerializeField] private ItemSetConfig itemSetConfigOverride;
@@ -153,6 +156,7 @@ namespace Container
             builder.RegisterEntryPoint<PlayerGravity>().AsSelf();
             builder.Register<StatsController>(Lifetime.Singleton).AsSelf();
             builder.Register<StatFillers>(Lifetime.Singleton).AsSelf();
+            builder.RegisterInstance(new AdditionalStatsPeriodicDrainPolicy(consumeAdditionalStatsOverTime)).As<IAdditionalStatsPeriodicDrainPolicy>();
             builder.RegisterEntryPoint<StatsPeriodicChanger>().AsSelf();
             builder.RegisterEntryPoint<StaminaPeriodicChanger>().AsSelf();
             builder.RegisterEntryPoint<StaminaMovementChanger>().AsSelf();
