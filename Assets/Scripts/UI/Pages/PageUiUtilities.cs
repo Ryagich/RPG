@@ -27,7 +27,7 @@ namespace UI.Pages
     {
         // Chill отвечает за сон. До появления дня/ночи и сна не показываем его в usable item UI,
         // но сам StatType и serialized данные остаются в проекте.
-        private static readonly StatType[] UsablePopupStatTypes = { StatType.Hp, StatType.Water, StatType.Food };
+        private static readonly StatType[] UsablePopupStatTypes = { StatType.Hp, StatType.Water, StatType.Food, StatType.Stamina };
         private static readonly StatType[] DefensePopupStatTypes = { StatType.PhysicalDefense, StatType.TemperatureDefense, StatType.PsiDefense, StatType.MagicDefense };
 
         public static Image CreateBloodScreen(
@@ -790,8 +790,8 @@ namespace UI.Pages
                         positiveChangeColor,
                         negativeChangeColor);
                     break;
-                case ItemType.Backpack when itemConfig is BackpackItemConfig backpackItemConfig:
-                    CreateBackpackSizePopup(popupContentRect, uiConfig, resolver, backpackItemConfig);
+                case ItemType.Backpack:
+                    CreateBackpackSizePopup(popupContentRect, uiConfig, resolver, itemConfig);
                     break;
             }
         }
@@ -1153,6 +1153,7 @@ namespace UI.Pages
                     AddSignedRow(rows, "HP", itemConfig.HpStat, GetStatIcon(statIconsConfig, StatType.Hp));
                     AddSignedRow(rows, "Water", itemConfig.WaterStat, GetStatIcon(statIconsConfig, StatType.Water));
                     AddSignedRow(rows, "Food", itemConfig.FoodStat, GetStatIcon(statIconsConfig, StatType.Food));
+                    AddSignedRow(rows, "Stamina", itemConfig.StaminaStat, GetStatIcon(statIconsConfig, StatType.Stamina));
                     break;
                 case ItemType.Helm:
                 case ItemType.Face:
@@ -1531,7 +1532,7 @@ namespace UI.Pages
                 return;
             }
 
-            if (itemConfig is BackpackItemConfig backpackItemConfig)
+            if (itemConfig.ItemType == ItemType.Backpack)
             {
                 primaryStat.name = "HUD_Stat_BackpackInventorySize";
                 primaryStat.gameObject.SetActive(true);
@@ -1540,7 +1541,7 @@ namespace UI.Pages
                 ConfigureFantasyWarriorLabel(
                     primaryStat,
                     "Label_Stat_Number",
-                    FormatBackpackInventorySize(backpackItemConfig, playerInventory, isEquippedItemPopup, positiveChangeColor, negativeChangeColor),
+                    FormatBackpackInventorySize(itemConfig, playerInventory, isEquippedItemPopup, positiveChangeColor, negativeChangeColor),
                     TextAlignmentOptions.Left,
                     76f,
                     42f,
@@ -1563,7 +1564,7 @@ namespace UI.Pages
 
         private static bool HasFantasyWarriorPrimaryStat(ItemConfig itemConfig)
         {
-            return itemConfig?.ItemType == ItemType.Weapon || itemConfig is BackpackItemConfig;
+            return itemConfig?.ItemType is ItemType.Weapon or ItemType.Backpack;
         }
 
         private static void ConfigureFantasyWarriorPrimaryStatIcon(RectTransform statRect, Sprite iconSprite)
@@ -1873,7 +1874,7 @@ namespace UI.Pages
         }
 
         private static string FormatBackpackInventorySize(
-            BackpackItemConfig backpackItemConfig,
+            ItemConfig backpackItemConfig,
             PlayerInventory playerInventory,
             bool isEquippedItemPopup,
             Color positiveChangeColor,
@@ -2342,7 +2343,7 @@ namespace UI.Pages
                 RectTransform popupRect,
                 UIConfig uiConfig,
                 IObjectResolver resolver,
-                BackpackItemConfig backpackItemConfig
+                ItemConfig backpackItemConfig
             )
         {
             if (popupRect == null || uiConfig?.PopupWeight == null || resolver == null || backpackItemConfig == null)
@@ -2574,6 +2575,7 @@ namespace UI.Pages
                 StatType.Hp => itemConfig.HpStat,
                 StatType.Water => itemConfig.WaterStat,
                 StatType.Food => itemConfig.FoodStat,
+                StatType.Stamina => itemConfig.StaminaStat,
                 StatType.Chill => itemConfig.ChillStat,
                 StatType.PhysicalDefense => itemConfig.PhysicalDefense,
                 StatType.TemperatureDefense => itemConfig.TemperatureDefense,

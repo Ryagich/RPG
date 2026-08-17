@@ -9,36 +9,36 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c683b90b3f2473f9c7a8fbca87c7fc4, type: 3}
-  m_Name: BackpackItemConfig 1
-  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.BackpackItemConfig
-  <Id>k__BackingField: Backpack Item Config ID Test 1
-  <Price>k__BackingField: 12
-  <Weight>k__BackingField: 2.3
-  <MaxStack>k__BackingField: 1
-  <Icon>k__BackingField: {fileID: 21300000, guid: 47c3e2302157a814d85e6a8cae8d621e, type: 3}
+  m_Script: {fileID: 11500000, guid: 60723d5f93cc4ad190a060664630a272, type: 3}
+  m_Name: Bread Config
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
+  <Id>k__BackingField: Bread Config ID
+  <Price>k__BackingField: 1
+  <Weight>k__BackingField: 0.8
+  <MaxStack>k__BackingField: 5
+  <Icon>k__BackingField: {fileID: 21300000, guid: b57f035da78a03d4c8ce7e088f72632a, type: 3}
   <Name>k__BackingField:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
-      m_KeyId: 84000000000000001
+      m_KeyId: 944427890884608
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
   <Description>k__BackingField:
     m_TableReference:
-      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+      m_TableCollectionName: Tables
     m_TableEntryReference:
-      m_KeyId: 84000000000000002
-      m_Key: 
+      m_KeyId: 0
+      m_Key: Null String
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  <HandPrefab>k__BackingField: {fileID: 667040102321871160, guid: b0fa75e8bb013d24da22e6de5d35d087, type: 3}
-  <Size>k__BackingField: {x: 2, y: 2}
-  <SizeInInventory>k__BackingField: {x: 125, y: 125}
-  <ItemType>k__BackingField: 2
+  <HandPrefab>k__BackingField: {fileID: 1963997498088867377, guid: 383bcfe55c5ee8b428945993a75912a9, type: 3}
+  <Size>k__BackingField: {x: 1, y: 1}
+  <SizeInInventory>k__BackingField: {x: 155, y: 80}
+  <ItemType>k__BackingField: 1
   weaponInHandPrefab: {fileID: 0}
   weaponDamageRange: {x: 9, y: 11}
   heavyWeaponDamageRange: {x: 9, y: 11}
@@ -48,19 +48,19 @@ MonoBehaviour:
   beltWeaponAttachment:
     localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
-  physicalDefense: 0
-  temperatureDefense: 0
-  psiDefense: 0
-  magicDefense: 0
+  physicalDefense: 0.07
+  temperatureDefense: 6
+  psiDefense: 2
+  magicDefense: 4
   blocksFaceSlot: 1
   hpStat: 0
   waterStat: 0
-  foodStat: 0
+  foodStat: 40
+  staminaStat: 0
+  <BackpackSize>k__BackingField: {x: 7, y: 2}
+  <AdditionalWeightCapacity>k__BackingField: 0
   chillStat: 0
-  equippedVisuals:
-  - <BodyPart>k__BackingField: 10
-    <VisualName>k__BackingField: Chr_BackAttachment_01
-  <BackpackSize>k__BackingField: {x: 7, y: 3}
+  equippedVisuals: []
   references:
     version: 2
     RefIds: []

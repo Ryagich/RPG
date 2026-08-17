@@ -280,8 +280,7 @@ namespace UI.Pages
                     slot.ItemStack = new ItemStack(itemStack.ItemConfig, countToPlace, itemStack.IsRotated);
 
                     if (slot.ItemType == ItemType.Backpack
-                     && itemStack.ItemConfig is BackpackItemConfig backpackConfig
-                     && !TryResizeGrid(backpackConfig.BackpackSize))
+                     && !TryResizeGrid(itemStack.ItemConfig.BackpackSize))
                     {
                         slot.ItemStack = null;
                         return itemStack;

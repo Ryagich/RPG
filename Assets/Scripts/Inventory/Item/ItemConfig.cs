@@ -17,6 +17,7 @@ namespace Inventory.Item
                                            || ItemType == ItemType.Hips;
         private bool HasFaceBlockingFlag => ItemType == ItemType.Helm;
         private bool HasUsableStats => ItemType == ItemType.Usable;
+        private bool HasBackpackStats => ItemType == ItemType.Backpack;
         private bool HasWeaponPrefab => ItemType == ItemType.Weapon;
         private bool HasWeaponDamage => ItemType == ItemType.Weapon;
         private bool HasEquippedVisuals => ItemType == ItemType.Backpack
@@ -52,6 +53,9 @@ namespace Inventory.Item
         [SerializeField, ShowIf(nameof(HasUsableStats))] private float hpStat;
         [SerializeField, ShowIf(nameof(HasUsableStats))] private float waterStat;
         [SerializeField, ShowIf(nameof(HasUsableStats))] private float foodStat;
+        [SerializeField, ShowIf(nameof(HasUsableStats))] private float staminaStat;
+        [field: SerializeField, ShowIf(nameof(HasBackpackStats)), Min(1)] public Vector2Int BackpackSize { get; private set; } = new(7, 2);
+        [field: SerializeField, ShowIf(nameof(HasBackpackStats)), Min(0f)] public float AdditionalWeightCapacity { get; private set; }
         // Chill отвечает за сон. Механик дня/ночи и сна пока нет, поэтому стат выключен и скрыт,
         // но serialized поле оставлено для будущего возврата без миграции данных.
         [SerializeField, HideInInspector] private float chillStat;
@@ -67,6 +71,7 @@ namespace Inventory.Item
         public float HpStat => hpStat;
         public float WaterStat => waterStat;
         public float FoodStat => foodStat;
+        public float StaminaStat => staminaStat;
         // Chill отвечает за сон и пока не должен влиять на usable items до появления дня/ночи и сна.
         public float ChillStat => 0f;
         public GameObject WeaponInHandPrefab => weaponInHandPrefab;
@@ -85,6 +90,8 @@ namespace Inventory.Item
         private void OnValidate()
         {
             physicalDefense = NormalizeProtectionValue(physicalDefense);
+            BackpackSize = new Vector2Int(Mathf.Max(1, BackpackSize.x), Mathf.Max(1, BackpackSize.y));
+            AdditionalWeightCapacity = Mathf.Max(0f, AdditionalWeightCapacity);
         }
 
         private static float NormalizeProtectionValue(float value)

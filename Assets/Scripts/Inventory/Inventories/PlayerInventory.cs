@@ -58,7 +58,7 @@ namespace Inventory.Inventories
         {
             this.inventoryConfig = inventoryConfig;
             var inventorySize = GetCurrentInventorySize();
-            MaxWeight = inventoryConfig.DefaultMaxWeight;
+            MaxWeight = GetCurrentMaxWeight();
             Tiles = new Tiles(inventorySize.x, inventorySize.y);
             CurrentWeightReactive = Observable.Merge(
                     changedSubject.Select(_ => CurrentWeight),
@@ -484,6 +484,7 @@ namespace Inventory.Inventories
                 Items.Add(item);
             }
 
+            HandleSlotItemChanged(slot);
             NotifyChanged();
             return true;
         }
@@ -556,6 +557,7 @@ namespace Inventory.Inventories
             if (takenCount >= slot.ItemStack.Count)
             {
                 slot.ItemStack = null;
+                HandleSlotItemChanged(slot);
             }
             else
             {
@@ -803,12 +805,20 @@ namespace Inventory.Inventories
 
         private Vector2Int GetCurrentInventorySize()
         {
-            if (BackpackSlot.ItemConfig is BackpackItemConfig backpackConfig)
+            if (BackpackSlot.ItemConfig?.ItemType == ItemType.Backpack)
             {
-                return backpackConfig.BackpackSize;
+                return BackpackSlot.ItemConfig.BackpackSize;
             }
 
             return inventoryConfig.Size;
+        }
+
+        private float GetCurrentMaxWeight()
+        {
+            var additionalWeightCapacity = BackpackSlot.ItemConfig?.ItemType == ItemType.Backpack
+                ? BackpackSlot.ItemConfig.AdditionalWeightCapacity
+                : 0f;
+            return inventoryConfig.DefaultMaxWeight + additionalWeightCapacity;
         }
 
         private bool TryGetAvailableTiles(ItemStack itemStack, Tile tile, out List<Tile> itemTiles)
@@ -1152,7 +1162,8 @@ namespace Inventory.Inventories
         {
             if (slot == BackpackSlot)
             {
-                RebuildInventoryFromCurrentBackpack();
+                MaxWeight = GetCurrentMaxWeight();
+                pendingOverflowItems.AddRange(RebuildInventoryFromCurrentBackpack());
             }
 
             if (slot == HelmSlot)

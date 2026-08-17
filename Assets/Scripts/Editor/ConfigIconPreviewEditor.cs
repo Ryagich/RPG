@@ -2,19 +2,15 @@ using System;
 using System.Collections.Generic;
 using Factions;
 using Inventory.Item;
+using NaughtyAttributes.Editor;
 using UnityEditor;
 using UnityEngine;
 
 namespace EditorTools
 {
-    internal abstract class ConfigIconPreviewEditor<TConfig> : UnityEditor.Editor
+    internal abstract class ConfigIconPreviewEditor<TConfig> : NaughtyInspector
         where TConfig : ScriptableObject
     {
-        public override void OnInspectorGUI()
-        {
-            DrawDefaultInspector();
-        }
-
         public override Texture2D RenderStaticPreview(string assetPath, UnityEngine.Object[] subAssets, int width, int height)
         {
             var config = target as TConfig;

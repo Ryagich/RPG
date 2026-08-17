@@ -9,19 +9,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c683b90b3f2473f9c7a8fbca87c7fc4, type: 3}
-  m_Name: BackpackItemConfig 2
-  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.BackpackItemConfig
-  <Id>k__BackingField: Backpack Item Config ID Test 2
-  <Price>k__BackingField: 31
-  <Weight>k__BackingField: 1.8
+  m_Script: {fileID: 11500000, guid: 60723d5f93cc4ad190a060664630a272, type: 3}
+  m_Name: Backpack ItemConfig 1
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
+  <Id>k__BackingField: Backpack Item Config ID Test 1
+  <Price>k__BackingField: 12
+  <Weight>k__BackingField: 2.3
   <MaxStack>k__BackingField: 1
-  <Icon>k__BackingField: {fileID: 21300000, guid: 3500c2c13be7383469aa55427f1e7e0b, type: 3}
+  <Icon>k__BackingField: {fileID: 21300000, guid: 47c3e2302157a814d85e6a8cae8d621e, type: 3}
   <Name>k__BackingField:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
-      m_KeyId: 84000000000000003
+      m_KeyId: 84000000000000001
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
@@ -30,12 +30,12 @@ MonoBehaviour:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
-      m_KeyId: 84000000000000004
+      m_KeyId: 84000000000000002
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  <HandPrefab>k__BackingField: {fileID: 6206770068819643213, guid: 45ab161ecf9e6f444bcc3ee0b6778d8a, type: 3}
+  <HandPrefab>k__BackingField: {fileID: 667040102321871160, guid: b0fa75e8bb013d24da22e6de5d35d087, type: 3}
   <Size>k__BackingField: {x: 2, y: 2}
   <SizeInInventory>k__BackingField: {x: 125, y: 125}
   <ItemType>k__BackingField: 2
@@ -56,11 +56,12 @@ MonoBehaviour:
   hpStat: 0
   waterStat: 0
   foodStat: 0
+  <BackpackSize>k__BackingField: {x: 7, y: 3}
+  <AdditionalWeightCapacity>k__BackingField: 0
   chillStat: 0
   equippedVisuals:
   - <BodyPart>k__BackingField: 10
-    <VisualName>k__BackingField: Chr_BackAttachment_02
-  <BackpackSize>k__BackingField: {x: 7, y: 3}
+    <VisualName>k__BackingField: Chr_BackAttachment_01
   references:
     version: 2
     RefIds: []
