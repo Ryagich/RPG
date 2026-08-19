@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60723d5f93cc4ad190a060664630a272, type: 3}
+  m_Name: Ring_02
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
+  <Id>k__BackingField: Ring_02 Config ID
+  <Price>k__BackingField: 125
+  <Weight>k__BackingField: 0.05
+  <MaxStack>k__BackingField: 12
+  <Icon>k__BackingField: {fileID: 21300000, guid: ba280dd540568ce489bd840a35d9040b, type: 3}
+  <Name>k__BackingField:
+    m_TableReference:
+      m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+    m_TableEntryReference:
+      m_KeyId: 944427890884608
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  <Description>k__BackingField:
+    m_TableReference:
+      m_TableCollectionName: Tables
+    m_TableEntryReference:
+      m_KeyId: 0
+      m_Key: Null String
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  <HandPrefab>k__BackingField: {fileID: 6815136036303174607, guid: d4fe8a6c4121ade479e7dc7c2f187ffe, type: 3}
+  <Size>k__BackingField: {x: 1, y: 1}
+  <SizeInInventory>k__BackingField: {x: 85, y: 85}
+  <ItemType>k__BackingField: 0
+  weaponInHandPrefab: {fileID: 0}
+  weaponDamageRange: {x: 9, y: 11}
+  heavyWeaponDamageRange: {x: 9, y: 11}
+  rightHandWeaponAttachment:
+    localPosition: {x: 0, y: 0, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+  beltWeaponAttachment:
+    localPosition: {x: 0, y: 0, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+  physicalDefense: 0.07
+  temperatureDefense: 6
+  psiDefense: 2
+  magicDefense: 4
+  blocksFaceSlot: 1
+  hpStat: 0
+  waterStat: 0
+  foodStat: 60
+  staminaStat: 0
+  <BackpackSize>k__BackingField: {x: 7, y: 2}
+  <AdditionalWeightCapacity>k__BackingField: 0
+  chillStat: 0
+  equippedVisuals: []
+  references:
+    version: 2
+    RefIds: []
