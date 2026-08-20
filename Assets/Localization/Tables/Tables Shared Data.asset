@@ -1937,14 +1937,174 @@ MonoBehaviour:
     m_Key: Item_Helm_13_Description
     m_Metadata:
       m_Items: []
+  - m_Id: 83000000000000019
+    m_Key: Item_Baguette_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000020
+    m_Key: Item_Baguette_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000021
+    m_Key: Item_Bottle_Of_Water_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000022
+    m_Key: Item_Bottle_Of_Water_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000023
+    m_Key: Item_Bottle_Of_Wine_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000024
+    m_Key: Item_Bottle_Of_Wine_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000025
+    m_Key: Item_Round_Loaf_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000026
+    m_Key: Item_Round_Loaf_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000027
+    m_Key: Item_Roast_Turkey_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000028
+    m_Key: Item_Roast_Turkey_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000029
+    m_Key: Item_Healing_Potion_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000030
+    m_Key: Item_Healing_Potion_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000031
+    m_Key: Item_Jar_Of_Honey_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000032
+    m_Key: Item_Jar_Of_Honey_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000033
+    m_Key: Item_Mug_Of_Beer_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000034
+    m_Key: Item_Mug_Of_Beer_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000035
+    m_Key: Item_Piece_Of_Cheese_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000036
+    m_Key: Item_Piece_Of_Cheese_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000037
+    m_Key: Item_Restoring_Draught_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000038
+    m_Key: Item_Restoring_Draught_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000039
+    m_Key: Item_Square_Cut_Gold_Ring_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000040
+    m_Key: Item_Square_Cut_Gold_Ring_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000041
+    m_Key: Item_Plain_Gold_Ring_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000042
+    m_Key: Item_Plain_Gold_Ring_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000043
+    m_Key: Item_Gold_Ring_With_Blue_Stone_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000044
+    m_Key: Item_Gold_Ring_With_Blue_Stone_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000045
+    m_Key: Item_Silver_Band_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000046
+    m_Key: Item_Silver_Band_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000047
+    m_Key: Item_Silver_Ring_With_Rose_Stone_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000048
+    m_Key: Item_Silver_Ring_With_Rose_Stone_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000049
+    m_Key: Item_Silver_Ring_With_Red_Stone_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000050
+    m_Key: Item_Silver_Ring_With_Red_Stone_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000051
+    m_Key: Item_Thick_Gold_Band_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000052
+    m_Key: Item_Thick_Gold_Band_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000053
+    m_Key: Item_Gold_Ring_With_Flat_Bezel_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000054
+    m_Key: Item_Gold_Ring_With_Flat_Bezel_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000055
+    m_Key: Item_Black_Iron_Ring_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000056
+    m_Key: Item_Black_Iron_Ring_Description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000057
+    m_Key: Item_Gold_Signet_Ring_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 83000000000000058
+    m_Key: Item_Gold_Signet_Ring_Description
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
-    rid: 6228807269837701217
+    rid: 9012649995056971777
   references:
     version: 2
     RefIds:
-    - rid: 6228807269837701217
+    - rid: 9012649995056971777
       type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
       data:
-        m_CustomEpoch: 1773162149169
+        m_CustomEpoch: 1787215251752

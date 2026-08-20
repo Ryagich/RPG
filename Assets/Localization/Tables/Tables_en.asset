@@ -1701,6 +1701,126 @@ MonoBehaviour:
   - m_Id: 93000000000000008
     m_Localized: "A broad pale face plate is dotted with small angular openings, set in pairs from the temples down to the lower edge. A low dark crown rises above it, and a broad faceted collar gathers the form below. The many gaps do not turn the piece into a pattern; they remain sparse dark marks on an even pale surface."
     m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000019
+    m_Localized: "Baguette"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000020
+    m_Localized: "A long crusty loaf, baked before dawn and wrapped in paper. It is plain road food, but its dry crackle and warm crumb make a sparse meal feel deliberate."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000021
+    m_Localized: "Bottle of Water"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000022
+    m_Localized: "Clear water in a stoppered bottle. It has no taste worth remembering, which is exactly what a thirsty traveller asks of it."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000023
+    m_Localized: "Bottle of Wine"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000024
+    m_Localized: "A dark red wine with a sharp, fruity scent. It warms the throat and loosens the tongue, though neither is always a virtue."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000025
+    m_Localized: "Round Loaf"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000026
+    m_Localized: "A small round loaf with a firm crust. It travels well, and even after a day in a pack it can still be broken and shared."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000027
+    m_Localized: "Roast Turkey"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000028
+    m_Localized: "A well-roasted piece of turkey, rich with fat and the scent of smoke. Too heavy for a quick bite, but enough to restore a hungry traveller."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000029
+    m_Localized: "Healing Potion"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000030
+    m_Localized: "A small vial of bitter red tincture. It stings on the tongue, but closes wounds faster than a bandage and a quiet night by the fire."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000031
+    m_Localized: "Jar of Honey"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000032
+    m_Localized: "Thick honey collected from the hives beyond the village fences. Sweet, sticky, and too valuable to leave uncorked near children or ants."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000033
+    m_Localized: "Mug of Beer"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000034
+    m_Localized: "A foaming mug of light beer, still cool from the cellar. It will not solve a hard day, but it makes one easier to speak about."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000035
+    m_Localized: "Piece of Cheese"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000036
+    m_Localized: "A wedge of hard cheese with a nutty smell. It is salty, filling, and durable enough to outlast softer provisions."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000037
+    m_Localized: "Restoring Draught"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000038
+    m_Localized: "A pale draught with a sharp herbal taste. It wakes tired muscles, though the aftertaste is enough to make anyone reach for water."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000039
+    m_Localized: "Square-Cut Gold Ring"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000040
+    m_Localized: "A heavy gold ring with a broad square bezel. The metal is polished smooth, leaving the empty setting to catch the eye."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000041
+    m_Localized: "Plain Gold Ring"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000042
+    m_Localized: "A simple gold band with a thick, even rim. No maker's mark is visible; only the weight suggests it was not made for a common purse."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000043
+    m_Localized: "Gold Ring with Blue Stone"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000044
+    m_Localized: "A gold band clasping a pale blue stone. Its cool gleam stands out even in poor light."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000045
+    m_Localized: "Silver Band"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000046
+    m_Localized: "A plain silver band, bright at the edges and darker in the recesses. Modest workmanship, kept clean by habit or care."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000047
+    m_Localized: "Silver Ring with Rose Stone"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000048
+    m_Localized: "A silver ring set with a rose-coloured stone. The gem is cut simply, but gives the restrained setting a touch of ceremony."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000049
+    m_Localized: "Silver Ring with Red Stone"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000050
+    m_Localized: "A silver band with a small red stone held above its rim. The bright colour makes the plain metal seem warmer than it is."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000051
+    m_Localized: "Thick Gold Band"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000052
+    m_Localized: "A broad gold band without a stone or engraving. Its value is obvious at a glance, which makes it an unwise thing to flaunt on the road."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000053
+    m_Localized: "Gold Ring with Flat Bezel"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000054
+    m_Localized: "A gold ring with a flat, angular bezel, perhaps once meant for a seal. No crest remains on its worn face."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000055
+    m_Localized: "Black Iron Ring"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000056
+    m_Localized: "A dark iron ring with a dull, almost black surface. It lacks polish and ornament, yet the band has been forged to endure."
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000057
+    m_Localized: "Gold Signet Ring"
+    m_Metadata: {m_Items: []}
+  - m_Id: 83000000000000058
+    m_Localized: "A gold ring with a raised, faceted signet. Its face bears no clear mark, whether from wear or deliberate removal."
+    m_Metadata: {m_Items: []}
  references:
     version: 2
     RefIds: []
