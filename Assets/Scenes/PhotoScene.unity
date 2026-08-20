@@ -6928,6 +6928,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Stamina potion
       objectReference: {fileID: 0}
+    - target: {fileID: 3383010293087307666, guid: cec26737f1eccc349af9e6d31cc44ab4, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -7853,6 +7857,68 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6b8ec1d781512104a9ba7dd8f4710d5f, type: 3}
+--- !u!1001 &1654435266
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4462267588074157945, guid: 2cd374e5548a7454ca846b2360be530f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7446728293551747430, guid: 2cd374e5548a7454ca846b2360be530f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.002
+      objectReference: {fileID: 0}
+    - target: {fileID: 7446728293551747430, guid: 2cd374e5548a7454ca846b2360be530f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.741
+      objectReference: {fileID: 0}
+    - target: {fileID: 7446728293551747430, guid: 2cd374e5548a7454ca846b2360be530f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.233
+      objectReference: {fileID: 0}
+    - target: {fileID: 7446728293551747430, guid: 2cd374e5548a7454ca846b2360be530f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.6858427
+      objectReference: {fileID: 0}
+    - target: {fileID: 7446728293551747430, guid: 2cd374e5548a7454ca846b2360be530f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.1721042
+      objectReference: {fileID: 0}
+    - target: {fileID: 7446728293551747430, guid: 2cd374e5548a7454ca846b2360be530f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.6858427
+      objectReference: {fileID: 0}
+    - target: {fileID: 7446728293551747430, guid: 2cd374e5548a7454ca846b2360be530f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.1721042
+      objectReference: {fileID: 0}
+    - target: {fileID: 7446728293551747430, guid: 2cd374e5548a7454ca846b2360be530f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7446728293551747430, guid: 2cd374e5548a7454ca846b2360be530f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 7446728293551747430, guid: 2cd374e5548a7454ca846b2360be530f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -28.174
+      objectReference: {fileID: 0}
+    - target: {fileID: 8824095181891190784, guid: 2cd374e5548a7454ca846b2360be530f, type: 3}
+      propertyPath: m_Name
+      value: Baguette
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 9193029164086426230, guid: 2cd374e5548a7454ca846b2360be530f, type: 3}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2cd374e5548a7454ca846b2360be530f, type: 3}
 --- !u!1001 &1666029588
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10351,6 +10417,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 2076391817}
   - {fileID: 1969877690}
+  - {fileID: 1654435266}
   - {fileID: 708771875}
   - {fileID: 2006498239}
   - {fileID: 1343907251}

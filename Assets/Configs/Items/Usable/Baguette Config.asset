@@ -16,13 +16,13 @@ MonoBehaviour:
   <Price>k__BackingField: 1
   <Weight>k__BackingField: 0.8
   <MaxStack>k__BackingField: 5
-  <Icon>k__BackingField: {fileID: 21300000, guid: 86f4eef6a1d656c4b91d9c93956152bf, type: 3}
+  <Icon>k__BackingField: {fileID: 21300000, guid: e5409476b795b894ab691450eee24765, type: 3}
   <Name>k__BackingField:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
       m_KeyId: 83000000000000019
-      m_Key:
+      m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
@@ -31,11 +31,11 @@ MonoBehaviour:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
       m_KeyId: 83000000000000020
-      m_Key:
+      m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  <HandPrefab>k__BackingField: {fileID: 1963997498088867377, guid: 383bcfe55c5ee8b428945993a75912a9, type: 3}
+  <HandPrefab>k__BackingField: {fileID: 7348458205524555570, guid: 2cd374e5548a7454ca846b2360be530f, type: 3}
   <Size>k__BackingField: {x: 2, y: 1}
   <SizeInInventory>k__BackingField: {x: 120, y: 120}
   <ItemType>k__BackingField: 1
