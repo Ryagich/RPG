@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90a4e7f98cc749149a40d716476f0208, type: 3}
   m_Name: TargetLockConfig
   m_EditorClassIdentifier: Assembly-CSharp::TargetLock.TargetLockConfig
-  <ControlMode>k__BackingField: 0
+  <ControlMode>k__BackingField: 2
   <SearchRadius>k__BackingField: 14
   <BreakRadius>k__BackingField: 18
   <MaxScreenAngle>k__BackingField: 70

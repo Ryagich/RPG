@@ -14,7 +14,7 @@ namespace TargetLock
     public sealed class TargetLockConfig : ScriptableObject
     {
         [field: Header("Player Settings")]
-        [field: SerializeField] public TargetLockControlMode ControlMode { get; private set; } = TargetLockControlMode.Switch;
+        [field: SerializeField] public TargetLockControlMode ControlMode { get; private set; } = TargetLockControlMode.Soft;
 
         [field: SerializeField, Min(0f)] public float SearchRadius { get; private set; } = 14f;
         [field: SerializeField, Min(0f)] public float BreakRadius { get; private set; } = 18f;
