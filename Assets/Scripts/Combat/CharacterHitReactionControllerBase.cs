@@ -9,10 +9,9 @@ namespace Combat
 {
     public abstract class CharacterHitReactionControllerBase : ICharacterHitReactionController, IStartable, ITickable, IDisposable
     {
-        private static readonly int HitFrontHash = Animator.StringToHash("HitFront");
-        private static readonly int HitBackHash = Animator.StringToHash("HitBack");
-        private static readonly int HitLeftHash = Animator.StringToHash("HitLeft");
-        private static readonly int HitRightHash = Animator.StringToHash("HitRight");
+        private static readonly int HitHash = Animator.StringToHash("Hit");
+        private static readonly int HitDirectionXHash = Animator.StringToHash("HitDirectionX");
+        private static readonly int HitDirectionYHash = Animator.StringToHash("HitDirectionY");
 
         private readonly Queue<DamageSample> damageSamples = new();
         private readonly HitReactionConfig config;
@@ -94,7 +93,7 @@ namespace Combat
             OnTick(deltaTime);
         }
 
-        public void RegisterDamage(float damage, Vector3 hitPoint)
+        public void RegisterDamage(float damage, Vector3 hitPoint, Transform attackerTransform = null)
         {
             if (damage <= 0f || ownerTransform == null || config == null)
             {
@@ -110,7 +109,7 @@ namespace Combat
                 return;
             }
 
-            StartReaction(hitPoint);
+            StartReaction(hitPoint, attackerTransform);
         }
 
         protected virtual void OnTick(float deltaTime) { }
@@ -125,10 +124,10 @@ namespace Combat
                 return;
             }
 
-            RegisterDamage(message.FinalDamage, message.Point);
+            RegisterDamage(message.FinalDamage, message.Point, message.Attacker?.OwnerTransform);
         }
 
-        private void StartReaction(Vector3 hitPoint)
+        private void StartReaction(Vector3 hitPoint, Transform attackerTransform)
         {
             damageSamples.Clear();
             reactionTimer = config.ReactionCooldown;
@@ -140,7 +139,7 @@ namespace Combat
             rootMotionController?.SetRootMotionActive(this, true);
 
             OnReactionStarted();
-            TriggerHitReactionAnimation(hitPoint);
+            TriggerHitReactionAnimation(hitPoint, attackerTransform);
         }
 
         private void EndReaction()
@@ -152,36 +151,81 @@ namespace Combat
             OnReactionEnded();
         }
 
-        private void TriggerHitReactionAnimation(Vector3 hitPoint)
+        private void TriggerHitReactionAnimation(Vector3 hitPoint, Transform attackerTransform)
         {
             if (animator == null)
             {
                 return;
             }
 
-            animator.ResetTrigger(HitFrontHash);
-            animator.ResetTrigger(HitBackHash);
-            animator.ResetTrigger(HitLeftHash);
-            animator.ResetTrigger(HitRightHash);
-            animator.SetTrigger(ResolveHitTrigger(hitPoint));
+            var localReactionDirection = ResolveLocalReactionDirection(hitPoint, attackerTransform);
+            animator.SetFloat(HitDirectionXHash, localReactionDirection.x);
+            animator.SetFloat(HitDirectionYHash, localReactionDirection.z);
+            LogHitReactionDirection(hitPoint, attackerTransform, localReactionDirection);
+            animator.ResetTrigger(HitHash);
+            animator.SetTrigger(HitHash);
         }
 
-        private int ResolveHitTrigger(Vector3 hitPoint)
+        private Vector3 ResolveLocalReactionDirection(Vector3 hitPoint, Transform attackerTransform)
         {
-            var direction = hitPoint - ownerTransform.position;
+            // HitDirectionX/Y are consumed by the Animator's Blend Tree, so their coordinate
+            // system must match the Animator transform. The gameplay root can have a different
+            // orientation from the visual hierarchy (as it does for the player prefab).
+            var animationTransform = animator != null ? animator.transform : ownerTransform;
+            var attackerDirection = attackerTransform != null
+                ? GetPlanarDirection(attackerTransform.position - animationTransform.position)
+                : Vector3.zero;
+
+            // Weapon hits always provide their attacker. The impact point keeps non-weapon
+            // callers directional too, without selecting a fixed reaction animation.
+            var incomingDirection = attackerDirection.sqrMagnitude > 0.0001f
+                ? attackerDirection
+                : GetPlanarDirection(hitPoint - animationTransform.position);
+            if (incomingDirection.sqrMagnitude <= 0.0001f)
+            {
+                return Vector3.zero;
+            }
+
+            var localAttackerDirection = animationTransform.InverseTransformDirection(incomingDirection.normalized);
+
+            // Blend Tree coordinates describe the direction of the reaction, not the attacker:
+            // attacker behind (local Z < 0) therefore yields HitDirectionY = 1,
+            // while attacker in front (local Z > 0) yields HitDirectionY = -1.
+            return -new Vector3(localAttackerDirection.x, 0f, localAttackerDirection.z);
+        }
+
+        private void LogHitReactionDirection(
+            Vector3 hitPoint,
+            Transform attackerTransform,
+            Vector3 localReactionDirection)
+        {
+            if (attackerTransform == null)
+            {
+                Debug.LogWarning(
+                    $"[HitReaction] '{ownerTransform.name}': attacker is unavailable; " +
+                    $"reaction was derived from hit point={hitPoint}. " +
+                    $"Blend Tree parameters=({localReactionDirection.x:F2}, {localReactionDirection.z:F2}).",
+                    ownerTransform);
+                return;
+            }
+
+            var animationTransform = animator != null ? animator.transform : ownerTransform;
+            var attackerWorldOffset = GetPlanarDirection(attackerTransform.position - animationTransform.position);
+            var attackerLocalDirection = animationTransform.InverseTransformDirection(attackerWorldOffset);
+            Debug.Log(
+                $"[HitReaction] target='{ownerTransform.name}', attacker='{attackerTransform.name}'; " +
+                $"attacker world position={attackerTransform.position}, animation transform='{animationTransform.name}', " +
+                $"animation world position={animationTransform.position}; " +
+                $"attacker direction in animation local space=({attackerLocalDirection.x:F2}, {attackerLocalDirection.z:F2}); " +
+                $"reaction direction (opposite attacker)=({localReactionDirection.x:F2}, {localReactionDirection.z:F2}); " +
+                $"HitDirectionX={localReactionDirection.x:F2}, HitDirectionY={localReactionDirection.z:F2}.",
+                ownerTransform);
+        }
+
+        private static Vector3 GetPlanarDirection(Vector3 direction)
+        {
             direction.y = 0f;
-            if (direction.sqrMagnitude <= 0.0001f)
-            {
-                return HitFrontHash;
-            }
-
-            var localDirection = ownerTransform.InverseTransformDirection(direction.normalized);
-            if (Mathf.Abs(localDirection.z) >= Mathf.Abs(localDirection.x))
-            {
-                return localDirection.z >= 0f ? HitFrontHash : HitBackHash;
-            }
-
-            return localDirection.x >= 0f ? HitRightHash : HitLeftHash;
+            return direction.sqrMagnitude <= 0.0001f ? Vector3.zero : direction.normalized;
         }
 
         private void PruneOldDamageSamples(float now)
