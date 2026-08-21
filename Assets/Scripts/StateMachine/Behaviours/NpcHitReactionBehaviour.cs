@@ -14,7 +14,9 @@ namespace StateMachine.Behaviours
             var nav = context?.GetService<NpcNavMeshController>();
             nav?.ResetSpeed();
             nav?.Stop();
-            context?.GetService<NpcCombatService>()?.TryPrepareWeapon();
+            // A hit reaction owns the full-body interruption. Requesting a draw here lets the
+            // Weapon Handling layer fire its transfer event while the hit clip is still active.
+            // The next combat/search state prepares the weapon after this reaction has ended.
             FaceThreat(context);
         }
 

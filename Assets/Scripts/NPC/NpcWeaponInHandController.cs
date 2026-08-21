@@ -196,20 +196,24 @@ namespace NPC
                 return false;
             }
 
-            if (IsWeaponDrawn)
+            if (isWeaponDrawn)
             {
                 return true;
             }
 
             isWeaponDrawn = true;
             CompleteSheatheAnimation();
-            if (animator != null)
+            if (animator == null || weaponAnimationLayerIndex < 0)
             {
-                animator.ResetTrigger(SheatheWeaponRequestedParameterHash);
-                animator.SetTrigger(DrawWeaponRequestedParameterHash);
+                // An NPC without the Weapon Handling layer cannot receive the clip-owned handoff.
+                // Keep the immediate visual fallback for incomplete Animator setups.
+                RefreshWeaponInHand();
+                return true;
             }
 
-            RefreshWeaponInHand();
+            // The draw clip owns the transfer from belt to hand through its animation events.
+            animator.ResetTrigger(SheatheWeaponRequestedParameterHash);
+            animator.SetTrigger(DrawWeaponRequestedParameterHash);
             return true;
         }
 
@@ -226,12 +230,16 @@ namespace NPC
                                          && animator != null
                                          && weaponAnimationLayerIndex >= 0;
             hasEnteredSheatheAnimationState = false;
-            if (animator != null)
+            if (isSheatheAnimationInProgress)
             {
                 animator.ResetTrigger(DrawWeaponRequestedParameterHash);
                 animator.SetTrigger(SheatheWeaponRequestedParameterHash);
+                // Do not refresh here: RefreshWeaponInHand derives Belt from isWeaponDrawn and
+                // would move the visual before BeginMoveWeaponToBelt/PutWeaponOnBelt.
+                return;
             }
 
+            // Preserve the non-animated fallback when the Animator or its layer is unavailable.
             RefreshWeaponInHand();
         }
 
@@ -250,6 +258,9 @@ namespace NPC
 
             if (hasEnteredSheatheAnimationState)
             {
+                // If an animation event was skipped by an interrupted transition, commit the
+                // same final visual state before exposing this NPC as sheathed to session logic.
+                MoveCurrentWeapon(WeaponDisplayMode.Belt);
                 CompleteSheatheAnimation();
                 weaponSheathedPublisher?.Publish(new Messages.WeaponSheathedMessage(ownerDamageReceiver?.OwnerTransform));
             }
