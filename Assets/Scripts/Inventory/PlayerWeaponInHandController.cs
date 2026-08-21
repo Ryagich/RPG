@@ -992,7 +992,6 @@ namespace Inventory
             isCombatActionLocked = false;
             ResetAnimationRequests();
             playerAnimationController?.ReleaseEvasionDirection();
-            playerAnimationController?.SetLocomotionLocked(false);
             UpdateAttackRootMotionAvailability(forceDisable: true);
             ResetFullBodyAnimationForSheathing();
             UpdateRunningAvailability();
