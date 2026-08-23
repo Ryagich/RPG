@@ -10,135 +10,48 @@ using TargetLock;
 using UniRx;
 using UnityEngine;
 using VContainer.Unity;
-using Object = UnityEngine.Object;
 using Stats;
 
 namespace Inventory
 {
     public sealed class PlayerWeaponInHandController : IWeaponAnimationEventHandler, IEquippedWeaponVisual, IStartable, ITickable, IDisposable
     {
-        private const string WeaponAnimationLayerName = "Weapon Handling";
-        private const string AttackLayerName = "Full Body";
-        private const string DrawWeaponStatePath = "Weapon Handling.DrawWeapon";
-        private const string SheatheWeaponStatePath = "Weapon Handling.SheatheWeapon";
-        private const string EmptyIdleStateName = "Empty Idle";
-        private const string AttackStateName = "A_Attack_LightCombo01C_Sword";
-        private const string AttackComboAStateName = "A_Attack_LightCombo01A_Sword";
-        private const string AttackComboBHitStateName = "A_Attack_LightCombo01B_Hit_Sword";
-        private const string AttackWindUpStateName = "A_Attack_LightCombo01C_WindUp_Sword";
-        private const string AttackHitStateName = "A_Attack_LightCombo01C_Hit_Sword";
-        private const string AttackFollowThroughStateName = "A_Attack_LightCombo01C_FollowThrough_Sword";
-        private const string AttackComboAReturnToIdleStateName = "A_Attack_LightCombo01A_ReturnToIdle_Sword";
-        private const string AttackComboBReturnToIdleStateName = "A_Attack_LightCombo01B_ReturnToIdle_Sword";
-        private const string AttackRootMotionStateName = "A_Attack_LightCombo01C_RootMotion_Sword";
-        private const string AttackWindUpRootMotionStateName = "A_Attack_LightCombo01C_WindUp_RootMotion_Sword";
-        private const string AttackHitRootMotionStateName = "A_Attack_LightCombo01C_Hit_RootMotion_Sword";
-        private const string AttackFollowThroughRootMotionStateName = "A_Attack_LightCombo01C_FollowThrough_RootMotion_Sword";
-        private const string AttackComboCReturnToIdleRootMotionStateName = "A_Attack_LightCombo01C_ReturnToIdle_RootMotion_Sword";
-        private const string HitBackStateName = "A_Hit_B_Stagger_RootMotion_Sword";
-        private const string HitFrontStateName = "A_Hit_F_Stagger_RootMotion_Sword";
-        private const string HitRightStateName = "A_Hit_R_Stagger_RootMotion_Sword";
-        private const string HitLeftStateName = "A_Hit_L_Stagger_RootMotion_Sword";
-        private const string HeavyAttackHitRootMotionStateName = "A_Attack_HeavyCombo01A_Hit_RootMotion_Sword";
-        private const string HeavyAttackHitStateName = "A_Attack_HeavyCombo01B_Hit_Sword";
-        private const string DodgeStateName = "Dodge Tree";
-        private const string RollStateName = "Dodge RollTree";
-        private const string DrawWeaponClipName = "A_Draw_Sword";
-        private const string SheatheWeaponClipName = "A_Sheathe_Sword";
-        private const float FallbackAttachmentBlendDuration = 0.08f;
         private const string BeginMoveWeaponToRightHandEventName = "BeginMoveWeaponToRightHand";
         private const string TakeWeaponInHandEventName = "TakeWeaponInHand";
         private const string BeginMoveWeaponToBeltEventName = "BeginMoveWeaponToBelt";
         private const string PutWeaponOnBeltEventName = "PutWeaponOnBelt";
-        private const string DrawWeaponRequestedParameter = "MoveWeaponInHand";
-        private const string SheatheWeaponRequestedParameter = "MoveWeaponInBelt";
-        private const string AttackRequestedParameter = "Attack";
-        private const string HeavyAttackRequestedParameter = "HeavyAttack";
-        private const string DodgeRequestedParameter = "Dodge";
-        private const string RollRequestedParameter = "Roll";
-
-        private static readonly int DrawWeaponStateHash = Animator.StringToHash(DrawWeaponStatePath);
-        private static readonly int SheatheWeaponStateHash = Animator.StringToHash(SheatheWeaponStatePath);
-        private static readonly int EmptyIdleStateShortNameHash = Animator.StringToHash(EmptyIdleStateName);
-        private static readonly int AttackStateShortNameHash = Animator.StringToHash(AttackStateName);
-        private static readonly int AttackComboAStateShortNameHash = Animator.StringToHash(AttackComboAStateName);
-        private static readonly int AttackComboBHitStateShortNameHash = Animator.StringToHash(AttackComboBHitStateName);
-        private static readonly int AttackWindUpStateShortNameHash = Animator.StringToHash(AttackWindUpStateName);
-        private static readonly int AttackHitStateShortNameHash = Animator.StringToHash(AttackHitStateName);
-        private static readonly int AttackFollowThroughStateShortNameHash = Animator.StringToHash(AttackFollowThroughStateName);
-        private static readonly int AttackComboAReturnToIdleStateShortNameHash = Animator.StringToHash(AttackComboAReturnToIdleStateName);
-        private static readonly int AttackComboBReturnToIdleStateShortNameHash = Animator.StringToHash(AttackComboBReturnToIdleStateName);
-        private static readonly int AttackRootMotionStateShortNameHash = Animator.StringToHash(AttackRootMotionStateName);
-        private static readonly int AttackWindUpRootMotionStateShortNameHash = Animator.StringToHash(AttackWindUpRootMotionStateName);
-        private static readonly int AttackHitRootMotionStateShortNameHash = Animator.StringToHash(AttackHitRootMotionStateName);
-        private static readonly int AttackFollowThroughRootMotionStateShortNameHash = Animator.StringToHash(AttackFollowThroughRootMotionStateName);
-        private static readonly int AttackComboCReturnToIdleRootMotionStateShortNameHash = Animator.StringToHash(AttackComboCReturnToIdleRootMotionStateName);
-        private static readonly int HitBackStateShortNameHash = Animator.StringToHash(HitBackStateName);
-        private static readonly int HitFrontStateShortNameHash = Animator.StringToHash(HitFrontStateName);
-        private static readonly int HitRightStateShortNameHash = Animator.StringToHash(HitRightStateName);
-        private static readonly int HitLeftStateShortNameHash = Animator.StringToHash(HitLeftStateName);
-        private static readonly int HeavyAttackHitRootMotionStateShortNameHash = Animator.StringToHash(HeavyAttackHitRootMotionStateName);
-        private static readonly int HeavyAttackHitStateShortNameHash = Animator.StringToHash(HeavyAttackHitStateName);
-        private static readonly int DodgeStateShortNameHash = Animator.StringToHash(DodgeStateName);
-        private static readonly int RollStateShortNameHash = Animator.StringToHash(RollStateName);
-        private static readonly int DrawWeaponRequestedParameterHash = Animator.StringToHash(DrawWeaponRequestedParameter);
-        private static readonly int SheatheWeaponRequestedParameterHash = Animator.StringToHash(SheatheWeaponRequestedParameter);
-        private static readonly int AttackRequestedParameterHash = Animator.StringToHash(AttackRequestedParameter);
-        private static readonly int HeavyAttackRequestedParameterHash = Animator.StringToHash(HeavyAttackRequestedParameter);
-        private static readonly int DodgeRequestedParameterHash = Animator.StringToHash(DodgeRequestedParameter);
-        private static readonly int RollRequestedParameterHash = Animator.StringToHash(RollRequestedParameter);
-
-        private enum WeaponDisplayMode
-        {
-            None,
-            RightHand,
-            Belt
-        }
-
-        private enum WeaponAnimationKind
-        {
-            None,
-            Draw,
-            Sheathe
-        }
-
         private readonly PlayerInventory playerInventory;
-        private readonly PlayerWeaponHandAnchor handAnchor;
         private readonly PlayerWeaponAnimationEventReceiver animationEventReceiver;
         private readonly Animator animator;
-        private readonly CharacterRootMotionController rootMotionController;
-        private readonly GameModesController gameModesController;
         private readonly PlayerMovement playerMovement;
-        private readonly PlayerMovementConfig playerMovementConfig;
-        private readonly PlayerAnimationController playerAnimationController;
-        private readonly TargetLockController targetLockController;
         private readonly CharacterDamageReceiver ownerDamageReceiver;
         private readonly CharacterActionState actionState;
-        private readonly StatsController statsController;
-        private readonly IPublisher<PlayerEvasionCompletedMessage> evasionCompletedPublisher;
         private readonly IPublisher<WeaponSheathedMessage> weaponSheathedPublisher;
         private readonly CompositeDisposable disposables = new();
-        private readonly SerialDisposable weaponAttachmentBlendDisposable = new();
+        private readonly PlayerWeaponInputSubscriptions inputSubscriptions;
+        private readonly PlayerWeaponVisualController weaponVisual;
+        private readonly PlayerWeaponTransitionAnimator weaponTransitionAnimator;
+        private readonly PlayerWeaponCombatActionController combatActions;
         private readonly int weaponAnimationLayerIndex;
-        private readonly int attackLayerIndex;
 
         private int selectedWeaponSlotIndex = 1;
         private bool isInitialized;
-        private bool isWeaponDrawn;
-        private bool isWeaponAnimationInProgress;
-        private bool hasEnteredSheatheAnimationState;
         private bool hasPendingRefresh;
-        private bool isHitAttackInProgress;
-        private bool isCombatActionLocked;
-        private bool hasAttachmentBlendStartedForCurrentAnimation;
-        private bool shouldPreservePoseForCurrentDraw;
-        private GameObject currentWeaponInstance;
-        private ItemConfig currentWeaponItemConfig;
-        private WeaponDamageZone activeDamageZone;
-        private int currentRenderedSlotIndex;
-        private WeaponDisplayMode currentDisplayMode;
-        private WeaponAnimationKind currentAnimationKind;
-        private string currentAnimationClipName;
+        private readonly PlayerWeaponTransitionState weaponTransitionState = new();
+
+        private bool isWeaponDrawn
+        {
+            get => weaponTransitionState.IsWeaponDrawn;
+            set => weaponTransitionState.SetWeaponDrawn(value);
+        }
+
+        private bool isWeaponAnimationInProgress => weaponTransitionState.IsAnimationInProgress;
+        private bool shouldPreservePoseForCurrentDraw => weaponTransitionState.ShouldPreservePoseForDraw;
+        private WeaponAnimationKind currentAnimationKind => weaponTransitionState.CurrentKind;
+        private GameObject currentWeaponInstance => weaponVisual.Instance;
+        private ItemConfig currentWeaponItemConfig => weaponVisual.ItemConfig;
+        private int currentRenderedSlotIndex => weaponVisual.SlotIndex;
+        private WeaponDisplayMode currentDisplayMode => weaponVisual.DisplayMode;
 
         public PlayerWeaponInHandController(
             PlayerInventory playerInventory,
@@ -163,33 +76,46 @@ namespace Inventory
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
         {
             this.playerInventory = playerInventory;
-            this.handAnchor = handAnchor;
             this.animationEventReceiver = animationEventReceiver;
             this.animator = animator;
-            this.rootMotionController = rootMotionController;
-            this.gameModesController = gameModesController;
             this.playerMovement = playerMovement;
-            this.playerMovementConfig = playerMovementConfig;
-            this.playerAnimationController = playerAnimationController;
-            this.targetLockController = targetLockController;
             this.ownerDamageReceiver = ownerDamageReceiver;
             this.actionState = actionState;
-            this.statsController = statsController;
-            this.evasionCompletedPublisher = evasionCompletedPublisher;
             this.weaponSheathedPublisher = weaponSheathedPublisher;
-            weaponAnimationLayerIndex = animator != null
-                ? animator.GetLayerIndex(WeaponAnimationLayerName)
-                : -1;
-            attackLayerIndex = animator != null
-                ? animator.GetLayerIndex(AttackLayerName)
-                : -1;
+            weaponTransitionAnimator = new PlayerWeaponTransitionAnimator(animator);
+            var weaponCombatAnimator = new PlayerWeaponCombatAnimator(animator);
+            var damageWindow = new EquippedWeaponDamageWindowController();
+            weaponAnimationLayerIndex = weaponTransitionAnimator.LayerIndex;
+            weaponVisual = new PlayerWeaponVisualController(handAnchor, animator, weaponAnimationLayerIndex);
+            combatActions = new PlayerWeaponCombatActionController(
+                animator,
+                weaponCombatAnimator,
+                rootMotionController,
+                gameModesController,
+                playerMovement,
+                playerMovementConfig,
+                playerAnimationController,
+                targetLockController,
+                ownerDamageReceiver,
+                actionState,
+                statsController,
+                evasionCompletedPublisher,
+                damageWindow,
+                () => currentWeaponInstance,
+                () => currentWeaponItemConfig);
             animationEventReceiver?.Bind(this);
 
-            weaponSlotInputSubscriber.Subscribe(OnWeaponSlotInput).AddTo(disposables);
-            mouseDownSubscriber.Subscribe(OnMouseDown).AddTo(disposables);
-            dodgeInputSubscriber.Subscribe(OnDodgeInput).AddTo(disposables);
-            rollInputSubscriber.Subscribe(OnRollInput).AddTo(disposables);
-            gameModeChangedSubscriber.Subscribe(OnGameModeChanged).AddTo(disposables);
+            inputSubscriptions = new PlayerWeaponInputSubscriptions(
+                weaponSlotInputSubscriber,
+                mouseDownSubscriber,
+                dodgeInputSubscriber,
+                rollInputSubscriber,
+                gameModeChangedSubscriber,
+                OnWeaponSlotInput,
+                OnMouseDown,
+                OnDodgeInput,
+                OnRollInput,
+                OnGameModeChanged);
             playerInventory.Changed.Subscribe(_ => RefreshWeaponAfterInitialization()).AddTo(disposables);
             playerInventory.HandSlot.Subscribe(_ => RefreshWeaponAfterInitialization()).AddTo(disposables);
         }
@@ -197,8 +123,7 @@ namespace Inventory
         public void Start()
         {
             ResetAnimatorRequests();
-            playerAnimationController?.ReleaseEvasionDirection();
-            ownerDamageReceiver?.SetWeaponDamageBlocked(false);
+            combatActions.Start();
 
             // The initial item set is applied before this entry point starts. Its inventory
             // notifications must establish the initial belt presentation, not begin a draw
@@ -206,28 +131,25 @@ namespace Inventory
             isInitialized = true;
             RefreshWeaponInHand();
             UpdateRunningAvailability();
-            UpdateAttackRootMotionAvailability();
         }
 
         public void Dispose()
         {
-            playerAnimationController?.ReleaseEvasionDirection();
-            ownerDamageReceiver?.SetWeaponDamageBlocked(false);
-            weaponAttachmentBlendDisposable.Dispose();
-            DestroyCurrentWeaponInstance();
-            UpdateAttackRootMotionAvailability(forceDisable: true);
+            combatActions.Dispose();
+            weaponVisual.Dispose();
+            inputSubscriptions.Dispose();
             disposables.Dispose();
         }
 
         public void Tick()
         {
-            UpdateAttackRootMotionAvailability();
+            combatActions.Tick();
             SynchronizeSheatheCompletionWithAnimatorState();
 
             if (hasPendingRefresh
              && !isWeaponAnimationInProgress
              && !actionState.IsActionBlocked
-             && !IsAttackBlockingWeaponChanges())
+             && !combatActions.IsAttackBlockingWeaponChanges)
             {
                 hasPendingRefresh = false;
                 RefreshWeaponInHand();
@@ -236,12 +158,10 @@ namespace Inventory
 
         public void BeginMoveWeaponToRightHandFromAnimationEvent()
         {
-            if (currentAnimationKind != WeaponAnimationKind.Draw || hasAttachmentBlendStartedForCurrentAnimation)
+            if (!weaponTransitionState.TryBeginAttachmentBlend(WeaponAnimationKind.Draw))
             {
                 return;
             }
-
-            hasAttachmentBlendStartedForCurrentAnimation = true;
 
             if (shouldPreservePoseForCurrentDraw)
             {
@@ -275,12 +195,10 @@ namespace Inventory
 
         public void BeginMoveWeaponToBeltFromAnimationEvent()
         {
-            if (currentAnimationKind != WeaponAnimationKind.Sheathe || hasAttachmentBlendStartedForCurrentAnimation)
+            if (!weaponTransitionState.TryBeginAttachmentBlend(WeaponAnimationKind.Sheathe))
             {
                 return;
             }
-
-            hasAttachmentBlendStartedForCurrentAnimation = true;
 
             if (TryStartNextWeaponDuringSheathe())
             {
@@ -329,26 +247,17 @@ namespace Inventory
 
         public void AttackStartedFromAnimationEvent()
         {
-            // Animation Event: AttackStarted
-            // Use on attack clips when the combat action itself begins.
-            // This event is stronger than a pure movement lock: it marks attack-in-progress,
-            // enables attack root motion handling, and also removes player control.
-            isHitAttackInProgress = true;
-            isCombatActionLocked = true;
-            UpdateAttackRootMotionAvailability();
-
-            playerMovement?.ChangeState(false);
-            playerAnimationController?.SetLocomotionLocked(true);
+            combatActions.AttackStartedFromAnimationEvent();
         }
 
         public void BeginDamageWindowFromAnimationEvent()
         {
-            BeginCurrentWeaponDamageWindow();
+            combatActions.BeginDamageWindowFromAnimationEvent();
         }
 
         public void EndDamageWindowFromAnimationEvent()
         {
-            EndCurrentWeaponDamageWindow();
+            combatActions.EndDamageWindowFromAnimationEvent();
         }
 
         public bool IsWeaponSheathed => !isWeaponAnimationInProgress
@@ -358,7 +267,7 @@ namespace Inventory
 
         public bool CanProcessWeaponSlotInput => isInitialized
                                                   && !actionState.IsActionBlocked
-                                                  && !IsAttackBlockingWeaponChanges();
+                                                  && !combatActions.IsAttackBlockingWeaponChanges;
 
         private bool IsWeaponInHand => isWeaponDrawn
                                       && currentDisplayMode == WeaponDisplayMode.RightHand
@@ -371,19 +280,19 @@ namespace Inventory
         /// active full-body action or another weapon transition.
         /// </summary>
         public bool CanStartWeaponSheathing => IsWeaponSheathed
-                                              || (!isWeaponAnimationInProgress && !IsAttackRootMotionStateActive());
+                                              || (!isWeaponAnimationInProgress && !combatActions.IsAttackRootMotionStateActive);
 
         /// <summary>
         /// True from the animation's LockMovement event until its matching UnlockMovement event.
         /// </summary>
-        public bool IsCombatActionLocked => isCombatActionLocked;
+        public bool IsCombatActionLocked => combatActions.IsCombatActionLocked;
 
         /// <summary>
         /// True while the Roll request, transition, or its full-body animation is active.
         /// Consumers that synchronize with a roll must wait for this to become false rather
         /// than relying on the earlier UnlockMovement animation event.
         /// </summary>
-        public bool IsRollAnimationActive => IsRollInProgress();
+        public bool IsRollAnimationActive => combatActions.IsRollAnimationActive;
 
         /// <summary>
         /// Starts the normal sheathing transition. An explicit sheathe command takes precedence
@@ -397,66 +306,34 @@ namespace Inventory
                 return;
             }
 
-            CancelAttackFlow(restoreMovement: false);
+            combatActions.Cancel(restoreMovement: false);
             isWeaponDrawn = false;
             StartSheatheAnimation(currentRenderedSlotIndex, currentWeaponItemConfig, ignoreActiveCombatAction: true);
         }
 
         public void EnableDamageImmunityFromAnimationEvent()
         {
-            ownerDamageReceiver?.SetWeaponDamageBlocked(true);
+            combatActions.EnableDamageImmunityFromAnimationEvent();
         }
 
         public void DisableDamageImmunityFromAnimationEvent()
         {
-            ownerDamageReceiver?.SetWeaponDamageBlocked(false);
+            combatActions.DisableDamageImmunityFromAnimationEvent();
         }
 
         public void LockMovementFromAnimationEvent()
         {
-            // Animation Event: LockMovement
-            // Use on attack / return-to-idle clips when control should be taken away
-            // without changing the rest of the attack flow state.
-            isCombatActionLocked = true;
-            playerMovement?.ChangeState(false);
-            playerAnimationController?.SetLocomotionLocked(true);
+            combatActions.LockMovementFromAnimationEvent();
         }
 
         public void UnlockMovementFromAnimationEvent()
         {
-            // Animation Event: UnlockMovement
-            // Use on attack / return-to-idle clips when control can be returned
-            // before the full attack flow has completely ended.
-            var completedEvasion = IsEvasionInProgress();
-            var completedRoll = IsRollInProgress();
-            isCombatActionLocked = false;
-            playerAnimationController?.ReleaseEvasionDirection();
-
-            if (gameModesController.GameMode == GameMode.Game)
-            {
-                playerMovement?.ChangeState(true);
-            }
-
-            playerAnimationController?.SetLocomotionLocked(false);
-
-            if (completedEvasion)
-            {
-                evasionCompletedPublisher.Publish(new PlayerEvasionCompletedMessage(completedRoll));
-            }
+            combatActions.UnlockMovementFromAnimationEvent();
         }
 
         public void AttackFinishedFromAnimationEvent()
         {
-            isHitAttackInProgress = false;
-            isCombatActionLocked = false;
-            UpdateAttackRootMotionAvailability();
-
-            if (gameModesController.GameMode == GameMode.Game)
-            {
-                playerMovement?.ChangeState(true);
-            }
-
-            playerAnimationController?.SetLocomotionLocked(false);
+            combatActions.AttackFinishedFromAnimationEvent();
             UpdateRunningAvailability();
             RefreshWeaponInHand();
         }
@@ -466,18 +343,13 @@ namespace Inventory
             // Legacy event endpoint: ResetAttackRequest.
             // Its meaning is now "reset animation requests": both mutually exclusive
             // attack request bools are cleared together.
-            ResetAnimationRequests();
+            combatActions.ResetAnimationRequests();
         }
 
         public void InterruptByHitReaction()
         {
-            playerAnimationController?.ReleaseEvasionDirection();
-            CancelAttackFlow(restoreMovement: false);
-            // A damage window can be active before the AttackStarted event has set its flag.
-            // Hit reaction must close it regardless of that timing.
-            EndCurrentWeaponDamageWindow();
+            combatActions.InterruptByHitReaction();
             ResetAnimatorRequests();
-            UpdateAttackRootMotionAvailability(forceDisable: true);
         }
 
         public bool TryGetCurrentWeaponSlot(out Inventory.Slot.SlotModel slot)
@@ -522,16 +394,7 @@ namespace Inventory
 
         public bool TryGetCurrentWeaponPose(out Vector3 position, out Quaternion rotation)
         {
-            if (currentWeaponInstance != null)
-            {
-                position = currentWeaponInstance.transform.position;
-                rotation = currentWeaponInstance.transform.rotation;
-                return true;
-            }
-
-            position = default;
-            rotation = default;
-            return false;
+            return weaponVisual.TryGetPose(out position, out rotation);
         }
 
         private void OnWeaponSlotInput(WeaponSlotInputMessage message)
@@ -606,12 +469,7 @@ namespace Inventory
 
             // A hit reaction may also block the player, but only an active weapon attack
             // is allowed to receive a replacement request while movement is locked.
-            if (actionState.IsActionBlocked && !isHitAttackInProgress)
-            {
-                return;
-            }
-
-            if (gameModesController.GameMode != GameMode.Game)
+            if (actionState.IsActionBlocked && !combatActions.IsHitAttackInProgress)
             {
                 return;
             }
@@ -644,72 +502,27 @@ namespace Inventory
                 return;
             }
 
-            targetLockController?.TryFaceAttackTarget();
-            TriggerAttack(message.Button);
+            combatActions.TryTriggerAttack(message.Button);
         }
 
         private void OnGameModeChanged(GameModeChangedMessage message)
         {
-            if (message.GameMode == GameMode.Game)
-            {
-                if (!isHitAttackInProgress)
-                {
-                    playerAnimationController?.SetLocomotionLocked(false);
-                }
-
-                return;
-            }
-
-            CancelAttackFlow();
+            combatActions.HandleGameModeChanged(message);
         }
 
         private void OnDodgeInput(DodgeInputMessage _)
         {
-            // Dodge and Roll are full-body actions and must remain available while the weapon
-            // visual is being drawn or sheathed. In particular, a lesson can pause that visual
-            // transition before forwarding the player's first evasion input.
-            if (animator == null
-             || gameModesController.GameMode != GameMode.Game
-             || IsHitAnimationInProgress()
-             || (actionState.IsActionBlocked && !isHitAttackInProgress))
-            {
-                return;
-            }
-
-            SpendStamina(GetStamina().DodgeCost);
-
-            CaptureEvasionDirection();
-
-            SetAnimationRequests(
-                lightAttackRequested: false,
-                heavyAttackRequested: false,
-                dodgeRequested: true,
-                rollRequested: false);
+            combatActions.TryRequestDodge();
         }
 
         private void OnRollInput(RollInputMessage _)
         {
-            if (animator == null
-             || gameModesController.GameMode != GameMode.Game
-             || IsHitAnimationInProgress()
-             || (actionState.IsActionBlocked && !isHitAttackInProgress))
-            {
-                return;
-            }
-
-            SpendStamina(GetStamina().RollCost);
-            CaptureEvasionDirection();
-
-            SetAnimationRequests(
-                lightAttackRequested: false,
-                heavyAttackRequested: false,
-                dodgeRequested: false,
-                rollRequested: true);
+            combatActions.TryRequestRoll();
         }
 
         private void RefreshWeaponInHand()
         {
-            if (actionState.IsActionBlocked || IsAttackBlockingWeaponChanges())
+            if (actionState.IsActionBlocked || combatActions.IsAttackBlockingWeaponChanges)
             {
                 hasPendingRefresh = true;
                 return;
@@ -724,14 +537,14 @@ namespace Inventory
 
             if (selectedItemConfig == null)
             {
-                CancelAttackFlow();
+                combatActions.Cancel();
                 HandleEmptySelectedSlot();
                 return;
             }
 
             if (!isWeaponDrawn)
             {
-                CancelAttackFlow();
+                combatActions.Cancel();
                 HandleDesiredHolsteredWeapon(selectedItemConfig);
                 return;
             }
@@ -808,7 +621,7 @@ namespace Inventory
 
         private void StartDrawAnimation(int slotIndex, ItemConfig itemConfig, bool preserveCurrentVisual = false)
         {
-            if (itemConfig == null || IsAttackBlockingWeaponChanges())
+            if (itemConfig == null || combatActions.IsAttackBlockingWeaponChanges)
             {
                 return;
             }
@@ -828,11 +641,8 @@ namespace Inventory
                 RenderWeapon(itemConfig, slotIndex, WeaponDisplayMode.Belt);
             }
 
-            isWeaponAnimationInProgress = true;
+            weaponTransitionState.Begin(WeaponAnimationKind.Draw, preserveCurrentVisual);
             hasPendingRefresh = false;
-            hasAttachmentBlendStartedForCurrentAnimation = false;
-            currentAnimationKind = WeaponAnimationKind.Draw;
-            currentAnimationClipName = DrawWeaponClipName;
             UpdateRunningAvailability();
 
             if (animator == null)
@@ -842,9 +652,7 @@ namespace Inventory
                 return;
             }
 
-            animator.ResetTrigger(DrawWeaponRequestedParameterHash);
-            animator.ResetTrigger(SheatheWeaponRequestedParameterHash);
-            animator.SetTrigger(DrawWeaponRequestedParameterHash);
+            weaponTransitionAnimator.Request(WeaponAnimationKind.Draw);
         }
 
         private void StartSheatheAnimation(
@@ -858,17 +666,13 @@ namespace Inventory
                 return;
             }
 
-            if (!ignoreActiveCombatAction && IsAttackBlockingWeaponChanges())
+            if (!ignoreActiveCombatAction && combatActions.IsAttackBlockingWeaponChanges)
             {
                 return;
             }
 
-            isWeaponAnimationInProgress = true;
-            hasEnteredSheatheAnimationState = false;
+            weaponTransitionState.Begin(WeaponAnimationKind.Sheathe);
             hasPendingRefresh = false;
-            hasAttachmentBlendStartedForCurrentAnimation = false;
-            currentAnimationKind = WeaponAnimationKind.Sheathe;
-            currentAnimationClipName = SheatheWeaponClipName;
             UpdateRunningAvailability();
 
             if (animator == null)
@@ -878,56 +682,7 @@ namespace Inventory
                 return;
             }
 
-            animator.ResetTrigger(SheatheWeaponRequestedParameterHash);
-            animator.ResetTrigger(DrawWeaponRequestedParameterHash);
-            animator.SetTrigger(SheatheWeaponRequestedParameterHash);
-        }
-
-        private void TriggerAttack(MouseButtonType button)
-        {
-            if (animator == null)
-            {
-                return;
-            }
-
-            var isHeavyAttack = button == MouseButtonType.Right;
-            SpendStamina(isHeavyAttack ? GetStamina().HeavyAttackCost : GetStamina().LightAttackCost);
-            SetAnimationRequests(
-                lightAttackRequested: !isHeavyAttack,
-                heavyAttackRequested: isHeavyAttack,
-                dodgeRequested: false,
-                rollRequested: false);
-        }
-
-        private void CancelAttackFlow(bool restoreMovement = true)
-        {
-            playerAnimationController?.ReleaseEvasionDirection();
-            DisableDamageImmunityFromAnimationEvent();
-            isCombatActionLocked = false;
-
-            if (isHitAttackInProgress)
-            {
-                isHitAttackInProgress = false;
-                EndCurrentWeaponDamageWindow();
-                UpdateAttackRootMotionAvailability();
-                if (restoreMovement && gameModesController.GameMode == GameMode.Game)
-                {
-                    playerMovement?.ChangeState(true);
-                }
-
-                if (restoreMovement)
-                {
-                    playerAnimationController?.SetLocomotionLocked(false);
-                }
-            }
-
-            if (animator == null)
-            {
-                return;
-            }
-
-            ResetAnimationRequests();
-
+            weaponTransitionAnimator.Request(WeaponAnimationKind.Sheathe);
         }
 
         private void CompleteWeaponAnimationFromEvent(WeaponAnimationKind expectedAnimationKind)
@@ -942,12 +697,7 @@ namespace Inventory
                 ConfirmWeaponSheathed();
             }
 
-            isWeaponAnimationInProgress = false;
-            hasEnteredSheatheAnimationState = false;
-            hasAttachmentBlendStartedForCurrentAnimation = false;
-            shouldPreservePoseForCurrentDraw = false;
-            currentAnimationKind = WeaponAnimationKind.None;
-            currentAnimationClipName = null;
+            weaponTransitionState.Complete(expectedAnimationKind);
             ResetAnimatorRequests();
             UpdateRunningAvailability();
 
@@ -967,10 +717,7 @@ namespace Inventory
             // forced sheathing, where a session owns the request but the weapon controller
             // still owns the final state transition.
             isWeaponDrawn = false;
-            isCombatActionLocked = false;
-            ResetAnimationRequests();
-            playerAnimationController?.ReleaseEvasionDirection();
-            UpdateAttackRootMotionAvailability(forceDisable: true);
+            combatActions.Cancel(restoreMovement: false);
             UpdateRunningAvailability();
         }
 
@@ -986,11 +733,11 @@ namespace Inventory
 
             if (IsSheatheWeaponAnimationStateActive())
             {
-                hasEnteredSheatheAnimationState = true;
+                weaponTransitionState.MarkSheatheStateEntered();
                 return;
             }
 
-            if (!hasEnteredSheatheAnimationState || currentWeaponItemConfig == null)
+            if (!weaponTransitionState.CanSynchronizeSheathe() || currentWeaponItemConfig == null)
             {
                 return;
             }
@@ -1011,13 +758,7 @@ namespace Inventory
 
         private bool IsSheatheWeaponAnimationStateActive()
         {
-            if (animator.GetCurrentAnimatorStateInfo(weaponAnimationLayerIndex).fullPathHash == SheatheWeaponStateHash)
-            {
-                return true;
-            }
-
-            return animator.IsInTransition(weaponAnimationLayerIndex)
-                   && animator.GetNextAnimatorStateInfo(weaponAnimationLayerIndex).fullPathHash == SheatheWeaponStateHash;
+            return weaponTransitionAnimator.IsStateActive(WeaponAnimationKind.Sheathe);
         }
 
         private bool TryHandleWeaponSlotInputDuringAnimation()
@@ -1077,61 +818,31 @@ namespace Inventory
                 return false;
             }
 
-            weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
             DestroyCurrentWeaponInstance();
-            currentWeaponItemConfig = null;
-            currentRenderedSlotIndex = 0;
-            currentDisplayMode = WeaponDisplayMode.None;
 
             RenderWeapon(selectedItemConfig, selectedWeaponSlotIndex, WeaponDisplayMode.Belt);
-            shouldPreservePoseForCurrentDraw = true;
             StartDrawAnimation(selectedWeaponSlotIndex, selectedItemConfig, preserveCurrentVisual: true);
             return true;
         }
 
         private void MoveCurrentWeaponToBeltPreservingPose()
         {
-            if (currentWeaponInstance == null || currentWeaponItemConfig == null)
-            {
-                return;
-            }
-
-            var targetParent = GetTargetParent(WeaponDisplayMode.Belt);
-            if (targetParent == null)
-            {
-                return;
-            }
-
-            weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
-            currentWeaponInstance.transform.SetParent(targetParent, true);
-            currentDisplayMode = WeaponDisplayMode.Belt;
-            UpdateCurrentWeaponInstanceName();
+            weaponVisual.MovePreservingPose(WeaponDisplayMode.Belt);
             UpdateRunningAvailability();
         }
 
         private void MoveCurrentWeaponToRightHandPreservingPose()
         {
-            if (currentWeaponInstance == null || currentWeaponItemConfig == null)
-            {
-                return;
-            }
-
-            var targetParent = GetTargetParent(WeaponDisplayMode.RightHand);
-            if (targetParent == null)
-            {
-                return;
-            }
-
-            weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
-            currentWeaponInstance.transform.SetParent(targetParent, true);
-            currentDisplayMode = WeaponDisplayMode.RightHand;
-            UpdateCurrentWeaponInstanceName();
+            weaponVisual.MovePreservingPose(WeaponDisplayMode.RightHand);
             UpdateRunningAvailability();
         }
 
         private bool TryStartNextWeaponDuringSheatheIfBeginEventPassed()
         {
-            if (!TryGetAnimationEventNormalizedTime(currentAnimationClipName, BeginMoveWeaponToBeltEventName, out var beginMoveNormalizedTime))
+            if (!weaponTransitionAnimator.TryGetEventNormalizedTime(
+                    WeaponAnimationKind.Sheathe,
+                    BeginMoveWeaponToBeltEventName,
+                    out var beginMoveNormalizedTime))
             {
                 return false;
             }
@@ -1142,7 +853,8 @@ namespace Inventory
             }
 
             var stateInfo = animator.GetCurrentAnimatorStateInfo(weaponAnimationLayerIndex);
-            if (stateInfo.fullPathHash != SheatheWeaponStateHash || stateInfo.normalizedTime < beginMoveNormalizedTime)
+            if (stateInfo.fullPathHash != weaponTransitionAnimator.GetStateHash(WeaponAnimationKind.Sheathe)
+             || stateInfo.normalizedTime < beginMoveNormalizedTime)
             {
                 return false;
             }
@@ -1178,54 +890,10 @@ namespace Inventory
             return GetSelectedWeaponItemConfig();
         }
 
-        private ItemConfig GetWeaponItemConfigForSlot(int slotIndex)
-        {
-            var slot = slotIndex == 1
-                ? playerInventory.LeftWeaponSlot
-                : playerInventory.RightWeaponSlot;
-            var itemConfig = slot?.ItemConfig;
-
-            return itemConfig?.ItemType == ItemType.Weapon
-                ? itemConfig
-                : null;
-        }
-
         private void RenderWeapon(ItemConfig itemConfig, int slotIndex, WeaponDisplayMode displayMode)
         {
-            DestroyCurrentWeaponInstance();
-            CleanupSpawnedWeaponInstancesExceptCurrent(itemConfig);
-
-            if (itemConfig == null || displayMode == WeaponDisplayMode.None)
-            {
-                currentWeaponItemConfig = null;
-                currentRenderedSlotIndex = 0;
-                currentDisplayMode = WeaponDisplayMode.None;
-                UpdateRunningAvailability();
-                return;
-            }
-
-            var weaponPrefab = itemConfig.ItemType == ItemType.Weapon
-                ? itemConfig.WeaponInHandPrefab
-                : null;
-            var targetParent = GetTargetParent(displayMode);
-            if (weaponPrefab == null || targetParent == null)
-            {
-                currentWeaponItemConfig = null;
-                currentRenderedSlotIndex = 0;
-                currentDisplayMode = WeaponDisplayMode.None;
-                UpdateRunningAvailability();
-                return;
-            }
-
-            currentWeaponItemConfig = itemConfig;
-            currentRenderedSlotIndex = slotIndex;
-            currentDisplayMode = displayMode;
-
-            currentWeaponInstance = Object.Instantiate(weaponPrefab, targetParent, false);
-            UpdateCurrentWeaponInstanceName();
-
-            ApplyAttachmentTransform(currentWeaponInstance.transform, itemConfig, displayMode);
-
+            EndCurrentWeaponDamageWindow();
+            weaponVisual.Render(itemConfig, slotIndex, displayMode);
             UpdateRunningAvailability();
         }
 
@@ -1235,136 +903,24 @@ namespace Inventory
             WeaponDisplayMode displayMode,
             bool snapToAttachmentTransform)
         {
-            var targetParent = GetTargetParent(displayMode);
-            if (currentWeaponInstance != null
-             && currentWeaponItemConfig == itemConfig
-             && targetParent != null)
-            {
-                currentWeaponInstance.transform.SetParent(targetParent, !snapToAttachmentTransform);
-
-                if (snapToAttachmentTransform)
-                {
-                    ApplyAttachmentTransform(currentWeaponInstance.transform, itemConfig, displayMode);
-                }
-
-                currentRenderedSlotIndex = slotIndex;
-                currentDisplayMode = displayMode;
-                UpdateCurrentWeaponInstanceName();
-                return;
-            }
-
-            RenderWeapon(itemConfig, slotIndex, displayMode);
+            weaponVisual.FinalizeRender(itemConfig, slotIndex, displayMode, snapToAttachmentTransform);
+            UpdateRunningAvailability();
         }
 
         private void DestroyCurrentWeaponInstance()
         {
-            if (currentWeaponInstance == null)
-            {
-                return;
-            }
-
             EndCurrentWeaponDamageWindow();
-            Object.Destroy(currentWeaponInstance);
-            currentWeaponInstance = null;
+            weaponVisual.Destroy();
         }
 
-        private void CleanupSpawnedWeaponInstancesExceptCurrent(ItemConfig expectedItemConfig = null)
+        private void CleanupSpawnedWeaponInstancesExceptCurrent()
         {
-            expectedItemConfig ??= currentWeaponItemConfig;
-            CleanupSpawnedWeaponInstancesInAnchor(handAnchor?.RightHand, expectedItemConfig);
-            CleanupSpawnedWeaponInstancesInAnchor(handAnchor?.Belt, expectedItemConfig);
-        }
-
-        private void CleanupSpawnedWeaponInstancesInAnchor(Transform anchor, ItemConfig expectedItemConfig)
-        {
-            if (anchor == null)
-            {
-                return;
-            }
-
-            for (var index = anchor.childCount - 1; index >= 0; index--)
-            {
-                var child = anchor.GetChild(index);
-                if (child == null || child.gameObject == currentWeaponInstance)
-                {
-                    continue;
-                }
-
-                if (!IsGeneratedWeaponInstance(child.gameObject, expectedItemConfig))
-                {
-                    continue;
-                }
-
-                Object.Destroy(child.gameObject);
-            }
-        }
-
-        private static bool IsGeneratedWeaponInstance(GameObject candidate, ItemConfig expectedItemConfig)
-        {
-            if (candidate == null)
-            {
-                return false;
-            }
-
-            var prefabName = expectedItemConfig?.WeaponInHandPrefab != null
-                ? expectedItemConfig.WeaponInHandPrefab.name
-                : null;
-            return !string.IsNullOrWhiteSpace(prefabName) && candidate.name.StartsWith(prefabName, StringComparison.Ordinal);
-        }
-
-        private void UpdateCurrentWeaponInstanceName()
-        {
-            if (currentWeaponInstance != null && currentWeaponItemConfig?.WeaponInHandPrefab != null)
-            {
-                currentWeaponInstance.name = $"{currentWeaponItemConfig.WeaponInHandPrefab.name} | {currentDisplayMode}";
-            }
-        }
-
-        private void BeginCurrentWeaponDamageWindow()
-        {
-            if (activeDamageZone != null)
-            {
-                return;
-            }
-
-            if (currentWeaponInstance == null || currentWeaponItemConfig == null)
-            {
-                return;
-            }
-
-            var weapon = currentWeaponInstance.GetComponentInChildren<Weapon>(true);
-            var damageZone = weapon != null ? weapon.DamageZone : null;
-            if (damageZone == null)
-            {
-                return;
-            }
-
-            activeDamageZone = damageZone;
-            activeDamageZone.BeginDamageWindow(
-                ownerDamageReceiver,
-                currentWeaponItemConfig,
-                IsHeavyAttackDamageAnimationActive());
+            weaponVisual.CleanupExceptCurrent();
         }
 
         private void EndCurrentWeaponDamageWindow()
         {
-            if (activeDamageZone == null)
-            {
-                return;
-            }
-
-            activeDamageZone.EndDamageWindow();
-            activeDamageZone = null;
-        }
-
-        private Transform GetTargetParent(WeaponDisplayMode displayMode)
-        {
-            return displayMode switch
-            {
-                WeaponDisplayMode.RightHand => handAnchor?.RightHand,
-                WeaponDisplayMode.Belt => handAnchor?.Belt,
-                _ => null
-            };
+            combatActions.EndDamageWindowFromAnimationEvent();
         }
 
         private void StartWeaponAttachmentBlend(
@@ -1372,244 +928,19 @@ namespace Inventory
             string startEventName,
             string finishEventName)
         {
-            if (currentWeaponInstance == null || currentWeaponItemConfig == null)
-            {
-                return;
-            }
-
-            var targetParent = GetTargetParent(targetMode);
-            var attachment = GetAttachmentTransformData(currentWeaponItemConfig, targetMode);
-            if (targetParent == null || attachment == null)
-            {
-                return;
-            }
-
-            var weaponTransform = currentWeaponInstance.transform;
-            weaponTransform.SetParent(targetParent, true);
-            currentDisplayMode = targetMode;
-            UpdateCurrentWeaponInstanceName();
-
-            if (targetMode == WeaponDisplayMode.Belt)
-            {
-                return;
-            }
-
-            if (TryGetAnimationEventWindowNormalized(
-                    currentAnimationClipName,
-                    startEventName,
-                    finishEventName,
-                    out var startNormalizedTime,
-                    out var finishNormalizedTime))
-            {
-                StartTransformBlendByNormalizedTime(
-                    weaponTransform,
-                    attachment.LocalPosition,
-                    Quaternion.Euler(attachment.LocalEulerAngles),
-                    startNormalizedTime,
-                    finishNormalizedTime);
-                return;
-            }
-
-            StartTransformBlendByDuration(
-                weaponTransform,
-                attachment.LocalPosition,
-                Quaternion.Euler(attachment.LocalEulerAngles),
-                FallbackAttachmentBlendDuration);
-        }
-
-        private void StartTransformBlendByDuration(
-            Transform targetTransform,
-            Vector3 targetLocalPosition,
-            Quaternion targetLocalRotation,
-            float duration)
-        {
-            weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
-
-            if (targetTransform == null)
-            {
-                return;
-            }
-
-            if (duration <= 0f)
-            {
-                targetTransform.localPosition = targetLocalPosition;
-                targetTransform.localRotation = targetLocalRotation;
-                return;
-            }
-
-            var startLocalPosition = targetTransform.localPosition;
-            var startLocalRotation = targetTransform.localRotation;
-            var elapsed = 0f;
-
-            weaponAttachmentBlendDisposable.Disposable = Observable.EveryUpdate()
-                .ObserveOnMainThread()
-                .Subscribe(_ =>
-                {
-                    if (targetTransform == null)
-                    {
-                        weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
-                        return;
-                    }
-
-                    elapsed += Time.deltaTime;
-                    var progress = Mathf.Clamp01(elapsed / duration);
-
-                    targetTransform.localPosition = Vector3.Lerp(startLocalPosition, targetLocalPosition, progress);
-                    targetTransform.localRotation = Quaternion.Slerp(startLocalRotation, targetLocalRotation, progress);
-
-                    if (progress < 1f)
-                    {
-                        return;
-                    }
-
-                    weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
-                });
-        }
-
-        private void StartTransformBlendByNormalizedTime(
-            Transform targetTransform,
-            Vector3 targetLocalPosition,
-            Quaternion targetLocalRotation,
-            float startNormalizedTime,
-            float finishNormalizedTime)
-        {
-            weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
-
-            if (targetTransform == null)
-            {
-                return;
-            }
-
-            var startLocalPosition = targetTransform.localPosition;
-            var startLocalRotation = targetTransform.localRotation;
-            var targetStateHash = GetCurrentAnimationStateHash();
-
-            weaponAttachmentBlendDisposable.Disposable = Observable.EveryUpdate()
-                .ObserveOnMainThread()
-                .Subscribe(_ =>
-                {
-                    if (targetTransform == null || animator == null || weaponAnimationLayerIndex < 0)
-                    {
-                        weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
-                        return;
-                    }
-
-                    var stateInfo = animator.GetCurrentAnimatorStateInfo(weaponAnimationLayerIndex);
-                    if (stateInfo.fullPathHash != targetStateHash)
-                    {
-                        weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
-                        return;
-                    }
-
-                    var progress = Mathf.InverseLerp(startNormalizedTime, finishNormalizedTime, stateInfo.normalizedTime);
-                    targetTransform.localPosition = Vector3.Lerp(startLocalPosition, targetLocalPosition, progress);
-                    targetTransform.localRotation = Quaternion.Slerp(startLocalRotation, targetLocalRotation, progress);
-
-                    if (progress < 1f)
-                    {
-                        return;
-                    }
-
-                    weaponAttachmentBlendDisposable.Disposable = Disposable.Empty;
-                });
-        }
-
-        private bool TryGetAnimationEventWindowNormalized(
-            string clipName,
-            string startEventName,
-            string finishEventName,
-            out float startNormalizedTime,
-            out float finishNormalizedTime)
-        {
-            var clip = GetAnimationClip(clipName);
-            if (clip == null)
-            {
-                startNormalizedTime = 0f;
-                finishNormalizedTime = 0f;
-                return false;
-            }
-
-            float? startTime = null;
-            float? finishTime = null;
-
-            foreach (var animationEvent in clip.events)
-            {
-                if (!startTime.HasValue && animationEvent.functionName == startEventName)
-                {
-                    startTime = animationEvent.time;
-                }
-
-                if (!finishTime.HasValue && animationEvent.functionName == finishEventName)
-                {
-                    finishTime = animationEvent.time;
-                }
-            }
-
-            if (!startTime.HasValue || !finishTime.HasValue || finishTime.Value <= startTime.Value || clip.length <= 0f)
-            {
-                startNormalizedTime = 0f;
-                finishNormalizedTime = 0f;
-                return false;
-            }
-
-            startNormalizedTime = startTime.Value / clip.length;
-            finishNormalizedTime = finishTime.Value / clip.length;
-            return true;
-        }
-
-        private bool TryGetAnimationEventNormalizedTime(
-            string clipName,
-            string eventName,
-            out float normalizedTime)
-        {
-            var clip = GetAnimationClip(clipName);
-            if (clip == null || clip.length <= 0f)
-            {
-                normalizedTime = 0f;
-                return false;
-            }
-
-            foreach (var animationEvent in clip.events)
-            {
-                if (animationEvent.functionName != eventName)
-                {
-                    continue;
-                }
-
-                normalizedTime = animationEvent.time / clip.length;
-                return true;
-            }
-
-            normalizedTime = 0f;
-            return false;
+            weaponVisual.StartAttachmentBlend(
+                targetMode,
+                weaponTransitionAnimator.GetClip(currentAnimationKind),
+                GetCurrentAnimationStateHash(),
+                startEventName,
+                finishEventName);
         }
 
         private int GetCurrentAnimationStateHash()
         {
-            return currentAnimationKind switch
-            {
-                WeaponAnimationKind.Draw => DrawWeaponStateHash,
-                WeaponAnimationKind.Sheathe => SheatheWeaponStateHash,
-                _ => 0
-            };
-        }
-
-        private AnimationClip GetAnimationClip(string clipName)
-        {
-            if (string.IsNullOrWhiteSpace(clipName) || animator?.runtimeAnimatorController == null)
-            {
-                return null;
-            }
-
-            foreach (var clip in animator.runtimeAnimatorController.animationClips)
-            {
-                if (clip != null && clip.name == clipName)
-                {
-                    return clip;
-                }
-            }
-
-            return null;
+            return currentAnimationKind == WeaponAnimationKind.None
+                ? 0
+                : weaponTransitionAnimator.GetStateHash(currentAnimationKind);
         }
 
         private void ResetAnimatorRequests()
@@ -1619,257 +950,19 @@ namespace Inventory
                 return;
             }
 
-            animator.ResetTrigger(DrawWeaponRequestedParameterHash);
-            animator.ResetTrigger(SheatheWeaponRequestedParameterHash);
-            ResetAnimationRequests();
-        }
-
-        private void ResetAnimationRequests()
-        {
-            SetAnimationRequests(
-                lightAttackRequested: false,
-                heavyAttackRequested: false,
-                dodgeRequested: false,
-                rollRequested: false);
-        }
-
-        private void SetAnimationRequests(
-            bool lightAttackRequested,
-            bool heavyAttackRequested,
-            bool dodgeRequested,
-            bool rollRequested)
-        {
-            if (animator == null)
-            {
-                return;
-            }
-
-            animator.SetBool(AttackRequestedParameterHash, lightAttackRequested);
-            animator.SetBool(HeavyAttackRequestedParameterHash, heavyAttackRequested);
-            animator.SetBool(DodgeRequestedParameterHash, dodgeRequested);
-            animator.SetBool(RollRequestedParameterHash, rollRequested);
+            weaponTransitionAnimator.ResetRequests();
+            combatActions.ResetAnimationRequests();
         }
 
         private void UpdateRunningAvailability()
         {
             var shouldAllowRunning =
-                !IsAttackRootMotionStateActive()
+                !combatActions.IsAttackRootMotionStateActive
              && currentAnimationKind != WeaponAnimationKind.Draw
              && (currentDisplayMode != WeaponDisplayMode.RightHand || currentWeaponItemConfig == null);
 
             playerMovement?.SetRunAllowed(shouldAllowRunning);
         }
 
-        private void UpdateAttackRootMotionAvailability(bool forceDisable = false)
-        {
-            if (animator == null)
-            {
-                return;
-            }
-
-            var isRootMotionActive = !forceDisable && IsAttackRootMotionStateActive();
-            var positionMultiplier = isRootMotionActive
-                ? GetEvasionRootMotionMultiplier()
-                : 1f;
-            rootMotionController?.SetRootMotionActive(this, isRootMotionActive, positionMultiplier);
-        }
-
-        private bool IsAttackRootMotionStateActive()
-        {
-            if (animator == null || attackLayerIndex < 0)
-            {
-                return false;
-            }
-
-            if (IsAttackState(animator.GetCurrentAnimatorStateInfo(attackLayerIndex)))
-            {
-                return true;
-            }
-
-            return animator.IsInTransition(attackLayerIndex)
-                && IsAttackState(animator.GetNextAnimatorStateInfo(attackLayerIndex));
-        }
-
-        private bool IsAttackBlockingWeaponChanges()
-        {
-            return isHitAttackInProgress || IsCombatActionAnimationActive();
-        }
-
-        private bool IsCombatActionAnimationActive()
-        {
-            return IsAttackRootMotionStateActive() || IsAttackRequested();
-        }
-
-        private bool IsAttackRequested()
-        {
-            return animator != null
-                && (animator.GetBool(AttackRequestedParameterHash)
-                 || animator.GetBool(HeavyAttackRequestedParameterHash)
-                 || animator.GetBool(DodgeRequestedParameterHash)
-                 || animator.GetBool(RollRequestedParameterHash));
-        }
-
-        private bool IsEvasionInProgress()
-        {
-            return IsDodgeInProgress() || IsRollInProgress();
-        }
-
-        private bool IsDodgeInProgress()
-        {
-            if (animator == null || attackLayerIndex < 0)
-            {
-                return false;
-            }
-
-            // The request bool is true only until the entry event resets it. Once the dodge
-            // begins, the state check still identifies it for root-motion handling; it does
-            // not block later combat requests from being buffered in the Animator.
-            if (animator.GetBool(DodgeRequestedParameterHash)
-                || animator.GetCurrentAnimatorStateInfo(attackLayerIndex).shortNameHash == DodgeStateShortNameHash)
-            {
-                return true;
-            }
-
-            return animator.IsInTransition(attackLayerIndex)
-                && animator.GetNextAnimatorStateInfo(attackLayerIndex).shortNameHash == DodgeStateShortNameHash;
-        }
-
-        private bool IsRollInProgress()
-        {
-            if (animator == null || attackLayerIndex < 0)
-            {
-                return false;
-            }
-
-            if (animator.GetBool(RollRequestedParameterHash)
-                || animator.GetCurrentAnimatorStateInfo(attackLayerIndex).shortNameHash == RollStateShortNameHash)
-            {
-                return true;
-            }
-
-            return animator.IsInTransition(attackLayerIndex)
-                && animator.GetNextAnimatorStateInfo(attackLayerIndex).shortNameHash == RollStateShortNameHash;
-        }
-
-        private float GetEvasionRootMotionMultiplier()
-        {
-            if (IsRollInProgress())
-            {
-                return playerMovementConfig.RollRootMotionMultiplier;
-            }
-
-            return IsDodgeInProgress()
-                ? playerMovementConfig.DodgeRootMotionMultiplier
-                : 1f;
-        }
-
-        private void CaptureEvasionDirection()
-        {
-            // Both evasion blend trees select a directional clip from DirectionX/DirectionY.
-            // This must happen before their time-zero LockMovement event clears locomotion.
-            playerAnimationController?.CaptureEvasionDirection();
-        }
-
-        private bool IsHitAnimationInProgress()
-        {
-            if (animator == null || attackLayerIndex < 0)
-            {
-                return false;
-            }
-
-            if (IsHitState(animator.GetCurrentAnimatorStateInfo(attackLayerIndex)))
-            {
-                return true;
-            }
-
-            return animator.IsInTransition(attackLayerIndex)
-                && IsHitState(animator.GetNextAnimatorStateInfo(attackLayerIndex));
-        }
-
-        private static bool IsHitState(AnimatorStateInfo stateInfo)
-        {
-            var stateHash = stateInfo.shortNameHash;
-            return stateHash == HitBackStateShortNameHash
-                || stateHash == HitFrontStateShortNameHash
-                || stateHash == HitRightStateShortNameHash
-                || stateHash == HitLeftStateShortNameHash
-                || stateHash == AttackComboBHitStateShortNameHash
-                || stateHash == AttackHitStateShortNameHash
-                || stateHash == HeavyAttackHitRootMotionStateShortNameHash
-                || stateHash == HeavyAttackHitStateShortNameHash;
-        }
-
-        private bool IsHeavyAttackDamageAnimationActive()
-        {
-            if (animator == null || attackLayerIndex < 0)
-            {
-                return false;
-            }
-
-            if (IsHeavyAttackHitState(animator.GetCurrentAnimatorStateInfo(attackLayerIndex)))
-            {
-                return true;
-            }
-
-            return animator.IsInTransition(attackLayerIndex)
-                && IsHeavyAttackHitState(animator.GetNextAnimatorStateInfo(attackLayerIndex));
-        }
-
-        private static bool IsHeavyAttackHitState(AnimatorStateInfo stateInfo)
-        {
-            var stateHash = stateInfo.shortNameHash;
-            return stateHash == HeavyAttackHitRootMotionStateShortNameHash
-                || stateHash == HeavyAttackHitStateShortNameHash;
-        }
-
-        private Stamina GetStamina()
-        {
-            return (Stamina)statsController.GetStat(StatType.Stamina);
-        }
-
-        private void SpendStamina(float amount)
-        {
-            if (amount <= 0f)
-            {
-                return;
-            }
-
-            statsController.AddValue(StatType.Stamina, -amount, StatChangeSource.Combat);
-        }
-
-        private static bool IsAttackState(AnimatorStateInfo stateInfo)
-        {
-            return stateInfo.shortNameHash != 0
-                && stateInfo.shortNameHash != EmptyIdleStateShortNameHash;
-        }
-
-        private static WeaponAttachmentTransformData GetAttachmentTransformData(ItemConfig itemConfig, WeaponDisplayMode displayMode)
-        {
-            if (itemConfig == null)
-            {
-                return null;
-            }
-
-            return displayMode == WeaponDisplayMode.RightHand
-                ? itemConfig.RightHandWeaponAttachment
-                : itemConfig.BeltWeaponAttachment;
-        }
-
-        private static void ApplyAttachmentTransform(Transform targetTransform, ItemConfig itemConfig, WeaponDisplayMode displayMode)
-        {
-            if (targetTransform == null || itemConfig == null)
-            {
-                return;
-            }
-
-            var attachment = GetAttachmentTransformData(itemConfig, displayMode);
-            if (attachment == null)
-            {
-                return;
-            }
-
-            targetTransform.localPosition = attachment.LocalPosition;
-            targetTransform.localRotation = Quaternion.Euler(attachment.LocalEulerAngles);
-        }
     }
 }
