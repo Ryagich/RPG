@@ -19,7 +19,6 @@ namespace Inventory
     {
         private const string WeaponAnimationLayerName = "Weapon Handling";
         private const string AttackLayerName = "Full Body";
-        private const string EmptyIdleStatePath = "Full Body.Empty Idle";
         private const string DrawWeaponStatePath = "Weapon Handling.DrawWeapon";
         private const string SheatheWeaponStatePath = "Weapon Handling.SheatheWeapon";
         private const string EmptyIdleStateName = "Empty Idle";
@@ -57,11 +56,9 @@ namespace Inventory
         private const string HeavyAttackRequestedParameter = "HeavyAttack";
         private const string DodgeRequestedParameter = "Dodge";
         private const string RollRequestedParameter = "Roll";
-        private const string AttackInputLogPrefix = "[WeaponAttack]";
 
         private static readonly int DrawWeaponStateHash = Animator.StringToHash(DrawWeaponStatePath);
         private static readonly int SheatheWeaponStateHash = Animator.StringToHash(SheatheWeaponStatePath);
-        private static readonly int EmptyIdleStateHash = Animator.StringToHash(EmptyIdleStatePath);
         private static readonly int EmptyIdleStateShortNameHash = Animator.StringToHash(EmptyIdleStateName);
         private static readonly int AttackStateShortNameHash = Animator.StringToHash(AttackStateName);
         private static readonly int AttackComboAStateShortNameHash = Animator.StringToHash(AttackComboAStateName);
@@ -342,7 +339,6 @@ namespace Inventory
 
             playerMovement?.ChangeState(false);
             playerAnimationController?.SetLocomotionLocked(true);
-            LogAttackInput(null, "attack started event");
         }
 
         public void BeginDamageWindowFromAnimationEvent()
@@ -462,7 +458,6 @@ namespace Inventory
 
             playerAnimationController?.SetLocomotionLocked(false);
             UpdateRunningAvailability();
-            LogAttackInput(null, "attack finished event");
             RefreshWeaponInHand();
         }
 
@@ -616,18 +611,14 @@ namespace Inventory
                 return;
             }
 
-            LogAttackInput(message.Button, "received");
-
             if (gameModesController.GameMode != GameMode.Game)
             {
-                LogAttackInput(message.Button, "ignored: not in Game mode");
                 return;
             }
 
             var selectedItemConfig = ResolveActiveWeaponSelection();
             if (selectedItemConfig == null)
             {
-                LogAttackInput(message.Button, "ignored: no weapon in active slot");
                 return;
             }
 
@@ -641,22 +632,18 @@ namespace Inventory
                 if (isWeaponAnimationInProgress)
                 {
                     hasPendingRefresh = true;
-                    LogAttackInput(message.Button, "weapon transition in progress -> queue draw", selectedItemConfig);
                     return;
                 }
 
-                LogAttackInput(message.Button, "weapon not in hand -> request draw", selectedItemConfig);
                 RefreshWeaponInHand();
                 return;
             }
 
             if (isWeaponAnimationInProgress)
             {
-                LogAttackInput(message.Button, "ignored: weapon animation in progress");
                 return;
             }
 
-            LogAttackInput(message.Button, "weapon in hand -> request attack", selectedItemConfig);
             targetLockController?.TryFaceAttackTarget();
             TriggerAttack(message.Button);
         }
@@ -900,7 +887,6 @@ namespace Inventory
         {
             if (animator == null)
             {
-                LogAttackInput(button, "request skipped: animator missing");
                 return;
             }
 
@@ -911,9 +897,6 @@ namespace Inventory
                 heavyAttackRequested: isHeavyAttack,
                 dodgeRequested: false,
                 rollRequested: false);
-            LogAttackInput(button, isHeavyAttack
-                ? "HeavyAttack=true, Attack=false"
-                : "Attack=true, HeavyAttack=false");
         }
 
         private void CancelAttackFlow(bool restoreMovement = true)
@@ -921,7 +904,6 @@ namespace Inventory
             playerAnimationController?.ReleaseEvasionDirection();
             DisableDamageImmunityFromAnimationEvent();
             isCombatActionLocked = false;
-            var hadActiveAttackFlow = isHitAttackInProgress;
 
             if (isHitAttackInProgress)
             {
@@ -946,10 +928,6 @@ namespace Inventory
 
             ResetAnimationRequests();
 
-            if (hadActiveAttackFlow)
-            {
-                LogAttackInput(null, "attack flow cancelled");
-            }
         }
 
         private void CompleteWeaponAnimationFromEvent(WeaponAnimationKind expectedAnimationKind)
@@ -993,21 +971,7 @@ namespace Inventory
             ResetAnimationRequests();
             playerAnimationController?.ReleaseEvasionDirection();
             UpdateAttackRootMotionAvailability(forceDisable: true);
-            ResetFullBodyAnimationForSheathing();
             UpdateRunningAvailability();
-        }
-
-        private void ResetFullBodyAnimationForSheathing()
-        {
-            if (animator == null || attackLayerIndex < 0)
-            {
-                return;
-            }
-
-            // Weapon Handling owns the draw/sheath clip, while Full Body owns the combat
-            // stance. The ordinary sheathe transition must therefore also leave the sword
-            // stance; otherwise its attack transitions remain available without a weapon.
-            animator.Play(EmptyIdleStateHash, attackLayerIndex, 0f);
         }
 
         private void SynchronizeSheatheCompletionWithAnimatorState()
@@ -1684,20 +1648,6 @@ namespace Inventory
             animator.SetBool(HeavyAttackRequestedParameterHash, heavyAttackRequested);
             animator.SetBool(DodgeRequestedParameterHash, dodgeRequested);
             animator.SetBool(RollRequestedParameterHash, rollRequested);
-        }
-
-        private void LogAttackInput(MouseButtonType? button, string message, ItemConfig selectedItemConfig = null)
-        {
-            Debug.Log(
-                $"{AttackInputLogPrefix} button={button?.ToString() ?? "animation"} {message} | " +
-                $"selectedSlot={selectedWeaponSlotIndex} " +
-                $"selectedItem={(selectedItemConfig ?? GetSelectedWeaponItemConfig())?.name ?? "null"} " +
-                $"isWeaponDrawn={isWeaponDrawn} " +
-                $"currentMode={currentDisplayMode} " +
-                $"currentItem={currentWeaponItemConfig?.name ?? "null"} " +
-                $"weaponAnimInProgress={isWeaponAnimationInProgress} " +
-                $"hitInProgress={isHitAttackInProgress} " +
-                $"gameMode={gameModesController.GameMode}");
         }
 
         private void UpdateRunningAvailability()
