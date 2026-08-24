@@ -161,7 +161,6 @@ namespace Combat
             var localReactionDirection = ResolveLocalReactionDirection(hitPoint, attackerTransform);
             animator.SetFloat(HitDirectionXHash, localReactionDirection.x);
             animator.SetFloat(HitDirectionYHash, localReactionDirection.z);
-            LogHitReactionDirection(hitPoint, attackerTransform, localReactionDirection);
             animator.ResetTrigger(HitHash);
             animator.SetTrigger(HitHash);
         }
@@ -192,34 +191,6 @@ namespace Combat
             // attacker behind (local Z < 0) therefore yields HitDirectionY = 1,
             // while attacker in front (local Z > 0) yields HitDirectionY = -1.
             return -new Vector3(localAttackerDirection.x, 0f, localAttackerDirection.z);
-        }
-
-        private void LogHitReactionDirection(
-            Vector3 hitPoint,
-            Transform attackerTransform,
-            Vector3 localReactionDirection)
-        {
-            if (attackerTransform == null)
-            {
-                Debug.LogWarning(
-                    $"[HitReaction] '{ownerTransform.name}': attacker is unavailable; " +
-                    $"reaction was derived from hit point={hitPoint}. " +
-                    $"Blend Tree parameters=({localReactionDirection.x:F2}, {localReactionDirection.z:F2}).",
-                    ownerTransform);
-                return;
-            }
-
-            var animationTransform = animator != null ? animator.transform : ownerTransform;
-            var attackerWorldOffset = GetPlanarDirection(attackerTransform.position - animationTransform.position);
-            var attackerLocalDirection = animationTransform.InverseTransformDirection(attackerWorldOffset);
-            Debug.Log(
-                $"[HitReaction] target='{ownerTransform.name}', attacker='{attackerTransform.name}'; " +
-                $"attacker world position={attackerTransform.position}, animation transform='{animationTransform.name}', " +
-                $"animation world position={animationTransform.position}; " +
-                $"attacker direction in animation local space=({attackerLocalDirection.x:F2}, {attackerLocalDirection.z:F2}); " +
-                $"reaction direction (opposite attacker)=({localReactionDirection.x:F2}, {localReactionDirection.z:F2}); " +
-                $"HitDirectionX={localReactionDirection.x:F2}, HitDirectionY={localReactionDirection.z:F2}.",
-                ownerTransform);
         }
 
         private static Vector3 GetPlanarDirection(Vector3 direction)
