@@ -22,7 +22,7 @@ MonoBehaviour:
   <RotationSharpness>k__BackingField: 12
   <CollisionLayers>k__BackingField:
     serializedVersion: 2
-    m_Bits: 4294951323
+    m_Bits: 4294951067
   <CollisionRadius>k__BackingField: 0.25
   <CollisionPadding>k__BackingField: 0.08
   <DefaultPitch>k__BackingField: 12
