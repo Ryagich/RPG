@@ -63,6 +63,22 @@ namespace Inventory
                    && animator.GetNextAnimatorStateInfo(LayerIndex).fullPathHash == stateHash;
         }
 
+        public bool IsStateExpectedForAnimationEvent(WeaponAnimationKind kind)
+        {
+            if (!IsAvailable)
+            {
+                return false;
+            }
+
+            var stateHash = GetStateHash(kind);
+            if (animator.IsInTransition(LayerIndex))
+            {
+                return animator.GetNextAnimatorStateInfo(LayerIndex).fullPathHash == stateHash;
+            }
+
+            return animator.GetCurrentAnimatorStateInfo(LayerIndex).fullPathHash == stateHash;
+        }
+
         public int GetStateHash(WeaponAnimationKind kind)
         {
             return kind == WeaponAnimationKind.Draw ? DrawStateHash : SheatheStateHash;

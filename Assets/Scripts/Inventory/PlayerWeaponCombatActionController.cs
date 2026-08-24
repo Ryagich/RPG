@@ -31,6 +31,7 @@ namespace Inventory
         private readonly EquippedWeaponDamageWindowController damageWindow;
         private readonly Func<GameObject> weaponVisualProvider;
         private readonly Func<Item.ItemConfig> weaponConfigProvider;
+        private readonly Action fullBodyActionRequested;
 
         private bool isHitAttackInProgress;
         private bool isCombatActionLocked;
@@ -50,7 +51,8 @@ namespace Inventory
             IPublisher<PlayerEvasionCompletedMessage> evasionCompletedPublisher,
             EquippedWeaponDamageWindowController damageWindow,
             Func<GameObject> weaponVisualProvider,
-            Func<Item.ItemConfig> weaponConfigProvider)
+            Func<Item.ItemConfig> weaponConfigProvider,
+            Action fullBodyActionRequested)
         {
             this.animator = animator;
             this.combatAnimator = combatAnimator;
@@ -67,6 +69,7 @@ namespace Inventory
             this.damageWindow = damageWindow;
             this.weaponVisualProvider = weaponVisualProvider;
             this.weaponConfigProvider = weaponConfigProvider;
+            this.fullBodyActionRequested = fullBodyActionRequested;
         }
 
         public bool IsCombatActionLocked => isCombatActionLocked;
@@ -108,7 +111,7 @@ namespace Inventory
             targetLockController?.TryFaceAttackTarget();
             var isHeavyAttack = button == MouseButtonType.Right;
             SpendStamina(isHeavyAttack ? GetStamina().HeavyAttackCost : GetStamina().LightAttackCost);
-            SetAnimationRequests(!isHeavyAttack, isHeavyAttack, dodgeRequested: false, rollRequested: false);
+            RequestFullBodyAction(!isHeavyAttack, isHeavyAttack, dodgeRequested: false, rollRequested: false);
         }
 
         public void TryRequestDodge()
@@ -120,7 +123,7 @@ namespace Inventory
 
             SpendStamina(GetStamina().DodgeCost);
             CaptureEvasionDirection();
-            SetAnimationRequests(lightAttackRequested: false, heavyAttackRequested: false, dodgeRequested: true, rollRequested: false);
+            RequestFullBodyAction(lightAttackRequested: false, heavyAttackRequested: false, dodgeRequested: true, rollRequested: false);
         }
 
         public void TryRequestRoll()
@@ -132,7 +135,7 @@ namespace Inventory
 
             SpendStamina(GetStamina().RollCost);
             CaptureEvasionDirection();
-            SetAnimationRequests(lightAttackRequested: false, heavyAttackRequested: false, dodgeRequested: false, rollRequested: true);
+            RequestFullBodyAction(lightAttackRequested: false, heavyAttackRequested: false, dodgeRequested: false, rollRequested: true);
         }
 
         public void HandleGameModeChanged(GameModeChangedMessage message)
@@ -323,6 +326,16 @@ namespace Inventory
             }
 
             combatAnimator.SetRequests(lightAttackRequested, heavyAttackRequested, dodgeRequested, rollRequested);
+        }
+
+        private void RequestFullBodyAction(
+            bool lightAttackRequested,
+            bool heavyAttackRequested,
+            bool dodgeRequested,
+            bool rollRequested)
+        {
+            fullBodyActionRequested?.Invoke();
+            SetAnimationRequests(lightAttackRequested, heavyAttackRequested, dodgeRequested, rollRequested);
         }
 
         private Stamina GetStamina()

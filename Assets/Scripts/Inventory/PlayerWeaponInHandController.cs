@@ -102,7 +102,8 @@ namespace Inventory
                 evasionCompletedPublisher,
                 damageWindow,
                 () => currentWeaponInstance,
-                () => currentWeaponItemConfig);
+                () => currentWeaponItemConfig,
+                RequestWeaponTransitionReversal);
             animationEventReceiver?.Bind(this);
 
             inputSubscriptions = new PlayerWeaponInputSubscriptions(
@@ -158,6 +159,15 @@ namespace Inventory
 
         public void BeginMoveWeaponToRightHandFromAnimationEvent()
         {
+            if (!weaponTransitionAnimator.IsStateExpectedForAnimationEvent(WeaponAnimationKind.Draw))
+            {
+                return;
+            }
+
+            SynchronizeWeaponTransitionWithAnimationEvent(
+                WeaponAnimationKind.Draw,
+                preservePoseForDraw: weaponVisual.IsAttachedTo(WeaponDisplayMode.RightHand));
+
             if (!weaponTransitionState.TryBeginAttachmentBlend(WeaponAnimationKind.Draw))
             {
                 return;
@@ -179,10 +189,13 @@ namespace Inventory
 
         public void TakeWeaponInHandFromAnimationEvent()
         {
-            if (currentAnimationKind != WeaponAnimationKind.Draw || currentWeaponItemConfig == null)
+            if (!weaponTransitionAnimator.IsStateExpectedForAnimationEvent(WeaponAnimationKind.Draw)
+                || currentWeaponItemConfig == null)
             {
                 return;
             }
+
+            SynchronizeWeaponTransitionWithAnimationEvent(WeaponAnimationKind.Draw);
 
             FinalizeWeaponRender(
                 currentWeaponItemConfig,
@@ -190,11 +203,19 @@ namespace Inventory
                 WeaponDisplayMode.RightHand,
                 snapToAttachmentTransform: true);
             CleanupSpawnedWeaponInstancesExceptCurrent();
+            isWeaponDrawn = true;
             CompleteWeaponAnimationFromEvent(WeaponAnimationKind.Draw);
         }
 
         public void BeginMoveWeaponToBeltFromAnimationEvent()
         {
+            if (!weaponTransitionAnimator.IsStateExpectedForAnimationEvent(WeaponAnimationKind.Sheathe))
+            {
+                return;
+            }
+
+            SynchronizeWeaponTransitionWithAnimationEvent(WeaponAnimationKind.Sheathe);
+
             if (!weaponTransitionState.TryBeginAttachmentBlend(WeaponAnimationKind.Sheathe))
             {
                 return;
@@ -210,10 +231,13 @@ namespace Inventory
 
         public void PutWeaponOnBeltFromAnimationEvent()
         {
-            if (currentAnimationKind != WeaponAnimationKind.Sheathe || currentWeaponItemConfig == null)
+            if (!weaponTransitionAnimator.IsStateExpectedForAnimationEvent(WeaponAnimationKind.Sheathe)
+                || currentWeaponItemConfig == null)
             {
                 return;
             }
+
+            SynchronizeWeaponTransitionWithAnimationEvent(WeaponAnimationKind.Sheathe);
 
             FinalizeWeaponRender(
                 currentWeaponItemConfig,
@@ -350,6 +374,7 @@ namespace Inventory
         {
             combatActions.InterruptByHitReaction();
             ResetAnimatorRequests();
+            RequestWeaponTransitionReversal();
         }
 
         public bool TryGetCurrentWeaponSlot(out Inventory.Slot.SlotModel slot)
@@ -737,7 +762,9 @@ namespace Inventory
                 return;
             }
 
-            if (!weaponTransitionState.CanSynchronizeSheathe() || currentWeaponItemConfig == null)
+            if (!weaponTransitionState.CanSynchronizeSheathe()
+                || currentWeaponItemConfig == null
+                || !weaponVisual.IsAttachedTo(WeaponDisplayMode.Belt))
             {
                 return;
             }
@@ -759,6 +786,32 @@ namespace Inventory
         private bool IsSheatheWeaponAnimationStateActive()
         {
             return weaponTransitionAnimator.IsStateActive(WeaponAnimationKind.Sheathe);
+        }
+
+        private void RequestWeaponTransitionReversal()
+        {
+            if (weaponVisual.IsAttachedTo(WeaponDisplayMode.RightHand)
+                && weaponTransitionAnimator.IsStateActive(WeaponAnimationKind.Sheathe))
+            {
+                weaponTransitionAnimator.Request(WeaponAnimationKind.Draw);
+                return;
+            }
+
+            if (weaponVisual.IsAttachedTo(WeaponDisplayMode.Belt)
+                && weaponTransitionAnimator.IsStateActive(WeaponAnimationKind.Draw))
+            {
+                weaponTransitionAnimator.Request(WeaponAnimationKind.Sheathe);
+            }
+        }
+
+        private void SynchronizeWeaponTransitionWithAnimationEvent(
+            WeaponAnimationKind animationKind,
+            bool preservePoseForDraw = false)
+        {
+            if (currentAnimationKind != animationKind)
+            {
+                weaponTransitionState.Begin(animationKind, preservePoseForDraw);
+            }
         }
 
         private bool TryHandleWeaponSlotInputDuringAnimation()
