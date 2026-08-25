@@ -589,6 +589,10 @@ MonoBehaviour:
     m_Key: Input_LessonSkip
     m_Metadata:
       m_Items: []
+  - m_Id: 30000000000000004
+    m_Key: Input_QuestLog
+    m_Metadata:
+      m_Items: []
   - m_Id: 75000000000000001
     m_Key: Oswin_Conversation_Ask
     m_Metadata:

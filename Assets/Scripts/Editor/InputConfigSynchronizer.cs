@@ -32,7 +32,7 @@ namespace Rpg.EditorTools
             foreach (var actionName in new[]
                      {
                           "Movement", "Interactable", "Inventory", "LeftClick", "RightClick", "Dodge", "Roll", "LessonSkip", "Run", "ShowStats",
-                         "Pause", "Map", "TargetLock", "TargetLockNext", "TargetLockPrevious",
+                         "Pause", "Map", "QuestLog", "TargetLock", "TargetLockNext", "TargetLockPrevious",
                          "FastSlot1", "FastSlot2", "FastSlot3", "FastSlot4", "WeaponSlot1", "WeaponSlot2",
                          "CameraZoomIn", "CameraZoomOut",
                      })

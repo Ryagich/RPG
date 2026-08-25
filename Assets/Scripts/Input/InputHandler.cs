@@ -17,6 +17,7 @@ namespace Input
         private readonly IPublisher<InteractableInputMessage> interactableInputPublisher;
         private readonly IPublisher<InventoryInputMessage> inventoryInputPublisher;
         private readonly IPublisher<MapInputMessage> mapInputPublisher;
+        private readonly IPublisher<QuestLogInputMessage> questLogInputPublisher;
         private readonly IPublisher<MouseDown> mouseDown;
         private readonly IPublisher<MouseUp> mouseUp;
         private readonly IPublisher<DodgeInputMessage> dodgeInputPublisher;
@@ -45,6 +46,7 @@ namespace Input
                 IPublisher<InteractableInputMessage> interactableInputPublisher,
                 IPublisher<InventoryInputMessage> inventoryInputPublisher,
                 IPublisher<MapInputMessage> mapInputPublisher,
+                IPublisher<QuestLogInputMessage> questLogInputPublisher,
                 IPublisher<MouseDown> mouseDown,
                 IPublisher<MouseUp> mouseUp,
                 IPublisher<DodgeInputMessage> dodgeInputPublisher,
@@ -68,6 +70,7 @@ namespace Input
             this.interactableInputPublisher = interactableInputPublisher;
             this.inventoryInputPublisher = inventoryInputPublisher;
             this.mapInputPublisher = mapInputPublisher;
+            this.questLogInputPublisher = questLogInputPublisher;
             this.mouseDown = mouseDown;
             this.mouseUp = mouseUp;
             this.dodgeInputPublisher = dodgeInputPublisher;
@@ -94,6 +97,7 @@ namespace Input
             inputConfig.Interactable.action.started += Interactable;
             inputConfig.Inventory.action.started += OpenInventory;
             inputConfig.Map.action.started += OpenMap;
+            inputConfig.QuestLog.action.started += OpenQuestLog;
             inputConfig.LeftClick.action.started += LeftMouseDown;
             inputConfig.LeftClick.action.canceled += LeftMouseUp;
             inputConfig.RightClick.action.started += RightMouseDown;
@@ -192,6 +196,16 @@ namespace Input
             }
 
             mapInputPublisher.Publish(new MapInputMessage());
+        }
+
+        private void OpenQuestLog(InputAction.CallbackContext context)
+        {
+            if (isPlayerDead)
+            {
+                return;
+            }
+
+            questLogInputPublisher.Publish(new QuestLogInputMessage());
         }
 
         private void LeftMouseDown(InputAction.CallbackContext context)

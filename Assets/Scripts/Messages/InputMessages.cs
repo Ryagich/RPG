@@ -37,6 +37,8 @@ namespace Messages
 
     public readonly struct MapInputMessage { }
 
+    public readonly struct QuestLogInputMessage { }
+
     public readonly struct PauseInputMessage { }
 
     public enum TargetLockCommand

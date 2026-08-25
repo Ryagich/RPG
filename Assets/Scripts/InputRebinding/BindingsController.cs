@@ -32,14 +32,17 @@ public class BindingsController : MonoBehaviour
     private const string DodgeActionName = "Dodge";
     private const string RollActionName = "Roll";
     private const string LessonSkipActionName = "LessonSkip";
+    private const string QuestLogActionName = "QuestLog";
     private const string EvasionLocalizationTable = "Tables";
     private const string DodgeLocalizationKey = "Input_Dodge";
     private const string RollLocalizationKey = "Input_Roll";
     private const string LessonSkipLocalizationKey = "Input_LessonSkip";
+    private const string QuestLogLocalizationKey = "Input_QuestLog";
 
     private InputRebinder dodgeRebinder;
     private InputRebinder rollRebinder;
     private InputRebinder lessonSkipRebinder;
+    private InputRebinder questLogRebinder;
 
     private void Awake()
     {
@@ -48,7 +51,7 @@ public class BindingsController : MonoBehaviour
         _settingsButtons = _settingsCanvas != null
             ? _settingsCanvas.GetComponentsInChildren<Button>().ToList()
             : new List<Button>();
-        CreateCombatBindingButtons();
+        CreateDynamicBindingButtons();
         _buttons = GetComponentsInChildren<Button>().ToList();
         foreach (var button in _buttons)
         {
@@ -65,7 +68,7 @@ public class BindingsController : MonoBehaviour
 
         InitializeMouseSensitivitySlider();
         LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
-        UpdateCombatBindingDisplayNames();
+        UpdateDynamicBindingDisplayNames();
     }
 
     private void OnDestroy()
@@ -80,14 +83,18 @@ public class BindingsController : MonoBehaviour
 
     private void OnSelectedLocaleChanged(Locale _)
     {
-        UpdateCombatBindingDisplayNames();
+        UpdateDynamicBindingDisplayNames();
     }
 
-    private void CreateCombatBindingButtons()
+    private void CreateDynamicBindingButtons()
     {
         dodgeRebinder = CreateBindingButton(DodgeActionName, transformAfter: null);
         rollRebinder = CreateBindingButton(RollActionName, dodgeRebinder?.transform);
         lessonSkipRebinder = CreateBindingButton(LessonSkipActionName, rollRebinder?.transform);
+
+        var mapRebinder = GetComponentsInChildren<InputRebinder>(true)
+            .FirstOrDefault(rebinder => rebinder.ActionName == "Map");
+        questLogRebinder = CreateBindingButton(QuestLogActionName, mapRebinder?.transform);
     }
 
     private InputRebinder CreateBindingButton(string actionName, Transform transformAfter)
@@ -127,11 +134,12 @@ public class BindingsController : MonoBehaviour
         return rebinder;
     }
 
-    private void UpdateCombatBindingDisplayNames()
+    private void UpdateDynamicBindingDisplayNames()
     {
         UpdateBindingDisplayName(dodgeRebinder, DodgeLocalizationKey);
         UpdateBindingDisplayName(rollRebinder, RollLocalizationKey);
         UpdateBindingDisplayName(lessonSkipRebinder, LessonSkipLocalizationKey);
+        UpdateBindingDisplayName(questLogRebinder, QuestLogLocalizationKey);
     }
 
     private async void UpdateBindingDisplayName(InputRebinder rebinder, string localizationKey)

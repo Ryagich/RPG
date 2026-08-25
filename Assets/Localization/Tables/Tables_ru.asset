@@ -837,6 +837,10 @@ MonoBehaviour:
     m_Localized: "Пропустить урок"
     m_Metadata:
       m_Items: []
+  - m_Id: 30000000000000004
+    m_Localized: "Журнал"
+    m_Metadata:
+      m_Items: []
   - m_Id: 75000000000000001
     m_Localized: "Я хотел бы у тебя кое-что узнать."
     m_Metadata: {m_Items: []}

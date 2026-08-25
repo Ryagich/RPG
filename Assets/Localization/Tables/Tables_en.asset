@@ -690,6 +690,10 @@ MonoBehaviour:
     m_Localized: "Skip lesson"
     m_Metadata:
       m_Items: []
+  - m_Id: 30000000000000004
+    m_Localized: "Quest log"
+    m_Metadata:
+      m_Items: []
   - m_Id: 75000000000000001
     m_Localized: "There is something I would like to ask you."
     m_Metadata: {m_Items: []}

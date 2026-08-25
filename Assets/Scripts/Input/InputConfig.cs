@@ -18,6 +18,7 @@ namespace Input
         [field: SerializeField] public InputActionReference ShowStats { get; private set; }
         [field: SerializeField] public InputActionReference Pause { get; private set; }
         [field: SerializeField] public InputActionReference Map { get; private set; }
+        [field: SerializeField] public InputActionReference QuestLog { get; private set; }
         [field: SerializeField] public InputActionReference TargetLock { get; private set; }
         [field: SerializeField] public InputActionReference TargetLockNext { get; private set; }
         [field: SerializeField] public InputActionReference TargetLockPrevious { get; private set; }
@@ -49,6 +50,7 @@ namespace Input
             ShowStats = EnsureReference(ShowStats, actionMap, "ShowStats");
             Pause = EnsureReference(Pause, actionMap, "Pause");
             Map = EnsureReference(Map, actionMap, "Map");
+            QuestLog = EnsureReference(QuestLog, actionMap, "QuestLog");
             TargetLock = EnsureReference(TargetLock, actionMap, "TargetLock");
             TargetLockNext = EnsureReference(TargetLockNext, actionMap, "TargetLockNext");
             TargetLockPrevious = EnsureReference(TargetLockPrevious, actionMap, "TargetLockPrevious");

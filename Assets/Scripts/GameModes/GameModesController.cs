@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Dialogue;
 using MessagePipe;
 using Messages;
@@ -14,7 +13,7 @@ namespace GameModes
 
         private readonly IPublisher<GameModeChangedMessage> gameModeChangedPublisher;
         private readonly DialogueContext dialogueContext;
-        private readonly Stack<GameMode> navigationHistory = new();
+        private GameMode pauseResumeMode = GameMode.Game;
 
         public GameModesController(
             IPublisher<GameModeChangedMessage> gameModeChangedPublisher,
@@ -22,6 +21,7 @@ namespace GameModes
             ISubscriber<ChangeGameModeRequest> openPageRequestSubscriber,
             ISubscriber<InventoryInputMessage> inventoryInputSubscriber,
             ISubscriber<MapInputMessage> mapInputSubscriber,
+            ISubscriber<QuestLogInputMessage> questLogInputSubscriber,
             ISubscriber<PauseInputMessage> pauseInputSubscriber)
         {
             this.gameModeChangedPublisher = gameModeChangedPublisher;
@@ -30,12 +30,13 @@ namespace GameModes
             openPageRequestSubscriber.Subscribe(ChangeGameMode);
             inventoryInputSubscriber.Subscribe(OnInventoryInput);
             mapInputSubscriber.Subscribe(OnMapInput);
+            questLogInputSubscriber.Subscribe(OnQuestLogInput);
             pauseInputSubscriber.Subscribe(OnPauseInput);
         }
 
         public void Start()
         {
-            navigationHistory.Clear();
+            pauseResumeMode = GameMode.Game;
             ApplyGameMode(GameMode.Game);
         }
 
@@ -58,7 +59,7 @@ namespace GameModes
 
             if (msg.Mode == GameMode.Death)
             {
-                navigationHistory.Clear();
+                pauseResumeMode = GameMode.Game;
                 ApplyGameMode(GameMode.Death);
                 return;
             }
@@ -68,6 +69,10 @@ namespace GameModes
                 if (GameMode is GameMode.Game or GameMode.Lesson)
                 {
                     EnterPauseMode(GameMode);
+                }
+                else if (GameMode == GameMode.PauseSettings)
+                {
+                    ApplyGameMode(GameMode.Pause);
                 }
 
                 return;
@@ -84,14 +89,6 @@ namespace GameModes
                 return;
             }
 
-            if (navigationHistory.Count > 0 && navigationHistory.Peek() == msg.Mode)
-            {
-                navigationHistory.Pop();
-                ApplyGameMode(msg.Mode);
-                return;
-            }
-
-            navigationHistory.Push(GameMode);
             ApplyGameMode(msg.Mode);
         }
 
@@ -118,13 +115,10 @@ namespace GameModes
                 case GameMode.Pause:
                     ExitPauseMode();
                     return;
-                case GameMode.Quest:
-                    EnterMainGameMode();
-                    return;
                 case GameMode.SwitchLocation:
                     return;
                 default:
-                    ReturnToPreviousMode();
+                    EnterMainGameMode();
                     return;
             }
         }
@@ -136,10 +130,7 @@ namespace GameModes
                 return;
             }
 
-            // A lesson owns the active gameplay flow. Its read-only navigation is handled via
-            // the map/quest modes, but inventory interaction must not replace the lesson page
-            // and leave the presentation context without a visible owner.
-            if (GameMode == GameMode.Lesson)
+            if (!IsNavigationPageMode(GameMode))
             {
                 return;
             }
@@ -154,51 +145,51 @@ namespace GameModes
                 return;
             }
 
-            if (GameMode is GameMode.Game or GameMode.Inventory or GameMode.Lesson)
+            if (!IsNavigationPageMode(GameMode))
             {
-                ChangeGameMode(new ChangeGameModeRequest(GameMode.Map));
+                return;
             }
-            else if (GameMode is GameMode.Map or GameMode.Quest)
+
+            ChangeGameMode(new ChangeGameModeRequest(GameMode == GameMode.Map ? GameMode.Game : GameMode.Map));
+        }
+
+        private void OnQuestLogInput(QuestLogInputMessage _)
+        {
+            if (GameMode == GameMode.Death)
             {
-                // Keep the navigation stack intact: Map can be opened from a paused lesson,
-                // and closing it must return to that lesson rather than terminating the flow.
-                ReturnToPreviousMode();
+                return;
             }
+
+            if (!IsNavigationPageMode(GameMode))
+            {
+                return;
+            }
+
+            ChangeGameMode(new ChangeGameModeRequest(GameMode == GameMode.Quest ? GameMode.Game : GameMode.Quest));
         }
 
         private void EnterMainGameMode()
         {
-            navigationHistory.Clear();
+            pauseResumeMode = GameMode.Game;
             ApplyGameMode(GameMode.Game);
         }
 
         private void EnterPauseMode(GameMode resumeMode)
         {
-            navigationHistory.Push(resumeMode);
+            pauseResumeMode = resumeMode;
             ApplyGameMode(GameMode.Pause);
         }
 
         private void ExitPauseMode()
         {
-            if (navigationHistory.Count > 0)
-            {
-                ApplyGameMode(navigationHistory.Pop());
-                return;
-            }
-
-            ApplyGameMode(GameMode.Game);
+            var resumeMode = pauseResumeMode;
+            pauseResumeMode = GameMode.Game;
+            ApplyGameMode(resumeMode);
         }
 
-        private void ReturnToPreviousMode()
+        private static bool IsNavigationPageMode(GameMode mode)
         {
-            if (navigationHistory.Count == 0)
-            {
-                EnterMainGameMode();
-                return;
-            }
-
-            var previousMode = navigationHistory.Pop();
-            ApplyGameMode(previousMode);
+            return mode is GameMode.Game or GameMode.Inventory or GameMode.Map or GameMode.Quest;
         }
 
         private void ApplyGameMode(GameMode mode)

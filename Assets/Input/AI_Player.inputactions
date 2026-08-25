@@ -115,6 +115,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "QuestLog",
+                    "type": "Button",
+                    "id": "366190b5-f68e-42d5-80fd-59291158bf29",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "TargetLock",
                     "type": "Button",
                     "id": "64b5c5ea-65c5-43da-b4d9-2446f94a1072",
@@ -388,6 +397,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Map",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e2c0502c-c809-48c2-b61d-d3d8222623fc",
+                    "path": "<Keyboard>/j",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "QuestLog",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

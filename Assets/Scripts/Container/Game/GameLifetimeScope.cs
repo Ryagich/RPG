@@ -57,6 +57,7 @@ namespace Container.Game
             builder.RegisterMessageBroker<InteractableInputMessage>(options);
             builder.RegisterMessageBroker<InventoryInputMessage>(options);
             builder.RegisterMessageBroker<MapInputMessage>(options);
+            builder.RegisterMessageBroker<QuestLogInputMessage>(options);
             builder.RegisterMessageBroker<PauseInputMessage>(options);
             builder.RegisterMessageBroker<TargetLockInputMessage>(options);
             builder.RegisterMessageBroker<MouseDown>(options);
