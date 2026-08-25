@@ -815,12 +815,13 @@ namespace UI.Pages
                 questNameText.text = questName ?? string.Empty;
             }
 
+            RectTransform statsGroupRect = FindRect(popupRect, "Content/Stats_Group");
             RectTransform stageRect = FindRect(popupRect, "Content/HUD_Stat_Base_Large");
             TMP_Text stageText = FindText(stageRect, "Label_Stat_Text");
             if (stageText != null)
             {
                 stageText.text = currentStepName ?? string.Empty;
-                ResizePopupSectionToText(stageRect, stageText, null);
+                MoveMapQuestStatsBelowStage(statsGroupRect, ResizeMapQuestStageToText(stageRect, stageText));
             }
 
             var popupIcon = FindImage(popupRect, "Content/HUD_Stat_Base_Large/Quest ICON");
@@ -833,7 +834,6 @@ namespace UI.Pages
                 popupIcon.raycastTarget = false;
             }
 
-            RectTransform statsGroupRect = FindRect(popupRect, "Content/Stats_Group");
             RectTransform backgroundRect = FindRect(statsGroupRect, "Background");
             TMP_Text descriptionText = FindText(backgroundRect, "Label_ItemDescription");
             if (descriptionText != null)
@@ -842,7 +842,105 @@ namespace UI.Pages
                 ResizePopupSectionToText(statsGroupRect, descriptionText, backgroundRect);
             }
 
+            ResizeMapQuestPopupToContent(popupRect);
+
             return true;
+        }
+
+        private static float ResizeMapQuestStageToText(RectTransform stageRect, TMP_Text stageText)
+        {
+            if (stageRect == null || stageText == null)
+            {
+                return 0f;
+            }
+
+            Canvas.ForceUpdateCanvases();
+
+            RectTransform textRect = stageText.rectTransform;
+            float availableWidth = textRect.rect.width;
+            if (availableWidth <= 0f)
+            {
+                return 0f;
+            }
+
+            float stageBottomBeforeResize = GetBottomInParent(stageRect);
+            float currentTextHeight = textRect.rect.height;
+            float sectionPadding = Mathf.Max(0f, stageRect.rect.height - currentTextHeight);
+            float preferredTextHeight = Mathf.Ceil(stageText.GetPreferredValues(stageText.text, availableWidth, 0f).y);
+
+            textRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, preferredTextHeight);
+            stageRect.SetSizeWithCurrentAnchors(
+                RectTransform.Axis.Vertical,
+                Mathf.Max(stageRect.rect.height, preferredTextHeight + sectionPadding));
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(stageRect);
+            return GetBottomInParent(stageRect) - stageBottomBeforeResize;
+        }
+
+        private static void MoveMapQuestStatsBelowStage(RectTransform statsGroupRect, float stageBottomOffset)
+        {
+            if (statsGroupRect == null || Mathf.Approximately(stageBottomOffset, 0f))
+            {
+                return;
+            }
+
+            statsGroupRect.anchoredPosition += Vector2.up * stageBottomOffset;
+        }
+
+        private static float GetBottomInParent(RectTransform rect)
+        {
+            if (rect == null || rect.parent == null)
+            {
+                return 0f;
+            }
+
+            var corners = new Vector3[4];
+            rect.GetWorldCorners(corners);
+            float bottom = float.PositiveInfinity;
+            for (var i = 0; i < corners.Length; i++)
+            {
+                bottom = Mathf.Min(bottom, rect.parent.InverseTransformPoint(corners[i]).y);
+            }
+
+            return float.IsPositiveInfinity(bottom) ? 0f : bottom;
+        }
+
+        private static void ResizeMapQuestPopupToContent(RectTransform popupRect)
+        {
+            if (popupRect == null)
+            {
+                return;
+            }
+
+            RectTransform contentRect = FindRect(popupRect, "Content");
+            if (contentRect == null)
+            {
+                return;
+            }
+
+            Canvas.ForceUpdateCanvases();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(contentRect);
+
+            float contentBottom = 0f;
+            var corners = new Vector3[4];
+            for (var i = 0; i < contentRect.childCount; i++)
+            {
+                if (contentRect.GetChild(i) is not RectTransform child || !child.gameObject.activeInHierarchy)
+                {
+                    continue;
+                }
+
+                child.GetWorldCorners(corners);
+                for (var cornerIndex = 0; cornerIndex < corners.Length; cornerIndex++)
+                {
+                    contentBottom = Mathf.Min(contentBottom, popupRect.InverseTransformPoint(corners[cornerIndex]).y);
+                }
+            }
+
+            popupRect.SetSizeWithCurrentAnchors(
+                RectTransform.Axis.Vertical,
+                Mathf.Max(popupRect.rect.height, -contentBottom));
+            LayoutRebuilder.ForceRebuildLayoutImmediate(popupRect);
         }
 
         private static void ResizePopupSectionToText(RectTransform sectionRect, TMP_Text text, RectTransform backgroundRect)
