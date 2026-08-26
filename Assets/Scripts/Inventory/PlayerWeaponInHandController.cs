@@ -20,6 +20,7 @@ namespace Inventory
         private const string TakeWeaponInHandEventName = "TakeWeaponInHand";
         private const string BeginMoveWeaponToBeltEventName = "BeginMoveWeaponToBelt";
         private const string PutWeaponOnBeltEventName = "PutWeaponOnBelt";
+        private readonly GameModesController gameModesController;
         private readonly PlayerInventory playerInventory;
         private readonly PlayerWeaponAnimationEventReceiver animationEventReceiver;
         private readonly Animator animator;
@@ -75,6 +76,7 @@ namespace Inventory
             ISubscriber<RollInputMessage> rollInputSubscriber,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
         {
+            this.gameModesController = gameModesController;
             this.playerInventory = playerInventory;
             this.animationEventReceiver = animationEventReceiver;
             this.animator = animator;
@@ -426,6 +428,18 @@ namespace Inventory
         {
             LogWeaponSlotInput(message.SlotIndex, "Received weapon-slot input");
 
+            if (gameModesController.GameMode == GameMode.Dialogue)
+            {
+                // Modal pages must never begin a weapon draw. A player who entered the page
+                // with a weapon in hand can still use either weapon-slot command to stow it.
+                if (isWeaponDrawn || currentDisplayMode == WeaponDisplayMode.RightHand)
+                {
+                    RequestSheatheWeapon();
+                }
+
+                return;
+            }
+
             if (!CanProcessWeaponSlotInput)
             {
                 LogWeaponSlotInput(message.SlotIndex, "Ignored weapon-slot input because weapon changes are blocked");
@@ -488,6 +502,11 @@ namespace Inventory
             }
 
             if (!isInitialized)
+            {
+                return;
+            }
+
+            if (gameModesController.GameMode == GameMode.Dialogue)
             {
                 return;
             }

@@ -12,6 +12,7 @@ using Stats;
 using TMPro;
 using UI;
 using UI.Configs;
+using UI.UIElements;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
@@ -29,6 +30,8 @@ namespace UI.Pages
         private readonly StatsConfig statsConfig;
         private readonly StatsController statsController;
         private readonly StatFiller hpFiller;
+        private readonly PlayerStatsHud playerStatsHud;
+        private readonly PlayerStatsHudContinuity playerStatsHudContinuity;
         private readonly DialogueContext dialogueContext;
         private readonly DialogueAnswerProvider dialogueAnswerProvider;
         private readonly CharacterInfo playerCharacterInfo;
@@ -45,6 +48,7 @@ namespace UI.Pages
 
         private RectTransform contentRect;
         private DialogueContainer dialogueContainer;
+        private StatsHolder dialogueStatsHolder;
         private Image bloodScreen;
         private HeartbeatPulse heartbeatPulse;
         private BloodScreenController bloodScreenController;
@@ -54,6 +58,8 @@ namespace UI.Pages
             StatsConfig statsConfig,
             StatsController statsController,
             StatFillers statFillers,
+            global::Inventory.InventoryConfig inventoryConfig,
+            PlayerStatsHudContinuity playerStatsHudContinuity,
             DialogueContext dialogueContext,
             DialogueAnswerProvider dialogueAnswerProvider,
             CharacterInfo playerCharacterInfo,
@@ -66,12 +72,21 @@ namespace UI.Pages
             IObjectResolver resolver,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
             IPublisher<DialogueExitRequestedMessage> dialogueExitRequestedPublisher,
-            IPublisher<DialogueGameplayEventRaisedMessage> dialogueGameplayEventPublisher)
+            IPublisher<DialogueGameplayEventRaisedMessage> dialogueGameplayEventPublisher,
+            ISubscriber<ShowStatsInputMessage> showStatsInputSubscriber)
         {
             this.uiConfig = uiConfig;
             this.statsConfig = statsConfig;
             this.statsController = statsController;
             hpFiller = statFillers.Get(StatType.Hp);
+            playerStatsHud = new PlayerStatsHud(
+                statsConfig,
+                statsController,
+                statFillers,
+                inventoryConfig,
+                playerInventory,
+                showStatsInputSubscriber);
+            this.playerStatsHudContinuity = playerStatsHudContinuity;
             this.dialogueContext = dialogueContext;
             this.dialogueAnswerProvider = dialogueAnswerProvider;
             this.playerCharacterInfo = playerCharacterInfo;
@@ -85,7 +100,6 @@ namespace UI.Pages
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
             this.dialogueExitRequestedPublisher = dialogueExitRequestedPublisher;
             this.dialogueGameplayEventPublisher = dialogueGameplayEventPublisher;
-
             canvasRect = canvas.GetComponent<RectTransform>();
         }
 
@@ -102,6 +116,7 @@ namespace UI.Pages
 
             dialogueContainer = resolver.Instantiate(uiConfig.DialogueContainer, contentRect);
             dialogueContainer.TradeButton.onClick.AddListener(OpenTradePage);
+            CreateDialogueStatsHud();
             bloodScreen = PageUiUtilities.CreateBloodScreen(uiConfig, resolver, contentRect, Type);
             heartbeatPulse = new HeartbeatPulse(statsConfig, statsController.Hp, hpFiller);
             bloodScreenController = new BloodScreenController(statsConfig, statsController.Hp, hpFiller, heartbeatPulse, bloodScreen);
@@ -111,6 +126,9 @@ namespace UI.Pages
 
         public override void Hide()
         {
+            playerStatsHud.Detach();
+            dialogueStatsHolder = null;
+
             bloodScreenController?.Dispose();
             bloodScreenController = null;
 
@@ -129,6 +147,29 @@ namespace UI.Pages
             {
                 Object.Destroy(contentRect.gameObject);
             }
+        }
+
+        private void CreateDialogueStatsHud()
+        {
+            if (uiConfig.StatsHolder == null)
+            {
+                return;
+            }
+
+            dialogueStatsHolder = resolver.Instantiate(uiConfig.StatsHolder, contentRect);
+            dialogueStatsHolder.name = $"{uiConfig.StatsHolder.name} | {Type}";
+            playerStatsHud.Attach(dialogueStatsHolder, playerStatsHudContinuity.Consume(Type));
+        }
+
+        public override void PrepareForTransition(PageType nextPageType)
+        {
+            if (nextPageType == PageType.MainGame)
+            {
+                playerStatsHudContinuity.Store(Type, playerStatsHud.CaptureState());
+                return;
+            }
+
+            playerStatsHudContinuity.Clear();
         }
 
         private void OpenTradePage()

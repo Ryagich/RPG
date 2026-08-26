@@ -8,6 +8,8 @@ namespace UI.Pages
 
         public abstract void Draw();
 
+        public virtual void PrepareForTransition(PageType nextPageType) { }
+
         public abstract void Hide();
     }
 }

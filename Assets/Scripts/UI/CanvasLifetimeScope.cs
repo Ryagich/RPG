@@ -1,4 +1,5 @@
 ﻿using UI.Pages;
+using UI.UIElements;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -16,6 +17,7 @@ namespace UI
             builder.RegisterInstance(Canvas).As<Canvas>();
             builder.RegisterEntryPoint<QuestNotificationService>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueAnswerProvider>(Lifetime.Singleton).AsSelf();
+            builder.Register<PlayerStatsHudContinuity>(Lifetime.Singleton);
 
             builder.Register<MainPage>(Lifetime.Singleton);
             builder.Register<PausePage>(Lifetime.Singleton);

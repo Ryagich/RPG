@@ -65,51 +65,47 @@ namespace UI.Pages
         private void Update(GameMode gameMode)
         {
             Debug.Log($"Update Page {gameMode}");
+            var nextPage = ResolvePage(gameMode);
+            currentPage?.PrepareForTransition(nextPage.Type);
             HideCurrentPage();
+            currentPage = nextPage;
+            if (currentPage is not null)
+            {
+                currentPage.Draw();
+            }
+        }
+
+        private BasePage ResolvePage(GameMode gameMode)
+        {
             switch (gameMode)
             {
                 case GameMode.Game:
-                    currentPage = mainPage;
-                    break;
+                    return mainPage;
                 case GameMode.Pause:
-                    currentPage = pausePage;
-                    break;
+                    return pausePage;
                 case GameMode.PauseSettings:
-                    currentPage = pauseSettingsPage;
-                    break;
+                    return pauseSettingsPage;
                 case GameMode.Inventory:
-                    currentPage = inventoryPage;
-                    break;
+                    return inventoryPage;
                 case GameMode.Looting:
-                    currentPage = lootingPage;
-                    break;
+                    return lootingPage;
                 case GameMode.Dialogue:
-                    currentPage = dialoguePage;
-                    break;
+                    return dialoguePage;
                 case GameMode.Trade:
-                    currentPage = tradePage;
-                    break;
+                    return tradePage;
                 case GameMode.Map:
-                    currentPage = mapPage;
-                    break;
+                    return mapPage;
                 case GameMode.Quest:
-                    currentPage = questPage;
-                    break;
+                    return questPage;
                 case GameMode.Lesson:
-                    currentPage = lessonPage;
-                    break;
+                    return lessonPage;
                 case GameMode.Death:
-                    currentPage = deathPage;
-                    break;
+                    return deathPage;
                 case GameMode.SwitchLocation:
-                    currentPage = switchLocationPage;
-                    break;
+                    return switchLocationPage;
                 default:
-                    currentPage = mainPage;
-                    break;
+                    return mainPage;
             }
-            if (currentPage is not null)
-                currentPage.Draw();
         }
         
         private void HideCurrentPage()

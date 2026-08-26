@@ -63,14 +63,15 @@ namespace UI.Pages
         private readonly StatFillers statFillers;
         private readonly StatFiller hpFiller;
         private readonly global::Inventory.InventoryConfig inventoryConfig;
+        private readonly PlayerInventory playerInventory;
         private readonly PlayerInteractableLogic playerInteractableLogic;
         private readonly ItemHolderInteractableLogic itemHolderInteractableLogic;
-        private readonly PlayerInventory playerInventory;
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
         private readonly QuestNotificationService questNotifications;
         private readonly QuestController questController;
         private readonly QuestObjectiveOverrideContext questObjectiveOverride;
+        private readonly PlayerStatsHudContinuity playerStatsHudContinuity;
         private readonly CompositeDisposable drawDisposables = new();
         private readonly Dictionary<StatType, StatVisibilityState> statVisibilityStates = new();
         private readonly Dictionary<FastSlotModel, StatVisibilityState> fastSlotVisibilityStates = new();
@@ -95,6 +96,7 @@ namespace UI.Pages
         private float globalPhaseElapsed;
         private VisibilityPhase globalPhase;
         private bool holdGlobalAtFull;
+        private readonly PlayerStatsHud playerStatsHud;
         private float questDescriptionAlpha;
         private float questDescriptionStartAlpha;
         private float questDescriptionTargetAlpha;
@@ -120,6 +122,7 @@ namespace UI.Pages
                 QuestNotificationService questNotifications,
                 QuestController questController,
                 QuestObjectiveOverrideContext questObjectiveOverride,
+                PlayerStatsHudContinuity playerStatsHudContinuity,
                 ISubscriber<ShowStatsInputMessage> showStatsInputSubscriber,
                 ISubscriber<FastSlotInputMessage> fastSlotInputSubscriber
             )
@@ -138,11 +141,19 @@ namespace UI.Pages
             this.questNotifications = questNotifications;
             this.questController = questController;
             this.questObjectiveOverride = questObjectiveOverride;
+            this.playerStatsHudContinuity = playerStatsHudContinuity;
 
             canvasRect = canvas.GetComponent<RectTransform>();
 
+            playerStatsHud = new PlayerStatsHud(
+                statsConfig,
+                statsController,
+                statFillers,
+                inventoryConfig,
+                playerInventory,
+                showStatsInputSubscriber,
+                fastSlotInputSubscriber);
             showStatsInputSubscriber.Subscribe(OnShowStatsInputChanged);
-            fastSlotInputSubscriber.Subscribe(OnFastSlotInput);
             questController.Changed += OnQuestChanged;
             questObjectiveOverride.Changed += OnQuestObjectiveOverrideChanged;
         }
@@ -183,65 +194,9 @@ namespace UI.Pages
                     itemHolderInteractableLogic
                 );
 
-            InitializeVisibilityState();
             InitializeQuestDescriptionVisibility();
             RefreshQuestDescriptionContent();
-
-            lastHpTarget = statsController.Hp.Value.Value;
-            hpFillMode = HpFillMode.Synced;
-
-            hpFiller.Current
-                    .Subscribe(_ => RefreshHpFill())
-                    .AddTo(drawDisposables);
-            statsController.Changed
-                           .Subscribe(OnStatChanged)
-                           .AddTo(drawDisposables);
-            statsController.Hp.Value
-                           .Subscribe(newTarget =>
-                                      {
-                                          OnHpTargetChanged(newTarget);
-                                          UpdateCriticalState(StatType.Hp);
-                                      })
-                           .AddTo(drawDisposables);
-
-            foreach (var statType in AdditionalStatTypes)
-            {
-                var currentStatType = statType;
-                var filler = statFillers.Get(currentStatType);
-                filler.Current
-                      .Subscribe(_ => RefreshStatFill(currentStatType))
-                      .AddTo(drawDisposables);
-                statsController.GetStat(currentStatType).Value
-                               .Subscribe(_ =>
-                                          {
-                                              RefreshStatFill(currentStatType);
-                                              UpdateCriticalState(currentStatType);
-                                          })
-                               .AddTo(drawDisposables);
-            }
-
-            Observable.EveryUpdate()
-                      .Subscribe(_ => TickVisibility())
-                      .AddTo(drawDisposables);
-            playerInventory.CurrentWeightReactive
-                           .Subscribe(UpdateWeightIndicator)
-                           .AddTo(drawDisposables);
-            playerInventory.Changed
-                           .Subscribe(_ => DrawFastSlots())
-                           .AddTo(drawDisposables);
-
-            RefreshHpFill();
-            RefreshAdditionalStatFills();
-            UpdateWeightIndicator(playerInventory.CurrentWeight);
-            DrawFastSlots();
-
-            foreach (var statType in AllStatTypes)
-            {
-                UpdateCriticalState(statType);
-            }
-
-            BeginGlobalReleaseSequence();
-            ApplyAllVisualAlphas();
+            playerStatsHud.Attach(statsHolder, playerStatsHudContinuity.Consume(Type));
             ApplyQuestDescriptionAlpha();
 
             bloodScreen = PageUiUtilities.CreateBloodScreen(uiConfig, resolver, contentRect, Type);
@@ -262,8 +217,7 @@ namespace UI.Pages
             heartbeatPulse = null;
 
             drawDisposables.Clear();
-            statVisibilityStates.Clear();
-            fastSlotVisibilityStates.Clear();
+            playerStatsHud.Detach();
 
             interactableInterface?.Dispose();
             interactableInterface = null;
@@ -281,6 +235,17 @@ namespace UI.Pages
             {
                 Object.Destroy(contentRect.gameObject);
             }
+        }
+
+        public override void PrepareForTransition(PageType nextPageType)
+        {
+            if (nextPageType == PageType.Dialogue)
+            {
+                playerStatsHudContinuity.Store(Type, playerStatsHud.CaptureState());
+                return;
+            }
+
+            playerStatsHudContinuity.Clear();
         }
 
         private void RefreshHpFill()
@@ -485,21 +450,6 @@ namespace UI.Pages
         private void OnShowStatsInputChanged(ShowStatsInputMessage message)
         {
             isShowStatsPressed = message.IsPressed;
-
-            if (statsHolder != null)
-            {
-                if (message.IsPressed)
-                {
-                    BeginGlobalHold();
-                }
-                else
-                {
-                    BeginGlobalReleaseSequence();
-                }
-
-                ApplyAllVisualAlphas();
-            }
-
             UpdateQuestDescriptionForInput();
         }
 
