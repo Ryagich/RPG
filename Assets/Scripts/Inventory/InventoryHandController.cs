@@ -40,6 +40,7 @@ namespace Inventory
         private IInventory handSourceInventory;
         private SlotModel handSourceSlot;
         private Matrix4x4 handSourcePosition;
+        private bool handSourceWasRotated;
         private Vector2 handGrabOffset;
         private MouseButtonType? activeHandButton;
         private bool suppressNextRightMouseUp;
@@ -102,6 +103,7 @@ namespace Inventory
             handSourceInventory = null;
             handSourceSlot = null;
             handSourcePosition = Matrix4x4.identity;
+            handSourceWasRotated = false;
             activeHandButton = null;
             playerInventory.HandSourceInventory.Value = null;
 
@@ -132,6 +134,7 @@ namespace Inventory
 
                 handSourceInventory = playerInventory;
                 handSourceSlot = slotModel;
+                handSourceWasRotated = slotItemStack.IsRotated;
                 playerInventory.HandSourceInventory.Value = handSourceInventory;
                 playerInventory.HandSlot.Value = new SlotModel(slotItemStack.ItemConfig.ItemType, SlotStackLimitType.SingleItem, slotItemStack);
                 activeHandButton = message.Button;
@@ -146,6 +149,7 @@ namespace Inventory
 
             handSourceInventory = hoveredInventory;
             handSourcePosition = itemInInventory.Position;
+            handSourceWasRotated = itemStack.IsRotated;
             playerInventory.HandSourceInventory.Value = handSourceInventory;
             playerInventory.HandSlot.Value = new SlotModel(itemInInventory.ItemConfig.ItemType, SlotStackLimitType.SingleItem, itemStack);
             activeHandButton = message.Button;
@@ -232,8 +236,15 @@ namespace Inventory
             var pointer = Pointer.current;
             if (interactionPage == null
              || pointer == null
-             || !interactionPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel)
-             || !playerInventory.TryPlaceInSlot(slotModel, itemStack, out var remainderStack, out var replacedStack))
+             || !interactionPage.TryGetHoveredSlot(pointer.position.ReadValue(), out var slotModel))
+            {
+                return false;
+            }
+
+            var slotSize = interactionPage.TryGetSlotSize(slotModel, out var resolvedSlotSize)
+                ? resolvedSlotSize
+                : (Vector2?)null;
+            if (!playerInventory.TryPlaceInSlot(slotModel, itemStack, slotSize, out var remainderStack, out var replacedStack))
             {
                 return false;
             }
@@ -308,6 +319,7 @@ namespace Inventory
             }
 
             var itemStack = playerInventory.HandSlot.Value.ItemStack;
+            RestoreHandSourceOrientation(itemStack);
             if (TryStoreOrDrop(itemStack, playerInventory.TryAdd(itemStack)))
             {
                 return;
@@ -387,6 +399,7 @@ namespace Inventory
             handSourceInventory = null;
             handSourceSlot = null;
             handSourcePosition = Matrix4x4.identity;
+            handSourceWasRotated = false;
             handGrabOffset = Vector2.zero;
             activeHandButton = null;
             suppressNextRightMouseUp = false;
@@ -395,6 +408,14 @@ namespace Inventory
             GetCurrentInteractionPage()?.ResetGrabOffset();
             equippedDefenseStatsChanger.ApplyDelayedRefresh();
             ProcessDelayedBackpackResize();
+        }
+
+        private void RestoreHandSourceOrientation(ItemStack itemStack)
+        {
+            if (itemStack != null)
+            {
+                itemStack.IsRotated = handSourceWasRotated;
+            }
         }
 
         private bool TryTakeFromHoveredSlot(SlotModel slotModel, MouseButtonType button, out ItemStack itemStack)
@@ -557,7 +578,7 @@ namespace Inventory
 
             if (tradePage.IsInPlayerSections(pointer.position.ReadValue())
              && tradePage.CanMoveToInventory(handSourceInventory, handSourceSlot, playerInventory)
-             && TryStoreOrDrop(itemStack, playerInventory.TryAdd(itemStack)))
+             && TryStoreOrDrop(itemStack, tradePage.TryAddToPlayerInventory(itemStack)))
             {
                 tradePage.ConsumeSellOriginIfAny(itemStack, handSourceInventory);
                 return true;

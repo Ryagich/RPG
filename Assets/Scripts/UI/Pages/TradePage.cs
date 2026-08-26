@@ -73,17 +73,15 @@ namespace UI.Pages
         private readonly struct SellItemKey : IEquatable<SellItemKey>
         {
             public readonly ItemConfig ItemConfig;
-            public readonly bool IsRotated;
 
-            public SellItemKey(ItemConfig itemConfig, bool isRotated)
+            public SellItemKey(ItemConfig itemConfig)
             {
                 ItemConfig = itemConfig;
-                IsRotated = isRotated;
             }
 
             public bool Equals(SellItemKey other)
             {
-                return ItemConfig == other.ItemConfig && IsRotated == other.IsRotated;
+                return ItemConfig == other.ItemConfig;
             }
 
             public override bool Equals(object obj)
@@ -93,10 +91,7 @@ namespace UI.Pages
 
             public override int GetHashCode()
             {
-                unchecked
-                {
-                    return ((ItemConfig != null ? ItemConfig.GetHashCode() : 0) * 397) ^ IsRotated.GetHashCode();
-                }
+                return ItemConfig != null ? ItemConfig.GetHashCode() : 0;
             }
         }
 
@@ -908,6 +903,18 @@ namespace UI.Pages
             return PageUiUtilities.TryGetSlotUnderPointer(centerSection.RightWeaponSlot, playerInventory.RightWeaponSlot, screenPoint, handItemType, eventCamera, out slotModel);
         }
 
+        public bool TryGetSlotSize(SlotModel slotModel, out Vector2 slotSize)
+        {
+            slotSize = Vector2.zero;
+            if (!PageUiUtilities.TryGetSlotRect(centerSection, playerInventory, slotModel, out var slotRect))
+            {
+                return false;
+            }
+
+            slotSize = slotRect.rect.size;
+            return slotSize.x > 0f && slotSize.y > 0f;
+        }
+
         public bool TryGetHoveredFastSlot(Vector2 screenPoint, out FastSlotModel fastSlotModel)
         {
             fastSlotModel = null;
@@ -993,6 +1000,11 @@ namespace UI.Pages
 
             RegisterMoveIntoSell(itemStack, itemStack.Count, destinationSellInventory, sourceInventory, sourceSlot, sourcePosition);
             return true;
+        }
+
+        public ItemStack TryAddToPlayerInventory(ItemStack itemStack)
+        {
+            return playerInventory.TryAdd(itemStack, GetSlotSizeOrNull);
         }
 
         public IInventory GetTargetInventory()
@@ -1855,7 +1867,7 @@ namespace UI.Pages
             var key = GetSellItemKey(itemStack);
             if (!origins.TryGetValue(key, out var queue) || queue.Count == 0)
             {
-                return fallbackInventory?.TryAdd(itemStack) ?? itemStack;
+                return TryAddToInventory(fallbackInventory, itemStack);
             }
 
             var remainingCount = itemStack.Count;
@@ -1911,7 +1923,7 @@ namespace UI.Pages
             }
 
             var remainingStack = new ItemStack(itemStack.ItemConfig, remainingCount, itemStack.IsRotated);
-            return fallbackInventory?.TryAdd(remainingStack) ?? remainingStack;
+            return TryAddToInventory(fallbackInventory, remainingStack);
         }
 
         private ItemStack TryRestoreToOrigin(SellItemOrigin origin, ItemStack itemStack, IInventory fallbackInventory)
@@ -1949,7 +1961,7 @@ namespace UI.Pages
 
             if (origin.SourceInventory != null)
             {
-                remainder = origin.SourceInventory.TryAdd(remainder);
+                remainder = TryAddToInventory(origin.SourceInventory, remainder);
             }
 
             if (remainder == null || fallbackInventory == null || fallbackInventory == origin.SourceInventory)
@@ -1957,7 +1969,7 @@ namespace UI.Pages
                 return remainder;
             }
 
-            return fallbackInventory.TryAdd(remainder);
+            return TryAddToInventory(fallbackInventory, remainder);
         }
 
         private bool TryPlaceBackIntoOriginalSlot(SlotModel slotModel, ItemStack itemStack)
@@ -1981,9 +1993,27 @@ namespace UI.Pages
                 }
             }
 
-            return playerInventory.TryPlaceInSlot(slotModel, itemStack, out var remainderStack, out var replacedStack)
+            var slotSize = TryGetSlotSize(slotModel, out var resolvedSlotSize)
+                ? resolvedSlotSize
+                : (Vector2?)null;
+            return playerInventory.TryPlaceInSlot(slotModel, itemStack, slotSize, out var remainderStack, out var replacedStack)
                    && replacedStack == null
                    && remainderStack == null;
+        }
+
+        private Vector2? GetSlotSizeOrNull(SlotModel slotModel)
+        {
+            return TryGetSlotSize(slotModel, out var slotSize) ? slotSize : null;
+        }
+
+        private ItemStack TryAddToInventory(IInventory inventory, ItemStack itemStack)
+        {
+            if (inventory == playerInventory)
+            {
+                return TryAddToPlayerInventory(itemStack);
+            }
+
+            return inventory?.TryAdd(itemStack) ?? itemStack;
         }
 
         private void HandleBackpackResizeIfNeeded(ItemType slotType, ItemConfig itemConfig)
@@ -2217,7 +2247,7 @@ namespace UI.Pages
                 var remainder = RestoreFromOrigins(item.ItemStack.Clone(), origins, defaultInventory);
                 if (remainder != null)
                 {
-                    var overflow = defaultInventory?.TryAdd(remainder) ?? remainder;
+                    var overflow = TryAddToInventory(defaultInventory, remainder);
                     if (overflow != null)
                     {
                         inventoryHandController?.Drop(overflow);
@@ -2307,7 +2337,7 @@ namespace UI.Pages
                 buyerMoneyStorage.TrySpend(soldPrice);
                 sellerMoneyStorage.Add(soldPrice);
 
-                var key = new SellItemKey(item.ItemConfig, item.ItemStack.IsRotated);
+                var key = new SellItemKey(item.ItemConfig);
                 if (origins.TryGetValue(key, out var queue) && queue.Count > 0)
                 {
                     var remainingOriginCount = soldCount;
@@ -2335,7 +2365,7 @@ namespace UI.Pages
 
         private static SellItemKey GetSellItemKey(ItemStack itemStack)
         {
-            return new SellItemKey(itemStack.ItemConfig, itemStack.IsRotated);
+            return new SellItemKey(itemStack.ItemConfig);
         }
 
         private bool CanTargetAcceptPlayerSell()

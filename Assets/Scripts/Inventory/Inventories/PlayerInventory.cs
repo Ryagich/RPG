@@ -329,6 +329,11 @@ namespace Inventory.Inventories
 
         public ItemStack TryAdd(ItemStack itemStack)
         {
+            return TryAdd(itemStack, (Func<SlotModel, Vector2?>)null);
+        }
+
+        public ItemStack TryAdd(ItemStack itemStack, Func<SlotModel, Vector2?> slotSizeProvider)
+        {
             var remainingStack = CloneIfValid(itemStack);
             if (remainingStack == null)
             {
@@ -347,7 +352,7 @@ namespace Inventory.Inventories
                 return null;
             }
 
-            var freeSlotRemainder = TryAddToFreeSlot(remainingStack);
+            var freeSlotRemainder = TryAddToFreeSlot(remainingStack, slotSizeProvider);
             if (freeSlotRemainder == null)
             {
                 NotifyChanged();
@@ -582,6 +587,16 @@ namespace Inventory.Inventories
 
         public bool TryPlaceInSlot(SlotModel slot, ItemStack newItemStack, out ItemStack remainderStack, out ItemStack replacedStack)
         {
+            return TryPlaceInSlot(slot, newItemStack, null, out remainderStack, out replacedStack);
+        }
+
+        public bool TryPlaceInSlot(
+            SlotModel slot,
+            ItemStack newItemStack,
+            Vector2? slotSize,
+            out ItemStack remainderStack,
+            out ItemStack replacedStack)
+        {
             remainderStack = null;
             replacedStack = null;
             if (newItemStack == null || newItemStack.ItemConfig == null || slot == null)
@@ -593,6 +608,9 @@ namespace Inventory.Inventories
             {
                 return false;
             }
+
+            var originalRotation = newItemStack.IsRotated;
+            RotateItemToFitSlot(newItemStack, slotSize);
 
             if (slot.ItemStack == null)
             {
@@ -614,6 +632,7 @@ namespace Inventory.Inventories
                 var freeSpace = existingSlotMaxStack - slot.ItemStack.Count;
                 if (freeSpace <= 0)
                 {
+                    newItemStack.IsRotated = originalRotation;
                     remainderStack = newItemStack.Clone();
                     return false;
                 }
@@ -885,7 +904,7 @@ namespace Inventory.Inventories
             return changed;
         }
 
-        private ItemStack TryAddToFreeSlot(ItemStack itemStack)
+        private ItemStack TryAddToFreeSlot(ItemStack itemStack, Func<SlotModel, Vector2?> slotSizeProvider)
         {
             foreach (var slot in GetSlots())
             {
@@ -894,6 +913,7 @@ namespace Inventory.Inventories
                     continue;
                 }
 
+                RotateItemToFitSlot(itemStack, slotSizeProvider?.Invoke(slot));
                 var countToPlace = Mathf.Min(itemStack.Count, slot.GetMaxStack(itemStack.ItemConfig));
                 slot.ItemStack = new ItemStack(itemStack.ItemConfig, countToPlace, itemStack.IsRotated);
                 HandleSlotItemChanged(slot);
@@ -1156,6 +1176,29 @@ namespace Inventory.Inventories
                    && itemStack?.ItemConfig != null
                    && slot.ItemType == itemStack.ItemConfig.ItemType
                    && !IsSlotBlocked(slot);
+        }
+
+        private static void RotateItemToFitSlot(ItemStack itemStack, Vector2? slotSize)
+        {
+            if (itemStack?.ItemConfig == null
+             || !itemStack.CanRotate()
+             || !slotSize.HasValue
+             || slotSize.Value.x <= 0f
+             || slotSize.Value.y <= 0f)
+            {
+                return;
+            }
+
+            var itemSize = itemStack.Size;
+            if (itemSize.x == itemSize.y || Mathf.Approximately(slotSize.Value.x, slotSize.Value.y))
+            {
+                return;
+            }
+
+            if ((itemSize.x > itemSize.y) != (slotSize.Value.x > slotSize.Value.y))
+            {
+                itemStack.Rotate90();
+            }
         }
 
         private void HandleSlotItemChanged(SlotModel slot)

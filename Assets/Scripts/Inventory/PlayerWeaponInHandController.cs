@@ -506,7 +506,7 @@ namespace Inventory
                 return;
             }
 
-            if (gameModesController.GameMode == GameMode.Dialogue)
+            if (gameModesController.GameMode != GameMode.Game)
             {
                 return;
             }

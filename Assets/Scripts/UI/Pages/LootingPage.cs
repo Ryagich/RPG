@@ -403,6 +403,18 @@ namespace UI.Pages
             return TryGetSlotUnderPointer(slotsViewContainer.RightWeaponSlot, playerInventory.RightWeaponSlot, screenPoint, handItemType, out slotModel);
         }
 
+        public bool TryGetSlotSize(SlotModel slotModel, out Vector2 slotSize)
+        {
+            slotSize = Vector2.zero;
+            if (!PageUiUtilities.TryGetSlotRect(slotsViewContainer, playerInventory, slotModel, out var slotRect))
+            {
+                return false;
+            }
+
+            slotSize = slotRect.rect.size;
+            return slotSize.x > 0f && slotSize.y > 0f;
+        }
+
         public bool TryGetHoveredFastSlot(Vector2 screenPoint, out FastSlotModel fastSlotModel)
         {
             fastSlotModel = null;
