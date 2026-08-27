@@ -18,6 +18,7 @@ namespace Factions
         [field: SerializeField] public List<NpcCombatProfile> CombatProfiles { get; private set; } = new();
         [field: Header("Initial Inventory")]
         [field: SerializeField] public List<ItemSetConfig> ItemSetConfigs { get; private set; } = new();
+        [field: SerializeField] public List<ItemLootSetConfig> ItemLootSetConfigs { get; private set; } = new();
 
         public NpcCombatProfile GetRandomCombatProfile()
         {
@@ -89,6 +90,44 @@ namespace Factions
                 if (selectedConfigIndex-- == 0)
                 {
                     return itemSetConfig;
+                }
+            }
+
+            return null;
+        }
+
+        public ItemLootSetConfig GetRandomItemLootSetConfig()
+        {
+            if (ItemLootSetConfigs == null || ItemLootSetConfigs.Count == 0)
+            {
+                return null;
+            }
+
+            var validConfigCount = 0;
+            foreach (var itemLootSetConfig in ItemLootSetConfigs)
+            {
+                if (itemLootSetConfig != null)
+                {
+                    validConfigCount++;
+                }
+            }
+
+            if (validConfigCount == 0)
+            {
+                return null;
+            }
+
+            var selectedConfigIndex = Random.Range(0, validConfigCount);
+            foreach (var itemLootSetConfig in ItemLootSetConfigs)
+            {
+                if (itemLootSetConfig == null)
+                {
+                    continue;
+                }
+
+                if (selectedConfigIndex-- == 0)
+                {
+                    return itemLootSetConfig;
                 }
             }
 

@@ -28,6 +28,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 323b8085f34902c4198b8206e4893184, type: 2}
   <ItemSetConfigs>k__BackingField:
   - {fileID: 11400000, guid: f23b48b0dbc24c344866ef758eb60a0b, type: 2}
+  <ItemLootSetConfigs>k__BackingField:
+  - {fileID: 11400000, guid: 9a021fea2ca0670499603c47423fc6a3, type: 2}
   references:
     version: 2
     RefIds: []

@@ -1,0 +1,91 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b2974ffa3174e739ebd999a21c6f2b1, type: 3}
+  m_Name: ItemLootSetConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemLootSetConfig
+  <Entries>k__BackingField:
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 3fce84469cc47704e8595210c50f07d4, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 2
+    <Chance>k__BackingField: 0.15
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 08968d2a8d903b4448d4c7d8709408d1, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 5
+    <Chance>k__BackingField: 0.5
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 5b5f43ce9ed3fe242a3e4a97410e9377, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 2
+    <Chance>k__BackingField: 0.1
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 7c5945ca5ddc7674485d5542ed1caa28, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 2
+    <Chance>k__BackingField: 0.1
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 7c5945ca5ddc7674485d5542ed1caa28, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 2
+    <Chance>k__BackingField: 0.1
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 21401a23623e0ff47aee323420fe992b, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 2
+    <Chance>k__BackingField: 0.1
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: defe963ecb30a354b9dceb9c6b7c8bc8, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 1
+    <Chance>k__BackingField: 0.1
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 940f5444797dad148b8c82e64a997cc8, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 5
+    <Chance>k__BackingField: 0.2
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 9369fa5abea4fdf40b9772357b6d27e1, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 5
+    <Chance>k__BackingField: 0.4
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 0192b9033a95e6341857f232297faa9e, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 1
+    <Chance>k__BackingField: 0.05
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 7fa9a3c245a9f6e4c964d32232513bcc, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 1
+    <Chance>k__BackingField: 0.05
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: c7ef1549db925884787bbd70e4888d30, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 1
+    <Chance>k__BackingField: 0.05
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: d02e67f7849b6a440b3a8f9b6751075b, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 1
+    <Chance>k__BackingField: 0.05
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 425d1559c3aa72743bcc5e84f0ee2d26, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 1
+    <Chance>k__BackingField: 0.05
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: d8577f00098b5d14789a786ef48a9917, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 1
+    <Chance>k__BackingField: 0.05
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 86f5e5510e4e6b04abd3b9a302e80cbb, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 1
+    <Chance>k__BackingField: 0.05
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: e41338e4ec5ae6c4582247569bc2b863, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 1
+    <Chance>k__BackingField: 0.05
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 16da3eaa3dccfc740a5e2d2edcce00a6, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 1
+    <Chance>k__BackingField: 0.05
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 92ede066921116b47bd04641f43cf23f, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 1
+    <Chance>k__BackingField: 0.05

@@ -144,10 +144,22 @@ namespace Container
             }
 
             var initialItemSetConfig = itemSetConfigOverride ?? faction?.GetRandomItemSetConfig();
-            if (initialItemSetConfig != null)
+            var initialItemLootSetConfig = faction?.GetRandomItemLootSetConfig();
+            if (initialItemSetConfig != null || initialItemLootSetConfig != null)
             {
-                builder.RegisterInstance(initialItemSetConfig).AsSelf();
-                builder.RegisterEntryPoint<InitialInventoryItemSetApplier>().AsSelf();
+                if (initialItemSetConfig != null)
+                {
+                    builder.RegisterInstance(initialItemSetConfig).AsSelf();
+                }
+
+                if (initialItemLootSetConfig != null)
+                {
+                    builder.RegisterInstance(initialItemLootSetConfig).AsSelf();
+                }
+
+                builder.Register<NpcInitialInventoryLoadoutApplier>(Lifetime.Scoped)
+                       .AsSelf()
+                       .As<IStartable>();
             }
 
             var damageReceiverHost = GetComponent<DamageReceiverHost>() ?? gameObject.AddComponent<DamageReceiverHost>();

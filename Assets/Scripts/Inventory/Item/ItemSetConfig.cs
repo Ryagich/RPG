@@ -8,4 +8,5 @@ namespace Inventory.Item
     {
         [field: SerializeField] public List<ItemConfig> ItemConfigs { get; private set; } = new();
     }
+
 }
