@@ -32,4 +32,49 @@ namespace CameraScripts
         [field: SerializeField, Min(0f)] public float HorizontalSensitivity { get; private set; } = 0.15f;
         [field: SerializeField, Min(0f)] public float VerticalSensitivity { get; private set; } = 0.12f;
     }
+
+    /// <summary>
+    /// Persistent player preferences for the gameplay camera's per-axis rotation speed.
+    /// The configured values remain the defaults for players who have not changed them.
+    /// </summary>
+    public static class CameraSensitivitySettings
+    {
+        private const string HorizontalPreferenceKey = "RPG.Camera.HorizontalSensitivity";
+        private const string VerticalPreferenceKey = "RPG.Camera.VerticalSensitivity";
+
+        public const float Minimum = 0.01f;
+        public const float Maximum = 1f;
+        private static float horizontal = -1f;
+        private static float vertical = -1f;
+
+        public static float GetHorizontal(float defaultValue) => GetValue(ref horizontal, HorizontalPreferenceKey, defaultValue);
+        public static float GetVertical(float defaultValue) => GetValue(ref vertical, VerticalPreferenceKey, defaultValue);
+
+        public static void SetHorizontal(float value)
+        {
+            SetValue(ref horizontal, HorizontalPreferenceKey, value);
+        }
+
+        public static void SetVertical(float value)
+        {
+            SetValue(ref vertical, VerticalPreferenceKey, value);
+        }
+
+        private static float GetValue(ref float value, string preferenceKey, float defaultValue)
+        {
+            if (value < Minimum)
+            {
+                value = Mathf.Clamp(PlayerPrefs.GetFloat(preferenceKey, defaultValue), Minimum, Maximum);
+            }
+
+            return value;
+        }
+
+        private static void SetValue(ref float storedValue, string preferenceKey, float value)
+        {
+            storedValue = Mathf.Clamp(value, Minimum, Maximum);
+            PlayerPrefs.SetFloat(preferenceKey, storedValue);
+            PlayerPrefs.Save();
+        }
+    }
 }

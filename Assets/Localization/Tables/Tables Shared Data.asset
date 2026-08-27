@@ -15,6 +15,14 @@ MonoBehaviour:
   m_TableCollectionName: Tables
   m_TableCollectionNameGuidString: bf30f5dd6628f424e86623c160908482
   m_Entries:
+  - m_Id: 99000000000000001
+    m_Key: Title_Camera_Horizontal_Sensitivity
+    m_Metadata:
+      m_Items: []
+  - m_Id: 99000000000000002
+    m_Key: Title_Camera_Vertical_Sensitivity
+    m_Metadata:
+      m_Items: []
   - m_Id: 944427890884608
     m_Key: Null String
     m_Metadata:

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using CameraScripts;
 using Input;
 using TMPro;
 using UnityEngine;
@@ -29,6 +30,15 @@ public class BindingsController : MonoBehaviour
     [SerializeField] private Slider _mouseSensitivitySlider;
     [SerializeField] private TMP_Text _mouseSensitivityValue;
 
+    [Header("Camera Sensitivity")]
+    [SerializeField] private CameraConfig _cameraConfig;
+    [SerializeField] private Slider _cameraHorizontalSensitivitySlider;
+    [SerializeField] private Slider _cameraVerticalSensitivitySlider;
+    [SerializeField] private TMP_Text _cameraHorizontalSensitivityValue;
+    [SerializeField] private TMP_Text _cameraVerticalSensitivityValue;
+    [SerializeField] private TMP_Text _cameraHorizontalSensitivityTitle;
+    [SerializeField] private TMP_Text _cameraVerticalSensitivityTitle;
+
     private const string DodgeActionName = "Dodge";
     private const string RollActionName = "Roll";
     private const string LessonSkipActionName = "LessonSkip";
@@ -38,6 +48,8 @@ public class BindingsController : MonoBehaviour
     private const string RollLocalizationKey = "Input_Roll";
     private const string LessonSkipLocalizationKey = "Input_LessonSkip";
     private const string QuestLogLocalizationKey = "Input_QuestLog";
+    private const string CameraHorizontalSensitivityLocalizationKey = "Title_Camera_Horizontal_Sensitivity";
+    private const string CameraVerticalSensitivityLocalizationKey = "Title_Camera_Vertical_Sensitivity";
 
     private InputRebinder dodgeRebinder;
     private InputRebinder rollRebinder;
@@ -67,8 +79,10 @@ public class BindingsController : MonoBehaviour
         }
 
         InitializeMouseSensitivitySlider();
+        InitializeCameraSensitivitySliders();
         LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
         UpdateDynamicBindingDisplayNames();
+        UpdateCameraSensitivityTitles();
     }
 
     private void OnDestroy()
@@ -79,11 +93,22 @@ public class BindingsController : MonoBehaviour
         {
             _mouseSensitivitySlider.onValueChanged.RemoveListener(SetMouseSensitivity);
         }
+
+        if (_cameraHorizontalSensitivitySlider != null)
+        {
+            _cameraHorizontalSensitivitySlider.onValueChanged.RemoveListener(SetCameraHorizontalSensitivity);
+        }
+
+        if (_cameraVerticalSensitivitySlider != null)
+        {
+            _cameraVerticalSensitivitySlider.onValueChanged.RemoveListener(SetCameraVerticalSensitivity);
+        }
     }
 
     private void OnSelectedLocaleChanged(Locale _)
     {
         UpdateDynamicBindingDisplayNames();
+        UpdateCameraSensitivityTitles();
     }
 
     private void CreateDynamicBindingButtons()
@@ -198,7 +223,88 @@ public class BindingsController : MonoBehaviour
     {
         if (_mouseSensitivityValue != null)
         {
-            _mouseSensitivityValue.text = value.ToString();
+            _mouseSensitivityValue.text = $"{value}%";
+        }
+    }
+
+    private void InitializeCameraSensitivitySliders()
+    {
+        if (_cameraConfig == null)
+        {
+            Debug.LogError("Camera config is not assigned.", this);
+            return;
+        }
+
+        InitializeCameraSensitivitySlider(
+            _cameraHorizontalSensitivitySlider,
+            CameraSensitivitySettings.GetHorizontal(_cameraConfig.HorizontalSensitivity),
+            SetCameraHorizontalSensitivity,
+            _cameraHorizontalSensitivityValue);
+        InitializeCameraSensitivitySlider(
+            _cameraVerticalSensitivitySlider,
+            CameraSensitivitySettings.GetVertical(_cameraConfig.VerticalSensitivity),
+            SetCameraVerticalSensitivity,
+            _cameraVerticalSensitivityValue);
+    }
+
+    private void InitializeCameraSensitivitySlider(
+        Slider slider,
+        float value,
+        UnityEngine.Events.UnityAction<float> listener,
+        TMP_Text valueText)
+    {
+        if (slider == null)
+        {
+            Debug.LogError("Camera sensitivity Slider is not assigned.", this);
+            return;
+        }
+
+        slider.minValue = CameraSensitivitySettings.Minimum;
+        slider.maxValue = CameraSensitivitySettings.Maximum;
+        slider.wholeNumbers = false;
+        slider.SetValueWithoutNotify(value);
+        UpdateCameraSensitivityValue(valueText, value);
+        slider.onValueChanged.AddListener(listener);
+    }
+
+    private void SetCameraHorizontalSensitivity(float value)
+    {
+        CameraSensitivitySettings.SetHorizontal(value);
+        UpdateCameraSensitivityValue(_cameraHorizontalSensitivityValue, CameraSensitivitySettings.GetHorizontal(_cameraConfig.HorizontalSensitivity));
+    }
+
+    private void SetCameraVerticalSensitivity(float value)
+    {
+        CameraSensitivitySettings.SetVertical(value);
+        UpdateCameraSensitivityValue(_cameraVerticalSensitivityValue, CameraSensitivitySettings.GetVertical(_cameraConfig.VerticalSensitivity));
+    }
+
+    private static void UpdateCameraSensitivityValue(TMP_Text valueText, float value)
+    {
+        if (valueText != null)
+        {
+            valueText.text = $"{value * 100f:0}%";
+        }
+    }
+
+    private async void UpdateCameraSensitivityTitles()
+    {
+        await UpdateLocalizedText(_cameraHorizontalSensitivityTitle, CameraHorizontalSensitivityLocalizationKey);
+        await UpdateLocalizedText(_cameraVerticalSensitivityTitle, CameraVerticalSensitivityLocalizationKey);
+    }
+
+    private async System.Threading.Tasks.Task UpdateLocalizedText(TMP_Text text, string localizationKey)
+    {
+        if (text == null)
+        {
+            return;
+        }
+
+        var localizedText = await LocalizationSettings.StringDatabase
+            .GetLocalizedStringAsync(EvasionLocalizationTable, localizationKey).Task;
+        if (text != null)
+        {
+            text.text = localizedText;
         }
     }
     

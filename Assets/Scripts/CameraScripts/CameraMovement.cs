@@ -317,8 +317,11 @@ namespace CameraScripts
                 return;
             }
 
-            yaw += delta.x * config.HorizontalSensitivity;
-            pitch = Mathf.Clamp(pitch - delta.y * config.VerticalSensitivity, config.MinPitch, config.MaxPitch);
+            yaw += delta.x * CameraSensitivitySettings.GetHorizontal(config.HorizontalSensitivity);
+            pitch = Mathf.Clamp(
+                pitch - delta.y * CameraSensitivitySettings.GetVertical(config.VerticalSensitivity),
+                config.MinPitch,
+                config.MaxPitch);
         }
 
         private void UpdateTargetLockLook(float deltaTime)
@@ -364,11 +367,11 @@ namespace CameraScripts
             }
 
             targetLockYawOffset = Mathf.Clamp(
-                targetLockYawOffset + delta.x * config.HorizontalSensitivity,
+                targetLockYawOffset + delta.x * CameraSensitivitySettings.GetHorizontal(config.HorizontalSensitivity),
                 -targetLockConfig.CameraMaxManualYawOffset,
                 targetLockConfig.CameraMaxManualYawOffset);
             targetLockPitchOffset = Mathf.Clamp(
-                targetLockPitchOffset - delta.y * config.VerticalSensitivity,
+                targetLockPitchOffset - delta.y * CameraSensitivitySettings.GetVertical(config.VerticalSensitivity),
                 -targetLockConfig.CameraMaxManualPitchOffset,
                 targetLockConfig.CameraMaxManualPitchOffset);
         }
