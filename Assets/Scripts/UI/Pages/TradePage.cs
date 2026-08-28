@@ -22,6 +22,7 @@ using UI.UIElements;
 using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Localization;
 using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
@@ -1715,7 +1716,7 @@ namespace UI.Pages
         {
             if (target?.InventoryItem?.ItemStack?.ItemConfig != null && IsSellInventory(target.SourceInventory))
             {
-                CreatePopupButton("Out Sell", () => ExecutePopupAction(() => TryReturnSellItem(target.SourceInventory, target.InventoryItem)));
+                CreatePopupButton(localizationConfig.PopupActionRemoveFromSale, () => ExecutePopupAction(() => TryReturnSellItem(target.SourceInventory, target.InventoryItem)));
                 return;
             }
 
@@ -1725,12 +1726,12 @@ namespace UI.Pages
                 return;
             }
 
-            CreatePopupButton("To Sell", () => ExecutePopupAction(() => TryMoveTargetToSell(target, itemCount)));
+            CreatePopupButton(localizationConfig.PopupActionPutUpForSale, () => ExecutePopupAction(() => TryMoveTargetToSell(target, itemCount)));
 
             var halfCount = GetHalfCount(itemCount);
             if (halfCount > 0)
             {
-                CreatePopupButton("Half To Sell", () => ExecutePopupAction(() => TryMoveTargetToSell(target, halfCount)));
+                CreatePopupButton(localizationConfig.PopupActionPutHalfUpForSale, () => ExecutePopupAction(() => TryMoveTargetToSell(target, halfCount)));
             }
         }
 
@@ -1741,7 +1742,7 @@ namespace UI.Pages
             action?.Invoke();
         }
 
-        private void CreatePopupButton(string label, UnityEngine.Events.UnityAction onClick, bool interactable = true)
+        private void CreatePopupButton(LocalizedString label, UnityEngine.Events.UnityAction onClick, bool interactable = true)
         {
             PageUiUtilities.CreatePopupButton(popupContentRect, uiConfig, resolver, label, onClick, interactable);
         }

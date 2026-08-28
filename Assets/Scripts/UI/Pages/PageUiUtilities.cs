@@ -977,7 +977,7 @@ namespace UI.Pages
                 RectTransform popupContentRect,
                 UIConfig uiConfig,
                 IObjectResolver resolver,
-                string label,
+                LocalizedString label,
                 UnityAction onClick,
                 bool interactable = true
             )
@@ -988,7 +988,8 @@ namespace UI.Pages
             }
 
             var button = resolver.Instantiate(uiConfig.PopupButton, popupContentRect);
-            button.name = $"{uiConfig.PopupButton.name} | {label}";
+            string localizedLabel = label.GetLocalizedStringCached();
+            button.name = $"{uiConfig.PopupButton.name} | {localizedLabel}";
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(onClick);
             button.interactable = interactable;
@@ -996,7 +997,7 @@ namespace UI.Pages
             var text = button.GetComponentInChildren<TMP_Text>(true);
             if (text != null)
             {
-                text.text = label;
+                text.text = localizedLabel;
             }
         }
 
@@ -1178,7 +1179,7 @@ namespace UI.Pages
             ConfigureFantasyWarriorLabel(
                 popupRect,
                 "Content/Item/Name/Label_ItemRarity",
-                GetItemTypeDisplayName(itemConfig.ItemType),
+                localizationConfig.GetItemTypeDisplayName(itemConfig.ItemType),
                 TextAlignmentOptions.Left,
                 34f,
                 22f,
@@ -2273,24 +2274,6 @@ namespace UI.Pages
             {
                 rect.gameObject.SetActive(isActive);
             }
-        }
-
-        private static string GetItemTypeDisplayName(ItemType itemType)
-        {
-            return itemType switch
-            {
-                ItemType.Usable => "Usable",
-                ItemType.Helm => "Helm",
-                ItemType.Face => "Face",
-                ItemType.Body => "Body",
-                ItemType.Hands => "Hands",
-                ItemType.Arms => "Arms",
-                ItemType.Legs => "Legs",
-                ItemType.Hips => "Hips",
-                ItemType.Backpack => "Backpack",
-                ItemType.Weapon => "Weapon",
-                _ => itemType.ToString()
-            };
         }
 
         private static void CreateFastSlotLabel(RectTransform parent, string labelText)

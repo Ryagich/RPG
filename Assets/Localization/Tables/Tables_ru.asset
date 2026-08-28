@@ -1980,6 +1980,81 @@ MonoBehaviour:
   - m_Id: 83000000000000058
     m_Localized: "Золотое кольцо с выпуклой гранёной печаткой. На её поверхности не разобрать знака — то ли от времени, то ли потому, что его стёрли намеренно."
     m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000009
+    m_Localized: "Новая игра"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000010
+    m_Localized: "Настройки"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000011
+    m_Localized: "Продолжить"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000012
+    m_Localized: "Используется"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000013
+    m_Localized: "Нет"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000014
+    m_Localized: "Расходуемое"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000015
+    m_Localized: "Рюкзак"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000016
+    m_Localized: "Оружие"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000017
+    m_Localized: "Торс"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000018
+    m_Localized: "Шлем"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000019
+    m_Localized: "Лицо"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000020
+    m_Localized: "Кисти"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000021
+    m_Localized: "Ноги"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000022
+    m_Localized: "Бёдра"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000023
+    m_Localized: "Предплечья"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000024
+    m_Localized: "Главное меню"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000025
+    m_Localized: "Использовать"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000026
+    m_Localized: "Выбросить"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000027
+    m_Localized: "Выбросить половину"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000028
+    m_Localized: "Переместить"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000029
+    m_Localized: "Переместить половину"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000030
+    m_Localized: "Переместить в инвентарь"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000031
+    m_Localized: "Выставить на продажу"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000032
+    m_Localized: "Выставить половину на продажу"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000033
+    m_Localized: "Снять с продажи"
+    m_Metadata: {m_Items: []}
  references:
     version: 2
     RefIds: []

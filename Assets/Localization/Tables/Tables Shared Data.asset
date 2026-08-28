@@ -2109,6 +2109,106 @@ MonoBehaviour:
     m_Key: Item_Gold_Signet_Ring_Description
     m_Metadata:
       m_Items: []
+  - m_Id: 93000000000000009
+    m_Key: Menu_New_Game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000010
+    m_Key: Menu_Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000011
+    m_Key: Menu_Continue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000012
+    m_Key: Popup_Item_Equipped
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000013
+    m_Key: Item_Type_None
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000014
+    m_Key: Item_Type_Usable
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000015
+    m_Key: Item_Type_Backpack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000016
+    m_Key: Item_Type_Weapon
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000017
+    m_Key: Item_Type_Body
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000018
+    m_Key: Item_Type_Helm
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000019
+    m_Key: Item_Type_Face
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000020
+    m_Key: Item_Type_Hands
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000021
+    m_Key: Item_Type_Legs
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000022
+    m_Key: Item_Type_Hips
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000023
+    m_Key: Item_Type_Arms
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000024
+    m_Key: Pause_Main_Menu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000025
+    m_Key: Popup_Action_Use
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000026
+    m_Key: Popup_Action_Drop
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000027
+    m_Key: Popup_Action_Drop_Half
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000028
+    m_Key: Popup_Action_Move
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000029
+    m_Key: Popup_Action_Move_Half
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000030
+    m_Key: Popup_Action_Move_To_Inventory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000031
+    m_Key: Popup_Action_Put_Up_For_Sale
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000032
+    m_Key: Popup_Action_Put_Half_Up_For_Sale
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000033
+    m_Key: Popup_Action_Remove_From_Sale
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

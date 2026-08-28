@@ -20,6 +20,7 @@ using UI.UIElements;
 using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Localization;
 using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
@@ -1106,7 +1107,7 @@ namespace UI.Pages
                 return;
             }
 
-            CreatePopupButton("Move", () => ExecutePopupAction(() => MoveSlotItem(slotModel, slotModel.ItemStack?.Count ?? 0)), CanMoveSlotItem(slotModel));
+            CreatePopupButton(localizationConfig.PopupActionMove, () => ExecutePopupAction(() => MoveSlotItem(slotModel, slotModel.ItemStack?.Count ?? 0)), CanMoveSlotItem(slotModel));
         }
 
         private void CreateInventoryPopupButtons(PopupTarget target)
@@ -1115,14 +1116,14 @@ namespace UI.Pages
             var itemCount = itemStack?.Count ?? 0;
             var moveHalfCount = GetDropHalfCount(itemCount);
 
-            CreatePopupButton("Use", () => ExecutePopupAction(() => UseTarget(target)), CanUseInventoryItem(itemStack?.ItemConfig));
+            CreatePopupButton(localizationConfig.PopupActionUse, () => ExecutePopupAction(() => UseTarget(target)), CanUseInventoryItem(itemStack?.ItemConfig));
 
             if (moveHalfCount > 0)
             {
-                CreatePopupButton("Move Half", () => ExecutePopupAction(() => MoveTarget(target, moveHalfCount)), CanMoveInventoryItem(target, moveHalfCount));
+                CreatePopupButton(localizationConfig.PopupActionMoveHalf, () => ExecutePopupAction(() => MoveTarget(target, moveHalfCount)), CanMoveInventoryItem(target, moveHalfCount));
             }
 
-            CreatePopupButton("Move", () => ExecutePopupAction(() => MoveTarget(target, itemCount)), CanMoveInventoryItem(target, itemCount));
+            CreatePopupButton(localizationConfig.PopupActionMove, () => ExecutePopupAction(() => MoveTarget(target, itemCount)), CanMoveInventoryItem(target, itemCount));
         }
 
         private void ExecutePopupAction(Action action)
@@ -1132,7 +1133,7 @@ namespace UI.Pages
             action?.Invoke();
         }
 
-        private void CreatePopupButton(string label, UnityEngine.Events.UnityAction onClick, bool interactable = true)
+        private void CreatePopupButton(LocalizedString label, UnityEngine.Events.UnityAction onClick, bool interactable = true)
         {
             PageUiUtilities.CreatePopupButton(popupContentRect, uiConfig, resolver, label, onClick, interactable);
         }

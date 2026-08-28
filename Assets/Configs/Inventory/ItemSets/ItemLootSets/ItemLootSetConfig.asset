@@ -29,9 +29,9 @@ MonoBehaviour:
     <MinAmount>k__BackingField: 1
     <MaxAmount>k__BackingField: 2
     <Chance>k__BackingField: 0.1
-  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 7c5945ca5ddc7674485d5542ed1caa28, type: 2}
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 24899914fce3a9f43bed2955c46a4a2b, type: 2}
     <MinAmount>k__BackingField: 1
-    <MaxAmount>k__BackingField: 2
+    <MaxAmount>k__BackingField: 5
     <Chance>k__BackingField: 0.1
   - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 21401a23623e0ff47aee323420fe992b, type: 2}
     <MinAmount>k__BackingField: 1
@@ -47,7 +47,7 @@ MonoBehaviour:
     <Chance>k__BackingField: 0.2
   - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 9369fa5abea4fdf40b9772357b6d27e1, type: 2}
     <MinAmount>k__BackingField: 1
-    <MaxAmount>k__BackingField: 5
+    <MaxAmount>k__BackingField: 3
     <Chance>k__BackingField: 0.4
   - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 0192b9033a95e6341857f232297faa9e, type: 2}
     <MinAmount>k__BackingField: 1
@@ -89,3 +89,15 @@ MonoBehaviour:
     <MinAmount>k__BackingField: 1
     <MaxAmount>k__BackingField: 1
     <Chance>k__BackingField: 0.05
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 8a29c35bf78feee4eb7fc6f7f6c51df2, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 4
+    <Chance>k__BackingField: 0.15
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 9113afed435d472408132622bcc7bffa, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 5
+    <Chance>k__BackingField: 0.3
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 0c67c9e7662b9514f96cc5571e27a2bf, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 2
+    <Chance>k__BackingField: 0.125

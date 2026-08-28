@@ -1833,6 +1833,81 @@ MonoBehaviour:
   - m_Id: 83000000000000058
     m_Localized: "A gold ring with a raised, faceted signet. Its face bears no clear mark, whether from wear or deliberate removal."
     m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000009
+    m_Localized: New Game
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000010
+    m_Localized: Settings
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000011
+    m_Localized: Continue
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000012
+    m_Localized: Equipped
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000013
+    m_Localized: None
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000014
+    m_Localized: Usable
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000015
+    m_Localized: Backpack
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000016
+    m_Localized: Weapon
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000017
+    m_Localized: Body
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000018
+    m_Localized: Helm
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000019
+    m_Localized: Face
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000020
+    m_Localized: Hands
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000021
+    m_Localized: Legs
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000022
+    m_Localized: Hips
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000023
+    m_Localized: Arms
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000024
+    m_Localized: Main Menu
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000025
+    m_Localized: Use
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000026
+    m_Localized: Drop
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000027
+    m_Localized: Drop Half
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000028
+    m_Localized: Move
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000029
+    m_Localized: Move Half
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000030
+    m_Localized: Move to Inventory
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000031
+    m_Localized: Put Up for Sale
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000032
+    m_Localized: Put Half Up for Sale
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000033
+    m_Localized: Remove from Sale
+    m_Metadata: {m_Items: []}
  references:
     version: 2
     RefIds: []
