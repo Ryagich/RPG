@@ -145,7 +145,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 223450091874612451}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -168,9 +168,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 12716628881408
+            m_KeyId: 93000000000000034
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -321,7 +321,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 366697898720611633}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -344,9 +344,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 12627734802432
+            m_KeyId: 93000000000000035
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -408,6 +408,7 @@ GameObject:
   - component: {fileID: 8483501751487687735}
   - component: {fileID: 4528955470314571335}
   - component: {fileID: 1559369776314325595}
+  - component: {fileID: 900000000000000501}
   m_Layer: 5
   m_Name: Text_Name
   m_TagString: Untagged
@@ -545,6 +546,7 @@ GameObject:
   - component: {fileID: 2619818457711560341}
   - component: {fileID: 1932134843549758853}
   - component: {fileID: 4678305450598663395}
+  - component: {fileID: 900000000000000502}
   m_Layer: 5
   m_Name: Text_Name
   m_TagString: Untagged
@@ -758,6 +760,7 @@ GameObject:
   - component: {fileID: 8378473660277915969}
   - component: {fileID: 9141374208701237519}
   - component: {fileID: 2487589603957695368}
+  - component: {fileID: 900000000000000503}
   m_Layer: 5
   m_Name: Text_Name
   m_TagString: Untagged
@@ -1392,7 +1395,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4373998523499265737}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -1415,9 +1418,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 12812967849984
+            m_KeyId: 93000000000000039
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -1855,7 +1858,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7527646775342895986}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -1878,9 +1881,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 28439663406710784
+            m_KeyId: 93000000000000040
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -2484,7 +2487,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2323957744327679647}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -2507,9 +2510,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 29992631956373504
+            m_KeyId: 93000000000000041
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -2707,7 +2710,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3150292138634603078}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -2730,9 +2733,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 220020070526976
+            m_KeyId: 93000000000000046
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -3315,7 +3318,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 655152167123261296}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -3338,9 +3341,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 226549461004288
+            m_KeyId: 93000000000000045
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -3813,7 +3816,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1695494409273797823}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -3836,9 +3839,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 30000000000000004
+            m_KeyId: 93000000000000054
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -4036,7 +4039,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1569343514683302222}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -4059,9 +4062,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 226372067110912
+            m_KeyId: 93000000000000044
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -4259,7 +4262,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2215283465537005005}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -4282,9 +4285,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 226300990435328
+            m_KeyId: 93000000000000043
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -4482,7 +4485,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2058677814153801406}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -4505,9 +4508,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 221811101249536
+            m_KeyId: 93000000000000058
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -4713,7 +4716,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7534420104992936342}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -4736,9 +4739,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 219807855521792
+            m_KeyId: 93000000000000050
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -4936,7 +4939,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7878900765555770129}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -4959,9 +4962,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 222053439746048
+            m_KeyId: 93000000000000060
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -5151,7 +5154,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8588833448750048375}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -5174,9 +5177,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 219855351820288
+            m_KeyId: 93000000000000049
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -5478,7 +5481,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8618624267305802425}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -5501,9 +5504,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 219762519289856
+            m_KeyId: 93000000000000052
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -6082,7 +6085,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5061164889952666303}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -6105,9 +6108,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 221742922838016
+            m_KeyId: 93000000000000055
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -6309,7 +6312,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5083994389643626985}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -6332,9 +6335,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 28441243786903552
+            m_KeyId: 93000000000000042
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -6532,7 +6535,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4962440841572179221}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -6555,9 +6558,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 220248517488640
+            m_KeyId: 93000000000000048
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -6757,7 +6760,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4975645845102338226}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -6780,9 +6783,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 220358534082560
+            m_KeyId: 93000000000000047
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -6972,7 +6975,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5232374475290295046}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -6995,9 +6998,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 219932325687296
+            m_KeyId: 93000000000000051
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -7195,7 +7198,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5910024603098450382}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -7218,9 +7221,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 222142828752896
+            m_KeyId: 93000000000000061
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -7420,7 +7423,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6324016371694921359}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -7443,9 +7446,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 219979436109824
+            m_KeyId: 93000000000000056
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -7648,7 +7651,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6372754569316616549}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -7671,9 +7674,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 221811101249536
+            m_KeyId: 93000000000000059
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -7871,7 +7874,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6661564483521770555}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -7894,9 +7897,9 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 220086420221952
+            m_KeyId: 93000000000000057
             m_Key: 
           m_FallbackState: 0
           m_WaitForCompletion: 0
@@ -8094,7 +8097,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6731850304138642720}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
   m_Name: 
@@ -8117,10 +8120,124 @@ MonoBehaviour:
       data:
         m_Localized:
           m_TableReference:
-            m_TableCollectionName: GUID:af837c3e273b47744a87c87c56c48773
+            m_TableCollectionName: Tables
           m_TableEntryReference:
-            m_KeyId: 220179777040384
+            m_KeyId: 93000000000000053
             m_Key: 
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
+        m_PropertyPath: m_text
+--- !u!114 &900000000000000501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 856032857404283519}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  m_TrackedObjects:
+  - rid: 9000000000000005011
+  references:
+    version: 2
+    RefIds:
+    - rid: 9000000000000005011
+      type: {class: TrackedUGuiGraphic, ns: UnityEngine.Localization.PropertyVariants.TrackedObjects, asm: Unity.Localization}
+      data:
+        m_Target: {fileID: 1559369776314325595}
+        m_TrackedProperties:
+          items:
+          - rid: 90000000000000050112
+        m_UpdateType: 0
+    - rid: 90000000000000050112
+      type: {class: LocalizedStringProperty, ns: UnityEngine.Localization.PropertyVariants.TrackedProperties, asm: Unity.Localization}
+      data:
+        m_Localized:
+          m_TableReference:
+            m_TableCollectionName: Tables
+          m_TableEntryReference:
+            m_KeyId: 93000000000000036
+            m_Key:
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
+        m_PropertyPath: m_text
+--- !u!114 &900000000000000502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1047928464294787401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  m_TrackedObjects:
+  - rid: 9000000000000005021
+  references:
+    version: 2
+    RefIds:
+    - rid: 9000000000000005021
+      type: {class: TrackedUGuiGraphic, ns: UnityEngine.Localization.PropertyVariants.TrackedObjects, asm: Unity.Localization}
+      data:
+        m_Target: {fileID: 4678305450598663395}
+        m_TrackedProperties:
+          items:
+          - rid: 90000000000000050212
+        m_UpdateType: 0
+    - rid: 90000000000000050212
+      type: {class: LocalizedStringProperty, ns: UnityEngine.Localization.PropertyVariants.TrackedProperties, asm: Unity.Localization}
+      data:
+        m_Localized:
+          m_TableReference:
+            m_TableCollectionName: Tables
+          m_TableEntryReference:
+            m_KeyId: 93000000000000037
+            m_Key:
+          m_FallbackState: 0
+          m_WaitForCompletion: 0
+          m_LocalVariables: []
+        m_PropertyPath: m_text
+--- !u!114 &900000000000000503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1745651488581388765}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69beb381e244f92449b8c4cf954630e9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  m_TrackedObjects:
+  - rid: 9000000000000005031
+  references:
+    version: 2
+    RefIds:
+    - rid: 9000000000000005031
+      type: {class: TrackedUGuiGraphic, ns: UnityEngine.Localization.PropertyVariants.TrackedObjects, asm: Unity.Localization}
+      data:
+        m_Target: {fileID: 2487589603957695368}
+        m_TrackedProperties:
+          items:
+          - rid: 90000000000000050312
+        m_UpdateType: 0
+    - rid: 90000000000000050312
+      type: {class: LocalizedStringProperty, ns: UnityEngine.Localization.PropertyVariants.TrackedProperties, asm: Unity.Localization}
+      data:
+        m_Localized:
+          m_TableReference:
+            m_TableCollectionName: Tables
+          m_TableEntryReference:
+            m_KeyId: 93000000000000038
+            m_Key:
           m_FallbackState: 0
           m_WaitForCompletion: 0
           m_LocalVariables: []

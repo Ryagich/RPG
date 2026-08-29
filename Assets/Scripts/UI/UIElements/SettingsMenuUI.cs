@@ -1,4 +1,3 @@
-using System;
 using Input;
 using TMPro;
 using TargetLock;
@@ -6,6 +5,8 @@ using UI.Configs;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 namespace UI.UIElements
@@ -19,6 +20,14 @@ namespace UI.UIElements
         private InputActionAsset inputActions;
         private UIConfig uiConfig;
         private RectTransform bindingsPage;
+        private bool isLocaleSubscribed;
+        private int targetLockModeLocalizationRevision;
+
+        private const string LocalizationTable = "Tables";
+        private const string TargetLockModeSoftLocalizationKey = "Bindings_Target_Lock_Mode_Soft";
+        private const string TargetLockModeHardLocalizationKey = "Bindings_Target_Lock_Mode_Hard";
+        private const string TargetLockModeSwitchLocalizationKey = "Bindings_Target_Lock_Mode_Switch";
+        private const string TargetLockModeOffLocalizationKey = "Bindings_Target_Lock_Mode_Off";
         public void Initialize(InputActionAsset actions, UIConfig config, RectTransform page)
         {
             inputActions = actions;
@@ -27,8 +36,12 @@ namespace UI.UIElements
 
             BindingOverridesStorage.Load(inputActions);
             inputActions.Enable();
-            DisableExternalLocalization(bindingsPage);
             ConfigureTargetLockSettings(bindingsPage);
+            if (!isLocaleSubscribed)
+            {
+                LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+                isLocaleSubscribed = true;
+            }
             EventSystem.current?.SetSelectedGameObject(null);
         }
 
@@ -36,25 +49,21 @@ namespace UI.UIElements
 
         public void Dispose()
         {
+            if (isLocaleSubscribed)
+            {
+                LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+                isLocaleSubscribed = false;
+            }
+
             bindingsPage = null;
         }
 
-        private static void DisableExternalLocalization(RectTransform page)
+        private void OnSelectedLocaleChanged(Locale _)
         {
-            foreach (var component in page.GetComponentsInChildren<Component>(true))
+            var targetLockConfig = uiConfig != null ? uiConfig.TargetLockConfig : null;
+            if (bindingsPage != null && targetLockConfig != null)
             {
-                var componentNamespace = component.GetType().Namespace;
-                if (componentNamespace == null || !componentNamespace.StartsWith("UnityEngine.Localization", StringComparison.Ordinal))
-                {
-                    continue;
-                }
-
-                if (component is Behaviour behaviour)
-                {
-                    behaviour.enabled = false;
-                }
-
-                Destroy(component);
+                UpdateTargetLockSettings(bindingsPage, targetLockConfig);
             }
         }
 
@@ -92,19 +101,48 @@ namespace UI.UIElements
             UpdateTargetLockSettings(page, targetLockConfig);
         }
 
-        private static void UpdateTargetLockSettings(RectTransform page, TargetLockConfig targetLockConfig)
+        private void UpdateTargetLockSettings(RectTransform page, TargetLockConfig targetLockConfig)
         {
             var modeRow = FindDescendant(page, "TargetLock Mode");
             var modeText = FindDescendant(modeRow, "Text_Key")?.GetComponent<TMP_Text>();
-            if (modeText != null)
-            {
-                modeText.text = targetLockConfig.ControlMode.ToString();
-            }
+            UpdateTargetLockModeText(modeText, targetLockConfig);
 
             var targetLockEnabled = targetLockConfig.ControlMode != TargetLockControlMode.Off;
             SetRowActive(page, "Button_TargetLock", targetLockEnabled && targetLockConfig.ControlMode == TargetLockControlMode.Switch);
             SetRowActive(page, "Button_TargetLockNext", targetLockEnabled);
             SetRowActive(page, "Button_TargetLockPrevious", targetLockEnabled);
+        }
+
+        private async void UpdateTargetLockModeText(TMP_Text modeText, TargetLockConfig targetLockConfig)
+        {
+            if (modeText == null || targetLockConfig == null)
+            {
+                return;
+            }
+
+            var controlMode = targetLockConfig.ControlMode;
+            var localizationKey = controlMode switch
+            {
+                TargetLockControlMode.Soft => TargetLockModeSoftLocalizationKey,
+                TargetLockControlMode.Hard => TargetLockModeHardLocalizationKey,
+                TargetLockControlMode.Switch => TargetLockModeSwitchLocalizationKey,
+                TargetLockControlMode.Off => TargetLockModeOffLocalizationKey,
+                _ => string.Empty
+            };
+            if (string.IsNullOrEmpty(localizationKey))
+            {
+                return;
+            }
+
+            var revision = ++targetLockModeLocalizationRevision;
+            var localizedText = await LocalizationSettings.StringDatabase
+                .GetLocalizedStringAsync(LocalizationTable, localizationKey).Task;
+            if (revision == targetLockModeLocalizationRevision
+                && modeText != null
+                && targetLockConfig.ControlMode == controlMode)
+            {
+                modeText.text = localizedText;
+            }
         }
 
         private static void SetRowActive(RectTransform page, string rowName, bool isActive)

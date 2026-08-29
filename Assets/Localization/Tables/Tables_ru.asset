@@ -842,7 +842,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 30000000000000003
-    m_Localized: "Пропустить урок"
+    m_Localized: Пропустить
     m_Metadata:
       m_Items: []
   - m_Id: 30000000000000004
@@ -2054,6 +2054,117 @@ MonoBehaviour:
     m_Metadata: {m_Items: []}
   - m_Id: 93000000000000033
     m_Localized: "Снять с продажи"
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000034
+    m_Localized: Бой
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000035
+    m_Localized: Передвижение
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000036
+    m_Localized: Чувствительность мыши
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000037
+    m_Localized: Горизонтальная чувствительность камеры
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000038
+    m_Localized: Вертикальная чувствительность камеры
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000039
+    m_Localized: Игровой процесс
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000040
+    m_Localized: Быстрые слоты
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000041
+    m_Localized: Быстрый слот 1
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000042
+    m_Localized: Быстрый слот 2
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000043
+    m_Localized: Быстрый слот 3
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000044
+    m_Localized: Быстрый слот 4
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000045
+    m_Localized: Взаимодействие
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000046
+    m_Localized: Инвентарь
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000047
+    m_Localized: Атака
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000048
+    m_Localized: Карта
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000049
+    m_Localized: Движение вниз
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000050
+    m_Localized: Движение влево
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000051
+    m_Localized: Движение вправо
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000052
+    m_Localized: Движение вверх
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000053
+    m_Localized: Пауза
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000054
+    m_Localized: Журнал
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000055
+    m_Localized: Тяжёлая атака
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000056
+    m_Localized: Бег
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000057
+    m_Localized: Показать информацию
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000058
+    m_Localized: Захват цели
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000059
+    m_Localized: Режим захвата цели
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000060
+    m_Localized: Следующая цель
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000061
+    m_Localized: Предыдущая цель
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000062
+    m_Localized: Приблизить камеру
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000063
+    m_Localized: Отдалить камеру
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000064
+    m_Localized: Мягкий
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000065
+    m_Localized: Жёсткий
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000066
+    m_Localized: Переключение
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000067
+    m_Localized: Выключено
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000068
+    m_Localized: Управление
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000069
+    m_Localized: Звук
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000070
+    m_Localized: Игровой процесс
     m_Metadata: {m_Items: []}
  references:
     version: 2

@@ -2209,6 +2209,154 @@ MonoBehaviour:
     m_Key: Popup_Action_Remove_From_Sale
     m_Metadata:
       m_Items: []
+  - m_Id: 93000000000000034
+    m_Key: Bindings_Title_Combat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000035
+    m_Key: Bindings_Title_Movement
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000036
+    m_Key: Bindings_Title_Mouse_Sensitivity
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000037
+    m_Key: Bindings_Title_Camera_Horizontal_Sensitivity
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000038
+    m_Key: Bindings_Title_Camera_Vertical_Sensitivity
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000039
+    m_Key: Bindings_Title_Gameplay
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000040
+    m_Key: Bindings_Title_Quick_Slots
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000041
+    m_Key: Bindings_Action_Fast_Slot_1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000042
+    m_Key: Bindings_Action_Fast_Slot_2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000043
+    m_Key: Bindings_Action_Fast_Slot_3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000044
+    m_Key: Bindings_Action_Fast_Slot_4
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000045
+    m_Key: Bindings_Action_Interactable
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000046
+    m_Key: Bindings_Action_Inventory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000047
+    m_Key: Bindings_Action_Left_Mouse
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000048
+    m_Key: Bindings_Action_Map
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000049
+    m_Key: Bindings_Action_Move_Down
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000050
+    m_Key: Bindings_Action_Move_Left
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000051
+    m_Key: Bindings_Action_Move_Right
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000052
+    m_Key: Bindings_Action_Move_Up
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000053
+    m_Key: Bindings_Action_Pause
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000054
+    m_Key: Bindings_Action_Quest_Log
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000055
+    m_Key: Bindings_Action_Right_Mouse
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000056
+    m_Key: Bindings_Action_Run
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000057
+    m_Key: Bindings_Action_Show_Info
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000058
+    m_Key: Bindings_Action_Target_Lock
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000059
+    m_Key: Bindings_Action_Target_Lock_Mode
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000060
+    m_Key: Bindings_Action_Target_Lock_Next
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000061
+    m_Key: Bindings_Action_Target_Lock_Previous
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000062
+    m_Key: Bindings_Action_Camera_Zoom_In
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000063
+    m_Key: Bindings_Action_Camera_Zoom_Out
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000064
+    m_Key: Bindings_Target_Lock_Mode_Soft
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000065
+    m_Key: Bindings_Target_Lock_Mode_Hard
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000066
+    m_Key: Bindings_Target_Lock_Mode_Switch
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000067
+    m_Key: Bindings_Target_Lock_Mode_Off
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000068
+    m_Key: Title_Sections_Bindings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000069
+    m_Key: Title_Sections_Sounds
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000070
+    m_Key: Title_Sections_Gameplay
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

@@ -43,11 +43,15 @@ public class BindingsController : MonoBehaviour
     private const string RollActionName = "Roll";
     private const string LessonSkipActionName = "LessonSkip";
     private const string QuestLogActionName = "QuestLog";
+    private const string CameraZoomInActionName = "CameraZoomIn";
+    private const string CameraZoomOutActionName = "CameraZoomOut";
     private const string EvasionLocalizationTable = "Tables";
     private const string DodgeLocalizationKey = "Input_Dodge";
     private const string RollLocalizationKey = "Input_Roll";
     private const string LessonSkipLocalizationKey = "Input_LessonSkip";
     private const string QuestLogLocalizationKey = "Input_QuestLog";
+    private const string CameraZoomInLocalizationKey = "Bindings_Action_Camera_Zoom_In";
+    private const string CameraZoomOutLocalizationKey = "Bindings_Action_Camera_Zoom_Out";
     private const string CameraHorizontalSensitivityLocalizationKey = "Title_Camera_Horizontal_Sensitivity";
     private const string CameraVerticalSensitivityLocalizationKey = "Title_Camera_Vertical_Sensitivity";
 
@@ -55,6 +59,8 @@ public class BindingsController : MonoBehaviour
     private InputRebinder rollRebinder;
     private InputRebinder lessonSkipRebinder;
     private InputRebinder questLogRebinder;
+    private InputRebinder cameraZoomInRebinder;
+    private InputRebinder cameraZoomOutRebinder;
 
     private void Awake()
     {
@@ -81,7 +87,7 @@ public class BindingsController : MonoBehaviour
         InitializeMouseSensitivitySlider();
         InitializeCameraSensitivitySliders();
         LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
-        UpdateDynamicBindingDisplayNames();
+        UpdateBindingDisplayNames();
         UpdateCameraSensitivityTitles();
     }
 
@@ -107,7 +113,7 @@ public class BindingsController : MonoBehaviour
 
     private void OnSelectedLocaleChanged(Locale _)
     {
-        UpdateDynamicBindingDisplayNames();
+        UpdateBindingDisplayNames();
         UpdateCameraSensitivityTitles();
     }
 
@@ -117,15 +123,16 @@ public class BindingsController : MonoBehaviour
         rollRebinder = CreateBindingButton(RollActionName, dodgeRebinder?.transform);
         lessonSkipRebinder = CreateBindingButton(LessonSkipActionName, rollRebinder?.transform);
 
-        var mapRebinder = GetComponentsInChildren<InputRebinder>(true)
-            .FirstOrDefault(rebinder => rebinder.ActionName == "Map");
+        cameraZoomInRebinder = FindBindingButton(CameraZoomInActionName);
+        cameraZoomOutRebinder = FindBindingButton(CameraZoomOutActionName);
+
+        var mapRebinder = FindBindingButton("Map");
         questLogRebinder = CreateBindingButton(QuestLogActionName, mapRebinder?.transform);
     }
 
     private InputRebinder CreateBindingButton(string actionName, Transform transformAfter)
     {
-        var existingBinding = GetComponentsInChildren<InputRebinder>(true)
-            .FirstOrDefault(rebinder => rebinder.ActionName == actionName);
+        var existingBinding = FindBindingButton(actionName);
         if (existingBinding != null)
         {
             return existingBinding;
@@ -159,12 +166,20 @@ public class BindingsController : MonoBehaviour
         return rebinder;
     }
 
-    private void UpdateDynamicBindingDisplayNames()
+    private InputRebinder FindBindingButton(string actionName)
+    {
+        return GetComponentsInChildren<InputRebinder>(true)
+            .FirstOrDefault(rebinder => rebinder.ActionName == actionName);
+    }
+
+    private void UpdateBindingDisplayNames()
     {
         UpdateBindingDisplayName(dodgeRebinder, DodgeLocalizationKey);
         UpdateBindingDisplayName(rollRebinder, RollLocalizationKey);
         UpdateBindingDisplayName(lessonSkipRebinder, LessonSkipLocalizationKey);
         UpdateBindingDisplayName(questLogRebinder, QuestLogLocalizationKey);
+        UpdateBindingDisplayName(cameraZoomInRebinder, CameraZoomInLocalizationKey);
+        UpdateBindingDisplayName(cameraZoomOutRebinder, CameraZoomOutLocalizationKey);
     }
 
     private async void UpdateBindingDisplayName(InputRebinder rebinder, string localizationKey)
