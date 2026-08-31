@@ -196,7 +196,7 @@ namespace Container
                    .As<ITickable>()
                    .As<System.IDisposable>();
 
-            builder.RegisterEntryPoint<PlayerInventory>().As<IInventory>().AsSelf();
+            RegisterCharacterInventory(builder);
             builder.Register<CharacterWorldItemDropper>(Lifetime.Scoped).AsSelf();
             builder.Register<NpcInventoryPlanner>(Lifetime.Scoped).AsSelf();
             builder.Register<NpcItemPickupService>(Lifetime.Scoped).AsSelf();
@@ -213,9 +213,24 @@ namespace Container
                 builder.RegisterEntryPoint<NpcForcedDialogueInteractableLogic>().AsSelf();
             }
             builder.Register<EquippedWeaponDropService>(Lifetime.Scoped).AsSelf();
-            builder.Register(_ => new MoneyStorage(0), Lifetime.Scoped).AsSelf();
+            RegisterMoneyStorage(builder);
             builder.Register<QuestController>(Lifetime.Scoped).AsSelf();
 
+        }
+
+        protected virtual void RegisterCharacterInventory(IContainerBuilder builder)
+        {
+            builder.RegisterEntryPoint<PlayerInventory>()
+                   .As<IInventory>()
+                   .As<IEquipmentInventory>()
+                   .As<ICharacterInventoryCapacity>()
+                   .As<IInventoryOverflow>()
+                   .AsSelf();
+        }
+
+        protected virtual void RegisterMoneyStorage(IContainerBuilder builder)
+        {
+            builder.Register(_ => new MoneyStorage(0), Lifetime.Scoped).AsSelf();
         }
 
         private void EnsureDialogueInteractionZone()

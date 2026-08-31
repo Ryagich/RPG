@@ -16,7 +16,7 @@ namespace NPC
         private readonly StateMachineGraph stateMachineGraph;
         private readonly Transform ownerTransform;
         private readonly StatsController statsController;
-        private readonly PlayerInventory playerInventory;
+        private readonly IEquipmentInventory inventory;
         private readonly CharacterDamageReceiver damageReceiver;
         private readonly CharacterActionState actionState;
         private readonly PlayerRagdollController ragdollController;
@@ -58,7 +58,7 @@ namespace NPC
             StateMachineGraph stateMachineGraph,
             Transform ownerTransform,
             StatsController statsController,
-            PlayerInventory playerInventory,
+            IEquipmentInventory inventory,
             CharacterDamageReceiver damageReceiver,
             CharacterActionState actionState,
             PlayerRagdollController ragdollController,
@@ -81,7 +81,7 @@ namespace NPC
             this.stateMachineGraph = stateMachineGraph;
             this.ownerTransform = ownerTransform;
             this.statsController = statsController;
-            this.playerInventory = playerInventory;
+            this.inventory = inventory;
             this.damageReceiver = damageReceiver;
             this.actionState = actionState;
             this.ragdollController = ragdollController;
@@ -116,7 +116,7 @@ namespace NPC
 
             context.SetService(stateMachineGraph);
             context.SetService(statsController);
-            context.SetService(playerInventory);
+            context.SetService(inventory);
             context.SetService(damageReceiver);
             context.SetService(actionState);
             context.SetService(ragdollController);

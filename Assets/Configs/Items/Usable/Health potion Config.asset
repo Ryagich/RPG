@@ -39,6 +39,7 @@ MonoBehaviour:
   <Size>k__BackingField: {x: 1, y: 1}
   <SizeInInventory>k__BackingField: {x: 80, y: 155}
   <ItemType>k__BackingField: 1
+  <ItemCategory>k__BackingField: 11
   weaponInHandPrefab: {fileID: 0}
   weaponDamageRange: {x: 9, y: 11}
   heavyWeaponDamageRange: {x: 9, y: 11}

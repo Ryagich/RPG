@@ -2305,9 +2305,9 @@ namespace UI.Pages
             foreach (var item in items)
             {
                 var stackToSell = item.ItemStack.Clone();
-                var maxAffordableCount = stackToSell.ItemConfig.Price > 0
-                    ? buyerMoneyStorage.CurrentMoney.Value / stackToSell.ItemConfig.Price
-                    : stackToSell.Count;
+                var maxAffordableCount = buyerMoneyStorage.GetAffordableItemCount(
+                    stackToSell.ItemConfig.Price,
+                    stackToSell.Count);
                 if (maxAffordableCount <= 0)
                 {
                     continue;

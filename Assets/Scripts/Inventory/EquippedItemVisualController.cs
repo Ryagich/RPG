@@ -11,7 +11,7 @@ namespace Inventory
 {
     public class EquippedItemVisualController : IStartable, IDisposable
     {
-        private readonly PlayerInventory playerInventory;
+        private readonly IEquipmentInventory inventory;
         private readonly CharacterVisualRoot characterVisualRoot;
         private readonly CharacterDefaultVisualConfig defaultVisualConfig;
         private readonly IDisposable inventoryChangedSubscription;
@@ -28,14 +28,14 @@ namespace Inventory
         private ItemConfig lastBackpackItemConfig;
 
         public EquippedItemVisualController(
-            PlayerInventory playerInventory,
+            IEquipmentInventory inventory,
             CharacterVisualRoot characterVisualRoot,
             CharacterDefaultVisualConfig defaultVisualConfig = null)
         {
-            this.playerInventory = playerInventory;
+            this.inventory = inventory;
             this.characterVisualRoot = characterVisualRoot;
             this.defaultVisualConfig = defaultVisualConfig;
-            inventoryChangedSubscription = playerInventory.Changed.Subscribe(_ => RefreshVisuals());
+            inventoryChangedSubscription = inventory.Changed.Subscribe(_ => RefreshVisuals());
         }
 
         public void Start()
@@ -51,38 +51,38 @@ namespace Inventory
         private void RefreshVisuals(bool force = false)
         {
             if (!force
-                && lastHelmItemConfig == playerInventory.HelmSlot.ItemConfig
-                && lastFaceItemConfig == playerInventory.FaceSlot.ItemConfig
-                && lastBodyItemConfig == playerInventory.BodySlot.ItemConfig
-                && lastHandsItemConfig == playerInventory.HandsSlot.ItemConfig
-                && lastArmsSlotItemConfig == playerInventory.ArmsSlot.ItemConfig
-                && lastLegsItemConfig == playerInventory.LegsSlot.ItemConfig
-                && lastHipsItemConfig == playerInventory.HipsSlot.ItemConfig
-                && lastBackpackItemConfig == playerInventory.BackpackSlot.ItemConfig)
+                && lastHelmItemConfig == inventory.HelmSlot.ItemConfig
+                && lastFaceItemConfig == inventory.FaceSlot.ItemConfig
+                && lastBodyItemConfig == inventory.BodySlot.ItemConfig
+                && lastHandsItemConfig == inventory.HandsSlot.ItemConfig
+                && lastArmsSlotItemConfig == inventory.ArmsSlot.ItemConfig
+                && lastLegsItemConfig == inventory.LegsSlot.ItemConfig
+                && lastHipsItemConfig == inventory.HipsSlot.ItemConfig
+                && lastBackpackItemConfig == inventory.BackpackSlot.ItemConfig)
             {
                 return;
             }
 
             desiredVisualsByBodyPart.Clear();
             ApplyDefaultVisuals();
-            ApplySlotVisuals(playerInventory.HelmSlot, "Helm");
-            ApplySlotVisuals(playerInventory.FaceSlot, "Face");
-            ApplySlotVisuals(playerInventory.BodySlot, "Body");
-            ApplySlotVisuals(playerInventory.HandsSlot, "Hands");
-            ApplySlotVisuals(playerInventory.ArmsSlot, "ArmsSlot");
-            ApplySlotVisuals(playerInventory.LegsSlot, "Legs");
-            ApplySlotVisuals(playerInventory.HipsSlot, "Hips");
-            ApplySlotVisuals(playerInventory.BackpackSlot, "Backpack");
+            ApplySlotVisuals(inventory.HelmSlot, "Helm");
+            ApplySlotVisuals(inventory.FaceSlot, "Face");
+            ApplySlotVisuals(inventory.BodySlot, "Body");
+            ApplySlotVisuals(inventory.HandsSlot, "Hands");
+            ApplySlotVisuals(inventory.ArmsSlot, "ArmsSlot");
+            ApplySlotVisuals(inventory.LegsSlot, "Legs");
+            ApplySlotVisuals(inventory.HipsSlot, "Hips");
+            ApplySlotVisuals(inventory.BackpackSlot, "Backpack");
 
             characterVisualRoot.ApplyVisuals(desiredVisualsByBodyPart);
-            lastHelmItemConfig = playerInventory.HelmSlot.ItemConfig;
-            lastFaceItemConfig = playerInventory.FaceSlot.ItemConfig;
-            lastBodyItemConfig = playerInventory.BodySlot.ItemConfig;
-            lastHandsItemConfig = playerInventory.HandsSlot.ItemConfig;
-            lastArmsSlotItemConfig = playerInventory.ArmsSlot.ItemConfig;
-            lastLegsItemConfig = playerInventory.LegsSlot.ItemConfig;
-            lastHipsItemConfig = playerInventory.HipsSlot.ItemConfig;
-            lastBackpackItemConfig = playerInventory.BackpackSlot.ItemConfig;
+            lastHelmItemConfig = inventory.HelmSlot.ItemConfig;
+            lastFaceItemConfig = inventory.FaceSlot.ItemConfig;
+            lastBodyItemConfig = inventory.BodySlot.ItemConfig;
+            lastHandsItemConfig = inventory.HandsSlot.ItemConfig;
+            lastArmsSlotItemConfig = inventory.ArmsSlot.ItemConfig;
+            lastLegsItemConfig = inventory.LegsSlot.ItemConfig;
+            lastHipsItemConfig = inventory.HipsSlot.ItemConfig;
+            lastBackpackItemConfig = inventory.BackpackSlot.ItemConfig;
         }
 
         private void ApplyDefaultVisuals()

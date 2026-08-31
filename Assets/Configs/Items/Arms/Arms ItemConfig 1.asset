@@ -39,6 +39,7 @@ MonoBehaviour:
   <Size>k__BackingField: {x: 2, y: 2}
   <SizeInInventory>k__BackingField: {x: 120, y: 120}
   <ItemType>k__BackingField: 10
+  <ItemCategory>k__BackingField: 8
   weaponInHandPrefab: {fileID: 0}
   rightHandWeaponAttachment:
     localPosition: {x: 0, y: 0, z: 0}

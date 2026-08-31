@@ -17,14 +17,14 @@ namespace Combat
             DamageBodyPart.Feet
         };
 
-        public static float CalculateEffective(PlayerInventory playerInventory)
+        public static float CalculateEffective(IEquipmentInventory inventory)
         {
-            return CalculateEffective(playerInventory, ItemType.None, null);
+            return CalculateEffective(inventory, ItemType.None, null);
         }
 
-        public static float CalculateEffective(PlayerInventory playerInventory, ItemType overrideSlotType, ItemConfig overrideItemConfig)
+        public static float CalculateEffective(IEquipmentInventory inventory, ItemType overrideSlotType, ItemConfig overrideItemConfig)
         {
-            if (playerInventory == null)
+            if (inventory == null)
             {
                 return 0f;
             }
@@ -35,7 +35,7 @@ namespace Combat
             foreach (var bodyPart in ProtectedBodyParts)
             {
                 var weight = DamageBodyPartUtility.GetDefaultDamageMultiplier(bodyPart);
-                weightedProtection += ResolveProtection(playerInventory, bodyPart, overrideSlotType, overrideItemConfig) * weight;
+                weightedProtection += ResolveProtection(inventory, bodyPart, overrideSlotType, overrideItemConfig) * weight;
                 totalWeight += weight;
             }
 
@@ -44,36 +44,36 @@ namespace Combat
                 : Mathf.Clamp01(weightedProtection / totalWeight);
         }
 
-        public static float ResolveProtection(PlayerInventory playerInventory, DamageBodyPart bodyPart)
+        public static float ResolveProtection(IEquipmentInventory inventory, DamageBodyPart bodyPart)
         {
-            return ResolveProtection(playerInventory, bodyPart, ItemType.None, null);
+            return ResolveProtection(inventory, bodyPart, ItemType.None, null);
         }
 
         private static float ResolveProtection(
-            PlayerInventory playerInventory,
+            IEquipmentInventory inventory,
             DamageBodyPart bodyPart,
             ItemType overrideSlotType,
             ItemConfig overrideItemConfig)
         {
-            if (playerInventory == null || bodyPart == DamageBodyPart.None)
+            if (inventory == null || bodyPart == DamageBodyPart.None)
             {
                 return 0f;
             }
 
             var protection =
-                GetSlotProtection(playerInventory, ItemType.Helm, bodyPart, overrideSlotType, overrideItemConfig)
-              + GetSlotProtection(playerInventory, ItemType.Face, bodyPart, overrideSlotType, overrideItemConfig)
-              + GetSlotProtection(playerInventory, ItemType.Body, bodyPart, overrideSlotType, overrideItemConfig)
-              + GetSlotProtection(playerInventory, ItemType.Arms, bodyPart, overrideSlotType, overrideItemConfig)
-              + GetSlotProtection(playerInventory, ItemType.Hands, bodyPart, overrideSlotType, overrideItemConfig)
-              + GetSlotProtection(playerInventory, ItemType.Hips, bodyPart, overrideSlotType, overrideItemConfig)
-              + GetSlotProtection(playerInventory, ItemType.Legs, bodyPart, overrideSlotType, overrideItemConfig);
+                GetSlotProtection(inventory, ItemType.Helm, bodyPart, overrideSlotType, overrideItemConfig)
+              + GetSlotProtection(inventory, ItemType.Face, bodyPart, overrideSlotType, overrideItemConfig)
+              + GetSlotProtection(inventory, ItemType.Body, bodyPart, overrideSlotType, overrideItemConfig)
+              + GetSlotProtection(inventory, ItemType.Arms, bodyPart, overrideSlotType, overrideItemConfig)
+              + GetSlotProtection(inventory, ItemType.Hands, bodyPart, overrideSlotType, overrideItemConfig)
+              + GetSlotProtection(inventory, ItemType.Hips, bodyPart, overrideSlotType, overrideItemConfig)
+              + GetSlotProtection(inventory, ItemType.Legs, bodyPart, overrideSlotType, overrideItemConfig);
 
             return Mathf.Clamp01(protection);
         }
 
         private static float GetSlotProtection(
-            PlayerInventory playerInventory,
+            IEquipmentInventory inventory,
             ItemType slotType,
             DamageBodyPart bodyPart,
             ItemType overrideSlotType,
@@ -81,7 +81,7 @@ namespace Combat
         {
             var itemConfig = overrideSlotType == slotType
                 ? overrideItemConfig
-                : GetEquippedItemConfig(playerInventory, slotType);
+                : GetEquippedItemConfig(inventory, slotType);
 
             if (itemConfig == null || !DamageBodyPartUtility.IsProtectedBy(itemConfig.ItemType, bodyPart))
             {
@@ -91,17 +91,17 @@ namespace Combat
             return Mathf.Clamp01(itemConfig.PhysicalDefense);
         }
 
-        private static ItemConfig GetEquippedItemConfig(PlayerInventory playerInventory, ItemType slotType)
+        private static ItemConfig GetEquippedItemConfig(IEquipmentInventory inventory, ItemType slotType)
         {
             return slotType switch
             {
-                ItemType.Helm => playerInventory.HelmSlot.ItemConfig,
-                ItemType.Face => playerInventory.FaceSlot.ItemConfig,
-                ItemType.Body => playerInventory.BodySlot.ItemConfig,
-                ItemType.Arms => playerInventory.ArmsSlot.ItemConfig,
-                ItemType.Hands => playerInventory.HandsSlot.ItemConfig,
-                ItemType.Hips => playerInventory.HipsSlot.ItemConfig,
-                ItemType.Legs => playerInventory.LegsSlot.ItemConfig,
+                ItemType.Helm => inventory.HelmSlot.ItemConfig,
+                ItemType.Face => inventory.FaceSlot.ItemConfig,
+                ItemType.Body => inventory.BodySlot.ItemConfig,
+                ItemType.Arms => inventory.ArmsSlot.ItemConfig,
+                ItemType.Hands => inventory.HandsSlot.ItemConfig,
+                ItemType.Hips => inventory.HipsSlot.ItemConfig,
+                ItemType.Legs => inventory.LegsSlot.ItemConfig,
                 _ => null
             };
         }

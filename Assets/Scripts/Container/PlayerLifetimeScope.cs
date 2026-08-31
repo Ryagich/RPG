@@ -129,7 +129,12 @@ namespace Container
             builder.RegisterEntryPoint<PlayerDeathController>().AsSelf();
             builder.RegisterEntryPoint<CorpseLootInteractableLogic>().AsSelf();
 
-            builder.RegisterEntryPoint<PlayerInventory>().As<IInventory>().AsSelf();
+            builder.RegisterEntryPoint<PlayerInventory>()
+                   .As<IInventory>()
+                   .As<IEquipmentInventory>()
+                   .As<ICharacterInventoryCapacity>()
+                   .As<IInventoryOverflow>()
+                   .AsSelf();
             builder.Register<CharacterWorldItemDropper>(Lifetime.Scoped).AsSelf();
             builder.Register<EquippedWeaponDropService>(Lifetime.Scoped).AsSelf();
             builder.Register(_ => new MoneyStorage(112), Lifetime.Scoped).AsSelf();

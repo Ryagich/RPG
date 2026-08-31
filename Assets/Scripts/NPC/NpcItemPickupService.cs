@@ -9,12 +9,17 @@ namespace NPC
 {
     public sealed class NpcItemPickupService
     {
-        private readonly PlayerInventory inventory;
+        private readonly IEquipmentInventory inventory;
+        private readonly IInventoryOverflow inventoryOverflow;
         private readonly CharacterWorldItemDropper dropper;
 
-        public NpcItemPickupService(PlayerInventory inventory, CharacterWorldItemDropper dropper)
+        public NpcItemPickupService(
+            IEquipmentInventory inventory,
+            IInventoryOverflow inventoryOverflow,
+            CharacterWorldItemDropper dropper)
         {
             this.inventory = inventory;
+            this.inventoryOverflow = inventoryOverflow;
             this.dropper = dropper;
         }
 
@@ -133,7 +138,7 @@ namespace NPC
 
         private void DropPendingOverflowItems()
         {
-            foreach (var overflowItem in inventory.ConsumePendingOverflowItems())
+            foreach (var overflowItem in inventoryOverflow.ConsumePendingOverflowItems())
             {
                 dropper.Drop(overflowItem);
             }

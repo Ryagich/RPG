@@ -10,18 +10,18 @@ namespace Stats
 {
     public class EquippedDefenseStatsChanger : IStartable, IDisposable
     {
-        private readonly PlayerInventory playerInventory;
+        private readonly IEquipmentInventory inventory;
         private readonly StatsController statsController;
         private readonly IDisposable inventoryChangedSubscription;
 
         private DefenseBonuses appliedBonuses;
         private bool isRefreshDelayed;
 
-        public EquippedDefenseStatsChanger(PlayerInventory playerInventory, StatsController statsController)
+        public EquippedDefenseStatsChanger(IEquipmentInventory inventory, StatsController statsController)
         {
-            this.playerInventory = playerInventory;
+            this.inventory = inventory;
             this.statsController = statsController;
-            inventoryChangedSubscription = playerInventory.Changed.Subscribe(_ => OnInventoryChanged());
+            inventoryChangedSubscription = inventory.Changed.Subscribe(_ => OnInventoryChanged());
         }
 
         public void Start()
@@ -63,15 +63,15 @@ namespace Stats
         private void RefreshBonuses()
         {
             var currentBonuses =
-                GetBonuses(playerInventory.HelmSlot)
-                + GetBonuses(playerInventory.FaceSlot)
-                + GetBonuses(playerInventory.BodySlot)
-                + GetBonuses(playerInventory.HandsSlot)
-                + GetBonuses(playerInventory.ArmsSlot)
-                + GetBonuses(playerInventory.LegsSlot)
-                + GetBonuses(playerInventory.HipsSlot);
+                GetBonuses(inventory.HelmSlot)
+                + GetBonuses(inventory.FaceSlot)
+                + GetBonuses(inventory.BodySlot)
+                + GetBonuses(inventory.HandsSlot)
+                + GetBonuses(inventory.ArmsSlot)
+                + GetBonuses(inventory.LegsSlot)
+                + GetBonuses(inventory.HipsSlot);
 
-            var currentPhysicalDefense = PhysicalDefenseCalculator.CalculateEffective(playerInventory);
+            var currentPhysicalDefense = PhysicalDefenseCalculator.CalculateEffective(inventory);
             ApplyValue(StatType.PhysicalDefense, currentPhysicalDefense);
             ApplyDelta(StatType.TemperatureDefense, currentBonuses.TemperatureDefense - appliedBonuses.TemperatureDefense);
             ApplyDelta(StatType.PsiDefense, currentBonuses.PsiDefense - appliedBonuses.PsiDefense);

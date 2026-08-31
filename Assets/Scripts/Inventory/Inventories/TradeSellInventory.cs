@@ -366,7 +366,7 @@ namespace Inventory.Inventories
             return itemStack?.ItemConfig == null || itemStack.Count <= 0 ? null : itemStack.Clone();
         }
 
-        private void NotifyChanged()
+        protected void NotifyChanged()
         {
             changedSubject.OnNext(Unit.Default);
         }

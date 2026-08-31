@@ -7,13 +7,13 @@ namespace Inventory
 {
     public sealed class EquippedWeaponDropService
     {
-        private readonly PlayerInventory inventory;
+        private readonly IEquipmentInventory inventory;
         private readonly CharacterWorldItemDropper dropper;
         private readonly IEquippedWeaponVisual weaponVisual;
         private readonly Transform ownerTransform;
 
         public EquippedWeaponDropService(
-            PlayerInventory inventory,
+            IEquipmentInventory inventory,
             CharacterWorldItemDropper dropper,
             IEquippedWeaponVisual weaponVisual,
             Transform ownerTransform)

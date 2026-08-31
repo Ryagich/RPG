@@ -40,6 +40,7 @@ namespace Inventory.Item
         [field: SerializeField] public Vector2Int Size { get; private set; } = new(1, 1);
         [field: SerializeField] public Vector2Int SizeInInventory { get; private set; } = new(50, 50);
         [field: SerializeField] public ItemType ItemType { get; private set; }
+        [field: SerializeField] public ItemCategory ItemCategory { get; private set; }
         [SerializeField, ShowIf(nameof(HasWeaponPrefab))] private GameObject weaponInHandPrefab;
         [SerializeField, ShowIf(nameof(HasWeaponDamage))] private Vector2Int weaponDamageRange = new(9, 11);
         [SerializeField, ShowIf(nameof(HasWeaponDamage))] private Vector2Int heavyWeaponDamageRange = new(9, 11);

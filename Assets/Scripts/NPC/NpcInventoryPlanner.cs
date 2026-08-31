@@ -9,12 +9,17 @@ namespace NPC
 {
     public sealed class NpcInventoryPlanner
     {
-        private readonly PlayerInventory inventory;
+        private readonly IEquipmentInventory inventory;
+        private readonly ICharacterInventoryCapacity inventoryCapacity;
         private readonly NpcItemPickupConfig config;
 
-        public NpcInventoryPlanner(PlayerInventory inventory, NpcItemPickupConfig config)
+        public NpcInventoryPlanner(
+            IEquipmentInventory inventory,
+            ICharacterInventoryCapacity inventoryCapacity,
+            NpcItemPickupConfig config)
         {
             this.inventory = inventory;
+            this.inventoryCapacity = inventoryCapacity;
             this.config = config;
         }
 
@@ -122,7 +127,9 @@ namespace NPC
         private List<NpcInventoryDropSource> BuildWeightDropPlan(float additionalWeight, float candidateScore, out float droppedScore)
         {
             droppedScore = 0f;
-            if (additionalWeight <= 0f || inventory.CurrentWeight + additionalWeight <= inventory.MaxWeight)
+            if (additionalWeight <= 0f
+                || inventory.MaxWeight <= 0f
+                || inventoryCapacity.CurrentWeight + additionalWeight <= inventory.MaxWeight)
             {
                 return new List<NpcInventoryDropSource>();
             }
@@ -142,7 +149,7 @@ namespace NPC
                 removedWeight += source.Snapshot.TotalWeight;
                 droppedScore += source.Score;
 
-                if (inventory.CurrentWeight + additionalWeight - removedWeight <= inventory.MaxWeight)
+                if (inventoryCapacity.CurrentWeight + additionalWeight - removedWeight <= inventory.MaxWeight)
                 {
                     return selected;
                 }
@@ -154,7 +161,7 @@ namespace NPC
         private bool CanCarryAdditional(float additionalWeight, IReadOnlyCollection<NpcInventoryDropSource> plannedDrops)
         {
             var droppedWeight = plannedDrops.Sum(source => source.Snapshot?.TotalWeight ?? 0f);
-            return inventory.MaxWeight <= 0f || inventory.CurrentWeight + additionalWeight - droppedWeight <= inventory.MaxWeight;
+            return inventory.MaxWeight <= 0f || inventoryCapacity.CurrentWeight + additionalWeight - droppedWeight <= inventory.MaxWeight;
         }
 
         private bool CanPackWithCandidate(IReadOnlyList<NpcInventoryDropSource> keptSources, ItemStack candidate)

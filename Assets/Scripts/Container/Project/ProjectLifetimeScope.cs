@@ -5,6 +5,7 @@ using Gravity;
 using Input;
 using Interactable;
 using Inventory;
+using Inventory.Storage;
 using Localization;
 using Locations;
 using Loading;
@@ -110,6 +111,7 @@ namespace Container.Project
             builder.Register<BootCompletion>(Lifetime.Singleton).AsSelf();
             builder.Register<LocationTransitionContext>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueRuntimeFlagRegistry>(Lifetime.Singleton).AsSelf();
+            builder.RegisterEntryPoint<ItemStorage>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<InputBindingOverridesBootstrap>();
 
             builder.RegisterEntryPoint<Bootloader>().AsSelf();

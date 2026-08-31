@@ -12,7 +12,7 @@ namespace Inventory.Looting
     {
         [SerializeField, Min(0f)] private float followDeadZone = 0.05f;
 
-        private PlayerInventory sourceInventory;
+        private IEquipmentInventory sourceInventory;
         private Player.PlayerRagdollController ragdollController;
         private CharacterVisualRoot visualRoot;
         private GridOnlyInventory lootInventory;
@@ -22,7 +22,7 @@ namespace Inventory.Looting
 
         [VContainer.Inject]
         public void Construct(
-            PlayerInventory sourceInventory,
+            IEquipmentInventory sourceInventory,
             Player.PlayerRagdollController ragdollController,
             CharacterVisualRoot visualRoot)
         {
@@ -75,9 +75,9 @@ namespace Inventory.Looting
 
         private sealed class GridOnlyInventory : ITiledInventory
         {
-            private readonly PlayerInventory source;
+            private readonly IEquipmentInventory source;
 
-            public GridOnlyInventory(PlayerInventory source)
+            public GridOnlyInventory(IEquipmentInventory source)
             {
                 this.source = source;
             }
@@ -99,7 +99,7 @@ namespace Inventory.Looting
 
             public bool TryAdd(ItemConfig config)
             {
-                return source.TryAddToGrid(config);
+                return source.TryAddToGrid(new ItemStack(config)) == null;
             }
 
             public ItemStack TryAdd(ItemStack itemStack)

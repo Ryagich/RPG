@@ -10,7 +10,7 @@ using UnityEngine;
 namespace Inventory.Inventories
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class PlayerInventory : ITiledInventory
+    public class PlayerInventory : IEquipmentInventory, ICharacterInventoryCapacity, IInventoryOverflow
     {
         private readonly InventoryConfig inventoryConfig;
         private readonly Subject<Unit> changedSubject = new();
@@ -1260,6 +1260,17 @@ namespace Inventory.Inventories
         {
             changedSubject.OnNext(Unit.Default);
         }
+
+        SlotModel IEquipmentInventory.HelmSlot => HelmSlot;
+        SlotModel IEquipmentInventory.FaceSlot => FaceSlot;
+        SlotModel IEquipmentInventory.BodySlot => BodySlot;
+        SlotModel IEquipmentInventory.HandsSlot => HandsSlot;
+        SlotModel IEquipmentInventory.ArmsSlot => ArmsSlot;
+        SlotModel IEquipmentInventory.LegsSlot => LegsSlot;
+        SlotModel IEquipmentInventory.HipsSlot => HipsSlot;
+        SlotModel IEquipmentInventory.BackpackSlot => BackpackSlot;
+        SlotModel IEquipmentInventory.LeftWeaponSlot => LeftWeaponSlot;
+        SlotModel IEquipmentInventory.RightWeaponSlot => RightWeaponSlot;
 
         private readonly struct TransferEntry
         {

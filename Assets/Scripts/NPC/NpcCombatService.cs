@@ -82,7 +82,7 @@ namespace NPC
         private readonly NpcVision vision;
         private readonly NpcCombatConfig combatConfig;
         private readonly FactionRelationsConfig factionRelationsConfig;
-        private readonly PlayerInventory inventory;
+        private readonly IEquipmentInventory inventory;
         private readonly StatsController statsController;
         private readonly CharacterDamageReceiver ownerDamageReceiver;
         private readonly NpcWeaponInHandController weaponController;
@@ -134,7 +134,7 @@ namespace NPC
             NpcVision vision,
             NpcCombatConfig combatConfig,
             FactionRelationsConfig factionRelationsConfig,
-            PlayerInventory inventory,
+            IEquipmentInventory inventory,
             StatsController statsController,
             CharacterDamageReceiver ownerDamageReceiver,
             NpcWeaponInHandController weaponController,

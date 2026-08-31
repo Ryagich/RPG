@@ -39,7 +39,7 @@ namespace NPC
             Belt
         }
 
-        private readonly PlayerInventory inventory;
+        private readonly IEquipmentInventory inventory;
         private readonly PlayerWeaponHandAnchor handAnchor;
         private readonly PlayerWeaponAnimationEventReceiver animationEventReceiver;
         private readonly Animator animator;
@@ -69,7 +69,7 @@ namespace NPC
         private readonly int weaponAnimationLayerIndex;
 
         public NpcWeaponInHandController(
-            PlayerInventory inventory,
+            IEquipmentInventory inventory,
             PlayerWeaponHandAnchor handAnchor,
             PlayerWeaponAnimationEventReceiver animationEventReceiver,
             Animator animator,

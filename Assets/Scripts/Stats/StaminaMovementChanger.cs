@@ -9,7 +9,8 @@ namespace Stats
     {
         private readonly StatsConfig statsConfig;
         private readonly StatsController statsController;
-        private readonly PlayerInventory playerInventory;
+        private readonly IInventory inventory;
+        private readonly ICharacterInventoryCapacity inventoryCapacity;
         private readonly IStaminaMovementState movementState;
 
         private float elapsedTime;
@@ -18,12 +19,14 @@ namespace Stats
         public StaminaMovementChanger(
             StatsConfig statsConfig,
             StatsController statsController,
-            PlayerInventory playerInventory,
+            IInventory inventory,
+            ICharacterInventoryCapacity inventoryCapacity,
             IStaminaMovementState movementState)
         {
             this.statsConfig = statsConfig;
             this.statsController = statsController;
-            this.playerInventory = playerInventory;
+            this.inventory = inventory;
+            this.inventoryCapacity = inventoryCapacity;
             this.movementState = movementState;
         }
 
@@ -63,8 +66,8 @@ namespace Stats
             }
 
             var staminaStat = (Stamina)statsController.GetStat(StatType.Stamina);
-            var drainMultiplier = staminaStat.EvaluateWeightDrainMultiplier(playerInventory.CurrentWeight, playerInventory.MaxWeight);
-            var drainAmount = playerInventory.CurrentWeight * drainMultiplier;
+            var drainMultiplier = staminaStat.EvaluateWeightDrainMultiplier(inventoryCapacity.CurrentWeight, inventory.MaxWeight);
+            var drainAmount = inventoryCapacity.CurrentWeight * drainMultiplier;
             if (Mathf.Approximately(drainAmount, 0f))
             {
                 return;

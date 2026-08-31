@@ -14,7 +14,817 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
   m_GroupName: Default Local Group
   m_GUID: 4c1059769290fe94a817b07a8c93d387
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 4c62ef8ce74286846b40f1ac44ec3a58
+    m_Address: Assets/Configs/Items/Arms/Arms ItemConfig 1.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2404a33986f88b64f80699e91d7fd6d6
+    m_Address: Assets/Configs/Items/Arms/Arms ItemConfig 2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5be4422a38f14ef780953f84e291d545
+    m_Address: Assets/Configs/Items/Backpacks/Backpack ItemConfig 1.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e54d384bd6c246c69a3e2ff47b5bf679
+    m_Address: Assets/Configs/Items/Backpacks/Backpack ItemConfig 2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c575ea7ca63d0aa48b282e11ff54a216
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 1.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5ede60d674dd86c40af43ab5059f0f70
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 10.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f74ec8b6e37482149ae2db750d186d53
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 11.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8eaa0222d39f4a0478f1a5dec22da09b
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 12.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9de143cba388af248b180c07884cb462
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 13.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5c180112da4ff3b4894ee3131239417b
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 14.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fbe89206e467d1c48af87874ec754b37
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 15.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9f7491b7a7388be48809873b8285d172
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 16.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c16cb792aa38e874795390298ab6cd7b
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 17.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9cd5e5e731e4fd445b08da4f9d34a030
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 18.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 907e16ff99faf2c4b977302b6e97a1a8
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 19.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8ce01e22a216be947ba48366d277a056
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6fcdcb3d8a138744099b39b847c9f85c
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 20.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6031dc19c25a3c54897d052be5d701a8
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 21.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 73ea64548fea63149b4a3df09fdbcd12
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 22.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4008030dadbf1394283fc21f58e649ee
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 23.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a417f729602c6404db7ac5eae1854315
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 24.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6fe00812153031c4c9ad372702b86ea5
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 25.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1c61b694031b9fc49973b18fa262aa53
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 26.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 79012cecbbddb5347bb766c4c7a78746
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 27.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f6e15803376797b4497e58effaec4c6f
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 28.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 74c311cd1c12fc446beeba008ee19b1a
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 3.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2ccc47ad93856ca4eb7eaa450aeff3cc
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 4.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 36490f2f6403eb548bf88a07852678de
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 5.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 380626b92d62afc429c238de0c404a36
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 6.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fc4e531f3d29c0c448741bce074225ec
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 7.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 93e134a579ec3ba41b6e8c5ea7b0d45a
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 8.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 801d1372db3f3ce49a30364f564a4179
+    m_Address: Assets/Configs/Items/Body/Body ItemConfig 9.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 55305e29786823f4286ed69fc1817911
+    m_Address: Assets/Configs/Items/Hands/Hands ItemConfig 1.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9c56ecfae42f7e840a6a9798122814c7
+    m_Address: Assets/Configs/Items/Hands/Hands ItemConfig 2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9ddfce10a185b7e4ebaa7cd214a04266
+    m_Address: Assets/Configs/Items/Head/Face/Face ItemConfig 1.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: af6b3e5c64b992c4a9d0b9bbee8bfbd3
+    m_Address: Assets/Configs/Items/Head/Face/Face ItemConfig 2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b68f0d33ea632ce4c86dd46a328ee9d6
+    m_Address: Assets/Configs/Items/Head/Face/Face ItemConfig 3.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 23c23432d42dcb94aa08ba2a24846f20
+    m_Address: Assets/Configs/Items/Head/Face/Face ItemConfig 4.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0a0573b340adef54d988ed6dec55d88b
+    m_Address: Assets/Configs/Items/Head/Face/Face ItemConfig 5.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0f638c2cad788641a7d3c61405094c9
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 1.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7a41ee5f5cb14564b976b687f4d11a71
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 10.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 33d3afd6764784d47960f349693b2884
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 11.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fe33ab55904f686499beee181b8fa404
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 12.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 19b633c8ca042e146a7e5a43f17ed57f
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 13.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c5978ed960b4c194f9535ea128a0dc29
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 14.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ffd275f53d0ccda40968c620ca369046
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 15.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 499116e3e617be344bd1766ed646769c
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 16.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 23088fec520f06243841d0662537d6f6
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 17.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 171331fc9d98d8a48acead16ed3391e2
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 18.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 10a98e2422a7f5e48a4eb9f2e17cb50d
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 19.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7547e2e59b5730143bb6486b8ad32f3a
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d3ba70c2d5e2e644b838ebc6f4a44ee2
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 20.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6faec4446a894cf429bece64faba27b6
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 21.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3cee32b716412e543944072d0c8ec678
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 22.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 95146d4d9e1f5694aa943abd52c3658f
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 23.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5755b548280986b42bb310a4c1b98692
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 3.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f4cb1f21af4c5fb459eaa2f42315200a
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 4.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f1cbe2e603cedbf48b28decd7ea3723a
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 5.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a81c71828adfc664b97e2fcfd12d9a88
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 6.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f584ad33f853de240baef30cf2081f26
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 7.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e53f1ca12ec18da46b94c34ef214be3c
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 8.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 97938124e7684db47b982e564f054649
+    m_Address: Assets/Configs/Items/Head/Hat/Hat ItemConfig 9.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c7e12cf46fb9966429cb6d3b26e2e904
+    m_Address: Assets/Configs/Items/Head/Helm/Helm ItemConfig 10.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 50f350c582ed6ed4e8dc5854aa16e977
+    m_Address: Assets/Configs/Items/Head/Helm/Helm ItemConfig 11.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4b2667ee4e6ca2048b52a4404c01479a
+    m_Address: Assets/Configs/Items/Head/Helm/Helm ItemConfig 12.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4d922c61ae9d062459866a1462084eca
+    m_Address: Assets/Configs/Items/Head/Helm/Helm ItemConfig 13.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e3d95ce56bcfed441b8464a0b7af288f
+    m_Address: Assets/Configs/Items/Head/Helm/Helm ItemConfig 2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b0c35a69077bbf14cbc001485a6c58e0
+    m_Address: Assets/Configs/Items/Head/Helm/Helm ItemConfig 3.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a571f3c868252874ab351c31d2db1e6e
+    m_Address: Assets/Configs/Items/Head/Helm/Helm ItemConfig 4.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 353f7341db097b54c809e6db75540bb8
+    m_Address: Assets/Configs/Items/Head/Helm/Helm ItemConfig 5.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3d9042be34c27b0418fa5ee7370cefec
+    m_Address: Assets/Configs/Items/Head/Helm/Helm ItemConfig 6.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: de66a0138fa82814a842716f9cd9bd22
+    m_Address: Assets/Configs/Items/Head/Helm/Helm ItemConfig 7.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: adcde1a41fab9774c92c2b903fb66d90
+    m_Address: Assets/Configs/Items/Head/Helm/Helm ItemConfig 8.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9b5ffe5d980ddaf4582ac7211e28f7e6
+    m_Address: Assets/Configs/Items/Head/Helm/Helm ItemConfig 9.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2a5921abf5c88044293626a0a6d94238
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 1.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 269a0505a5cb44c47a47aa4cc41a91c2
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 10.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6bf5af9d88b8e804ea2ecbfc583d7477
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 11.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3bf735ac780f7d946926bd229543f302
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 12.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ffe7c10f355331b4085386cae46ff622
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 13.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2258baa98d8babb45935c1dd43f46035
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 14.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0b2205960135d924990e0ee1fd64491c
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 15.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 486eafbd9f69ea9499644da1a912ba47
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 16.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f5bd91bb4d5bf3b4990b275ac2be3512
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 17.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f80fb1c9a84c1ad42a3bb6fe5bdba878
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 18.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f34efdb4a7a9d8a4d9d7afc8d3560aeb
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 19.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 058d2ddf54b43814397aae402e8b2561
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: da16c85eb2b2f8f41a4bcfc87136c535
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 20.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3106bbbe32ef05d4b86ef9fb4652b2f8
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 21.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 57a897491ff196e47b00c0c11fb09565
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 22.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e384c62484ac9dd4aaf035a38307e5e2
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 23.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d51f46b965b53ca44b516620ada51dd8
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 24.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3371d98f62c1ee941bd6af61490b5792
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 25.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fabcdab2d7d68904b8b17fcbb59b9402
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 26.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 445d723d3eae64e4d95a3107dccd8506
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 27.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5e1953d06a3d7274d9b566274fe2477a
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 28.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3c9855725d046684ab754c8bdedf392c
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 3.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fff289ae8924cff42ad277b8ac2468ba
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 4.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 968f9b477b6804c4083d20006bee88aa
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 5.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1f2070e2260f08f44909266c93615ffd
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 6.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: df0e9a4cacf10014ebc23f7982d66b41
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 7.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a910b350cf6388b4bb225c672c72c4ba
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 8.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7b2965b3200fa7a44bd45a9e966b8564
+    m_Address: Assets/Configs/Items/Hips/Hips ItemConfig 9.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2e190bdb6772d0c4f99dafd0aa0f70f0
+    m_Address: Assets/Configs/Items/Legs/Legs ItemConfig 1.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 57fd27856ab84da479b619a6557c7aed
+    m_Address: Assets/Configs/Items/Legs/Legs ItemConfig 2.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0192b9033a95e6341857f232297faa9e
+    m_Address: Assets/Configs/Items/None/Ring_01.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7fa9a3c245a9f6e4c964d32232513bcc
+    m_Address: Assets/Configs/Items/None/Ring_02.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c7ef1549db925884787bbd70e4888d30
+    m_Address: Assets/Configs/Items/None/Ring_03.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d02e67f7849b6a440b3a8f9b6751075b
+    m_Address: Assets/Configs/Items/None/Ring_04.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 425d1559c3aa72743bcc5e84f0ee2d26
+    m_Address: Assets/Configs/Items/None/Ring_05.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d8577f00098b5d14789a786ef48a9917
+    m_Address: Assets/Configs/Items/None/Ring_06.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 86f5e5510e4e6b04abd3b9a302e80cbb
+    m_Address: Assets/Configs/Items/None/Ring_07.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e41338e4ec5ae6c4582247569bc2b863
+    m_Address: Assets/Configs/Items/None/Ring_08.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 16da3eaa3dccfc740a5e2d2edcce00a6
+    m_Address: Assets/Configs/Items/None/Ring_09.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 92ede066921116b47bd04641f43cf23f
+    m_Address: Assets/Configs/Items/None/Ring_10.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b0f4b12fc87701245b1c1fe954955f6b
+    m_Address: Assets/Configs/Items/Usable/Baguette Config.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9113afed435d472408132622bcc7bffa
+    m_Address: Assets/Configs/Items/Usable/Bottle of Water Config.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8a29c35bf78feee4eb7fc6f7f6c51df2
+    m_Address: Assets/Configs/Items/Usable/Bottle of wine.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 21401a23623e0ff47aee323420fe992b
+    m_Address: Assets/Configs/Items/Usable/Bread Config.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: defe963ecb30a354b9dceb9c6b7c8bc8
+    m_Address: Assets/Configs/Items/Usable/Cooked turkey.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 24899914fce3a9f43bed2955c46a4a2b
+    m_Address: Assets/Configs/Items/Usable/Health potion Config.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7c5945ca5ddc7674485d5542ed1caa28
+    m_Address: Assets/Configs/Items/Usable/Honey Config.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3fce84469cc47704e8595210c50f07d4
+    m_Address: Assets/Configs/Items/Usable/Mug of beer.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 08968d2a8d903b4448d4c7d8709408d1
+    m_Address: Assets/Configs/Items/Usable/Piece of cheese Config.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 940f5444797dad148b8c82e64a997cc8
+    m_Address: Assets/Configs/Items/Usable/Plants/Apple ItemConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0c67c9e7662b9514f96cc5571e27a2bf
+    m_Address: Assets/Configs/Items/Usable/Plants/Beetroot ItemConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1df385f9137f1e743ba1d50a9d46719f
+    m_Address: Assets/Configs/Items/Usable/Plants/Broccoli ItemConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9369fa5abea4fdf40b9772357b6d27e1
+    m_Address: Assets/Configs/Items/Usable/Plants/Carrot ItemConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7d8a65ee166969742b5b085653390ae3
+    m_Address: Assets/Configs/Items/Usable/Plants/Flowers/Camomile ItemConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f9753ca26d26bfd4880d49eb38e09421
+    m_Address: Assets/Configs/Items/Usable/Plants/Flowers/Chrysanthemums ItemConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 31ce78eb4d0b15240a02973ac12b8fca
+    m_Address: Assets/Configs/Items/Usable/Plants/Flowers/Larkspur ItemConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b26f023b4e490364bab02635a532faff
+    m_Address: Assets/Configs/Items/Usable/Plants/Flowers/Lupine ItemConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5ec665709712faa49a7d92bd609873ab
+    m_Address: Assets/Configs/Items/Usable/Plants/Tomato ItemConfig.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5b5f43ce9ed3fe242a3e4a97410e9377
+    m_Address: Assets/Configs/Items/Usable/Stamina potion Config.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 971cfd05ecd9f284381201cdeee5f087
+    m_Address: Assets/Configs/Items/Weapons/Swords/Sword_12.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b595ff8ec3a59cc4faaf7e067fb544cc
+    m_Address: Assets/Configs/Items/Weapons/Swords/Sword_7.asset
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - ItemConfig
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: ebce560b37b872f459d4c69adb0a55bb, type: 2}
   m_SchemaSet:

@@ -84,7 +84,7 @@ namespace UI.Pages
             infoAboutPlayer.Name.text = currentCharacterInfo.Name.GetLocalizedStringCached();
             if (infoAboutPlayer.Money != null)
             {
-                infoAboutPlayer.Money.text = moneyStorage == null
+                infoAboutPlayer.Money.text = moneyStorage == null || moneyStorage.HasUnlimitedFunds
                                                  ? "---"
                                                  : moneyStorage.CurrentMoney.Value.ToString(CultureInfo.InvariantCulture);
             }

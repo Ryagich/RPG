@@ -11,7 +11,7 @@ namespace NPC
         private readonly EquippedWeaponDropService inner;
 
         public NpcEquippedWeaponDropService(
-            PlayerInventory inventory,
+            IEquipmentInventory inventory,
             CharacterWorldItemDropper dropper,
             IEquippedWeaponVisual weaponVisual,
             Transform ownerTransform)

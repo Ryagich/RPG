@@ -475,6 +475,95 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 29513498}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &46621405 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+  m_PrefabInstance: {fileID: 239138976}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &46621420
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 46621405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c07825eba374e689d071a28eaf39e03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Container.MerchantLifetimeScope
+  parentReference:
+    TypeName: Container.Game.GameLifetimeScope
+  autoRun: 0
+  autoInjectGameObjects: []
+  characterInfo: {fileID: 11400000, guid: 3e00ca4ee5487f047ba759a296c3372a, type: 2}
+  inventoryConfig: {fileID: 0}
+  defaultVisualConfig: {fileID: 11400000, guid: d06f3e2d4c1b7256a789abcdef012345, type: 2}
+  canTalk: 1
+  dialog: {fileID: 11400000, guid: 88d2c07937d080b4ba52468317585259, type: 2}
+  stateMachineGraph: {fileID: 11400000, guid: 9fef677537be06b4e8a00a17d5132a30, type: 2}
+  faction: {fileID: 11400000, guid: dc98ce5b51f108947b4b8e8bc61ffc22, type: 2}
+  consumeAdditionalStatsOverTime: 0
+  itemSetConfigOverride: {fileID: 0}
+  combatProfileOverride: {fileID: 0}
+  dialogueInteractionRadius: 1.8
+  forcedDialogueInteractable: {fileID: 1234610931}
+  currentHp: 0
+  currentState: Not Started
+  stockRules:
+  - <Category>k__BackingField: 1
+    <UniqueItemCount>k__BackingField: 1
+    <ItemAmount>k__BackingField: 1
+  - <Category>k__BackingField: 2
+    <UniqueItemCount>k__BackingField: 1
+    <ItemAmount>k__BackingField: 1
+  - <Category>k__BackingField: 3
+    <UniqueItemCount>k__BackingField: 0
+    <ItemAmount>k__BackingField: 0
+  - <Category>k__BackingField: 4
+    <UniqueItemCount>k__BackingField: 0
+    <ItemAmount>k__BackingField: 0
+  - <Category>k__BackingField: 5
+    <UniqueItemCount>k__BackingField: 0
+    <ItemAmount>k__BackingField: 0
+  - <Category>k__BackingField: 6
+    <UniqueItemCount>k__BackingField: 0
+    <ItemAmount>k__BackingField: 0
+  - <Category>k__BackingField: 7
+    <UniqueItemCount>k__BackingField: 0
+    <ItemAmount>k__BackingField: 0
+  - <Category>k__BackingField: 8
+    <UniqueItemCount>k__BackingField: 1
+    <ItemAmount>k__BackingField: 0
+  - <Category>k__BackingField: 9
+    <UniqueItemCount>k__BackingField: 0
+    <ItemAmount>k__BackingField: 0
+  - <Category>k__BackingField: 10
+    <UniqueItemCount>k__BackingField: 1
+    <ItemAmount>k__BackingField: 0
+  - <Category>k__BackingField: 11
+    <UniqueItemCount>k__BackingField: 0
+    <ItemAmount>k__BackingField: 0
+  uniqueItemCountRanges:
+  - <Value>k__BackingField: 0
+    <Min>k__BackingField: 0
+    <Max>k__BackingField: 2
+  - <Value>k__BackingField: 1
+    <Min>k__BackingField: 1
+    <Max>k__BackingField: 3
+  - <Value>k__BackingField: 2
+    <Min>k__BackingField: 2
+    <Max>k__BackingField: 4
+  itemAmountRanges:
+  - <Value>k__BackingField: 0
+    <Min>k__BackingField: 1
+    <Max>k__BackingField: 2
+  - <Value>k__BackingField: 1
+    <Min>k__BackingField: 2
+    <Max>k__BackingField: 4
+  - <Value>k__BackingField: 2
+    <Min>k__BackingField: 3
+    <Max>k__BackingField: 6
 --- !u!1 &78797564
 GameObject:
   m_ObjectHideFlags: 0
@@ -1333,6 +1422,83 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8802c2b9a3bf06f4687a50beeac5d7a0, type: 3}
+--- !u!1001 &239138976
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1029115330142763011, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1444182756704375305, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -8.83
+      objectReference: {fileID: 0}
+    - target: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.76
+      objectReference: {fileID: 0}
+    - target: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 6.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9858117
+      objectReference: {fileID: 0}
+    - target: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.16785492
+      objectReference: {fileID: 0}
+    - target: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -19.326
+      objectReference: {fileID: 0}
+    - target: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: m_Name
+      value: Merchant
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: canTalk
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: faction
+      value: 
+      objectReference: {fileID: 11400000, guid: dc98ce5b51f108947b4b8e8bc61ffc22, type: 2}
+    m_RemovedComponents:
+    - {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 46621420}
+  m_SourcePrefab: {fileID: 100100000, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
 --- !u!1001 &241062582
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7025,6 +7191,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+--- !u!114 &1234610931 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 712188980136653328, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+  m_PrefabInstance: {fileID: 239138976}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea093bae76d94729bf3a705a563bf7cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Interactable.Interactable
 --- !u!1 &1241384707
 GameObject:
   m_ObjectHideFlags: 0
@@ -7869,9 +8046,10 @@ MonoBehaviour:
   gameScopePrefab: {fileID: 88207094466115628, guid: 01b3b82635921a042b7893487bda68f7, type: 3}
   locationSelector: {fileID: 0}
   gameCamera: {fileID: 330585545}
-  levelScopes:
-  - {fileID: 1834779877}
-  - {fileID: 9141871603821371956}
+    levelScopes:
+    - {fileID: 1834779877}
+    - {fileID: 9141871603821371956}
+    - {fileID: 46621420}
 --- !u!4 &1363242808
 Transform:
   m_ObjectHideFlags: 0
@@ -19781,6 +19959,7 @@ SceneRoots:
   - {fileID: 820326895}
   - {fileID: 1456851140}
   - {fileID: 1965427952}
+  - {fileID: 239138976}
   - {fileID: 1642615700}
   - {fileID: 837719305}
   - {fileID: 2060912570}
