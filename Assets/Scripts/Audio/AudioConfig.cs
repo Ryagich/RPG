@@ -19,6 +19,7 @@ namespace GameAudio
         [SerializeField] private AudioMixerGroup uiMixerGroup;
         [SerializeField] private AudioMixerGroup gameMixerGroup;
         [SerializeField] private AudioMixerGroup musicMixerGroup;
+        [SerializeField] private AudioMixerGroup voiceMixerGroup;
 
         [Header("Pooled source prefab")]
         [SerializeField] private AudioSource footstepSourcePrefab;
@@ -35,6 +36,7 @@ namespace GameAudio
         [SerializeField, Range(MinimumDecibels, MaximumDecibels)] private float uiDefaultDecibels = -30f;
         [SerializeField, Range(MinimumDecibels, MaximumDecibels)] private float gameDefaultDecibels = -15f;
         [SerializeField, Range(MinimumDecibels, MaximumDecibels)] private float musicDefaultDecibels = -5f;
+        [SerializeField, Range(MinimumDecibels, MaximumDecibels)] private float voiceDefaultDecibels = 0f;
 
         public AudioMixer Mixer => mixer;
         public AudioSource FootstepSourcePrefab => footstepSourcePrefab;
@@ -48,6 +50,7 @@ namespace GameAudio
             AudioMixerCategory.UI,
             AudioMixerCategory.Game,
             AudioMixerCategory.Music,
+            AudioMixerCategory.Voice,
         };
 
         public string GetExposedParameter(AudioMixerCategory category) => $"{category}_Volume";
@@ -60,6 +63,7 @@ namespace GameAudio
                 AudioMixerCategory.UI => uiDefaultDecibels,
                 AudioMixerCategory.Game => gameDefaultDecibels,
                 AudioMixerCategory.Music => musicDefaultDecibels,
+                AudioMixerCategory.Voice => voiceDefaultDecibels,
                 _ => MaximumDecibels,
             };
         }
@@ -72,14 +76,10 @@ namespace GameAudio
                 AudioMixerCategory.UI => uiMixerGroup,
                 AudioMixerCategory.Game => gameMixerGroup,
                 AudioMixerCategory.Music => musicMixerGroup,
+                AudioMixerCategory.Voice => voiceMixerGroup,
                 _ => null,
             };
-            if (configuredGroup != null)
-            {
-                return configuredGroup;
-            }
-
-            return FindGroup(category);
+            return configuredGroup;
         }
 
         public void ConfigureForProject(
@@ -93,6 +93,7 @@ namespace GameAudio
             uiMixerGroup = FindGroup(AudioMixerCategory.UI);
             gameMixerGroup = FindGroup(AudioMixerCategory.Game);
             musicMixerGroup = FindGroup(AudioMixerCategory.Music);
+            voiceMixerGroup = FindGroup(AudioMixerCategory.Voice);
             footstepSourcePrefab = valueFootstepSourcePrefab;
             buttonHoverClip = valueButtonHoverClip;
             buttonClickClip = valueButtonClickClip;

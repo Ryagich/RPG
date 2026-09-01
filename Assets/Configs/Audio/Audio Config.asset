@@ -17,6 +17,7 @@ MonoBehaviour:
   uiMixerGroup: {fileID: 8296641888768157167, guid: 73b2f93c5f5c1a84986de6b64134645b, type: 2}
   gameMixerGroup: {fileID: -561013206691005878, guid: 73b2f93c5f5c1a84986de6b64134645b, type: 2}
   musicMixerGroup: {fileID: 9049543159456873, guid: 73b2f93c5f5c1a84986de6b64134645b, type: 2}
+  voiceMixerGroup: {fileID: 6921840715938472104, guid: 73b2f93c5f5c1a84986de6b64134645b, type: 2}
   footstepSourcePrefab: {fileID: 4475651691867625152, guid: 63385babb7fec69439d9ed21b5bb418e, type: 3}
   buttonHoverClip: {fileID: 8300000, guid: 71629c64266e0b541b6f0fc0156ebfe0, type: 3}
   buttonClickClip: {fileID: 8300000, guid: a60f9476a4dd21742acfcca50e5c6062, type: 3}
@@ -110,3 +111,4 @@ MonoBehaviour:
   uiDefaultDecibels: -30
   gameDefaultDecibels: -15
   musicDefaultDecibels: -5
+  voiceDefaultDecibels: 0

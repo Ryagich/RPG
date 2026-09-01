@@ -14,6 +14,8 @@ namespace GameAudio
     public sealed class AudioService : IAudioService, IStartable, IDisposable
     {
         private const string VolumePreferencePrefix = "RPG.Audio.Volume.";
+        private const string VolumePreferenceSchemaKey = VolumePreferencePrefix + "Schema";
+        private const int CurrentVolumePreferenceSchema = 2;
         private const string LegacyEffectsPreferenceKey = VolumePreferencePrefix + "Effects";
         private const int UiPoolLimit = 6;
         private const int GamePoolLimit = 20;
@@ -135,6 +137,7 @@ namespace GameAudio
             gamePool = new SourcePool(GetWorldSoundParent(), null, GamePoolLimit);
             footstepsPool = new SourcePool(GetWorldSoundParent(), config.FootstepSourcePrefab, FootstepsPoolLimit);
 
+            MigrateVolumePreferences();
             foreach (var category in AudioConfig.SettingsCategories)
             {
                 ApplyDecibels(category, LoadDecibels(category));
@@ -361,12 +364,12 @@ namespace GameAudio
         public float GetNormalizedVolume(AudioMixerCategory category)
         {
             var decibels = LoadDecibels(category);
-            return Mathf.InverseLerp(AudioConfig.MinimumDecibels, AudioConfig.MaximumDecibels, decibels);
+            return DecibelsToNormalizedVolume(decibels);
         }
 
         public void SetNormalizedVolume(AudioMixerCategory category, float value)
         {
-            var decibels = Mathf.Lerp(AudioConfig.MinimumDecibels, AudioConfig.MaximumDecibels, Mathf.Clamp01(value));
+            var decibels = NormalizedVolumeToDecibels(value);
             ApplyDecibels(category, decibels);
             PlayerPrefs.SetFloat(GetPreferenceKey(category), decibels);
             PlayerPrefs.Save();
@@ -426,6 +429,66 @@ namespace GameAudio
         }
 
         private static string GetPreferenceKey(AudioMixerCategory category) => VolumePreferencePrefix + category;
+
+        private void MigrateVolumePreferences()
+        {
+            if (PlayerPrefs.GetInt(VolumePreferenceSchemaKey) >= CurrentVolumePreferenceSchema)
+            {
+                return;
+            }
+
+            foreach (var category in AudioConfig.SettingsCategories)
+            {
+                var preferenceKey = GetPreferenceKey(category);
+                if (!PlayerPrefs.HasKey(preferenceKey))
+                {
+                    if (category == AudioMixerCategory.Game && PlayerPrefs.HasKey(LegacyEffectsPreferenceKey))
+                    {
+                        var legacyEffectsDecibels = PlayerPrefs.GetFloat(LegacyEffectsPreferenceKey);
+                        var legacyEffectsNormalizedVolume = Mathf.InverseLerp(
+                            AudioConfig.MinimumDecibels,
+                            AudioConfig.MaximumDecibels,
+                            legacyEffectsDecibels);
+                        PlayerPrefs.SetFloat(preferenceKey, NormalizedVolumeToDecibels(legacyEffectsNormalizedVolume));
+                    }
+
+                    continue;
+                }
+
+                var legacyDecibels = PlayerPrefs.GetFloat(preferenceKey);
+                var legacyNormalizedVolume = Mathf.InverseLerp(
+                    AudioConfig.MinimumDecibels,
+                    AudioConfig.MaximumDecibels,
+                    legacyDecibels);
+                PlayerPrefs.SetFloat(preferenceKey, NormalizedVolumeToDecibels(legacyNormalizedVolume));
+            }
+
+            PlayerPrefs.SetInt(VolumePreferenceSchemaKey, CurrentVolumePreferenceSchema);
+            PlayerPrefs.Save();
+        }
+
+        private static float NormalizedVolumeToDecibels(float normalizedVolume)
+        {
+            if (normalizedVolume <= 0f)
+            {
+                return AudioConfig.MinimumDecibels;
+            }
+
+            return Mathf.Clamp(
+                20f * Mathf.Log10(Mathf.Clamp01(normalizedVolume)),
+                AudioConfig.MinimumDecibels,
+                AudioConfig.MaximumDecibels);
+        }
+
+        private static float DecibelsToNormalizedVolume(float decibels)
+        {
+            if (decibels <= AudioConfig.MinimumDecibels)
+            {
+                return 0f;
+            }
+
+            return Mathf.Clamp01(Mathf.Pow(10f, decibels / 20f));
+        }
 
         private static AudioClip GetRandomClip(IReadOnlyList<AudioClip> clips)
         {

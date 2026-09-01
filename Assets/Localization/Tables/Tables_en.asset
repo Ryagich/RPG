@@ -2019,6 +2019,21 @@ MonoBehaviour:
   - m_Id: 93000000000000070
     m_Localized: Gameplay
     m_Metadata: {m_Items: []}
- references:
+  - m_Id: 93000000000000071
+    m_Localized: Master Volume
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000072
+    m_Localized: Interface
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000073
+    m_Localized: Game
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000074
+    m_Localized: Music
+    m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000075
+    m_Localized: Voice
+    m_Metadata: {m_Items: []}
+  references:
     version: 2
     RefIds: []

@@ -2357,6 +2357,26 @@ MonoBehaviour:
     m_Key: Title_Sections_Gameplay
     m_Metadata:
       m_Items: []
+  - m_Id: 93000000000000071
+    m_Key: Audio_Settings_Master
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000072
+    m_Key: Audio_Settings_UI
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000073
+    m_Key: Audio_Settings_Game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000074
+    m_Key: Audio_Settings_Music
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93000000000000075
+    m_Key: Audio_Settings_Voice
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

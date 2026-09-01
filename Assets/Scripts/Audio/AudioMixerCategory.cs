@@ -9,5 +9,6 @@ namespace GameAudio
         UI = 1,
         Game = 2,
         Music = 3,
+        Voice = 4,
     }
 }
