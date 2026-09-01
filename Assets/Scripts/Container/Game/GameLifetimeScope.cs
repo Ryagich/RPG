@@ -137,6 +137,7 @@ namespace Container.Game
             builder.Register<Player.PlayerDeathState>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<GameModesController>().AsSelf();
             builder.RegisterEntryPoint<SoundMessagePlayer>().AsSelf();
+            builder.RegisterEntryPoint<AmbientController>().AsSelf();
         }
 
         private Transform CreateGlobalSoundsRoot()

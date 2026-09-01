@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e06a2d8f0e743ba9d7dd12cc9d28af1, type: 3}
+  m_Name: Ambient Config
+  m_EditorClassIdentifier: Assembly-CSharp::GameAudio.AmbientConfig
+  forest:
+    clips:
+    - {fileID: 8300000, guid: da588553623ebc64ab9dc0c32b0a7876, type: 3}
+    - {fileID: 8300000, guid: f7e5522c82200674ea43fdbbd30773d2, type: 3}
+    - {fileID: 8300000, guid: b900fce48bf8d6e4b9feac8774e68bcc, type: 3}
+    - {fileID: 8300000, guid: 572826339dfb0e3428ea8a11c09fc73e, type: 3}
+    delayRange: {x: 0, y: 30}
+  birds:
+    clips:
+    - {fileID: 8300000, guid: 57b1c580ba9c8cb4aa838dd50bec3eb4, type: 3}
+    - {fileID: 8300000, guid: 2ebeb4ebd80284b45aea3c3b2c1dbc55, type: 3}
+    - {fileID: 8300000, guid: 7fa4514d9662e1f468e2b73428cb923e, type: 3}
+    delayRange: {x: 15, y: 45}
+  music:
+    clips:
+    - {fileID: 8300000, guid: 4763c7b28a5689548bb1d92dc3dea58a, type: 3}
+    - {fileID: 8300000, guid: 7458e86ae0cef0b40831dc2cfca9850a, type: 3}
+    - {fileID: 8300000, guid: 3332926ce6997d146a1909b72dc72275, type: 3}
+    - {fileID: 8300000, guid: cee49b216896ea943b68f1852c7eeded, type: 3}
+    delayRange: {x: 30, y: 65}

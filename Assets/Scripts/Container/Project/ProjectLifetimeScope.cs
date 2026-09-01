@@ -52,6 +52,7 @@ namespace Container.Project
         [field: SerializeField] public HitReactionConfig HitReactionConfig { get; private set; }
         [field: SerializeField] public FactionRelationsConfig FactionRelationsConfig { get; private set; }
         [field: SerializeField] public AudioConfig AudioConfig { get; private set; }
+        [field: SerializeField] public AmbientConfig AmbientConfig { get; private set; }
         [field: SerializeField] public FootstepConfig FootstepConfig { get; private set; }
         [field: SerializeField] public AnimationEventSoundConfig AnimationEventSoundConfig { get; private set; }
         [field: SerializeField] public LessonConfig LessonConfig { get; private set; }
@@ -103,6 +104,7 @@ namespace Container.Project
             builder.RegisterInstance(HitReactionConfig != null ? HitReactionConfig : HitReactionConfig.CreateDefault()).AsSelf();
             builder.RegisterInstance(FactionRelationsConfig).AsSelf();
             builder.RegisterInstance(AudioConfig).AsSelf();
+            builder.RegisterInstance(AmbientConfig).AsSelf();
             builder.RegisterInstance(FootstepConfig).AsSelf();
             builder.RegisterInstance(AnimationEventSoundConfig).AsSelf();
             builder.RegisterInstance(LessonConfig).AsSelf();
