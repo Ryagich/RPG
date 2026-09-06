@@ -58,11 +58,16 @@ MonoBehaviour:
   waterStat: 0
   foodStat: 0
   chillStat: 0
-  equippedVisuals:
+  maleEquippedVisuals:
   - <BodyPart>k__BackingField: 30
     <VisualName>k__BackingField: Chr_LegRight_Male_02
   - <BodyPart>k__BackingField: 31
     <VisualName>k__BackingField: Chr_LegLeft_Male_02
+  femaleEquippedVisuals:
+  - <BodyPart>k__BackingField: 30
+    <VisualName>k__BackingField: Chr_LegRight_Female_02
+  - <BodyPart>k__BackingField: 31
+    <VisualName>k__BackingField: Chr_LegLeft_Female_02
   references:
     version: 2
     RefIds: []

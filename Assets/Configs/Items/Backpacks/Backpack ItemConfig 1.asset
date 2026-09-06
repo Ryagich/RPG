@@ -61,7 +61,10 @@ MonoBehaviour:
   <BackpackSize>k__BackingField: {x: 7, y: 3}
   <AdditionalWeightCapacity>k__BackingField: 25
   chillStat: 0
-  equippedVisuals:
+  maleEquippedVisuals:
+  - <BodyPart>k__BackingField: 10
+    <VisualName>k__BackingField: Chr_BackAttachment_01
+  femaleEquippedVisuals:
   - <BodyPart>k__BackingField: 10
     <VisualName>k__BackingField: Chr_BackAttachment_01
   references:

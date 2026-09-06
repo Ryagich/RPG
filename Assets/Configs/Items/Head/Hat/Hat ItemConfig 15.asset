@@ -58,7 +58,7 @@ MonoBehaviour:
   waterStat: 0
   foodStat: 0
   chillStat: 0
-  equippedVisuals:
+  maleEquippedVisuals:
   - <BodyPart>k__BackingField: 2
     <VisualName>k__BackingField: Chr_HeadCoverings_No_Hair_04
   - <BodyPart>k__BackingField: 4
@@ -67,6 +67,15 @@ MonoBehaviour:
     <VisualName>k__BackingField: 
   - <BodyPart>k__BackingField: 5
     <VisualName>k__BackingField: 
+  femaleEquippedVisuals:
+  - <BodyPart>k__BackingField: 2
+    <VisualName>k__BackingField: Chr_HeadCoverings_No_Hair_04
+  - <BodyPart>k__BackingField: 4
+    <VisualName>k__BackingField:
+  - <BodyPart>k__BackingField: 6
+    <VisualName>k__BackingField:
+  - <BodyPart>k__BackingField: 5
+    <VisualName>k__BackingField:
   references:
     version: 2
     RefIds: []

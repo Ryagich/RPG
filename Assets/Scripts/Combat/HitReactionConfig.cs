@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Combat
 {
-    [CreateAssetMenu(fileName = "HitReactionConfig", menuName = "configs/Character/HitReactionConfig")]
+    [CreateAssetMenu(fileName = "HitReactionConfig", menuName = "configs/Combat/Hit Reactions/HitReactionConfig")]
     public sealed class HitReactionConfig : ScriptableObject
     {
         [field: SerializeField, Min(0f)] public float DamageReactionThreshold { get; private set; } = 15f;

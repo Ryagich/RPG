@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: deca0a02cad2c9c41bd15e2c41c6e131, type: 3}
+  m_Name: Garven ItemSetConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemSetConfig
+  <ItemConfigs>k__BackingField:
+  - {fileID: 11400000, guid: c575ea7ca63d0aa48b282e11ff54a216, type: 2}
+  - {fileID: 11400000, guid: a910b350cf6388b4bb225c672c72c4ba, type: 2}
+  - {fileID: 11400000, guid: 57fd27856ab84da479b619a6557c7aed, type: 2}
+  - {fileID: 11400000, guid: 9c56ecfae42f7e840a6a9798122814c7, type: 2}

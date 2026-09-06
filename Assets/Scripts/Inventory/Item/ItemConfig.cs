@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Localization;
+using UnityEngine.Serialization;
 
 namespace Inventory.Item
 {
@@ -60,7 +61,11 @@ namespace Inventory.Item
         // Chill отвечает за сон. Механик дня/ночи и сна пока нет, поэтому стат выключен и скрыт,
         // но serialized поле оставлено для будущего возврата без миграции данных.
         [SerializeField, HideInInspector] private float chillStat;
-        [SerializeField, ShowIf(nameof(HasEquippedVisuals))] private List<EquippedItemVisual> equippedVisuals = new();
+        [Header("Male Parts")]
+        [SerializeField, ShowIf(nameof(HasEquippedVisuals)), FormerlySerializedAs("equippedVisuals")]
+        private List<EquippedItemVisual> maleEquippedVisuals = new();
+        [Header("Female Parts")]
+        [SerializeField, ShowIf(nameof(HasEquippedVisuals))] private List<EquippedItemVisual> femaleEquippedVisuals = new();
 
         public float PhysicalDefense => NormalizeProtectionValue(physicalDefense);
         public float TemperatureDefense => temperatureDefense;
@@ -78,7 +83,8 @@ namespace Inventory.Item
         public GameObject WeaponInHandPrefab => weaponInHandPrefab;
         public WeaponAttachmentTransformData RightHandWeaponAttachment => rightHandWeaponAttachment;
         public WeaponAttachmentTransformData BeltWeaponAttachment => beltWeaponAttachment;
-        public IReadOnlyList<EquippedItemVisual> EquippedVisuals => equippedVisuals;
+        public IReadOnlyList<EquippedItemVisual> GetEquippedVisuals(CharacterGender gender) =>
+            gender == CharacterGender.Female ? femaleEquippedVisuals : maleEquippedVisuals;
 
         public int GetRandomWeaponDamage(bool isHeavyAttack = false)
         {

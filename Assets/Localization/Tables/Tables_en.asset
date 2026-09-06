@@ -2034,6 +2034,78 @@ MonoBehaviour:
   - m_Id: 93000000000000075
     m_Localized: Voice
     m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000001
+    m_Localized: Halvar
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000002
+    m_Localized: Elina
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000004
+    m_Localized: Orren
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000005
+    m_Localized: Marta Veyn
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000006
+    m_Localized: Edric
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000007
+    m_Localized: Runa
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000008
+    m_Localized: Tarek
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000009
+    m_Localized: Livio Aguilar
+    m_Metadata: {m_Items: []}
+  - m_Id: 40000000000000003
+    m_Localized: District Residents
+    m_Metadata: {m_Items: []}
+  - m_Id: 40000000000000004
+    m_Localized: Mages
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000010
+    m_Localized: Erdan Vell
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000011
+    m_Localized: Father Cadmon
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000012
+    m_Localized: Meyra
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000013
+    m_Localized: Harn
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000014
+    m_Localized: Garven
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000015
+    m_Localized: Lissa
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000016
+    m_Localized: Varna
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000017
+    m_Localized: Rogan
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000018
+    m_Localized: Selm
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000019
+    m_Localized: Hedda Roun
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000020
+    m_Localized: Corvin Veyr
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000021
+    m_Localized: Ulrik
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000022
+    m_Localized: Keld Rook
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000023
+    m_Localized: Bram Voss
+    m_Metadata: {m_Items: []}
   references:
     version: 2
     RefIds: []

@@ -30,7 +30,7 @@ namespace Container
         [SerializeField] private Character.CharacterInfo characterInfo;
         [SerializeField] private InventoryConfig inventoryConfig;
         [Header("Visuals")]
-        [SerializeField] private CharacterDefaultVisualConfig defaultVisualConfig;
+        [SerializeField] private CharacterVisualConfig defaultVisualConfig;
         [Header("Dialogue")]
         [SerializeField] private bool canTalk = true;
         [SerializeField] private DialogGraph dialog;

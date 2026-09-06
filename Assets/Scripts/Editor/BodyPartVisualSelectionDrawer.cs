@@ -62,7 +62,8 @@ namespace EditorScripts
 
             var bodyPart = GetBodyPartValue(bodyPartProperty);
             var currentVisualName = visualNameProperty.stringValue;
-            var visualOptions = BodyPartVisualOptionsCache.GetVisualNames(bodyPart);
+            var gender = GetCharacterGender(property);
+            var visualOptions = BodyPartVisualOptionsCache.GetVisualNames(bodyPart, gender);
             var displayOptions = new List<string> { "<None>" };
             displayOptions.AddRange(visualOptions);
 
@@ -77,7 +78,13 @@ namespace EditorScripts
                 }
             }
 
-            using (new EditorGUI.DisabledScope(bodyPart == BodyPart.None))
+            var isUnavailableForGender = bodyPart == BodyPart.Beard && gender == CharacterGender.Female;
+            if (isUnavailableForGender)
+            {
+                visualNameProperty.stringValue = string.Empty;
+            }
+
+            using (new EditorGUI.DisabledScope(bodyPart == BodyPart.None || isUnavailableForGender))
             {
                 var newIndex = EditorGUI.Popup(visualNameRect, "Visual Name", selectedIndex, displayOptions.ToArray());
                 if (newIndex <= 0)
@@ -91,6 +98,22 @@ namespace EditorScripts
                     ? currentVisualName
                     : selectedOption;
             }
+        }
+
+        private static CharacterGender GetCharacterGender(SerializedProperty property)
+        {
+            if (property.serializedObject.targetObject is CharacterVisualConfig)
+            {
+                var genderProperty = property.serializedObject.FindProperty("<Gender>k__BackingField");
+                if (genderProperty != null)
+                {
+                    return (CharacterGender)genderProperty.enumValueIndex;
+                }
+            }
+
+            return property.propertyPath.StartsWith("femaleEquippedVisuals", StringComparison.Ordinal)
+                ? CharacterGender.Female
+                : CharacterGender.Male;
         }
 
         private static BodyPart GetBodyPartValue(SerializedProperty bodyPartProperty)
@@ -116,23 +139,22 @@ namespace EditorScripts
     [InitializeOnLoad]
     internal static class BodyPartVisualOptionsCache
     {
-        private static readonly Dictionary<BodyPart, string[]> Cache = new();
+        private static readonly Dictionary<(BodyPart BodyPart, CharacterGender Gender), string[]> Cache = new();
         private static bool isDirty = true;
 
         static BodyPartVisualOptionsCache()
         {
             EditorApplication.projectChanged += MarkDirty;
-            EditorApplication.hierarchyChanged += MarkDirty;
         }
 
-        public static string[] GetVisualNames(BodyPart bodyPart)
+        public static string[] GetVisualNames(BodyPart bodyPart, CharacterGender gender)
         {
             if (isDirty)
             {
-                Rebuild();
+                RebuildFromLoadedVisuals();
             }
 
-            return Cache.TryGetValue(bodyPart, out var options) ? options : Array.Empty<string>();
+            return Cache.TryGetValue((bodyPart, gender), out var options) ? options : Array.Empty<string>();
         }
 
         private static void MarkDirty()
@@ -140,12 +162,12 @@ namespace EditorScripts
             isDirty = true;
         }
 
-        private static void Rebuild()
+        private static void RebuildFromLoadedVisuals()
         {
             isDirty = false;
             Cache.Clear();
 
-            var namesByBodyPart = new Dictionary<BodyPart, SortedSet<string>>();
+            var namesByBodyPart = new Dictionary<(BodyPart BodyPart, CharacterGender Gender), SortedSet<string>>();
             foreach (BodyPart bodyPart in Enum.GetValues(typeof(BodyPart)))
             {
                 if (bodyPart == BodyPart.None)
@@ -153,27 +175,15 @@ namespace EditorScripts
                     continue;
                 }
 
-                namesByBodyPart[bodyPart] = new SortedSet<string>(StringComparer.Ordinal);
+                foreach (CharacterGender gender in Enum.GetValues(typeof(CharacterGender)))
+                {
+                    namesByBodyPart[(bodyPart, gender)] = new SortedSet<string>(StringComparer.Ordinal);
+                }
             }
 
             foreach (var visual in Resources.FindObjectsOfTypeAll<CharacterBodyPartVisual>())
             {
                 AddVisual(visual, namesByBodyPart);
-            }
-
-            foreach (var guid in AssetDatabase.FindAssets("t:Prefab"))
-            {
-                var path = AssetDatabase.GUIDToAssetPath(guid);
-                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                if (prefab == null)
-                {
-                    continue;
-                }
-
-                foreach (var visual in prefab.GetComponentsInChildren<CharacterBodyPartVisual>(true))
-                {
-                    AddVisual(visual, namesByBodyPart);
-                }
             }
 
             foreach (var pair in namesByBodyPart)
@@ -182,19 +192,23 @@ namespace EditorScripts
             }
         }
 
-        private static void AddVisual(CharacterBodyPartVisual visual, IReadOnlyDictionary<BodyPart, SortedSet<string>> namesByBodyPart)
+        private static void AddVisual(
+            CharacterBodyPartVisual visual,
+            IReadOnlyDictionary<(BodyPart BodyPart, CharacterGender Gender), SortedSet<string>> namesByBodyPart)
         {
             if (visual == null || visual.BodyPart == BodyPart.None || string.IsNullOrWhiteSpace(visual.Name))
             {
                 return;
             }
 
-            if (!namesByBodyPart.TryGetValue(visual.BodyPart, out var visualNames))
+            foreach (CharacterGender gender in Enum.GetValues(typeof(CharacterGender)))
             {
-                return;
+                if (visual.IsAvailableFor(gender)
+                    && namesByBodyPart.TryGetValue((visual.BodyPart, gender), out var visualNames))
+                {
+                    visualNames.Add(visual.Name);
+                }
             }
-
-            visualNames.Add(visual.Name);
         }
     }
 }

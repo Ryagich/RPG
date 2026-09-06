@@ -28,7 +28,7 @@ namespace Container
         [SerializeField] private Character.CharacterInfo characterInfo;
         [SerializeField] private InventoryConfig inventoryConfig;
         [Header("Visuals")]
-        [SerializeField] private CharacterDefaultVisualConfig defaultVisualConfig;
+        [SerializeField] private CharacterVisualConfig defaultVisualConfig;
         [Header("Faction")]
         [SerializeField] private FactionConfig faction;
         [Header("Initial Inventory")]

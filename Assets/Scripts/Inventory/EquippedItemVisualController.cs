@@ -13,7 +13,7 @@ namespace Inventory
     {
         private readonly IEquipmentInventory inventory;
         private readonly CharacterVisualRoot characterVisualRoot;
-        private readonly CharacterDefaultVisualConfig defaultVisualConfig;
+        private readonly CharacterVisualConfig defaultVisualConfig;
         private readonly IDisposable inventoryChangedSubscription;
         private readonly HashSet<string> missingBindingWarnings = new();
         private readonly System.Collections.Generic.Dictionary<BodyPart, string> desiredVisualsByBodyPart = new();
@@ -30,7 +30,7 @@ namespace Inventory
         public EquippedItemVisualController(
             IEquipmentInventory inventory,
             CharacterVisualRoot characterVisualRoot,
-            CharacterDefaultVisualConfig defaultVisualConfig = null)
+            CharacterVisualConfig defaultVisualConfig = null)
         {
             this.inventory = inventory;
             this.characterVisualRoot = characterVisualRoot;
@@ -74,7 +74,7 @@ namespace Inventory
             ApplySlotVisuals(inventory.HipsSlot, "Hips");
             ApplySlotVisuals(inventory.BackpackSlot, "Backpack");
 
-            characterVisualRoot.ApplyVisuals(desiredVisualsByBodyPart);
+            characterVisualRoot.ApplyVisuals(desiredVisualsByBodyPart, GetCharacterGender());
             lastHelmItemConfig = inventory.HelmSlot.ItemConfig;
             lastFaceItemConfig = inventory.FaceSlot.ItemConfig;
             lastBodyItemConfig = inventory.BodySlot.ItemConfig;
@@ -106,7 +106,7 @@ namespace Inventory
                 return;
             }
 
-            foreach (var visual in itemConfig.EquippedVisuals)
+            foreach (var visual in itemConfig.GetEquippedVisuals(GetCharacterGender()))
             {
                 ApplyBodyPartVisual(visual?.BodyPart ?? BodyPart.None, visual?.VisualName, $"{source}:{itemConfig.Id}");
             }
@@ -125,7 +125,7 @@ namespace Inventory
                 ? string.Empty
                 : visualName;
 
-            if (string.IsNullOrWhiteSpace(visualName) || characterVisualRoot.HasVisual(bodyPart, visualName))
+            if (string.IsNullOrWhiteSpace(visualName) || characterVisualRoot.HasVisual(bodyPart, visualName, GetCharacterGender()))
             {
                 return;
             }
@@ -138,5 +138,7 @@ namespace Inventory
 
             Debug.LogWarning($"Missing character visual '{visualName}' for body part {bodyPart}. Source: {source}.", null);
         }
+
+        private CharacterGender GetCharacterGender() => defaultVisualConfig?.Gender ?? CharacterGender.Male;
     }
 }

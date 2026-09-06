@@ -21,7 +21,7 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
-  <Photo>k__BackingField: {fileID: 21300000, guid: cf62cacef6efe584d9462ed6dce2240c, type: 3}
+  <Photo>k__BackingField: {fileID: 0}
   references:
     version: 2
     RefIds: []

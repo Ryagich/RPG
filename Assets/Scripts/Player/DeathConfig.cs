@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Player
 {
-    [CreateAssetMenu(fileName = "DeathConfig", menuName = "configs/Character/DeathConfig")]
+    [CreateAssetMenu(fileName = "DeathConfig", menuName = "configs/Player/Death/DeathConfig")]
     public sealed class DeathConfig : ScriptableObject
     {
         [field: SerializeField]

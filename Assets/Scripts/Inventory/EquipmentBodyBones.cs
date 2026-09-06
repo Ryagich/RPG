@@ -9,15 +9,28 @@ namespace Inventory
         private readonly Dictionary<BodyPart, Dictionary<string, List<CharacterBodyPartVisual>>> visualsByBodyPart = new();
         private bool isCacheBuilt;
 
-        public bool HasVisual(BodyPart bodyPart, string visualName)
+        public bool HasVisual(BodyPart bodyPart, string visualName, CharacterGender gender)
         {
             EnsureCache();
-            return !string.IsNullOrWhiteSpace(visualName)
-                   && visualsByBodyPart.TryGetValue(bodyPart, out var visualsByName)
-                   && visualsByName.ContainsKey(visualName);
+            if (string.IsNullOrWhiteSpace(visualName)
+                || !visualsByBodyPart.TryGetValue(bodyPart, out var visualsByName)
+                || !visualsByName.TryGetValue(visualName, out var visuals))
+            {
+                return false;
+            }
+
+            foreach (var visual in visuals)
+            {
+                if (visual != null && visual.IsAvailableFor(gender))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
-        public void ApplyVisuals(IReadOnlyDictionary<BodyPart, string> visualNamesByBodyPart)
+        public void ApplyVisuals(IReadOnlyDictionary<BodyPart, string> visualNamesByBodyPart, CharacterGender gender)
         {
             EnsureCache();
 
@@ -26,7 +39,10 @@ namespace Inventory
                 visualNamesByBodyPart.TryGetValue(bodyPartEntry.Key, out var targetVisualName);
                 foreach (var visualEntry in bodyPartEntry.Value)
                 {
-                    SetVisualGroupActive(visualEntry.Value, ShouldEnableVisualGroup(visualEntry.Key, targetVisualName));
+                    SetVisualGroupActive(
+                        visualEntry.Value,
+                        ShouldEnableVisualGroup(visualEntry.Key, targetVisualName),
+                        gender);
                 }
             }
         }
@@ -64,13 +80,17 @@ namespace Inventory
             }
         }
 
-        private static void SetVisualGroupActive(IEnumerable<CharacterBodyPartVisual> visuals, bool isActive)
+        private static void SetVisualGroupActive(
+            IEnumerable<CharacterBodyPartVisual> visuals,
+            bool isActive,
+            CharacterGender gender)
         {
             foreach (var visual in visuals)
             {
-                if (visual != null && visual.gameObject.activeSelf != isActive)
+                var shouldBeActive = visual != null && isActive && visual.IsAvailableFor(gender);
+                if (visual != null && visual.gameObject.activeSelf != shouldBeActive)
                 {
-                    visual.gameObject.SetActive(isActive);
+                    visual.gameObject.SetActive(shouldBeActive);
                 }
             }
         }

@@ -157,6 +157,14 @@ MonoBehaviour:
     m_Key: Faction_Bandits
     m_Metadata:
       m_Items: []
+  - m_Id: 40000000000000003
+    m_Key: Faction_District_Residents
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40000000000000004
+    m_Key: Faction_Mages
+    m_Metadata:
+      m_Items: []
   - m_Id: 50000000000000001
     m_Key: Switch_Location_Title
     m_Metadata:
@@ -2375,6 +2383,94 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 93000000000000075
     m_Key: Audio_Settings_Voice
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000001
+    m_Key: Character_Halvar_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000002
+    m_Key: Character_Elina_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000004
+    m_Key: Character_Orren_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000005
+    m_Key: Character_Marta_Veyn_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000006
+    m_Key: Character_Edric_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000007
+    m_Key: Character_Runa_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000008
+    m_Key: Character_Tarek_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000009
+    m_Key: Character_Livio_Aguilar_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000010
+    m_Key: Character_Erdan_Vell_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000011
+    m_Key: Character_Father_Cadmon_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000012
+    m_Key: Character_Meyra_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000013
+    m_Key: Character_Harn_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000014
+    m_Key: Character_Garven_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000015
+    m_Key: Character_Lissa_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000016
+    m_Key: Character_Varna_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000017
+    m_Key: Character_Rogan_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000018
+    m_Key: Character_Selm_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000019
+    m_Key: Character_Hedda_Roun_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000020
+    m_Key: Character_Corvin_Veyr_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000021
+    m_Key: Character_Ulrik_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000022
+    m_Key: Character_Keld_Rook_Name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 94000000000000023
+    m_Key: Character_Bram_Voss_Name
     m_Metadata:
       m_Items: []
   m_Metadata:
