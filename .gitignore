@@ -9,6 +9,7 @@
 /[Bb]uild/
 /[Bb]uilds/
 /[Ll]ogs/
+/BuildValidation/
 /[Uu]ser[Ss]ettings/
 *.log
 
@@ -88,6 +89,11 @@ InitTestScene*.unity*
 # files in platform-specific subfolders, for example:
 # /Assets/AddressableAssetsData/OSX/addressables_content_state.bin
 /[Aa]ssets/AddressableAssetsData/*/*.bin*
+
+# Local build and performance-test reports
+/[Aa]ssets/PluginYourGames/Editor/BuildLogYG2.txt*
+/[Aa]ssets/Resources/PerformanceTestRunInfo.json*
+/[Aa]ssets/Resources/PerformanceTestRunSettings.json*
 
 # Visual Scripting auto-generated files
 /[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Flow/UnitOptions.db

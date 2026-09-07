@@ -893,6 +893,7 @@ namespace UI.Pages
             PageUiUtilities.ClearChildren(view.ContentForTiles);
             var gridWidth = tiles.tiles.GetLength(0);
             var gridHeight = tiles.tiles.GetLength(1);
+            view.UpdateScrollableContentHeight(gridHeight);
 
             for (var y = 0; y < gridHeight; y++)
             for (var x = 0; x < gridWidth; x++)

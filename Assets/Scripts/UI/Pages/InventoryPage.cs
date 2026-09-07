@@ -843,6 +843,7 @@ namespace UI.Pages
             PageUiUtilities.ClearChildren(inventoryView.ContentForTiles);
             var gridWidth = playerInventory.Tiles.tiles.GetLength(0);
             var gridHeight = playerInventory.Tiles.tiles.GetLength(1);
+            inventoryView.UpdateScrollableContentHeight(gridHeight);
 
             for (var y = 0; y < gridHeight; y++)
             for (var x = 0; x < gridWidth; x++)
