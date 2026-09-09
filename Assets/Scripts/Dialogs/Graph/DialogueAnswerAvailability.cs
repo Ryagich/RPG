@@ -101,6 +101,13 @@ namespace Dialogs.Graph
                         }
 
                         break;
+                    case DialogAnswerConditionType.CheckQuestNode:
+                        if (!questController.IsAtNode(condition.QuestGraph, condition.QuestNode))
+                        {
+                            return false;
+                        }
+
+                        break;
                     case DialogAnswerConditionType.RequireRuntimeFlag:
                         if (runtimeFlags == null || !runtimeFlags.IsActive(condition.RuntimeFlag))
                         {

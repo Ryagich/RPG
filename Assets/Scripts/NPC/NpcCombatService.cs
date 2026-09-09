@@ -81,7 +81,7 @@ namespace NPC
         private readonly Transform ownerTransform;
         private readonly NpcVision vision;
         private readonly NpcCombatConfig combatConfig;
-        private readonly FactionRelationsConfig factionRelationsConfig;
+        private readonly IFactionRelations factionRelations;
         private readonly IEquipmentInventory inventory;
         private readonly StatsController statsController;
         private readonly CharacterDamageReceiver ownerDamageReceiver;
@@ -133,7 +133,7 @@ namespace NPC
             Transform ownerTransform,
             NpcVision vision,
             NpcCombatConfig combatConfig,
-            FactionRelationsConfig factionRelationsConfig,
+            IFactionRelations factionRelations,
             IEquipmentInventory inventory,
             StatsController statsController,
             CharacterDamageReceiver ownerDamageReceiver,
@@ -148,7 +148,7 @@ namespace NPC
             this.ownerTransform = ownerTransform;
             this.vision = vision;
             this.combatConfig = combatConfig;
-            this.factionRelationsConfig = factionRelationsConfig;
+            this.factionRelations = factionRelations;
             this.inventory = inventory;
             this.statsController = statsController;
             this.ownerDamageReceiver = ownerDamageReceiver;
@@ -2041,7 +2041,7 @@ namespace NPC
                 return combatConfig != null && combatConfig.TreatFactionlessTargetsAsHostile;
             }
 
-            return factionRelationsConfig != null && factionRelationsConfig.IsHostile(ownerFaction, targetFaction);
+            return factionRelations != null && factionRelations.IsHostile(ownerFaction, targetFaction);
         }
 
         private bool IsHostileTo(CharacterDamageReceiver receiver)
@@ -2269,17 +2269,17 @@ namespace NPC
                 return NpcFactionRelation.Friendly;
             }
 
-            if (ownerFaction == null || otherFaction == null || factionRelationsConfig == null)
+            if (ownerFaction == null || otherFaction == null || factionRelations == null)
             {
                 return NpcFactionRelation.Neutral;
             }
 
-            if (factionRelationsConfig.IsHostile(ownerFaction, otherFaction))
+            if (factionRelations.IsHostile(ownerFaction, otherFaction))
             {
                 return NpcFactionRelation.Hostile;
             }
 
-            return factionRelationsConfig.IsFriendly(ownerFaction, otherFaction)
+            return factionRelations.IsFriendly(ownerFaction, otherFaction)
                 ? NpcFactionRelation.Friendly
                 : NpcFactionRelation.Neutral;
         }

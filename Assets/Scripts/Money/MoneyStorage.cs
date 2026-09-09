@@ -75,6 +75,14 @@ namespace Money
             }
         }
 
+        public void Set(int amount)
+        {
+            if (!HasUnlimitedFunds)
+            {
+                currentMoney.Value = ClampMoney(amount);
+            }
+        }
+
         public int GetAffordableItemCount(int itemPrice, int requestedCount)
         {
             if (requestedCount <= 0)

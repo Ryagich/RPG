@@ -9,6 +9,7 @@ namespace Quests.Graph
     [CreateAssetMenu(fileName = "QuestGraph", menuName = "configs/Quests/Graph")]
     public class QuestGraph : ScriptableObject
     {
+        [SerializeField, HideInInspector] private string persistentId;
         [SerializeField] private LocalizedString title = new();
         [SerializeField] private LocalizedString description = new();
         [SerializeField] private Sprite icon;
@@ -16,6 +17,7 @@ namespace Quests.Graph
 
         public List<QuestNode> Nodes = new();
         public LocalizedString Title => title;
+        public string PersistentId => persistentId;
         public LocalizedString Description => description;
         public Sprite Icon => icon;
         public bool KeepCompletedInJournal => keepCompletedInJournal;
@@ -31,5 +33,15 @@ namespace Quests.Graph
         {
             return ContainsNode(nodeData) && !nodeData.HasOutgoingTransitions();
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (string.IsNullOrWhiteSpace(persistentId))
+            {
+                persistentId = System.Guid.NewGuid().ToString("N");
+            }
+        }
+#endif
     }
 }

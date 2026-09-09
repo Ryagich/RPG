@@ -16,6 +16,7 @@ using Quests.MapTargets;
 using TargetLock;
 using UI.Inventory;
 using Training;
+using Mill;
 
 namespace Container.Game
 {
@@ -29,6 +30,7 @@ namespace Container.Game
         private Transform globalSoundsRoot;
         private VillageLocationSelector locationSelector;
         private Camera gameCamera;
+        private bool worldInitialized;
 
         public void SetLocationSelector(VillageLocationSelector selector)
         {
@@ -117,20 +119,8 @@ namespace Container.Game
             // === InputHandler ===
             builder.Register<InputHandler>(Lifetime.Singleton).AsSelf().As<IStartable>();
 
-            builder.RegisterBuildCallback(container =>
-                                          {
-                                              globalSoundsRoot = CreateGlobalSoundsRoot();
-                                              var audioService = container.Resolve<IAudioService>();
-                                              audioService.SetWorldSoundParent(globalSoundsRoot);
-                                              var locationTransitions = container.Resolve<LocationTransitionService>();
-                                              locationTransitions.Initialize();
-                                              playerScope = CreateChildFromPrefab(PlayerPrefab, _ => { });
-                                              if (locationTransitions.TryGetPlayerSpawn(out var spawnPose))
-                                              {
-                                                  PlacePlayerAtSpawn(playerScope, spawnPose);
-                                              }
-                                              audioService.SetListenerTransform(playerScope.transform);
-                                          });
+            builder.RegisterEntryPoint<GameWorldBootstrapper>().AsSelf();
+            builder.RegisterEntryPoint<MillQuestProgressionCoordinator>().AsSelf();
             builder.Register<LootingContext>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueContext>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<DialogueExitController>().AsSelf();
@@ -145,6 +135,26 @@ namespace Container.Game
             var soundsRoot = new GameObject(GlobalSoundsRootName).transform;
             soundsRoot.SetParent(transform, false);
             return soundsRoot;
+        }
+
+        internal void InitializeWorld(LocationTransitionService locationTransitions, IAudioService audioService)
+        {
+            if (worldInitialized)
+            {
+                return;
+            }
+
+            worldInitialized = true;
+            globalSoundsRoot = CreateGlobalSoundsRoot();
+            audioService.SetWorldSoundParent(globalSoundsRoot);
+            locationTransitions.Initialize();
+            playerScope = CreateChildFromPrefab(PlayerPrefab, _ => { });
+            if (locationTransitions.TryGetPlayerSpawn(out var spawnPose))
+            {
+                PlacePlayerAtSpawn(playerScope, spawnPose);
+            }
+
+            audioService.SetListenerTransform(playerScope.transform);
         }
 
         private static void PlacePlayerAtSpawn(PlayerLifetimeScope player, Pose spawnPose)

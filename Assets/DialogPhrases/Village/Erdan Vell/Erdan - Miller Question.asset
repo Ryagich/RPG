@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cab1eab763ecf6f4c96f41d14656eb42, type: 3}
+  m_Name: Erdan - Miller Question
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.Model.DialogPhrase
+  text: {m_TableReference: {m_TableCollectionName: }, m_TableEntryReference: {m_KeyId: 0, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+  alternativeTexts: []
+  isForcedDialoguePhrase: 0
+  forcedDialoguePriority: 0
+  restoresExitAbility: 0
+  isQuestPhrase: 1
+  questAnswer:
+    text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 97000000000000029, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: 11000000000000000000000000000034, type: 2}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 1
+    conditions:
+    - type: 8
+      moneyAmount: 0
+      itemConfig: {fileID: 0}
+      itemCount: 1
+      questGraph: {fileID: 0}
+      questSourceNode: {fileID: 0}
+      questTransition: {fileID: 0}
+      questNode: {fileID: 0}
+      runtimeFlag: {fileID: 11400000, guid: e7042b51ff1c4fe4a9a4a1505bf02884, type: 2}
+  isConversationTopic: 0
+  isConversationReturnAction: 0
+  isDialogueExitAction: 0
+  hasGameplayEvents: 0
+  gameplayEvents: []
+  answers: []

@@ -20,7 +20,8 @@ namespace Dialogs.Graph.Model
         ClearRuntimeFlag = 9,
         RequireInactiveRuntimeFlag = 10,
         SetRuntimeFlag = 11,
-        CanAddQuest = 12
+        CanAddQuest = 12,
+        CheckQuestNode = 13
     }
 
     [Serializable]

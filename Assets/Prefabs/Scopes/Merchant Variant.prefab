@@ -113,7 +113,7 @@ MonoBehaviour:
   inventoryConfig: {fileID: 0}
   defaultVisualConfig: {fileID: 11400000, guid: d06f3e2d4c1b7256a789abcdef012345, type: 2}
   canTalk: 1
-  dialog: {fileID: 11400000, guid: 88d2c07937d080b4ba52468317585259, type: 2}
+  dialog: {fileID: 11400000, guid: e7302b51ff1c4fe4a9a4a1505bf02881, type: 2}
   stateMachineGraph: {fileID: 11400000, guid: 9fef677537be06b4e8a00a17d5132a30, type: 2}
   faction: {fileID: 11400000, guid: dc98ce5b51f108947b4b8e8bc61ffc22, type: 2}
   consumeAdditionalStatsOverTime: 0

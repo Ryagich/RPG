@@ -3,20 +3,48 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8790978157e23cc4186df7e90601f3fa, type: 3}
   m_Name: Guard Captain - Check Mill
   m_EditorClassIdentifier: Assembly-CSharp::Quests.Graph.Model.QuestNodeData
+  persistentId: af2f4f0333cc4453bc9b512020a52dc6
   editorTitle: Check the mill
-  localizedName: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 78000000000000020, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
-  localizedDescription: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 78000000000000021, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+  localizedName:
+    m_TableReference:
+      m_TableCollectionName: GUID
+    m_TableEntryReference:
+      m_KeyId: 78000000000000020
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  localizedDescription:
+    m_TableReference:
+      m_TableCollectionName: GUID
+    m_TableEntryReference:
+      m_KeyId: 78000000000000021
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   icon: {fileID: 0}
-  mapTargetSource: 0
-  sceneMapTargetId: 
+  mapTargetSource: 1
+  sceneMapTargetId: mill-windmill
   scriptMapTargetKey: 
+  hasAuthoredMapPosition: 1
+  authoredMapPosition: {x: 132.02, y: 0.04, z: -89.34}
   ownerGraph: {fileID: 11400000, guid: b3000000000000000000000000000001, type: 2}
   hasAvailabilityRequirements: 0
   availabilityRequirements: []
   hasCompletionResults: 0
   completionResults: []
-  transitions: []
-  references: {version: 2, RefIds: []}
+  transitions:
+  - {fileID: 11400000, guid: 4f83923f94874056a3d8343cab6cdbf3, type: 2}
+  references:
+    version: 2
+    RefIds: []

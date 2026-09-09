@@ -880,47 +880,108 @@ namespace Dialogs.Graph.Editor
                     continue;
                 }
 
-                foreach (DialogAnswer answer in phrase.Answers)
+                foreach (DialogAnswer answer in GetConnectionAnswers(phrase))
                 {
-                    if (answer == null || answer.NextPhrase == null)
+                    DrawConnection(node, answer, false);
+                }
+
+                foreach (DialogPhrase returnAction in GetImplicitConversationReturnActions(phrase))
+                {
+                    if (phraseToNodeLookup.TryGetValue(returnAction, out DialogNode targetNode))
                     {
-                        continue;
+                        DrawConnection(node, null, targetNode, true);
                     }
-
-                    if (!phraseToNodeLookup.TryGetValue(answer.NextPhrase, out DialogNode targetNode))
-                    {
-                        continue;
-                    }
-
-                    if (!nodeRects.TryGetValue(node, out Rect sourceRect) ||
-                        !nodeRects.TryGetValue(targetNode, out Rect targetRect))
-                    {
-                        continue;
-                    }
-
-                    Vector2 startPos;
-                    if (!answerAnchorPositions.TryGetValue(answer, out startPos))
-                    {
-                        startPos = new Vector2(sourceRect.xMax - 12f, sourceRect.center.y);
-                    }
-
-                    Handles.color = GetConnectionColor(node, targetNode);
-                    Vector2 endPos = GetNearestSideCenter(targetRect, startPos);
-                    (Vector2 startTangent, Vector2 endTangent) = GetOrBuildConnectionTangents(
-                        answer,
-                        startPos,
-                        endPos,
-                        sourceRect,
-                        targetRect,
-                        node,
-                        targetNode);
-
-                    Handles.DrawBezier(startPos, endPos, startTangent, endTangent, Handles.color, null, 3f);
-                    DrawConnectionArrow(endPos, endPos - endTangent);
                 }
             }
 
             Handles.EndGUI();
+        }
+
+        private void DrawConnection(DialogNode sourceNode, DialogAnswer answer, bool isImplicit)
+        {
+            if (answer?.NextPhrase == null || !phraseToNodeLookup.TryGetValue(answer.NextPhrase, out DialogNode targetNode))
+            {
+                return;
+            }
+
+            DrawConnection(sourceNode, answer, targetNode, isImplicit);
+        }
+
+        private void DrawConnection(DialogNode sourceNode, DialogAnswer answer, DialogNode targetNode, bool isImplicit)
+        {
+            if (!nodeRects.TryGetValue(sourceNode, out Rect sourceRect) ||
+                !nodeRects.TryGetValue(targetNode, out Rect targetRect))
+            {
+                return;
+            }
+
+            Vector2 startPos = answer != null && answerAnchorPositions.TryGetValue(answer, out Vector2 anchorPosition)
+                ? anchorPosition
+                : new Vector2(sourceRect.xMax - 12f, sourceRect.center.y);
+            Vector2 endPos = GetNearestSideCenter(targetRect, startPos);
+            (Vector2 startTangent, Vector2 endTangent) = GetOrBuildConnectionTangents(
+                answer,
+                startPos,
+                endPos,
+                sourceRect,
+                targetRect,
+                sourceNode,
+                targetNode);
+
+            Color connectionColor = GetConnectionColor(sourceNode, targetNode);
+            if (isImplicit)
+            {
+                connectionColor = Color.Lerp(connectionColor, new Color(0.76f, 0.82f, 0.94f), 0.6f);
+            }
+
+            Handles.DrawBezier(startPos, endPos, startTangent, endTangent, connectionColor, null, 3f);
+            DrawConnectionArrow(endPos, endPos - endTangent);
+        }
+
+        private static IEnumerable<DialogAnswer> GetConnectionAnswers(DialogPhrase phrase)
+        {
+            if (phrase == null)
+            {
+                yield break;
+            }
+
+            foreach (DialogAnswer answer in phrase.Answers)
+            {
+                yield return answer;
+            }
+
+            if (phrase.IsQuestPhrase)
+            {
+                yield return phrase.QuestAnswer;
+            }
+
+            if (phrase.IsConversationTopic)
+            {
+                yield return phrase.ConversationAnswer;
+            }
+
+            if (phrase.IsConversationReturnAction)
+            {
+                yield return phrase.ConversationReturnAnswer;
+            }
+
+            if (phrase.IsDialogueExitAction)
+            {
+                yield return phrase.DialogueExitAnswer;
+            }
+        }
+
+        private IEnumerable<DialogPhrase> GetImplicitConversationReturnActions(DialogPhrase phrase)
+        {
+            if (currentGraph == null || phrase == null)
+            {
+                yield break;
+            }
+
+            foreach (DialogPhrase returnAction in currentGraph.GetConversationReturnPhrases(phrase))
+            {
+                yield return returnAction;
+            }
         }
 
         private void HandleConnectionHighlightSelection(Event currentEvent)
@@ -2235,7 +2296,7 @@ namespace Dialogs.Graph.Editor
             private readonly VisualElement graphContent;
             private readonly Label emptyState;
             private readonly Dictionary<DialogNode, DialogToolkitNodeElement> nodeElements = new();
-            private readonly Dictionary<DialogAnswer, DialogToolkitConnectionElement> connectionElements = new();
+            private readonly List<DialogToolkitConnectionElement> connectionElements = new();
             private DialogNode draggedNode;
             private bool rebuildScheduled;
             private bool isPanning;
@@ -2395,7 +2456,7 @@ namespace Dialogs.Graph.Editor
                         continue;
                     }
 
-                    foreach (DialogAnswer answer in sourceNode.Phrase.Answers)
+                    foreach (DialogAnswer answer in GetConnectionAnswers(sourceNode.Phrase))
                     {
                         if (answer?.NextPhrase == null ||
                             !owner.phraseToNodeLookup.TryGetValue(answer.NextPhrase, out DialogNode targetNode))
@@ -2403,14 +2464,36 @@ namespace Dialogs.Graph.Editor
                             continue;
                         }
 
-                        var connectionElement = new DialogToolkitConnectionElement(this, sourceNode, targetNode, answer);
-                        connectionElements[answer] = connectionElement;
-                        graphContent.Insert(1, connectionElement);
+                        AddConnection(sourceNode, targetNode, answer, false);
+                    }
+
+                    foreach (DialogPhrase returnAction in owner.GetImplicitConversationReturnActions(sourceNode.Phrase))
+                    {
+                        if (owner.phraseToNodeLookup.TryGetValue(returnAction, out DialogNode targetNode))
+                        {
+                            AddConnection(sourceNode, targetNode, null, true);
+                        }
                     }
                 }
 
                 ApplyViewTransform();
                 RefreshGraphAppearance();
+            }
+
+            private void AddConnection(
+                DialogNode sourceNode,
+                DialogNode targetNode,
+                DialogAnswer answer,
+                bool isImplicit)
+            {
+                var connectionElement = new DialogToolkitConnectionElement(
+                    this,
+                    sourceNode,
+                    targetNode,
+                    answer,
+                    isImplicit);
+                connectionElements.Add(connectionElement);
+                graphContent.Insert(1, connectionElement);
             }
 
             public void RequestRebuild()
@@ -2527,7 +2610,7 @@ namespace Dialogs.Graph.Editor
 
             private void RefreshConnectionsFor(DialogNode node)
             {
-                foreach (DialogToolkitConnectionElement connectionElement in connectionElements.Values)
+                foreach (DialogToolkitConnectionElement connectionElement in connectionElements)
                 {
                     if (connectionElement.IsConnectedTo(node))
                     {
@@ -2538,7 +2621,7 @@ namespace Dialogs.Graph.Editor
 
             private void RefreshConnections()
             {
-                foreach (DialogToolkitConnectionElement connectionElement in connectionElements.Values)
+                foreach (DialogToolkitConnectionElement connectionElement in connectionElements)
                 {
                     connectionElement.MarkDirtyRepaint();
                 }
@@ -2848,17 +2931,20 @@ namespace Dialogs.Graph.Editor
             private readonly DialogNode sourceNode;
             private readonly DialogNode targetNode;
             private readonly DialogAnswer answer;
+            private readonly bool isImplicit;
 
             public DialogToolkitConnectionElement(
                 DialogToolkitCanvas canvas,
                 DialogNode sourceNode,
                 DialogNode targetNode,
-                DialogAnswer answer)
+                DialogAnswer answer,
+                bool isImplicit)
             {
                 this.canvas = canvas;
                 this.sourceNode = sourceNode;
                 this.targetNode = targetNode;
                 this.answer = answer;
+                this.isImplicit = isImplicit;
                 name = "dialog-toolkit-connection";
                 pickingMode = PickingMode.Ignore;
                 style.position = Position.Absolute;
@@ -2901,6 +2987,10 @@ namespace Dialogs.Graph.Editor
                 }
 
                 Color color = canvas.OwnerGetConnectionColor(sourceNode, targetNode);
+                if (isImplicit)
+                {
+                    color = Color.Lerp(color, new Color(0.76f, 0.82f, 0.94f), 0.6f);
+                }
                 Painter2D painter = context.painter2D;
                 painter.strokeColor = color;
                 painter.lineWidth = 3f;

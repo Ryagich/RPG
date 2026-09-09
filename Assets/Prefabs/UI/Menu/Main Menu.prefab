@@ -1226,6 +1226,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UI.UIElements.MenuUI
   <ToGameButton>k__BackingField: {fileID: 2839911977469033640}
+  <ContinueButton>k__BackingField: {fileID: 811820374249426217}
   <ToDevelopButton>k__BackingField: {fileID: 261851592973251009}
   <SettingsButton>k__BackingField: {fileID: 1897959654820449170}
   fadeOutTime: 1
@@ -2038,7 +2039,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 0
+  m_Transition: 3
   m_Colors:
     m_NormalColor: {r: 0.7924528, g: 0.7924528, b: 0.7924528, a: 0.4}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}

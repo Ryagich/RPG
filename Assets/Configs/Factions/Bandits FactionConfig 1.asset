@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f5f3d26e9b64d24b84e1d0c11b9a101, type: 3}
   m_Name: Bandits FactionConfig 1
   m_EditorClassIdentifier: Assembly-CSharp::Factions.FactionConfig
+  <PersistentId>k__BackingField: bandits
   <Name>k__BackingField:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482

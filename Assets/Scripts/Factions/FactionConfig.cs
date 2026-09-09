@@ -9,6 +9,7 @@ namespace Factions
     [CreateAssetMenu(fileName = "FactionConfig", menuName = "configs/Factions/Faction")]
     public sealed class FactionConfig : ScriptableObject
     {
+        [field: SerializeField] public string PersistentId { get; private set; }
         [field: SerializeField] public LocalizedString Name { get; private set; } = new("Tables", "Null String");
         [field: SerializeField] public Sprite Icon { get; private set; }
         [field: Header("Combat AI")]

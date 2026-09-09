@@ -1756,6 +1756,8 @@ namespace Quests.Graph.Editor
             SerializedProperty iconProperty = nodeDataObject.FindProperty("icon");
             SerializedProperty mapTargetSourceProperty = nodeDataObject.FindProperty("mapTargetSource");
             SerializedProperty sceneMapTargetIdProperty = nodeDataObject.FindProperty("sceneMapTargetId");
+            SerializedProperty authoredMapPositionProperty = nodeDataObject.FindProperty("authoredMapPosition");
+            SerializedProperty hasAuthoredMapPositionProperty = nodeDataObject.FindProperty("hasAuthoredMapPosition");
             SerializedProperty scriptMapTargetKeyProperty = nodeDataObject.FindProperty("scriptMapTargetKey");
             SerializedProperty hasAvailabilityRequirementsProperty = nodeDataObject.FindProperty("hasAvailabilityRequirements");
             SerializedProperty availabilityRequirementsProperty = nodeDataObject.FindProperty("availabilityRequirements");
@@ -1784,7 +1786,13 @@ namespace Quests.Graph.Editor
                 DrawPropertyFieldWithCustomLabel(iconProperty, "Sprite");
             }
 
-            DrawMapTargetSelector(nodeData, mapTargetSourceProperty, sceneMapTargetIdProperty, scriptMapTargetKeyProperty);
+            DrawMapTargetSelector(
+                nodeData,
+                mapTargetSourceProperty,
+                sceneMapTargetIdProperty,
+                scriptMapTargetKeyProperty,
+                authoredMapPositionProperty,
+                hasAuthoredMapPositionProperty);
 
             if (IsStartNode(node) && hasAvailabilityRequirementsProperty != null && availabilityRequirementsProperty != null)
             {
@@ -1815,12 +1823,16 @@ namespace Quests.Graph.Editor
             QuestNodeData nodeData,
             SerializedProperty mapTargetSourceProperty,
             SerializedProperty sceneMapTargetIdProperty,
-            SerializedProperty scriptMapTargetKeyProperty)
+            SerializedProperty scriptMapTargetKeyProperty,
+            SerializedProperty authoredMapPositionProperty,
+            SerializedProperty hasAuthoredMapPositionProperty)
         {
             if (nodeData == null ||
                 mapTargetSourceProperty == null ||
                 sceneMapTargetIdProperty == null ||
-                scriptMapTargetKeyProperty == null)
+                scriptMapTargetKeyProperty == null ||
+                authoredMapPositionProperty == null ||
+                hasAuthoredMapPositionProperty == null)
             {
                 return;
             }
@@ -1840,6 +1852,8 @@ namespace Quests.Graph.Editor
                     mapTargetSourceProperty,
                     sceneMapTargetIdProperty,
                     scriptMapTargetKeyProperty,
+                    authoredMapPositionProperty,
+                    hasAuthoredMapPositionProperty,
                     availableTargets,
                     newSelectedIndex);
             }
@@ -1941,6 +1955,8 @@ namespace Quests.Graph.Editor
             SerializedProperty mapTargetSourceProperty,
             SerializedProperty sceneMapTargetIdProperty,
             SerializedProperty scriptMapTargetKeyProperty,
+            SerializedProperty authoredMapPositionProperty,
+            SerializedProperty hasAuthoredMapPositionProperty,
             IReadOnlyList<QuestMapTarget> availableTargets,
             int selectedIndex)
         {
@@ -1949,6 +1965,7 @@ namespace Quests.Graph.Editor
                 mapTargetSourceProperty.enumValueIndex = (int)QuestMapTargetSourceType.None;
                 sceneMapTargetIdProperty.stringValue = string.Empty;
                 scriptMapTargetKeyProperty.stringValue = string.Empty;
+                hasAuthoredMapPositionProperty.boolValue = false;
                 return;
             }
 
@@ -1956,6 +1973,7 @@ namespace Quests.Graph.Editor
             {
                 mapTargetSourceProperty.enumValueIndex = (int)QuestMapTargetSourceType.ScriptTarget;
                 sceneMapTargetIdProperty.stringValue = string.Empty;
+                hasAuthoredMapPositionProperty.boolValue = false;
                 return;
             }
 
@@ -1965,12 +1983,15 @@ namespace Quests.Graph.Editor
                 mapTargetSourceProperty.enumValueIndex = (int)QuestMapTargetSourceType.None;
                 sceneMapTargetIdProperty.stringValue = string.Empty;
                 scriptMapTargetKeyProperty.stringValue = string.Empty;
+                hasAuthoredMapPositionProperty.boolValue = false;
                 return;
             }
 
             mapTargetSourceProperty.enumValueIndex = (int)QuestMapTargetSourceType.SceneTarget;
             sceneMapTargetIdProperty.stringValue = availableTargets[targetIndex].TargetId;
             scriptMapTargetKeyProperty.stringValue = string.Empty;
+            authoredMapPositionProperty.vector3Value = availableTargets[targetIndex].TargetTransform.position;
+            hasAuthoredMapPositionProperty.boolValue = true;
         }
 
         private static string BuildMapTargetLabel(QuestMapTarget mapTarget)

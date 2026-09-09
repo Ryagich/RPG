@@ -97,11 +97,44 @@ namespace Quests
             return true;
         }
 
+        /// <summary>
+        /// Restores an already authored quest state without applying availability requirements or
+        /// transition rewards a second time. Save adapters must resolve assets before calling it.
+        /// </summary>
+        public bool TryRestoreQuest(QuestGraph questGraph, QuestNodeData currentNode, bool isCompleted)
+        {
+            if (questGraph == null || currentNode == null || !questGraph.ContainsNode(currentNode) ||
+                progressByQuest.ContainsKey(questGraph))
+            {
+                return false;
+            }
+
+            var questProgress = new QuestProgress(questGraph, currentNode);
+            if (isCompleted)
+            {
+                questProgress.RestoreCompleted(currentNode);
+            }
+
+            progressByQuest.Add(questGraph, questProgress);
+            progress.Add(questProgress);
+            return true;
+        }
+
         public QuestNodeData GetCurrentNode(QuestGraph questGraph)
         {
             return TryGetProgress(questGraph, out QuestProgress questProgress)
                 ? questProgress.CurrentNode
                 : null;
+        }
+
+        /// <summary>
+        /// Returns whether an active quest currently owns the supplied authored node. Dialogue
+        /// availability uses this read-only query to expose state-specific branches without
+        /// coupling dialogue data to scenario implementations.
+        /// </summary>
+        public bool IsAtNode(QuestGraph questGraph, QuestNodeData nodeData)
+        {
+            return nodeData != null && GetCurrentNode(questGraph) == nodeData;
         }
 
         public QuestNodeData GetDisplayNode(QuestGraph questGraph)
@@ -274,6 +307,16 @@ namespace Quests
             return true;
         }
 
+        /// <summary>
+        /// Applies an authored resource bundle to the current player without coupling a domain
+        /// scenario to inventory or money implementations. Narrative systems should use quest
+        /// transitions; world scenarios use this only for their explicit one-time outcomes.
+        /// </summary>
+        public bool TryGrantResources(IReadOnlyList<QuestResourceEntry> resources)
+        {
+            return ApplyResults(resources);
+        }
+
         public bool TryRemoveQuest(QuestGraph questGraph)
         {
             if (!TryGetProgress(questGraph, out var questProgress)) return false;
@@ -290,6 +333,12 @@ namespace Quests
             progress.Remove(questProgress);
             Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Failed, questGraph));
             return true;
+        }
+
+        public void ClearRestoredProgress()
+        {
+            progressByQuest.Clear();
+            progress.Clear();
         }
 
         private bool TryGetProgress(QuestGraph questGraph, out QuestProgress questProgress)
@@ -461,6 +510,12 @@ namespace Quests
         {
             CurrentNode = nodeData ?? throw new System.ArgumentNullException(nameof(nodeData));
             AddCompletedNode(CurrentNode);
+            IsCompleted = true;
+        }
+
+        public void RestoreCompleted(QuestNodeData nodeData)
+        {
+            CurrentNode = nodeData ?? throw new System.ArgumentNullException(nameof(nodeData));
             IsCompleted = true;
         }
 

@@ -1170,6 +1170,120 @@ namespace Inventory.Inventories
             yield return RightWeaponSlot;
         }
 
+        private IEnumerable<(SlotModel Slot, PlayerInventoryContainer Container)> GetPersistentSlots()
+        {
+            yield return (HelmSlot, PlayerInventoryContainer.Helm);
+            yield return (FaceSlot, PlayerInventoryContainer.Face);
+            yield return (BodySlot, PlayerInventoryContainer.Body);
+            yield return (HandsSlot, PlayerInventoryContainer.Hands);
+            yield return (ArmsSlot, PlayerInventoryContainer.Arms);
+            yield return (LegsSlot, PlayerInventoryContainer.Legs);
+            yield return (HipsSlot, PlayerInventoryContainer.Hips);
+            yield return (BackpackSlot, PlayerInventoryContainer.Backpack);
+            yield return (LeftWeaponSlot, PlayerInventoryContainer.LeftWeapon);
+            yield return (RightWeaponSlot, PlayerInventoryContainer.RightWeapon);
+        }
+
+        private IEnumerable<(FastSlotModel Slot, PlayerInventoryContainer Container)> GetPersistentFastSlots()
+        {
+            yield return (FastSlot1, PlayerInventoryContainer.FastSlot1);
+            yield return (FastSlot2, PlayerInventoryContainer.FastSlot2);
+            yield return (FastSlot3, PlayerInventoryContainer.FastSlot3);
+            yield return (FastSlot4, PlayerInventoryContainer.FastSlot4);
+        }
+
+        private void ClearPersistenceState()
+        {
+            Items.Clear();
+            Tiles = new Tiles(inventoryConfig.Size.x, inventoryConfig.Size.y);
+            pendingOverflowItems.Clear();
+
+            foreach (SlotModel slot in GetSlots())
+            {
+                slot.ItemStack = null;
+            }
+
+            foreach (FastSlotModel fastSlot in GetFastSlots())
+            {
+                fastSlot.Clear();
+            }
+
+            MaxWeight = GetCurrentMaxWeight();
+        }
+
+        private void RestoreSlots(
+            IReadOnlyList<InventoryItemPlacement> placements,
+            PlayerInventoryContainer container,
+            ICollection<InventoryItemPlacement> rejected)
+        {
+            if (!TryGetSlotForContainer(container, out SlotModel slot))
+            {
+                return;
+            }
+
+            foreach (InventoryItemPlacement placement in placements)
+            {
+                if (placement.Container != container)
+                {
+                    continue;
+                }
+
+                var itemStack = new ItemStack(placement.ItemConfig, placement.Count, placement.IsRotated);
+                if (placement.ItemConfig == null || placement.Count <= 0 ||
+                    !CanAcceptItemInSlot(slot, itemStack) || slot.ItemStack != null)
+                {
+                    rejected.Add(placement);
+                    continue;
+                }
+
+                int acceptedCount = Mathf.Min(placement.Count, slot.GetMaxStack(placement.ItemConfig));
+                slot.ItemStack = new ItemStack(placement.ItemConfig, acceptedCount, placement.IsRotated);
+                HandleSlotItemChanged(slot);
+                if (acceptedCount != placement.Count)
+                {
+                    rejected.Add(new InventoryItemPlacement(
+                        placement.ItemConfig,
+                        placement.Count - acceptedCount,
+                        placement.X,
+                        placement.Y,
+                        placement.IsRotated,
+                        placement.Container));
+                }
+            }
+        }
+
+        private bool TryGetSlotForContainer(PlayerInventoryContainer container, out SlotModel result)
+        {
+            result = container switch
+            {
+                PlayerInventoryContainer.Helm => HelmSlot,
+                PlayerInventoryContainer.Face => FaceSlot,
+                PlayerInventoryContainer.Body => BodySlot,
+                PlayerInventoryContainer.Hands => HandsSlot,
+                PlayerInventoryContainer.Arms => ArmsSlot,
+                PlayerInventoryContainer.Legs => LegsSlot,
+                PlayerInventoryContainer.Hips => HipsSlot,
+                PlayerInventoryContainer.Backpack => BackpackSlot,
+                PlayerInventoryContainer.LeftWeapon => LeftWeaponSlot,
+                PlayerInventoryContainer.RightWeapon => RightWeaponSlot,
+                _ => null
+            };
+            return result != null;
+        }
+
+        private bool TryGetFastSlotForContainer(PlayerInventoryContainer container, out FastSlotModel result)
+        {
+            result = container switch
+            {
+                PlayerInventoryContainer.FastSlot1 => FastSlot1,
+                PlayerInventoryContainer.FastSlot2 => FastSlot2,
+                PlayerInventoryContainer.FastSlot3 => FastSlot3,
+                PlayerInventoryContainer.FastSlot4 => FastSlot4,
+                _ => null
+            };
+            return result != null;
+        }
+
         private bool CanAcceptItemInSlot(SlotModel slot, ItemStack itemStack)
         {
             return slot != null
@@ -1259,6 +1373,111 @@ namespace Inventory.Inventories
         private void NotifyChanged()
         {
             changedSubject.OnNext(Unit.Default);
+        }
+
+        public IEnumerable<InventoryItemPlacement> GetPersistenceSnapshot()
+        {
+            foreach (ItemInInventory item in Items)
+            {
+                if (item?.ItemStack?.ItemConfig == null || item.Tiles == null || item.Tiles.Count == 0)
+                {
+                    continue;
+                }
+
+                Vector2Int position = GetTopLeftTilePosition(item);
+                yield return new InventoryItemPlacement(
+                    item.ItemStack.ItemConfig,
+                    item.ItemStack.Count,
+                    position.x,
+                    position.y,
+                    item.ItemStack.IsRotated,
+                    PlayerInventoryContainer.Grid);
+            }
+
+            foreach ((SlotModel slot, PlayerInventoryContainer container) in GetPersistentSlots())
+            {
+                if (slot?.ItemStack?.ItemConfig == null)
+                {
+                    continue;
+                }
+
+                yield return new InventoryItemPlacement(
+                    slot.ItemStack.ItemConfig,
+                    slot.ItemStack.Count,
+                    0,
+                    0,
+                    slot.ItemStack.IsRotated,
+                    container);
+            }
+
+            foreach ((FastSlotModel slot, PlayerInventoryContainer container) in GetPersistentFastSlots())
+            {
+                if (slot?.ItemConfig != null)
+                {
+                    yield return new InventoryItemPlacement(slot.ItemConfig, 1, 0, 0, false, container);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Replaces player-owned inventory state from validated domain placements. Invalid or no
+        /// longer fitting entries are returned to the caller for logging; no world objects are
+        /// created by restoration.
+        /// </summary>
+        public IReadOnlyList<InventoryItemPlacement> RestorePersistenceSnapshot(
+            IReadOnlyList<InventoryItemPlacement> placements)
+        {
+            ClearPersistenceState();
+            var rejected = new List<InventoryItemPlacement>();
+            if (placements == null)
+            {
+                NotifyChanged();
+                return rejected;
+            }
+
+            RestoreSlots(placements, PlayerInventoryContainer.Backpack, rejected);
+            foreach ((SlotModel _, PlayerInventoryContainer container) in GetPersistentSlots())
+            {
+                if (container != PlayerInventoryContainer.Backpack)
+                {
+                    RestoreSlots(placements, container, rejected);
+                }
+            }
+
+            foreach (InventoryItemPlacement placement in placements)
+            {
+                if (placement.Container != PlayerInventoryContainer.Grid ||
+                    placement.ItemConfig == null ||
+                    placement.Count <= 0 ||
+                    !Tiles.TryGetTile(placement.X, placement.Y, out Tile tile) ||
+                    TryAdd(new ItemStack(placement.ItemConfig, placement.Count, placement.IsRotated), tile) != null)
+                {
+                    if (placement.Container == PlayerInventoryContainer.Grid)
+                    {
+                        rejected.Add(placement);
+                    }
+                }
+            }
+
+            foreach (InventoryItemPlacement placement in placements)
+            {
+                if (!TryGetFastSlotForContainer(placement.Container, out FastSlotModel fastSlot))
+                {
+                    continue;
+                }
+
+                if (placement.ItemConfig?.ItemType == ItemType.Usable)
+                {
+                    fastSlot.Assign(placement.ItemConfig);
+                }
+                else
+                {
+                    rejected.Add(placement);
+                }
+            }
+
+            NotifyChanged();
+            return rejected;
         }
 
         SlotModel IEquipmentInventory.HelmSlot => HelmSlot;

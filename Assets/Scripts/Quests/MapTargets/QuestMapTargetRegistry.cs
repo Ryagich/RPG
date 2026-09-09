@@ -7,7 +7,7 @@ namespace Quests.MapTargets
 {
     public interface IQuestMapTargetRegistry
     {
-        Transform GetTarget(QuestNodeData nodeData);
+        bool TryGetMapPosition(QuestNodeData nodeData, out Vector3 position);
         void SetScriptTarget(QuestGraph questGraph, string targetKey, Transform targetTransform);
         void SetScriptTarget(QuestNodeData nodeData, Transform targetTransform);
         void ClearScriptTarget(QuestGraph questGraph, string targetKey);
@@ -20,19 +20,19 @@ namespace Quests.MapTargets
     {
         private readonly Dictionary<QuestGraph, Dictionary<string, QuestMapTarget>> sceneTargetsByQuest = new();
         private readonly Dictionary<QuestGraph, Dictionary<string, Transform>> scriptTargetsByQuest = new();
-
-        public Transform GetTarget(QuestNodeData nodeData)
+        public bool TryGetMapPosition(QuestNodeData nodeData, out Vector3 position)
         {
+            position = default;
             if (nodeData == null || nodeData.OwnerGraph == null)
             {
-                return null;
+                return false;
             }
 
             return nodeData.MapTargetSource switch
             {
-                QuestMapTargetSourceType.SceneTarget => GetSceneTarget(nodeData.OwnerGraph, nodeData.SceneMapTargetId),
-                QuestMapTargetSourceType.ScriptTarget => GetScriptTarget(nodeData.OwnerGraph, nodeData.ScriptMapTargetKey),
-                _ => null
+                QuestMapTargetSourceType.SceneTarget => TryGetSceneTargetPosition(nodeData, out position),
+                QuestMapTargetSourceType.ScriptTarget => TryGetScriptTargetPosition(nodeData.OwnerGraph, nodeData.ScriptMapTargetKey, out position),
+                _ => false
             };
         }
 
@@ -120,44 +120,54 @@ namespace Quests.MapTargets
             }
         }
 
-        private Transform GetSceneTarget(QuestGraph questGraph, string targetId)
+        private bool TryGetSceneTargetPosition(QuestNodeData nodeData, out Vector3 position)
         {
-            if (questGraph == null || string.IsNullOrWhiteSpace(targetId))
+            position = default;
+            if (nodeData == null || nodeData.OwnerGraph == null || string.IsNullOrWhiteSpace(nodeData.SceneMapTargetId))
             {
-                return null;
+                return false;
             }
 
-            if (!sceneTargetsByQuest.TryGetValue(questGraph, out Dictionary<string, QuestMapTarget> targets) ||
-                !targets.TryGetValue(targetId, out QuestMapTarget questMapTarget) ||
-                questMapTarget == null)
+            if (sceneTargetsByQuest.TryGetValue(nodeData.OwnerGraph, out Dictionary<string, QuestMapTarget> targets) &&
+                targets.TryGetValue(nodeData.SceneMapTargetId, out QuestMapTarget questMapTarget) &&
+                questMapTarget != null)
             {
-                targets?.Remove(targetId);
-                return null;
+                position = questMapTarget.TargetTransform.position;
+                return true;
             }
 
-            return questMapTarget.TargetTransform;
+            targets?.Remove(nodeData.SceneMapTargetId);
+            if (!nodeData.HasAuthoredMapPosition)
+            {
+                return false;
+            }
+
+            position = nodeData.AuthoredMapPosition;
+            return true;
         }
 
-        private Transform GetScriptTarget(QuestGraph questGraph, string targetKey)
+        private bool TryGetScriptTargetPosition(QuestGraph questGraph, string targetKey, out Vector3 position)
         {
+            position = default;
             if (questGraph == null || string.IsNullOrWhiteSpace(targetKey))
             {
-                return null;
+                return false;
             }
 
             if (!scriptTargetsByQuest.TryGetValue(questGraph, out Dictionary<string, Transform> targets) ||
                 !targets.TryGetValue(targetKey, out Transform targetTransform))
             {
-                return null;
+                return false;
             }
 
             if (targetTransform == null)
             {
                 targets.Remove(targetKey);
-                return null;
+                return false;
             }
 
-            return targetTransform;
+            position = targetTransform.position;
+            return true;
         }
 
         private Dictionary<string, QuestMapTarget> GetOrCreateSceneTargets(QuestGraph questGraph)

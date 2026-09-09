@@ -18,5 +18,5 @@ MonoBehaviour:
   <AttackViewAngle>k__BackingField: 120
   <UseLineOfSight>k__BackingField: 1
   <VisionOccluderMask>k__BackingField:
-    m_Bits: -5
+    m_Bits: 4294967291
   <DrawVisionForAllNpcs>k__BackingField: 1

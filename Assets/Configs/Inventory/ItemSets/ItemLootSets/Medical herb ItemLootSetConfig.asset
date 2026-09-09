@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b2974ffa3174e739ebd999a21c6f2b1, type: 3}
+  m_Name: Medical herb ItemLootSetConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemLootSetConfig
+  <Entries>k__BackingField:
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 7d8a65ee166969742b5b085653390ae3, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 6
+    <Chance>k__BackingField: 0.5
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: b26f023b4e490364bab02635a532faff, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 6
+    <Chance>k__BackingField: 0.5
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 31ce78eb4d0b15240a02973ac12b8fca, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 6
+    <Chance>k__BackingField: 0.5
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: f9753ca26d26bfd4880d49eb38e09421, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 6
+    <Chance>k__BackingField: 0.5
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: c7ef1549db925884787bbd70e4888d30, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 1
+    <Chance>k__BackingField: 0.5
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 97938124e7684db47b982e564f054649, type: 2}
+    <MinAmount>k__BackingField: 1
+    <MaxAmount>k__BackingField: 1
+    <Chance>k__BackingField: 0.5
+  - <ItemConfig>k__BackingField: {fileID: 11400000, guid: 9113afed435d472408132622bcc7bffa, type: 2}
+    <MinAmount>k__BackingField: 3
+    <MaxAmount>k__BackingField: 7
+    <Chance>k__BackingField: 0.5

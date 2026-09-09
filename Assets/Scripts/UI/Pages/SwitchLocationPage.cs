@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using VContainer;
 using VContainer.Unity;
+using Saves;
 
 namespace UI.Pages
 {
@@ -23,6 +24,7 @@ namespace UI.Pages
         private readonly LocationTransitionService locationTransitions;
         private readonly Transform playerTransform;
         private readonly CharacterController playerController;
+        private readonly PlayerSaveCoordinator playerSaveCoordinator;
 
         private SwitchMenuHolder switchMenu;
         private VillageLocationTransitionRequest pendingRequest;
@@ -40,7 +42,8 @@ namespace UI.Pages
             SceneLoadingService sceneLoadingService,
             LocationTransitionService locationTransitions,
             Transform playerTransform,
-            CharacterController playerController)
+            CharacterController playerController,
+            PlayerSaveCoordinator playerSaveCoordinator)
         {
             this.uiConfig = uiConfig;
             this.resolver = resolver;
@@ -50,6 +53,7 @@ namespace UI.Pages
             this.locationTransitions = locationTransitions;
             this.playerTransform = playerTransform;
             this.playerController = playerController;
+            this.playerSaveCoordinator = playerSaveCoordinator;
             canvasRect = canvas.GetComponent<RectTransform>();
 
             locationTransitions.TransitionRequested += Open;
@@ -82,6 +86,7 @@ namespace UI.Pages
 
             switchMenu.YesButton.onClick.AddListener(ConfirmTransition);
             switchMenu.NoButton.onClick.AddListener(CancelTransition);
+            switchMenu.CancelRequested += CancelTransition;
         }
 
         public override void Hide()
@@ -97,6 +102,8 @@ namespace UI.Pages
                 {
                     switchMenu.NoButton.onClick.RemoveListener(CancelTransition);
                 }
+
+                switchMenu.CancelRequested -= CancelTransition;
 
                 Object.Destroy(switchMenu.gameObject);
                 switchMenu = null;
@@ -134,6 +141,7 @@ namespace UI.Pages
 
             isResolving = true;
             locationTransitions.ConfirmTransition(pendingRequest);
+            playerSaveCoordinator?.Save(pendingRequest.TargetLocationId, pendingRequest.TargetTransitionId);
             pendingRequest = default;
             hasPendingRequest = false;
             sceneLoadingService.Load(SceneManager.GetActiveScene().name);

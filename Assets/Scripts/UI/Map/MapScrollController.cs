@@ -9,14 +9,14 @@ namespace UI.Map
 {
     public readonly struct MapQuestMarkerData
     {
-        public MapQuestMarkerData(Transform targetTransform, QuestProgress questProgress, bool isCurrentQuest)
+        public MapQuestMarkerData(Vector3 worldPosition, QuestProgress questProgress, bool isCurrentQuest)
         {
-            TargetTransform = targetTransform;
+            WorldPosition = worldPosition;
             QuestProgress = questProgress;
             IsCurrentQuest = isCurrentQuest;
         }
 
-        public Transform TargetTransform { get; }
+        public Vector3 WorldPosition { get; }
         public QuestProgress QuestProgress { get; }
         public bool IsCurrentQuest { get; }
     }
@@ -99,11 +99,6 @@ namespace UI.Map
 
             foreach (MapQuestMarkerData marker in markers)
             {
-                if (marker.TargetTransform == null)
-                {
-                    continue;
-                }
-
                 Image questIcon = Instantiate(iconPrefab, content);
                 questIcon.name = $"{iconPrefab.name} | Quest";
                 if (questIconDefinition.Sprite != null)
@@ -123,7 +118,7 @@ namespace UI.Map
 
                 questIconRect.anchorMin = new Vector2(0f, 1f);
                 questIconRect.anchorMax = new Vector2(0f, 1f);
-                questIcons.Add(new QuestIconBinding(questIconRect, marker.TargetTransform, marker.QuestProgress));
+                questIcons.Add(new QuestIconBinding(questIconRect, marker.WorldPosition, marker.QuestProgress));
             }
 
             UpdateQuestIcons();
@@ -433,15 +428,9 @@ namespace UI.Map
                     continue;
                 }
 
-                if (questIcon.TargetTransform == null)
-                {
-                    questIcon.RectTransform.gameObject.SetActive(false);
-                    continue;
-                }
-
                 questIcon.RectTransform.gameObject.SetActive(true);
 
-                if (TryGetMapContentPointForWorldTarget(questIcon.TargetTransform.position, out Vector2 questPosition))
+                if (TryGetMapContentPointForWorldTarget(questIcon.WorldPosition, out Vector2 questPosition))
                 {
                     questIcon.RectTransform.anchoredPosition = questPosition;
                 }
@@ -675,16 +664,16 @@ namespace UI.Map
 
         private sealed class QuestIconBinding
         {
-            public QuestIconBinding(RectTransform rectTransform, Transform targetTransform, QuestProgress questProgress)
+            public QuestIconBinding(RectTransform rectTransform, Vector3 worldPosition, QuestProgress questProgress)
             {
                 RectTransform = rectTransform;
-                TargetTransform = targetTransform;
+                WorldPosition = worldPosition;
                 QuestProgress = questProgress;
                 InitialScale = rectTransform.localScale;
             }
 
             public RectTransform RectTransform { get; }
-            public Transform TargetTransform { get; }
+            public Vector3 WorldPosition { get; }
             public QuestProgress QuestProgress { get; }
             public Vector3 InitialScale { get; }
         }

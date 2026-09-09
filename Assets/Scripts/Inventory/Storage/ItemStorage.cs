@@ -26,7 +26,7 @@ namespace Inventory.Storage
         private bool hasLoadHandle;
         private bool disposed;
 
-        public Task Ready => readyCompletion.Task;
+        public Task<bool> Ready => readyCompletion.Task;
         public IReadOnlyList<ItemConfig> Items => items;
 
         public void Start()
@@ -39,6 +39,26 @@ namespace Inventory.Storage
             return itemsByCategory.TryGetValue(category, out var categoryItems)
                 ? categoryItems
                 : Array.Empty<ItemConfig>();
+        }
+
+        public bool TryGetById(string itemId, out ItemConfig itemConfig)
+        {
+            itemConfig = null;
+            if (string.IsNullOrWhiteSpace(itemId))
+            {
+                return false;
+            }
+
+            foreach (ItemConfig candidate in items)
+            {
+                if (candidate != null && candidate.Id == itemId)
+                {
+                    itemConfig = candidate;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public void Dispose()

@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_Script: {fileID: 11500000, guid: cab1eab763ecf6f4c96f41d14656eb42, type: 3}
+  m_Name: Varek - Claim Passive Reward
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.Model.DialogPhrase
+  text: {m_TableReference: {m_TableCollectionName: }, m_TableEntryReference: {m_KeyId: 0, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+  isForcedDialoguePhrase: 0
+  forcedDialoguePriority: 0
+  restoresExitAbility: 0
+  isQuestPhrase: 1
+  questAnswer:
+    text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 97000000000000019, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: 11000000000000000000000000000022, type: 2}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 1
+    conditions:
+    - type: 8
+      moneyAmount: 0
+      itemConfig: {fileID: 0}
+      itemCount: 1
+      questGraph: {fileID: 0}
+      questSourceNode: {fileID: 0}
+      questTransition: {fileID: 0}
+      questNode: {fileID: 0}
+      runtimeFlag: {fileID: 11400000, guid: c8d1cf2bd581be7dfa0863d35cbc819f, type: 2}
+    - type: 10
+      moneyAmount: 0
+      itemConfig: {fileID: 0}
+      itemCount: 1
+      questGraph: {fileID: 0}
+      questSourceNode: {fileID: 0}
+      questTransition: {fileID: 0}
+      questNode: {fileID: 0}
+      runtimeFlag: {fileID: 11400000, guid: ea03e14df7a3d09f1c2a85f57edea3b1, type: 2}
+    - type: 10
+      moneyAmount: 0
+      itemConfig: {fileID: 0}
+      itemCount: 1
+      questGraph: {fileID: 0}
+      questSourceNode: {fileID: 0}
+      questTransition: {fileID: 0}
+      questNode: {fileID: 0}
+      runtimeFlag: {fileID: 11400000, guid: ac25f36f19c5f21b3e4ca7f790f0c5d3, type: 2}
+  isConversationTopic: 0
+  isConversationReturnAction: 0
+  isDialogueExitAction: 0
+  hasGameplayEvents: 0
+  gameplayEvents: []
+  answers: []

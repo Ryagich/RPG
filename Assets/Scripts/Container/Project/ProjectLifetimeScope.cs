@@ -24,6 +24,9 @@ using Combat;
 using Dialogue;
 using GameAudio;
 using Training;
+using Quests;
+using Saves;
+using Mill;
 
 namespace Container.Project
 {
@@ -56,6 +59,8 @@ namespace Container.Project
         [field: SerializeField] public FootstepConfig FootstepConfig { get; private set; }
         [field: SerializeField] public AnimationEventSoundConfig AnimationEventSoundConfig { get; private set; }
         [field: SerializeField] public LessonConfig LessonConfig { get; private set; }
+        [field: SerializeField] public QuestCatalog QuestCatalog { get; private set; }
+        [field: SerializeField] public MillQuestProgressionConfig MillQuestProgressionConfig { get; private set; }
 
         protected override void Awake()
         {
@@ -103,6 +108,9 @@ namespace Container.Project
             builder.RegisterInstance(DeathConfig).AsSelf();
             builder.RegisterInstance(HitReactionConfig != null ? HitReactionConfig : HitReactionConfig.CreateDefault()).AsSelf();
             builder.RegisterInstance(FactionRelationsConfig).AsSelf();
+            builder.Register<RuntimeFactionRelations>(Lifetime.Singleton)
+                   .As<IFactionRelations>()
+                   .AsSelf();
             builder.RegisterInstance(AudioConfig).AsSelf();
             builder.RegisterInstance(AmbientConfig).AsSelf();
             builder.RegisterInstance(FootstepConfig).AsSelf();
@@ -111,10 +119,21 @@ namespace Container.Project
             builder.RegisterEntryPoint<AudioService>(Lifetime.Singleton).As<IAudioService>().AsSelf();
             builder.Register<SceneLoadingService>(Lifetime.Singleton).AsSelf();
             builder.Register<BootCompletion>(Lifetime.Singleton).AsSelf();
+            builder.RegisterEntryPoint<GameSaveService>(Lifetime.Singleton).AsSelf();
             builder.Register<LocationTransitionContext>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueRuntimeFlagRegistry>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<ItemStorage>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<InputBindingOverridesBootstrap>();
+
+            if (QuestCatalog != null)
+            {
+                builder.RegisterInstance(QuestCatalog).AsSelf();
+            }
+
+            if (MillQuestProgressionConfig != null)
+            {
+                builder.RegisterInstance(MillQuestProgressionConfig).AsSelf();
+            }
 
             builder.RegisterEntryPoint<Bootloader>().AsSelf();
         }

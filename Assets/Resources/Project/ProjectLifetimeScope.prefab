@@ -73,3 +73,5 @@ MonoBehaviour:
   <FootstepConfig>k__BackingField: {fileID: 11400000, guid: 3a3d715d9886471ab9f9822298d8cecb, type: 2}
   <AnimationEventSoundConfig>k__BackingField: {fileID: 11400000, guid: f854e7d72ab143e88061b97f73097fd6, type: 2}
   <LessonConfig>k__BackingField: {fileID: 11400000, guid: 91f234a5b678c901d23456789abcde01, type: 2}
+  <QuestCatalog>k__BackingField: {fileID: 11400000, guid: 35bea7a3c428ed54c84e74dfab55b49a, type: 2}
+  <MillQuestProgressionConfig>k__BackingField: {fileID: 11400000, guid: 7ab3c072f9c44d69ace57c2bfc4a4bce, type: 2}

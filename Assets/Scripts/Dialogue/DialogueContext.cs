@@ -21,6 +21,7 @@ namespace Dialogue
         public IInventory CurrentTargetInventory { get; private set; }
         public MoneyStorage CurrentTargetMoneyStorage { get; private set; }
         public QuestController PlayerQuestController { get; private set; }
+        public event System.Action<QuestController> PlayerQuestControllerAssigned;
         public bool IsForcedDialogue { get; private set; }
         public bool CanExitDialogue { get; private set; } = true;
         public bool ContinueForcedDialogueAfterExit { get; private set; } = true;
@@ -56,6 +57,7 @@ namespace Dialogue
         public void SetPlayerQuestController(QuestController questController)
         {
             PlayerQuestController = questController;
+            PlayerQuestControllerAssigned?.Invoke(questController);
         }
 
         public void SetCurrentPhrase(DialogPhrase phrase)

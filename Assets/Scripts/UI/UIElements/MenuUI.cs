@@ -16,6 +16,7 @@ namespace UI.UIElements
         }
 
         [field: SerializeField] public Button ToGameButton { get; private set; }
+        [field: SerializeField] public Button ContinueButton { get; private set; }
         [field: SerializeField] public Button ToDevelopButton { get; private set; }
         [field: SerializeField] public Button SettingsButton { get; private set; }
 
@@ -30,6 +31,7 @@ namespace UI.UIElements
         private float phaseDuration;
         private float phaseElapsed;
         private VisibilityPhase phase;
+        private bool modalOpen;
 
         private void Awake()
         {
@@ -45,12 +47,36 @@ namespace UI.UIElements
 
         private void Update()
         {
+            if (modalOpen)
+            {
+                alpha = 1f;
+                ApplyAlpha();
+                return;
+            }
+
             if (HasPlayerActivity())
             {
                 BeginVisibilitySequence();
             }
 
             UpdateVisibility(Time.unscaledDeltaTime);
+            ApplyAlpha();
+        }
+
+        public void SetModalOpen(bool value)
+        {
+            modalOpen = value;
+            if (modalOpen)
+            {
+                alpha = 1f;
+                phase = VisibilityPhase.Showing;
+                phaseElapsed = 0f;
+            }
+            else
+            {
+                BeginVisibilitySequence();
+            }
+
             ApplyAlpha();
         }
 

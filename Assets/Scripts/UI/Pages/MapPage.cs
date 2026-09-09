@@ -207,13 +207,13 @@ namespace UI.Pages
             QuestProgress currentQuest = questController.CurrentQuest;
             foreach (QuestProgress questProgress in questController.Progress)
             {
-                Transform mapTarget = questMapTargetRegistry.GetTarget(questProgress?.CurrentNode);
-                if (questProgress == null || mapTarget == null)
+                if (questProgress == null ||
+                    !questMapTargetRegistry.TryGetMapPosition(questProgress.CurrentNode, out Vector3 mapPosition))
                 {
                     continue;
                 }
 
-                questMarkers.Add(new MapQuestMarkerData(mapTarget, questProgress, ReferenceEquals(questProgress, currentQuest)));
+                questMarkers.Add(new MapQuestMarkerData(mapPosition, questProgress, ReferenceEquals(questProgress, currentQuest)));
             }
 
             mapScrollController.SetQuestMarkers(uiConfig.MapIcon, uiConfig.MapIconsConfig, questMarkers);

@@ -18,6 +18,10 @@ MonoBehaviour:
   m_Metadata:
     m_Items: []
   m_TableData:
+  - m_Id: 98000000000000001
+    m_Localized: "Start a new game?\nYour current saves will be permanently deleted."
+    m_Metadata:
+      m_Items: []
   - m_Id: 99000000000000001
     m_Localized: Camera Horizontal Sensitivity
     m_Metadata:
@@ -2105,6 +2109,303 @@ MonoBehaviour:
     m_Metadata: {m_Items: []}
   - m_Id: 94000000000000023
     m_Localized: Bram Voss
+    m_Metadata: {m_Items: []}
+  - m_Id: 94000000000000024
+    m_Localized: Varek Holt
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000001
+    m_Localized: "Hold. The road feeds us: fifteen gold and you walk where you please. Pay once, and we do not shake you down twice."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000002
+    m_Localized: "Here. Fifteen gold."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000003
+    m_Localized: "I won't pay robbers for a road."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000004
+    m_Localized: "I'd rather cut you and your friends down than pay."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000005
+    m_Localized: "Good. Coin goes to the common purse, you go down the road. Do not linger here."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000006
+    m_Localized: "Then turn around. You do not want it easy, you can wander the woods."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000007
+    m_Localized: "You stepped in it yourself. Boys, show the guest why it is too late to bargain with a knife drawn."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000008
+    m_Localized: "About the forest and your people."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000009
+    m_Localized: "The forest? Forget the trails. Ask the rest while I am feeling kind."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000010
+    m_Localized: "About the road payment"
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000011
+    m_Localized: "What do you want, traveller?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000012
+    m_Localized: "All right, something else."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000013
+    m_Localized: "Go on. Do not skulk around here."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000014
+    m_Localized: "What is this camp deeper in the forest?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000015
+    m_Localized: "The camp is beyond the stream. They put strangers in their place quickly there. We were set here to feed off the road; travellers fill the common purse steadier than hunting."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000016
+    m_Localized: "Does your chief keep you on a short leash?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000017
+    m_Localized: "The chief hates empty hands. The order is simple: squeeze travellers, keep the noise down. A share goes up, crumbs stay with us. That is how we live."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000018
+    m_Localized: "And the guard tolerates this?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000019
+    m_Localized: "The guard? They used to chase us through every bush: light a fire at night, find spears in the brush by dawn. Now they can barely hold their gates. They have no hands for the forest, so we breathe easier."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000020
+    m_Localized: "You think the forest is yours now?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000021
+    m_Localized: "The forest belongs to nobody until somebody holds it. First the road, then the trails, then people grow used to asking leave from those with iron. It takes time."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000022
+    m_Localized: "So? You opening that purse or not?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000023
+    m_Localized: "Here are fifteen gold."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000024
+    m_Localized: "I've thought it over. It is cheaper to cut you and your friends down than to pay."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000025
+    m_Localized: "Never mind. Forget it."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000026
+    m_Localized: "Aren't you afraid of the creatures in the forest?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000027
+    m_Localized: "I am afraid. Only a fool says otherwise. We keep to the trail, keep the fire alive, and never slip into the thicket alone. A man crawled back from the far post last week: barefoot, no partner. Said, “It walked beside us.” That was all. Even the loudest mouths stopped joking at night."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000028
+    m_Localized: "What do you know about the village by the road?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000029
+    m_Localized: "The village crouches in its huts waiting for the road to feed it again. The bold hide food. The clever keep their mouths shut. We do not pass by either kind."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000030
+    m_Localized: "What are you sniffing around for?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000031
+    m_Localized: "What have you done to the mill?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000032
+    m_Localized: "We took what stood without an owner. The wheel turns, flour comes out. Anyone needing grain ground leaves coin and keeps clever talk to himself."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000033
+    m_Localized: "Where is the miller?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000034
+    m_Localized: "Your Ulrik is alive. He sits locked in the mill and gets bread and water. Stays quiet, he sees morning."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000035
+    m_Localized: "So you are holding a man hostage."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000036
+    m_Localized: "Hostage, captive — words for folk with full bellies. He sits quiet, does not run for the woods or call the guard. Less trouble for us."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000037
+    m_Localized: "And the field?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000038
+    m_Localized: "We hold the field, the field feeds us. Flour close by, fresh food too. Nobody runs back to camp for every crust. You would not turn your nose up at it either."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000039
+    m_Localized: "All right. Let us talk about something else."
+    m_Metadata: {m_Items: []}
+  - m_Id: 95000000000000040
+    m_Localized: "Goodbye."
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000001
+    m_Localized: "Tell About the Miller's Fate"
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000002
+    m_Localized: "The miller is held in the mill by bandits. The news needs to reach someone able to act."
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000003
+    m_Localized: "Ask about the miller"
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000004
+    m_Localized: "Possible help for the captive miller must be found."
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000005
+    m_Localized: "Ask at the tavern"
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000006
+    m_Localized: "The blacksmith suggests looking for help among Halvar's people."
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000007
+    m_Localized: "Tell the guard captain"
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000008
+    m_Localized: "Halvar believes the city guard must deal with the bandits."
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000009
+    m_Localized: "Meet the squad at the mill"
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000010
+    m_Localized: "A guard squad waits at the mill."
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000011
+    m_Localized: "Help retake the mill"
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000012
+    m_Localized: "The squad is moving on the bandits. Choose whose side you are on."
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000013
+    m_Localized: "Report on the miller"
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000014
+    m_Localized: "The guard captain must learn that bandits hold the miller."
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000015
+    m_Localized: "Reach the squad at the mill"
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000016
+    m_Localized: "The guard gathers at the mill before the sortie."
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000017
+    m_Localized: "Help retake the mill"
+    m_Metadata: {m_Items: []}
+  - m_Id: 96000000000000018
+    m_Localized: "The squad is fighting the bandits at the mill."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000001
+    m_Localized: "The miller is being held by bandits. Where can I find help?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000002
+    m_Localized: "A bad business. I have a hammer for iron, not a squad for bandits. Ask at Halvar's tavern; people loosen their tongues there."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000003
+    m_Localized: "If you need warmth, ale, or a quiet corner, you came to the right counter."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000004
+    m_Localized: "Do you know anything about the miller held at the mill?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000005
+    m_Localized: "My guests have excuses, not courage. A hostage and armed bandits are the city guard's business. Speak to their captain."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000006
+    m_Localized: "The bandits at the mill hold Ulrik hostage."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000007
+    m_Localized: "Then we stop waiting. I have sent a squad to the mill; meet them there and keep clear until the order is given."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000008
+    m_Localized: "Aldren Vael: The captain's orders are clear. We take the mill back together. Ready?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000009
+    m_Localized: "I'm with you."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000010
+    m_Localized: "The mill is ours again."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000011
+    m_Localized: "About the reward."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000012
+    m_Localized: "You stood with us when it mattered. Take two healing draughts and a mug of ale. We should drink to those who made it home."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000013
+    m_Localized: "What about my share?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000014
+    m_Localized: "You watched while others bled. The mill is free; that is your share."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000017
+    m_Localized: "I fought with your people."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000018
+    m_Localized: "Steel spoke and you stood with us. Take the beer and draught. Bram will enjoy hearing how the guard bared its teeth, then dug the ground with them."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000019
+    m_Localized: "The guard could not break you."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000020
+    m_Localized: "The guard came in howling and left without a word. You stayed out of it — take the beer, and remember whose mill this is."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000021
+    m_Localized: "Varek sent me after the mill fight."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000022
+    m_Localized: "Varek says you did not flinch when the guard pushed in. That earns you one hundred and fifty coins. Spend them quick, before someone notices your purse is too heavy."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000023
+    m_Localized: "You gave me back more than a mill. When the fields are green again, there will be bread for anyone who needs it."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000024
+    m_Localized: "What is it?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000025
+    m_Localized: "Will you help the miller held by bandits?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000026
+    m_Localized: "I have children to feed. I am not trading their supper for a stranger's mill."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000027
+    m_Localized: "I saw men with blades once. That was enough for one lifetime."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000028
+    m_Localized: "I pay my taxes. Let the people paid to carry swords handle it."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000029
+    m_Localized: "Do you know anything about the miller?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000030
+    m_Localized: "No. And I have no intention of making a bandit's hostage my affair. Take that burden to someone who carries a badge."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000031
+    m_Localized: "What would it take for you to release the prisoner?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000032
+    m_Localized: "The captive is not on my neck. Bram keeps the keys and the tally, up at the forest camp. Take your purse there; without coin, he will not even look at the man in his lockup."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000033
+    m_Localized: "Varek said Bram Voss handles talk about the prisoner."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000034
+    m_Localized: "Ah, you came for the man in the lockup. Two thousand coins and Ulrik gets to breathe free. Do not pull a face; freedom is dear merchandise these days."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000035
+    m_Localized: "Hand over two thousand coins."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000036
+    m_Localized: "Two thousand rang out. Fine. But while you carried them, the tally grew. Another five hundred, and the key turns."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000037
+    m_Localized: "Hand over another five hundred coins."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000038
+    m_Localized: "Now the account is shut. My people leave the mill. Run and see before I remember that air has a price too."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000039
+    m_Localized: "Bram took two thousand for the prisoner and demanded another five hundred."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000040
+    m_Localized: "Two thousand, and you expected Bram's word to be honest? An expensive lesson, but you are breathing. My people are already at the mill; meet them and we will drive that gang out by the book."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000041
+    m_Localized: "Hello."
+    m_Metadata: {m_Items: []}
+  - m_Id: 97000000000000042
+    m_Localized: "Goodbye."
     m_Metadata: {m_Items: []}
   references:
     version: 2

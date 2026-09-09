@@ -404,6 +404,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UI.UIElements.SwitchMenuHolder
   <YesButton>k__BackingField: {fileID: 811820374249426217}
   <NoButton>k__BackingField: {fileID: 2839911977469033640}
+  <TitleText>k__BackingField: {fileID: 8910443872722033051}
+  <TitleLocalization>k__BackingField: {fileID: 2023541119579022202}
 --- !u!1 &4363230015179258463
 GameObject:
   m_ObjectHideFlags: 0

@@ -207,7 +207,7 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects: []
   characterInfo: {fileID: 11400000, guid: 43718f9d5b35b6b4e9b9cef541377a63, type: 2}
-  inventoryConfig: {fileID: 11400000, guid: c944c7194d92c2a4b809de1b4768183a, type: 2}
+  inventoryConfig: {fileID: 0}
   hasInfiniteInventorySize: 0
   itemLootSetConfig: {fileID: 0}
   itemSetConfig: {fileID: 0}

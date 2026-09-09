@@ -131,7 +131,13 @@ namespace Dialogs.Graph
         /// </summary>
         public IEnumerable<DialogPhrase> GetConversationReturnPhrases(DialogPhrase currentPhrase)
         {
-            if (!IsConversationBranchPhrase(currentPhrase) || Nodes == null)
+            // A topic may lead back to the graph entry. That does not make the entry part of
+            // the topic branch: it is a regular choice point and must never receive a
+            // topic-return action such as "Let's talk about something else."
+            if (IsRegularChoicePoint(currentPhrase) ||
+                !IsConversationBranchPhrase(currentPhrase) ||
+                HasAuthoredReturnToRegularChoicePoint(currentPhrase) ||
+                Nodes == null)
             {
                 yield break;
             }
@@ -192,6 +198,24 @@ namespace Dialogs.Graph
                 if (topicPhrase != null &&
                     topicPhrase.IsConversationTopic &&
                     CanReachPhrase(topicPhrase, phrase, new HashSet<DialogPhrase>()))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool HasAuthoredReturnToRegularChoicePoint(DialogPhrase phrase)
+        {
+            if (phrase?.Answers == null)
+            {
+                return false;
+            }
+
+            foreach (DialogAnswer answer in phrase.Answers)
+            {
+                if (IsRegularChoicePoint(answer?.NextPhrase))
                 {
                     return true;
                 }

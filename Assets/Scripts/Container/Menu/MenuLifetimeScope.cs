@@ -4,6 +4,7 @@ using UI.Configs;
 using UI.Pages;
 using UI.UIElements;
 using GameAudio;
+using Saves;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -87,7 +88,8 @@ namespace Container.Menu
             Cursor.visible = true;
             audioService.PlayMainMenuMusic();
 
-            mainPage.GameRequested += LoadGame;
+            mainPage.NewGameRequested += StartNewGame;
+            mainPage.ContinueRequested += LoadGame;
             mainPage.DevelopRequested += LoadDevelop;
             mainPage.SettingsRequested += ShowSettings;
             SubscribeSettingsPage(bindingsSettingsPage);
@@ -106,7 +108,8 @@ namespace Container.Menu
 
         public void Dispose()
         {
-            mainPage.GameRequested -= LoadGame;
+            mainPage.NewGameRequested -= StartNewGame;
+            mainPage.ContinueRequested -= LoadGame;
             mainPage.DevelopRequested -= LoadDevelop;
             mainPage.SettingsRequested -= ShowSettings;
             UnsubscribeSettingsPage(bindingsSettingsPage);
@@ -128,6 +131,16 @@ namespace Container.Menu
         {
             audioService.StopMainMenuMusic();
             sceneLoadingService.Load(GameSceneName);
+        }
+
+        private void StartNewGame()
+        {
+            if (mainPage.HasSavedGame && !mainPage.ResetSavedGame())
+            {
+                return;
+            }
+
+            LoadGame();
         }
 
         private void ShowMain() => ShowPage(mainPage);
@@ -178,20 +191,24 @@ namespace Container.Menu
     public sealed class MenuMainPage : BasePage
     {
         private readonly UIConfig uiConfig;
+        private readonly GameSaveService saveService;
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
         private RectTransform contentRect;
         private RectTransform menuBackground;
         private MenuUI menuUI;
+        private SwitchMenuHolder newGameConfirmation;
 
         public override PageType Type { get; } = PageType.MenuMain;
-        public event System.Action GameRequested;
+        public event System.Action NewGameRequested;
+        public event System.Action ContinueRequested;
         public event System.Action DevelopRequested;
         public event System.Action SettingsRequested;
 
-        public MenuMainPage(UIConfig uiConfig, Canvas canvas, IObjectResolver resolver)
+        public MenuMainPage(UIConfig uiConfig, GameSaveService saveService, Canvas canvas, IObjectResolver resolver)
         {
             this.uiConfig = uiConfig;
+            this.saveService = saveService;
             this.resolver = resolver;
             canvasRect = canvas.GetComponent<RectTransform>();
         }
@@ -220,8 +237,11 @@ namespace Container.Menu
             menuBackground.SetAsFirstSibling();
 
             menuUI.ToGameButton.onClick.AddListener(OnGameRequested);
+            menuUI.ContinueButton.onClick.AddListener(OnContinueRequested);
             menuUI.ToDevelopButton.onClick.AddListener(OnDevelopRequested);
             menuUI.SettingsButton.onClick.AddListener(OnSettingsRequested);
+            saveService.ReadyStateChanged += RefreshContinueAvailability;
+            RefreshContinueAvailability();
         }
 
         public override void Hide()
@@ -234,9 +254,13 @@ namespace Container.Menu
             if (menuUI != null)
             {
                 menuUI.ToGameButton.onClick.RemoveListener(OnGameRequested);
+                menuUI.ContinueButton.onClick.RemoveListener(OnContinueRequested);
                 menuUI.ToDevelopButton.onClick.RemoveListener(OnDevelopRequested);
                 menuUI.SettingsButton.onClick.RemoveListener(OnSettingsRequested);
             }
+
+            saveService.ReadyStateChanged -= RefreshContinueAvailability;
+            CloseNewGameConfirmation();
 
             Object.Destroy(contentRect.gameObject);
             contentRect = null;
@@ -244,9 +268,98 @@ namespace Container.Menu
             menuUI = null;
         }
 
-        private void OnGameRequested() => GameRequested?.Invoke();
+        public bool HasSavedGame => saveService.HasSavedData;
+
+        public bool ResetSavedGame() => saveService.ResetToDefaults();
+
+        private async void OnGameRequested()
+        {
+            await saveService.Ready;
+            if (menuUI == null)
+            {
+                return;
+            }
+
+            if (!saveService.HasSavedData)
+            {
+                NewGameRequested?.Invoke();
+                return;
+            }
+
+            OpenNewGameConfirmation();
+        }
+
+        private void OnContinueRequested()
+        {
+            if (saveService.HasSavedData)
+            {
+                ContinueRequested?.Invoke();
+            }
+        }
+
         private void OnDevelopRequested() => DevelopRequested?.Invoke();
         private void OnSettingsRequested() => SettingsRequested?.Invoke();
+
+        private void RefreshContinueAvailability()
+        {
+            if (menuUI?.ContinueButton != null)
+            {
+                menuUI.ContinueButton.interactable = saveService.HasSavedData;
+            }
+        }
+
+        private void OpenNewGameConfirmation()
+        {
+            if (newGameConfirmation != null)
+            {
+                return;
+            }
+
+            if (uiConfig.SwitchMenu == null)
+            {
+                Debug.LogError("Switch Menu is not assigned in UIConfig.");
+                return;
+            }
+
+            newGameConfirmation = resolver.Instantiate(uiConfig.SwitchMenu, canvasRect);
+            newGameConfirmation.name = $"{uiConfig.SwitchMenu.name} | New Game Confirmation";
+            newGameConfirmation.SetTitle(new UnityEngine.Localization.LocalizedString(
+                "Tables",
+                "Menu_New_Game_Confirmation"));
+
+            if (newGameConfirmation.YesButton == null || newGameConfirmation.NoButton == null)
+            {
+                Debug.LogError("Switch Menu Holder requires both Yes Button and No Button references.", newGameConfirmation);
+                CloseNewGameConfirmation();
+                return;
+            }
+
+            newGameConfirmation.YesButton.onClick.AddListener(ConfirmNewGame);
+            newGameConfirmation.NoButton.onClick.AddListener(CloseNewGameConfirmation);
+            newGameConfirmation.CancelRequested += CloseNewGameConfirmation;
+            menuUI.SetModalOpen(true);
+        }
+
+        private void ConfirmNewGame()
+        {
+            CloseNewGameConfirmation();
+            NewGameRequested?.Invoke();
+        }
+
+        private void CloseNewGameConfirmation()
+        {
+            if (newGameConfirmation == null)
+            {
+                return;
+            }
+
+            newGameConfirmation.YesButton?.onClick.RemoveListener(ConfirmNewGame);
+            newGameConfirmation.NoButton?.onClick.RemoveListener(CloseNewGameConfirmation);
+            newGameConfirmation.CancelRequested -= CloseNewGameConfirmation;
+            Object.Destroy(newGameConfirmation.gameObject);
+            newGameConfirmation = null;
+            menuUI?.SetModalOpen(false);
+        }
     }
 
     public abstract class MenuSettingsSectionPage : BasePage

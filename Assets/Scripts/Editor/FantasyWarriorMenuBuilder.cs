@@ -80,6 +80,7 @@ public static class FantasyWarriorMenuBuilder
 
         SerializedObject serializedMenu = new SerializedObject(root.GetComponent<MenuUI>());
         serializedMenu.FindProperty("<ToGameButton>k__BackingField").objectReferenceValue = gameButton;
+        serializedMenu.FindProperty("<ContinueButton>k__BackingField").objectReferenceValue = continueButton;
         serializedMenu.FindProperty("<ToDevelopButton>k__BackingField").objectReferenceValue = developButton;
         serializedMenu.ApplyModifiedPropertiesWithoutUndo();
 
@@ -303,8 +304,6 @@ public static class FantasyWarriorMenuBuilder
 
     private static void MakeInactiveWithoutVisualChange(Button button)
     {
-        button.transition = Selectable.Transition.None;
-
         ColorBlock colors = button.colors;
         colors.disabledColor = colors.normalColor;
         button.colors = colors;

@@ -191,7 +191,7 @@ namespace EditorTools
         private const string NpcItemPickupConfigPath = NpcConfigFolderPath + "/NpcItemPickupConfig.asset";
         private const string NpcCombatConfigPath = NpcConfigFolderPath + "/NpcCombatConfig.asset";
         private const string DefaultNpcCombatProfilePath = NpcConfigFolderPath + "/NpcCombatProfile.asset";
-        private const string DefaultNpcDialogPath = "Assets/Dialogs/Test Dialog.asset";
+        private const string DefaultNpcDialogPath = "Assets/Dialogs/NPC Dialogue Placeholder.asset";
         private const string PlayerPrefabPath = "Assets/Prefabs/Scopes/Player.prefab";
         private const string NpcPrefabPath = "Assets/Prefabs/Scopes/NPC.prefab";
         private const string ProjectLifetimeScopePrefabPath = "Assets/Resources/Project/ProjectLifetimeScope.prefab";

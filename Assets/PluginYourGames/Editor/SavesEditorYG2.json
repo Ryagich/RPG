@@ -1,0 +1,82 @@
+{
+  "idSave": 15,
+  "GameReadyMetricSend": true,
+  "saveVersion": 1,
+  "locationId": "Mill",
+  "entranceId": "To River",
+  "money": 112,
+  "health": 17.2700748,
+  "stamina": 299.804718,
+  "quests": [],
+  "inventory": [
+    {
+      "itemId": "Larkspur ItemConfig ID",
+      "count": 3,
+      "x": 0,
+      "y": 0,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Body ItemConfig 6",
+      "count": 1,
+      "x": 0,
+      "y": 0,
+      "rotated": 0,
+      "slot": 3
+    },
+    {
+      "itemId": "Arms ItemConfig 2",
+      "count": 1,
+      "x": 0,
+      "y": 0,
+      "rotated": 0,
+      "slot": 5
+    },
+    {
+      "itemId": "Legs ItemConfig 2",
+      "count": 1,
+      "x": 0,
+      "y": 0,
+      "rotated": 0,
+      "slot": 6
+    },
+    {
+      "itemId": "Backpack Item Config ID Test 2",
+      "count": 1,
+      "x": 0,
+      "y": 0,
+      "rotated": 0,
+      "slot": 8
+    },
+    {
+      "itemId": "Sword 7 Item Config ID",
+      "count": 1,
+      "x": 0,
+      "y": 0,
+      "rotated": 0,
+      "slot": 9
+    }
+  ],
+  "millScenarioStage": 2,
+  "millOutcomeFlags": [
+    0
+  ],
+  "factionRelations": [
+    {
+      "leftFactionId": "free-knights",
+      "rightFactionId": "bandits",
+      "relation": 0
+    },
+    {
+      "leftFactionId": "free-knights",
+      "rightFactionId": "lions",
+      "relation": 0
+    },
+    {
+      "leftFactionId": "lions",
+      "rightFactionId": "bandits",
+      "relation": 0
+    }
+  ]
+}

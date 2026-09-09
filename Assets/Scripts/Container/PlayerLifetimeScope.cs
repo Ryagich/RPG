@@ -17,6 +17,7 @@ using UI;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using Saves;
 
 namespace Container
 {
@@ -140,6 +141,7 @@ namespace Container
             builder.Register(_ => new MoneyStorage(112), Lifetime.Scoped).AsSelf();
             builder.Register<QuestController>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<QuestAutomaticTransitionService>().AsSelf();
+            builder.RegisterEntryPoint<PlayerSaveCoordinator>().AsSelf();
             builder.RegisterEntryPoint<InventoryHandController>().AsSelf();
             builder.RegisterEntryPoint<PlayerFastSlotsController>().AsSelf();
             builder.Register<PlayerWeaponInHandController>(Lifetime.Scoped)

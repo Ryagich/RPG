@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f017ef0dab3961d4d9cc460c84f52c76, type: 3}
+  m_Name: Varek Holt - Mill
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.DialogGraph
+  Nodes:
+  - Position: {x: 240, y: 300}
+    Phrase: {fileID: 11400000, guid: 10101010101010101010101010101030, type: 2}
+  - Position: {x: 620, y: 80}
+    Phrase: {fileID: 11400000, guid: 10101010101010101010101010101032, type: 2}
+  - Position: {x: 1000, y: 80}
+    Phrase: {fileID: 11400000, guid: 10101010101010101010101010101034, type: 2}
+  - Position: {x: 1380, y: 80}
+    Phrase: {fileID: 11400000, guid: 10101010101010101010101010101036, type: 2}
+  - Position: {x: 620, y: 460}
+    Phrase: {fileID: 11400000, guid: 10101010101010101010101010101038, type: 2}
+  - Position: {x: 1040, y: 460}
+    Phrase: {fileID: 11400000, guid: 10101010101010101010101010101039, type: 2}
+  - Position: {x: 620, y: 640}
+    Phrase: {fileID: 11400000, guid: 10101010101010101010101010101040, type: 2}
+  - Position: {x: 1800, y: 100}
+    Phrase: {fileID: 11400000, guid: 11000000000000000000000000000020, type: 2}
+  - Position: {x: 2200, y: 0}
+    Phrase: {fileID: 11400000, guid: 11000000000000000000000000000021, type: 2}
+  - Position: {x: 2200, y: 240}
+    Phrase: {fileID: 11400000, guid: 11000000000000000000000000000022, type: 2}
+  - Position: {x: 2600, y: 120}
+    Phrase: {fileID: 11400000, guid: 11000000000000000000000000000023, type: 2}
+  - Position: {x: 1380, y: 300}
+    Phrase: {fileID: 11400000, guid: e7102b51ff1c4fe4a9a4a1505bf02881, type: 2}
+  - Position: {x: 1780, y: 300}
+    Phrase: {fileID: 11400000, guid: e7112b51ff1c4fe4a9a4a1505bf02881, type: 2}
+  <EntryPhrase>k__BackingField: {fileID: 11400000, guid: 10101010101010101010101010101030, type: 2}

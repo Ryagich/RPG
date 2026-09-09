@@ -81,7 +81,7 @@ namespace Dialogue
                     sourcePhrase,
                     $"regular-choice-answer:{regularChoicePhrase?.name}",
                     choiceAnswer,
-                    regularChoicePhrase);
+                    choiceAnswer?.NextPhrase ?? regularChoicePhrase);
             }
         }
 

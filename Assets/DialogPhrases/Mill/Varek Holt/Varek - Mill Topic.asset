@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cab1eab763ecf6f4c96f41d14656eb42, type: 3}
+  m_Name: Varek - Mill Topic
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.Model.DialogPhrase
+  text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 95000000000000032, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+  alternativeTexts: []
+  isForcedDialoguePhrase: 0
+  forcedDialoguePriority: 0
+  restoresExitAbility: 0
+  isQuestPhrase: 0
+  isConversationTopic: 1
+  conversationAnswer: {text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 95000000000000031, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}, nextPhrase: {fileID: 0}, forceExitAfterAnswer: 0, continueForcedDialogueAfterExit: 1, hasGameplayEvents: 0, gameplayEvents: [], hasConditions: 0, conditions: []}
+  isConversationReturnAction: 0
+  isDialogueExitAction: 0
+  hasGameplayEvents: 0
+  gameplayEvents: []
+  answers:
+  - text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 95000000000000033, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: 10101010101010101010101010101034, type: 2}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 1
+    conditions:
+    - type: 10
+      moneyAmount: 0
+      itemConfig: {fileID: 0}
+      itemCount: 1
+      questGraph: {fileID: 0}
+      questSourceNode: {fileID: 0}
+      questTransition: {fileID: 0}
+      questNode: {fileID: 0}
+      runtimeFlag: {fileID: 11400000, guid: e7042b51ff1c4fe4a9a4a1505bf02884, type: 2}
+    - type: 6
+      moneyAmount: 0
+      itemConfig: {fileID: 0}
+      itemCount: 1
+      questGraph: {fileID: 11400000, guid: b3000000000000000000000000000001, type: 2}
+      questSourceNode: {fileID: 0}
+      questTransition: {fileID: 11400000, guid: 4f83923f94874056a3d8343cab6cdbf3, type: 2}
+      questNode: {fileID: 0}
+      runtimeFlag: {fileID: 0}
+  - text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 95000000000000033, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: 10101010101010101010101010101034, type: 2}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 1
+    conditions:
+    - type: 10
+      moneyAmount: 0
+      itemConfig: {fileID: 0}
+      itemCount: 1
+      questGraph: {fileID: 0}
+      questSourceNode: {fileID: 0}
+      questTransition: {fileID: 0}
+      questNode: {fileID: 0}
+      runtimeFlag: {fileID: 11400000, guid: e7042b51ff1c4fe4a9a4a1505bf02884, type: 2}
+    - type: 5
+      moneyAmount: 0
+      itemConfig: {fileID: 0}
+      itemCount: 1
+      questGraph: {fileID: 11400000, guid: 9e5af8e2c382c8b4894587e2841bb2ee, type: 2}
+      questSourceNode: {fileID: 0}
+      questTransition: {fileID: 0}
+      questNode: {fileID: 0}
+      runtimeFlag: {fileID: 0}

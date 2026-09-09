@@ -77,6 +77,7 @@ namespace Locations
         }
 
         public VillageLocationDefinition CurrentLocation => currentLocation;
+        public VillageLocationTransition CurrentEntrance => currentEntrance;
 
         public void Initialize()
         {
