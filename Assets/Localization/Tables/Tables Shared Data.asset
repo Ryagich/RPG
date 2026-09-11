@@ -2815,6 +2815,18 @@ MonoBehaviour:
   - m_Id: 97000000000000042
     m_Key: Dialog_NpcPlaceholder_Farewell
     m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000003
+    m_Key: Quest_Mill_Assault_Failed_Name
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000004
+    m_Key: Quest_Mill_Assault_Failed_Description
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000005
+    m_Key: Dialog_GuardCaptain_Assault_Failed_Report
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000006
+    m_Key: Dialog_GuardCaptain_Assault_Failed_Response
+    m_Metadata: {m_Items: []}
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

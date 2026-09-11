@@ -22,6 +22,10 @@ namespace Dialogue
         public MoneyStorage CurrentTargetMoneyStorage { get; private set; }
         public QuestController PlayerQuestController { get; private set; }
         public event System.Action<QuestController> PlayerQuestControllerAssigned;
+        public event System.Action<QuestController> PlayerQuestControllerReady;
+        public event System.Action Opened;
+        public event System.Action Closed;
+        public bool IsPlayerQuestControllerReady { get; private set; }
         public bool IsForcedDialogue { get; private set; }
         public bool CanExitDialogue { get; private set; } = true;
         public bool ContinueForcedDialogueAfterExit { get; private set; } = true;
@@ -52,12 +56,29 @@ namespace Dialogue
                 CurrentPhrase,
                 CurrentPhraseText,
                 IsForcedDialogue);
+            Opened?.Invoke();
         }
 
         public void SetPlayerQuestController(QuestController questController)
         {
             PlayerQuestController = questController;
+            IsPlayerQuestControllerReady = false;
             PlayerQuestControllerAssigned?.Invoke(questController);
+        }
+
+        /// <summary>
+        /// Signals that the player-owned quest controller has finished save restoration and can
+        /// safely be observed by cross-location gameplay coordinators.
+        /// </summary>
+        public void NotifyPlayerQuestControllerReady(QuestController questController)
+        {
+            if (questController == null || PlayerQuestController != questController)
+            {
+                return;
+            }
+
+            IsPlayerQuestControllerReady = true;
+            PlayerQuestControllerReady?.Invoke(questController);
         }
 
         public void SetCurrentPhrase(DialogPhrase phrase)
@@ -94,6 +115,7 @@ namespace Dialogue
 
         public void Clear()
         {
+            bool wasOpen = CurrentTarget != null;
             DialogueFlowTrace.ContextCleared(
                 CurrentTarget,
                 CurrentDialog,
@@ -113,6 +135,10 @@ namespace Dialogue
             IsForcedDialogue = false;
             CanExitDialogue = true;
             ContinueForcedDialogueAfterExit = true;
+            if (wasOpen)
+            {
+                Closed?.Invoke();
+            }
         }
 
         private static string ResolvePhraseText(DialogPhrase phrase)

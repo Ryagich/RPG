@@ -77,6 +77,12 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: 11000000000000000000000000000010, type: 2}
   - Position: {x: 3100, y: 220}
     Phrase: {fileID: 11400000, guid: 11000000000000000000000000000011, type: 2}
+  - Position: {x: 3100, y: -220}
+    Phrase: {fileID: 11400000, guid: d5e67b0d527126d448336a1a1cf436c6, type: 2}
+  - Position: {x: 3100, y: -440}
+    Phrase: {fileID: 11400000, guid: 0f1e2d3c4b5a69788796a5b4c3d2e004, type: 2}
+  - Position: {x: 3500, y: -440}
+    Phrase: {fileID: 11400000, guid: 0f1e2d3c4b5a69788796a5b4c3d2e005, type: 2}
   - Position: {x: 3500, y: 110}
     Phrase: {fileID: 11400000, guid: 11000000000000000000000000000009, type: 2}
   - Position: {x: 1500, y: 600}

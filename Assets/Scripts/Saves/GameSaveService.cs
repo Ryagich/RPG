@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dialogue;
 using Inventory;
 using Factions;
 using Inventory.Inventories;
@@ -25,9 +26,10 @@ namespace Saves
     /// </summary>
     public sealed class GameSaveService : IStartable
     {
-        private const int CurrentVersion = 1;
+        private const int CurrentVersion = 3;
         private readonly BootCompletion bootCompletion;
         private readonly RuntimeFactionRelations factionRelations;
+        private readonly DialogueRuntimeFlagRegistry dialogueRuntimeFlags;
         private readonly System.Threading.Tasks.TaskCompletionSource<bool> ready = new();
 
         public System.Threading.Tasks.Task Ready => ready.Task;
@@ -36,10 +38,14 @@ namespace Saves
 
         public event Action ReadyStateChanged;
 
-        public GameSaveService(BootCompletion bootCompletion, RuntimeFactionRelations factionRelations)
+        public GameSaveService(
+            BootCompletion bootCompletion,
+            RuntimeFactionRelations factionRelations,
+            DialogueRuntimeFlagRegistry dialogueRuntimeFlags)
         {
             this.bootCompletion = bootCompletion;
             this.factionRelations = factionRelations;
+            this.dialogueRuntimeFlags = dialogueRuntimeFlags;
         }
 
         public async void Start()
@@ -52,9 +58,10 @@ namespace Saves
             ReadyStateChanged?.Invoke();
         }
 
-        public void SavePlayer(
+        internal bool SavePlayer(
             string locationId,
             string entranceId,
+            SavedPlayerPose playerPose,
             PlayerInventory inventory,
             MoneyStorage money,
             StatsController stats,
@@ -62,12 +69,13 @@ namespace Saves
         {
             if (!IsReady || inventory == null || money == null || stats == null || quests == null)
             {
-                return;
+                return false;
             }
 
             SavesYG data = YG2.saves;
             data.locationId = locationId ?? string.Empty;
             data.entranceId = entranceId ?? string.Empty;
+            data.playerPose = playerPose;
             data.money = money.CurrentMoney.Value;
             data.health = stats.Hp.Value.Value;
             data.stamina = stats.GetStat(StatType.Stamina).Value.Value;
@@ -76,9 +84,10 @@ namespace Saves
             data.factionRelations = SerializeFactionRelations(factionRelations);
             data.saveVersion = CurrentVersion;
             Persist();
+            return true;
         }
 
-        public bool TryRestorePlayer(
+        internal bool TryRestorePlayer(
             PlayerInventory inventory,
             MoneyStorage money,
             StatsController stats,
@@ -105,7 +114,7 @@ namespace Saves
             return true;
         }
 
-        public bool TryGetSavedLocation(out string locationId, out string entranceId)
+        internal bool TryGetSavedLocation(out string locationId, out string entranceId)
         {
             locationId = null;
             entranceId = null;
@@ -119,12 +128,47 @@ namespace Saves
             return true;
         }
 
+        internal bool TryGetSavedPlayerPose(out Pose pose)
+        {
+            pose = default;
+            if (!IsReady || YG2.saves.saveVersion <= 0)
+            {
+                return false;
+            }
+
+            SavedPlayerPose savedPose = YG2.saves.playerPose;
+            if (savedPose.isValid == 0 ||
+                !IsFinite(savedPose.positionX) || !IsFinite(savedPose.positionY) || !IsFinite(savedPose.positionZ) ||
+                !IsFinite(savedPose.rotationX) || !IsFinite(savedPose.rotationY) ||
+                !IsFinite(savedPose.rotationZ) || !IsFinite(savedPose.rotationW))
+            {
+                return false;
+            }
+
+            var rotation = new Quaternion(
+                savedPose.rotationX,
+                savedPose.rotationY,
+                savedPose.rotationZ,
+                savedPose.rotationW);
+            float rotationLengthSquared = rotation.x * rotation.x + rotation.y * rotation.y +
+                                          rotation.z * rotation.z + rotation.w * rotation.w;
+            if (rotationLengthSquared < 0.0001f)
+            {
+                return false;
+            }
+
+            pose = new Pose(
+                new Vector3(savedPose.positionX, savedPose.positionY, savedPose.positionZ),
+                rotation.normalized);
+            return true;
+        }
+
         /// <summary>
         /// Replaces the persisted game snapshot with PluginYG's default save object.
         /// Runtime faction state is reset as well because the project scope survives a return
         /// to the main menu.
         /// </summary>
-        public bool ResetToDefaults()
+        internal bool ResetToDefaults()
         {
             if (!IsReady)
             {
@@ -133,12 +177,14 @@ namespace Saves
 
             YG2.SetDefaultSaves();
             EnsureInitialized();
+            YG2.saves.quests = Array.Empty<SavedQuestProgress>();
             factionRelations.ResetToDefaults();
+            dialogueRuntimeFlags?.Clear();
             Persist();
             return true;
         }
 
-        public void RestoreLocationTransition(LocationTransitionContext transitionContext)
+        internal void RestoreLocationTransition(LocationTransitionContext transitionContext)
         {
             if (transitionContext == null || transitionContext.HasPendingTransition ||
                 !TryGetSavedLocation(out string locationId, out string entranceId))
@@ -149,15 +195,19 @@ namespace Saves
             transitionContext.SetPendingTransition(locationId, entranceId);
         }
 
-        public int GetMillScenarioStage() => IsReady ? YG2.saves.millScenarioStage : 0;
+        internal int GetMillScenarioStage() => IsReady ? YG2.saves.millScenarioStage : 0;
 
-        public int GetMillOutcomeFlag(int index)
+        internal int GetMillOutcomeFlag(int index)
         {
             int[] flags = IsReady ? YG2.saves.millOutcomeFlags : null;
             return flags != null && index >= 0 && index < flags.Length ? flags[index] : 0;
         }
 
-        public void SaveMillScenario(int stage, IReadOnlyList<int> outcomeFlags)
+        /// <summary>
+        /// Updates state that belongs in the next complete checkpoint. Persisting remains the
+        /// responsibility of <see cref="GameSaveController"/>.
+        /// </summary>
+        internal void SetMillScenarioState(int stage, IReadOnlyList<int> outcomeFlags)
         {
             if (!IsReady)
             {
@@ -166,8 +216,6 @@ namespace Saves
 
             YG2.saves.millScenarioStage = Mathf.Max(0, stage);
             YG2.saves.millOutcomeFlags = outcomeFlags?.ToArray() ?? Array.Empty<int>();
-            YG2.saves.saveVersion = CurrentVersion;
-            Persist();
         }
 
         private static SavedInventoryItem[] SerializeInventory(PlayerInventory inventory)
@@ -196,6 +244,10 @@ namespace Saves
                 {
                     questId = progress.QuestGraph.PersistentId,
                     currentNodeId = progress.CurrentNode.PersistentId,
+                    completedNodeIds = progress.CompletedNodes
+                        .Where(node => node != null && !string.IsNullOrWhiteSpace(node.PersistentId))
+                        .Select(node => node.PersistentId)
+                        .ToArray(),
                     state = progress.IsCompleted ? 1 : 0
                 })
                 .ToArray();
@@ -295,11 +347,38 @@ namespace Saves
                 QuestNodeData node = questGraph.Nodes
                     .Select(questNode => questNode?.NodeData)
                     .FirstOrDefault(candidate => candidate != null && candidate.PersistentId == entry.currentNodeId);
-                if (node == null || !quests.TryRestoreQuest(questGraph, node, entry.state != 0))
+                IReadOnlyList<QuestNodeData> completedNodes = ResolveCompletedNodes(questGraph, entry.completedNodeIds);
+                if (node == null || !quests.TryRestoreQuest(questGraph, node, completedNodes, entry.state != 0))
                 {
                     Debug.LogWarning($"Saved state for quest '{questGraph.name}' could not be restored.");
                 }
             }
+        }
+
+        private static IReadOnlyList<QuestNodeData> ResolveCompletedNodes(
+            QuestGraph questGraph,
+            IEnumerable<string> completedNodeIds)
+        {
+            if (questGraph == null || completedNodeIds == null)
+            {
+                return Array.Empty<QuestNodeData>();
+            }
+
+            var nodesById = questGraph.Nodes
+                .Select(node => node?.NodeData)
+                .Where(node => node != null && !string.IsNullOrWhiteSpace(node.PersistentId))
+                .ToDictionary(node => node.PersistentId);
+            var completedNodes = new List<QuestNodeData>();
+
+            foreach (string nodeId in completedNodeIds)
+            {
+                if (!string.IsNullOrWhiteSpace(nodeId) && nodesById.TryGetValue(nodeId, out QuestNodeData node))
+                {
+                    completedNodes.Add(node);
+                }
+            }
+
+            return completedNodes;
         }
 
         private static void EnsureInitialized()
@@ -309,6 +388,8 @@ namespace Saves
             YG2.saves.millOutcomeFlags ??= Array.Empty<int>();
             YG2.saves.factionRelations ??= Array.Empty<SavedFactionRelation>();
         }
+
+        private static bool IsFinite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
 
         private static void Persist()
         {

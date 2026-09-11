@@ -52,6 +52,8 @@ namespace UI.Pages
         private Image bloodScreen;
         private HeartbeatPulse heartbeatPulse;
         private BloodScreenController bloodScreenController;
+        private int gameplayEventPublicationDepth;
+        private bool isQuestChangeSubscribed;
 
         public DialoguePage(
             UIConfig uiConfig,
@@ -93,7 +95,6 @@ namespace UI.Pages
             this.playerInventory = playerInventory;
             this.playerMoneyStorage = playerMoneyStorage;
             this.questController = questController;
-            dialogueContext.SetPlayerQuestController(questController);
             this.localizationConfig = localizationConfig;
             this.runtimeFlags = runtimeFlags;
             this.resolver = resolver;
@@ -111,6 +112,8 @@ namespace UI.Pages
                 return;
             }
 
+            SubscribeToQuestChanges();
+
             contentRect = resolver.Instantiate(uiConfig.ContentPref, canvasRect);
             contentRect.name = $"{uiConfig.ContentPref.name} | {Type}";
 
@@ -126,6 +129,7 @@ namespace UI.Pages
 
         public override void Hide()
         {
+            UnsubscribeFromQuestChanges();
             playerStatsHud.Detach();
             dialogueStatsHolder = null;
 
@@ -291,17 +295,17 @@ namespace UI.Pages
 
             AddNotifications(deferredNotifications);
 
-            if (answer.ForceExitAfterAnswer)
-            {
-                dialogueExitRequestedPublisher.Publish(
-                    new DialogueExitRequestedMessage(answer.ContinueForcedDialogueAfterExit));
-            }
-
             PublishGameplayEvents(answer.GameplayEvents, $"answer:{dialogueContext.CurrentPhrase?.name}");
 
             if (answer.NextPhrase != null)
             {
                 PublishGameplayEvents(answer.NextPhrase.GameplayEvents, $"next-phrase:{answer.NextPhrase.name}");
+            }
+
+            if (answer.ForceExitAfterAnswer)
+            {
+                dialogueExitRequestedPublisher.Publish(
+                    new DialogueExitRequestedMessage(answer.ContinueForcedDialogueAfterExit));
             }
 
             if (answer.ForceExitAfterAnswer)
@@ -336,10 +340,50 @@ namespace UI.Pages
             {
                 if (gameplayEvent != null)
                 {
-                    DialogueFlowTrace.GameplayEventPublished(gameplayEvent, source);
-                    dialogueGameplayEventPublisher.Publish(new DialogueGameplayEventRaisedMessage(gameplayEvent));
+                    gameplayEventPublicationDepth++;
+                    try
+                    {
+                        DialogueFlowTrace.GameplayEventPublished(gameplayEvent, source);
+                        dialogueGameplayEventPublisher.Publish(new DialogueGameplayEventRaisedMessage(gameplayEvent));
+                    }
+                    finally
+                    {
+                        gameplayEventPublicationDepth--;
+                    }
                 }
             }
+        }
+
+        private void OnQuestChanged(QuestChangeInfo change)
+        {
+            if (gameplayEventPublicationDepth <= 0 || dialogueContainer == null)
+            {
+                return;
+            }
+
+            AddNotification(CreateQuestNotification(change.Type, change.Quest));
+        }
+
+        private void SubscribeToQuestChanges()
+        {
+            if (isQuestChangeSubscribed)
+            {
+                return;
+            }
+
+            questController.Changed += OnQuestChanged;
+            isQuestChangeSubscribed = true;
+        }
+
+        private void UnsubscribeFromQuestChanges()
+        {
+            if (!isQuestChangeSubscribed)
+            {
+                return;
+            }
+
+            questController.Changed -= OnQuestChanged;
+            isQuestChangeSubscribed = false;
         }
 
         private bool TryExecuteConditions(
@@ -543,6 +587,21 @@ namespace UI.Pages
 
             string questName = GetQuestDisplayName(questGraph);
             return new DialogNotificationData(title, $"{title}: {questName}", questController.GetQuestSprite(questGraph));
+        }
+
+        private DialogNotificationData CreateQuestNotification(QuestChangeType changeType, Quests.Graph.QuestGraph questGraph)
+        {
+            QuestNotificationType notificationType = changeType switch
+            {
+                QuestChangeType.Added => QuestNotificationType.New,
+                QuestChangeType.Updated => QuestNotificationType.Update,
+                QuestChangeType.Completed => QuestNotificationType.Completed,
+                QuestChangeType.Failed => QuestNotificationType.Failed,
+                QuestChangeType.Removed => QuestNotificationType.Canceled,
+                _ => QuestNotificationType.Update
+            };
+
+            return CreateQuestNotification(notificationType, questGraph);
         }
 
         private static string GetQuestDisplayName(Quests.Graph.QuestGraph questGraph)

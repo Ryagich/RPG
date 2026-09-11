@@ -24,7 +24,7 @@ namespace UI.Pages
         private readonly LocationTransitionService locationTransitions;
         private readonly Transform playerTransform;
         private readonly CharacterController playerController;
-        private readonly PlayerSaveCoordinator playerSaveCoordinator;
+        private readonly LocationTransitionSaveCoordinator transitionSaveCoordinator;
 
         private SwitchMenuHolder switchMenu;
         private VillageLocationTransitionRequest pendingRequest;
@@ -43,7 +43,7 @@ namespace UI.Pages
             LocationTransitionService locationTransitions,
             Transform playerTransform,
             CharacterController playerController,
-            PlayerSaveCoordinator playerSaveCoordinator)
+            LocationTransitionSaveCoordinator transitionSaveCoordinator)
         {
             this.uiConfig = uiConfig;
             this.resolver = resolver;
@@ -53,7 +53,7 @@ namespace UI.Pages
             this.locationTransitions = locationTransitions;
             this.playerTransform = playerTransform;
             this.playerController = playerController;
-            this.playerSaveCoordinator = playerSaveCoordinator;
+            this.transitionSaveCoordinator = transitionSaveCoordinator;
             canvasRect = canvas.GetComponent<RectTransform>();
 
             locationTransitions.TransitionRequested += Open;
@@ -141,7 +141,11 @@ namespace UI.Pages
 
             isResolving = true;
             locationTransitions.ConfirmTransition(pendingRequest);
-            playerSaveCoordinator?.Save(pendingRequest.TargetLocationId, pendingRequest.TargetTransitionId);
+            if (!transitionSaveCoordinator.SaveConfirmedTransition(pendingRequest))
+            {
+                isResolving = false;
+                return;
+            }
             pendingRequest = default;
             hasPendingRequest = false;
             sceneLoadingService.Load(SceneManager.GetActiveScene().name);

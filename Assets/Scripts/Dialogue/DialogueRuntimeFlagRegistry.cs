@@ -42,5 +42,10 @@ namespace Dialogue
 
             Activate(activeFlag);
         }
+
+        public void Clear()
+        {
+            activeFlags.Clear();
+        }
     }
 }

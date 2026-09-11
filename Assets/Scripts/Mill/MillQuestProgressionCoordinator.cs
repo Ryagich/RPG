@@ -3,6 +3,7 @@ using Dialogue;
 using MessagePipe;
 using Messages;
 using Quests;
+using Quests.Graph;
 using Saves;
 using VContainer.Unity;
 
@@ -15,7 +16,7 @@ namespace Mill
     public sealed class MillQuestProgressionCoordinator : IStartable, IDisposable
     {
         private readonly MillQuestProgressionConfig config;
-        private readonly GameSaveService saveService;
+        private readonly GameSaveController saveController;
         private readonly DialogueContext dialogueContext;
         private readonly DialogueRuntimeFlagRegistry runtimeFlags;
         private readonly ISubscriber<DialogueGameplayEventRaisedMessage> dialogueEvents;
@@ -24,13 +25,13 @@ namespace Mill
 
         public MillQuestProgressionCoordinator(
             MillQuestProgressionConfig config,
-            GameSaveService saveService,
+            GameSaveController saveController,
             DialogueContext dialogueContext,
             DialogueRuntimeFlagRegistry runtimeFlags,
             ISubscriber<DialogueGameplayEventRaisedMessage> dialogueEvents)
         {
             this.config = config;
-            this.saveService = saveService;
+            this.saveController = saveController;
             this.dialogueContext = dialogueContext;
             this.runtimeFlags = runtimeFlags;
             this.dialogueEvents = dialogueEvents;
@@ -41,18 +42,21 @@ namespace Mill
             if (config != null)
             {
                 subscription = dialogueEvents?.Subscribe(OnDialogueEvent);
-                dialogueContext.PlayerQuestControllerAssigned += OnPlayerQuestControllerAssigned;
-                await saveService.Ready;
+                dialogueContext.PlayerQuestControllerReady += OnPlayerQuestControllerReady;
+                await saveController.Ready;
                 isSaveReady = true;
                 RestoreDialogueState();
-                ReconcileFateKnownQuest();
+                if (dialogueContext.IsPlayerQuestControllerReady)
+                {
+                    MigrateLegacyQuest(dialogueContext.PlayerQuestController);
+                }
             }
         }
 
         public void Dispose()
         {
             subscription?.Dispose();
-            dialogueContext.PlayerQuestControllerAssigned -= OnPlayerQuestControllerAssigned;
+            dialogueContext.PlayerQuestControllerReady -= OnPlayerQuestControllerReady;
         }
 
         private void OnDialogueEvent(DialogueGameplayEventRaisedMessage message)
@@ -103,8 +107,7 @@ namespace Mill
             bool isProgressed = quests.HasQuest(config.GuardInvestigationQuest)
                 ? quests.IsAtNode(config.GuardInvestigationQuest, config.ReportToGuardNode) ||
                   quests.TrySetCurrentNode(config.GuardInvestigationQuest, config.ReportToGuardNode)
-                : quests.HasQuest(config.TellMillerFateQuest) ||
-                  quests.TryAddQuest(config.TellMillerFateQuest);
+                : TryStartMillQuestAt(config.AskAroundNode);
             if (!isProgressed)
             {
                 return;
@@ -118,12 +121,12 @@ namespace Mill
         {
             QuestController quests = dialogueContext?.PlayerQuestController;
             if (GetStage() != MillScenarioStage.FateKnown || quests == null ||
-                !quests.HasQuest(config.TellMillerFateQuest))
+                !quests.HasQuest(config.GuardInvestigationQuest))
             {
                 return;
             }
 
-            quests.TrySetCurrentNode(config.TellMillerFateQuest, node);
+            quests.TrySetCurrentNode(config.GuardInvestigationQuest, node);
         }
 
         private void PrepareGuards()
@@ -135,10 +138,9 @@ namespace Mill
                 return;
             }
 
-            bool progressed = quests.HasQuest(config.GuardInvestigationQuest)
-                ? quests.TrySetCurrentNode(config.GuardInvestigationQuest, config.GuardSquadAwaitingNode)
-                : quests.HasQuest(config.TellMillerFateQuest) &&
-                  quests.TrySetCurrentNode(config.TellMillerFateQuest, config.RumourSquadAwaitingNode);
+            bool progressed = quests.TrySetCurrentNode(
+                config.GuardInvestigationQuest,
+                config.GuardSquadAwaitingNode);
 
             if (progressed)
             {
@@ -150,7 +152,7 @@ namespace Mill
 
         private void RequestRansom()
         {
-            if (GetStage() != MillScenarioStage.FateKnown)
+            if (GetStage() is not (MillScenarioStage.FateKnown or MillScenarioStage.BanditsHeldMill))
             {
                 return;
             }
@@ -185,7 +187,6 @@ namespace Mill
             if (quests != null)
             {
                 CompleteActiveMillQuest(quests, config.GuardInvestigationQuest);
-                CompleteActiveMillQuest(quests, config.TellMillerFateQuest);
             }
 
             SetStage(MillScenarioStage.Ransomed);
@@ -219,40 +220,55 @@ namespace Mill
             }
         }
 
-        private void OnPlayerQuestControllerAssigned(QuestController _)
+        private void OnPlayerQuestControllerReady(QuestController _)
         {
             if (isSaveReady)
             {
-                ReconcileFateKnownQuest();
+                MigrateLegacyQuest(dialogueContext.PlayerQuestController);
             }
         }
 
-        private void ReconcileFateKnownQuest()
+        private void MigrateLegacyQuest(QuestController quests)
         {
-            if (GetStage() != MillScenarioStage.FateKnown)
+            QuestGraph legacyQuest = config.LegacyTellMillerFateQuest;
+            if (legacyQuest == null || !quests.HasQuest(legacyQuest) || quests.IsCompleted(legacyQuest))
             {
                 return;
             }
 
-            QuestController quests = dialogueContext.PlayerQuestController;
+            Quests.Graph.Model.QuestNodeData legacyNode = quests.GetCurrentNode(legacyQuest);
+            Quests.Graph.Model.QuestNodeData targetNode = legacyNode == config.LegacyAskAroundNode
+                ? config.AskAroundNode
+                : legacyNode == config.LegacyVisitTavernNode
+                    ? config.VisitTavernNode
+                    : legacyNode == config.LegacyReportToGuardNode
+                        ? config.ReportToGuardFromRumourNode
+                        : legacyNode == config.LegacySquadAwaitingNode
+                            ? config.GuardSquadAwaitingNode
+                            : legacyNode == config.LegacyHelpRetakeMillNode
+                                ? config.HelpRetakeMillNode
+                                : null;
+
+            if (targetNode != null)
+            {
+                quests.TryReplaceActiveQuest(legacyQuest, config.GuardInvestigationQuest, targetNode);
+            }
+        }
+
+        private bool TryStartMillQuestAt(Quests.Graph.Model.QuestNodeData node)
+        {
+            QuestController quests = dialogueContext?.PlayerQuestController;
             if (quests == null)
             {
-                return;
+                return false;
             }
 
-            if (quests.HasQuest(config.GuardInvestigationQuest))
-            {
-                quests.TrySetCurrentNode(config.GuardInvestigationQuest, config.ReportToGuardNode);
-            }
-            else if (!quests.HasQuest(config.TellMillerFateQuest))
-            {
-                quests.TryAddQuest(config.TellMillerFateQuest);
-            }
+            return quests.TryAddQuestAtNode(config.GuardInvestigationQuest, node);
         }
 
         private MillScenarioStage GetStage()
         {
-            int stage = saveService.GetMillScenarioStage();
+            int stage = saveController.GetMillScenarioStage();
             return Enum.IsDefined(typeof(MillScenarioStage), stage)
                 ? (MillScenarioStage)stage
                 : MillScenarioStage.Occupied;
@@ -260,7 +276,7 @@ namespace Mill
 
         private void SetStage(MillScenarioStage stage)
         {
-            saveService.SaveMillScenario((int)stage, new[] { saveService.GetMillOutcomeFlag(0) });
+            saveController.SetMillScenarioState((int)stage, new[] { saveController.GetMillOutcomeFlag(0) });
         }
     }
 }

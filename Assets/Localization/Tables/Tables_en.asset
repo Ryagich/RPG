@@ -2407,6 +2407,18 @@ MonoBehaviour:
   - m_Id: 97000000000000042
     m_Localized: "Goodbye."
     m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000003
+    m_Localized: "The assault has failed"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000004
+    m_Localized: "The guards are dead. Report the failure to the guard captain or try to negotiate with the bandits to free the miller."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000005
+    m_Localized: "The squad at the mill is dead."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000006
+    m_Localized: "I have no more people. I will not send those left at the gate into the same grave. If you want the miller out, find a way yourself."
+    m_Metadata: {m_Items: []}
   references:
     version: 2
     RefIds: []

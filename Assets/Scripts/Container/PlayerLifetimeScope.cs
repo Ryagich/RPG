@@ -138,8 +138,8 @@ namespace Container
                    .AsSelf();
             builder.Register<CharacterWorldItemDropper>(Lifetime.Scoped).AsSelf();
             builder.Register<EquippedWeaponDropService>(Lifetime.Scoped).AsSelf();
-            builder.Register(_ => new MoneyStorage(112), Lifetime.Scoped).AsSelf();
-            builder.Register<QuestController>(Lifetime.Scoped).AsSelf();
+            builder.Register(_ => new MoneyStorage(112), Lifetime.Singleton).AsSelf();
+            builder.Register<QuestController>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<QuestAutomaticTransitionService>().AsSelf();
             builder.RegisterEntryPoint<PlayerSaveCoordinator>().AsSelf();
             builder.RegisterEntryPoint<InventoryHandController>().AsSelf();

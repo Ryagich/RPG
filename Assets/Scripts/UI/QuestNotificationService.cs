@@ -41,6 +41,7 @@ namespace UI
             this.localization = localization;
             this.questObjectiveOverride = questObjectiveOverride;
             quests.Changed += Enqueue;
+            quests.StateRestored += SynchronizeRestoredState;
             CaptureCurrentStates();
         }
 
@@ -108,11 +109,22 @@ namespace UI
 
         private void CaptureCurrentStates()
         {
+            knownStates.Clear();
             foreach (var progress in quests.Progress)
             {
                 if (progress?.QuestGraph != null)
                     knownStates[progress.QuestGraph] = new QuestState(progress.CurrentNode, progress.IsCompleted);
             }
+        }
+
+        private void SynchronizeRestoredState()
+        {
+            queue.Clear();
+            current = null;
+            phase = Phase.Hidden;
+            elapsed = 0f;
+            view?.HideImmediately();
+            CaptureCurrentStates();
         }
 
         private void DetectQuestStateChanges()
@@ -204,6 +216,7 @@ namespace UI
         public void Dispose()
         {
             quests.Changed -= Enqueue;
+            quests.StateRestored -= SynchronizeRestoredState;
         }
     }
 }

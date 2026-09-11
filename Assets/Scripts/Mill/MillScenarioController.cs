@@ -27,11 +27,11 @@ namespace Mill
     [DisallowMultipleComponent]
     public sealed class MillScenarioController : MonoBehaviour
     {
-        private const int GuardSupportFlag = 1 << 0;
-        private const int BanditSupportFlag = 1 << 1;
-        private const int GuardRewardClaimedFlag = 1 << 2;
-        private const int BanditRewardClaimedFlag = 1 << 3;
-        private const int BanditCampRewardClaimedFlag = 1 << 4;
+        private const int GuardSupportFlag = (int)MillScenarioOutcomeFlags.PlayerSupportedGuards;
+        private const int BanditSupportFlag = (int)MillScenarioOutcomeFlags.PlayerSupportedBandits;
+        private const int GuardRewardClaimedFlag = (int)MillScenarioOutcomeFlags.GuardRewardClaimed;
+        private const int BanditRewardClaimedFlag = (int)MillScenarioOutcomeFlags.BanditRewardClaimed;
+        private const int BanditCampRewardClaimedFlag = (int)MillScenarioOutcomeFlags.BanditCampRewardClaimed;
 
         [Header("Mill residents")]
         // Scene instances are recreated whenever the location is loaded.  Keep anchors as
@@ -50,8 +50,7 @@ namespace Mill
         [Header("Quest progression")]
         [SerializeField] private QuestGraph guardInvestigationQuest;
         [SerializeField] private QuestNodeData guardHelpRetakeMillNode;
-        [SerializeField] private QuestGraph tellMillerFateQuest;
-        [SerializeField] private QuestNodeData rumourHelpRetakeMillNode;
+        [SerializeField] private QuestNodeData guardAssaultFailedNode;
 
         [Header("Dialogue contracts")]
         [SerializeField] private DialogueGameplayEvent beginAssaultEvent;
@@ -77,7 +76,7 @@ namespace Mill
         [SerializeField] private FactionConfig banditFaction;
         [SerializeField, Min(1)] private int banditReputationGain = 100;
 
-        private GameSaveService saveService;
+        private GameSaveController saveController;
         private DialogueRuntimeFlagRegistry runtimeFlags;
         private DialogueContext dialogueContext;
         private IFactionRelations factionRelations;
@@ -92,14 +91,14 @@ namespace Mill
 
         [Inject]
         public void Construct(
-            GameSaveService saveService,
+            GameSaveController saveController,
             IFactionRelations factionRelations,
             DialogueRuntimeFlagRegistry runtimeFlags,
             DialogueContext dialogueContext,
             ISubscriber<DialogueGameplayEventRaisedMessage> dialogueEvents,
             ISubscriber<CharacterDamagedMessage> characterDamaged)
         {
-            this.saveService = saveService;
+            this.saveController = saveController;
             this.factionRelations = factionRelations;
             this.runtimeFlags = runtimeFlags;
             this.dialogueContext = dialogueContext;
@@ -116,14 +115,14 @@ namespace Mill
         private async void Start()
         {
             await constructed.Task;
-            await saveService.Ready;
-            stage = (MillScenarioStage)saveService.GetMillScenarioStage();
+            await saveController.Ready;
+            stage = (MillScenarioStage)saveController.GetMillScenarioStage();
             if (!Enum.IsDefined(typeof(MillScenarioStage), stage))
             {
                 stage = MillScenarioStage.Occupied;
             }
 
-            outcomeFlags = saveService.GetMillOutcomeFlag(0);
+            outcomeFlags = saveController.GetMillOutcomeFlag(0);
             EnsurePreAssaultNeutrality();
             dialogueSubscription = dialogueEvents?.Subscribe(OnDialogueEvent);
             damageSubscription = characterDamaged?.Subscribe(OnCharacterDamaged);
@@ -138,7 +137,7 @@ namespace Mill
                 TryStartAssaultAfterArrival();
             }
 
-            if (stage is MillScenarioStage.GuardsMarching or MillScenarioStage.AssaultInProgress)
+            if (stage is MillScenarioStage.GuardsMarching or MillScenarioStage.AssaultInProgress or MillScenarioStage.BanditsHeldMill)
             {
                 ResolveBattleIfFinished();
             }
@@ -185,10 +184,7 @@ namespace Mill
             QuestController quests = dialogueContext?.PlayerQuestController;
             if (quests != null)
             {
-                bool hasGuardQuest = quests.HasQuest(guardInvestigationQuest);
-                quests.TrySetCurrentNode(
-                    hasGuardQuest ? guardInvestigationQuest : tellMillerFateQuest,
-                    hasGuardQuest ? guardHelpRetakeMillNode : rumourHelpRetakeMillNode);
+                quests.TrySetCurrentNode(guardInvestigationQuest, guardHelpRetakeMillNode);
             }
 
             SetStage(MillScenarioStage.GuardsMarching);
@@ -265,16 +261,21 @@ namespace Mill
             if (AllDefeated(bandits, varekHolt))
             {
                 SetStage(MillScenarioStage.Liberated);
-                CompleteRetakeQuest();
+                CompleteActiveMillQuest();
                 runtimeFlags?.Activate(guardVictoryFlag);
                 SetExitAvailability(true);
                 return;
             }
 
-            if (AllDefeated(guards, squadLeader))
+            if (AllDefeated(guards, squadLeader) && stage != MillScenarioStage.BanditsHeldMill)
             {
                 SetStage(MillScenarioStage.BanditsHeldMill);
-                CompleteRetakeQuest();
+                if ((outcomeFlags & GuardSupportFlag) == 0)
+                {
+                    dialogueContext?.PlayerQuestController?.TrySetCurrentNode(
+                        guardInvestigationQuest,
+                        guardAssaultFailedNode);
+                }
                 runtimeFlags?.Activate(banditVictoryFlag);
                 SetExitAvailability(true);
             }
@@ -313,7 +314,7 @@ namespace Mill
 
             stage = nextStage;
             ApplyWorldState(stage, true);
-            saveService.SaveMillScenario((int)stage, new[] { outcomeFlags });
+            saveController.SetMillScenarioState((int)stage, new[] { outcomeFlags });
         }
 
         private void ApplyWorldState(MillScenarioStage currentStage, bool isRuntimeTransition)
@@ -433,10 +434,10 @@ namespace Mill
 
             outcomeFlags |= rewardFlag;
             runtimeFlags?.Activate(claimedFlag);
-            saveService.SaveMillScenario((int)stage, new[] { outcomeFlags });
+            saveController.SetMillScenarioState((int)stage, new[] { outcomeFlags });
         }
 
-        private void CompleteRetakeQuest()
+        private void CompleteActiveMillQuest()
         {
             QuestController quests = dialogueContext?.PlayerQuestController;
             if (quests == null)
@@ -444,13 +445,10 @@ namespace Mill
                 return;
             }
 
-            if (quests.HasQuest(guardInvestigationQuest))
+            QuestNodeData currentNode = quests.GetCurrentNode(guardInvestigationQuest);
+            if (currentNode != null)
             {
-                quests.TryCompleteNode(guardInvestigationQuest, guardHelpRetakeMillNode);
-            }
-            else if (quests.HasQuest(tellMillerFateQuest))
-            {
-                quests.TryCompleteNode(tellMillerFateQuest, rumourHelpRetakeMillNode);
+                quests.TryCompleteNode(guardInvestigationQuest, currentNode);
             }
         }
 
@@ -562,5 +560,16 @@ namespace Mill
         RansomPrincipalDue = 7,
         RansomInterestDue = 8,
         Ransomed = 9
+    }
+
+    [Flags]
+    public enum MillScenarioOutcomeFlags
+    {
+        None = 0,
+        PlayerSupportedGuards = 1 << 0,
+        PlayerSupportedBandits = 1 << 1,
+        GuardRewardClaimed = 1 << 2,
+        BanditRewardClaimed = 1 << 3,
+        BanditCampRewardClaimed = 1 << 4
     }
 }

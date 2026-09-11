@@ -7041,6 +7041,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000027, type: 2}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: autoRun
       value: 1
       objectReference: {fileID: 0}
@@ -7052,10 +7056,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: 28acd051f67700f4c889864f11b25b26, type: 2}
-    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
-      propertyPath: dialog
-      value: 
-      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000027, type: 2}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -7202,17 +7202,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8541562820077727205, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
   m_PrefabInstance: {fileID: 41523655}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &41523657 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
-  m_PrefabInstance: {fileID: 41523655}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c07825eba374e689d071a28eaf39e03, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Container.MerchantLifetimeScope
 --- !u!1 &42336742
 GameObject:
   m_ObjectHideFlags: 0
@@ -30365,6 +30354,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000032, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: cf1dcfaaebf04f749a82360b74140750, type: 2}
@@ -30372,10 +30365,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: ae2b93ea88994d468b91da1fe09f0a20, type: 2}
-    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      propertyPath: dialog
-      value: 
-      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000032, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -56413,6 +56402,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000032, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: canTalk
       value: 1
       objectReference: {fileID: 0}
@@ -56424,10 +56417,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: 2c391bac24874408a883810a0dade034, type: 2}
-    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      propertyPath: dialog
-      value: 
-      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000032, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -88514,6 +88503,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000032, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: cf1dcfaaebf04f749a82360b74140750, type: 2}
@@ -88521,10 +88514,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: 057c9d2bb2e148dcbaaca8ea82cb51df, type: 2}
-    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      propertyPath: dialog
-      value: 
-      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000032, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -126990,17 +126979,6 @@ MonoBehaviour:
   questGraph: {fileID: 11400000, guid: a55b3d8e42960da47bb27f0695f75776, type: 2}
   targetTransform: {fileID: 719675547}
   targetId: a4c63ac742c545aa9ab088a154fc59f7
---- !u!114 &719675550 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-  m_PrefabInstance: {fileID: 719675546}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 719675548}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb467034570e4dbebcc69fb2058f672d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Container.NpcLifetimeScope
 --- !u!1 &721437522
 GameObject:
   m_ObjectHideFlags: 0
@@ -145985,30 +145963,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1207266197}
-    - targetCorrespondingSourceObject: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2120000500}
   m_SourcePrefab: {fileID: 100100000, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
 --- !u!1 &828593852 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
   m_PrefabInstance: {fileID: 828593851}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2120000500
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 828593851}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 828593852}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 13de18f9f7762c34c86f0dedb3275b89, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Quests.MapTargets.QuestMapTarget
-  questGraph: {fileID: 11400000, guid: b3000000000000000000000000000001, type: 2}
-  targetTransform: {fileID: 1207266196}
-  targetId: city-guard-captain-mill
 --- !u!1 &829909532
 GameObject:
   m_ObjectHideFlags: 0
@@ -147369,6 +147329,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000032, type: 2}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: autoRun
       value: 1
       objectReference: {fileID: 0}
@@ -147380,10 +147344,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: a092a2cd0d4ed3a478bf43bec21e34c0, type: 2}
-    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
-      propertyPath: dialog
-      value: 
-      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000032, type: 2}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -149695,17 +149655,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
   m_PrefabInstance: {fileID: 851781686}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &851781688 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-  m_PrefabInstance: {fileID: 851781686}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb467034570e4dbebcc69fb2058f672d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Container.NpcLifetimeScope
 --- !u!1 &854154383
 GameObject:
   m_ObjectHideFlags: 0
@@ -150684,6 +150633,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000032, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: canTalk
       value: 0
       objectReference: {fileID: 0}
@@ -150695,10 +150648,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: 5d4668ecf28a46fbb0dbf9063f2a9eb6, type: 2}
-    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      propertyPath: dialog
-      value: 
-      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000032, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -211509,6 +211458,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000032, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: cf1dcfaaebf04f749a82360b74140750, type: 2}
@@ -211516,10 +211469,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: 13a0db8ce1824ed8842491cd79093309, type: 2}
-    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      propertyPath: dialog
-      value: 
-      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000032, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -255878,19 +255827,8 @@ MonoBehaviour:
   - {fileID: 1951998394}
   - {fileID: 1094286034}
   guardInvestigationQuest: {fileID: 11400000, guid: b3000000000000000000000000000001, type: 2}
-  reportToGuardNode: {fileID: 11400000, guid: 4442e37bbd8f090409b00b6e4fa427af, type: 2}
-  guardSquadAwaitingNode: {fileID: 11400000, guid: ca55d7a6d6479ba49a7c3f619f8cb28d, type: 2}
   guardHelpRetakeMillNode: {fileID: 11400000, guid: 1d43225673f171e4fbaaa7fce9e7bbe0, type: 2}
-  tellMillerFateQuest: {fileID: 11400000, guid: 9e5af8e2c382c8b4894587e2841bb2ee, type: 2}
-  askAroundNode: {fileID: 11400000, guid: 4cd63c153d75fdf46afd7c8207f5c9cd, type: 2}
-  visitTavernNode: {fileID: 11400000, guid: b534357db5f25b945811a481f42a9a40, type: 2}
-  reportToGuardFromRumourNode: {fileID: 11400000, guid: b515c3b9dd0a02d4c8a59b0f9c1502a4, type: 2}
-  rumourSquadAwaitingNode: {fileID: 11400000, guid: 21933e8c6ce6a364d855a17a255b1d5e, type: 2}
-  rumourHelpRetakeMillNode: {fileID: 11400000, guid: dc9e000afa3f5544cb7a8001ee24bd17, type: 2}
-  learnedMillerFateEvent: {fileID: 11400000, guid: a08f7ed4823c4f7a873d4f2f4550671c, type: 2}
-  askedBlacksmithEvent: {fileID: 11400000, guid: b16a58b468e1470c9371fd6e54512a3e, type: 2}
-  askedHalvarEvent: {fileID: 11400000, guid: c27b69c579f2581da4820e7f65623b4f, type: 2}
-  reportedToGuardEvent: {fileID: 11400000, guid: d38c7ad68a03692eb5931f8076734c5a, type: 2}
+  guardAssaultFailedNode: {fileID: 11400000, guid: 0f1e2d3c4b5a69788796a5b4c3d2e003, type: 2}
   beginAssaultEvent: {fileID: 11400000, guid: e49d8be79b147a3fc6a42f9187845d6b, type: 2}
   claimGuardRewardEvent: {fileID: 11400000, guid: 6b607302b7a487344a8c28b5a4cf6dcf, type: 2}
   claimBanditRewardEvent: {fileID: 11400000, guid: 7ce0c502c0f8cd140aece86d115f7409, type: 2}
@@ -292353,6 +292291,10 @@ PrefabInstance:
       value: Orren
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000032, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: cf1dcfaaebf04f749a82360b74140750, type: 2}
@@ -292360,10 +292302,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: 379ce280a0714cc4ae11ce8d48349655, type: 2}
-    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      propertyPath: dialog
-      value: 
-      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000032, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -308795,6 +308733,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000006, type: 2}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: autoRun
       value: 1
       objectReference: {fileID: 0}
@@ -308806,10 +308748,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: b1140ed680677584abcafcdfda10025d, type: 2}
-    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
-      propertyPath: dialog
-      value: 
-      objectReference: {fileID: 11400000, guid: 11000000000000000000000000000006, type: 2}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -337951,6 +337889,118 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1926996618}
   m_Mesh: {fileID: 4300000, guid: 44fb33c2b7970af49b74b09876bee97f, type: 3}
+--- !u!1 &1928894837
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1928894838}
+  - component: {fileID: 1928894841}
+  - component: {fileID: 1928894840}
+  - component: {fileID: 1928894839}
+  m_Layer: 8
+  m_Name: Spawn  Point in  R
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1928894838
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1928894837}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.78913313, z: -0, w: 0.61422217}
+  m_LocalPosition: {x: 85.7, y: 0.148, z: -133}
+  m_LocalScale: {x: 0.1, y: 0.099999994, z: 0.1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2130047751}
+  m_LocalEulerAnglesHint: {x: 0, y: -104.209, z: 0}
+--- !u!65 &1928894839
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1928894837}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!23 &1928894840
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1928894837}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 7a7c919e1e240154fbf4bf6776cc12cf, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &1928894841
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1928894837}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &1929223888
 GameObject:
   m_ObjectHideFlags: 0
@@ -363970,8 +364020,8 @@ MonoBehaviour:
   objectsToDestroyOnSceneStart:
   - {fileID: 869122094}
   navMeshSurface: {fileID: 389327572}
-  defaultLocationId: Tavern
-  defaultPlayerTransform: {fileID: 1552108189}
+  defaultLocationId: River
+  defaultPlayerTransform: {fileID: 1928894838}
 --- !u!4 &2077356446
 Transform:
   m_ObjectHideFlags: 0
@@ -379819,6 +379869,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1928894838}
   - {fileID: 506798065}
   - {fileID: 1658444543}
   - {fileID: 596082947}

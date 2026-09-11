@@ -43,6 +43,7 @@ namespace Quests
             }
         }
         public event System.Action<QuestChangeInfo> Changed;
+        public event System.Action StateRestored;
 
         public QuestController(
             PlayerInventory playerInventory,
@@ -71,7 +72,7 @@ namespace Quests
                 return false;
             }
 
-            QuestNodeData entryNode = questGraph.GetEntryNode();
+            QuestNodeData entryNode = questGraph?.GetEntryNode();
             if (entryNode == null)
             {
                 return false;
@@ -84,13 +85,23 @@ namespace Quests
 
         public bool TryAddQuest(QuestGraph questGraph)
         {
-            if (!CanAddQuest(questGraph))
+            QuestNodeData entryNode = questGraph?.GetEntryNode();
+            return TryAddQuestAtNode(questGraph, entryNode);
+        }
+
+        /// <summary>
+        /// Starts a quest at an authored node without treating the graph entry as completed.
+        /// This supports legitimate alternate entry points while preserving the history shown in
+        /// the quest journal.
+        /// </summary>
+        public bool TryAddQuestAtNode(QuestGraph questGraph, QuestNodeData startNode)
+        {
+            if (!CanAddQuest(questGraph) || startNode == null || !questGraph.ContainsNode(startNode))
             {
                 return false;
             }
 
-            QuestNodeData entryNode = questGraph.GetEntryNode();
-            var questProgress = new QuestProgress(questGraph, entryNode);
+            var questProgress = new QuestProgress(questGraph, startNode);
             progressByQuest.Add(questGraph, questProgress);
             progress.Add(questProgress);
             Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Added, questGraph));
@@ -101,7 +112,11 @@ namespace Quests
         /// Restores an already authored quest state without applying availability requirements or
         /// transition rewards a second time. Save adapters must resolve assets before calling it.
         /// </summary>
-        public bool TryRestoreQuest(QuestGraph questGraph, QuestNodeData currentNode, bool isCompleted)
+        public bool TryRestoreQuest(
+            QuestGraph questGraph,
+            QuestNodeData currentNode,
+            IReadOnlyList<QuestNodeData> completedNodes,
+            bool isCompleted)
         {
             if (questGraph == null || currentNode == null || !questGraph.ContainsNode(currentNode) ||
                 progressByQuest.ContainsKey(questGraph))
@@ -110,10 +125,7 @@ namespace Quests
             }
 
             var questProgress = new QuestProgress(questGraph, currentNode);
-            if (isCompleted)
-            {
-                questProgress.RestoreCompleted(currentNode);
-            }
+            questProgress.Restore(completedNodes, isCompleted);
 
             progressByQuest.Add(questGraph, questProgress);
             progress.Add(questProgress);
@@ -198,6 +210,31 @@ namespace Quests
 
             questProgress.SetCurrentNode(nodeData);
             Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Updated, questGraph));
+            return true;
+        }
+
+        /// <summary>
+        /// Replaces an active quest with an equivalent node from another authored graph.
+        /// Migration coordinators use this when content consolidation preserves the player's
+        /// progress but changes the graph that owns it.
+        /// </summary>
+        public bool TryReplaceActiveQuest(QuestGraph sourceQuest, QuestGraph targetQuest, QuestNodeData targetNode)
+        {
+            if (!TryGetActiveProgress(sourceQuest, out QuestProgress sourceProgress) ||
+                targetQuest == null || targetNode == null || !targetQuest.ContainsNode(targetNode) ||
+                progressByQuest.ContainsKey(targetQuest))
+            {
+                return false;
+            }
+
+            progressByQuest.Remove(sourceQuest);
+            progress.Remove(sourceProgress);
+            Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Removed, sourceQuest));
+
+            var targetProgress = new QuestProgress(targetQuest, targetNode);
+            progressByQuest.Add(targetQuest, targetProgress);
+            progress.Add(targetProgress);
+            Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Added, targetQuest));
             return true;
         }
 
@@ -339,6 +376,16 @@ namespace Quests
         {
             progressByQuest.Clear();
             progress.Clear();
+        }
+
+        /// <summary>
+        /// Completes a persistence restore after all restored state and automatic transitions
+        /// have been applied. Observers can synchronize their view without treating it as new
+        /// player progress.
+        /// </summary>
+        public void NotifyStateRestored()
+        {
+            StateRestored?.Invoke();
         }
 
         private bool TryGetProgress(QuestGraph questGraph, out QuestProgress questProgress)
@@ -513,10 +560,24 @@ namespace Quests
             IsCompleted = true;
         }
 
-        public void RestoreCompleted(QuestNodeData nodeData)
+        public void Restore(IReadOnlyList<QuestNodeData> restoredCompletedNodes, bool isCompleted)
         {
-            CurrentNode = nodeData ?? throw new System.ArgumentNullException(nameof(nodeData));
-            IsCompleted = true;
+            if (restoredCompletedNodes != null)
+            {
+                foreach (QuestNodeData node in restoredCompletedNodes)
+                {
+                    if (QuestGraph.ContainsNode(node))
+                    {
+                        AddCompletedNode(node);
+                    }
+                }
+            }
+
+            if (isCompleted)
+            {
+                AddCompletedNode(CurrentNode);
+                IsCompleted = true;
+            }
         }
 
         private void AddCompletedNode(QuestNodeData nodeData)

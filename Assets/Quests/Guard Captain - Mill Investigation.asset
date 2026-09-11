@@ -42,6 +42,14 @@ MonoBehaviour:
     NodeData: {fileID: 11400000, guid: ca55d7a6d6479ba49a7c3f619f8cb28d, type: 2}
   - Position: {x: 0, y: 0}
     NodeData: {fileID: 11400000, guid: 1d43225673f171e4fbaaa7fce9e7bbe0, type: 2}
+  - Position: {x: 0, y: 0}
+    NodeData: {fileID: 11400000, guid: 0f1e2d3c4b5a69788796a5b4c3d2e001, type: 2}
+  - Position: {x: 0, y: 0}
+    NodeData: {fileID: 11400000, guid: 0f1e2d3c4b5a69788796a5b4c3d2e002, type: 2}
+  - Position: {x: 0, y: 0}
+    NodeData: {fileID: 11400000, guid: f3d45f833af55574992e77cd265e0b68, type: 2}
+  - Position: {x: 0, y: 0}
+    NodeData: {fileID: 11400000, guid: 0f1e2d3c4b5a69788796a5b4c3d2e003, type: 2}
   references:
     version: 2
     RefIds: []

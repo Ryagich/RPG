@@ -24,10 +24,10 @@ MonoBehaviour:
       moneyAmount: 0
       itemConfig: {fileID: 0}
       itemCount: 1
-      questGraph: {fileID: 11400000, guid: 9e5af8e2c382c8b4894587e2841bb2ee, type: 2}
+      questGraph: {fileID: 11400000, guid: b3000000000000000000000000000001, type: 2}
       questSourceNode: {fileID: 0}
       questTransition: {fileID: 0}
-      questNode: {fileID: 11400000, guid: 4cd63c153d75fdf46afd7c8207f5c9cd, type: 2}
+      questNode: {fileID: 11400000, guid: 0f1e2d3c4b5a69788796a5b4c3d2e001, type: 2}
       runtimeFlag: {fileID: 0}
   isConversationTopic: 0
   isConversationReturnAction: 0

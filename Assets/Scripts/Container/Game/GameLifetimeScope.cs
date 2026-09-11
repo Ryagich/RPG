@@ -17,6 +17,7 @@ using TargetLock;
 using UI.Inventory;
 using Training;
 using Mill;
+using Saves;
 
 namespace Container.Game
 {
@@ -124,6 +125,8 @@ namespace Container.Game
             builder.Register<LootingContext>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueContext>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<DialogueExitController>().AsSelf();
+            builder.RegisterEntryPoint<DialogueSaveCoordinator>().AsSelf();
+            builder.Register<LocationTransitionSaveCoordinator>(Lifetime.Singleton).AsSelf();
             builder.Register<Player.PlayerDeathState>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<GameModesController>().AsSelf();
             builder.RegisterEntryPoint<SoundMessagePlayer>().AsSelf();
@@ -137,7 +140,10 @@ namespace Container.Game
             return soundsRoot;
         }
 
-        internal void InitializeWorld(LocationTransitionService locationTransitions, IAudioService audioService)
+        internal void InitializeWorld(
+            LocationTransitionService locationTransitions,
+            IAudioService audioService,
+            Pose? savedPlayerPose)
         {
             if (worldInitialized)
             {
@@ -152,6 +158,11 @@ namespace Container.Game
             if (locationTransitions.TryGetPlayerSpawn(out var spawnPose))
             {
                 PlacePlayerAtSpawn(playerScope, spawnPose);
+            }
+
+            if (savedPlayerPose.HasValue)
+            {
+                PlacePlayerAtSpawn(playerScope, savedPlayerPose.Value);
             }
 
             audioService.SetListenerTransform(playerScope.transform);

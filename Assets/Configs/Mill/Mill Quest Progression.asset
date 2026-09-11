@@ -13,12 +13,20 @@ MonoBehaviour:
   m_Name: Mill Quest Progression
   m_EditorClassIdentifier: Assembly-CSharp::Mill.MillQuestProgressionConfig
   guardInvestigationQuest: {fileID: 11400000, guid: b3000000000000000000000000000001, type: 2}
+  checkMillNode: {fileID: 11400000, guid: b4000000000000000000000000000001, type: 2}
   reportToGuardNode: {fileID: 11400000, guid: 4442e37bbd8f090409b00b6e4fa427af, type: 2}
   guardSquadAwaitingNode: {fileID: 11400000, guid: ca55d7a6d6479ba49a7c3f619f8cb28d, type: 2}
-  tellMillerFateQuest: {fileID: 11400000, guid: 9e5af8e2c382c8b4894587e2841bb2ee, type: 2}
-  visitTavernNode: {fileID: 11400000, guid: b534357db5f25b945811a481f42a9a40, type: 2}
-  reportToGuardFromRumourNode: {fileID: 11400000, guid: b515c3b9dd0a02d4c8a59b0f9c1502a4, type: 2}
-  rumourSquadAwaitingNode: {fileID: 11400000, guid: 21933e8c6ce6a364d855a17a255b1d5e, type: 2}
+  helpRetakeMillNode: {fileID: 11400000, guid: 1d43225673f171e4fbaaa7fce9e7bbe0, type: 2}
+  guardAssaultFailedNode: {fileID: 11400000, guid: 0f1e2d3c4b5a69788796a5b4c3d2e003, type: 2}
+  askAroundNode: {fileID: 11400000, guid: 0f1e2d3c4b5a69788796a5b4c3d2e001, type: 2}
+  visitTavernNode: {fileID: 11400000, guid: 0f1e2d3c4b5a69788796a5b4c3d2e002, type: 2}
+  reportToGuardFromRumourNode: {fileID: 11400000, guid: f3d45f833af55574992e77cd265e0b68, type: 2}
+  legacyTellMillerFateQuest: {fileID: 11400000, guid: 9e5af8e2c382c8b4894587e2841bb2ee, type: 2}
+  legacyAskAroundNode: {fileID: 11400000, guid: 4cd63c153d75fdf46afd7c8207f5c9cd, type: 2}
+  legacyVisitTavernNode: {fileID: 11400000, guid: b534357db5f25b945811a481f42a9a40, type: 2}
+  legacyReportToGuardNode: {fileID: 11400000, guid: b515c3b9dd0a02d4c8a59b0f9c1502a4, type: 2}
+  legacySquadAwaitingNode: {fileID: 11400000, guid: 21933e8c6ce6a364d855a17a255b1d5e, type: 2}
+  legacyHelpRetakeMillNode: {fileID: 11400000, guid: dc9e000afa3f5544cb7a8001ee24bd17, type: 2}
   learnedMillerFateEvent: {fileID: 11400000, guid: a08f7ed4823c4f7a873d4f2f4550671c, type: 2}
   askedBlacksmithEvent: {fileID: 11400000, guid: b16a58b468e1470c9371fd6e54512a3e, type: 2}
   askedHalvarEvent: {fileID: 11400000, guid: c27b69c579f2581da4820e7f65623b4f, type: 2}

@@ -14,13 +14,22 @@ namespace Mill
     {
         [Header("Quests")]
         [SerializeField] private QuestGraph guardInvestigationQuest;
+        [SerializeField] private QuestNodeData checkMillNode;
         [SerializeField] private QuestNodeData reportToGuardNode;
         [SerializeField] private QuestNodeData guardSquadAwaitingNode;
-
-        [SerializeField] private QuestGraph tellMillerFateQuest;
+        [SerializeField] private QuestNodeData helpRetakeMillNode;
+        [SerializeField] private QuestNodeData guardAssaultFailedNode;
+        [SerializeField] private QuestNodeData askAroundNode;
         [SerializeField] private QuestNodeData visitTavernNode;
         [SerializeField] private QuestNodeData reportToGuardFromRumourNode;
-        [SerializeField] private QuestNodeData rumourSquadAwaitingNode;
+
+        [Header("Legacy save migration")]
+        [SerializeField] private QuestGraph legacyTellMillerFateQuest;
+        [SerializeField] private QuestNodeData legacyAskAroundNode;
+        [SerializeField] private QuestNodeData legacyVisitTavernNode;
+        [SerializeField] private QuestNodeData legacyReportToGuardNode;
+        [SerializeField] private QuestNodeData legacySquadAwaitingNode;
+        [SerializeField] private QuestNodeData legacyHelpRetakeMillNode;
 
         [Header("Dialogue events")]
         [SerializeField] private DialogueGameplayEvent learnedMillerFateEvent;
@@ -37,12 +46,20 @@ namespace Mill
         [SerializeField] private DialogueRuntimeFlag ransomInterestDueFlag;
 
         public QuestGraph GuardInvestigationQuest => guardInvestigationQuest;
+        public QuestNodeData CheckMillNode => checkMillNode;
         public QuestNodeData ReportToGuardNode => reportToGuardNode;
         public QuestNodeData GuardSquadAwaitingNode => guardSquadAwaitingNode;
-        public QuestGraph TellMillerFateQuest => tellMillerFateQuest;
+        public QuestNodeData HelpRetakeMillNode => helpRetakeMillNode;
+        public QuestNodeData GuardAssaultFailedNode => guardAssaultFailedNode;
+        public QuestNodeData AskAroundNode => askAroundNode;
         public QuestNodeData VisitTavernNode => visitTavernNode;
         public QuestNodeData ReportToGuardFromRumourNode => reportToGuardFromRumourNode;
-        public QuestNodeData RumourSquadAwaitingNode => rumourSquadAwaitingNode;
+        public QuestGraph LegacyTellMillerFateQuest => legacyTellMillerFateQuest;
+        public QuestNodeData LegacyAskAroundNode => legacyAskAroundNode;
+        public QuestNodeData LegacyVisitTavernNode => legacyVisitTavernNode;
+        public QuestNodeData LegacyReportToGuardNode => legacyReportToGuardNode;
+        public QuestNodeData LegacySquadAwaitingNode => legacySquadAwaitingNode;
+        public QuestNodeData LegacyHelpRetakeMillNode => legacyHelpRetakeMillNode;
         public DialogueGameplayEvent LearnedMillerFateEvent => learnedMillerFateEvent;
         public DialogueGameplayEvent AskedBlacksmithEvent => askedBlacksmithEvent;
         public DialogueGameplayEvent AskedHalvarEvent => askedHalvarEvent;

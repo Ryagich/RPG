@@ -120,6 +120,7 @@ namespace Container.Project
             builder.Register<SceneLoadingService>(Lifetime.Singleton).AsSelf();
             builder.Register<BootCompletion>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<GameSaveService>(Lifetime.Singleton).AsSelf();
+            builder.Register<GameSaveController>(Lifetime.Singleton).AsSelf();
             builder.Register<LocationTransitionContext>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueRuntimeFlagRegistry>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<ItemStorage>(Lifetime.Singleton).AsSelf();

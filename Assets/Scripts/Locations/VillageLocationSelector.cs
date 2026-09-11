@@ -210,6 +210,18 @@ namespace Locations
             return transition != null;
         }
 
+        public bool TryGetEntrancePose(string locationId, string transitionId, out Pose pose)
+        {
+            pose = default;
+            if (!TryGetTransition(locationId, transitionId, out VillageLocationTransition transition) || !transition.CanEnter)
+            {
+                return false;
+            }
+
+            pose = new Pose(transition.PlayerSpawnTransform.position, transition.PlayerSpawnTransform.rotation);
+            return true;
+        }
+
         private void ConfigureTransitionTriggers(VillageLocationDefinition location)
         {
             foreach (var transition in location.Transitions)

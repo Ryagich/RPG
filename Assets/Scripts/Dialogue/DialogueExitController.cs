@@ -2,6 +2,7 @@ using System;
 using GameModes;
 using MessagePipe;
 using Messages;
+using Saves;
 using VContainer.Unity;
 
 namespace Dialogue
@@ -12,16 +13,19 @@ namespace Dialogue
     public sealed class DialogueExitController : IStartable, IDisposable
     {
         private readonly DialogueContext dialogueContext;
+        private readonly DialogueSaveCoordinator dialogueSaveCoordinator;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
         private readonly ISubscriber<DialogueExitRequestedMessage> dialogueExitRequestedSubscriber;
         private IDisposable dialogueExitSubscription;
 
         public DialogueExitController(
             DialogueContext dialogueContext,
+            DialogueSaveCoordinator dialogueSaveCoordinator,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
             ISubscriber<DialogueExitRequestedMessage> dialogueExitRequestedSubscriber)
         {
             this.dialogueContext = dialogueContext;
+            this.dialogueSaveCoordinator = dialogueSaveCoordinator;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
             this.dialogueExitRequestedSubscriber = dialogueExitRequestedSubscriber;
         }
@@ -44,6 +48,7 @@ namespace Dialogue
                 return;
             }
 
+            dialogueSaveCoordinator.SaveBeforeExit();
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Game));
         }
     }

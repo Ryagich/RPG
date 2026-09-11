@@ -1,18 +1,103 @@
 {
-  "idSave": 16,
+  "idSave": 94,
   "GameReadyMetricSend": true,
-  "saveVersion": 1,
-  "locationId": "River",
-  "entranceId": "To Mill",
+  "saveVersion": 3,
+  "locationId": "Mill",
+  "entranceId": "To River",
+  "playerPose": {
+    "isValid": 1,
+    "positionX": 128.673889,
+    "positionY": 0.5316675,
+    "positionZ": -90.4421,
+    "rotationX": 0.0,
+    "rotationY": -0.07110539,
+    "rotationZ": 0.0,
+    "rotationW": 0.9974688
+  },
   "money": 112,
-  "health": 18.5701046,
-  "stamina": 299.822449,
-  "quests": [],
+  "health": 100.0,
+  "stamina": 276.439026,
+  "quests": [
+    {
+      "questId": "4a52dc390b3a4df98d7b204c23916053",
+      "currentNodeId": "e3d8fb0f217f46a197775692df71919e",
+      "completedNodeIds": [
+        "5ba9f2143c7e4aab9d7b198e65f30c11",
+        "58b867eda2cf49c8a79230dd28ed16cb",
+        "e3d8fb0f217f46a197775692df71919e"
+      ],
+      "state": 1
+    }
+  ],
   "inventory": [
     {
       "itemId": "Larkspur ItemConfig ID",
-      "count": 3,
+      "count": 6,
       "x": 0,
+      "y": 0,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Bottle of Water Config ID",
+      "count": 3,
+      "x": 1,
+      "y": 1,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Ring_10 Config ID",
+      "count": 1,
+      "x": 0,
+      "y": 2,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Carrot ItemConfig ID",
+      "count": 6,
+      "x": 2,
+      "y": 0,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Tomato ItemConfig ID",
+      "count": 12,
+      "x": 1,
+      "y": 0,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Bottle of wine Config ID",
+      "count": 2,
+      "x": 3,
+      "y": 0,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Apple ItemConfig ID",
+      "count": 2,
+      "x": 3,
+      "y": 1,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Piece of cheese Config ID",
+      "count": 6,
+      "x": 0,
+      "y": 1,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Ring_08 Config ID",
+      "count": 1,
+      "x": 4,
       "y": 0,
       "rotated": 0,
       "slot": 0
@@ -42,6 +127,14 @@
       "slot": 6
     },
     {
+      "itemId": "Hips ItemConfig 14",
+      "count": 1,
+      "x": 0,
+      "y": 0,
+      "rotated": 0,
+      "slot": 7
+    },
+    {
       "itemId": "Backpack Item Config ID Test 2",
       "count": 1,
       "x": 0,
@@ -56,11 +149,27 @@
       "y": 0,
       "rotated": 0,
       "slot": 9
+    },
+    {
+      "itemId": "Sword 7 Item Config ID",
+      "count": 1,
+      "x": 0,
+      "y": 0,
+      "rotated": 0,
+      "slot": 10
+    },
+    {
+      "itemId": "Larkspur ItemConfig ID",
+      "count": 1,
+      "x": 0,
+      "y": 0,
+      "rotated": 0,
+      "slot": 11
     }
   ],
-  "millScenarioStage": 2,
+  "millScenarioStage": 5,
   "millOutcomeFlags": [
-    0
+    3
   ],
   "factionRelations": [
     {

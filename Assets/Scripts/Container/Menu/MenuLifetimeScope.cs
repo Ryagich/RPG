@@ -197,7 +197,7 @@ namespace Container.Menu
     public sealed class MenuMainPage : BasePage
     {
         private readonly UIConfig uiConfig;
-        private readonly GameSaveService saveService;
+        private readonly GameSaveController saveController;
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
         private RectTransform contentRect;
@@ -211,10 +211,10 @@ namespace Container.Menu
         public event System.Action DevelopRequested;
         public event System.Action SettingsRequested;
 
-        public MenuMainPage(UIConfig uiConfig, GameSaveService saveService, Canvas canvas, IObjectResolver resolver)
+        public MenuMainPage(UIConfig uiConfig, GameSaveController saveController, Canvas canvas, IObjectResolver resolver)
         {
             this.uiConfig = uiConfig;
-            this.saveService = saveService;
+            this.saveController = saveController;
             this.resolver = resolver;
             canvasRect = canvas.GetComponent<RectTransform>();
         }
@@ -246,7 +246,7 @@ namespace Container.Menu
             menuUI.ContinueButton.onClick.AddListener(OnContinueRequested);
             menuUI.ToDevelopButton.onClick.AddListener(OnDevelopRequested);
             menuUI.SettingsButton.onClick.AddListener(OnSettingsRequested);
-            saveService.ReadyStateChanged += RefreshContinueAvailability;
+            saveController.ReadyStateChanged += RefreshContinueAvailability;
             RefreshContinueAvailability();
         }
 
@@ -265,7 +265,7 @@ namespace Container.Menu
                 menuUI.SettingsButton.onClick.RemoveListener(OnSettingsRequested);
             }
 
-            saveService.ReadyStateChanged -= RefreshContinueAvailability;
+            saveController.ReadyStateChanged -= RefreshContinueAvailability;
             CloseNewGameConfirmation();
 
             Object.Destroy(contentRect.gameObject);
@@ -274,19 +274,19 @@ namespace Container.Menu
             menuUI = null;
         }
 
-        public bool HasSavedGame => saveService.HasSavedData;
+        public bool HasSavedGame => saveController.HasSavedData;
 
-        public bool ResetSavedGame() => saveService.ResetToDefaults();
+        public bool ResetSavedGame() => saveController.ResetToDefaults();
 
         private async void OnGameRequested()
         {
-            await saveService.Ready;
+            await saveController.Ready;
             if (menuUI == null)
             {
                 return;
             }
 
-            if (!saveService.HasSavedData)
+            if (!saveController.HasSavedData)
             {
                 NewGameRequested?.Invoke();
                 return;
@@ -297,7 +297,7 @@ namespace Container.Menu
 
         private void OnContinueRequested()
         {
-            if (saveService.HasSavedData)
+            if (saveController.HasSavedData)
             {
                 ContinueRequested?.Invoke();
             }
@@ -310,7 +310,7 @@ namespace Container.Menu
         {
             if (menuUI?.ContinueButton != null)
             {
-                menuUI.ContinueButton.interactable = saveService.HasSavedData;
+                menuUI.ContinueButton.interactable = saveController.HasSavedData;
             }
         }
 

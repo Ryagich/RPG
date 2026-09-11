@@ -16,7 +16,7 @@ namespace Container.Game
     {
         private readonly GameLifetimeScope scope;
         private readonly BootCompletion bootCompletion;
-        private readonly GameSaveService saveService;
+        private readonly GameSaveController saveController;
         private readonly LocationTransitionContext transitionContext;
         private readonly LocationTransitionService locationTransitions;
         private readonly IAudioService audioService;
@@ -24,14 +24,14 @@ namespace Container.Game
         public GameWorldBootstrapper(
             GameLifetimeScope scope,
             BootCompletion bootCompletion,
-            GameSaveService saveService,
+            GameSaveController saveController,
             LocationTransitionContext transitionContext,
             LocationTransitionService locationTransitions,
             IAudioService audioService)
         {
             this.scope = scope;
             this.bootCompletion = bootCompletion;
-            this.saveService = saveService;
+            this.saveController = saveController;
             this.transitionContext = transitionContext;
             this.locationTransitions = locationTransitions;
             this.audioService = audioService;
@@ -40,9 +40,12 @@ namespace Container.Game
         public async void Start()
         {
             await bootCompletion.WaitAsync();
-            await saveService.Ready;
-            saveService.RestoreLocationTransition(transitionContext);
-            scope.InitializeWorld(locationTransitions, audioService);
+            await saveController.Ready;
+            saveController.RestoreLocationTransition(transitionContext);
+            UnityEngine.Pose? savedPlayerPose = saveController.TryGetSavedPlayerPose(out UnityEngine.Pose pose)
+                ? pose
+                : null;
+            scope.InitializeWorld(locationTransitions, audioService, savedPlayerPose);
         }
     }
 }
