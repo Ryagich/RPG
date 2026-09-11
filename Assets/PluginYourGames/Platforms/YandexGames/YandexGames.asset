@@ -18,7 +18,7 @@ MonoBehaviour:
     interAdvInterval: 60
     postponeCallByFail: 0
     setLanguageMod: 1
-    useYandexMetrica: 1
+    useYandexMetrica: 0
     metricaCounterID: 0
     skipInterAdvAfterReward: 0
     saveLocal: 0

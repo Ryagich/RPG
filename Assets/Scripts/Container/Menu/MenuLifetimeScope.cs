@@ -1,5 +1,6 @@
 using Container.Project;
 using Loading;
+using Localization;
 using UI.Configs;
 using UI.Pages;
 using UI.UIElements;
@@ -61,6 +62,7 @@ namespace Container.Menu
         private readonly MenuGameplaySettingsPage gameplaySettingsPage;
         private readonly IAudioService audioService;
         private readonly OpeningSlidesPage openingSlidesPage;
+        private readonly BootCompletion bootCompletion;
         private BasePage currentPage;
 
         public MenuController(
@@ -70,7 +72,8 @@ namespace Container.Menu
             MenuSoundsSettingsPage soundsSettingsPage,
             MenuGameplaySettingsPage gameplaySettingsPage,
             OpeningSlidesPage openingSlidesPage,
-            IAudioService audioService)
+            IAudioService audioService,
+            BootCompletion bootCompletion)
         {
             this.sceneLoadingService = sceneLoadingService;
             this.mainPage = mainPage;
@@ -79,10 +82,13 @@ namespace Container.Menu
             this.gameplaySettingsPage = gameplaySettingsPage;
             this.openingSlidesPage = openingSlidesPage;
             this.audioService = audioService;
+            this.bootCompletion = bootCompletion;
         }
 
-        public void Start()
+        public async void Start()
         {
+            await bootCompletion.WaitAsync();
+
             Time.timeScale = 1f;
             Cursor.lockState = CursorLockMode.Confined;
             Cursor.visible = true;

@@ -14,7 +14,23 @@ MonoBehaviour:
   isQuestPhrase: 0
   isConversationTopic: 0
   isConversationReturnAction: 1
-  conversationReturnAnswer: {text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 95000000000000039, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}, nextPhrase: {fileID: 11400000, guid: 10101010101010101010101010101030, type: 2}, forceExitAfterAnswer: 0, continueForcedDialogueAfterExit: 1, hasGameplayEvents: 0, gameplayEvents: [], hasConditions: 0, conditions: []}
+  conversationReturnAnswer:
+    text:
+      m_TableReference:
+        m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
+      m_TableEntryReference:
+        m_KeyId: 95000000000000039
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 11400000, guid: 10101010101010101010101010101030, type: 2}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 0
+    conditions: []
   isDialogueExitAction: 0
   hasGameplayEvents: 0
   gameplayEvents: []

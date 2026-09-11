@@ -1,12 +1,12 @@
 {
-  "idSave": 15,
+  "idSave": 16,
   "GameReadyMetricSend": true,
   "saveVersion": 1,
-  "locationId": "Mill",
-  "entranceId": "To River",
+  "locationId": "River",
+  "entranceId": "To Mill",
   "money": 112,
-  "health": 17.2700748,
-  "stamina": 299.804718,
+  "health": 18.5701046,
+  "stamina": 299.822449,
   "quests": [],
   "inventory": [
     {
