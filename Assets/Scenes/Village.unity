@@ -61555,6 +61555,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: a4000000000000000000000000000001, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: cf1dcfaaebf04f749a82360b74140750, type: 2}
@@ -61562,10 +61566,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: d3c200ee323f43e08894c491c44a31d6, type: 2}
-    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      propertyPath: dialog
-      value:
-      objectReference: {fileID: 11400000, guid: a4000000000000000000000000000001, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -80393,6 +80393,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: b4e00000000000000000000000000001, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: canTalk
       value: 1
       objectReference: {fileID: 0}
@@ -80404,10 +80408,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: 64545ba0d14e42948350deff9cc96c70, type: 2}
-    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      propertyPath: dialog
-      value:
-      objectReference: {fileID: 11400000, guid: b4e00000000000000000000000000001, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -88543,27 +88543,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
   m_PrefabInstance: {fileID: 506798064}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &919000000000000005 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-  m_PrefabInstance: {fileID: 506798064}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &919000000000000004
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 919000000000000005}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e1a00000000000000000000000000001, type: 3}
-  m_Name: ""
-  m_EditorClassIdentifier: Assembly-CSharp::Tavern.ElinaQuestLocationPresence
-  quest: {fileID: 11400000, guid: b3000000000000000000000000000002, type: 2}
-  tavernStageNode: {fileID: 11400000, guid: b4000000000000000000000000000004, type: 2}
-  relocationPendingFlag: {fileID: 11400000, guid: e3a00000000000000000000000000001, type: 2}
-  isTavernAppearance: 0
 --- !u!1001 &507203478
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -122660,10 +122639,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 240556210}
     m_Modifications:
-    - target: {fileID: 2214256804773834761, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      propertyPath: allowOnlyOneForcedDialoguePerActivation
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 239359662976059219, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -122707,6 +122682,10 @@ PrefabInstance:
     - target: {fileID: 2083708640806320028, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2214256804773834761, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: allowOnlyOneForcedDialoguePerActivation
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2338758805014143517, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
@@ -126990,9 +126969,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       insertIndex: -1
       addedObject: {fileID: 719675549}
-    - targetCorrespondingSourceObject: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 919000000000000001}
   m_SourcePrefab: {fileID: 100100000, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
 --- !u!4 &719675547 stripped
 Transform:
@@ -127019,21 +126995,6 @@ MonoBehaviour:
   questGraph: {fileID: 11400000, guid: a55b3d8e42960da47bb27f0695f75776, type: 2}
   targetTransform: {fileID: 719675547}
   targetId: a4c63ac742c545aa9ab088a154fc59f7
---- !u!114 &919000000000000001
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 719675548}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 13de18f9f7762c34c86f0dedb3275b89, type: 3}
-  m_Name: ""
-  m_EditorClassIdentifier: Assembly-CSharp::Quests.MapTargets.QuestMapTarget
-  questGraph: {fileID: 11400000, guid: 971e12bc350c9594482845c6543433c9, type: 2}
-  targetTransform: {fileID: 719675547}
-  targetId: oswin-blacksmith-garven
 --- !u!1 &721437522
 GameObject:
   m_ObjectHideFlags: 0
@@ -157469,6 +157430,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: a4000000000000000000000000000002, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: canTalk
       value: 1
       objectReference: {fileID: 0}
@@ -157480,10 +157445,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: ee77863f17db44fe9bd91f096208bbf7, type: 2}
-    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      propertyPath: dialog
-      value:
-      objectReference: {fileID: 11400000, guid: a4000000000000000000000000000002, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -203613,6 +203574,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: b4800000000000000000000000000001, type: 2}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: autoRun
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: cf1dcfaaebf04f749a82360b74140750, type: 2}
@@ -203620,10 +203589,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: 67359da774744fa99512f0559caab8ca, type: 2}
-    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
-      propertyPath: dialog
-      value:
-      objectReference: {fileID: 11400000, guid: b4800000000000000000000000000001, type: 2}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -205635,6 +205600,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: b4900000000000000000000000000001, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: canTalk
       value: 1
       objectReference: {fileID: 0}
@@ -205646,10 +205615,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: 88e002706f064d40adef267762998301, type: 2}
-    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      propertyPath: dialog
-      value:
-      objectReference: {fileID: 11400000, guid: b4900000000000000000000000000001, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -220683,6 +220648,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: a4000000000000000000000000000003, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: canTalk
       value: 1
       objectReference: {fileID: 0}
@@ -220694,10 +220663,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: 07ff86aef953bb649b537ec9dfb39f42, type: 2}
-    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      propertyPath: dialog
-      value:
-      objectReference: {fileID: 11400000, guid: a4000000000000000000000000000003, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -254504,6 +254469,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: b4d00000000000000000000000000001, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: canTalk
       value: 1
       objectReference: {fileID: 0}
@@ -254515,10 +254484,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: e46d7f9a797b47afa32550089416ab5b, type: 2}
-    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      propertyPath: dialog
-      value:
-      objectReference: {fileID: 11400000, guid: b4d00000000000000000000000000001, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -276249,13 +276214,13 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: b4700000000000000000000000000001, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: canTalk
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      propertyPath: dialog
-      value:
-      objectReference: {fileID: 11400000, guid: b4700000000000000000000000000001, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: faction
       value: 
@@ -280048,6 +280013,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: b4b00000000000000000000000000001, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: cf1dcfaaebf04f749a82360b74140750, type: 2}
@@ -280055,10 +280024,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: 49bbccae2cf349acbc365603d2ad3baf, type: 2}
-    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-      propertyPath: dialog
-      value:
-      objectReference: {fileID: 11400000, guid: b4b00000000000000000000000000001, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -286014,6 +285979,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: b4c00000000000000000000000000001, type: 2}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: autoRun
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: cf1dcfaaebf04f749a82360b74140750, type: 2}
@@ -286021,10 +285994,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: c6b9edd9d3d9426d86781dd9af21de0c, type: 2}
-    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
-      propertyPath: dialog
-      value:
-      objectReference: {fileID: 11400000, guid: b4c00000000000000000000000000001, type: 2}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -287360,7 +287329,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: dialog
-      value:
+      value: 
       objectReference: {fileID: 11400000, guid: e2a00000000000000000000000000001, type: 2}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: faction
@@ -287391,27 +287360,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6840519812694819384, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
   m_PrefabInstance: {fileID: 1647616072}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &919000000000000007 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-  m_PrefabInstance: {fileID: 1647616072}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &919000000000000006
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 919000000000000007}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e1a00000000000000000000000000001, type: 3}
-  m_Name: ""
-  m_EditorClassIdentifier: Assembly-CSharp::Tavern.ElinaQuestLocationPresence
-  quest: {fileID: 11400000, guid: b3000000000000000000000000000002, type: 2}
-  tavernStageNode: {fileID: 11400000, guid: b4000000000000000000000000000004, type: 2}
-  relocationPendingFlag: {fileID: 11400000, guid: e3a00000000000000000000000000001, type: 2}
-  isTavernAppearance: 1
 --- !u!1001 &1647871704
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -314425,6 +314373,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: dialog
+      value: 
+      objectReference: {fileID: 11400000, guid: b4a00000000000000000000000000001, type: 2}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: autoRun
       value: 1
       objectReference: {fileID: 0}
@@ -314436,10 +314388,6 @@ PrefabInstance:
       propertyPath: characterInfo
       value: 
       objectReference: {fileID: 11400000, guid: 300ab62b74dc411683e1261b8dcbfe57, type: 2}
-    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
-      propertyPath: dialog
-      value:
-      objectReference: {fileID: 11400000, guid: b4a00000000000000000000000000001, type: 2}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: defaultVisualConfig
       value: 
@@ -382132,6 +382080,68 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &919000000000000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 919000000000000003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13de18f9f7762c34c86f0dedb3275b89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Quests.MapTargets.QuestMapTarget
+  questGraph: {fileID: 11400000, guid: 971e12bc350c9594482845c6543433c9, type: 2}
+  targetTransform: {fileID: 6840519811184863040}
+  targetId: oswin-blacksmith-oswin
+--- !u!1 &919000000000000003 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8546271600265788014, guid: ae58676d275493441a78925e511e63d3, type: 3}
+  m_PrefabInstance: {fileID: 2753995356337865765}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &919000000000000004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 919000000000000005}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1a00000000000000000000000000001, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Tavern.ElinaQuestLocationPresence
+  quest: {fileID: 11400000, guid: b3000000000000000000000000000002, type: 2}
+  tavernStageNode: {fileID: 11400000, guid: b4000000000000000000000000000004, type: 2}
+  relocationPendingFlag: {fileID: 11400000, guid: e3a00000000000000000000000000001, type: 2}
+  isTavernAppearance: 0
+--- !u!1 &919000000000000005 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+  m_PrefabInstance: {fileID: 506798064}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &919000000000000006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 919000000000000007}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1a00000000000000000000000000001, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Tavern.ElinaQuestLocationPresence
+  quest: {fileID: 11400000, guid: b3000000000000000000000000000002, type: 2}
+  tavernStageNode: {fileID: 11400000, guid: b4000000000000000000000000000004, type: 2}
+  relocationPendingFlag: {fileID: 11400000, guid: e3a00000000000000000000000000001, type: 2}
+  isTavernAppearance: 1
+--- !u!1 &919000000000000007 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+  m_PrefabInstance: {fileID: 1647616072}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2753995356337865765
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -382209,26 +382219,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6973757959135382267, guid: ae58676d275493441a78925e511e63d3, type: 3}
   m_PrefabInstance: {fileID: 2753995356337865765}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &919000000000000003 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8546271600265788014, guid: ae58676d275493441a78925e511e63d3, type: 3}
-  m_PrefabInstance: {fileID: 2753995356337865765}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &919000000000000002
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 919000000000000003}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 13de18f9f7762c34c86f0dedb3275b89, type: 3}
-  m_Name: ""
-  m_EditorClassIdentifier: Assembly-CSharp::Quests.MapTargets.QuestMapTarget
-  questGraph: {fileID: 11400000, guid: 971e12bc350c9594482845c6543433c9, type: 2}
-  targetTransform: {fileID: 6840519811184863040}
-  targetId: oswin-blacksmith-oswin
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

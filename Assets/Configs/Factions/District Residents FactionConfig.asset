@@ -26,7 +26,8 @@ MonoBehaviour:
   <CombatProfile>k__BackingField: {fileID: 11400000, guid: 673d413f9df33004a8618f290335e095, type: 2}
   <CombatProfiles>k__BackingField: []
   <ItemSetConfigs>k__BackingField: []
-  <ItemLootSetConfigs>k__BackingField: []
+  <ItemLootSetConfigs>k__BackingField:
+  - {fileID: 11400000, guid: 9a021fea2ca0670499603c47423fc6a3, type: 2}
   references:
     version: 2
     RefIds: []
