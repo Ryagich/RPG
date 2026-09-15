@@ -13,6 +13,7 @@ namespace Saves
         private readonly LocationTransitionService locationTransitions;
         private readonly GameSaveController saveController;
         private bool hasCheckpointForCurrentDialogue;
+        private bool suppressCheckpointForCurrentDialogue;
 
         public DialogueSaveCoordinator(
             DialogueContext dialogueContext,
@@ -44,6 +45,7 @@ namespace Saves
         private void OnDialogueOpened()
         {
             hasCheckpointForCurrentDialogue = false;
+            suppressCheckpointForCurrentDialogue = dialogueContext.CurrentDialog?.SuppressCheckpointOnClose == true;
         }
 
         private void SaveFullCheckpoint()
@@ -53,6 +55,11 @@ namespace Saves
 
         private bool TrySaveCurrentDialogue()
         {
+            if (suppressCheckpointForCurrentDialogue)
+            {
+                return true;
+            }
+
             if (hasCheckpointForCurrentDialogue)
             {
                 return true;

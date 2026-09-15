@@ -8,4 +8,62 @@ MonoBehaviour:
   Nodes:
   - Position: {x: 0, y: 0}
     Phrase: {fileID: 11400000, guid: 11000000000000000000000000000026, type: 2}
+  - Position: {x: 420, y: 0}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e701, type: 2}
+  - Position: {x: 820, y: -320}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e702, type: 2}
+  - Position: {x: 1220, y: -420}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e703, type: 2}
+  - Position: {x: 1220, y: -220}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e704, type: 2}
+  - Position: {x: 820, y: -100}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e705, type: 2}
+  - Position: {x: 1220, y: -100}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e706, type: 2}
+  - Position: {x: 1220, y: 100}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e707, type: 2}
+  - Position: {x: 820, y: 120}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e708, type: 2}
+  - Position: {x: 1220, y: 220}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e709, type: 2}
+  - Position: {x: 1220, y: 420}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e70a, type: 2}
+  - Position: {x: 820, y: 340}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e70b, type: 2}
+  - Position: {x: 1220, y: 540}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e70c, type: 2}
+  - Position: {x: 1220, y: 740}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e70d, type: 2}
+  - Position: {x: 820, y: 560}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e70e, type: 2}
+  - Position: {x: 1220, y: 900}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e70f, type: 2}
+  - Position: {x: 1220, y: 1100}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e710, type: 2}
+  - Position: {x: 820, y: 780}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e711, type: 2}
+  - Position: {x: 1600, y: -420}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e712, type: 2}
+  - Position: {x: 1600, y: -220}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e713, type: 2}
+  - Position: {x: 1600, y: -100}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e714, type: 2}
+  - Position: {x: 1600, y: 100}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e715, type: 2}
+  - Position: {x: 1600, y: 220}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e716, type: 2}
+  - Position: {x: 1600, y: 420}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e717, type: 2}
+  - Position: {x: 1600, y: 540}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e718, type: 2}
+  - Position: {x: 1600, y: 740}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e719, type: 2}
+  - Position: {x: 1600, y: 900}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e71a, type: 2}
+  - Position: {x: 1600, y: 1100}
+    Phrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e71b, type: 2}
+  - Position: {x: 420, y: 1360}
+    Phrase: {fileID: 11400000, guid: a4100000000000000000000000000002, type: 2}
+  - Position: {x: 420, y: 1540}
+    Phrase: {fileID: 11400000, guid: a4100000000000000000000000000003, type: 2}
   <EntryPhrase>k__BackingField: {fileID: 11400000, guid: 11000000000000000000000000000026, type: 2}

@@ -113,4 +113,8 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: 11000000000000000000000000000001, type: 2}
   - Position: {x: 4200, y: 2700}
     Phrase: {fileID: 11400000, guid: 11000000000000000000000000000002, type: 2}
+  - Position: {x: 3800, y: 3200}
+    Phrase: {fileID: 11400000, guid: e1000000000000000000000000000008, type: 2}
+  - Position: {x: 4200, y: 3200}
+    Phrase: {fileID: 11400000, guid: e1000000000000000000000000000009, type: 2}
   <EntryPhrase>k__BackingField: {fileID: 11400000, guid: 89886865c12e7c147a89adf0209b7542, type: 2}

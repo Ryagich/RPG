@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f017ef0dab3961d4d9cc460c84f52c76, type: 3}
   m_Name: Bram Voss - Forest Toll
   m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.DialogGraph
+  suppressCheckpointOnClose: 1
   Nodes:
   - Position: {x: 250, y: 180}
     Phrase: {fileID: 11400000, guid: a162aecd7d5f41d42affb328d6ec48a4, type: 2}

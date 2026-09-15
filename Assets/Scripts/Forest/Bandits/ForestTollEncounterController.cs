@@ -27,6 +27,7 @@ namespace Forest.Bandits
         [SerializeField] private DialogueGameplayEvent paidTollEvent;
         [SerializeField] private DialogueGameplayEvent threatenBanditsEvent;
         [SerializeField] private DialogueRuntimeFlag tollPaidFlag;
+        [SerializeField] private DialogueRuntimeFlag tollDemandResolvedFlag;
         [SerializeField] private DialogueRuntimeFlag encounterClearedFlag;
 
         private LocationTransitionService locationTransitions;
@@ -34,6 +35,7 @@ namespace Forest.Bandits
         private ISubscriber<DialogueGameplayEventRaisedMessage> dialogueEventSubscriber;
         private System.IDisposable dialogueEventSubscription;
         private bool isResolved;
+        private bool isInitialized;
 
         [Inject]
         public void Construct(
@@ -49,7 +51,18 @@ namespace Forest.Bandits
         private void Start()
         {
             dialogueEventSubscription = dialogueEventSubscriber?.Subscribe(OnDialogueGameplayEvent);
-            ApplyArrivalWalls();
+            isInitialized = true;
+            ApplyArrivalState();
+        }
+
+        private void OnEnable()
+        {
+            // The forest location is deactivated between transitions rather than recreated.
+            // Start has already run on later arrivals, but the selected entrance has changed.
+            if (isInitialized)
+            {
+                ApplyArrivalState();
+            }
         }
 
         private void Update()
@@ -71,7 +84,7 @@ namespace Forest.Bandits
             if (message.Event == paidTollEvent)
             {
                 runtimeFlags?.Activate(tollPaidFlag);
-                ResolveEncounter();
+                OpenCurrentPassage();
             }
             else if (message.Event == threatenBanditsEvent)
             {
@@ -81,7 +94,7 @@ namespace Forest.Bandits
 
         private void ApplyArrivalWalls()
         {
-            if (runtimeFlags?.IsActive(tollPaidFlag) == true || runtimeFlags?.IsActive(encounterClearedFlag) == true)
+            if (runtimeFlags?.IsActive(encounterClearedFlag) == true)
             {
                 ResolveEncounter();
                 return;
@@ -94,11 +107,33 @@ namespace Forest.Bandits
             SetWallState(enteredForestFromTavern, !enteredForestFromTavern);
         }
 
+        private void ApplyArrivalState()
+        {
+            ResetArrivalTollState();
+            ApplyArrivalWalls();
+        }
+
+        private void ResetArrivalTollState()
+        {
+            // Paying is valid for this crossing only. Runtime dialogue flags are used solely
+            // to hide the repeated payment branch during the current forest visit.
+            runtimeFlags?.Deactivate(tollPaidFlag);
+            runtimeFlags?.Deactivate(tollDemandResolvedFlag);
+        }
+
+        private void OpenCurrentPassage()
+        {
+            // Exactly one authored wall is active for each arrival direction. The other is
+            // already open, so clearing both opens the paid crossing without changing the
+            // direction-selection rules used on the next forest entry.
+            SetWallState(false, false);
+        }
+
         private void ResolveEncounter()
         {
             isResolved = true;
             runtimeFlags?.Activate(encounterClearedFlag);
-            SetWallState(false, false);
+            OpenCurrentPassage();
         }
 
         private void MakeRoadsideGroupHostile()

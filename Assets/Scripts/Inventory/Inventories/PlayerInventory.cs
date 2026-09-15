@@ -1466,7 +1466,7 @@ namespace Inventory.Inventories
                     continue;
                 }
 
-                if (placement.ItemConfig?.ItemType == ItemType.Usable)
+                if (placement.ItemConfig.ItemType == ItemType.Usable)
                 {
                     fastSlot.Assign(placement.ItemConfig);
                 }

@@ -80,6 +80,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63be2dac46c14373be9aca61214402db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPC.NpcForcedDialogueAvailability
+  allowOnlyOneForcedDialoguePerActivation: 0
 --- !u!1 &7593543931042045572
 GameObject:
   m_ObjectHideFlags: 0
@@ -1769,7 +1770,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4171048262479041620, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4187340070719265021, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
       propertyPath: m_IsActive
@@ -3438,6 +3439,309 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8746402204278370877, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2334073334939782623}
+    - targetCorrespondingSourceObject: {fileID: 5613735113554165826, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6266628105600491067}
+    - targetCorrespondingSourceObject: {fileID: 3091334473207201176, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1328161589646078669}
+    - targetCorrespondingSourceObject: {fileID: 7958943176579775584, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1537949552582048412}
+    - targetCorrespondingSourceObject: {fileID: 2175263419519018670, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8462486415938098104}
+    - targetCorrespondingSourceObject: {fileID: 1294413350684001550, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6487636514390428895}
+    - targetCorrespondingSourceObject: {fileID: 5815605079460954848, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6503785003737451662}
+    - targetCorrespondingSourceObject: {fileID: 600415910617658537, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5249606274393537585}
+    - targetCorrespondingSourceObject: {fileID: 822855061621417349, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 317451073250597622}
+    - targetCorrespondingSourceObject: {fileID: 974326588701109285, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8940745000193370053}
+    - targetCorrespondingSourceObject: {fileID: 4191493470840992034, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4050129628927112477}
+    - targetCorrespondingSourceObject: {fileID: 6771030763154962832, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1818782383289092491}
+    - targetCorrespondingSourceObject: {fileID: 2498988162658440684, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1485700843685709394}
+    - targetCorrespondingSourceObject: {fileID: 274061169006787800, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8679785190402700143}
+    - targetCorrespondingSourceObject: {fileID: 8545188319005343614, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4005664314928264522}
+    - targetCorrespondingSourceObject: {fileID: 5824944735706078205, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7655601071143408639}
+    - targetCorrespondingSourceObject: {fileID: 2898708671642465440, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8313419300858753610}
+    - targetCorrespondingSourceObject: {fileID: 3145583523169549774, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6011840475463089462}
+    - targetCorrespondingSourceObject: {fileID: 3503293660251113892, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4849627424832597121}
+    - targetCorrespondingSourceObject: {fileID: 1112134774624772254, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2950735522856783113}
+    - targetCorrespondingSourceObject: {fileID: 310972718212987606, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8649577545750272026}
+    - targetCorrespondingSourceObject: {fileID: 7897068255792438211, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2582380070350001058}
+    - targetCorrespondingSourceObject: {fileID: 8707477263117533988, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4644067184549199485}
+    - targetCorrespondingSourceObject: {fileID: 1325262490728462694, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7936563827236320639}
+    - targetCorrespondingSourceObject: {fileID: 1096541765128562570, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8709840838985639441}
+    - targetCorrespondingSourceObject: {fileID: 3909305034998130257, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7292233496790331182}
+    - targetCorrespondingSourceObject: {fileID: 868828615837599501, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5835410710481394977}
+    - targetCorrespondingSourceObject: {fileID: 3369373128935883206, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7834039267222518600}
+    - targetCorrespondingSourceObject: {fileID: 4649967880786458379, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8317502878343644757}
+    - targetCorrespondingSourceObject: {fileID: 5962489068992508220, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7902575885769713696}
+    - targetCorrespondingSourceObject: {fileID: 3215309051168292041, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2236660652791635545}
+    - targetCorrespondingSourceObject: {fileID: 2639752828893390911, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6706046273133610020}
+    - targetCorrespondingSourceObject: {fileID: 8833023931088673218, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7749179449148508504}
+    - targetCorrespondingSourceObject: {fileID: 2546457086222080400, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3982749867381879823}
+    - targetCorrespondingSourceObject: {fileID: 4777368814311081633, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2152503283555761022}
+    - targetCorrespondingSourceObject: {fileID: 2459199210817184496, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7017320112358695129}
+    - targetCorrespondingSourceObject: {fileID: 6576740559606660038, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1779406312191052031}
+    - targetCorrespondingSourceObject: {fileID: 1362139887444841388, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 581027132372917802}
+    - targetCorrespondingSourceObject: {fileID: 7657119946465789683, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2347419187065354765}
+    - targetCorrespondingSourceObject: {fileID: 8155440235643873207, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4552968835362505106}
+    - targetCorrespondingSourceObject: {fileID: 3960237787227788473, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3901898604780822075}
+    - targetCorrespondingSourceObject: {fileID: 8175619184724324871, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2452634063495409905}
+    - targetCorrespondingSourceObject: {fileID: 1547870482062280338, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2461409281550286987}
+    - targetCorrespondingSourceObject: {fileID: 8201424670502308772, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4597462640650053081}
+    - targetCorrespondingSourceObject: {fileID: 7660407731983370630, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3146072058126363128}
+    - targetCorrespondingSourceObject: {fileID: 2622918061187743216, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1315381916503621342}
+    - targetCorrespondingSourceObject: {fileID: 2260570111850189762, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2765005947037991896}
+    - targetCorrespondingSourceObject: {fileID: 5881759317338234152, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4627398483462212081}
+    - targetCorrespondingSourceObject: {fileID: 6019296344897352151, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 307223320839487144}
+    - targetCorrespondingSourceObject: {fileID: 123940343280544559, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8574890037705397214}
+    - targetCorrespondingSourceObject: {fileID: 4701901192536424991, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2478221326092991728}
+    - targetCorrespondingSourceObject: {fileID: 6325927110789165725, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1076266564841496861}
+    - targetCorrespondingSourceObject: {fileID: 6993115471870933726, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 589395608950603687}
+    - targetCorrespondingSourceObject: {fileID: 1805860189690239663, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 893147234733525301}
+    - targetCorrespondingSourceObject: {fileID: 7472138276855716707, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7890606518226688770}
+    - targetCorrespondingSourceObject: {fileID: 1110807829658061514, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5858133588607098315}
+    - targetCorrespondingSourceObject: {fileID: 4283384138152920321, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7950924752958676396}
+    - targetCorrespondingSourceObject: {fileID: 6034933062402131663, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7792024302804272923}
+    - targetCorrespondingSourceObject: {fileID: 8245218557608595636, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2089870256351117533}
+    - targetCorrespondingSourceObject: {fileID: 5057147258395876472, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 758933909492034763}
+    - targetCorrespondingSourceObject: {fileID: 493520653478861285, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4283489058166283585}
+    - targetCorrespondingSourceObject: {fileID: 3940378232386172234, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3977837636464090968}
+    - targetCorrespondingSourceObject: {fileID: 3379971066366678880, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1464422923492198205}
+    - targetCorrespondingSourceObject: {fileID: 2660275199213971476, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5503623165475188503}
+    - targetCorrespondingSourceObject: {fileID: 7073312386934526434, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 790081809943464372}
+    - targetCorrespondingSourceObject: {fileID: 1542378402793786394, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1434307015190368541}
+    - targetCorrespondingSourceObject: {fileID: 3200253105337076708, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3924711574352310065}
+    - targetCorrespondingSourceObject: {fileID: 4535728621020866216, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3251066020151360213}
+    - targetCorrespondingSourceObject: {fileID: 8921090130364767056, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 416204637386024288}
+    - targetCorrespondingSourceObject: {fileID: 6488225648075650023, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 400820133159113710}
+    - targetCorrespondingSourceObject: {fileID: 469411067220274470, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5359088734526547203}
+    - targetCorrespondingSourceObject: {fileID: 3816156470142268205, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1138124093111223969}
+    - targetCorrespondingSourceObject: {fileID: 4867533002069544975, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1741868716430494437}
+    - targetCorrespondingSourceObject: {fileID: 2976530472265667728, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4343132447585058452}
+    - targetCorrespondingSourceObject: {fileID: 1193819091080368296, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6449318379917932054}
+    - targetCorrespondingSourceObject: {fileID: 8064301474325707826, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4932527628287218295}
+    - targetCorrespondingSourceObject: {fileID: 8959995931159661545, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1960480772335151116}
+    - targetCorrespondingSourceObject: {fileID: 7006259359244070523, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4787799853882561290}
+    - targetCorrespondingSourceObject: {fileID: 3574946243008660869, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1866533851981106398}
+    - targetCorrespondingSourceObject: {fileID: 5637710690860677704, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7483058656516238273}
+    - targetCorrespondingSourceObject: {fileID: 7789437729741348634, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6691897099456947725}
+    - targetCorrespondingSourceObject: {fileID: 8081360000585623836, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4665449247602031466}
+    - targetCorrespondingSourceObject: {fileID: 2448032760160360110, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8050340772877595891}
+    - targetCorrespondingSourceObject: {fileID: 2553452586666144956, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8087094197401416149}
+    - targetCorrespondingSourceObject: {fileID: 4719697902027101493, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7987843687137736007}
+    - targetCorrespondingSourceObject: {fileID: 9036742175004208100, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4370883124230849554}
+    - targetCorrespondingSourceObject: {fileID: 1102429395451242860, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2075011383707283407}
+    - targetCorrespondingSourceObject: {fileID: 6573063529607658261, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8173146275153277968}
+    - targetCorrespondingSourceObject: {fileID: 2592056304485848299, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2920575275486517429}
+    - targetCorrespondingSourceObject: {fileID: 1822189804603688899, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3178199841671654285}
+    - targetCorrespondingSourceObject: {fileID: 5071060009257580875, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6568385358021283919}
+    - targetCorrespondingSourceObject: {fileID: 8037296557679196144, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6417042713132295222}
+    - targetCorrespondingSourceObject: {fileID: 3039908215866225417, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2864027026032890871}
+    - targetCorrespondingSourceObject: {fileID: 7324486928471266464, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6856294704155611059}
+    - targetCorrespondingSourceObject: {fileID: 3429226094965160105, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6052085213721043532}
+    - targetCorrespondingSourceObject: {fileID: 9145440348177036866, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3381036072879191004}
+    - targetCorrespondingSourceObject: {fileID: 216009933134467993, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2981871753051522349}
+    - targetCorrespondingSourceObject: {fileID: 3712394341870052697, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9124467081564627564}
+    - targetCorrespondingSourceObject: {fileID: 6017389606412288956, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4415480418775309219}
+    - targetCorrespondingSourceObject: {fileID: 113678160269618618, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 856511634614671129}
+    - targetCorrespondingSourceObject: {fileID: 271663435393454182, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2737691991608765891}
+    - targetCorrespondingSourceObject: {fileID: 7813896197675593483, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1494474521058109369}
     - targetCorrespondingSourceObject: {fileID: 2753871776476068466, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7761087065421716293}
@@ -4918,6 +5222,26 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 544572665549281201}
   m_SourcePrefab: {fileID: 100100000, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+--- !u!1 &10793220593215855 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5815605079460954848, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6503785003737451662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 10793220593215855}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 20
+  visualName: Chr_ArmLowerRight_Female_02
+  gender: 1
 --- !u!1 &19420186051518613 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5825275207255329562, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4937,7 +5261,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_07
-  gender: 0
+  gender: 2
+--- !u!1 &19467959529402482 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5824944735706078205, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7655601071143408639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 19467959529402482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 5
+  visualName: Chr_Eyebrow_Female_04
+  gender: 1
 --- !u!1 &20988425865841827 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5825941293081716524, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5017,7 +5361,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_01
-  gender: 0
+  gender: 2
 --- !u!1 &68574125652636671 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5791886047017457776, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5058,6 +5402,26 @@ MonoBehaviour:
   bodyPart: 1
   visualName: Chr_Head_No_Elements_Male_04
   gender: 0
+--- !u!1 &86485996308313767 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5881759317338234152, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4627398483462212081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 86485996308313767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_08
+  gender: 1
 --- !u!1 &107244532988309743 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5903783929165667168, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5138,6 +5502,26 @@ MonoBehaviour:
   bodyPart: 8
   visualName: Chr_Torso_Male_01
   gender: 0
+--- !u!1 &156625801452198579 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5962489068992508220, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7902575885769713696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 156625801452198579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 1
+  visualName: Chr_Head_No_Elements_Female_04
+  gender: 1
 --- !u!1 &167494346198650867 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5962899333878916220, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5218,6 +5602,46 @@ MonoBehaviour:
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_08
   gender: 0
+--- !u!1 &221091544841562163 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6017389606412288956, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4415480418775309219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 221091544841562163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_25
+  gender: 1
+--- !u!1 &223948819583425112 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6019296344897352151, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &307223320839487144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 223948819583425112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_09
+  gender: 1
 --- !u!1 &230412685413466024 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6026345700258386983, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5278,6 +5702,26 @@ MonoBehaviour:
   bodyPart: 1
   visualName: Chr_Head_Male_00
   gender: 0
+--- !u!1 &239559140227673408 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6034933062402131663, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7792024302804272923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 239559140227673408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_18
+  gender: 1
 --- !u!1 &242976579578994794 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6038288650070985701, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5477,7 +5921,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_01
-  gender: 0
+  gender: 2
 --- !u!1 &408442117408504314 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6140769763405304437, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5538,6 +5982,26 @@ MonoBehaviour:
   bodyPart: 22
   visualName: Chr_HandLeft_Male_15
   gender: 0
+--- !u!1 &529528448340941074 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6325927110789165725, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1076266564841496861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 529528448340941074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_12
+  gender: 1
 --- !u!1 &548313668082598605 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6273362556371642690, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5698,6 +6162,26 @@ MonoBehaviour:
   bodyPart: 11
   visualName: Chr_Hips_Male_20
   gender: 0
+--- !u!1 &763844713511524456 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6488225648075650023, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &400820133159113710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 763844713511524456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 31
+  visualName: Chr_LegLeft_Female_01
+  gender: 1
 --- !u!1 &823027290021553982 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6627201419804232881, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5738,6 +6222,26 @@ MonoBehaviour:
   bodyPart: 1
   visualName: Chr_Head_Male_17
   gender: 0
+--- !u!1 &840836218602934426 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6573063529607658261, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8173146275153277968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 840836218602934426}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_14
+  gender: 1
 --- !u!1 &848804839843948274 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6581159698895818109, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5753,11 +6257,31 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_00
   gender: 0
+--- !u!1 &852922850402144329 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6576740559606660038, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1779406312191052031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 852922850402144329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 1
+  visualName: Chr_Head_No_Elements_Female_11
+  gender: 1
 --- !u!1 &874320689394669806 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6679190543214211937, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5773,7 +6297,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_07
@@ -5793,7 +6317,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_09
@@ -5923,6 +6447,26 @@ MonoBehaviour:
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_04
   gender: 0
+--- !u!1 &965176575586554399 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6771030763154962832, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1818782383289092491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 965176575586554399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 17
+  visualName: Chr_ArmUpperRight_Female_01
+  gender: 1
 --- !u!1 &967630009562870004 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6773062255392725883, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6122,7 +6666,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_06
-  gender: 0
+  gender: 2
 --- !u!1 &1132379539494568017 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6855731322719316958, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6142,7 +6686,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_13
-  gender: 0
+  gender: 2
 --- !u!1 &1134573635128926944 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6858321237574715759, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6183,6 +6727,26 @@ MonoBehaviour:
   bodyPart: 6
   visualName: Chr_FacialHair_Male_11
   gender: 0
+--- !u!1 &1160652476794936452 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4649967880786458379, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8317502878343644757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1160652476794936452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 1
+  visualName: Chr_Head_No_Elements_Female_03
+  gender: 1
 --- !u!1 &1188825527690853924 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4678387776732222891, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6263,6 +6827,46 @@ MonoBehaviour:
   bodyPart: 23
   visualName: Chr_HandRight_Male_00
   gender: 0
+--- !u!1 &1284638979980011920 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4701901192536424991, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2478221326092991728
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1284638979980011920}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_11
+  gender: 1
+--- !u!1 &1291629698177171130 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4719697902027101493, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7987843687137736007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1291629698177171130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_11
+  gender: 1
 --- !u!1 &1297380350277245114 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4796983344066884405, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6303,6 +6907,26 @@ MonoBehaviour:
   bodyPart: 4
   visualName: Chr_Hair_11
   gender: 2
+--- !u!1 &1360062630282145070 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4777368814311081633, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2152503283555761022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1360062630282145070}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 1
+  visualName: Chr_Head_No_Elements_Female_09
+  gender: 1
 --- !u!1 &1368512269343887622 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4786931443421624969, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6323,6 +6947,26 @@ MonoBehaviour:
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_01
   gender: 0
+--- !u!1 &1377966351214328704 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4867533002069544975, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1741868716430494437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1377966351214328704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 30
+  visualName: Chr_LegRight_Female_01
+  gender: 1
 --- !u!1 &1382115974226929014 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4881116148025446137, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6623,6 +7267,46 @@ MonoBehaviour:
   bodyPart: 31
   visualName: Chr_LegLeft_Male_15
   gender: 0
+--- !u!1 &1638728359205435383 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5057147258395876472, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &758933909492034763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1638728359205435383}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_20
+  gender: 1
+--- !u!1 &1653788996036596420 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5071060009257580875, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6568385358021283919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1653788996036596420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_17
+  gender: 1
 --- !u!1 &1688587119978503128 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5187134582747885655, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7083,6 +7767,26 @@ MonoBehaviour:
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_07
   gender: 0
+--- !u!1 &2122471091363523533 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5613735113554165826, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6266628105600491067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2122471091363523533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 18
+  visualName: Chr_ArmLowerLeft_Female_00
+  gender: 1
 --- !u!1 &2134242261176496059 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5552142736482075700, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7143,6 +7847,26 @@ MonoBehaviour:
   bodyPart: 31
   visualName: Chr_LegLeft_Male_18
   gender: 0
+--- !u!1 &2210803841881248199 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5637710690860677704, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7483058656516238273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2210803841881248199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_06
+  gender: 1
 --- !u!1 &2252880967639801293 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5751273935998170690, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7222,7 +7946,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_12
-  gender: 0
+  gender: 2
 --- !u!1 &2317561586964872162 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8123041949850210413, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7303,6 +8027,26 @@ MonoBehaviour:
   bodyPart: 6
   visualName: Chr_FacialHair_Male_09
   gender: 0
+--- !u!1 &2356988420720312979 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8081360000585623836, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4665449247602031466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2356988420720312979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_08
+  gender: 1
 --- !u!1 &2373405110607113078 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8098441066339877113, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7362,7 +8106,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_11
-  gender: 0
+  gender: 2
+--- !u!1 &2396519911215128619 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8201424670502308772, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4597462640650053081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2396519911215128619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_04
+  gender: 1
 --- !u!1 &2411317328024802548 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8207192619053432699, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7383,6 +8147,26 @@ MonoBehaviour:
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_10
   gender: 0
+--- !u!1 &2431530170951240760 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8155440235643873207, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4552968835362505106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2431530170951240760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 11
+  visualName: Chr_Hips_Female_00
+  gender: 1
 --- !u!1 &2440368837647760654 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8164631290841650817, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7403,6 +8187,26 @@ MonoBehaviour:
   bodyPart: 30
   visualName: Chr_LegRight_Male_06
   gender: 0
+--- !u!1 &2442873170115828104 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8175619184724324871, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2452634063495409905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2442873170115828104}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_02
+  gender: 1
 --- !u!1 &2486430603643963743 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8219884145117061840, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7488,6 +8292,26 @@ MonoBehaviour:
   bodyPart: 29
   visualName: Chr_KneeAttachRight_03
   gender: 0
+--- !u!1 &2521893703827766075 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8245218557608595636, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2089870256351117533
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2521893703827766075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_19
+  gender: 1
 --- !u!1 &2526852824707333312 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8323313055376463695, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7822,7 +8646,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_02
-  gender: 0
+  gender: 2
 --- !u!1 &2731761180968132282 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8465179826100385077, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7863,6 +8687,26 @@ MonoBehaviour:
   bodyPart: 29
   visualName: Chr_KneeAttachRight_01
   gender: 0
+--- !u!1 &2739857502864397553 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8545188319005343614, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4005664314928264522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2739857502864397553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 5
+  visualName: Chr_Eyebrow_Female_03
+  gender: 1
 --- !u!1 &2754137375347132508 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8551173750387368915, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7902,7 +8746,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_10
-  gender: 0
+  gender: 2
 --- !u!1 &2796394742827490968 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8529180331801720087, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8002,7 +8846,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_02
-  gender: 0
+  gender: 2
 --- !u!1 &2884154944505567989 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8689103693510504826, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8043,6 +8887,26 @@ MonoBehaviour:
   bodyPart: 30
   visualName: Chr_LegRight_Male_17
   gender: 0
+--- !u!1 &2901543077613398187 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8707477263117533988, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4644067184549199485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2901543077613398187}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 23
+  visualName: Chr_HandRight_Female_02
+  gender: 1
 --- !u!1 &2949187784635796426 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8682633093337178181, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8160,6 +9024,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f2fbca3a9c34f6f8d3cb0f94c7a22f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.PlayerWeaponAnimationEventReceiver
+--- !u!1 &3028180465289409101 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8833023931088673218, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7749179449148508504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3028180465289409101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 1
+  visualName: Chr_Head_No_Elements_Female_07
+  gender: 1
 --- !u!1 &3078628504532539516 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8802859630780183539, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8220,6 +9104,26 @@ MonoBehaviour:
   bodyPart: 8
   visualName: Chr_Torso_Male_25
   gender: 0
+--- !u!1 &3124761832500768991 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8921090130364767056, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &416204637386024288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3124761832500768991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 31
+  visualName: Chr_LegLeft_Female_00
+  gender: 1
 --- !u!1 &3148154947097846326 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8872944895970331065, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8235,7 +9139,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_06
@@ -8260,6 +9164,26 @@ MonoBehaviour:
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_07
   gender: 0
+--- !u!1 &3227738095562334310 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8959995931159661545, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1960480772335151116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3227738095562334310}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_03
+  gender: 1
 --- !u!1 &3231662842670908482 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8956070152234872781, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8359,7 +9283,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_01
-  gender: 0
+  gender: 2
 --- !u!1 &3286574381730278513 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9011482527556438014, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8400,6 +9324,26 @@ MonoBehaviour:
   bodyPart: 4
   visualName: Chr_Hair_22
   gender: 2
+--- !u!1 &3313386264977211499 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9036742175004208100, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4370883124230849554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3313386264977211499}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_12
+  gender: 1
 --- !u!1 &3314007683360974671 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9038388054757199040, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8460,6 +9404,26 @@ MonoBehaviour:
   bodyPart: 6
   visualName: Chr_FacialHair_Male_18
   gender: 0
+--- !u!1 &3348522991386844621 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9145440348177036866, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3381036072879191004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3348522991386844621}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_22
+  gender: 1
 --- !u!1 &3367530030485167045 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9090701498241642570, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8660,6 +9624,46 @@ MonoBehaviour:
   bodyPart: 31
   visualName: Chr_LegLeft_Male_05
   gender: 0
+--- !u!1 &3575857115927744849 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6993115471870933726, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &589395608950603687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3575857115927744849}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_13
+  gender: 1
+--- !u!1 &3578195277891569140 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7006259359244070523, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4787799853882561290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3578195277891569140}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_04
+  gender: 1
 --- !u!1 &3613917622794655849 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7112380697242350566, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8700,6 +9704,26 @@ MonoBehaviour:
   bodyPart: 6
   visualName: Chr_FacialHair_Male_13
   gender: 0
+--- !u!1 &3655236531344439917 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7073312386934526434, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &790081809943464372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3655236531344439917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_25
+  gender: 1
 --- !u!1 &3655770580616381994 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7073063300190973349, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8879,7 +9903,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 7
   visualName: Chr_HeadCoverings_No_FacialHair_04
-  gender: 0
+  gender: 2
 --- !u!1 &3761653320470230013 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7252877472746788978, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9000,6 +10024,26 @@ MonoBehaviour:
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_06
   gender: 0
+--- !u!1 &3834454908389506863 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7324486928471266464, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6856294704155611059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3834454908389506863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_20
+  gender: 1
 --- !u!1 &3876910747259678075 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7304552349715138292, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9140,6 +10184,26 @@ MonoBehaviour:
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_03
   gender: 0
+--- !u!1 &3972500661334913260 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7472138276855716707, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7890606518226688770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3972500661334913260}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_15
+  gender: 1
 --- !u!1 &3974398060964401927 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7472759976575006856, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9374,7 +10438,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_03
-  gender: 0
+  gender: 2
 --- !u!1 &4060941064484958421 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7550330956891462490, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9707,7 +10771,47 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_05
-  gender: 0
+  gender: 2
+--- !u!1 &4238160358674296188 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7657119946465789683, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2347419187065354765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4238160358674296188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 1
+  visualName: Chr_Head_No_Elements_Female_13
+  gender: 1
+--- !u!1 &4241346723102646793 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7660407731983370630, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3146072058126363128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4241346723102646793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_05
+  gender: 1
 --- !u!1 &4248829844629710344 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7666699254436580743, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9943,6 +11047,26 @@ MonoBehaviour:
   bodyPart: 30
   visualName: Chr_LegRight_Male_12
   gender: 0
+--- !u!1 &4362530334756615317 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7789437729741348634, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6691897099456947725
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4362530334756615317}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_07
+  gender: 1
 --- !u!1 &4363480787843973284 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7790458564725975851, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9963,6 +11087,46 @@ MonoBehaviour:
   bodyPart: 6
   visualName: Chr_FacialHair_Male_14
   gender: 0
+--- !u!1 &4387631184179364996 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7813896197675593483, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1494474521058109369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4387631184179364996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_28
+  gender: 1
+--- !u!1 &4398736855790465100 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7897068255792438211, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2582380070350001058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4398736855790465100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 23
+  visualName: Chr_HandRight_Female_01
+  gender: 1
 --- !u!1 &4414132824884871900 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7913194029899917651, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10043,6 +11207,46 @@ MonoBehaviour:
   bodyPart: 8
   visualName: Chr_Torso_Male_26
   gender: 0
+--- !u!1 &4530813394986784751 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7958943176579775584, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1537949552582048412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4530813394986784751}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 18
+  visualName: Chr_ArmLowerLeft_Female_02
+  gender: 1
+--- !u!1 &4546736506659314815 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8037296557679196144, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6417042713132295222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4546736506659314815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_18
+  gender: 1
 --- !u!1 &4551236294528525558 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8050829929727020921, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10062,7 +11266,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_08
-  gender: 0
+  gender: 2
+--- !u!1 &4573776057921771453 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8064301474325707826, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4932527628287218295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4573776057921771453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_02
+  gender: 1
 --- !u!1 &4577707796393710050 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8004091282544654957, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10078,7 +11302,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_13
@@ -10098,7 +11322,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_00
@@ -10118,11 +11342,31 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 29
   visualName: Chr_KneeAttachRight_07
   gender: 0
+--- !u!1 &4612313027778607911 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1193819091080368296, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6449318379917932054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4612313027778607911}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 8
+  visualName: Chr_Torso_Female_01
+  gender: 1
 --- !u!1 &4642826551968310717 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1224368079075020338, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10163,6 +11407,26 @@ MonoBehaviour:
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_03
   gender: 0
+--- !u!1 &4712410577912311425 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1294413350684001550, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6487636514390428895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4712410577912311425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 20
+  visualName: Chr_ArmLowerRight_Female_01
+  gender: 1
 --- !u!1 &4714559660711735517 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1296488490662452050, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10178,7 +11442,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_09
@@ -10202,7 +11466,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_02
-  gender: 0
+  gender: 2
 --- !u!1 &4723468869207145612 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1233519591804606211, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10363,6 +11627,26 @@ MonoBehaviour:
   bodyPart: 4
   visualName: Chr_Hair_18
   gender: 2
+--- !u!1 &4788519799779031075 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1362139887444841388, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &581027132372917802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4788519799779031075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 1
+  visualName: Chr_Head_No_Elements_Female_12
+  gender: 1
 --- !u!1 &4805366650155526291 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1306995947578704668, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10383,6 +11667,26 @@ MonoBehaviour:
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_03
   gender: 0
+--- !u!1 &4825379776125358825 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1325262490728462694, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7936563827236320639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4825379776125358825}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 1
+  visualName: Chr_Head_Female_00
+  gender: 1
 --- !u!1 &4828310920523114245 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1410450574035504266, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10402,7 +11706,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_08
-  gender: 0
+  gender: 2
 --- !u!1 &4847442437037911983 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1429582094308656160, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10563,6 +11867,46 @@ MonoBehaviour:
   bodyPart: 6
   visualName: Chr_FacialHair_Male_05
   gender: 0
+--- !u!1 &5037366760817831197 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1547870482062280338, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2461409281550286987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5037366760817831197}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_03
+  gender: 1
+--- !u!1 &5040889856415803285 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1542378402793786394, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1434307015190368541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5040889856415803285}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_26
+  gender: 1
 --- !u!1 &5044519757844136364 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1626588501320919587, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10936,6 +12280,46 @@ MonoBehaviour:
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_11
   gender: 0
+--- !u!1 &5304327937330983200 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1805860189690239663, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &893147234733525301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5304327937330983200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_14
+  gender: 1
+--- !u!1 &5321778770635877452 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1822189804603688899, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3178199841671654285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5321778770635877452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_16
+  gender: 1
 --- !u!4 &5365332941455244718 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1938249349875013153, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10980,7 +12364,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_03
-  gender: 0
+  gender: 2
 --- !u!1 &5466149648062697798 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1966063427359996617, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11181,6 +12565,26 @@ MonoBehaviour:
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_17
   gender: 0
+--- !u!1 &5666479338076212513 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2175263419519018670, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8462486415938098104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5666479338076212513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 20
+  visualName: Chr_ArmLowerRight_Female_00
+  gender: 1
 --- !u!1 &5669029212128721873 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2179467796041437278, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11301,6 +12705,26 @@ MonoBehaviour:
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_09
   gender: 0
+--- !u!1 &5750075190725359693 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2260570111850189762, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2765005947037991896
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5750075190725359693}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_07
+  gender: 1
 --- !u!1 &5756685613420446403 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2265501314279385420, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11320,7 +12744,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_09
-  gender: 0
+  gender: 2
 --- !u!1 &5768651756677886381 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 44235913021970978, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11420,7 +12844,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 7
   visualName: Chr_HeadCoverings_No_FacialHair_01
-  gender: 0
+  gender: 2
 --- !u!1 &5815257176712074161 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9156693833054270, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11501,6 +12925,46 @@ MonoBehaviour:
   bodyPart: 29
   visualName: Chr_KneeAttachRight_08
   gender: 0
+--- !u!1 &5836854021106533941 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 113678160269618618, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &856511634614671129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5836854021106533941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_26
+  gender: 1
+--- !u!1 &5848809723278196896 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 123940343280544559, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8574890037705397214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5848809723278196896}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_10
+  gender: 1
 --- !u!1 &5848868432551465211 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 123898159888038772, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11620,7 +13084,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_09
-  gender: 0
+  gender: 2
 --- !u!1 &5928591291418346456 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 204315922712602711, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11641,6 +13105,26 @@ MonoBehaviour:
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_19
   gender: 0
+--- !u!1 &5939154454256629782 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 216009933134467993, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2981871753051522349
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5939154454256629782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_23
+  gender: 1
 --- !u!1 &5965535926748540508 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 169625163726833107, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11761,6 +13245,46 @@ MonoBehaviour:
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_01
   gender: 0
+--- !u!1 &6005077403718417385 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 271663435393454182, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2737691991608765891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6005077403718417385}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_27
+  gender: 1
+--- !u!1 &6007484487601624919 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 274061169006787800, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8679785190402700143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6007484487601624919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 5
+  visualName: Chr_Eyebrow_Female_01
+  gender: 1
 --- !u!1 &6069670238395989742 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 335723290264917345, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11776,7 +13300,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_07
@@ -11796,7 +13320,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_04
@@ -11840,7 +13364,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_06
-  gender: 0
+  gender: 2
 --- !u!1 &6103364079029060646 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 297509341158879145, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11861,6 +13385,26 @@ MonoBehaviour:
   bodyPart: 4
   visualName: Chr_Hair_27
   gender: 2
+--- !u!1 &6107930491584155993 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 310972718212987606, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8649577545750272026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6107930491584155993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 23
+  visualName: Chr_HandRight_Female_00
+  gender: 1
 --- !u!1 &6127845202266535064 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 403367794548612887, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11921,6 +13465,26 @@ MonoBehaviour:
   bodyPart: 22
   visualName: Chr_HandLeft_Male_12
   gender: 0
+--- !u!1 &6201694737448535721 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 469411067220274470, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5359088734526547203
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6201694737448535721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 31
+  visualName: Chr_LegLeft_Female_02
+  gender: 1
 --- !u!1 &6205406874990995847 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 472172956132327944, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11941,6 +13505,26 @@ MonoBehaviour:
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_18
   gender: 0
+--- !u!1 &6217817467082224234 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 493520653478861285, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4283489058166283585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6217817467082224234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_21
+  gender: 1
 --- !u!1 &6233067505514029764 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 437759278757644619, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12041,6 +13625,26 @@ MonoBehaviour:
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_06
   gender: 0
+--- !u!1 &6396920680500240166 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 600415910617658537, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5249606274393537585
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6396920680500240166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 16
+  visualName: Chr_ArmUpperLeft_Female_00
+  gender: 1
 --- !u!1 &6405227807541660128 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 608133974429213295, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12200,7 +13804,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_04
-  gender: 0
+  gender: 2
 --- !u!1 &6532550038362722538 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 737237697967012709, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12301,6 +13905,26 @@ MonoBehaviour:
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_12
   gender: 0
+--- !u!1 &6627091039336861194 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 822855061621417349, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &317451073250597622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6627091039336861194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 16
+  visualName: Chr_ArmUpperLeft_Female_01
+  gender: 1
 --- !u!1 &6659122037717088914 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 935203185663971613, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12416,6 +14040,46 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Combat.BodyHitbox
   bodyPart: 0
   damageMultiplier: 1
+--- !u!1 &6673707257294449794 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 868828615837599501, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5835410710481394977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6673707257294449794}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 7
+  visualName: Chr_Head_No_Elements_Female_01
+  gender: 1
+--- !u!1 &6707819996740175786 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 974326588701109285, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8940745000193370053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6707819996740175786}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 16
+  visualName: Chr_ArmUpperLeft_Female_02
+  gender: 1
 --- !u!1 &6726921857294071364 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 993507335053270475, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12636,6 +14300,106 @@ MonoBehaviour:
   bodyPart: 1
   visualName: Chr_Head_Male_09
   gender: 0
+--- !u!1 &6891849441458031621 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1096541765128562570, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8709840838985639441
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6891849441458031621}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 1
+  visualName: Chr_Head_Female_01
+  gender: 1
+--- !u!1 &6908499632626287331 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1102429395451242860, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2075011383707283407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6908499632626287331}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_13
+  gender: 1
+--- !u!1 &6915584766414119237 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1110807829658061514, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5858133588607098315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6915584766414119237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_16
+  gender: 1
+--- !u!1 &6916524962997390097 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1112134774624772254, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2950735522856783113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6916524962997390097}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 22
+  visualName: Chr_HandLeft_Female_02
+  gender: 1
+--- !u!1 &6921264499470098987 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3503293660251113892, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4849627424832597121
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6921264499470098987}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 22
+  visualName: Chr_HandLeft_Female_01
+  gender: 1
 --- !u!1 &6945183309354977746 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3526680306249228893, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12696,6 +14460,26 @@ MonoBehaviour:
   bodyPart: 22
   visualName: Chr_HandLeft_Male_08
   gender: 0
+--- !u!1 &6994007531742604810 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3574946243008660869, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1866533851981106398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6994007531742604810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_05
+  gender: 1
 --- !u!1 &7016940854409956448 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3599036797109315567, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12795,7 +14579,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_04
-  gender: 0
+  gender: 2
 --- !u!1 &7091517522524378759 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3673063714645130504, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12855,7 +14639,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 7
   visualName: Chr_HeadCoverings_No_FacialHair_03
-  gender: 0
+  gender: 2
 --- !u!1 &7120790339258600111 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3621271746675499296, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12876,6 +14660,26 @@ MonoBehaviour:
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_08
   gender: 0
+--- !u!1 &7140004886881439446 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3712394341870052697, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &9124467081564627564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7140004886881439446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_24
+  gender: 1
 --- !u!1 &7153984870351490002 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3736713595406999645, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13016,6 +14820,26 @@ MonoBehaviour:
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_14
   gender: 0
+--- !u!1 &7234681467247909026 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3816156470142268205, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1138124093111223969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7234681467247909026}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 30
+  visualName: Chr_LegRight_Female_00
+  gender: 1
 --- !u!1 &7238869739929398438 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3811971411218155305, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13116,6 +14940,46 @@ MonoBehaviour:
   bodyPart: 8
   visualName: Chr_Torso_Male_16
   gender: 0
+--- !u!1 &7366903009940709061 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3940378232386172234, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3977837636464090968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7366903009940709061}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_22
+  gender: 1
+--- !u!1 &7378832603983396662 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3960237787227788473, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3901898604780822075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7378832603983396662}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_01
+  gender: 1
 --- !u!1 &7393920777811069603 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3895347202041946412, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13131,11 +14995,31 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_20
   gender: 0
+--- !u!1 &7409497079132655070 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3909305034998130257, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7292233496790331182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7409497079132655070}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 1
+  visualName: Chr_Head_Female_07
+  gender: 1
 --- !u!1 &7413185024791009911 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3923649992679715320, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13151,7 +15035,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_No_Elements_Male_09
@@ -13255,7 +15139,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_10
-  gender: 0
+  gender: 2
 --- !u!1 &7440584243627395256 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4022054847804941111, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13456,6 +15340,26 @@ MonoBehaviour:
   bodyPart: 11
   visualName: Chr_Hips_Male_26
   gender: 0
+--- !u!1 &7689996948439440045 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4191493470840992034, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4050129628927112477
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7689996948439440045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 17
+  visualName: Chr_ArmUpperRight_Female_00
+  gender: 1
 --- !u!1 &7744049261903268141 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4317568477965869730, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13630,7 +15534,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_05
-  gender: 0
+  gender: 2
+--- !u!1 &7774010431260028558 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4283384138152920321, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7950924752958676396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7774010431260028558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_17
+  gender: 1
 --- !u!1 &7776106500145930332 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4285511255760260051, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13831,6 +15755,26 @@ MonoBehaviour:
   bodyPart: 31
   visualName: Chr_LegLeft_Male_12
   gender: 0
+--- !u!1 &7953729984975064359 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4535728621020866216, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3251066020151360213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7953729984975064359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_28
+  gender: 1
 --- !u!1 &7998301403442028669 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4498210776915446770, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13930,7 +15874,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_11
-  gender: 0
+  gender: 2
+--- !u!1 &8172448595227327777 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2448032760160360110, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8050340772877595891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8172448595227327777}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_09
+  gender: 1
 --- !u!1 &8175092138868353336 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2441149584489874103, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13991,6 +15955,26 @@ MonoBehaviour:
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_04
   gender: 0
+--- !u!1 &8231812797045096035 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2498988162658440684, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1485700843685709394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8231812797045096035}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 17
+  visualName: Chr_ArmUpperRight_Female_02
+  gender: 1
 --- !u!1 &8256631111811240539 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2451651589895109076, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -14126,6 +16110,26 @@ MonoBehaviour:
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_03
   gender: 0
+--- !u!1 &8265128715611490687 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2459199210817184496, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7017320112358695129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8265128715611490687}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 1
+  visualName: Chr_Head_No_Elements_Female_10
+  gender: 1
 --- !u!1 &8311245205923704382 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2577201496475731377, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -14166,6 +16170,26 @@ MonoBehaviour:
   bodyPart: 8
   visualName: Chr_Torso_Male_06
   gender: 0
+--- !u!1 &8316920461937770340 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2592056304485848299, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2920575275486517429
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8316920461937770340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_15
+  gender: 1
 --- !u!1 &8320311312568755069 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2586431160306993394, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -14186,6 +16210,46 @@ MonoBehaviour:
   bodyPart: 19
   visualName: Chr_ElbowAttachLeft_03
   gender: 0
+--- !u!1 &8342253500041900575 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2546457086222080400, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3982749867381879823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8342253500041900575}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 1
+  visualName: Chr_Head_No_Elements_Female_08
+  gender: 1
+--- !u!1 &8357794671279415091 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2553452586666144956, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8087094197401416149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8357794671279415091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_10
+  gender: 1
 --- !u!1 &8362520946015185502 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2638777466326680017, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -14206,6 +16270,26 @@ MonoBehaviour:
   bodyPart: 31
   visualName: Chr_LegLeft_Male_08
   gender: 0
+--- !u!1 &8372542827859493808 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2639752828893390911, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6706046273133610020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8372542827859493808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 1
+  visualName: Chr_Head_No_Elements_Female_06
+  gender: 1
 --- !u!1 &8384270373433383211 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2650824789721002660, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -14246,6 +16330,26 @@ MonoBehaviour:
   bodyPart: 1
   visualName: Chr_Head_Male_08
   gender: 0
+--- !u!1 &8392533030784500635 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2660275199213971476, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5503623165475188503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8392533030784500635}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_24
+  gender: 1
 --- !u!1 &8415945250445171473 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2618851962256437406, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -14266,6 +16370,26 @@ MonoBehaviour:
   bodyPart: 30
   visualName: Chr_LegRight_Male_10
   gender: 0
+--- !u!1 &8427655978308572799 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2622918061187743216, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1315381916503621342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8427655978308572799}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_06
+  gender: 1
 --- !u!1 &8438299523196176724 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2704880882082013915, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -14325,7 +16449,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 7
   visualName: Chr_HeadCoverings_No_FacialHair_02
-  gender: 0
+  gender: 2
 --- !u!1 &8518040484970499258 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2784736197771700021, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -14426,6 +16550,26 @@ MonoBehaviour:
   bodyPart: 6
   visualName: Chr_FacialHair_Male_15
   gender: 0
+--- !u!1 &8694549053177683759 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2898708671642465440, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8313419300858753610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8694549053177683759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 5
+  visualName: Chr_Eyebrow_Female_06
+  gender: 1
 --- !u!1 &8698377476845362469 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2892910042358150826, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -14506,6 +16650,66 @@ MonoBehaviour:
   bodyPart: 11
   visualName: Chr_Hips_Male_19
   gender: 0
+--- !u!1 &8781373654606806815 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2976530472265667728, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4343132447585058452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8781373654606806815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 30
+  visualName: Chr_LegRight_Female_02
+  gender: 1
+--- !u!1 &8824194558245312023 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3091334473207201176, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1328161589646078669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8824194558245312023}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 18
+  visualName: Chr_ArmLowerLeft_Female_01
+  gender: 1
+--- !u!1 &8844113140556093574 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3039908215866225417, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2864027026032890871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8844113140556093574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_19
+  gender: 1
 --- !u!1 &8877214871904846636 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3143870456289732771, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -14526,6 +16730,26 @@ MonoBehaviour:
   bodyPart: 30
   visualName: Chr_LegRight_Male_04
   gender: 0
+--- !u!1 &8877771264632886849 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3145583523169549774, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6011840475463089462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8877771264632886849}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  bodyPart: 22
+  visualName: Chr_HandLeft_Female_00
+  gender: 1
 --- !u!1 &8896422057833124061 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3162941839915187026, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -14626,6 +16850,26 @@ MonoBehaviour:
   bodyPart: 10
   visualName: Chr_BackAttachment_15
   gender: 0
+--- !u!1 &8938630318516164422 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3215309051168292041, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2236660652791635545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8938630318516164422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 1
+  visualName: Chr_Head_No_Elements_Female_05
+  gender: 1
 --- !u!1 &8945524576465243152 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3222208252489394079, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -14888,6 +17132,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Combat.BodyHitbox
   bodyPart: 6
   damageMultiplier: 0.7
+--- !u!1 &9005760405309464683 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3200253105337076708, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3924711574352310065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9005760405309464683}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_27
+  gender: 1
 --- !u!1 &9018579261407670608 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3295254421040143071, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -14948,6 +17212,26 @@ MonoBehaviour:
   bodyPart: 5
   visualName: Chr_Eyebrow_Male_07
   gender: 0
+--- !u!1 &9102088636382505545 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3369373128935883206, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7834039267222518600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9102088636382505545}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 1
+  visualName: Chr_Head_No_Elements_Female_02
+  gender: 1
 --- !u!1 &9106314279488162045 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3383143362293867378, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -14968,6 +17252,26 @@ MonoBehaviour:
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_02
   gender: 0
+--- !u!1 &9113992239845539055 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3379971066366678880, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1464422923492198205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9113992239845539055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 11
+  visualName: Chr_Hips_Female_23
+  gender: 1
 --- !u!1 &9124717680063038693 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3328991368430808938, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -15123,6 +17427,26 @@ MonoBehaviour:
   bodyPart: 11
   visualName: Chr_Hips_Male_09
   gender: 0
+--- !u!1 &9152572934549623590 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3429226094965160105, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
+  m_PrefabInstance: {fileID: 5806114506216745871}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6052085213721043532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9152572934549623590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51d8c7b9a6f4d01b23456789abcdef0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
+  bodyPart: 8
+  visualName: Chr_Torso_Female_21
+  gender: 1
 --- !u!1 &9185237921956395957 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3453121102482690106, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -15142,7 +17466,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_07
-  gender: 0
+  gender: 2
 --- !u!1 &9199506739088467790 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3402540723674057921, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}

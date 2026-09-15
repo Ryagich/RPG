@@ -35,7 +35,7 @@ MonoBehaviour:
   - bodyPart: 23
     visualName: Chr_HandRight_Female_00
   - bodyPart: 30
-    visualName: Chr_LegRight_Male_00
+    visualName: Chr_LegRight_Female_00
   - bodyPart: 31
     visualName: Chr_LegLeft_Female_00
   - bodyPart: 11

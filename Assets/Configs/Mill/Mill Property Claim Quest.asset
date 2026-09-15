@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 141dfb499f294de48a3961210ef0d747, type: 3}
+  m_Name: Mill Property Claim Quest
+  m_EditorClassIdentifier: Assembly-CSharp::Mill.MillPropertyClaimQuestConfig
+  quest: {fileID: 11400000, guid: f94551fcd4ca4ed89ebeb276c94f9c9c, type: 2}
+  askAroundNode: {fileID: 11400000, guid: 741f701390684a999f8b56abf5f9eeaa, type: 2}
+  confrontCorvinNode: {fileID: 11400000, guid: 9f164253eb4f4f8988e4563bbd356113, type: 2}
+  resolvedNode: {fileID: 11400000, guid: bef7eb0c450744549ac5d36b4dc17ab0, type: 2}
+  documentsReturnedNode: {fileID: 11400000, guid: c3d8d167bd874d0ca746e4b325a2cc51, type: 2}
+  bribeAcceptedNode: {fileID: 11400000, guid: 6be4ca86dd8445d4b1cf42cc1f6c0b1f, type: 2}
+  startedEvent: {fileID: 11400000, guid: 77db1392d58e4d0b827b11289f81dc0f, type: 2}
+  banditLeadLearnedEvent: {fileID: 11400000, guid: 6041f755578845979d8112a0ee39b707, type: 2}
+  villageLeadLearnedEvent: {fileID: 11400000, guid: 219e213f204f4453bab6518b571f957a, type: 2}
+  corvinIdentifiedEvent: {fileID: 11400000, guid: a7e9af55e70144308ca3dfabe0248931, type: 2}
+  documentsRecoveredEvent: {fileID: 11400000, guid: f78da5b1e91b4141910fa7fc322886c6, type: 2}
+  bribeAcceptedEvent: {fileID: 11400000, guid: c36eb633990e43f09d0e9facef5c52fb, type: 2}

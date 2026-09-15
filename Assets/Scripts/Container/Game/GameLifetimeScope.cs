@@ -122,6 +122,7 @@ namespace Container.Game
 
             builder.RegisterEntryPoint<GameWorldBootstrapper>().AsSelf();
             builder.RegisterEntryPoint<MillQuestProgressionCoordinator>().AsSelf();
+            builder.RegisterEntryPoint<MillPropertyClaimQuestCoordinator>().AsSelf();
             builder.Register<LootingContext>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueContext>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<DialogueExitController>().AsSelf();

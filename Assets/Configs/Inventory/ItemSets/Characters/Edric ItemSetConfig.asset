@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Edric ItemSetConfig
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemSetConfig
   <ItemConfigs>k__BackingField:
-  - {fileID: 11400000, guid: f6e15803376797b4497e58effaec4c6f, type: 2}
-  - {fileID: 11400000, guid: 95146d4d9e1f5694aa943abd52c3658f, type: 2}
-  - {fileID: 11400000, guid: 2258baa98d8babb45935c1dd43f46035, type: 2}
-  - {fileID: 11400000, guid: 57fd27856ab84da479b619a6557c7aed, type: 2}
+  - {fileID: 11400000, guid: f74ec8b6e37482149ae2db750d186d53, type: 2}
+  - {fileID: 11400000, guid: 2404a33986f88b64f80699e91d7fd6d6, type: 2}
   - {fileID: 11400000, guid: 9c56ecfae42f7e840a6a9798122814c7, type: 2}
+  - {fileID: 11400000, guid: b595ff8ec3a59cc4faaf7e067fb544cc, type: 2}
+  - {fileID: 11400000, guid: ffe7c10f355331b4085386cae46ff622, type: 2}
+  - {fileID: 11400000, guid: 57fd27856ab84da479b619a6557c7aed, type: 2}

@@ -150,6 +150,7 @@ namespace NPC
                 true,
                 faction);
             DialogueFlowTrace.ForcedPhraseSelected(forcedPhrase, dialogueContext.CurrentPhraseText);
+            availability.NotifyForcedDialogueOpened();
             availability.SuppressUntilZoneExit();
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Dialogue));
             return true;

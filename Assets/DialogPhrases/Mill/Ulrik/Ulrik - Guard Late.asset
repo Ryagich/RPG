@@ -1,0 +1,11 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_Script: {fileID: 11500000, guid: cab1eab763ecf6f4c96f41d14656eb42, type: 3}
+  m_Name: Ulrik - Guard Late
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.Model.DialogPhrase
+  text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 99000000000000030, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+  answers:
+  - text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 99000000000000052, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: f91a2b3c4d5e6f708192a3b4c5d6e718, type: 2}

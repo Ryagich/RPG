@@ -16,7 +16,7 @@ MonoBehaviour:
     m_TableReference:
       m_TableCollectionName: GUID
     m_TableEntryReference:
-      m_KeyId: 78000000000000022
+      m_KeyId: 99200000000000494
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
@@ -25,7 +25,7 @@ MonoBehaviour:
     m_TableReference:
       m_TableCollectionName: GUID
     m_TableEntryReference:
-      m_KeyId: 78000000000000023
+      m_KeyId: 99200000000000495
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
@@ -35,6 +35,10 @@ MonoBehaviour:
   Nodes:
   - Position: {x: 399.33826, y: 205.02454}
     NodeData: {fileID: 11400000, guid: b4000000000000000000000000000002, type: 2}
+  - Position: {x: 760, y: 205}
+    NodeData: {fileID: 11400000, guid: b4000000000000000000000000000003, type: 2}
+  - Position: {x: 1120, y: 205}
+    NodeData: {fileID: 11400000, guid: b4000000000000000000000000000004, type: 2}
   references:
     version: 2
     RefIds: []

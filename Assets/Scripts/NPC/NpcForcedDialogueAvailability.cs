@@ -15,23 +15,37 @@ namespace NPC
     [DisallowMultipleComponent]
     public sealed class NpcForcedDialogueAvailability : MonoBehaviour, IInteractableAvailability
     {
+        [SerializeField, Tooltip("Allows this automatic dialogue zone to open a forced dialogue only once per GameObject activation.")]
+        private bool allowOnlyOneForcedDialoguePerActivation;
+
         private NpcDialogueController dialogueController;
         private DialogueContext dialogueContext;
         private DialogGraph dialog;
         private DialogueRuntimeFlagRegistry runtimeFlags;
         private bool isSuppressedUntilZoneExit;
+        private bool hasOpenedForcedDialogueThisActivation;
+
+        private void OnEnable()
+        {
+            hasOpenedForcedDialogueThisActivation = false;
+        }
 
         [Inject]
         public void Construct(
             NpcDialogueController dialogueController,
             DialogueContext dialogueContext,
             DialogueRuntimeFlagRegistry runtimeFlags,
-            DialogGraph dialog = null)
+            IObjectResolver resolver)
         {
             this.dialogueController = dialogueController;
             this.dialogueContext = dialogueContext;
             this.runtimeFlags = runtimeFlags;
-            this.dialog = dialog;
+            // A forced dialogue is optional for an NPC. VContainer treats an [Inject]
+            // method parameter as required even if it has a C# default value, therefore
+            // resolving DialogGraph directly here could abort the whole NPC scope.
+            dialog = resolver.TryResolve<DialogGraph>(out var resolvedDialog)
+                ? resolvedDialog
+                : null;
         }
 
         public bool IsInteractableAvailable(LifetimeScope interactorScope)
@@ -57,10 +71,23 @@ namespace NPC
             DialogueFlowTrace.ForcedZoneState("immediate-next-dialogue-allowed");
         }
 
+        public void NotifyForcedDialogueOpened()
+        {
+            if (!allowOnlyOneForcedDialoguePerActivation)
+            {
+                return;
+            }
+
+            hasOpenedForcedDialogueThisActivation = true;
+            DialogueFlowTrace.ForcedZoneState("forced-dialogue-consumed-for-activation");
+        }
+
         public bool TryGetForcedPhrase(LifetimeScope interactorScope, out DialogPhrase forcedPhrase)
         {
             forcedPhrase = null;
-            if (isSuppressedUntilZoneExit || dialog == null || dialogueContext?.CurrentTarget != null ||
+            if (isSuppressedUntilZoneExit ||
+                (allowOnlyOneForcedDialoguePerActivation && hasOpenedForcedDialogueThisActivation) ||
+                dialog == null || dialogueContext?.CurrentTarget != null ||
                 dialogueController == null || !dialogueController.CanStartDialogue(interactorScope) ||
                 interactorScope is not PlayerLifetimeScope)
             {

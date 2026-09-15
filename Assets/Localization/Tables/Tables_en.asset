@@ -977,7 +977,7 @@ MonoBehaviour:
     m_Localized: "What is the matter at the tavern?"
     m_Metadata: {m_Items: []}
   - m_Id: 78000000000000012
-    m_Localized: "The tavern on the road used to live by its noise. No one has come from there for a long while, not even for salt. The owner and his daughter kept the place well; if they are quiet, either trouble found them or they barred the door in fear. Go in and see whether they are all right."
+    m_Localized: "I need to know how Elina is doing. She is Halvar's daughter — the innkeeper on the road. With the city shut, people disappear into their own worries. Find her, speak with her, and bring me the truth, not a polite answer."
     m_Metadata: {m_Items: []}
   - m_Id: 78000000000000013
     m_Localized: "Is this a guard matter or a personal one?"
@@ -986,10 +986,10 @@ MonoBehaviour:
     m_Localized: "Both. An empty tavern on the road is a bad sign for everyone. And the owner's daughter... she knows how to keep her head above trouble. I would like to know whether she still can. Do not carry her more worries. Just find out how they are."
     m_Metadata: {m_Items: []}
   - m_Id: 78000000000000015
-    m_Localized: "I will stop by the tavern and ask around."
+    m_Localized: "I will find Elina and speak with her."
     m_Metadata: {m_Items: []}
   - m_Id: 78000000000000016
-    m_Localized: "Thank you. Do not demand an account from them as if they were soldiers. See what you can, speak to them as people, and come back with word."
+    m_Localized: "Thank you. She is usually by the river. You may speak with Halvar first if you wish; he knows when something is weighing on her. And do not question her like a witness."
     m_Metadata: {m_Items: []}
   - m_Id: 78000000000000018
     m_Localized: "The Mill Is Silent"
@@ -1004,16 +1004,16 @@ MonoBehaviour:
     m_Localized: "Reach the mill and learn what happened to the miller."
     m_Metadata: {m_Items: []}
   - m_Id: 78000000000000022
-    m_Localized: "News from the Tavern"
+    m_Localized: "News of Elina"
     m_Metadata: {m_Items: []}
   - m_Id: 78000000000000023
-    m_Localized: "The captain of the city guard asks you to learn whether the tavern owner and his daughter are safe."
+    m_Localized: "The captain of the city guard asks you to make sure Elina, Halvar's daughter, is safe."
     m_Metadata: {m_Items: []}
   - m_Id: 78000000000000024
-    m_Localized: "Visit the tavern"
+    m_Localized: "Speak with Elina"
     m_Metadata: {m_Items: []}
   - m_Id: 78000000000000025
-    m_Localized: "Reach the tavern on the road and learn what is happening there."
+    m_Localized: "Elina is usually by the river. You may speak with Halvar before you go to her."
     m_Metadata: {m_Items: []}
   - m_Id: 78000000000000026
     m_Localized: "And you? Tell me about yourself."
@@ -2418,6 +2418,1662 @@ MonoBehaviour:
     m_Metadata: {m_Items: []}
   - m_Id: 99000000000000006
     m_Localized: "I have no more people. I will not send those left at the gate into the same grave. If you want the miller out, find a way yourself."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000007
+    m_Localized: "Ask. Just do not expect me to find my tongue at once. After listening so long for a bolt to scrape, ordinary questions take their time reaching me."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000008
+    m_Localized: "There are a few things I would like to ask."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000009
+    m_Localized: "What will become of the mill now?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000010
+    m_Localized: "First I sweep the straw from beneath the stones. Then I pull the boards off the windows — they nailed them up as if light could be fought. The wheel is sound, the stones are sound. The people's trust, I do not know."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000011
+    m_Localized: "Will people come back?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000012
+    m_Localized: "When they see smoke from the chimney and hear the wheel, they will. Not for me — for their sacks. Hunger does not ask who held the keys while the mill stood still."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000013
+    m_Localized: "Can you manage alone?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000014
+    m_Localized: "I can. I know how to hear a stone: when it sings true, when it asks for water, when it is ready to crack. People are harder. A stone, at least, does not lie that it will be back soon."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000015
+    m_Localized: "Why does this mill matter so much?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000016
+    m_Localized: "While the wheel hums, a field becomes a sack by the door, flour on a palm, a flatbread in a stranger's house. When it falls silent, everyone learns that. Too quickly."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000017
+    m_Localized: "So you feed the whole district?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000018
+    m_Localized: "No. I only make grain do what it was grown for. The ones who sowed in the cold, hauled the sacks and shared the last crust feed people."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000019
+    m_Localized: "And what is in it for you?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000020
+    m_Localized: "My share keeps the roof from leaking and the table from standing bare. I will not pretend sainthood. But I will not inspect a hungry person's clothes before I grind their last sack."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000021
+    m_Localized: "What did the bandits do to you?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000022
+    m_Localized: "First they asked where I kept the silver. I told them silver is not ground from flour. Then they told me to sit quietly. They argued over who would have my work, as if I was already gone."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000023
+    m_Localized: "Did they beat you?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000024
+    m_Localized: "Once, so the others would see. After that they had no need. A person learns to flinch at footsteps quicker than at pain."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000025
+    m_Localized: "Why did you not fight back?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000026
+    m_Localized: "Because I am a miller. My hands know flour and an old rope knife, not a blade. Burning a mill is easy. Then a hero remains a hero, and people have nothing to eat."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000027
+    m_Localized: "What do you think of the guard?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000028
+    m_Localized: "Men in mail are still men. Orders, distance and fear slow them while trouble belongs to someone else. I will neither weave them wreaths nor spit after them."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000029
+    m_Localized: "They came too late."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000030
+    m_Localized: "Too late is when you can answer no one. I can answer. So there is still time."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000031
+    m_Localized: "You still owe them."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000032
+    m_Localized: "I owe those who opened the door. No more and no less. A debt does not make a person holy, and gratitude does not make me forget."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000033
+    m_Localized: "What is the strangest thing you have seen here?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000034
+    m_Localized: "Before the bandits, there were three nights. The water was low and something knocked beneath the race: three blows, a pause, then three more. By morning there were fine fish scales on dry stones."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000035
+    m_Localized: "Sounds like water or an animal."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000036
+    m_Localized: "Perhaps. I have listened to water for twenty years. It does not knock as though waiting for an answer."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000037
+    m_Localized: "Why did you tell no one?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000038
+    m_Localized: "I meant to understand it first. I did not get the chance. If you hear it again, do not enter the water at night. Call for me."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000039
+    m_Localized: "That is enough for now."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000040
+    m_Localized: "People are harder than sacks."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000041
+    m_Localized: "That is it. A sack needs a dry place. A frightened person may walk past for a year. I will open the door and light the stove; they can decide the rest."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000042
+    m_Localized: "You still need people."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000043
+    m_Localized: "Who does not? A mill without people is a shed with costly stones."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000044
+    m_Localized: "You still charge them."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000045
+    m_Localized: "I do. But when a widow brings her last sack, I do not strip her for it. Others manage that well enough."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000046
+    m_Localized: "You are doing well for yourself."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000047
+    m_Localized: "While the wheel turns, perhaps. If it stops, they come to me first, not the reeve."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000048
+    m_Localized: "Are you angry with them?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000049
+    m_Localized: "I was. Anger spends strength, and I have little to spare. I only want them not to return."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000050
+    m_Localized: "You saved the grain, not yourself."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000051
+    m_Localized: "I saved myself too. I knew what they would threaten. A hungry person is a captive too, only without a door."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000052
+    m_Localized: "Would you say that to the captain's face?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000053
+    m_Localized: "I would. He would nod and go back to his papers. I did not stay alive to quarrel in town."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000054
+    m_Localized: "Easy to say after the door opened."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000055
+    m_Localized: "Easy? Sit in a pantry while strange boots pass outside. Then we can speak of easy."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000056
+    m_Localized: "We should look beneath the race by daylight."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000057
+    m_Localized: "We should. Not now. I will take a lantern and a hook when the mill is in order. Come by in daylight if you want; I will not go down alone."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000058
+    m_Localized: "What if it knocks again?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99000000000000059
+    m_Localized: "Do not answer. Do not call to it or knock back. We look in the morning. Night makes filth out of ordinary things."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000001
+    m_Localized: "The Miller's Papers"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000002
+    m_Localized: "Someone stole Ulrik's deeds while he was captive and intends to claim the mill."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000003
+    m_Localized: "Follow the trail of the mill papers"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000004
+    m_Localized: "Speak with Hedda Roun or Keld Rook for a lead."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000005
+    m_Localized: "Confront Corvin Veyr"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000006
+    m_Localized: "The evidence points to Corvin Veyr and Ulrik's stolen deeds."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000007
+    m_Localized: "The claim is settled"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000008
+    m_Localized: "The matter of Ulrik's mill has been decided."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000009
+    m_Localized: "You mentioned another trouble."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000010
+    m_Localized: "They took the deed chest, not the silver. Someone knew which drawer to open. Ask around—but do not make me a saint in the telling."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000011
+    m_Localized: "What do you know about Ulrik's papers?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000012
+    m_Localized: "I will tell you. But first, clear a widow's debt for milling. Since her husband died, she has kept a home and children going; Ulrik does not drive her away, but he is still waiting for payment. Twenty-five crowns, and she will have one month without that fear."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000013
+    m_Localized: "I will clear the widow's debt. (25 crowns)"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000014
+    m_Localized: "Corvin Veyr's clerk asked about Ulrik's seal and the lock before the raid."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000015
+    m_Localized: "Who paid for the mill raid?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000016
+    m_Localized: "Thirty crowns go to a wounded runner. Pay it, and I will tell you whose purse reached camp."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000017
+    m_Localized: "Pay for the wounded runner (30 crowns)."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000018
+    m_Localized: "Corvin Veyr paid through a clerk. He wanted the deed chest, not blood."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000019
+    m_Localized: "We need to speak about Ulrik's mill."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000020
+    m_Localized: "We should speak, then. Rumours usually arrive with accusations, not papers. I have papers; you have a temper. But I dislike loud scenes. They make people braver than they are."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000021
+    m_Localized: "Withdraw the claim and return Ulrik's papers."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000022
+    m_Localized: "Take them. Ulrik will have his papers, along with every account I might have put before him. Do not mistake it for remorse. A dispute that walks out the door almost always costs more than a mill."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000023
+    m_Localized: "One hundred and fifty crowns will do. Keep the papers."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000024
+    m_Localized: "Sensibly done. Ulrik will keep grinding, you will leave with money, and the papers will stay where they will not be torn apart in the first bad wind. No one leaves clean, but everyone leaves alive."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000025
+    m_Localized: "Well? What did you want?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000026
+    m_Localized: "Tell me about yourself."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000027
+    m_Localized: "About me? Fine. Just spare me cheap curiosity and ask plainly."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000028
+    m_Localized: "How did you become the leader?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000029
+    m_Localized: "The last leader liked waving a knife and could not count. When he was gone, there were three angry men, an empty pot, and a merchant's debt. I divided the food, cleared the debt, and said no traveler gets touched without my word. We all answer for it. That was enough. People need someone who will not leave them hungry in the morning, not the scariest man."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000030
+    m_Localized: "Why keep to this place?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000031
+    m_Localized: "There is one road here, and the detour is three wet days through the woods. The city shut its gates, carts stopped, and the guard watches the walls. We watch the road. Bram takes payment at the pass—he is not the leader, he is the gate. My job is stopping my fools from turning a living into slaughter."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000032
+    m_Localized: "What has been happening lately?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000033
+    m_Localized: "The city closed and everyone needed the road at once. Yesterday a merchant asked me to take his wagons through; today a farmer sells his knife for flour. In days like these, everyone wants their share. Then it turns out someone else paid for it."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000034
+    m_Localized: "Who do you answer to here?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000035
+    m_Localized: "Those who keep their word. Bram likes to press with his voice, but while he listens, he suits the road. The guard wants quiet at the gate, and I want them not chasing glory in the woods. Villagers are not friends, but they are not prey either. Better to keep accounts with neighbors than old blood."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000036
+    m_Localized: "Do you really read?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000037
+    m_Localized: "I read. I learned letters in a debtor's pit: first so I would not sign my own noose, then I acquired the taste. Accounts, court notices, old campaign books. People lie on paper no less than face to face, only slower. Useful work: read a page and you can see who is being made a fool of."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000038
+    m_Localized: "I have business to discuss."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000039
+    m_Localized: "Business. Go on."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000040
+    m_Localized: "The raid on Ulrik's mill."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000041
+    m_Localized: "I heard about the mill. But you do not need gossip. You need a name. Tell me why first."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000042
+    m_Localized: "The person who hired you hid behind other hands. If this comes out, he will deny you. You know that yourself."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000044
+    m_Localized: "You took coin for the raid. Tell me who paid."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000045
+    m_Localized: "Do not take me for a fool. I took a job: fetch a chest, hurt no one. The client feared noise more than he feared us. Such people cut loose ends first with somebody else's hands. But you came to demand, not talk. The risk is mine, the gain is yours."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000046
+    m_Localized: "Fine. What do you want for the risk?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000047
+    m_Localized: "Thirty crowns. Not for the name—for the silence I will need to buy after you leave. Do not haggle. You chose how to speak to me."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000048
+    m_Localized: "Pay 30 crowns for the information."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000049
+    m_Localized: "Corvin Veyr paid through a clerk. The deed chest was named separately, as though the silver in the house did not interest him at all. And the clerk said not to touch or read the papers. That tells me enough about whose scheme this was."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000050
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000051
+    m_Localized: "That is enough."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000052
+    m_Localized: "Who is there? If you need goods, name them. If you want a conversation, you have strange taste."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000053
+    m_Localized: "Are you Erdan Vell?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000054
+    m_Localized: "The name is old. The stories around it are older still. Did you come to buy something, or repeat them to me through a door?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000055
+    m_Localized: "I heard your name was connected to the Red Moon."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000056
+    m_Localized: "It has been connected to plague and missing cattle too. People like it when a misfortune has one name."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000057
+    m_Localized: "They spoke of children selected after the Red Moon."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000058
+    m_Localized: "They were not selected after the Moon. The reaction showed earlier, and the Red Moon only made it stronger... That is exactly why I do not discuss this with people carrying rumors."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000059
+    m_Localized: "Then it is true."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000060
+    m_Localized: "Then you can listen. That does not mean you understand what you are speaking about."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000061
+    m_Localized: "Then explain it."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000062
+    m_Localized: "After the Red Moon, some children changed. Not outwardly. They dreamed events that later happened. They sensed people behind walls. Sometimes things reacted beside them that an ordinary person could not affect. We wanted to know why."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000063
+    m_Localized: "And then you began experimenting on them."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000064
+    m_Localized: "At first we observed. Then we decided observation was not enough. We tested moonlight, blood, minerals, spells. At some point the children stopped being people to us and became a way to get an answer. It was convenient. And vile."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000065
+    m_Localized: "Did any of them survive?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000066
+    m_Localized: "Several. Not all left as they arrived. Then one of the survivors spoke, or one of the mages was broken. Names started passing from hand to hand. Two of my colleagues have already been found dead. I do not expect it ended with them."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000067
+    m_Localized: "Why do you always speak through the door?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000068
+    m_Localized: "Because a door, stone, and a good lock are more useful than most of my spells now."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000069
+    m_Localized: "Are you waiting for someone to come for revenge?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000070
+    m_Localized: "Not waiting. Preparing. Outside, they have woods, roads, and time. I have walls, supplies, and a chance to hear steps on the stairs. It is not a life. But on the road I would be just another name on somebody's list."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000071
+    m_Localized: "About magic."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000072
+    m_Localized: "If you came for a lesson, you are twenty years too late. If for goods, that I can understand."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000073
+    m_Localized: "How did you become a mage?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000074
+    m_Localized: "I could read, count, and did not argue with people who paid for my education. I thought that was enough. Later I learned that knowledge without restraint only gives you more ways to do harm."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000075
+    m_Localized: "Why do you still trade with people?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000076
+    m_Localized: "Because I need food, lamp oil, and rare substances. And because trade is the only conversation where people at least pretend to hear the terms."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000077
+    m_Localized: "What is happening in the village?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000078
+    m_Localized: "You are looking for gossip in the wrong place. But I notice a few obvious things even from this tower."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000079
+    m_Localized: "What do you think of Cadmon?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000080
+    m_Localized: "Cadmon likes it when everything has a simple explanation and one person to blame. It calms people. It does not feed a hungry person."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000081
+    m_Localized: "And Meyra?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000082
+    m_Localized: "Meyra has good hands and a bad habit of believing what worked once. She sees a person, not a problem. Sometimes that saves them. Sometimes it keeps her from knowing what she is treating."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000083
+    m_Localized: "What did the closed gates change?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000084
+    m_Localized: "While the mill works, people quarrel over the price of flour. When it stops, they will quarrel over food. The guard watches the gate, bandits watch the road, and the village counts how many days its stores will last."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000085
+    m_Localized: "Do you know anything about the tavern and its travelers?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000086
+    m_Localized: "I do not go to the tavern. Halvar knows who drinks, lies, and cannot pay. Livio knows who is in trouble. Both call it work."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000087
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000088
+    m_Localized: "That is enough."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000089
+    m_Localized: "Erdan's Supply"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000090
+    m_Localized: "Erdan asks for six fresh camomile flowers. He cannot leave the tower and refuses to take herbs from Meyra's supplies."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000091
+    m_Localized: "Gather camomile"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000092
+    m_Localized: "Gather six fresh camomile flowers for Erdan."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000093
+    m_Localized: "Bring camomile to Erdan"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000094
+    m_Localized: "Return to Erdan's tower and give him six camomile flowers."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000095
+    m_Localized: "Do you have work for me?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000096
+    m_Localized: "I do. I need camomile — six fresh flowers, not dried rubbish. It grows by the water and on sunny slopes. My supply is nearly gone, and as you can see, I do not leave this tower. Bring it and I will pay."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000097
+    m_Localized: "Meyra gathers herbs."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000098
+    m_Localized: "For people who need to survive the night. I will not take the last pinch from her basket merely to make myself more comfortable. And do not bring her brews; I need plain camomile."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000099
+    m_Localized: "All right. I will gather it."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000100
+    m_Localized: "Do not tear the plants out by the root. Six flowers, clean and fresh. If Meyra is already gathering nearby, leave her patch alone."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000101
+    m_Localized: "Find someone else."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000102
+    m_Localized: "I brought the camomile."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000103
+    m_Localized: "Six. And not soaked through — unusual care. Here are thirty-five crowns. It is not generosity; it is the price of not having to open this door."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000104
+    m_Localized: "I will. The trouble is, everyone who knows how to listen is trapped behind the gate."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000105
+    m_Localized: "If you came for a sermon, you will not get one. If you want to speak, speak plainly."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000106
+    m_Localized: "What do you do here besides hold services?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000107
+    m_Localized: "The things people usually remember too late: who needs food, whose roof leaks, who has no one to bury them. Service is not words at an altar. Words are the easy part."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000108
+    m_Localized: "Why did you remain in the village?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000109
+    m_Localized: "Because a parish is not a building or a post. It is people whose names you know. Leaving when things grew tight and frightening would have been convenient. I do not think much of convenience."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000110
+    m_Localized: "What will the closed gate bring?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000111
+    m_Localized: "First people hide flour. Then they start counting their neighbours' sacks. Once it reaches that point, the guard will be of no use. Right now, who shares water and firewood matters more than who shouts loudest at the gate."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000112
+    m_Localized: "What do you think of Erdan Vell?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000113
+    m_Localized: "I do not demand his tower be burned, and I do not fear the word 'mage'. I see a man accustomed to treating another life as part of a calculation. That I will not accept."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000114
+    m_Localized: "You condemn what you do not know."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000115
+    m_Localized: "I know enough: fear remains behind his door, and people outside inherited it. He may call the rest research, error, or necessity. Pain does not change with the name."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000116
+    m_Localized: "He is afraid of revenge."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000117
+    m_Localized: "Let him be afraid. Fear does not make someone a monster. Nor does it erase what made him lock himself away."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000118
+    m_Localized: "Do you dislike Meyra?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000119
+    m_Localized: "I dislike it when someone takes hold of a person's need without restraint. But Meyra will go to the sick at night and through mud. I respect her for that, though she would surely say she has no use for my respect."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000120
+    m_Localized: "People trust her."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000121
+    m_Localized: "And rightly so. Trust is not a reward for never being wrong. It is knowing you will not be abandoned when things turn bad. She does not abandon people."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000122
+    m_Localized: "Prayer cannot cure every sickness."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000123
+    m_Localized: "It cannot. I read over the dying not because I think it can replace her hands. I do it so no one leaves alone. Do not mistake comfort for medicine."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000124
+    m_Localized: "What will happen to Ulrik's mill?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000125
+    m_Localized: "While it stands, it is one man's misfortune. If it stops for long, the misfortune becomes everyone's. Ulrik understands that, though he used to like people remembering who they owed their bread to."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000126
+    m_Localized: "What can you tell me about the tavern and its travelers?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000127
+    m_Localized: "Halvar gave people a roof when the gate closed. At a time like this, that matters more than how many cups he pours. And the travelers... each waits for the road to become someone else's concern again."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000128
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000129
+    m_Localized: "That is enough."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000130
+    m_Localized: "If you need medicine, tell me what hurts. If you want to talk, do not stand over the baskets; herbs do not dry from conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000131
+    m_Localized: "How do you treat people?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000132
+    m_Localized: "First I listen. Then I look at hands, eyes, breathing. Only after that do I reach for herbs. Most people want it the other way round: drink something and never ask why they were struck down."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000133
+    m_Localized: "Do you gather every herb yourself?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000134
+    m_Localized: "What I can, I do. But not everything that grows belongs in a brew, and not everything picked is still good. A flower left in a wet bag for a day heals little beyond someone's conscience."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000135
+    m_Localized: "How did the closed gate affect you?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000136
+    m_Localized: "While people are well, almost not at all. Then one day three have fever, a child begins coughing, and a good brew is down to the dregs. Gates do not make people ill. They keep what could treat them from arriving in time."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000137
+    m_Localized: "What is between you and Father Cadmon?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000138
+    m_Localized: "He thinks I reach too often for things that can do harm. I think he waits too long for everything to become safe. The sick do not care what you call it; they need to live until morning."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000139
+    m_Localized: "But treatment is a risk."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000140
+    m_Localized: "It is. That is why I do not promise miracles or push a brew into every hand. Refusing to act is a risk too. Cadmon knows it; he simply finds it easier to speak of it afterwards."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000141
+    m_Localized: "He still stays with people."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000142
+    m_Localized: "He does. When my hands are busy, he carries water, keeps the light, sits beside those I cannot save. Not everything can be cured. That does not mean it should be abandoned."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000143
+    m_Localized: "What do you think of Erdan?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000144
+    m_Localized: "He can see things in a body that I would miss even after sitting by a bedside all night. It is a rare skill, and dangerous when someone forgets there is a living person before them, not a problem."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000145
+    m_Localized: "He locked himself away out of fear."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000146
+    m_Localized: "He did. I will not pretend I do not understand that fear. But if you can help and remain behind a door, the fear still falls on those you did not come out to help."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000147
+    m_Localized: "Would you ask him to treat people?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000148
+    m_Localized: "I would not. Help dragged from someone always sends a bill later. I would rather do what I can. Let him decide for himself one day who he is behind that door."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000149
+    m_Localized: "What have you heard about the tavern?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000150
+    m_Localized: "It is cramped and loud, and everyone pretends to know when the gate will open. Halvar feeds the travelers while he can. Livio is already watching who will decide to sell their last possession first."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000151
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000152
+    m_Localized: "That is enough."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000153
+    m_Localized: "If you came for meat, you are late; it has all been taken. If you are heading into the woods, watch your step and listen. That is usually enough to come back."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000154
+    m_Localized: "Have you hunted for long?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000155
+    m_Localized: "Long enough not to call the forest mine. A beast tolerates a person while he is quiet, not greedy, and knows when to leave. People are worse at that."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000156
+    m_Localized: "What is happening in the forest?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000157
+    m_Localized: "There is less game by the road. More smoke, fresh stumps, and boot prints. The deer have gone deeper, and the birds are quiet by the old path. The forest is not afraid. It simply knows where it should not be."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000158
+    m_Localized: "Why do you not drive the bandits off yourself?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000159
+    m_Localized: "One hunter can take down a sentry. The camp will send others after that. I bring in food; I do not start a war the village will have to eat through with its stores."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000160
+    m_Localized: "Bandits are not prey to you?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000161
+    m_Localized: "Prey does not set a watch or come to a house for revenge. With a wolf it is simpler: it is hungry, and so are you. With people, first learn what they want. Only then reach for the bow."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000162
+    m_Localized: "How do the closed gates change hunting?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000163
+    m_Localized: "There will be more people in the forest. Some will go for meat; others for someone else's meat. When food is scarce, there are many tracks and less game. I take only what I can carry and keep."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000164
+    m_Localized: "What do you make of Meyra?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000165
+    m_Localized: "She knows which part of a beast to dry and which to throw away. And she does not mind listening when I tell her where the water is foul or the tracks look sick. A sensible person does not pretend to know everything."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000166
+    m_Localized: "What will become of Ulrik's mill?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000167
+    m_Localized: "Hunting will not save the village without flour. Meat runs out quickly when everyone decides they deserve more. Ulrik understands that. If only he understood that bread does not make him more important than everyone else, he would be worth his price."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000168
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000169
+    m_Localized: "That is enough."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000170
+    m_Localized: "Tell me what broke first. When someone starts from far away, it usually turns out he struck a stone and blames the iron."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000171
+    m_Localized: "Have you always been a blacksmith?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000172
+    m_Localized: "No. First I carried coal and worked the bellows for an old master. Then he let me hold the tongs, because his hands had begun to shake. Hammers did not make me a smith. People did, when they brought what they had managed to ruin."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000173
+    m_Localized: "What can a weapon tell you about its owner?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000174
+    m_Localized: "Less the weapon than how it is cared for. A clean blade can belong to a coward or a hero. But a grip wrapped in a strip of old shirt says someone cannot afford a new one right now."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000175
+    m_Localized: "Do you pity people like that?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000176
+    m_Localized: "Pity does not mend iron. If I can, I make the thing last another season. Then they decide whether the money goes on a grip, boots, or food."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000177
+    m_Localized: "What if someone brings a weapon meant for a bad deed?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000178
+    m_Localized: "I am no judge, but I am not blind. If someone asks me to make a knife better for fighting a neighbour, I send him away to cool down. If he comes back calm, we talk work. If not, he finds another smith."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000179
+    m_Localized: "How have the closed gates affected the forge?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000180
+    m_Localized: "At first everyone thought they would buy less steel. It went the other way: nothing new comes in, so they bring the old things to mend. Nails are straightened twice, axes honed down to a narrow tooth. Worse than a lack of iron is a lack of fuel for the forge. Without heat, every blank is only a piece of worry."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000181
+    m_Localized: "What do you think of the city guard?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000182
+    m_Localized: "I see their steel more often than their faces. They bring cracked shields, buckles, scabbards, and every time say it is urgent. That is their work. Mine is not to guess whom they failed to protect; it is to make sure a fastening does not fail next time."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000183
+    m_Localized: "What do you make of Ulrik's mill trouble?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000184
+    m_Localized: "Badly. Not because Ulrik is a saint; he haggles over every bracket. But the mill feeds people who never argued with him. When a property dispute is carried through hunger, it is no longer a dispute."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000185
+    m_Localized: "Do you often work with Meyra?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000186
+    m_Localized: "Sometimes. She needs clean needles, hooks, and pots that do not leak. She pays on time and does not ask for the impossible. For that, I am willing to hear about herbs, even if half their names sound like a joke."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000187
+    m_Localized: "What can I buy from you?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000188
+    m_Localized: "Things that will not fail straight away. Time will speak for the rest. Look over the goods yourself; I will not scorn them before a sale or praise them after one."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000189
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000190
+    m_Localized: "Nothing else."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000191
+    m_Localized: "If you are looking for someone, ask plainly. These days people do not open even their own door to just anyone."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000192
+    m_Localized: "What do you do?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000193
+    m_Localized: "Whatever is most needed by evening: I carry water, help with food, watch a house while its owners are busy. The work has no fine name, but everyone notices it when there is no one left to do it."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000194
+    m_Localized: "How is the village holding up?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000195
+    m_Localized: "Unevenly. By day everyone keeps busy and pretends the old order remains. By evening they count stores, recall old resentments, and wonder who will leave first if the gates open."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000196
+    m_Localized: "Are they afraid?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000197
+    m_Localized: "Of course. But fear does not always shout. Sometimes someone asks for a pot back today, though they never hurried before. Or leaves a door unlatched so they can hear the street."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000198
+    m_Localized: "And are many angry?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000199
+    m_Localized: "The angry ones are those who think someone else is to blame for their empty pantry. It is best not to argue about fairness with them on an empty stomach."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000200
+    m_Localized: "What changed after the gates were closed?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000201
+    m_Localized: "People stopped putting little things off. Those who meant to mend a roof do it now. Those who owed an apology do it too. As if finishing every loose end will open the gates sooner. It will not, of course. But it keeps their hands busy."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000202
+    m_Localized: "What have you heard at the tavern?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000203
+    m_Localized: "Every bit of news there grows louder than it was in the street. Halvar is holding on, not turning travelers out while he can still feed them. Livio already knows fear by what a person is willing to pawn."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000204
+    m_Localized: "What do you think of Garven?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000205
+    m_Localized: "He speaks sharply, but if a neighbour's lock cracks, he does not first send them looking for coin. He has his own measure of kindness: do the work honestly and do not remind them of it later."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000206
+    m_Localized: "What can you tell me about Ulrik?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000207
+    m_Localized: "He is used to his work being in plain sight: the wheel's noise, the sacks, the queue. Now he has to ask for help, and you hear it in every word. It is not easy for everyone to stop being the one in charge."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000208
+    m_Localized: "What do you make of Meyra?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000209
+    m_Localized: "She cannot soothe with words, but she comes with what can help. People do not always like that; they first want to hear that everything will be fine. She asks where it hurts."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000210
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000211
+    m_Localized: "That is enough."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000212
+    m_Localized: "If you came for boots, first tell me where you are going. The same leather will not do for the square and the woods. If you only need to wait out the rain, there is the awning."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000213
+    m_Localized: "What do you trade in?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000214
+    m_Localized: "Footwear, hats, belts. Things people remember only when they begin to chafe, freeze, or lose their purse. Good clothing does not make a person richer. It keeps trouble from noticing them too early."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000215
+    m_Localized: "Why do you care so much about footwear?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000216
+    m_Localized: "Because the road takes your feet first. Rub a heel raw and you slow down. Soak your boots and you freeze. Tear a sole and you watch the ground instead of the way ahead. Then people wonder how a small thing ruined a big plan."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000217
+    m_Localized: "Have you travelled much yourself?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000218
+    m_Localized: "Enough. Trade taught me that words can be cheaper than a wagon, but you still have to carry the goods yourself. Now I can tell whose feet ache by the way they approach a stall."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000219
+    m_Localized: "Not everyone can pay for good boots."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000220
+    m_Localized: "I know. I do not offer an expensive pair to someone who needs a patch until spring. A strap can be replaced, a sole mended. Not everything must be bought new, even if that would profit the seller."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000221
+    m_Localized: "How have the closed gates affected trade?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000222
+    m_Localized: "Caravans do not arrive, and people look at goods not to choose but to judge whether they will last the season. Sizes run out in no order, and leather does not appear by wishing. I have to say no more often than I like."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000223
+    m_Localized: "What is happening with the travelers at the tavern?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000224
+    m_Localized: "They still stand by the door as if someone will shout that the road is clear any moment. One bought a hat for the wind and wears it indoors, not from cold but so he need not think about how long he will wait. People on the road do not know how to stand still."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000225
+    m_Localized: "Have you raised your prices?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000226
+    m_Localized: "On what has become dearer to me, yes. Not on what someone urgently needs. You can profit from the cold, but then that cold will stand at your own door. Livio would likely say that is no way to count. Everyone has their own reckoning."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000227
+    m_Localized: "What do you think of Garven?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000228
+    m_Localized: "Garven curses a bad buckle as if it were made to spite him. Then he takes a hammer and fixes it. He is easy to work with: if a strap will not hold, he says so plainly instead of pretending the buyer is at fault."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000229
+    m_Localized: "What do you make of Meyra?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000230
+    m_Localized: "I stitch straps for her bags and sheaths for glass vials. She knows dirty hands can be worse than a bad herb. With her, you can speak of work instead of miracles."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000231
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000232
+    m_Localized: "That is enough."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000233
+    m_Localized: "If you need a door, tell me where the opening is. If you need advice, say that too. I do not like guessing what someone wants to build out of another person's words."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000234
+    m_Localized: "What do you do?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000235
+    m_Localized: "Roofs, doors, carts, fences. All the things no one looks at while they hold. Then something warps, and they remember Rogan at once. That is the proper order."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000236
+    m_Localized: "What matters most in carpentry?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000237
+    m_Localized: "Not rushing when the wood is still damp. A board looks straight on the outside, then it warps and takes the whole job with it. People like to cut time short. Wood always collects for it."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000238
+    m_Localized: "Can wood deceive you?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000239
+    m_Localized: "It does not deceive. It speaks quietly at first: through a knot, a crack, a damp edge. If you do not listen, it answers later with a door that will not close in frost."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000240
+    m_Localized: "Does every job need to be redone?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000241
+    m_Localized: "Some do. Better to remake one beam than prop up a whole roof later. That is obvious in work. With people, for some reason, they wait until it collapses."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000242
+    m_Localized: "What have the closed gates changed in your work?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000243
+    m_Localized: "More orders, less material. People mend shutters, brace gates, move firewood closer to the house. Not because wood protects from everything. When all around is uncertain, they want at least their own things not to creak."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000244
+    m_Localized: "What is happening in the forest now?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000245
+    m_Localized: "I no longer go far for good timber. There are too many unfamiliar tracks by the road, and dead wood can be found here. Harn says the forest tells you where a person is not wanted. I believe him. I do not want to learn how loudly it can say it."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000246
+    m_Localized: "Do you work with Garven?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000247
+    m_Localized: "All the time. A good door without hinges is boards, and a good fence without brackets is asking the wind not to blow. Garven knows how to make iron simple. That is a rare gift."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000248
+    m_Localized: "What do you think of Harn?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000249
+    m_Localized: "He speaks little, but he does not promise the forest to people who will not return from it. For a man in his work, that matters more than pleasant words."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000250
+    m_Localized: "Does Meyra order anything from you?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000251
+    m_Localized: "Boxes for drying herbs and shelves to keep things off the floor. She asks how much a board will bear before she puts a jar on it. That makes for easy work."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000252
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000253
+    m_Localized: "That is enough."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000254
+    m_Localized: "If you came to look at the soil, look. Just do not ask why it keeps quiet. The soil answers late."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000255
+    m_Localized: "Do you work in the fields?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000256
+    m_Localized: "I do. I sow, weed, mend ditches, see what has come up and what must be sown again. There is no spare work in a field: leave it until tomorrow, and tomorrow it takes twice as long."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000257
+    m_Localized: "What is hardest about fieldwork?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000258
+    m_Localized: "Not mistaking patience for idleness. Sometimes you wait for the ground to take the water. Sometimes you get into the mud now, or the water takes everything. From outside, it looks the same: standing and watching."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000259
+    m_Localized: "Is a harvest always a gamble?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000260
+    m_Localized: "No. A gamble is sowing whatever comes to hand and hoping for luck. We can prepare the ground, save seed, pull weeds in time. The rest is not ours. But that is enough not to sit idle."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000261
+    m_Localized: "So the weather decides everything?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000262
+    m_Localized: "The weather decides much. But a bad ditch, a blunt hoe, and a person who arrives late decide no less. It is convenient to blame the sky for everything. The soil does not accept that."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000263
+    m_Localized: "How have the closed gates changed the work?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000264
+    m_Localized: "Now we count not only sacks, but seeds. If there is nothing to sow in spring, there is nothing to mill in autumn. People see food in the granary. I see it still in the handful that must not be eaten now."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000265
+    m_Localized: "What does Ulrik's mill mean for the fields?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000266
+    m_Localized: "Without it, grain is only heavy sacks. Ulrik turns our work into bread, and people forgave him much for that. But when his trouble became the village's trouble, everyone had to remember: the mill does not stand apart from the fields."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000267
+    m_Localized: "Do you speak with Harn often?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000268
+    m_Localized: "When animals get into the crops, often. He does not promise to drive off every one, but he explains where to put rattles and when not to leave a field unattended. His mind works more quietly than most."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000269
+    m_Localized: "Does Meyra come to your fields?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000270
+    m_Localized: "She takes what does not go in a sack: roots, leaves, flowers along the field's edge. But first she asks what I used on the ground and where it is sick. It is good when someone knows the cost of what they gather."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000271
+    m_Localized: "And Father Cadmon?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000272
+    m_Localized: "He comes when hands are scarce at sowing time. He does not pretend to work better than us: he carries water, clears stones, listens. That helps a field more than proper words."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000273
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000274
+    m_Localized: "I should go. I do not want to keep you."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000275
+    m_Localized: "If you brought laundry, put it over there. If you brought conversation, stand here—just do not tread on the wet things."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000276
+    m_Localized: "Do you wash and mend clothes here?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000277
+    m_Localized: "I wash, mend, and lift stains. I keep a tub, soap, a needle, and other people's patience. It is not heroic work, but afterward people go back among others as if nothing happened to them."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000278
+    m_Localized: "Can you really tell much from clothes?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000279
+    m_Localized: "A great deal. But not everything you can see should be repeated. Look at a shirt: soot ground into the elbow, burrs at the hem, a collar rubbed by a strap. Someone worked, went through brush, carried a load. Where and why is no business of mine."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000280
+    m_Localized: "So you judge people by appearances after all?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000281
+    m_Localized: "No. I would be judging if I decided whether someone was good or bad. Laundry tells me what was done to it. A person is another matter."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000282
+    m_Localized: "Do people really bring their secrets to you?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000283
+    m_Localized: "Not secrets. Dirt, yes. A secret usually lives not in the cloth, but in someone starting to explain when nobody asked."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000284
+    m_Localized: "What have the closed gates changed for you?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000285
+    m_Localized: "The road used to bring dust, blood, wine, and ink. Now people mend old things before they wear anything new, and think twice before spending a piece of soap on a collar. Trouble does not always arrive shouting. Sometimes it just makes cloth thinner."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000286
+    m_Localized: "Does Halvar send his laundry to you?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000287
+    m_Localized: "He does. And he knows I do not sort through who slept in which room. There is less bedding now, and more worry in it. An empty room leaves a mark too—especially on an innkeeper."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000288
+    m_Localized: "What does Ulrik's mill mean to you?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000289
+    m_Localized: "When the wheel stopped, every basket suddenly held less certainty. Flour washes out easily. It is worse when people start dividing the last sack as if it will never be replaced."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000290
+    m_Localized: "Does Meyra ever ask you for help?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000291
+    m_Localized: "She asks for old clean linen for bandages and sometimes teaches me how to boil it so it will not harm the wounded. She is not gentle. But when blood is involved, her hands do more good than many kind words."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000292
+    m_Localized: "How do you see the guard?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000293
+    m_Localized: "Their boots dirty the floor like anyone else's. But people watch them more closely: when a guard walks past someone else's trouble, everyone notices. And when one helps, people more often remember how long they waited."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000294
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000295
+    m_Localized: "Thank you. I should go."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000296
+    m_Localized: "Not now."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000297
+    m_Localized: "If you can name the matter in two sentences, do so. If not, sit down and begin with what you want."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000298
+    m_Localized: "What do you do in the village?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000299
+    m_Localized: "I buy stock when someone has a surplus, lend when someone has a shortfall, and bring people together when they need to sell one another what they do not have time for. Does it sound ugly? Work rarely looks beautiful when you only look at the sums."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000300
+    m_Localized: "Do you always think about debts?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000301
+    m_Localized: "Debt is not a mark of shame. It is a promise that today's hardship will not be the last word. The trouble is not borrowing. It is convincing yourself there are no terms and that someone else will pay anyway."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000302
+    m_Localized: "Do you count people as numbers?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000303
+    m_Localized: "If I did, I would not lend. A number does not ask for time, bury kin, or lie to itself from shame. But without numbers I cannot tell where help becomes the habit of living at another's expense."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000304
+    m_Localized: "And when are debts forgiven?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000305
+    m_Localized: "When collecting breaks both sides. A poor man without a roof will return nothing; a neighbour helped once may stand again and return more than money. Mercy without memory is foolishness. Calculation without it is too."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000306
+    m_Localized: "How have the closed gates changed your work?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000307
+    m_Localized: "The circle has narrowed. Goods do not arrive, money lies still, and people fear spending even on what they need. On days like these, those who promise everyone their old life back for one simple signature are especially dangerous."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000308
+    m_Localized: "Why stay in this village?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000309
+    m_Localized: "There is water, fields, skilled work, and a road—when it is not closed. People call places like this poor until they see how much labour passes through one yard. I prefer to invest where the result can be seen without a map."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000310
+    m_Localized: "What do you think of Ulrik?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000311
+    m_Localized: "He is a good miller: he knows the wheel, the water, and the grain. That is no small thing. But a business also needs dates, papers, and agreements, and he treats them as tiresome details. Men like that remember the law when it is already at the door."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000312
+    m_Localized: "How do you regard Meyra?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000313
+    m_Localized: "She sells not hope, but what she knows how to do. She is sometimes wrong, but she does not hide it behind fine words. Useful in a deal. For friendship, I cannot say."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000314
+    m_Localized: "Do you trust the guard?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000315
+    m_Localized: "You entrust the guard with what cannot be settled between yourselves. But waiting for them instead of making your own decision is an expensive habit. They come when they can; the village still pays the price of delay."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000316
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000317
+    m_Localized: "That is enough for today."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000318
+    m_Localized: "I need to think."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000319
+    m_Localized: "Return Ulrik's documents"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000320
+    m_Localized: "The papers were returned to their rightful owner. The mill remains Ulrik's."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000321
+    m_Localized: "Accept Corvin's deal"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000322
+    m_Localized: "The dispute over the mill has been settled by a deal. Corvin keeps the documents."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000323
+    m_Localized: "Do you have the papers?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000324
+    m_Localized: "I do. Locked in a drawer, where they should have been from the start. Strange to be glad about a scrap with a seal, but now that the water is turning the wheel, I can think about flour instead of who will arrive with another man's signature."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000325
+    m_Localized: "What will happen to the mill now?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000326
+    m_Localized: "The wheel is turning. That is the main thing for now. But the papers are still not with me. Corvin says the agreement settles it; I have seen agreements like that reopen when someone needs to press another person. I will keep the accounts straight and give him no excuse."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000327
+    m_Localized: "How have the fields weathered the trouble at the mill?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000328
+    m_Localized: "People have stopped hiding grain in their chests. They know they can take it over and have it ground. One paper has not added any bread, but without it everyone would have started saving only their own sack."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000329
+    m_Localized: "What do people say about the deal with Corvin?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000330
+    m_Localized: "They speak quietly. The mill is working, and everyone is glad of that. But now, before bringing grain, a person wonders who they are really promising their labour to. A thought like that does not dry out a field, but it makes the hands heavier."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000331
+    m_Localized: "Has it grown calmer since the papers were returned?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000332
+    m_Localized: "Calmer. People bring laundry to the river again and argue over stains instead of who will get the last sack of flour. I know calm does not always mean justice. But at least people here have stopped waiting for the next blow."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000333
+    m_Localized: "What do people think of Corvin's deal?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000334
+    m_Localized: "Everyone thinks their own thoughts and pretends to know nothing. Ulrik holds himself together, Corvin is polite, the mill makes its noise. But the clothes tell it: people have begun hiding their purses under their shirts more often. They do not believe the matter is over."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000335
+    m_Localized: "Did you give up the mill?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000336
+    m_Localized: "I gave up a paper acquired improperly. Do not mistake that for remorse: I simply will not hold property on such a foundation. Ulrik has been given a chance. What he does with it is his own account."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000337
+    m_Localized: "Are you satisfied with the deal?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000338
+    m_Localized: "Satisfied is the wrong word. We found a price at which you stopped pursuing the matter and Ulrik kept his work. The papers will stay with me until the city opens; then I will decide how to formalise everything without needless noise. For the village, the wheel turning matters more just now."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000339
+    m_Localized: "Has the tavern always been this full?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000340
+    m_Localized: "No. A full tavern is when people arrive in the evening, eat, kick up dust in the morning, and leave. Now they count coppers, ask for another night on credit, and listen to the door as if the road will open behind it. A guest who does not know when they leave becomes almost a neighbour."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000341
+    m_Localized: "And you will not turn anyone out?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000342
+    m_Localized: "Not while I can put a bowl before them. But pity has to be counted too: give everything away today, and tomorrow everyone behind this counter will be cold. So I cut the bread thinner and write down every debt. Nothing noble about it. It is simply how a house holds together longer."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000343
+    m_Localized: "How have the closed gates changed your work?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000344
+    m_Localized: "First the fresh barrels stopped coming, then salt, then people stopped ordering a second mug. Now the soup is thick not from meat, but because I have learned not to throw away anything edible. The gates did not close a road. They closed tomorrow's delivery."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000345
+    m_Localized: "So you work on credit?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000346
+    m_Localized: "Sometimes. But I do not let a person forget it is a debt. Tomorrow they may need not a mug, but a place by the hearth. Better to speak plainly now than watch them hide their eyes later."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000347
+    m_Localized: "Who are the people staying here?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000348
+    m_Localized: "The same sort as anywhere: one waits for good news, another for a convenient chance. Marta keeps her things packed as if departure were set for dawn. Edric argues with rumours until he tires himself out. Runa watches more than she speaks. And Tarek… Tarek pays on time and does his best not to be remembered."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000349
+    m_Localized: "Which of them worries you?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000350
+    m_Localized: "The one certain trouble only happens to other people. That person is first to raise an alarm and last to fetch a bucket when the roof catches fire. The others at least understand they are stuck together."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000351
+    m_Localized: "Does Livio help you?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000352
+    m_Localized: "He can find the price of a thing when its owner is ready to give it away for a bowl of stew. Sometimes that saves a person; sometimes it leaves them without their last possession. I do not call it help, but Livio does not meddle with my barrels and he pays for his table. That is already something."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000353
+    m_Localized: "Do you trust him?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000354
+    m_Localized: "I trust him to count. I check everything else myself. It is no insult; with people in his trade, that keeps both them and you calmer."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000355
+    m_Localized: "Have you known Ulrik long?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000356
+    m_Localized: "A long while. He used to come after milling, sit by the wall, and listen to everyone else first. Then he ordered food for the workers, not only for himself. Ulrik is stubborn and no friend to paperwork, but he remembers whose sack he held up and who needs flour first. For a miller, that matters more than fine speech."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000357
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000358
+    m_Localized: "That is enough for today."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000359
+    m_Localized: "If you want to talk, talk to me. Leave my brother alone."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000360
+    m_Localized: "Why does Edric not answer?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000361
+    m_Localized: "He can speak. He simply will not. Not with strangers, certainly. Do not take it personally: this is how he holds himself together when there are too many people and questions around him. I am his sister, Runa."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000362
+    m_Localized: "Did something happen to him?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000363
+    m_Localized: "To both of us. They took us as children, told our parents they would examine a fever after the Red Moon. In the records, we were called sensitive. The mages tested what its light did to us and called it treatment. After one such night, Edric asked them to stop. They wrote: 'subject is uncooperative.' He did not ask again."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000364
+    m_Localized: "Who did it?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000365
+    m_Localized: "People in clean sleeves. Some called the children by numbers, others by names. Most vanished when the truth came out. But one name remained in the papers and in the stories of those who survived: Erdan Vell."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000366
+    m_Localized: "Are you looking for Erdan Vell?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000367
+    m_Localized: "We are. We followed old letters and scraps of other people's words until we heard of a mage in a tower. I do not know whether it is truly him. But if it is Erdan, he cannot say he does not remember us: he had our names."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000368
+    m_Localized: "What will you do if you find him?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000369
+    m_Localized: "I will not promise a pretty answer. Edric wants to look him in the face. I want him to name what he did in his own words, not call it 'research' or 'necessity.' And after that… we will learn which of us can still stop."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000370
+    m_Localized: "What did the Red Moon do to you?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000371
+    m_Localized: "For the mages, it was an explanation. For us, heat beneath the skin, sleeplessness, and dreams after which you woke without knowing the room. Sometimes glass cracked from fear; sometimes we heard other voices. They awaited those days like a feast."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000372
+    m_Localized: "Why were you chosen?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000373
+    m_Localized: "Because we reacted. For other children, the Moon was only a red point above the roof. We developed a fever. The mages said it was rare, a chance to understand something important. Rare is a useful word when you do not want to say 'child.'"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000374
+    m_Localized: "Why did you stay when the gates closed?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000375
+    m_Localized: "Because we were already here. And because Edric will not leave before he checks the tower. I will not drag him through a closed gate like a sack. We waited too long to turn away at the threshold."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000376
+    m_Localized: "What if Erdan is not here?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000377
+    m_Localized: "Then we will go on. This is not the first door that has closed before us. But I still hope he is here. Hope is not always a good feeling; sometimes it simply keeps you from lying down and giving up the search."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000378
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000379
+    m_Localized: "I should go."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000380
+    m_Localized: "If you have an item to sell, show it to me. If you have a conversation, speak plainly. Time has a price too."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000381
+    m_Localized: "What do you do?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000382
+    m_Localized: "I buy what one person no longer needs or cannot carry, and find someone who can use it. A tool, a jewel, a travel thing: each has a price, but it changes with place, time, and who can afford to wait. My trade is not confusing an item's price with its owner's panic."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000383
+    m_Localized: "But you still profit from another person's need."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000384
+    m_Localized: "Sometimes even a fair price sounds insulting when someone needs coin before evening. I did not create their need, but I can choose how much to exploit it. A warm cloak, a working knife, a person's last boots: I do not pay coppers for such things. A deal made too cheaply often comes back to you as someone else's misery."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000385
+    m_Localized: "How have the closed gates changed your business?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000386
+    m_Localized: "The market has become small and nervous. Goods exist, but there is no buyer beyond the gate. People hide coins as if they could warm themselves with them; meanwhile any belt or pot that cannot be replaced suddenly costs more than silver. Now I count not only an item's worth, but whether we can find another in a month."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000387
+    m_Localized: "Who loses most from that?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000388
+    m_Localized: "The person who needs money today and the item tomorrow. The rich can wait; the poor sell what they will later need to work. That is why, in a closed city, gold is not the costliest thing. Time is."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000389
+    m_Localized: "Why do you sit in the tavern?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000390
+    m_Localized: "Because you hear what is happening here before you do in the square. A person does not bring an item to sell in silence: first they complain about the road, a debt, a broken lock. A tavern is a market before the item reaches the table. I listen, but I do not enter another person's conversation uninvited."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000391
+    m_Localized: "Does Halvar allow that?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000392
+    m_Localized: "Halvar lets me use a table while I do not turn his house into a trap for the desperate. He keeps his own accounts: bowls, firewood, people under the roof. I keep mine: objects and deadlines. We do not share ledgers, and that is why we get along better than many business partners."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000393
+    m_Localized: "How did you become a buyer?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000394
+    m_Localized: "At first I ran between shops with other people's parcels and counted what the owner lost to every middleman. Then I learned to tell good steel from polished junk, and to listen when someone called their own possession worthless. This trade rarely begins with a grand deal. Usually, it begins when someone cheats you once."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000395
+    m_Localized: "Why keep doing such work?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000396
+    m_Localized: "Because a thing lying unused with one person can feed another or carry them home. Money is not the purpose; it is a way not to argue for hours over who owes whom. Of course people can make dirt of it. But dirt does not vanish when you stop noticing what it sticks to."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000397
+    m_Localized: "Do you know Corvin Veyr?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000398
+    m_Localized: "We know each other's names. That is enough. Corvin works in promises: he gives a person time, then sees what they will pay for it. I work with what lies before me. He sees future profit; I see a present price. Sometimes those views meet. I would not call it friendship."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000399
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000400
+    m_Localized: "That is all."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000401
+    m_Localized: "Best approach horses without sudden words. They do not understand them anyway, but they remember a hand."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000402
+    m_Localized: "You seem to think more about horses than guests."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000403
+    m_Localized: "A guest sleeps and leaves. A horse leaves, and the guest stays with you: angry and on foot. So first I know who is lame and who did not drink enough; only then do I hear who lacks a pillow."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000404
+    m_Localized: "Is that enough to make one obey?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000405
+    m_Localized: "No. But shouting only makes a horse obey out of fear, and a frightened horse brings more trouble on the road. First let it know you saw the fear. Then ask it to work. It is not so different with people."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000406
+    m_Localized: "What is your work besides the stalls?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000407
+    m_Localized: "Stalls are half of it. Hooves, harness, water, oats, a roof against rain. Then listening to the owner: they always know why a horse will not go, until we find a strap has rubbed its shoulder. A good stablehand notices first."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000408
+    m_Localized: "How have the closed gates affected the stable?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000409
+    m_Localized: "People can wait and make up reasons for it. An animal cannot: it needs feed today. There are fewer travellers, but more horses left behind because those stranded do not want to abandon them on the road. There is room. Oats have to be counted."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000410
+    m_Localized: "Will the feed last?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000411
+    m_Localized: "If nobody starts feeding their colt like a lord, it will last a while. Halvar arranged hay with the farmers; I set the horses on rations. It is not pretty, but it is fair: one full horse is not worth three hungry ones."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000412
+    m_Localized: "Have you worked on the road long?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000413
+    m_Localized: "Since I was small. First I carried water into another man's yard for a bowl of stew. Then an old stablehand gave me a brush and told me not to get underfoot. A year later he trusted me with a mare that had a temper. I thought: if she did not throw me, I might last here."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000414
+    m_Localized: "Do you not want to leave yourself?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000415
+    m_Localized: "I did, until I rode with a caravan. The road is fine when you are its guest. When you have four animals, wet bundles, and an owner who cannot read the sky behind you, you soon appreciate a dry stable. I have nothing against travel. I just know its price."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000416
+    m_Localized: "You see the guests before anyone else. What do you make of them?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000417
+    m_Localized: "A horse tells you plenty. Marta keeps everything ready: her packs are tied twice over, as if the gates will open any moment. Runa does not take the reins herself, but watches her brother breathe when it gets loud. Livio asks where people came from as if he is only making conversation. Everyone has their own way of waiting."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000418
+    m_Localized: "Are you afraid of the forest road?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000419
+    m_Localized: "I am afraid when there is reason. Fear on the road helps if it does not make you foolish: do not enter darkness, do not run a horse over stones, do not put yourself between strangers and their quarrel. The rest is luck and how well you prepared."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000420
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000421
+    m_Localized: "I will not keep you."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000422
+    m_Localized: "If you want to talk, talk. Just do not touch my bag: I spent too long learning not to leave my things unwatched."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000423
+    m_Localized: "Have you waited long for the gates to open?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000424
+    m_Localized: "Long enough to stop asking the guard every morning. I came through this village for two nights, and now I know how Halvar counts firewood and when Orren takes the horses to water. Not the knowledge one sets out to gain."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000425
+    m_Localized: "Do you have to get beyond the gates?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000426
+    m_Localized: "I do. I left work elsewhere and promised to return by a date. While I am here, other people's letters and accounts lie unanswered. Nothing heroic. People simply dislike having their important words stuck in someone else's bag."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000427
+    m_Localized: "You work with letters and accounts?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000428
+    m_Localized: "I copy contracts, letters, and sometimes keep accounts for those with no time or skill for it. On paper, people are usually braver: they promise more than they would say to a face. My work is making sure it is possible to see later who promised what."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000429
+    m_Localized: "Why are your things always packed?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000430
+    m_Localized: "Because packing when it is already time to leave is a fine way to forget what matters. I check straps in the evening, not at dawn. If the gates open suddenly, I will not have to choose between my place in a caravan and my ink bottle."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000431
+    m_Localized: "Do you always expect the worst?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000432
+    m_Localized: "I account for plans changing. That is different. Best not call for the worst ahead of time; it knows the road without an invitation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000433
+    m_Localized: "What have the closed gates done to people?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000434
+    m_Localized: "At first everyone was angry. Then they began speaking more quietly and listening to the door more often. Some fear losing money; some fear bad news is already waiting at home. A delay is not simply another day. It is a day you cannot tell anyone about."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000435
+    m_Localized: "Do you write down everything you hear?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000436
+    m_Localized: "No. Another person's worry is not a draft for my work. I notice when someone needs to speak and when it is better to leave them alone. Those are different skills. I learned the second one first."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000437
+    m_Localized: "How are you finding life in the tavern?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000438
+    m_Localized: "Crowded, noisy, but honest. Halvar does not promise everyone comfort, but in the morning there is still a fire and stew. Runa stays close to her brother. Livio stays close to other people's things. I keep a place by the wall so no one sits on my papers. Everyone manages as they can."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000439
+    m_Localized: "Can you read something for me?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000440
+    m_Localized: "I can, if it is yours and you know why you are listening. But do not ask me to read another person's letter over their shoulder. Paper can keep boundaries too."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000441
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000442
+    m_Localized: "I should go."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000443
+    m_Localized: "If a strap, lock, or sheath has broken, show me. If you only want to talk, sit down. I do not bite."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000444
+    m_Localized: "You try not to draw attention."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000445
+    m_Localized: "I try not to be in the way. Different thing. Pay on time, stay out of another person's quarrel, return a tool whole, and people remember you when they need you. Enough for me."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000446
+    m_Localized: "You do not like people?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000447
+    m_Localized: "I do. I have simply seen places where one careless word makes a person known, and then they are sold that word back for a week. I do not like that trade."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000448
+    m_Localized: "How do you earn your living?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000449
+    m_Localized: "I mend what people are sorry to throw away: buckles, sheaths, door hinges, straps, travel pots. Small work, but it reminds you at the right time that not everything useful looks expensive."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000450
+    m_Localized: "Where did you learn it?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000451
+    m_Localized: "From a master who said: first find why a thing broke, then charge for mending it. Otherwise tomorrow they bring you the same thing, only angrier. I did not stay with him long, but I kept that lesson."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000452
+    m_Localized: "Do the closed gates trouble you much?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000453
+    m_Localized: "They trouble everyone, only differently. I used to mend things on the road and move on. Now something breaks here, and there is nowhere to replace it. More work, less metal. That is the arithmetic of it."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000454
+    m_Localized: "Do you take coin for repairs now?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000455
+    m_Localized: "If someone can pay, I take it. If not, I ask what the thing is for. For a working knife or harness strap, we can sometimes make an arrangement. Not generosity: without them, a person soon becomes trouble to themselves and everyone else."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000456
+    m_Localized: "What do you think of the people in the tavern?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000457
+    m_Localized: "Each holds to their own. Marta to order. Runa to her brother. Halvar to a house that must not come apart. Livio to the price of things. Nothing unusual. It is simply all visible here because nobody can leave yet."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000458
+    m_Localized: "Have you travelled the roads much?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000459
+    m_Localized: "Enough not to call the road freedom. It only trades one worry for another: where to sleep, whom to trust, how not to soak your tools. But the road is honest in one way: if you did the work well, it shows at once."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000460
+    m_Localized: "And the forest road?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000461
+    m_Localized: "I walk where people walk and do not seek shortcuts through another person's ground. I have heard the same of bandits as everyone. But when a road goes empty, tracks lie before rumours do. I watch them more closely."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000462
+    m_Localized: "Return to the conversation."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000463
+    m_Localized: "Take care."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000464
+    m_Localized: "Oswin Marlow asked me to see how you were. He says he has had no word from you in a long while."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000465
+    m_Localized: "Oswin worries as if he has a bell where his heart should be. Tell him this: I am alive, working, and doing well. I have even taken on an apprentice — in two years she has learned to hold the tongs and argue about iron. Oswin and I have not seen each other for just as long. When the roads open, I will call on him myself. And ask why he decided I had vanished."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000466
+    m_Localized: "Bring Oswin the news"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000467
+    m_Localized: "Return to Oswin and deliver Garven's message."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000468
+    m_Localized: "I found Garven. He is alive, doing well, and asked me to tell you that he has had an apprentice for two years now."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000469
+    m_Localized: "An apprentice? So Garven has finally learned not to carry all the work by himself. That is good news. Thank you for going. When we meet, I expect he will explain why he kept quiet for two years — and I will explain why I spent that time waiting for word from him."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000470
+    m_Localized: "Speak with Elina"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000471
+    m_Localized: "Halvar says Elina is by the river. Find her and make sure she is all right."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000472
+    m_Localized: "Speak with Elina at the tavern"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000473
+    m_Localized: "Elina has gone back to the tavern. Continue the conversation there."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000474
+    m_Localized: "Yes?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000475
+    m_Localized: "What do you like about the river?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000476
+    m_Localized: "It never asks whether I have washed the cups or counted the linen. I can sit here for ten minutes, listen to the water, and come back to the tavern without wanting to bite anyone. That is already plenty."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000477
+    m_Localized: "The river does not hold grudges. Useful quality."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000478
+    m_Localized: "The captain of the guard asked me to see whether you are all right."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000479
+    m_Localized: "Of course he did. He notices a loose buckle three streets away, but will stand at our door and forget why he came. Tell him I am well. Better yet, do not tell him anything yet. I will be at the tavern; he can hear it from me when he finds the courage."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000480
+    m_Localized: "Your father is worried. He says you often come here."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000481
+    m_Localized: "Father worries when I am two steps from the door. He is not wrong, only exhausting. Since you have spoken with him, tell him I will come back before the stew burns. Then meet me at the tavern if you still want answers."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000482
+    m_Localized: "Is it hard to be back at the tavern?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000483
+    m_Localized: "Hard is too grand a word. There are cups to dry, travelers to feed, and Father pretending he did not save the stool beside him for me. Work puts things in order. Sometimes that is enough."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000484
+    m_Localized: "You seem to have learned the rhythm of this place."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000485
+    m_Localized: "Are you angry with the captain?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000486
+    m_Localized: "No. Anger would be easier. He is decent, and so careful not to overstep that he sometimes steps right out of his own life. I do not need a man to watch me from a gate. I need him to speak plainly."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000487
+    m_Localized: "Fair enough."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000488
+    m_Localized: "Let us talk about something else."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000489
+    m_Localized: "I am looking for Elina. Is she by the river?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000490
+    m_Localized: "She is. Goes there when this room feels too close. If the captain sent you, do not make it sound like an inspection. She will hear concern even if you wrap it in orders."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000491
+    m_Localized: "I need to know how Elina is doing. She is Halvar's daughter — the innkeeper on the road. With the city shut, people disappear into their own worries. Find her, speak with her, and bring me the truth, not a polite answer."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000492
+    m_Localized: "I will find Elina and speak with her."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000493
+    m_Localized: "Thank you. She is usually by the river. You may speak with Halvar first if you wish; he knows when something is weighing on her. And do not question her like a witness."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000494
+    m_Localized: "News of Elina"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000495
+    m_Localized: "The captain of the city guard asks you to make sure Elina, Halvar's daughter, is safe."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000496
+    m_Localized: "Speak with Elina"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000497
+    m_Localized: "Elina is usually by the river. You may speak with Halvar before you go to her."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000498
+    m_Localized: "It is personal, but not only that. Elina is capable; that is precisely why she does not ask for help when she should. I would rather hear she is well than spend another day imagining the worst."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000499
+    m_Localized: "Do you know where I can get apples?"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99200000000000500
+    m_Localized: "There is an apple tree right in front of us. You can wait for the apples to fall on their own, or give the trunk a couple of knocks — maybe a pair will come down. Just do not lay into it."
     m_Metadata: {m_Items: []}
   references:
     version: 2

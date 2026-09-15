@@ -12,4 +12,30 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: 11000000000000000000000000000004, type: 2}
   - Position: {x: 800, y: 0}
     Phrase: {fileID: 11400000, guid: 11000000000000000000000000000005, type: 2}
+  - Position: {x: 400, y: 220}
+    Phrase: {fileID: 11400000, guid: b6100000000000000000000000000001, type: 2}
+  - Position: {x: 850, y: 220}
+    Phrase: {fileID: 11400000, guid: b6100000000000000000000000000002, type: 2}
+  - Position: {x: 400, y: 460}
+    Phrase: {fileID: 11400000, guid: b6100000000000000000000000000003, type: 2}
+  - Position: {x: 850, y: 460}
+    Phrase: {fileID: 11400000, guid: b6100000000000000000000000000004, type: 2}
+  - Position: {x: 400, y: 700}
+    Phrase: {fileID: 11400000, guid: b6100000000000000000000000000005, type: 2}
+  - Position: {x: 850, y: 700}
+    Phrase: {fileID: 11400000, guid: b6100000000000000000000000000006, type: 2}
+  - Position: {x: 400, y: 940}
+    Phrase: {fileID: 11400000, guid: b6100000000000000000000000000007, type: 2}
+  - Position: {x: 850, y: 940}
+    Phrase: {fileID: 11400000, guid: b6100000000000000000000000000008, type: 2}
+  - Position: {x: 400, y: 1180}
+    Phrase: {fileID: 11400000, guid: b6100000000000000000000000000009, type: 2}
+  - Position: {x: 0, y: 1420}
+    Phrase: {fileID: 11400000, guid: b610000000000000000000000000000a, type: 2}
+  - Position: {x: 0, y: 1580}
+    Phrase: {fileID: 11400000, guid: b610000000000000000000000000000b, type: 2}
+  - Position: {-400, y: 220}
+    Phrase: {fileID: 11400000, guid: e2a00000000000000000000000000014, type: 2}
+  - Position: {-750, y: 220}
+    Phrase: {fileID: 11400000, guid: e2a00000000000000000000000000015, type: 2}
   <EntryPhrase>k__BackingField: {fileID: 11400000, guid: 11000000000000000000000000000003, type: 2}

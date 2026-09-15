@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_Script: {fileID: 11500000, guid: cab1eab763ecf6f4c96f41d14656eb42, type: 3}
+  m_Name: Keld - Mill Question
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.Model.DialogPhrase
+  text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 99200000000000041, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+  answers:
+  - text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 99200000000000042, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: a4510000000000000000000000000013, type: 2}
+    hasGameplayEvents: 1
+    gameplayEvents:
+    - {fileID: 11400000, guid: 6041f755578845979d8112a0ee39b707, type: 2}
+    hasConditions: 0
+    conditions: []
+  - text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 99200000000000044, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: a4510000000000000000000000000011, type: 2}
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 0
+    conditions: []

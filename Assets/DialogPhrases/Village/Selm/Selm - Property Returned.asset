@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_Script: {fileID: 11500000, guid: cab1eab763ecf6f4c96f41d14656eb42, type: 3}
+  m_Name: Selm - Property Returned
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.Model.DialogPhrase
+  text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 99200000000000328, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+  isConversationTopic: 1
+  conversationAnswer:
+    text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 99200000000000327, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: a4e00000000000000000000000000013, type: 2}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 1
+    conditions:
+    - type: 13
+      moneyAmount: 0
+      itemConfig: {fileID: 0}
+      itemCount: 1
+      questGraph: {fileID: 11400000, guid: f94551fcd4ca4ed89ebeb276c94f9c9c, type: 2}
+      questSourceNode: {fileID: 0}
+      questTransition: {fileID: 0}
+      questNode: {fileID: 11400000, guid: c3d8d167bd874d0ca746e4b325a2cc51, type: 2}
+      runtimeFlag: {fileID: 0}
+  answers: []

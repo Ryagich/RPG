@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_Script: {fileID: 11500000, guid: cab1eab763ecf6f4c96f41d14656eb42, type: 3}
+  m_Name: Keld - Mill Price
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.Model.DialogPhrase
+  text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 99200000000000047, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+  answers:
+  - text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 99200000000000048, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+    nextPhrase: {fileID: 11400000, guid: a4510000000000000000000000000013, type: 2}
+    hasGameplayEvents: 1
+    gameplayEvents:
+    - {fileID: 11400000, guid: 6041f755578845979d8112a0ee39b707, type: 2}
+    hasConditions: 1
+    conditions:
+    - type: 1
+      moneyAmount: 30
+      itemConfig: {fileID: 0}
+      itemCount: 1
+      questGraph: {fileID: 0}
+      questSourceNode: {fileID: 0}
+      questTransition: {fileID: 0}
+      questNode: {fileID: 0}
+      runtimeFlag: {fileID: 0}

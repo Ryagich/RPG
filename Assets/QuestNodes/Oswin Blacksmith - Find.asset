@@ -10,13 +10,16 @@ MonoBehaviour:
   localizedName: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 76000000000000021, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
   localizedDescription: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 76000000000000022, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
   icon: {fileID: 0}
-  mapTargetSource: 0
-  sceneMapTargetId: 
+  mapTargetSource: 1
+  sceneMapTargetId: oswin-blacksmith-garven
   scriptMapTargetKey: 
+  hasAuthoredMapPosition: 1
+  authoredMapPosition: {x: 112.6, y: 0.09299587, z: -113.22}
   ownerGraph: {fileID: 11400000, guid: 971e12bc350c9594482845c6543433c9, type: 2}
   hasAvailabilityRequirements: 0
   availabilityRequirements: []
   hasCompletionResults: 0
   completionResults: []
-  transitions: []
+  transitions:
+  - {fileID: 11400000, guid: d1000000000000000000000000000002, type: 2}
   references: {version: 2, RefIds: []}

@@ -29,7 +29,7 @@ MonoBehaviour:
   questAnswer:
     text:
       m_TableReference:
-        m_TableCollectionName: 
+        m_TableCollectionName:
       m_TableEntryReference:
         m_KeyId: 0
         m_Key: 
@@ -56,7 +56,7 @@ MonoBehaviour:
   conversationAnswer:
     text:
       m_TableReference:
-        m_TableCollectionName: 
+        m_TableCollectionName:
       m_TableEntryReference:
         m_KeyId: 0
         m_Key: 
@@ -74,7 +74,7 @@ MonoBehaviour:
   conversationReturnAnswer:
     text:
       m_TableReference:
-        m_TableCollectionName: 
+        m_TableCollectionName:
       m_TableEntryReference:
         m_KeyId: 0
         m_Key: 
@@ -92,7 +92,7 @@ MonoBehaviour:
   dialogueExitAnswer:
     text:
       m_TableReference:
-        m_TableCollectionName: 
+        m_TableCollectionName:
       m_TableEntryReference:
         m_KeyId: 0
         m_Key: 

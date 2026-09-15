@@ -92,7 +92,10 @@ namespace Locations
                 return;
             }
 
-            requiresTransitionEntrance = transitionContext.HasPendingTransition;
+            // A restored location may deliberately have no entrance: it selects the saved
+            // location while spawning the player at the scene's default point. Only an
+            // authored transition ID requires a destination entrance.
+            requiresTransitionEntrance = !string.IsNullOrWhiteSpace(transitionContext.TargetTransitionId);
             var selectedId = string.IsNullOrWhiteSpace(transitionContext.TargetLocationId)
                 ? selector.DefaultLocationId
                 : transitionContext.TargetLocationId;

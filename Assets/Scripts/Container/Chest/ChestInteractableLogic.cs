@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Character;
 using Factions;
 using GameModes;
-using Inventory;
 using Inventory.Inventories;
 using Inventory.Looting;
 using MessagePipe;

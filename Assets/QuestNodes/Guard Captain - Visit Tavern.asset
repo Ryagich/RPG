@@ -6,9 +6,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8790978157e23cc4186df7e90601f3fa, type: 3}
   m_Name: Guard Captain - Visit Tavern
   m_EditorClassIdentifier: Assembly-CSharp::Quests.Graph.Model.QuestNodeData
-  editorTitle: Visit the tavern
-  localizedName: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 78000000000000024, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
-  localizedDescription: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 78000000000000025, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+  editorTitle: Find Elina
+  localizedName: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 99200000000000496, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+  localizedDescription: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 99200000000000497, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
   icon: {fileID: 0}
   mapTargetSource: 0
   sceneMapTargetId: 
@@ -18,5 +18,7 @@ MonoBehaviour:
   availabilityRequirements: []
   hasCompletionResults: 0
   completionResults: []
-  transitions: []
+  transitions:
+  - {fileID: 11400000, guid: b5000000000000000000000000000001, type: 2}
+  - {fileID: 11400000, guid: b5000000000000000000000000000002, type: 2}
   references: {version: 2, RefIds: []}

@@ -38,12 +38,19 @@ namespace NPC
             LootingContext lootingContext,
             CorpseLootController corpseLootController,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
-            IObjectResolver resolver,
-            CharacterInfo characterInfo = null,
-            DialogGraph dialog = null)
+            IObjectResolver resolver)
         {
             this.interactable = interactable;
             this.dialogueController = dialogueController;
+            // Dialogue data is optional for NPCs that only serve as world actors. VContainer
+            // does not treat optional constructor parameters as optional registrations, so
+            // resolve these dependencies explicitly instead of aborting the NPC scope.
+            characterInfo = resolver.TryResolve<CharacterInfo>(out var resolvedCharacterInfo)
+                ? resolvedCharacterInfo
+                : null;
+            dialog = resolver.TryResolve<DialogGraph>(out var resolvedDialog)
+                ? resolvedDialog
+                : null;
             this.characterInfo = characterInfo;
             this.dialog = dialog;
             this.inventory = inventory;

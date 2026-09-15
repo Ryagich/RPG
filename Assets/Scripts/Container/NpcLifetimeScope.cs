@@ -99,7 +99,10 @@ namespace Container
             }
 
             EnsureDialogueInteractionZone();
-            bool hasForcedDialogueZone = RegisterForcedDialogueZone(builder);
+            // A forced dialogue zone only has meaning for an NPC with a dialogue graph.  The
+            // availability component depends on that graph, so registering it without one
+            // aborts construction of the entire NPC scope before its initial loadout can run.
+            bool hasForcedDialogueZone = dialog != null && RegisterForcedDialogueZone(builder);
             var navMeshAgent = GetComponent<NavMeshAgent>() ?? gameObject.AddComponent<NavMeshAgent>();
             builder.RegisterComponent(navMeshAgent).AsSelf();
             builder.RegisterEntryPoint<NpcNavMeshController>().AsSelf().As<IStaminaMovementState>();
@@ -157,9 +160,8 @@ namespace Container
                     builder.RegisterInstance(initialItemLootSetConfig).AsSelf();
                 }
 
-                builder.Register<NpcInitialInventoryLoadoutApplier>(Lifetime.Scoped)
-                       .AsSelf()
-                       .As<IStartable>();
+                builder.RegisterEntryPoint<NpcInitialInventoryLoadoutApplier>(Lifetime.Scoped)
+                       .AsSelf();
             }
 
             var damageReceiverHost = GetComponent<DamageReceiverHost>() ?? gameObject.AddComponent<DamageReceiverHost>();

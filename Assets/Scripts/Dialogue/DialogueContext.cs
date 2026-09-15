@@ -2,7 +2,6 @@ using Character;
 using Dialogs.Graph;
 using Dialogs.Graph.Model;
 using Factions;
-using Interactable;
 using Inventory.Inventories;
 using Localization;
 using Money;

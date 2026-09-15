@@ -13,4 +13,6 @@ MonoBehaviour:
   Nodes:
   - Position: {x: 0, y: 0}
     NodeData: {fileID: 11400000, guid: c1000000000000000000000000000003, type: 2}
+  - Position: {x: 420, y: 0}
+    NodeData: {fileID: 11400000, guid: c1000000000000000000000000000004, type: 2}
   references: {version: 2, RefIds: []}

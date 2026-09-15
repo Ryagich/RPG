@@ -54,9 +54,8 @@ namespace Dialogue
                 AddRegularChoiceAnswers(visibleAnswers, phrase, currentDialog);
             }
 
-            bool hasStandardAnswers = visibleAnswers.Count != 0;
             AddConversationReturnAnswers(visibleAnswers, phrase, currentDialog);
-            AddExitAnswers(visibleAnswers, phrase, currentDialog, isRegularChoicePoint, hasStandardAnswers);
+            AddExitAnswers(visibleAnswers, phrase, currentDialog, isRegularChoicePoint, visibleAnswers.Count != 0);
             return visibleAnswers;
         }
 

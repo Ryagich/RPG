@@ -7,8 +7,64 @@ MonoBehaviour:
   m_Name: Erdan Vell - Village
   m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.DialogGraph
   Nodes:
-  - Position: {x: 300, y: 200}
+  - Position: {x: 0, y: 0}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000001, type: 2}
+  - Position: {x: 350, y: -250}
+    Phrase: {fileID: 11400000, guid: cc28fbe4d5cb4f19b7369476299a55fc, type: 2}
+  - Position: {x: 350, y: 0}
     Phrase: {fileID: 11400000, guid: e7202b51ff1c4fe4a9a4a1505bf02881, type: 2}
-  - Position: {x: 700, y: 200}
+  - Position: {x: 700, y: 0}
     Phrase: {fileID: 11400000, guid: 11000000000000000000000000000034, type: 2}
-  <EntryPhrase>k__BackingField: {fileID: 11400000, guid: e7202b51ff1c4fe4a9a4a1505bf02881, type: 2}
+  - Position: {x: 350, y: 250}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000002, type: 2}
+  - Position: {x: 750, y: 250}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000003, type: 2}
+  - Position: {x: 1150, y: 250}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000004, type: 2}
+  - Position: {x: 1550, y: 250}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000005, type: 2}
+  - Position: {x: 1950, y: 250}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000006, type: 2}
+  - Position: {x: 2350, y: 250}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000007, type: 2}
+  - Position: {x: 2750, y: 250}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000008, type: 2}
+  - Position: {x: 3150, y: 250}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000009, type: 2}
+  - Position: {x: 350, y: 550}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000010, type: 2}
+  - Position: {x: 750, y: 550}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000011, type: 2}
+  - Position: {x: 350, y: 850}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000012, type: 2}
+  - Position: {x: 750, y: 850}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000013, type: 2}
+  - Position: {x: 1150, y: 750}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000014, type: 2}
+  - Position: {x: 1150, y: 950}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000015, type: 2}
+  - Position: {x: 350, y: 1150}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000016, type: 2}
+  - Position: {x: 750, y: 1150}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000017, type: 2}
+  - Position: {x: 1150, y: 1050}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000018, type: 2}
+  - Position: {x: 350, y: 1550}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000022, type: 2}
+  - Position: {x: 350, y: 1700}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000023, type: 2}
+  - Position: {x: 350, y: 1950}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000024, type: 2}
+  - Position: {x: 750, y: 1950}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000025, type: 2}
+  - Position: {x: 1150, y: 1850}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000026, type: 2}
+  - Position: {x: 1150, y: 2050}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000027, type: 2}
+  - Position: {x: 1550, y: 1950}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000028, type: 2}
+  - Position: {x: 1950, y: 1950}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000029, type: 2}
+  - Position: {x: 1150, y: 2250}
+    Phrase: {fileID: 11400000, guid: a4600000000000000000000000000030, type: 2}
+  <EntryPhrase>k__BackingField: {fileID: 11400000, guid: a4600000000000000000000000000001, type: 2}

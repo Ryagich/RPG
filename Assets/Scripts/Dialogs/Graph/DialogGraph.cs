@@ -12,6 +12,15 @@ namespace Dialogs.Graph
 
         [field: SerializeField] public DialogPhrase EntryPhrase { get; private set; }
 
+        [SerializeField, Tooltip("Prevents the dialogue lifecycle from creating a player checkpoint when it closes.")]
+        private bool suppressCheckpointOnClose;
+
+        /// <summary>
+        /// Some short-lived world interactions alter only the current scene and must not turn
+        /// their closing line into a persistent player checkpoint.
+        /// </summary>
+        public bool SuppressCheckpointOnClose => suppressCheckpointOnClose;
+
         public void SetEntryPhrase(DialogPhrase phrase)
         {
             EntryPhrase = phrase;
@@ -235,6 +244,12 @@ namespace Dialogs.Graph
             }
 
             if (currentPhrase == targetPhrase)
+            {
+                return true;
+            }
+
+            if (currentPhrase.IsConversationTopic &&
+                CanReachPhrase(currentPhrase.ConversationAnswer?.NextPhrase, targetPhrase, visited))
             {
                 return true;
             }

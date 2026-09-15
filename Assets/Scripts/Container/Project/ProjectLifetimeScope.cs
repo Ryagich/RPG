@@ -61,6 +61,7 @@ namespace Container.Project
         [field: SerializeField] public LessonConfig LessonConfig { get; private set; }
         [field: SerializeField] public QuestCatalog QuestCatalog { get; private set; }
         [field: SerializeField] public MillQuestProgressionConfig MillQuestProgressionConfig { get; private set; }
+        [field: SerializeField] public MillPropertyClaimQuestConfig MillPropertyClaimQuestConfig { get; private set; }
 
         protected override void Awake()
         {
@@ -134,6 +135,11 @@ namespace Container.Project
             if (MillQuestProgressionConfig != null)
             {
                 builder.RegisterInstance(MillQuestProgressionConfig).AsSelf();
+            }
+
+            if (MillPropertyClaimQuestConfig != null)
+            {
+                builder.RegisterInstance(MillPropertyClaimQuestConfig).AsSelf();
             }
 
             builder.RegisterEntryPoint<Bootloader>().AsSelf();
