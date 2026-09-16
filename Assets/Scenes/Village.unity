@@ -235682,6 +235682,7 @@ MonoBehaviour:
   gameCamera: {fileID: 330585545}
   levelScopes:
   - {fileID: 2099181784}
+  isGameplayScene: 1
 --- !u!4 &1363242808
 Transform:
   m_ObjectHideFlags: 0

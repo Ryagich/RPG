@@ -1,4 +1,5 @@
 using Locations;
+using Container.Game;
 using UnityEngine;
 
 namespace Saves
@@ -8,17 +9,25 @@ namespace Saves
     {
         private readonly LocationTransitionService locationTransitions;
         private readonly GameSaveController saveController;
+        private readonly GameSceneSessionConfiguration sceneSessionConfiguration;
 
         public LocationTransitionSaveCoordinator(
             LocationTransitionService locationTransitions,
-            GameSaveController saveController)
+            GameSaveController saveController,
+            GameSceneSessionConfiguration sceneSessionConfiguration)
         {
             this.locationTransitions = locationTransitions;
             this.saveController = saveController;
+            this.sceneSessionConfiguration = sceneSessionConfiguration;
         }
 
         public bool SaveConfirmedTransition(VillageLocationTransitionRequest transition)
         {
+            if (!sceneSessionConfiguration.IsGameplayScene)
+            {
+                return true;
+            }
+
             if (!locationTransitions.TryGetEntrancePose(
                     transition.TargetLocationId,
                     transition.TargetTransitionId,

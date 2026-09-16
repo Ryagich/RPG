@@ -109,6 +109,7 @@ namespace UI.UIElements
 
             var targetLockEnabled = targetLockConfig.ControlMode != TargetLockControlMode.Off;
             SetRowActive(page, "Button_TargetLock", targetLockEnabled && targetLockConfig.ControlMode == TargetLockControlMode.Switch);
+            SetRowActive(page, "Button_TargetTurn", targetLockConfig.ControlMode is TargetLockControlMode.Hard or TargetLockControlMode.Soft);
             SetRowActive(page, "Button_TargetLockNext", targetLockEnabled);
             SetRowActive(page, "Button_TargetLockPrevious", targetLockEnabled);
         }

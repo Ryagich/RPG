@@ -20,6 +20,7 @@ namespace Container.Game
         private readonly LocationTransitionContext transitionContext;
         private readonly LocationTransitionService locationTransitions;
         private readonly IAudioService audioService;
+        private readonly GameSceneSessionConfiguration sceneSessionConfiguration;
 
         public GameWorldBootstrapper(
             GameLifetimeScope scope,
@@ -27,7 +28,8 @@ namespace Container.Game
             GameSaveController saveController,
             LocationTransitionContext transitionContext,
             LocationTransitionService locationTransitions,
-            IAudioService audioService)
+            IAudioService audioService,
+            GameSceneSessionConfiguration sceneSessionConfiguration)
         {
             this.scope = scope;
             this.bootCompletion = bootCompletion;
@@ -35,16 +37,26 @@ namespace Container.Game
             this.transitionContext = transitionContext;
             this.locationTransitions = locationTransitions;
             this.audioService = audioService;
+            this.sceneSessionConfiguration = sceneSessionConfiguration;
         }
 
         public async void Start()
         {
             await bootCompletion.WaitAsync();
-            await saveController.Ready;
-            saveController.RestoreLocationTransition(transitionContext);
-            UnityEngine.Pose? savedPlayerPose = saveController.TryGetSavedPlayerPose(out UnityEngine.Pose pose)
-                ? pose
-                : null;
+            UnityEngine.Pose? savedPlayerPose = null;
+            if (sceneSessionConfiguration.IsGameplayScene)
+            {
+                await saveController.Ready;
+                saveController.RestoreLocationTransition(transitionContext);
+                savedPlayerPose = saveController.TryGetSavedPlayerPose(out UnityEngine.Pose pose)
+                    ? pose
+                    : null;
+            }
+            else
+            {
+                transitionContext.Clear();
+            }
+
             scope.InitializeWorld(locationTransitions, audioService, savedPlayerPose);
         }
     }

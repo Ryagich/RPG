@@ -133,6 +133,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "TargetTurn",
+                    "type": "Button",
+                    "id": "94e492b3-7bf5-498a-9d6d-8ecce2a9e3b2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "TargetLockNext",
                     "type": "Button",
                     "id": "6b3fdfbb-18b0-4ac8-96f6-bc9fa6f2230a",
@@ -414,11 +423,22 @@
                 {
                     "name": "",
                     "id": "e9e9fb40-a46c-4e2a-a095-dae4072fa8a3",
-                    "path": "<Keyboard>/q",
+                    "path": "<Keyboard>/r",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "TargetLock",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9a7a594a-4513-4702-8de5-81cad3f7a3bd",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TargetTurn",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -436,7 +456,7 @@
                 {
                     "name": "",
                     "id": "f9a8f251-6017-401f-9f8e-b7e68a860eea",
-                    "path": "<Keyboard>/z",
+                    "path": "<Keyboard>/q",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

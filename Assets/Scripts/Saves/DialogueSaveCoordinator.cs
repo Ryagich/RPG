@@ -1,5 +1,6 @@
 using System;
 using Dialogue;
+using Container.Game;
 using Locations;
 using UnityEngine;
 using VContainer.Unity;
@@ -12,17 +13,20 @@ namespace Saves
         private readonly DialogueContext dialogueContext;
         private readonly LocationTransitionService locationTransitions;
         private readonly GameSaveController saveController;
+        private readonly GameSceneSessionConfiguration sceneSessionConfiguration;
         private bool hasCheckpointForCurrentDialogue;
         private bool suppressCheckpointForCurrentDialogue;
 
         public DialogueSaveCoordinator(
             DialogueContext dialogueContext,
             LocationTransitionService locationTransitions,
-            GameSaveController saveController)
+            GameSaveController saveController,
+            GameSceneSessionConfiguration sceneSessionConfiguration)
         {
             this.dialogueContext = dialogueContext;
             this.locationTransitions = locationTransitions;
             this.saveController = saveController;
+            this.sceneSessionConfiguration = sceneSessionConfiguration;
         }
 
         public void Start()
@@ -55,6 +59,11 @@ namespace Saves
 
         private bool TrySaveCurrentDialogue()
         {
+            if (!sceneSessionConfiguration.IsGameplayScene)
+            {
+                return true;
+            }
+
             if (suppressCheckpointForCurrentDialogue)
             {
                 return true;

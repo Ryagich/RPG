@@ -26,6 +26,7 @@ namespace TargetLock
         private readonly CompositeDisposable disposables = new();
 
         private GameMode currentGameMode = GameMode.Game;
+        private TargetLockControlMode observedControlMode = TargetLockControlMode.Off;
         private float invalidCurrentTargetTime;
 
         public TargetLockController(
@@ -64,6 +65,8 @@ namespace TargetLock
 
         public void Tick()
         {
+            SynchronizeControlMode();
+
             if (config.ControlMode == TargetLockControlMode.Off)
             {
                 if (Mode != TargetLockMode.Disabled)
@@ -128,7 +131,7 @@ namespace TargetLock
 
         public bool TryFaceAttackTarget()
         {
-            if (Mode == TargetLockMode.Disabled)
+            if (Mode == TargetLockMode.Disabled || config.ControlMode == TargetLockControlMode.Off)
             {
                 return false;
             }
@@ -151,7 +154,18 @@ namespace TargetLock
 
         private void OnTargetLockInput(TargetLockInputMessage message)
         {
-            if (config.ControlMode == TargetLockControlMode.Off || currentGameMode != GameMode.Game)
+            if (currentGameMode != GameMode.Game)
+            {
+                return;
+            }
+
+            if (message.Command == TargetLockCommand.ToggleConfiguredLock)
+            {
+                ToggleConfiguredLock();
+                return;
+            }
+
+            if (config.ControlMode == TargetLockControlMode.Off)
             {
                 return;
             }
@@ -216,6 +230,30 @@ namespace TargetLock
             if (Mode != configuredMode)
             {
                 SwitchMode(configuredMode);
+            }
+        }
+
+        private void SynchronizeControlMode()
+        {
+            if (observedControlMode == config.ControlMode)
+            {
+                return;
+            }
+
+            observedControlMode = config.ControlMode;
+            Unlock();
+        }
+
+        private void ToggleConfiguredLock()
+        {
+            if (!config.ToggleConfiguredControlMode())
+            {
+                return;
+            }
+
+            if (config.ControlMode == TargetLockControlMode.Off)
+            {
+                Unlock();
             }
         }
 

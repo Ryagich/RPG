@@ -2185,6 +2185,9 @@ MonoBehaviour:
   - m_Id: 93000000000000075
     m_Localized: "\u0420\u0435\u0447\u044c"
     m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000076
+    m_Localized: "\u0412\u043a\u043b\u044e\u0447\u0438\u0442\u044c/\u0432\u044b\u043a\u043b\u044e\u0447\u0438\u0442\u044c \u0437\u0430\u0445\u0432\u0430\u0442 \u0446\u0435\u043b\u0438"
+    m_Metadata: {m_Items: []}
   - m_Id: 94000000000000001
     m_Localized: "\u0425\u0430\u043b\u044c\u0432\u0430\u0440"
     m_Metadata: {m_Items: []}

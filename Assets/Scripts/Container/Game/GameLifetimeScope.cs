@@ -1,5 +1,6 @@
 ﻿using Dialogue;
 using Combat;
+using Factions;
 using GameModes;
 using Input;
 using MessagePipe;
@@ -31,6 +32,7 @@ namespace Container.Game
         private Transform globalSoundsRoot;
         private VillageLocationSelector locationSelector;
         private Camera gameCamera;
+        private GameSceneSessionConfiguration sceneSessionConfiguration = new(isGameplayScene: true);
         private bool worldInitialized;
 
         public void SetLocationSelector(VillageLocationSelector selector)
@@ -43,8 +45,31 @@ namespace Container.Game
             gameCamera = camera;
         }
 
+        public void SetSceneSessionConfiguration(GameSceneSessionConfiguration configuration)
+        {
+            if (Container != null)
+            {
+                Debug.LogError("Game scene session configuration must be assigned before GameLifetimeScope is built.", this);
+                return;
+            }
+
+            sceneSessionConfiguration = configuration ?? new GameSceneSessionConfiguration(isGameplayScene: true);
+        }
+
         protected override void Configure(IContainerBuilder builder)
         {
+            builder.RegisterInstance(sceneSessionConfiguration);
+
+            // Faction standing is mutable session state. Development scenes must begin from
+            // authored relations instead of inheriting the project-level relations restored
+            // from a player's save; gameplay scenes deliberately keep that shared instance.
+            if (!sceneSessionConfiguration.IsGameplayScene)
+            {
+                builder.Register<RuntimeFactionRelations>(Lifetime.Singleton)
+                    .As<IFactionRelations>()
+                    .AsSelf();
+            }
+
             if (gameCamera == null)
             {
                 Debug.LogError("Game camera is not assigned to GameLifetimeScope.", this);
@@ -121,8 +146,12 @@ namespace Container.Game
             builder.Register<InputHandler>(Lifetime.Singleton).AsSelf().As<IStartable>();
 
             builder.RegisterEntryPoint<GameWorldBootstrapper>().AsSelf();
-            builder.RegisterEntryPoint<MillQuestProgressionCoordinator>().AsSelf();
-            builder.RegisterEntryPoint<MillPropertyClaimQuestCoordinator>().AsSelf();
+            if (sceneSessionConfiguration.IsGameplayScene)
+            {
+                builder.RegisterEntryPoint<MillQuestProgressionCoordinator>().AsSelf();
+                builder.RegisterEntryPoint<MillPropertyClaimQuestCoordinator>().AsSelf();
+            }
+
             builder.Register<LootingContext>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueContext>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<DialogueExitController>().AsSelf();
@@ -154,16 +183,19 @@ namespace Container.Game
             worldInitialized = true;
             globalSoundsRoot = CreateGlobalSoundsRoot();
             audioService.SetWorldSoundParent(globalSoundsRoot);
-            locationTransitions.Initialize();
             playerScope = CreateChildFromPrefab(PlayerPrefab, _ => { });
-            if (locationTransitions.TryGetPlayerSpawn(out var spawnPose))
+            if (sceneSessionConfiguration.IsGameplayScene)
             {
-                PlacePlayerAtSpawn(playerScope, spawnPose);
-            }
+                locationTransitions.Initialize();
+                if (locationTransitions.TryGetPlayerSpawn(out var spawnPose))
+                {
+                    PlacePlayerAtSpawn(playerScope, spawnPose);
+                }
 
-            if (savedPlayerPose.HasValue)
-            {
-                PlacePlayerAtSpawn(playerScope, savedPlayerPose.Value);
+                if (savedPlayerPose.HasValue)
+                {
+                    PlacePlayerAtSpawn(playerScope, savedPlayerPose.Value);
+                }
             }
 
             audioService.SetListenerTransform(playerScope.transform);

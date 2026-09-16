@@ -5874,7 +5874,7 @@ PhysicsMaterial:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name:
+  m_Name: 
   serializedVersion: 2
   m_DynamicFriction: 0.6
   m_StaticFriction: 0.6
@@ -7897,6 +7897,7 @@ MonoBehaviour:
   - {fileID: 1834779877}
   - {fileID: 0}
   - {fileID: 46621420}
+  isGameplayScene: 0
 --- !u!4 &1363242808
 Transform:
   m_ObjectHideFlags: 0
@@ -8570,7 +8571,7 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
-  m_ForceMeshLod: 0
+  m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0

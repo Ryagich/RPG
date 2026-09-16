@@ -131057,6 +131057,13 @@ AnimationClip:
   m_HasMotionFloatCurves: 1
   m_Events:
   - time: 0
+    functionName: ResetAnimationRequests
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0
     functionName: EnableDamageImmunity
     data: 
     objectReferenceParameter: {fileID: 0}
@@ -131070,22 +131077,15 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
-  - time: 0
-    functionName: ResetAnimationRequests
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
-  - time: 1.0666667
-    functionName: DisableDamageImmunity
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
-  - time: 1.0666667
+  - time: 1
     functionName: UnlockMovement
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 1
+    functionName: DisableDamageImmunity
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

@@ -6,6 +6,7 @@ using Quests;
 using Stats;
 using UnityEngine;
 using VContainer.Unity;
+using Container.Game;
 
 namespace Saves
 {
@@ -21,6 +22,8 @@ namespace Saves
         private readonly QuestController quests;
         private readonly DialogueContext dialogueContext;
         private readonly Transform playerTransform;
+        private readonly GameSceneSessionConfiguration sceneSessionConfiguration;
+        private bool isPlayerStateRegistered;
 
         public PlayerSaveCoordinator(
             GameSaveController saveController,
@@ -31,7 +34,8 @@ namespace Saves
             StatsController stats,
             QuestController quests,
             DialogueContext dialogueContext,
-            Transform playerTransform)
+            Transform playerTransform,
+            GameSceneSessionConfiguration sceneSessionConfiguration)
         {
             this.saveController = saveController;
             this.itemStorage = itemStorage;
@@ -42,11 +46,18 @@ namespace Saves
             this.quests = quests;
             this.dialogueContext = dialogueContext;
             this.playerTransform = playerTransform;
+            this.sceneSessionConfiguration = sceneSessionConfiguration;
         }
 
         public async void Start()
         {
             dialogueContext.SetPlayerQuestController(quests);
+            if (!sceneSessionConfiguration.IsGameplayScene)
+            {
+                dialogueContext.NotifyPlayerQuestControllerReady(quests);
+                return;
+            }
+
             await saveController.Ready;
             if (!await itemStorage.Ready)
             {
@@ -57,6 +68,7 @@ namespace Saves
                 ? catalog as QuestCatalog
                 : null;
             saveController.RegisterPlayerState(inventory, money, stats, quests, itemStorage, questCatalog, playerTransform);
+            isPlayerStateRegistered = true;
             bool restored = saveController.RestoreRegisteredPlayer();
             if (restored)
             {
@@ -78,7 +90,10 @@ namespace Saves
 
         public void Dispose()
         {
-            saveController.UnregisterPlayerState(quests);
+            if (isPlayerStateRegistered)
+            {
+                saveController.UnregisterPlayerState(quests);
+            }
         }
     }
 }

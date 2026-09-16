@@ -14,6 +14,8 @@ namespace Container.Game
         [SerializeField] private VillageLocationSelector locationSelector;
         [SerializeField] private Camera gameCamera;
         [SerializeField] private LifetimeScope[] levelScopes;
+        [Header("Scene session")]
+        [SerializeField] private bool isGameplayScene = true;
 
         private async void Awake()
         {
@@ -45,6 +47,8 @@ namespace Container.Game
             SceneManager.MoveGameObjectToScene(gameLifetimeScope.gameObject, gameObject.scene);
             gameLifetimeScope.SetLocationSelector(locationSelector);
             gameLifetimeScope.SetGameCamera(gameCamera);
+            gameLifetimeScope.SetSceneSessionConfiguration(
+                new GameSceneSessionConfiguration(isGameplayScene));
 
             gameLifetimeScope.gameObject.SetActive(true);
             gameLifetimeScope.Build();

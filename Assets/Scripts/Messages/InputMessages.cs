@@ -44,6 +44,7 @@ namespace Messages
     public enum TargetLockCommand
     {
         Toggle,
+        ToggleConfiguredLock,
         Next,
         Previous
     }

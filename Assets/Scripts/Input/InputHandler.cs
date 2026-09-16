@@ -113,6 +113,7 @@ namespace Input
             SubscribeWeaponSlot(inputConfig.WeaponSlot2, 2);
             inputConfig.Pause.action.started += Pause;
             inputConfig.TargetLock.action.started += _ => PublishTargetLockCommand(TargetLockCommand.Toggle);
+            inputConfig.TargetTurn.action.started += _ => PublishTargetLockCommand(TargetLockCommand.ToggleConfiguredLock);
             inputConfig.TargetLockNext.action.started += _ => PublishTargetLockCommand(TargetLockCommand.Next);
             inputConfig.TargetLockPrevious.action.started += _ => PublishTargetLockCommand(TargetLockCommand.Previous);
             inputConfig.ShowStats.action.started += ShowStatsPressed;

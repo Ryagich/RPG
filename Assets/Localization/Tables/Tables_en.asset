@@ -2038,6 +2038,9 @@ MonoBehaviour:
   - m_Id: 93000000000000075
     m_Localized: Voice
     m_Metadata: {m_Items: []}
+  - m_Id: 93000000000000076
+    m_Localized: Toggle Target Lock
+    m_Metadata: {m_Items: []}
   - m_Id: 94000000000000001
     m_Localized: Halvar
     m_Metadata: {m_Items: []}

@@ -20,6 +20,7 @@ namespace Input
         [field: SerializeField] public InputActionReference Map { get; private set; }
         [field: SerializeField] public InputActionReference QuestLog { get; private set; }
         [field: SerializeField] public InputActionReference TargetLock { get; private set; }
+        [field: SerializeField] public InputActionReference TargetTurn { get; private set; }
         [field: SerializeField] public InputActionReference TargetLockNext { get; private set; }
         [field: SerializeField] public InputActionReference TargetLockPrevious { get; private set; }
         [field: SerializeField] public InputActionReference FastSlot1 { get; private set; }
@@ -52,6 +53,7 @@ namespace Input
             Map = EnsureReference(Map, actionMap, "Map");
             QuestLog = EnsureReference(QuestLog, actionMap, "QuestLog");
             TargetLock = EnsureReference(TargetLock, actionMap, "TargetLock");
+            TargetTurn = EnsureReference(TargetTurn, actionMap, "TargetTurn");
             TargetLockNext = EnsureReference(TargetLockNext, actionMap, "TargetLockNext");
             TargetLockPrevious = EnsureReference(TargetLockPrevious, actionMap, "TargetLockPrevious");
             FastSlot1 = EnsureReference(FastSlot1, actionMap, "FastSlot1");

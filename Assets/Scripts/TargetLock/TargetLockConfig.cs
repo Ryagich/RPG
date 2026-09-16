@@ -40,15 +40,44 @@ namespace TargetLock
         [field: SerializeField, Range(0f, 60f)] public float CameraMaxManualYawOffset { get; private set; } = 18f;
         [field: SerializeField, Range(0f, 30f)] public float CameraMaxManualPitchOffset { get; private set; } = 8f;
 
+        private TargetLockControlMode lastEnabledControlMode = TargetLockControlMode.Soft;
+
         public void CycleControlMode()
         {
-            ControlMode = ControlMode switch
+            SetControlMode(ControlMode switch
             {
                 TargetLockControlMode.Switch => TargetLockControlMode.Soft,
                 TargetLockControlMode.Soft => TargetLockControlMode.Hard,
                 TargetLockControlMode.Hard => TargetLockControlMode.Off,
                 _ => TargetLockControlMode.Switch
-            };
+            });
+        }
+
+        public bool ToggleConfiguredControlMode()
+        {
+            if (ControlMode is TargetLockControlMode.Hard or TargetLockControlMode.Soft)
+            {
+                lastEnabledControlMode = ControlMode;
+                SetControlMode(TargetLockControlMode.Off);
+                return true;
+            }
+
+            if (ControlMode == TargetLockControlMode.Off)
+            {
+                SetControlMode(lastEnabledControlMode);
+                return true;
+            }
+
+            return false;
+        }
+
+        private void SetControlMode(TargetLockControlMode controlMode)
+        {
+            ControlMode = controlMode;
+            if (controlMode is TargetLockControlMode.Hard or TargetLockControlMode.Soft)
+            {
+                lastEnabledControlMode = controlMode;
+            }
         }
     }
 }
