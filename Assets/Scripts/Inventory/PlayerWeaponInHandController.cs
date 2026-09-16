@@ -6,53 +6,36 @@ using Inventory.Item;
 using MessagePipe;
 using Messages;
 using Movement;
+using Stats;
 using TargetLock;
 using UniRx;
 using UnityEngine;
 using VContainer.Unity;
-using Stats;
 
 namespace Inventory
 {
+    /// <summary>
+    /// Application coordinator for the player's equipped weapon. It accepts player intent and
+    /// inventory changes, waits for gameplay-owned blocking states, and delegates the Animator
+    /// and visual handoff to <see cref="PlayerWeaponTransitionController"/>.
+    /// </summary>
     public sealed class PlayerWeaponInHandController : IWeaponAnimationEventHandler, IEquippedWeaponVisual, IStartable, ITickable, IDisposable
     {
-        private const string BeginMoveWeaponToRightHandEventName = "BeginMoveWeaponToRightHand";
-        private const string TakeWeaponInHandEventName = "TakeWeaponInHand";
-        private const string BeginMoveWeaponToBeltEventName = "BeginMoveWeaponToBelt";
-        private const string PutWeaponOnBeltEventName = "PutWeaponOnBelt";
         private readonly GameModesController gameModesController;
         private readonly PlayerInventory playerInventory;
-        private readonly PlayerWeaponAnimationEventReceiver animationEventReceiver;
-        private readonly Animator animator;
         private readonly PlayerMovement playerMovement;
         private readonly CharacterDamageReceiver ownerDamageReceiver;
         private readonly CharacterActionState actionState;
         private readonly IPublisher<WeaponSheathedMessage> weaponSheathedPublisher;
         private readonly CompositeDisposable disposables = new();
         private readonly PlayerWeaponInputSubscriptions inputSubscriptions;
-        private readonly PlayerWeaponVisualController weaponVisual;
-        private readonly PlayerWeaponTransitionAnimator weaponTransitionAnimator;
         private readonly PlayerWeaponCombatActionController combatActions;
-        private readonly int weaponAnimationLayerIndex;
+        private readonly PlayerWeaponTransitionController weaponTransitions;
+        private readonly PlayerWeaponDrawingBlockState weaponDrawingBlockState;
+        private readonly PlayerWeaponIntentState weaponIntent = new();
 
-        private int selectedWeaponSlotIndex = 1;
         private bool isInitialized;
-        private bool hasPendingRefresh;
-        private readonly PlayerWeaponTransitionState weaponTransitionState = new();
-
-        private bool isWeaponDrawn
-        {
-            get => weaponTransitionState.IsWeaponDrawn;
-            set => weaponTransitionState.SetWeaponDrawn(value);
-        }
-
-        private bool isWeaponAnimationInProgress => weaponTransitionState.IsAnimationInProgress;
-        private bool shouldPreservePoseForCurrentDraw => weaponTransitionState.ShouldPreservePoseForDraw;
-        private WeaponAnimationKind currentAnimationKind => weaponTransitionState.CurrentKind;
-        private GameObject currentWeaponInstance => weaponVisual.Instance;
-        private ItemConfig currentWeaponItemConfig => weaponVisual.ItemConfig;
-        private int currentRenderedSlotIndex => weaponVisual.SlotIndex;
-        private WeaponDisplayMode currentDisplayMode => weaponVisual.DisplayMode;
+        private bool hasPendingPresentationReconciliation;
 
         public PlayerWeaponInHandController(
             PlayerInventory playerInventory,
@@ -74,21 +57,23 @@ namespace Inventory
             ISubscriber<MouseDown> mouseDownSubscriber,
             ISubscriber<DodgeInputMessage> dodgeInputSubscriber,
             ISubscriber<RollInputMessage> rollInputSubscriber,
-            ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
+            ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber,
+            PlayerWeaponDrawingBlockState weaponDrawingBlockState)
         {
             this.gameModesController = gameModesController;
             this.playerInventory = playerInventory;
-            this.animationEventReceiver = animationEventReceiver;
-            this.animator = animator;
             this.playerMovement = playerMovement;
             this.ownerDamageReceiver = ownerDamageReceiver;
             this.actionState = actionState;
             this.weaponSheathedPublisher = weaponSheathedPublisher;
-            weaponTransitionAnimator = new PlayerWeaponTransitionAnimator(animator);
+            this.weaponDrawingBlockState = weaponDrawingBlockState;
+            weaponDrawingBlockState.Changed += OnWeaponDrawingBlockChanged;
+            disposables.Add(Disposable.Create(() => weaponDrawingBlockState.Changed -= OnWeaponDrawingBlockChanged));
+
+            var transitionAnimator = new PlayerWeaponTransitionAnimator(animator);
+            var weaponVisual = new PlayerWeaponVisualController(handAnchor, animator, transitionAnimator.LayerIndex);
             var weaponCombatAnimator = new PlayerWeaponCombatAnimator(animator);
             var damageWindow = new EquippedWeaponDamageWindowController();
-            weaponAnimationLayerIndex = weaponTransitionAnimator.LayerIndex;
-            weaponVisual = new PlayerWeaponVisualController(handAnchor, animator, weaponAnimationLayerIndex);
             combatActions = new PlayerWeaponCombatActionController(
                 animator,
                 weaponCombatAnimator,
@@ -103,11 +88,15 @@ namespace Inventory
                 statsController,
                 evasionCompletedPublisher,
                 damageWindow,
-                () => currentWeaponInstance,
-                () => currentWeaponItemConfig,
-                RequestWeaponTransitionReversal);
-            animationEventReceiver?.Bind(this);
+                () => weaponVisual.Instance,
+                () => weaponVisual.ItemConfig,
+                HandleFullBodyActionRequested);
+            weaponTransitions = new PlayerWeaponTransitionController(
+                weaponVisual,
+                transitionAnimator,
+                combatActions.EndDamageWindowFromAnimationEvent);
 
+            animationEventReceiver?.Bind(this);
             inputSubscriptions = new PlayerWeaponInputSubscriptions(
                 weaponSlotInputSubscriber,
                 mouseDownSubscriber,
@@ -119,152 +108,80 @@ namespace Inventory
                 OnDodgeInput,
                 OnRollInput,
                 OnGameModeChanged);
-            playerInventory.Changed.Subscribe(_ => RefreshWeaponAfterInitialization()).AddTo(disposables);
-            playerInventory.HandSlot.Subscribe(_ => RefreshWeaponAfterInitialization()).AddTo(disposables);
+            playerInventory.Changed.Subscribe(_ => ReconcilePresentationAfterInitialization()).AddTo(disposables);
+            playerInventory.HandSlot.Subscribe(_ => ReconcilePresentationAfterInitialization()).AddTo(disposables);
         }
+
+        public bool IsWeaponSheathed => weaponTransitions.IsSheathed;
+        public bool IsWeaponDrawn => weaponIntent.IsDrawRequested;
+        public bool CanProcessWeaponSlotInput => isInitialized
+                                                  && !actionState.IsActionBlocked
+                                                  && !combatActions.IsAttackBlockingWeaponChanges;
+        public int ActiveWeaponSlotIndex => weaponIntent.SelectedSlotIndex;
+
+        /// <summary>
+        /// An ordinary sheathing transition can begin only when no full-body combat action owns
+        /// the Animator. Callers that need to sequence this operation should wait for this value.
+        /// </summary>
+        public bool CanStartWeaponSheathing => IsWeaponSheathed
+                                              || (!weaponTransitions.IsAnimationInProgress
+                                                  && !combatActions.IsAttackRootMotionStateActive);
+
+        public bool IsCombatActionLocked => combatActions.IsCombatActionLocked;
+        public bool IsRollAnimationActive => combatActions.IsRollAnimationActive;
 
         public void Start()
         {
             ResetAnimatorRequests();
             combatActions.Start();
 
-            // The initial item set is applied before this entry point starts. Its inventory
-            // notifications must establish the initial belt presentation, not begin a draw
-            // transition before the player has requested one.
+            // Initial inventory loading has already completed. Its notifications establish the
+            // belt visual; an initial item set must not implicitly draw a weapon.
             isInitialized = true;
-            RefreshWeaponInHand();
+            ReconcileWeaponPresentation();
             UpdateRunningAvailability();
-        }
-
-        public void Dispose()
-        {
-            combatActions.Dispose();
-            weaponVisual.Dispose();
-            inputSubscriptions.Dispose();
-            disposables.Dispose();
         }
 
         public void Tick()
         {
             combatActions.Tick();
-            SynchronizeSheatheCompletionWithAnimatorState();
+            HandleTransitionOutcome(weaponTransitions.SynchronizeSheatheCompletionWithAnimatorState());
 
-            if (hasPendingRefresh
-             && !isWeaponAnimationInProgress
-             && !actionState.IsActionBlocked
-             && !combatActions.IsAttackBlockingWeaponChanges)
+            if (hasPendingPresentationReconciliation && CanReconcileWeaponPresentation())
             {
-                hasPendingRefresh = false;
-                RefreshWeaponInHand();
+                hasPendingPresentationReconciliation = false;
+                ReconcileWeaponPresentation();
             }
+        }
+
+        public void Dispose()
+        {
+            combatActions.Dispose();
+            weaponTransitions.Dispose();
+            inputSubscriptions.Dispose();
+            disposables.Dispose();
         }
 
         public void BeginMoveWeaponToRightHandFromAnimationEvent()
         {
-            if (!weaponTransitionAnimator.IsStateExpectedForAnimationEvent(WeaponAnimationKind.Draw))
-            {
-                return;
-            }
-
-            SynchronizeWeaponTransitionWithAnimationEvent(
-                WeaponAnimationKind.Draw,
-                preservePoseForDraw: weaponVisual.IsAttachedTo(WeaponDisplayMode.RightHand));
-
-            if (!weaponTransitionState.TryBeginAttachmentBlend(WeaponAnimationKind.Draw))
-            {
-                return;
-            }
-
-            if (shouldPreservePoseForCurrentDraw)
-            {
-                MoveCurrentWeaponToRightHandPreservingPose();
-                CleanupSpawnedWeaponInstancesExceptCurrent();
-                return;
-            }
-
-            StartWeaponAttachmentBlend(
-                WeaponDisplayMode.RightHand,
-                BeginMoveWeaponToRightHandEventName,
-                TakeWeaponInHandEventName);
-            CleanupSpawnedWeaponInstancesExceptCurrent();
+            HandleTransitionOutcome(weaponTransitions.BeginMoveWeaponToRightHandFromAnimationEvent());
         }
 
         public void TakeWeaponInHandFromAnimationEvent()
         {
-            if (!weaponTransitionAnimator.IsStateExpectedForAnimationEvent(WeaponAnimationKind.Draw)
-                || currentWeaponItemConfig == null)
-            {
-                return;
-            }
-
-            SynchronizeWeaponTransitionWithAnimationEvent(WeaponAnimationKind.Draw);
-
-            FinalizeWeaponRender(
-                currentWeaponItemConfig,
-                currentRenderedSlotIndex,
-                WeaponDisplayMode.RightHand,
-                snapToAttachmentTransform: true);
-            CleanupSpawnedWeaponInstancesExceptCurrent();
-            isWeaponDrawn = true;
-            CompleteWeaponAnimationFromEvent(WeaponAnimationKind.Draw);
+            HandleTransitionOutcome(weaponTransitions.TakeWeaponInHandFromAnimationEvent());
         }
 
         public void BeginMoveWeaponToBeltFromAnimationEvent()
         {
-            if (!weaponTransitionAnimator.IsStateExpectedForAnimationEvent(WeaponAnimationKind.Sheathe))
-            {
-                return;
-            }
-
-            SynchronizeWeaponTransitionWithAnimationEvent(WeaponAnimationKind.Sheathe);
-
-            if (!weaponTransitionState.TryBeginAttachmentBlend(WeaponAnimationKind.Sheathe))
-            {
-                return;
-            }
-
-            if (TryStartNextWeaponDuringSheathe())
-            {
-                return;
-            }
-
-            MoveCurrentWeaponToBeltPreservingPose();
+            HandleTransitionOutcome(weaponTransitions.BeginMoveWeaponToBeltFromAnimationEvent(
+                GetSelectedWeapon(),
+                IsEffectiveDrawRequested));
         }
 
         public void PutWeaponOnBeltFromAnimationEvent()
         {
-            if (!weaponTransitionAnimator.IsStateExpectedForAnimationEvent(WeaponAnimationKind.Sheathe)
-                || currentWeaponItemConfig == null)
-            {
-                return;
-            }
-
-            SynchronizeWeaponTransitionWithAnimationEvent(WeaponAnimationKind.Sheathe);
-
-            FinalizeWeaponRender(
-                currentWeaponItemConfig,
-                currentRenderedSlotIndex,
-                WeaponDisplayMode.Belt,
-                snapToAttachmentTransform: false);
-            CleanupSpawnedWeaponInstancesExceptCurrent();
-
-            var selectedItemConfig = GetSelectedWeaponItemConfig();
-            if (selectedItemConfig == null)
-            {
-                RenderWeapon(null, 0, WeaponDisplayMode.None);
-                CompleteWeaponAnimationFromEvent(WeaponAnimationKind.Sheathe);
-                PublishWeaponSheathed();
-                return;
-            }
-
-            if (currentRenderedSlotIndex != selectedWeaponSlotIndex
-             || currentWeaponItemConfig != selectedItemConfig)
-            {
-                RenderWeapon(selectedItemConfig, selectedWeaponSlotIndex, WeaponDisplayMode.Belt);
-            }
-
-            CompleteWeaponAnimationFromEvent(WeaponAnimationKind.Sheathe);
-            PublishWeaponSheathed();
+            HandleTransitionOutcome(weaponTransitions.PutWeaponOnBeltFromAnimationEvent(GetSelectedWeapon()));
         }
 
         public void HoldAttackReadyFromAnimationEvent()
@@ -284,57 +201,6 @@ namespace Inventory
         public void EndDamageWindowFromAnimationEvent()
         {
             combatActions.EndDamageWindowFromAnimationEvent();
-        }
-
-        public bool IsWeaponSheathed => !isWeaponAnimationInProgress
-                                       && currentDisplayMode != WeaponDisplayMode.RightHand;
-
-        public bool IsWeaponDrawn => isWeaponDrawn;
-
-        public bool CanProcessWeaponSlotInput => isInitialized
-                                                  && !actionState.IsActionBlocked
-                                                  && !combatActions.IsAttackBlockingWeaponChanges;
-
-        private bool IsWeaponInHand => isWeaponDrawn
-                                      && currentDisplayMode == WeaponDisplayMode.RightHand
-                                      && currentWeaponItemConfig != null;
-
-        public int ActiveWeaponSlotIndex => selectedWeaponSlotIndex;
-
-        /// <summary>
-        /// Indicates that the ordinary sheathing animation can begin without replacing an
-        /// active full-body action or another weapon transition.
-        /// </summary>
-        public bool CanStartWeaponSheathing => IsWeaponSheathed
-                                              || (!isWeaponAnimationInProgress && !combatActions.IsAttackRootMotionStateActive);
-
-        /// <summary>
-        /// True from the animation's LockMovement event until its matching UnlockMovement event.
-        /// </summary>
-        public bool IsCombatActionLocked => combatActions.IsCombatActionLocked;
-
-        /// <summary>
-        /// True while the Roll request, transition, or its full-body animation is active.
-        /// Consumers that synchronize with a roll must wait for this to become false rather
-        /// than relying on the earlier UnlockMovement animation event.
-        /// </summary>
-        public bool IsRollAnimationActive => combatActions.IsRollAnimationActive;
-
-        /// <summary>
-        /// Starts the normal sheathing transition. An explicit sheathe command takes precedence
-        /// over an interrupted attack so the weapon cannot remain in hand when external gameplay
-        /// control has already been removed.
-        /// </summary>
-        public void RequestSheatheWeapon()
-        {
-            if (!isWeaponDrawn && currentDisplayMode != WeaponDisplayMode.RightHand)
-            {
-                return;
-            }
-
-            combatActions.Cancel(restoreMovement: false);
-            isWeaponDrawn = false;
-            StartSheatheAnimation(currentRenderedSlotIndex, currentWeaponItemConfig, ignoreActiveCombatAction: true);
         }
 
         public void EnableDamageImmunityFromAnimationEvent()
@@ -361,14 +227,11 @@ namespace Inventory
         {
             combatActions.AttackFinishedFromAnimationEvent();
             UpdateRunningAvailability();
-            RefreshWeaponInHand();
+            ReconcileWeaponPresentation();
         }
 
         public void ResetAttackRequestFromAnimationEvent()
         {
-            // Legacy event endpoint: ResetAttackRequest.
-            // Its meaning is now "reset animation requests": both mutually exclusive
-            // attack request bools are cleared together.
             combatActions.ResetAnimationRequests();
         }
 
@@ -376,40 +239,57 @@ namespace Inventory
         {
             combatActions.InterruptByHitReaction();
             ResetAnimatorRequests();
-            RequestWeaponTransitionReversal();
+
+            if (!weaponDrawingBlockState.IsWeaponDrawingBlocked
+                && weaponTransitions.TryReverseForFullBodyAction(out var isDrawRequested))
+            {
+                weaponIntent.SetDrawRequest(isDrawRequested);
+            }
+            else if (weaponDrawingBlockState.IsWeaponDrawingBlocked)
+            {
+                RequestPresentationReconciliation();
+            }
+
+            UpdateRunningAvailability();
+        }
+
+        /// <summary>
+        /// Requests the normal clip-owned sheathing transition. This is intentionally public for
+        /// gameplay sessions that own their own sequence, such as the sparring conclusion.
+        /// </summary>
+        public void RequestSheatheWeapon()
+        {
+            if (!weaponIntent.IsDrawRequested && weaponTransitions.DisplayMode != WeaponDisplayMode.RightHand)
+            {
+                return;
+            }
+
+            combatActions.Cancel(restoreMovement: false);
+            weaponIntent.RequestSheathe();
+            HandleTransitionOutcome(weaponTransitions.RequestSheathe());
         }
 
         public bool TryGetCurrentWeaponSlot(out Inventory.Slot.SlotModel slot)
         {
-            slot = currentRenderedSlotIndex switch
-            {
-                1 => playerInventory.LeftWeaponSlot,
-                2 => playerInventory.RightWeaponSlot,
-                _ => null
-            };
-
-            if (slot?.ItemConfig?.ItemType == ItemType.Weapon)
+            slot = GetWeaponSlot(weaponTransitions.CurrentSlotIndex);
+            if (IsWeaponSlot(slot))
             {
                 return true;
             }
 
-            var selectedSlot = selectedWeaponSlotIndex == 1
-                ? playerInventory.LeftWeaponSlot
-                : playerInventory.RightWeaponSlot;
-
-            if (selectedSlot?.ItemConfig?.ItemType == ItemType.Weapon)
+            slot = GetWeaponSlot(weaponIntent.SelectedSlotIndex);
+            if (IsWeaponSlot(slot))
             {
-                slot = selectedSlot;
                 return true;
             }
 
-            if (playerInventory.LeftWeaponSlot?.ItemConfig?.ItemType == ItemType.Weapon)
+            if (IsWeaponSlot(playerInventory.LeftWeaponSlot))
             {
                 slot = playerInventory.LeftWeaponSlot;
                 return true;
             }
 
-            if (playerInventory.RightWeaponSlot?.ItemConfig?.ItemType == ItemType.Weapon)
+            if (IsWeaponSlot(playerInventory.RightWeaponSlot))
             {
                 slot = playerInventory.RightWeaponSlot;
                 return true;
@@ -421,18 +301,21 @@ namespace Inventory
 
         public bool TryGetCurrentWeaponPose(out Vector3 position, out Quaternion rotation)
         {
-            return weaponVisual.TryGetPose(out position, out rotation);
+            return weaponTransitions.TryGetCurrentWeaponPose(out position, out rotation);
         }
 
         private void OnWeaponSlotInput(WeaponSlotInputMessage message)
         {
-            LogWeaponSlotInput(message.SlotIndex, "Received weapon-slot input");
+            if (weaponDrawingBlockState.IsWeaponDrawingBlocked)
+            {
+                return;
+            }
 
             if (gameModesController.GameMode == GameMode.Dialogue)
             {
-                // Modal pages must never begin a weapon draw. A player who entered the page
-                // with a weapon in hand can still use either weapon-slot command to stow it.
-                if (isWeaponDrawn || currentDisplayMode == WeaponDisplayMode.RightHand)
+                // Dialogue never begins a draw. It still permits the player to stow a weapon
+                // that was already in hand when the conversation started.
+                if (weaponIntent.IsDrawRequested || weaponTransitions.DisplayMode == WeaponDisplayMode.RightHand)
                 {
                     RequestSheatheWeapon();
                 }
@@ -440,113 +323,78 @@ namespace Inventory
                 return;
             }
 
-            if (!CanProcessWeaponSlotInput)
+            if (!CanProcessWeaponSlotInput || message.SlotIndex is < 1 or > 2)
             {
-                LogWeaponSlotInput(message.SlotIndex, "Ignored weapon-slot input because weapon changes are blocked");
                 return;
             }
 
-            if (message.SlotIndex is < 1 or > 2)
+            if (weaponIntent.IsSelectedSlot(message.SlotIndex))
             {
-                LogWeaponSlotInput(message.SlotIndex, "Ignored weapon-slot input because the slot is invalid");
-                return;
-            }
-
-            if (selectedWeaponSlotIndex == message.SlotIndex)
-            {
-                var selectedItemConfig = GetSelectedWeaponItemConfig();
-                if (selectedItemConfig == null)
+                if (!GetSelectedWeapon().HasWeapon)
                 {
-                    LogWeaponSlotInput(message.SlotIndex, "Active slot has no weapon; refreshing display");
-                    RefreshWeaponInHand();
+                    ReconcileWeaponPresentation();
                     return;
                 }
 
-                isWeaponDrawn = !isWeaponDrawn;
-                LogWeaponSlotInput(message.SlotIndex, "Toggled active weapon slot");
-                if (TryHandleWeaponSlotInputDuringAnimation())
-                {
-                    LogWeaponSlotInput(message.SlotIndex, "Queued active-slot change during weapon animation");
-                    return;
-                }
-
-                RefreshWeaponInHand();
-                LogWeaponSlotInput(message.SlotIndex, "Applied active-slot change");
-                return;
+                weaponIntent.ToggleDrawRequest();
             }
-
-            selectedWeaponSlotIndex = message.SlotIndex;
-            isWeaponDrawn = true;
-            LogWeaponSlotInput(message.SlotIndex, "Selected a different weapon slot");
-
-            if (TryHandleWeaponSlotInputDuringAnimation())
+            else
             {
-                LogWeaponSlotInput(message.SlotIndex, "Queued different-slot change during weapon animation");
+                weaponIntent.SelectSlotAndRequestDraw(message.SlotIndex);
+            }
+
+            if (TryApplyWeaponSlotIntentDuringTransition())
+            {
                 return;
             }
 
-            RefreshWeaponInHand();
-            LogWeaponSlotInput(message.SlotIndex, "Applied different-slot change");
-        }
-
-        private void LogWeaponSlotInput(int requestedSlotIndex, string eventName)
-        {
-            Debug.Log($"[PlayerWeaponSlotInput] {eventName}. RequestedSlot={requestedSlotIndex}, ActiveSlot={selectedWeaponSlotIndex}, IsWeaponDrawn={isWeaponDrawn}, IsWeaponInHand={IsWeaponInHand}, DisplayMode={currentDisplayMode}, WeaponAnimationInProgress={isWeaponAnimationInProgress}, ActionBlocked={actionState.IsActionBlocked}.");
+            ReconcileWeaponPresentation();
         }
 
         private void OnMouseDown(MouseDown message)
         {
-            if (message.Button is not (MouseButtonType.Left or MouseButtonType.Right))
+            if (weaponDrawingBlockState.IsWeaponDrawingBlocked)
             {
                 return;
             }
 
-            if (!isInitialized)
+            if (message.Button is not (MouseButtonType.Left or MouseButtonType.Right)
+             || !isInitialized
+             || gameModesController.GameMode != GameMode.Game)
             {
                 return;
             }
 
-            if (gameModesController.GameMode != GameMode.Game)
-            {
-                return;
-            }
-
-            // A hit reaction may also block the player, but only an active weapon attack
-            // is allowed to receive a replacement request while movement is locked.
+            // A hit reaction can block movement but may accept a follow-up attack. Other
+            // blocked actions do not receive an attack or draw request from the mouse.
             if (actionState.IsActionBlocked && !combatActions.IsHitAttackInProgress)
             {
                 return;
             }
 
-            var selectedItemConfig = ResolveActiveWeaponSelection();
-            if (selectedItemConfig == null)
+            var selectedWeapon = GetSelectedWeapon();
+            if (!selectedWeapon.HasWeapon)
             {
                 return;
             }
 
-            if (!isWeaponDrawn || !IsSelectedWeaponInHand(selectedItemConfig))
+            if (!weaponIntent.IsDrawRequested || !weaponTransitions.IsSelectionInHand(selectedWeapon))
             {
-                // A click on an unavailable selected weapon always means "ready the weapon",
-                // never "attack". When a sheath/draw transition is already playing, preserve
-                // that intent and apply it as soon as the current transition completes.
-                isWeaponDrawn = true;
-
-                if (isWeaponAnimationInProgress)
+                weaponIntent.RequestDraw();
+                if (weaponTransitions.IsAnimationInProgress)
                 {
-                    hasPendingRefresh = true;
+                    RequestPresentationReconciliation();
                     return;
                 }
 
-                RefreshWeaponInHand();
+                ReconcileWeaponPresentation();
                 return;
             }
 
-            if (isWeaponAnimationInProgress)
+            if (!weaponTransitions.IsAnimationInProgress)
             {
-                return;
+                combatActions.TryTriggerAttack(message.Button);
             }
-
-            combatActions.TryTriggerAttack(message.Button);
         }
 
         private void OnGameModeChanged(GameModeChangedMessage message)
@@ -564,237 +412,115 @@ namespace Inventory
             combatActions.TryRequestRoll();
         }
 
-        private void RefreshWeaponInHand()
+        private void HandleFullBodyActionRequested()
         {
-            if (actionState.IsActionBlocked || combatActions.IsAttackBlockingWeaponChanges)
+            if (!weaponDrawingBlockState.IsWeaponDrawingBlocked
+                && weaponTransitions.TryReverseForFullBodyAction(out var isDrawRequested))
             {
-                hasPendingRefresh = true;
-                return;
+                weaponIntent.SetDrawRequest(isDrawRequested);
+            }
+            else if (weaponDrawingBlockState.IsWeaponDrawingBlocked)
+            {
+                RequestPresentationReconciliation();
             }
 
-            var selectedItemConfig = ResolveActiveWeaponSelection();
-            if (isWeaponAnimationInProgress)
-            {
-                hasPendingRefresh = true;
-                return;
-            }
-
-            if (selectedItemConfig == null)
-            {
-                combatActions.Cancel();
-                HandleEmptySelectedSlot();
-                return;
-            }
-
-            if (!isWeaponDrawn)
-            {
-                combatActions.Cancel();
-                HandleDesiredHolsteredWeapon(selectedItemConfig);
-                return;
-            }
-
-            HandleDesiredWeaponInHand(selectedItemConfig);
+            UpdateRunningAvailability();
         }
 
-        private void RefreshWeaponAfterInitialization()
+        private bool TryApplyWeaponSlotIntentDuringTransition()
+        {
+            if (!weaponTransitions.TryApplyWeaponSlotIntentDuringTransition(
+                    GetSelectedWeapon(),
+                    IsEffectiveDrawRequested,
+                    out var outcome))
+            {
+                return false;
+            }
+
+            HandleTransitionOutcome(outcome);
+            return true;
+        }
+
+        private void ReconcileWeaponPresentation()
+        {
+            if (!CanReconcileWeaponPresentation())
+            {
+                RequestPresentationReconciliation();
+                return;
+            }
+
+            if (weaponTransitions.IsAnimationInProgress)
+            {
+                RequestPresentationReconciliation();
+                return;
+            }
+
+            var selectedWeapon = GetSelectedWeapon();
+            if (!selectedWeapon.HasWeapon || !IsEffectiveDrawRequested)
+            {
+                combatActions.Cancel();
+            }
+
+            hasPendingPresentationReconciliation = false;
+            HandleTransitionOutcome(weaponTransitions.Reconcile(selectedWeapon, IsEffectiveDrawRequested));
+        }
+
+        private bool CanReconcileWeaponPresentation()
+        {
+            return !actionState.IsActionBlocked && !combatActions.IsAttackBlockingWeaponChanges;
+        }
+
+        private void ReconcilePresentationAfterInitialization()
         {
             if (isInitialized)
             {
-                RefreshWeaponInHand();
+                ReconcileWeaponPresentation();
             }
         }
 
-        private void HandleEmptySelectedSlot()
+        private void OnWeaponDrawingBlockChanged()
         {
-            if (currentDisplayMode == WeaponDisplayMode.RightHand && currentWeaponItemConfig != null)
+            if (!isInitialized || !weaponDrawingBlockState.IsWeaponDrawingBlocked)
             {
-                StartSheatheAnimation(currentRenderedSlotIndex, currentWeaponItemConfig);
                 return;
             }
 
-            RenderWeapon(null, 0, WeaponDisplayMode.None);
+            weaponIntent.RequestSheathe();
+            ReconcileWeaponPresentation();
         }
 
-        private void HandleDesiredWeaponInHand(ItemConfig selectedItemConfig)
+        private void RequestPresentationReconciliation()
         {
-            if (currentDisplayMode == WeaponDisplayMode.RightHand)
+            hasPendingPresentationReconciliation = true;
+        }
+
+        private void HandleTransitionOutcome(WeaponTransitionOutcome outcome)
+        {
+            if (outcome != WeaponTransitionOutcome.None)
             {
-                if (currentRenderedSlotIndex == selectedWeaponSlotIndex
-                 && currentWeaponItemConfig == selectedItemConfig)
+                ResetAnimatorRequests();
+            }
+
+            if (outcome == WeaponTransitionOutcome.Sheathed)
+            {
+                if (!GetSelectedWeapon().HasWeapon)
                 {
-                    return;
+                    weaponIntent.RequestSheathe();
                 }
 
-                StartSheatheAnimation(currentRenderedSlotIndex, currentWeaponItemConfig);
-                return;
+                combatActions.Cancel(restoreMovement: false);
+                PublishWeaponSheathed();
+
+                // An interrupted transition can finish after the player has chosen another
+                // weapon. Reconcile in Tick rather than starting a new transition inside an
+                // animation-event callback.
+                if (IsEffectiveDrawRequested)
+                {
+                    RequestPresentationReconciliation();
+                }
             }
 
-            if (currentDisplayMode != WeaponDisplayMode.Belt
-             || currentRenderedSlotIndex != selectedWeaponSlotIndex
-             || currentWeaponItemConfig != selectedItemConfig)
-            {
-                RenderWeapon(selectedItemConfig, selectedWeaponSlotIndex, WeaponDisplayMode.Belt);
-            }
-
-            StartDrawAnimation(selectedWeaponSlotIndex, selectedItemConfig);
-        }
-
-        private bool IsSelectedWeaponInHand(ItemConfig selectedItemConfig)
-        {
-            return currentDisplayMode == WeaponDisplayMode.RightHand
-                   && currentWeaponItemConfig == selectedItemConfig;
-        }
-
-        private void HandleDesiredHolsteredWeapon(ItemConfig selectedItemConfig)
-        {
-            if (currentDisplayMode == WeaponDisplayMode.RightHand && currentWeaponItemConfig != null)
-            {
-                StartSheatheAnimation(currentRenderedSlotIndex, currentWeaponItemConfig);
-                return;
-            }
-
-            if (currentDisplayMode == WeaponDisplayMode.Belt
-             && currentRenderedSlotIndex == selectedWeaponSlotIndex
-             && currentWeaponItemConfig == selectedItemConfig)
-            {
-                return;
-            }
-
-            RenderWeapon(selectedItemConfig, selectedWeaponSlotIndex, WeaponDisplayMode.Belt);
-        }
-
-        private void StartDrawAnimation(int slotIndex, ItemConfig itemConfig, bool preserveCurrentVisual = false)
-        {
-            if (itemConfig == null || combatActions.IsAttackBlockingWeaponChanges)
-            {
-                return;
-            }
-
-            var canPreserveCurrentVisual =
-                preserveCurrentVisual
-             && currentWeaponInstance != null
-             && currentWeaponItemConfig == itemConfig
-             && currentRenderedSlotIndex == slotIndex
-             && currentDisplayMode != WeaponDisplayMode.None;
-
-            if (!canPreserveCurrentVisual
-             && (currentDisplayMode != WeaponDisplayMode.Belt
-              || currentRenderedSlotIndex != slotIndex
-              || currentWeaponItemConfig != itemConfig))
-            {
-                RenderWeapon(itemConfig, slotIndex, WeaponDisplayMode.Belt);
-            }
-
-            weaponTransitionState.Begin(WeaponAnimationKind.Draw, preserveCurrentVisual);
-            hasPendingRefresh = false;
             UpdateRunningAvailability();
-
-            if (animator == null)
-            {
-                FinalizeWeaponRender(itemConfig, slotIndex, WeaponDisplayMode.RightHand, snapToAttachmentTransform: true);
-                CompleteWeaponAnimationFromEvent(WeaponAnimationKind.Draw);
-                return;
-            }
-
-            weaponTransitionAnimator.Request(WeaponAnimationKind.Draw);
-        }
-
-        private void StartSheatheAnimation(
-            int slotIndex,
-            ItemConfig itemConfig,
-            bool ignoreActiveCombatAction = false)
-        {
-            if (itemConfig == null)
-            {
-                RenderWeapon(null, 0, WeaponDisplayMode.None);
-                return;
-            }
-
-            if (!ignoreActiveCombatAction && combatActions.IsAttackBlockingWeaponChanges)
-            {
-                return;
-            }
-
-            weaponTransitionState.Begin(WeaponAnimationKind.Sheathe);
-            hasPendingRefresh = false;
-            UpdateRunningAvailability();
-
-            if (animator == null)
-            {
-                FinalizeWeaponRender(itemConfig, slotIndex, WeaponDisplayMode.Belt, snapToAttachmentTransform: false);
-                PutWeaponOnBeltFromAnimationEvent();
-                return;
-            }
-
-            weaponTransitionAnimator.Request(WeaponAnimationKind.Sheathe);
-        }
-
-        private void CompleteWeaponAnimationFromEvent(WeaponAnimationKind expectedAnimationKind)
-        {
-            if (!isWeaponAnimationInProgress || currentAnimationKind != expectedAnimationKind)
-            {
-                return;
-            }
-
-            if (expectedAnimationKind == WeaponAnimationKind.Sheathe)
-            {
-                ConfirmWeaponSheathed();
-            }
-
-            weaponTransitionState.Complete(expectedAnimationKind);
-            ResetAnimatorRequests();
-            UpdateRunningAvailability();
-
-            if (!hasPendingRefresh)
-            {
-                return;
-            }
-
-            hasPendingRefresh = false;
-            RefreshWeaponInHand();
-        }
-
-        private void ConfirmWeaponSheathed()
-        {
-            // The animation event is the authoritative boundary: once the weapon reaches the
-            // belt, its visual and gameplay states must commit together. This also covers
-            // forced sheathing, where a session owns the request but the weapon controller
-            // still owns the final state transition.
-            isWeaponDrawn = false;
-            combatActions.Cancel(restoreMovement: false);
-            UpdateRunningAvailability();
-        }
-
-        private void SynchronizeSheatheCompletionWithAnimatorState()
-        {
-            if (!isWeaponAnimationInProgress
-                || currentAnimationKind != WeaponAnimationKind.Sheathe
-                || animator == null
-                || weaponAnimationLayerIndex < 0)
-            {
-                return;
-            }
-
-            if (IsSheatheWeaponAnimationStateActive())
-            {
-                weaponTransitionState.MarkSheatheStateEntered();
-                return;
-            }
-
-            if (!weaponTransitionState.CanSynchronizeSheathe()
-                || currentWeaponItemConfig == null
-                || !weaponVisual.IsAttachedTo(WeaponDisplayMode.Belt))
-            {
-                return;
-            }
-
-            FinalizeWeaponRender(
-                currentWeaponItemConfig,
-                currentRenderedSlotIndex,
-                WeaponDisplayMode.Belt,
-                snapToAttachmentTransform: false);
-            CompleteWeaponAnimationFromEvent(WeaponAnimationKind.Sheathe);
-            PublishWeaponSheathed();
         }
 
         private void PublishWeaponSheathed()
@@ -802,227 +528,34 @@ namespace Inventory
             weaponSheathedPublisher?.Publish(new WeaponSheathedMessage(ownerDamageReceiver?.OwnerTransform));
         }
 
-        private bool IsSheatheWeaponAnimationStateActive()
+        private PlayerWeaponSelection GetSelectedWeapon()
         {
-            return weaponTransitionAnimator.IsStateActive(WeaponAnimationKind.Sheathe);
+            var slot = GetWeaponSlot(weaponIntent.SelectedSlotIndex);
+            var itemConfig = IsWeaponSlot(slot) ? slot.ItemConfig : null;
+            return new PlayerWeaponSelection(weaponIntent.SelectedSlotIndex, itemConfig);
         }
 
-        private void RequestWeaponTransitionReversal()
+        private bool IsEffectiveDrawRequested => weaponIntent.IsDrawRequested
+                                                 && !weaponDrawingBlockState.IsWeaponDrawingBlocked;
+
+        private Inventory.Slot.SlotModel GetWeaponSlot(int slotIndex)
         {
-            if (weaponVisual.IsAttachedTo(WeaponDisplayMode.RightHand)
-                && weaponTransitionAnimator.IsStateActive(WeaponAnimationKind.Sheathe))
+            return slotIndex switch
             {
-                weaponTransitionAnimator.Request(WeaponAnimationKind.Draw);
-                return;
-            }
-
-            if (weaponVisual.IsAttachedTo(WeaponDisplayMode.Belt)
-                && weaponTransitionAnimator.IsStateActive(WeaponAnimationKind.Draw))
-            {
-                weaponTransitionAnimator.Request(WeaponAnimationKind.Sheathe);
-            }
+                1 => playerInventory.LeftWeaponSlot,
+                2 => playerInventory.RightWeaponSlot,
+                _ => null
+            };
         }
 
-        private void SynchronizeWeaponTransitionWithAnimationEvent(
-            WeaponAnimationKind animationKind,
-            bool preservePoseForDraw = false)
+        private static bool IsWeaponSlot(Inventory.Slot.SlotModel slot)
         {
-            if (currentAnimationKind != animationKind)
-            {
-                weaponTransitionState.Begin(animationKind, preservePoseForDraw);
-            }
-        }
-
-        private bool TryHandleWeaponSlotInputDuringAnimation()
-        {
-            if (!isWeaponAnimationInProgress)
-            {
-                return false;
-            }
-
-            var selectedItemConfig = GetSelectedWeaponItemConfig();
-
-            switch (currentAnimationKind)
-            {
-                case WeaponAnimationKind.Sheathe:
-                    if (!isWeaponDrawn || selectedItemConfig == null)
-                    {
-                        return true;
-                    }
-
-                    if (currentWeaponItemConfig == selectedItemConfig
-                     && currentRenderedSlotIndex == selectedWeaponSlotIndex)
-                    {
-                        StartDrawAnimation(selectedWeaponSlotIndex, selectedItemConfig, preserveCurrentVisual: true);
-                        return true;
-                    }
-
-                    if (TryStartNextWeaponDuringSheatheIfBeginEventPassed())
-                    {
-                        return true;
-                    }
-
-                    return true;
-
-                case WeaponAnimationKind.Draw:
-                    if (isWeaponDrawn
-                     && selectedItemConfig != null
-                     && currentWeaponItemConfig == selectedItemConfig
-                     && currentRenderedSlotIndex == selectedWeaponSlotIndex)
-                    {
-                        return true;
-                    }
-
-                    StartSheatheAnimation(currentRenderedSlotIndex, currentWeaponItemConfig);
-                    return true;
-
-                default:
-                    hasPendingRefresh = true;
-                    return true;
-            }
-        }
-
-        private bool TryStartNextWeaponDuringSheathe()
-        {
-            var selectedItemConfig = GetSelectedWeaponItemConfig();
-            if (!ShouldSwapWeaponOnBeginMoveToBeltEvent(selectedItemConfig))
-            {
-                return false;
-            }
-
-            DestroyCurrentWeaponInstance();
-
-            RenderWeapon(selectedItemConfig, selectedWeaponSlotIndex, WeaponDisplayMode.Belt);
-            StartDrawAnimation(selectedWeaponSlotIndex, selectedItemConfig, preserveCurrentVisual: true);
-            return true;
-        }
-
-        private void MoveCurrentWeaponToBeltPreservingPose()
-        {
-            weaponVisual.MovePreservingPose(WeaponDisplayMode.Belt);
-            UpdateRunningAvailability();
-        }
-
-        private void MoveCurrentWeaponToRightHandPreservingPose()
-        {
-            weaponVisual.MovePreservingPose(WeaponDisplayMode.RightHand);
-            UpdateRunningAvailability();
-        }
-
-        private bool TryStartNextWeaponDuringSheatheIfBeginEventPassed()
-        {
-            if (!weaponTransitionAnimator.TryGetEventNormalizedTime(
-                    WeaponAnimationKind.Sheathe,
-                    BeginMoveWeaponToBeltEventName,
-                    out var beginMoveNormalizedTime))
-            {
-                return false;
-            }
-
-            if (animator == null || weaponAnimationLayerIndex < 0)
-            {
-                return false;
-            }
-
-            var stateInfo = animator.GetCurrentAnimatorStateInfo(weaponAnimationLayerIndex);
-            if (stateInfo.fullPathHash != weaponTransitionAnimator.GetStateHash(WeaponAnimationKind.Sheathe)
-             || stateInfo.normalizedTime < beginMoveNormalizedTime)
-            {
-                return false;
-            }
-
-            return TryStartNextWeaponDuringSheathe();
-        }
-
-        private bool ShouldSwapWeaponOnBeginMoveToBeltEvent(ItemConfig selectedItemConfig)
-        {
-            return currentAnimationKind == WeaponAnimationKind.Sheathe
-                && currentDisplayMode == WeaponDisplayMode.RightHand
-                && currentWeaponItemConfig != null
-                && isWeaponDrawn
-                && selectedItemConfig != null
-                && (currentRenderedSlotIndex != selectedWeaponSlotIndex
-                 || currentWeaponItemConfig != selectedItemConfig);
-        }
-
-        private ItemConfig GetSelectedWeaponItemConfig()
-        {
-            var selectedSlot = selectedWeaponSlotIndex == 1
-                ? playerInventory.LeftWeaponSlot
-                : playerInventory.RightWeaponSlot;
-            var itemConfig = selectedSlot?.ItemConfig;
-
-            return itemConfig?.ItemType == ItemType.Weapon
-                ? itemConfig
-                : null;
-        }
-
-        private ItemConfig ResolveActiveWeaponSelection()
-        {
-            return GetSelectedWeaponItemConfig();
-        }
-
-        private void RenderWeapon(ItemConfig itemConfig, int slotIndex, WeaponDisplayMode displayMode)
-        {
-            EndCurrentWeaponDamageWindow();
-            weaponVisual.Render(itemConfig, slotIndex, displayMode);
-            UpdateRunningAvailability();
-        }
-
-        private void FinalizeWeaponRender(
-            ItemConfig itemConfig,
-            int slotIndex,
-            WeaponDisplayMode displayMode,
-            bool snapToAttachmentTransform)
-        {
-            weaponVisual.FinalizeRender(itemConfig, slotIndex, displayMode, snapToAttachmentTransform);
-            UpdateRunningAvailability();
-        }
-
-        private void DestroyCurrentWeaponInstance()
-        {
-            EndCurrentWeaponDamageWindow();
-            weaponVisual.Destroy();
-        }
-
-        private void CleanupSpawnedWeaponInstancesExceptCurrent()
-        {
-            weaponVisual.CleanupExceptCurrent();
-        }
-
-        private void EndCurrentWeaponDamageWindow()
-        {
-            combatActions.EndDamageWindowFromAnimationEvent();
-        }
-
-        private void StartWeaponAttachmentBlend(
-            WeaponDisplayMode targetMode,
-            string startEventName,
-            string finishEventName)
-        {
-            weaponVisual.StartAttachmentBlend(
-                targetMode,
-                weaponTransitionAnimator.GetClip(currentAnimationKind),
-                GetCurrentAnimationStateHash(),
-                startEventName,
-                finishEventName);
-        }
-
-        private int GetCurrentAnimationStateHash()
-        {
-            return currentAnimationKind == WeaponAnimationKind.None
-                ? 0
-                : weaponTransitionAnimator.GetStateHash(currentAnimationKind);
+            return slot?.ItemConfig?.ItemType == ItemType.Weapon;
         }
 
         private void ResetAnimatorRequests()
         {
-            if (animator == null)
-            {
-                return;
-            }
-
-            weaponTransitionAnimator.ResetRequests();
+            weaponTransitions.ResetAnimatorRequests();
             combatActions.ResetAnimationRequests();
         }
 
@@ -1030,11 +563,11 @@ namespace Inventory
         {
             var shouldAllowRunning =
                 !combatActions.IsAttackRootMotionStateActive
-             && currentAnimationKind != WeaponAnimationKind.Draw
-             && (currentDisplayMode != WeaponDisplayMode.RightHand || currentWeaponItemConfig == null);
+                && weaponTransitions.CurrentAnimationKind != WeaponAnimationKind.Draw
+                && (weaponTransitions.DisplayMode != WeaponDisplayMode.RightHand
+                    || weaponTransitions.CurrentItemConfig == null);
 
             playerMovement?.SetRunAllowed(shouldAllowRunning);
         }
-
     }
 }

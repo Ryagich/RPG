@@ -25,7 +25,7 @@ namespace Inventory
 
         public void Request(WeaponAnimationKind kind)
         {
-            if (animator == null)
+            if (animator == null || kind == WeaponAnimationKind.None)
             {
                 return;
             }
@@ -48,7 +48,7 @@ namespace Inventory
 
         public bool IsStateActive(WeaponAnimationKind kind)
         {
-            if (!IsAvailable)
+            if (!IsAvailable || kind == WeaponAnimationKind.None)
             {
                 return false;
             }
@@ -65,7 +65,7 @@ namespace Inventory
 
         public bool IsStateExpectedForAnimationEvent(WeaponAnimationKind kind)
         {
-            if (!IsAvailable)
+            if (!IsAvailable || kind == WeaponAnimationKind.None)
             {
                 return false;
             }
@@ -81,7 +81,12 @@ namespace Inventory
 
         public int GetStateHash(WeaponAnimationKind kind)
         {
-            return kind == WeaponAnimationKind.Draw ? DrawStateHash : SheatheStateHash;
+            return kind switch
+            {
+                WeaponAnimationKind.Draw => DrawStateHash,
+                WeaponAnimationKind.Sheathe => SheatheStateHash,
+                _ => 0
+            };
         }
 
         public AnimationClip GetClip(WeaponAnimationKind kind)
@@ -91,7 +96,16 @@ namespace Inventory
                 return null;
             }
 
-            var expectedClipName = kind == WeaponAnimationKind.Draw ? DrawClipName : SheatheClipName;
+            var expectedClipName = kind switch
+            {
+                WeaponAnimationKind.Draw => DrawClipName,
+                WeaponAnimationKind.Sheathe => SheatheClipName,
+                _ => null
+            };
+            if (expectedClipName == null)
+            {
+                return null;
+            }
             foreach (var clip in animator.runtimeAnimatorController.animationClips)
             {
                 if (clip != null && clip.name == expectedClipName)
@@ -127,6 +141,19 @@ namespace Inventory
             }
 
             return false;
+        }
+
+        public bool HasReachedEvent(WeaponAnimationKind kind, string eventName)
+        {
+            if (!IsAvailable
+                || !TryGetEventNormalizedTime(kind, eventName, out var normalizedEventTime))
+            {
+                return false;
+            }
+
+            var stateInfo = animator.GetCurrentAnimatorStateInfo(LayerIndex);
+            return stateInfo.fullPathHash == GetStateHash(kind)
+                   && stateInfo.normalizedTime >= normalizedEventTime;
         }
     }
 }

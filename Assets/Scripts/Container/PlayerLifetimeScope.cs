@@ -115,7 +115,7 @@ namespace Container
             // Player and NPC must keep the same character systems; only the control source differs:
             // player input drives these systems for Player, while the state machine drives them for NPC.
             builder.Register<CharacterActionState>(Lifetime.Scoped).AsSelf();
-            builder.Register<CharacterRootMotionController>(Lifetime.Scoped)
+            builder.Register<CharacterRootMotionController>(Lifetime.Singleton)
                    .AsSelf()
                    .As<IStartable>()
                    .As<System.IDisposable>();
@@ -144,7 +144,8 @@ namespace Container
             builder.RegisterEntryPoint<PlayerSaveCoordinator>().AsSelf();
             builder.RegisterEntryPoint<InventoryHandController>().AsSelf();
             builder.RegisterEntryPoint<PlayerFastSlotsController>().AsSelf();
-            builder.Register<PlayerWeaponInHandController>(Lifetime.Scoped)
+            builder.Register<PlayerWeaponDrawingBlockState>(Lifetime.Scoped).AsSelf();
+            builder.Register<PlayerWeaponInHandController>(Lifetime.Singleton)
                    .AsSelf()
                    .As<IEquippedWeaponVisual>()
                    .As<IStartable>()
