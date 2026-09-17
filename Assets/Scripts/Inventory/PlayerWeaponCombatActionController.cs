@@ -80,6 +80,7 @@ namespace Inventory
 
         public void Start()
         {
+            targetLockController?.SetAutomaticFacingPaused(this, false);
             ResetAnimationRequests();
             ownerDamageReceiver?.SetWeaponDamageBlocked(false);
             UpdateRootMotionAvailability();
@@ -92,6 +93,7 @@ namespace Inventory
 
         public void Dispose()
         {
+            targetLockController?.SetAutomaticFacingPaused(this, false);
             ownerDamageReceiver?.SetWeaponDamageBlocked(false);
             damageWindow?.End();
             UpdateRootMotionAvailability(forceDisable: true);
@@ -184,6 +186,11 @@ namespace Inventory
         public void LockMovementFromAnimationEvent()
         {
             isCombatActionLocked = true;
+            if (IsEvasionInProgress())
+            {
+                targetLockController?.SetAutomaticFacingPaused(this, true);
+            }
+
             playerMovement?.ChangeState(false);
             playerAnimationController?.SetLocomotionLocked(true);
         }
@@ -197,6 +204,11 @@ namespace Inventory
             if (gameModesController.GameMode == GameMode.Game)
             {
                 playerMovement?.ChangeState(true);
+            }
+
+            if (completedEvasion)
+            {
+                targetLockController?.SetAutomaticFacingPaused(this, false);
             }
 
             playerAnimationController?.SetLocomotionLocked(false);
@@ -229,6 +241,7 @@ namespace Inventory
         {
             DisableDamageImmunityFromAnimationEvent();
             isCombatActionLocked = false;
+            targetLockController?.SetAutomaticFacingPaused(this, false);
             damageWindow?.End();
 
             if (isHitAttackInProgress)

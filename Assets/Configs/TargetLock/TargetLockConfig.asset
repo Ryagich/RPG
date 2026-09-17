@@ -23,7 +23,6 @@ MonoBehaviour:
   <LineOfSightMask>k__BackingField:
     serializedVersion: 2
     m_Bits: 4294967295
-  <FacingRotationSpeed>k__BackingField: 720
   <CenterWeight>k__BackingField: 1
   <DistanceWeight>k__BackingField: 0.25
   <PlayerFacingWeight>k__BackingField: 0.2

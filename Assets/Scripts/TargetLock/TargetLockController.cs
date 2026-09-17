@@ -4,6 +4,7 @@ using CameraScripts;
 using GameModes;
 using MessagePipe;
 using Messages;
+using Movement;
 using UniRx;
 using UnityEngine;
 using VContainer.Unity;
@@ -15,6 +16,7 @@ namespace TargetLock
         private const float DirectionEpsilon = 0.001f;
 
         private readonly TargetLockConfig config;
+        private readonly PlayerMovementConfig playerMovementConfig;
         private readonly Camera camera;
         private readonly CameraMotor cameraMotor;
         private readonly Transform playerTransform;
@@ -24,6 +26,7 @@ namespace TargetLock
         private readonly ISubscriber<TargetLockInputMessage> targetLockInputSubscriber;
         private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
         private readonly CompositeDisposable disposables = new();
+        private readonly HashSet<object> automaticFacingPauseSources = new();
 
         private GameMode currentGameMode = GameMode.Game;
         private TargetLockControlMode observedControlMode = TargetLockControlMode.Off;
@@ -31,6 +34,7 @@ namespace TargetLock
 
         public TargetLockController(
             TargetLockConfig config,
+            PlayerMovementConfig playerMovementConfig,
             Camera camera,
             CameraMotor cameraMotor,
             Transform playerTransform,
@@ -41,6 +45,7 @@ namespace TargetLock
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
         {
             this.config = config;
+            this.playerMovementConfig = playerMovementConfig;
             this.camera = camera;
             this.cameraMotor = cameraMotor;
             this.playerTransform = playerTransform;
@@ -56,6 +61,27 @@ namespace TargetLock
         public bool IsLocked => CurrentTarget != null && Mode != TargetLockMode.Disabled;
         public bool IsHardLocked => CurrentTarget != null && Mode == TargetLockMode.Hard;
         public bool IsSoftLocked => CurrentTarget != null && Mode == TargetLockMode.Soft;
+
+        /// <summary>
+        /// Temporarily prevents this controller from rotating the visual towards its target.
+        /// Target selection and camera lock remain active. The source is tracked so overlapping
+        /// actions cannot resume automatic facing before every owner has released it.
+        /// </summary>
+        public void SetAutomaticFacingPaused(object source, bool isPaused)
+        {
+            if (source == null)
+            {
+                return;
+            }
+
+            if (isPaused)
+            {
+                automaticFacingPauseSources.Add(source);
+                return;
+            }
+
+            automaticFacingPauseSources.Remove(source);
+        }
 
         public void Start()
         {
@@ -117,7 +143,8 @@ namespace TargetLock
             invalidCurrentTargetTime = 0f;
             UpdateCameraTarget();
 
-            if (Mode is TargetLockMode.Hard or TargetLockMode.Soft)
+            if (automaticFacingPauseSources.Count == 0
+             && (Mode is TargetLockMode.Hard or TargetLockMode.Soft))
             {
                 RotateVisualTowardsTarget(false);
             }
@@ -604,7 +631,7 @@ namespace TargetLock
                 : Quaternion.RotateTowards(
                     visualTransform.rotation,
                     targetRotation,
-                    config.FacingRotationSpeed * Time.deltaTime);
+                    playerMovementConfig.WalkRotationSpeed * Time.deltaTime);
             return true;
         }
     }

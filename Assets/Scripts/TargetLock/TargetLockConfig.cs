@@ -24,7 +24,6 @@ namespace TargetLock
         [field: SerializeField, Min(0f)] public float LostTargetGraceSeconds { get; private set; } = 0.45f;
         [field: SerializeField] public Vector3 LineOfSightOriginOffset { get; private set; } = new(0f, 1.4f, 0f);
         [field: SerializeField] public LayerMask LineOfSightMask { get; private set; } = ~0;
-        [field: SerializeField, Min(0f)] public float FacingRotationSpeed { get; private set; } = 720f;
         [field: SerializeField, Min(0f)] public float CenterWeight { get; private set; } = 1f;
         [field: SerializeField, Min(0f)] public float DistanceWeight { get; private set; } = 0.25f;
         [field: SerializeField, Min(0f)] public float PlayerFacingWeight { get; private set; } = 0.2f;

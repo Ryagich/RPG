@@ -1,3 +1,4 @@
+using Movement;
 using UnityEngine;
 
 namespace TargetLock
@@ -6,12 +7,12 @@ namespace TargetLock
     {
         private const float DirectionEpsilon = 0.001f;
 
-        private readonly TargetLockConfig config;
+        private readonly PlayerMovementConfig playerMovementConfig;
         private readonly Transform ownerTransform;
 
-        public NpcTargetLockController(TargetLockConfig config, Animator animator, Transform ownerTransform)
+        public NpcTargetLockController(PlayerMovementConfig playerMovementConfig, Animator animator, Transform ownerTransform)
         {
-            this.config = config;
+            this.playerMovementConfig = playerMovementConfig;
             this.ownerTransform = ownerTransform != null ? ownerTransform : animator != null ? animator.transform : null;
         }
 
@@ -31,11 +32,10 @@ namespace TargetLock
             }
 
             var targetRotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
-            var rotationSpeed = config != null ? config.FacingRotationSpeed : 720f;
             ownerTransform.rotation = Quaternion.RotateTowards(
                 ownerTransform.rotation,
                 targetRotation,
-                rotationSpeed * Time.deltaTime);
+                playerMovementConfig.WalkRotationSpeed * Time.deltaTime);
             return true;
         }
     }
