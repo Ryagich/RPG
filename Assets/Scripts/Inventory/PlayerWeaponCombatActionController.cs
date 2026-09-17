@@ -81,7 +81,6 @@ namespace Inventory
         public void Start()
         {
             ResetAnimationRequests();
-            playerAnimationController?.ReleaseEvasionDirection();
             ownerDamageReceiver?.SetWeaponDamageBlocked(false);
             UpdateRootMotionAvailability();
         }
@@ -93,7 +92,6 @@ namespace Inventory
 
         public void Dispose()
         {
-            playerAnimationController?.ReleaseEvasionDirection();
             ownerDamageReceiver?.SetWeaponDamageBlocked(false);
             damageWindow?.End();
             UpdateRootMotionAvailability(forceDisable: true);
@@ -142,11 +140,8 @@ namespace Inventory
         {
             if (message.GameMode == GameMode.Game)
             {
-                if (!isHitAttackInProgress)
-                {
-                    playerAnimationController?.SetLocomotionLocked(false);
-                }
-
+                // Returning from UI only re-enables gameplay input. A full-body action keeps
+                // ownership of its locomotion lock until its UnlockMovement animation event.
                 return;
             }
 
@@ -198,7 +193,6 @@ namespace Inventory
             var completedEvasion = IsEvasionInProgress();
             var completedRoll = IsRollInProgress();
             isCombatActionLocked = false;
-            playerAnimationController?.ReleaseEvasionDirection();
 
             if (gameModesController.GameMode == GameMode.Game)
             {
@@ -233,7 +227,6 @@ namespace Inventory
 
         public void Cancel(bool restoreMovement = true)
         {
-            playerAnimationController?.ReleaseEvasionDirection();
             DisableDamageImmunityFromAnimationEvent();
             isCombatActionLocked = false;
             damageWindow?.End();

@@ -37,7 +37,8 @@ namespace Inventory
         private bool isInitialized;
         private bool hasPendingPresentationReconciliation;
 
-        public PlayerWeaponInHandController(
+        public PlayerWeaponInHandController
+            (
             PlayerInventory playerInventory,
             PlayerWeaponHandAnchor handAnchor,
             PlayerWeaponAnimationEventReceiver animationEventReceiver,
@@ -58,7 +59,8 @@ namespace Inventory
             ISubscriber<DodgeInputMessage> dodgeInputSubscriber,
             ISubscriber<RollInputMessage> rollInputSubscriber,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber,
-            PlayerWeaponDrawingBlockState weaponDrawingBlockState)
+            PlayerWeaponDrawingBlockState weaponDrawingBlockState
+            )
         {
             this.gameModesController = gameModesController;
             this.playerInventory = playerInventory;
@@ -184,9 +186,7 @@ namespace Inventory
             HandleTransitionOutcome(weaponTransitions.PutWeaponOnBeltFromAnimationEvent(GetSelectedWeapon()));
         }
 
-        public void HoldAttackReadyFromAnimationEvent()
-        {
-        }
+        public void HoldAttackReadyFromAnimationEvent() { }
 
         public void AttackStartedFromAnimationEvent()
         {

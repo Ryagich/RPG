@@ -22,9 +22,7 @@ namespace NPC
 
         private bool isFacingLocked;
         private bool isActionMovementLocked;
-        private bool isEvasionDirectionLocked;
         private bool hasMoveRequest;
-        private Vector2 evasionDirectionalInput;
         private Vector3 lastRequestedDestination;
         private float lastRequestedStoppingDistance;
 
@@ -253,38 +251,6 @@ namespace NPC
             }
         }
 
-        /// <summary>
-        /// Keeps the directional parameters selected for a Dodge/Roll until its animation has
-        /// released movement. NavMesh normally writes zero velocity while stopped, which would
-        /// otherwise overwrite the blend-tree direction on the next frame.
-        /// </summary>
-        public void LockEvasionDirection(Vector3 worldDirection)
-        {
-            if (animator == null)
-            {
-                return;
-            }
-
-            worldDirection.y = 0f;
-            if (worldDirection.sqrMagnitude <= VelocityThreshold)
-            {
-                worldDirection = animator.transform.forward;
-            }
-
-            var localDirection = animator.transform.InverseTransformDirection(worldDirection.normalized);
-            evasionDirectionalInput = new Vector2(
-                Mathf.Clamp(localDirection.x, -1f, 1f),
-                Mathf.Clamp(localDirection.z, -1f, 1f));
-            isEvasionDirectionLocked = true;
-            ApplyLockedEvasionDirection();
-        }
-
-        public void ReleaseEvasionDirection()
-        {
-            isEvasionDirectionLocked = false;
-            evasionDirectionalInput = Vector2.zero;
-        }
-
         public void SetSpeedMultiplier(float multiplier)
         {
             if (agent == null)
@@ -401,12 +367,6 @@ namespace NPC
                 return;
             }
 
-            if (isEvasionDirectionLocked)
-            {
-                ApplyLockedEvasionDirection();
-                return;
-            }
-
             var planarVelocity = worldVelocity;
             planarVelocity.y = 0f;
             if (planarVelocity.sqrMagnitude <= VelocityThreshold)
@@ -423,16 +383,5 @@ namespace NPC
             animator.SetBool(IsRunParameter, true);
         }
 
-        private void ApplyLockedEvasionDirection()
-        {
-            if (animator == null)
-            {
-                return;
-            }
-
-            animator.SetFloat(DirectionXParameter, evasionDirectionalInput.x);
-            animator.SetFloat(DirectionYParameter, evasionDirectionalInput.y);
-            animator.SetBool(IsRunParameter, false);
-        }
     }
 }

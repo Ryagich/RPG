@@ -23,8 +23,8 @@ namespace NPC
         private static readonly int HeavyAttackRequestedParameterHash = Animator.StringToHash("HeavyAttack");
         private static readonly int DodgeRequestedParameterHash = Animator.StringToHash("Dodge");
         private static readonly int RollRequestedParameterHash = Animator.StringToHash("Roll");
-        private static readonly int DirectionXParameterHash = Animator.StringToHash("DirectionX");
-        private static readonly int DirectionYParameterHash = Animator.StringToHash("DirectionY");
+        private static readonly int DirectionActionXParameterHash = Animator.StringToHash("DirectionActionX");
+        private static readonly int DirectionActionYParameterHash = Animator.StringToHash("DirectionActionY");
         private static readonly int EmptyStateHash = Animator.StringToHash("Empty Idle");
         private static readonly int HeavyAttackHitRootMotionStateHash = Animator.StringToHash("A_Attack_HeavyCombo01A_Hit_RootMotion_Sword");
         private static readonly int HeavyAttackHitStateHash = Animator.StringToHash("A_Attack_HeavyCombo01B_Hit_Sword");
@@ -663,12 +663,6 @@ namespace NPC
             }
 
             isEvasionDirectionLocked = true;
-            if (navMeshController != null)
-            {
-                navMeshController.LockEvasionDirection(worldDirection);
-                return;
-            }
-
             worldDirection.y = 0f;
             if (worldDirection.sqrMagnitude <= Mathf.Epsilon)
             {
@@ -676,8 +670,8 @@ namespace NPC
             }
 
             var localDirection = animator.transform.InverseTransformDirection(worldDirection.normalized);
-            animator.SetFloat(DirectionXParameterHash, Mathf.Clamp(localDirection.x, -1f, 1f));
-            animator.SetFloat(DirectionYParameterHash, Mathf.Clamp(localDirection.z, -1f, 1f));
+            animator.SetFloat(DirectionActionXParameterHash, Mathf.Clamp(localDirection.x, -1f, 1f));
+            animator.SetFloat(DirectionActionYParameterHash, Mathf.Clamp(localDirection.z, -1f, 1f));
         }
 
         private bool IsHeavyAttackDamageAnimationActive()
@@ -791,7 +785,6 @@ namespace NPC
             }
 
             isEvasionDirectionLocked = false;
-            navMeshController?.ReleaseEvasionDirection();
         }
 
         private Stamina GetStamina()

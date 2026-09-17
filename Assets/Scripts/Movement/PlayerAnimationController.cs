@@ -12,6 +12,8 @@ namespace Movement
         private const float InputThreshold = 0.001f;
         private const string DirectionXParameter = "DirectionX";
         private const string DirectionYParameter = "DirectionY";
+        private const string DirectionActionXParameter = "DirectionActionX";
+        private const string DirectionActionYParameter = "DirectionActionY";
         private const string IsRunParameter = "IsRun";
 
         private readonly CameraMotor cameraMotor;
@@ -25,8 +27,6 @@ namespace Movement
         private bool currentIsRun;
         private bool isGameplayActive = true;
         private bool isLocomotionLocked;
-        private bool isEvasionDirectionLocked;
-        private Vector2 evasionDirectionalInput;
 
         private PlayerAnimationController(
             CameraMotor cameraMotor,
@@ -54,7 +54,7 @@ namespace Movement
                 return;
             }
 
-            if (isEvasionDirectionLocked || isLocomotionLocked)
+            if (isLocomotionLocked)
             {
                 return;
             }
@@ -120,13 +120,7 @@ namespace Movement
 
             if (isLocked)
             {
-                // Dodge and Roll choose a child of their blend trees from DirectionX/DirectionY.
-                // Their animation events lock locomotion at time zero, so retain the direction
-                // captured at the request instead of overwriting it with zero.
-                ApplyLocomotionParameters(
-                    isEvasionDirectionLocked ? evasionDirectionalInput : Vector2.zero,
-                    false,
-                    force: true);
+                ApplyLocomotionParameters(Vector2.zero, false, force: true);
             }
             else
             {
@@ -135,9 +129,8 @@ namespace Movement
         }
 
         /// <summary>
-        /// Captures the direction of a Dodge or Roll request before its animation locks player movement.
-        /// The captured local direction is kept in Animator parameters until the corresponding
-        /// UnlockMovement event (or an action cancellation) releases it.
+        /// Writes the DirectionAction parameters used exclusively by Dodge and Roll before the
+        /// action request enters the Animator.
         /// </summary>
         public void CaptureEvasionDirection()
         {
@@ -146,24 +139,11 @@ namespace Movement
                                 new Vector3(movementInput.x, 0f, movementInput.y);
             var localMoveDirection = visualTransform.InverseTransformDirection(moveDirection);
 
-            evasionDirectionalInput = new Vector2(
+            var actionDirection = new Vector2(
                 Mathf.Clamp(localMoveDirection.x, -1f, 1f),
                 Mathf.Clamp(localMoveDirection.z, -1f, 1f));
-            isEvasionDirectionLocked = true;
-
-            // The action transition can begin before the time-zero LockMovement event fires.
-            // Write the captured values now so its blend tree never observes the later zeroes.
-            ApplyLocomotionParameters(evasionDirectionalInput, false, force: true);
-        }
-
-        /// <summary>
-        /// Releases the direction captured for a Dodge or Roll. Normal locomotion updates resume on
-        /// the next tick once movement is unlocked.
-        /// </summary>
-        public void ReleaseEvasionDirection()
-        {
-            isEvasionDirectionLocked = false;
-            evasionDirectionalInput = Vector2.zero;
+            animator.SetFloat(DirectionActionXParameter, actionDirection.x);
+            animator.SetFloat(DirectionActionYParameter, actionDirection.y);
         }
 
         private static bool AllowsLocomotion(GameMode mode)
