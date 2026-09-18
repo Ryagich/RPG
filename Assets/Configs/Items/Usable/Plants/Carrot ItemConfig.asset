@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Carrot ItemConfig
   m_EditorClassIdentifier: 
   <Id>k__BackingField: Carrot ItemConfig ID
-  <Price>k__BackingField: 1
+  <Price>k__BackingField: 2
   <Weight>k__BackingField: 0.2
   <MaxStack>k__BackingField: 10
   <Icon>k__BackingField: {fileID: 21300000, guid: 8f367f6372baac240b2cabf0794c310b, type: 3}
@@ -22,7 +22,7 @@ MonoBehaviour:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
       m_KeyId: 83000000000000007
-      m_Key:
+      m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
@@ -31,7 +31,7 @@ MonoBehaviour:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
       m_KeyId: 83000000000000008
-      m_Key:
+      m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
@@ -42,6 +42,7 @@ MonoBehaviour:
   <ItemCategory>k__BackingField: 2
   weaponInHandPrefab: {fileID: 0}
   weaponDamageRange: {x: 9, y: 11}
+  heavyWeaponDamageRange: {x: 9, y: 11}
   rightHandWeaponAttachment:
     localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
@@ -56,8 +57,12 @@ MonoBehaviour:
   hpStat: 3
   waterStat: 5
   foodStat: 2
+  staminaStat: 0
+  <BackpackSize>k__BackingField: {x: 7, y: 2}
+  <AdditionalWeightCapacity>k__BackingField: 0
   chillStat: 0
-  equippedVisuals: []
+  maleEquippedVisuals: []
+  femaleEquippedVisuals: []
   references:
     version: 2
     RefIds: []

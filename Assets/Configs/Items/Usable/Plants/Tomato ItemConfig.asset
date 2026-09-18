@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Tomato ItemConfig
   m_EditorClassIdentifier: 
   <Id>k__BackingField: Tomato ItemConfig ID
-  <Price>k__BackingField: 2
+  <Price>k__BackingField: 1
   <Weight>k__BackingField: 0.1
   <MaxStack>k__BackingField: 15
   <Icon>k__BackingField: {fileID: 21300000, guid: 722a2c64d215a4941984b815b6c39584, type: 3}
@@ -22,7 +22,7 @@ MonoBehaviour:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
       m_KeyId: 83000000000000009
-      m_Key:
+      m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
@@ -31,7 +31,7 @@ MonoBehaviour:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
       m_KeyId: 83000000000000010
-      m_Key:
+      m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
@@ -42,6 +42,7 @@ MonoBehaviour:
   <ItemCategory>k__BackingField: 2
   weaponInHandPrefab: {fileID: 0}
   weaponDamageRange: {x: 9, y: 11}
+  heavyWeaponDamageRange: {x: 9, y: 11}
   rightHandWeaponAttachment:
     localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
@@ -56,8 +57,12 @@ MonoBehaviour:
   hpStat: 1
   waterStat: 9
   foodStat: 1
+  staminaStat: 0
+  <BackpackSize>k__BackingField: {x: 7, y: 2}
+  <AdditionalWeightCapacity>k__BackingField: 0
   chillStat: 0
-  equippedVisuals: []
+  maleEquippedVisuals: []
+  femaleEquippedVisuals: []
   references:
     version: 2
     RefIds: []

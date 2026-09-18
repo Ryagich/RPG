@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Hat ItemConfig 20
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
   <Id>k__BackingField: Hat ItemConfig 20
-  <Price>k__BackingField: 1
+  <Price>k__BackingField: 115
   <Weight>k__BackingField: 0.75
   <MaxStack>k__BackingField: 1
   <Icon>k__BackingField: {fileID: 21300000, guid: 80eed7f2cd47c524a88d2a5c1da9964d, type: 3}
@@ -31,7 +31,7 @@ MonoBehaviour:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
       m_KeyId: 89000000000000008
-      m_Key:
+      m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
@@ -41,6 +41,8 @@ MonoBehaviour:
   <ItemType>k__BackingField: 5
   <ItemCategory>k__BackingField: 10
   weaponInHandPrefab: {fileID: 0}
+  weaponDamageRange: {x: 9, y: 11}
+  heavyWeaponDamageRange: {x: 9, y: 11}
   rightHandWeaponAttachment:
     localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
@@ -55,6 +57,9 @@ MonoBehaviour:
   hpStat: 0
   waterStat: 0
   foodStat: 0
+  staminaStat: 0
+  <BackpackSize>k__BackingField: {x: 7, y: 2}
+  <AdditionalWeightCapacity>k__BackingField: 0
   chillStat: 0
   maleEquippedVisuals:
   - <BodyPart>k__BackingField: 2
@@ -65,7 +70,7 @@ MonoBehaviour:
   - <BodyPart>k__BackingField: 2
     <VisualName>k__BackingField: Chr_HeadCoverings_No_Hair_09
   - <BodyPart>k__BackingField: 4
-    <VisualName>k__BackingField:
+    <VisualName>k__BackingField: 
   references:
     version: 2
     RefIds: []

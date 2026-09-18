@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Face ItemConfig 4
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
   <Id>k__BackingField: Face ItemConfig  4
-  <Price>k__BackingField: 1
+  <Price>k__BackingField: 20
   <Weight>k__BackingField: 0.1
   <MaxStack>k__BackingField: 1
   <Icon>k__BackingField: {fileID: 21300000, guid: 03d4f021e272af249b77c28af3443db5, type: 3}
@@ -57,6 +57,9 @@ MonoBehaviour:
   hpStat: 0
   waterStat: 0
   foodStat: 0
+  staminaStat: 0
+  <BackpackSize>k__BackingField: {x: 7, y: 2}
+  <AdditionalWeightCapacity>k__BackingField: 0
   chillStat: 0
   maleEquippedVisuals:
   - <BodyPart>k__BackingField: 7
@@ -67,7 +70,7 @@ MonoBehaviour:
   - <BodyPart>k__BackingField: 7
     <VisualName>k__BackingField: Chr_HeadCoverings_No_FacialHair_03
   - <BodyPart>k__BackingField: 6
-    <VisualName>k__BackingField:
+    <VisualName>k__BackingField: 
   references:
     version: 2
     RefIds: []

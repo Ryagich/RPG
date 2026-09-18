@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Hat ItemConfig 11
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
   <Id>k__BackingField: Hat ItemConfig 11
-  <Price>k__BackingField: 1
+  <Price>k__BackingField: 60
   <Weight>k__BackingField: 0.5
   <MaxStack>k__BackingField: 1
   <Icon>k__BackingField: {fileID: 21300000, guid: 0ee5f418659a17745ae80b65c628849e, type: 3}
@@ -57,6 +57,9 @@ MonoBehaviour:
   hpStat: 0
   waterStat: 0
   foodStat: 0
+  staminaStat: 0
+  <BackpackSize>k__BackingField: {x: 7, y: 2}
+  <AdditionalWeightCapacity>k__BackingField: 0
   chillStat: 0
   maleEquippedVisuals:
   - <BodyPart>k__BackingField: 2
@@ -67,7 +70,7 @@ MonoBehaviour:
   - <BodyPart>k__BackingField: 2
     <VisualName>k__BackingField: Chr_HeadCoverings_Base_Hair_11
   - <BodyPart>k__BackingField: 4
-    <VisualName>k__BackingField:
+    <VisualName>k__BackingField: 
   references:
     version: 2
     RefIds: []

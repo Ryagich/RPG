@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Body ItemConfig 19
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
   <Id>k__BackingField: Body ItemConfig 19
-  <Price>k__BackingField: 1
+  <Price>k__BackingField: 320
   <Weight>k__BackingField: 10
   <MaxStack>k__BackingField: 1
   <Icon>k__BackingField: {fileID: 21300000, guid: 97cd9aeb28eef6541b581f5eb8a3c21a, type: 3}
@@ -57,6 +57,9 @@ MonoBehaviour:
   hpStat: 0
   waterStat: 0
   foodStat: 0
+  staminaStat: 0
+  <BackpackSize>k__BackingField: {x: 7, y: 2}
+  <AdditionalWeightCapacity>k__BackingField: 0
   chillStat: 0
   maleEquippedVisuals:
   - <BodyPart>k__BackingField: 8

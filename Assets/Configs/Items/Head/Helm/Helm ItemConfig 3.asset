@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Helm ItemConfig 3
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
   <Id>k__BackingField: Helm ItemConfig 3
-  <Price>k__BackingField: 1
+  <Price>k__BackingField: 90
   <Weight>k__BackingField: 3
   <MaxStack>k__BackingField: 1
   <Icon>k__BackingField: {fileID: 21300000, guid: 7add617dc47915945a12a9e75a3d9151, type: 3}
@@ -31,16 +31,7 @@ MonoBehaviour:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
       m_KeyId: 91000000000000004
-      m_Key:
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
-  <Description>k__BackingField:
-    m_TableReference:
-      m_TableCollectionName: Tables
-    m_TableEntryReference:
-      m_KeyId: 0
-      m_Key: Null String
+      m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
@@ -51,6 +42,7 @@ MonoBehaviour:
   <ItemCategory>k__BackingField: 8
   weaponInHandPrefab: {fileID: 0}
   weaponDamageRange: {x: 9, y: 11}
+  heavyWeaponDamageRange: {x: 9, y: 11}
   rightHandWeaponAttachment:
     localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
@@ -65,6 +57,9 @@ MonoBehaviour:
   hpStat: 0
   waterStat: 0
   foodStat: 0
+  staminaStat: 0
+  <BackpackSize>k__BackingField: {x: 7, y: 2}
+  <AdditionalWeightCapacity>k__BackingField: 0
   chillStat: 0
   maleEquippedVisuals:
   - <BodyPart>k__BackingField: 1
@@ -79,11 +74,11 @@ MonoBehaviour:
   - <BodyPart>k__BackingField: 1
     <VisualName>k__BackingField: Chr_Head_No_Elements_Female_03
   - <BodyPart>k__BackingField: 6
-    <VisualName>k__BackingField:
+    <VisualName>k__BackingField: 
   - <BodyPart>k__BackingField: 5
-    <VisualName>k__BackingField:
+    <VisualName>k__BackingField: 
   - <BodyPart>k__BackingField: 4
-    <VisualName>k__BackingField:
+    <VisualName>k__BackingField: 
   references:
     version: 2
     RefIds: []

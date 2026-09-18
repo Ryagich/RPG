@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Body ItemConfig 23
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.Item.ItemConfig
   <Id>k__BackingField: Body ItemConfig 23
-  <Price>k__BackingField: 1
+  <Price>k__BackingField: 500
   <Weight>k__BackingField: 13
   <MaxStack>k__BackingField: 1
   <Icon>k__BackingField: {fileID: 21300000, guid: 901b30c508c792743b30b4302f583cd0, type: 3}
@@ -49,7 +49,7 @@ MonoBehaviour:
   beltWeaponAttachment:
     localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
-  physicalDefense: 0.07
+  physicalDefense: 0.9
   temperatureDefense: 6
   psiDefense: 2
   magicDefense: 4
@@ -57,6 +57,9 @@ MonoBehaviour:
   hpStat: 0
   waterStat: 0
   foodStat: 0
+  staminaStat: 0
+  <BackpackSize>k__BackingField: {x: 7, y: 2}
+  <AdditionalWeightCapacity>k__BackingField: 0
   chillStat: 0
   maleEquippedVisuals:
   - <BodyPart>k__BackingField: 8
