@@ -53,6 +53,7 @@ namespace YG
         public float stamina;
         public SavedQuestProgress[] quests;
         public SavedInventoryItem[] inventory;
+        // Read only by the v3-to-v4 migration. Mill progress is otherwise stored in quests.
         public int millScenarioStage;
         public int[] millOutcomeFlags;
         public SavedFactionRelation[] factionRelations;

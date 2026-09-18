@@ -322,7 +322,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 54301381582688261
-    m_Localized: City Guard Captain
+    m_Localized: Aldren Vael
     m_Metadata:
       m_Items: []
   - m_Id: 54301381582688262
@@ -2312,10 +2312,10 @@ MonoBehaviour:
     m_Localized: "Then we stop waiting. I have sent a squad to the mill; meet them there and keep clear until the order is given."
     m_Metadata: {m_Items: []}
   - m_Id: 97000000000000008
-    m_Localized: "Aldren Vael: The captain's orders are clear. We take the mill back together. Ready?"
+    m_Localized: "Are you the one we were told to wait for? Aldren Vael, city guard. I hear you ran into bandits at the mill."
     m_Metadata: {m_Items: []}
   - m_Id: 97000000000000009
-    m_Localized: "I'm with you."
+    m_Localized: "I am ready. Lead on."
     m_Metadata: {m_Items: []}
   - m_Id: 97000000000000010
     m_Localized: "The mill is ours again."
@@ -4077,6 +4077,72 @@ MonoBehaviour:
     m_Metadata: {m_Items: []}
   - m_Id: 99200000000000500
     m_Localized: "There is an apple tree right in front of us. You can wait for the apples to fall on their own, or give the trunk a couple of knocks — maybe a pair will come down. Just do not lay into it."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000001
+    m_Localized: "Pay Ulrik's ransom"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000002
+    m_Localized: "Bram Voss demands two thousand coins to release the miller."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000003
+    m_Localized: "Pay the rest of Ulrik's ransom"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000004
+    m_Localized: "Bram took the money and demands another five hundred coins."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000005
+    m_Localized: "Ulrik is free"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000006
+    m_Localized: "The ransom has been paid and the bandits have left the mill."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000007
+    m_Localized: "The mill is liberated"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000008
+    m_Localized: "The guard drove the bandits from the mill."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000009
+    m_Localized: "The mill is liberated"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000010
+    m_Localized: "You fought beside the guard and helped retake the mill."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000011
+    m_Localized: "The mill is liberated"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000012
+    m_Localized: "The guard's reward has been received."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000013
+    m_Localized: "The guard is defeated"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000014
+    m_Localized: "You fought beside the bandits and helped them hold the mill."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000015
+    m_Localized: "The bandits hold the mill"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000016
+    m_Localized: "Varek's reward has been received."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000017
+    m_Localized: "The bandits hold the mill"
+    m_Metadata: {m_Items: []}
+  - m_Id: 99300000000000018
+    m_Localized: "The bandit camp reward has been received."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99400000000000001
+    m_Localized: "I did. The bandits hold the miller. I saw where they stand and how they approach the building."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99400000000000002
+    m_Localized: "Good. Lead us in and show us the best way through. We need to reach the miller before one of those dogs loses his nerve."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99400000000000003
+    m_Localized: "I will. And I am not standing aside."
+    m_Metadata: {m_Items: []}
+  - m_Id: 99400000000000004
+    m_Localized: "That is what I wanted to hear. Stay with the squad and watch the flank. When we see the bandits, we cut them down fast and do not let them touch the miller."
     m_Metadata: {m_Items: []}
   references:
     version: 2

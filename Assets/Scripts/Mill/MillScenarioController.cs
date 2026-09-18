@@ -10,9 +10,7 @@ using MessagePipe;
 using Messages;
 using NPC;
 using Quests;
-using Quests.Graph;
 using Quests.Graph.Model;
-using Saves;
 using TargetLock;
 using UnityEngine;
 using VContainer;
@@ -20,24 +18,13 @@ using VContainer;
 namespace Mill
 {
     /// <summary>
-    /// Owns the mill occupation as a location-specific domain scenario. Dialogue only raises
-    /// authored events; this component owns stage transitions, encounter composition and battle
-    /// resolution. All references are explicit so no other bandits, guards or fields are touched.
+    /// Owns the live mill encounter. Its persistent state belongs to the mill quest; this
+    /// component only reconstructs and advances the scene from that quest state.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class MillScenarioController : MonoBehaviour
     {
-        private const int GuardSupportFlag = (int)MillScenarioOutcomeFlags.PlayerSupportedGuards;
-        private const int BanditSupportFlag = (int)MillScenarioOutcomeFlags.PlayerSupportedBandits;
-        private const int GuardRewardClaimedFlag = (int)MillScenarioOutcomeFlags.GuardRewardClaimed;
-        private const int BanditRewardClaimedFlag = (int)MillScenarioOutcomeFlags.BanditRewardClaimed;
-        private const int BanditCampRewardClaimedFlag = (int)MillScenarioOutcomeFlags.BanditCampRewardClaimed;
-
         [Header("Mill residents")]
-        // Scene instances are recreated whenever the location is loaded.  Keep anchors as
-        // transforms rather than serializing nested prefab components: this makes ownership
-        // explicit while still resolving the NPC scope only at the point where a service is
-        // needed.
         [SerializeField] private Transform ulrik;
         [SerializeField] private Transform varekHolt;
         [SerializeField] private Transform[] bandits = Array.Empty<Transform>();
@@ -46,11 +33,6 @@ namespace Mill
         [SerializeField] private FarmField[] millFields = Array.Empty<FarmField>();
         [SerializeField] private GameObject[] locationExitZones = Array.Empty<GameObject>();
         [SerializeField] private Transform[] guardAttackDestinations = Array.Empty<Transform>();
-
-        [Header("Quest progression")]
-        [SerializeField] private QuestGraph guardInvestigationQuest;
-        [SerializeField] private QuestNodeData guardHelpRetakeMillNode;
-        [SerializeField] private QuestNodeData guardAssaultFailedNode;
 
         [Header("Dialogue contracts")]
         [SerializeField] private DialogueGameplayEvent beginAssaultEvent;
@@ -76,29 +58,35 @@ namespace Mill
         [SerializeField] private FactionConfig banditFaction;
         [SerializeField, Min(1)] private int banditReputationGain = 100;
 
-        private GameSaveController saveController;
+        private MillQuestProgressionConfig config;
+        private MillQuestProgressionCoordinator progressionCoordinator;
+        private IFactionRelations factionRelations;
         private DialogueRuntimeFlagRegistry runtimeFlags;
         private DialogueContext dialogueContext;
-        private IFactionRelations factionRelations;
         private ISubscriber<DialogueGameplayEventRaisedMessage> dialogueEvents;
         private ISubscriber<CharacterDamagedMessage> characterDamaged;
+        private QuestController quests;
         private IDisposable dialogueSubscription;
         private IDisposable damageSubscription;
-        private MillScenarioStage stage;
-        private int outcomeFlags;
+        private MillQuestStage stage;
+        private bool playerSupportedGuards;
+        private bool playerSupportedBandits;
         private bool assaultOrdersIssued;
+        private bool assaultStarted;
         private readonly TaskCompletionSource<bool> constructed = new();
 
         [Inject]
         public void Construct(
-            GameSaveController saveController,
+            MillQuestProgressionConfig config,
+            MillQuestProgressionCoordinator progressionCoordinator,
             IFactionRelations factionRelations,
             DialogueRuntimeFlagRegistry runtimeFlags,
             DialogueContext dialogueContext,
             ISubscriber<DialogueGameplayEventRaisedMessage> dialogueEvents,
             ISubscriber<CharacterDamagedMessage> characterDamaged)
         {
-            this.saveController = saveController;
+            this.config = config;
+            this.progressionCoordinator = progressionCoordinator;
             this.factionRelations = factionRelations;
             this.runtimeFlags = runtimeFlags;
             this.dialogueContext = dialogueContext;
@@ -109,44 +97,50 @@ namespace Mill
 
         private void Awake()
         {
-            ApplyWorldState(MillScenarioStage.Occupied, false);
+            ApplyWorldState(MillQuestStage.Occupied, false);
         }
 
         private async void Start()
         {
             await constructed.Task;
-            await saveController.Ready;
-            stage = (MillScenarioStage)saveController.GetMillScenarioStage();
-            if (!Enum.IsDefined(typeof(MillScenarioStage), stage))
-            {
-                stage = MillScenarioStage.Occupied;
-            }
+            await progressionCoordinator.Ready;
 
-            outcomeFlags = saveController.GetMillOutcomeFlag(0);
-            EnsurePreAssaultNeutrality();
+            quests = dialogueContext.PlayerQuestController;
+            if (quests == null)
+                return;
+
+            quests.Changed += OnQuestChanged;
             dialogueSubscription = dialogueEvents?.Subscribe(OnDialogueEvent);
             damageSubscription = characterDamaged?.Subscribe(OnCharacterDamaged);
-            ApplyWorldState(stage, false);
+            UpdateStage(false);
             RestoreOutcomeFlags();
         }
 
         private void Update()
         {
-            if (stage == MillScenarioStage.GuardsMarching)
-            {
-                TryStartAssaultAfterArrival();
-            }
+            if (stage != MillQuestStage.AssaultInProgress)
+                return;
 
-            if (stage is MillScenarioStage.GuardsMarching or MillScenarioStage.AssaultInProgress or MillScenarioStage.BanditsHeldMill)
-            {
+            if (!assaultStarted)
+                TryStartAssaultAfterArrival();
+
+            if (assaultStarted)
                 ResolveBattleIfFinished();
-            }
         }
 
         private void OnDestroy()
         {
+            if (quests != null)
+                quests.Changed -= OnQuestChanged;
+
             dialogueSubscription?.Dispose();
             damageSubscription?.Dispose();
+        }
+
+        private void OnQuestChanged(QuestChangeInfo change)
+        {
+            if (change.Quest == config.GuardInvestigationQuest)
+                UpdateStage(true);
         }
 
         private void OnDialogueEvent(DialogueGameplayEventRaisedMessage message)
@@ -157,37 +151,24 @@ namespace Mill
             }
             else if (message.Event == claimGuardRewardEvent)
             {
-                ClaimReward(GuardRewardClaimedFlag, guardRewardClaimedFlag, guardVictoryRewards, false);
+                ClaimGuardReward();
             }
             else if (message.Event == claimBanditRewardEvent)
             {
-                bool playerSupportedBandits = (outcomeFlags & BanditSupportFlag) != 0;
-                ClaimReward(
-                    BanditRewardClaimedFlag,
-                    banditRewardClaimedFlag,
-                    playerSupportedBandits ? banditVictoryRewards : banditPassiveVictoryRewards,
-                    playerSupportedBandits);
+                ClaimBanditReward();
             }
             else if (message.Event == claimBanditCampRewardEvent)
             {
-                ClaimReward(BanditCampRewardClaimedFlag, banditCampRewardClaimedFlag, banditCampRewards, false);
+                ClaimBanditCampReward();
             }
         }
 
         private void BeginAssault()
         {
-            if (stage != MillScenarioStage.GuardsPrepared)
-            {
+            if (stage != MillQuestStage.GuardsPrepared ||
+                !quests.TrySetCurrentNode(config.GuardInvestigationQuest, config.HelpRetakeMillNode))
                 return;
-            }
 
-            QuestController quests = dialogueContext?.PlayerQuestController;
-            if (quests != null)
-            {
-                quests.TrySetCurrentNode(guardInvestigationQuest, guardHelpRetakeMillNode);
-            }
-
-            SetStage(MillScenarioStage.GuardsMarching);
             SetExitAvailability(false);
             IssueMarchOrders();
         }
@@ -195,9 +176,7 @@ namespace Mill
         private void IssueMarchOrders()
         {
             if (assaultOrdersIssued)
-            {
                 return;
-            }
 
             assaultOrdersIssued = true;
             int index = 0;
@@ -208,9 +187,7 @@ namespace Mill
                     : varekHolt;
                 index++;
                 if (guard == null || destination == null || !guard.gameObject.activeInHierarchy)
-                {
                     continue;
-                }
 
                 GetScope(guard)?.Container.Resolve<NpcNavMeshController>()?.MoveTo(destination.position, stoppingDistance: 2.5f);
             }
@@ -219,20 +196,16 @@ namespace Mill
         private void TryStartAssaultAfterArrival()
         {
             if (!assaultOrdersIssued || !AllLivingGuardsAtDestinations())
-            {
                 return;
-            }
 
             TargetLockTarget banditTarget = GetTarget(varekHolt);
             foreach (Transform guard in GetGuardParticipants())
             {
                 if (IsAlive(guard))
-                {
                     GetScope(guard)?.Container.Resolve<NpcCombatService>()?.ReceiveAggressionNotification(banditTarget, true);
-                }
             }
 
-            SetStage(MillScenarioStage.AssaultInProgress);
+            assaultStarted = true;
         }
 
         private bool AllLivingGuardsAtDestinations()
@@ -241,16 +214,12 @@ namespace Mill
             foreach (Transform guard in GetGuardParticipants())
             {
                 if (!IsAlive(guard))
-                {
                     continue;
-                }
 
                 anyLivingGuard = true;
                 NpcNavMeshController movement = GetScope(guard)?.Container.Resolve<NpcNavMeshController>();
                 if (movement != null && !movement.HasReachedDestination)
-                {
                     return false;
-                }
             }
 
             return anyLivingGuard;
@@ -260,99 +229,95 @@ namespace Mill
         {
             if (AllDefeated(bandits, varekHolt))
             {
-                SetStage(MillScenarioStage.Liberated);
-                CompleteActiveMillQuest();
-                runtimeFlags?.Activate(guardVictoryFlag);
-                SetExitAvailability(true);
+                if (CompleteScenario(playerSupportedGuards
+                        ? config.GuardVictoryWithPlayerNode
+                        : config.GuardVictoryNode,
+                        completeQuest: true))
+                    runtimeFlags?.Activate(guardVictoryFlag);
                 return;
             }
 
-            if (AllDefeated(guards, squadLeader) && stage != MillScenarioStage.BanditsHeldMill)
+            if (AllDefeated(guards, squadLeader))
             {
-                SetStage(MillScenarioStage.BanditsHeldMill);
-                if ((outcomeFlags & GuardSupportFlag) == 0)
-                {
-                    dialogueContext?.PlayerQuestController?.TrySetCurrentNode(
-                        guardInvestigationQuest,
-                        guardAssaultFailedNode);
-                }
-                runtimeFlags?.Activate(banditVictoryFlag);
-                SetExitAvailability(true);
+                if (CompleteScenario(playerSupportedBandits
+                        ? config.BanditVictoryWithPlayerNode
+                        : config.GuardAssaultFailedNode,
+                        completeQuest: false))
+                    runtimeFlags?.Activate(banditVictoryFlag);
             }
+        }
+
+        private bool CompleteScenario(Quests.Graph.Model.QuestNodeData outcomeNode, bool completeQuest)
+        {
+            if (!quests.TrySetCurrentNode(config.GuardInvestigationQuest, outcomeNode))
+                return false;
+
+            if (completeQuest)
+                quests.TryCompleteNode(config.GuardInvestigationQuest, outcomeNode);
+
+            SetExitAvailability(true);
+            return true;
         }
 
         private void OnCharacterDamaged(CharacterDamagedMessage message)
         {
-            if (stage is not (MillScenarioStage.GuardsMarching or MillScenarioStage.AssaultInProgress) || message.Attacker == null)
-            {
+            if (stage != MillQuestStage.AssaultInProgress || message.Attacker == null ||
+                message.Attacker.OwnerTransform?.GetComponentInParent<PlayerLifetimeScope>() == null)
                 return;
-            }
-
-            if (message.Attacker.OwnerTransform?.GetComponentInParent<PlayerLifetimeScope>() == null)
-            {
-                return;
-            }
 
             if (BelongsTo(message.CharacterTransform, bandits, varekHolt))
             {
-                outcomeFlags |= GuardSupportFlag;
+                playerSupportedGuards = true;
                 runtimeFlags?.Activate(playerSupportedGuardsFlag);
             }
             else if (BelongsTo(message.CharacterTransform, guards, squadLeader))
             {
-                outcomeFlags |= BanditSupportFlag;
+                playerSupportedBandits = true;
                 runtimeFlags?.Activate(playerSupportedBanditsFlag);
             }
         }
 
-        private void SetStage(MillScenarioStage nextStage)
+        private void UpdateStage(bool isRuntimeTransition)
         {
+            MillQuestStage nextStage = config.GetStage(quests);
             if (stage == nextStage)
-            {
                 return;
-            }
 
             stage = nextStage;
-            ApplyWorldState(stage, true);
-            saveController.SetMillScenarioState((int)stage, new[] { outcomeFlags });
+            assaultStarted = false;
+            ApplyWorldState(stage, isRuntimeTransition);
         }
 
-        private void ApplyWorldState(MillScenarioStage currentStage, bool isRuntimeTransition)
+        private void ApplyWorldState(MillQuestStage currentStage, bool isRuntimeTransition)
         {
-            bool liberated = currentStage is MillScenarioStage.Liberated or MillScenarioStage.Ransomed;
-            bool guardEncounterVisible = currentStage is MillScenarioStage.GuardsPrepared or MillScenarioStage.GuardsMarching or MillScenarioStage.AssaultInProgress;
+            bool liberated = currentStage == MillQuestStage.Liberated;
+            bool guardEncounterVisible = currentStage is MillQuestStage.GuardsPrepared or MillQuestStage.AssaultInProgress;
             bool retainRuntimeParticipants = isRuntimeTransition &&
-                                             (currentStage is MillScenarioStage.Liberated or MillScenarioStage.BanditsHeldMill);
+                                             (currentStage is MillQuestStage.Liberated or MillQuestStage.BanditsHeldMill);
             bool banditsVisible = !liberated || retainRuntimeParticipants;
 
             SetActive(ulrik, liberated);
             SetActive(varekHolt, banditsVisible);
             foreach (Transform bandit in bandits)
-            {
                 SetActive(bandit, banditsVisible);
-            }
 
             SetActive(squadLeader, guardEncounterVisible || retainRuntimeParticipants);
             foreach (Transform guard in guards)
-            {
                 SetActive(guard, guardEncounterVisible || retainRuntimeParticipants);
-            }
 
             foreach (FarmField field in millFields)
             {
                 if (field != null)
-                {
                     field.enabled = liberated;
-                }
             }
 
-            if (!isRuntimeTransition && (currentStage is MillScenarioStage.GuardsMarching or MillScenarioStage.AssaultInProgress))
+            if (currentStage == MillQuestStage.AssaultInProgress)
             {
                 SetExitAvailability(false);
                 assaultOrdersIssued = false;
                 IssueMarchOrders();
             }
-            else if (currentStage is MillScenarioStage.Liberated or MillScenarioStage.BanditsHeldMill or MillScenarioStage.Ransomed)
+            else if (currentStage is MillQuestStage.Liberated or MillQuestStage.BanditsHeldMill)
             {
                 SetExitAvailability(true);
             }
@@ -360,96 +325,77 @@ namespace Mill
 
         private void RestoreOutcomeFlags()
         {
-            if ((outcomeFlags & GuardSupportFlag) != 0)
-            {
-                runtimeFlags?.Activate(playerSupportedGuardsFlag);
-            }
+            playerSupportedGuards = config.HasReachedNode(quests, config.GuardVictoryWithPlayerNode);
+            playerSupportedBandits = config.HasReachedNode(quests, config.BanditVictoryWithPlayerNode);
 
-            if ((outcomeFlags & BanditSupportFlag) != 0)
-            {
-                runtimeFlags?.Activate(playerSupportedBanditsFlag);
-            }
+            SetRuntimeFlag(playerSupportedGuardsFlag, playerSupportedGuards);
+            SetRuntimeFlag(playerSupportedBanditsFlag, playerSupportedBandits);
+            SetRuntimeFlag(guardRewardClaimedFlag, config.HasReachedNode(quests, config.GuardRewardClaimedNode));
+            SetRuntimeFlag(banditRewardClaimedFlag, config.HasReachedNode(quests, config.BanditRewardClaimedNode));
+            SetRuntimeFlag(banditCampRewardClaimedFlag, config.HasReachedNode(quests, config.BanditCampRewardClaimedNode));
+            SetRuntimeFlag(guardVictoryFlag, IsGuardVictory());
+            SetRuntimeFlag(banditVictoryFlag, stage == MillQuestStage.BanditsHeldMill);
 
-            if ((outcomeFlags & GuardRewardClaimedFlag) != 0)
-            {
-                runtimeFlags?.Activate(guardRewardClaimedFlag);
-            }
-
-            if ((outcomeFlags & BanditRewardClaimedFlag) != 0)
-            {
-                runtimeFlags?.Activate(banditRewardClaimedFlag);
-            }
-
-            if ((outcomeFlags & BanditCampRewardClaimedFlag) != 0)
-            {
-                runtimeFlags?.Activate(banditCampRewardClaimedFlag);
-            }
-
-            if (stage == MillScenarioStage.Liberated)
-            {
-                runtimeFlags?.Activate(guardVictoryFlag);
-            }
-            else if (stage == MillScenarioStage.BanditsHeldMill)
-            {
-                runtimeFlags?.Activate(banditVictoryFlag);
-            }
+            EnsurePreAssaultNeutrality();
         }
 
         private void EnsurePreAssaultNeutrality()
         {
-            if (stage > MillScenarioStage.GuardsPrepared || outcomeFlags != 0 ||
+            if (stage is not (MillQuestStage.Occupied or MillQuestStage.FateKnown or MillQuestStage.GuardsPrepared) ||
                 playerFaction == null || banditFaction == null || factionRelations == null)
-            {
                 return;
-            }
 
             int relation = factionRelations.GetRelation(playerFaction, banditFaction);
             if (relation != 0)
-            {
                 factionRelations.TryChangeRelation(playerFaction, banditFaction, -relation);
-            }
         }
 
-        private void ClaimReward(
-            int rewardFlag,
-            DialogueRuntimeFlag claimedFlag,
-            IReadOnlyList<QuestResourceEntry> rewards,
-            bool improveBanditStanding)
+        private void ClaimGuardReward()
         {
-            if ((outcomeFlags & rewardFlag) != 0)
-            {
+            if (!IsGuardVictory() ||
+                config.HasReachedNode(quests, config.GuardRewardClaimedNode) ||
+                !quests.TryGrantResources(guardVictoryRewards))
                 return;
-            }
 
-            QuestController quests = dialogueContext?.PlayerQuestController;
-            if (quests == null || !quests.TryGrantResources(rewards))
-            {
+            quests.TryMarkNodeReached(config.GuardInvestigationQuest, config.GuardRewardClaimedNode);
+            runtimeFlags?.Activate(guardRewardClaimedFlag);
+        }
+
+        private bool IsGuardVictory()
+        {
+            return config.HasReachedNode(quests, config.GuardVictoryNode) ||
+                   config.HasReachedNode(quests, config.GuardVictoryWithPlayerNode);
+        }
+
+        private void ClaimBanditReward()
+        {
+            if (stage != MillQuestStage.BanditsHeldMill ||
+                config.HasReachedNode(quests, config.BanditRewardClaimedNode))
                 return;
-            }
 
-            if (improveBanditStanding)
-            {
+            bool helpedBandits = config.HasReachedNode(quests, config.BanditVictoryWithPlayerNode);
+            IReadOnlyList<QuestResourceEntry> rewards = helpedBandits
+                ? banditVictoryRewards
+                : banditPassiveVictoryRewards;
+            if (!quests.TryGrantResources(rewards))
+                return;
+
+            if (helpedBandits)
                 factionRelations?.TryChangeRelation(playerFaction, banditFaction, banditReputationGain);
-            }
 
-            outcomeFlags |= rewardFlag;
-            runtimeFlags?.Activate(claimedFlag);
-            saveController.SetMillScenarioState((int)stage, new[] { outcomeFlags });
+            quests.TryMarkNodeReached(config.GuardInvestigationQuest, config.BanditRewardClaimedNode);
+            runtimeFlags?.Activate(banditRewardClaimedFlag);
         }
 
-        private void CompleteActiveMillQuest()
+        private void ClaimBanditCampReward()
         {
-            QuestController quests = dialogueContext?.PlayerQuestController;
-            if (quests == null)
-            {
+            if (stage != MillQuestStage.BanditsHeldMill ||
+                config.HasReachedNode(quests, config.BanditCampRewardClaimedNode) ||
+                !quests.TryGrantResources(banditCampRewards))
                 return;
-            }
 
-            QuestNodeData currentNode = quests.GetCurrentNode(guardInvestigationQuest);
-            if (currentNode != null)
-            {
-                quests.TryCompleteNode(guardInvestigationQuest, currentNode);
-            }
+            quests.TryMarkNodeReached(config.GuardInvestigationQuest, config.BanditCampRewardClaimedNode);
+            runtimeFlags?.Activate(banditCampRewardClaimedFlag);
         }
 
         private void SetExitAvailability(bool isAvailable)
@@ -457,30 +403,30 @@ namespace Mill
             foreach (GameObject exitZone in locationExitZones)
             {
                 if (exitZone != null)
-                {
                     exitZone.SetActive(isAvailable);
-                }
             }
+        }
+
+        private void SetRuntimeFlag(DialogueRuntimeFlag flag, bool isActive)
+        {
+            if (isActive)
+                runtimeFlags?.Activate(flag);
+            else
+                runtimeFlags?.Deactivate(flag);
         }
 
         private static bool BelongsTo(Transform character, Transform[] group, Transform leader)
         {
             if (character == null)
-            {
                 return false;
-            }
 
             if (leader != null && character.IsChildOf(leader))
-            {
                 return true;
-            }
 
             foreach (Transform member in group)
             {
                 if (member != null && character.IsChildOf(member))
-                {
                     return true;
-                }
             }
 
             return false;
@@ -489,16 +435,12 @@ namespace Mill
         private static bool AllDefeated(Transform[] group, Transform leader)
         {
             if (!IsDefeated(leader))
-            {
                 return false;
-            }
 
             foreach (Transform member in group)
             {
                 if (!IsDefeated(member))
-                {
                     return false;
-                }
             }
 
             return true;
@@ -509,27 +451,21 @@ namespace Mill
         private static bool IsDefeated(Transform transform)
         {
             if (transform == null || !transform.gameObject.activeInHierarchy)
-            {
                 return true;
-            }
 
             CharacterDamageReceiver receiver = transform.GetComponentInChildren<DamageReceiverHost>(true)?.Receiver;
             return receiver != null && !receiver.IsAlive;
         }
 
-        private System.Collections.Generic.IEnumerable<Transform> GetGuardParticipants()
+        private IEnumerable<Transform> GetGuardParticipants()
         {
             if (squadLeader != null)
-            {
                 yield return squadLeader;
-            }
 
             foreach (Transform guard in guards)
             {
                 if (guard != null && guard != squadLeader)
-                {
                     yield return guard;
-                }
             }
         }
 
@@ -542,34 +478,7 @@ namespace Mill
         private static void SetActive(Transform transform, bool isActive)
         {
             if (transform != null)
-            {
                 transform.gameObject.SetActive(isActive);
-            }
         }
-    }
-
-    public enum MillScenarioStage
-    {
-        Occupied = 0,
-        FateKnown = 1,
-        GuardsPrepared = 2,
-        GuardsMarching = 3,
-        AssaultInProgress = 4,
-        Liberated = 5,
-        BanditsHeldMill = 6,
-        RansomPrincipalDue = 7,
-        RansomInterestDue = 8,
-        Ransomed = 9
-    }
-
-    [Flags]
-    public enum MillScenarioOutcomeFlags
-    {
-        None = 0,
-        PlayerSupportedGuards = 1 << 0,
-        PlayerSupportedBandits = 1 << 1,
-        GuardRewardClaimed = 1 << 2,
-        BanditRewardClaimed = 1 << 3,
-        BanditCampRewardClaimed = 1 << 4
     }
 }

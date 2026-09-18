@@ -26,7 +26,7 @@ namespace Saves
     /// </summary>
     public sealed class GameSaveService : IStartable
     {
-        private const int CurrentVersion = 3;
+        private const int CurrentVersion = 4;
         private readonly BootCompletion bootCompletion;
         private readonly RuntimeFactionRelations factionRelations;
         private readonly DialogueRuntimeFlagRegistry dialogueRuntimeFlags;
@@ -82,6 +82,10 @@ namespace Saves
             data.inventory = SerializeInventory(inventory);
             data.quests = SerializeQuests(quests);
             data.factionRelations = SerializeFactionRelations(factionRelations);
+            // Version 4 stores the mill entirely in the regular quest snapshot. Keep the old
+            // fields serialized only long enough for existing version-3 saves to migrate.
+            data.millScenarioStage = 0;
+            data.millOutcomeFlags = Array.Empty<int>();
             data.saveVersion = CurrentVersion;
             Persist();
             return true;
@@ -195,27 +199,23 @@ namespace Saves
             transitionContext.SetPendingTransition(locationId, entranceId);
         }
 
-        internal int GetMillScenarioStage() => IsReady ? YG2.saves.millScenarioStage : 0;
-
-        internal int GetMillOutcomeFlag(int index)
-        {
-            int[] flags = IsReady ? YG2.saves.millOutcomeFlags : null;
-            return flags != null && index >= 0 && index < flags.Length ? flags[index] : 0;
-        }
-
         /// <summary>
-        /// Updates state that belongs in the next complete checkpoint. Persisting remains the
-        /// responsibility of <see cref="GameSaveController"/>.
+        /// Exposes the obsolete mill payload only while loading a save created before the
+        /// quest-based format. New saves never read or write this data.
         /// </summary>
-        internal void SetMillScenarioState(int stage, IReadOnlyList<int> outcomeFlags)
+        internal bool TryGetLegacyMillScenario(out int stage, out int outcomeFlags)
         {
-            if (!IsReady)
+            stage = 0;
+            outcomeFlags = 0;
+            if (!IsReady || YG2.saves.saveVersion <= 0 || YG2.saves.saveVersion >= CurrentVersion)
             {
-                return;
+                return false;
             }
 
-            YG2.saves.millScenarioStage = Mathf.Max(0, stage);
-            YG2.saves.millOutcomeFlags = outcomeFlags?.ToArray() ?? Array.Empty<int>();
+            stage = YG2.saves.millScenarioStage;
+            int[] savedFlags = YG2.saves.millOutcomeFlags;
+            outcomeFlags = savedFlags != null && savedFlags.Length > 0 ? savedFlags[0] : 0;
+            return stage != 0 || outcomeFlags != 0;
         }
 
         private static SavedInventoryItem[] SerializeInventory(PlayerInventory inventory)

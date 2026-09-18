@@ -21,6 +21,15 @@ MonoBehaviour:
   askAroundNode: {fileID: 11400000, guid: 0f1e2d3c4b5a69788796a5b4c3d2e001, type: 2}
   visitTavernNode: {fileID: 11400000, guid: 0f1e2d3c4b5a69788796a5b4c3d2e002, type: 2}
   reportToGuardFromRumourNode: {fileID: 11400000, guid: f3d45f833af55574992e77cd265e0b68, type: 2}
+  ransomPrincipalDueNode: {fileID: 11400000, guid: d5b1b4f1fa274e0ba501ef9a00100001, type: 2}
+  ransomInterestDueNode: {fileID: 11400000, guid: d5b1b4f1fa274e0ba501ef9a00100002, type: 2}
+  ransomedNode: {fileID: 11400000, guid: d5b1b4f1fa274e0ba501ef9a00100003, type: 2}
+  guardVictoryNode: {fileID: 11400000, guid: d5b1b4f1fa274e0ba501ef9a00100004, type: 2}
+  guardVictoryWithPlayerNode: {fileID: 11400000, guid: d5b1b4f1fa274e0ba501ef9a00100005, type: 2}
+  guardRewardClaimedNode: {fileID: 11400000, guid: d5b1b4f1fa274e0ba501ef9a00100006, type: 2}
+  banditVictoryWithPlayerNode: {fileID: 11400000, guid: d5b1b4f1fa274e0ba501ef9a00100007, type: 2}
+  banditRewardClaimedNode: {fileID: 11400000, guid: d5b1b4f1fa274e0ba501ef9a00100008, type: 2}
+  banditCampRewardClaimedNode: {fileID: 11400000, guid: d5b1b4f1fa274e0ba501ef9a00100009, type: 2}
   legacyTellMillerFateQuest: {fileID: 11400000, guid: 9e5af8e2c382c8b4894587e2841bb2ee, type: 2}
   legacyAskAroundNode: {fileID: 11400000, guid: 4cd63c153d75fdf46afd7c8207f5c9cd, type: 2}
   legacyVisitTavernNode: {fileID: 11400000, guid: b534357db5f25b945811a481f42a9a40, type: 2}

@@ -1,28 +1,112 @@
 {
-  "idSave": 179,
+  "idSave": 192,
   "GameReadyMetricSend": true,
-  "saveVersion": 3,
-  "locationId": "Village",
-  "entranceId": "To Forrest",
+  "saveVersion": 4,
+  "locationId": "Forest",
+  "entranceId": "To Mill",
   "playerPose": {
     "isValid": 1,
-    "positionX": -2.778431,
-    "positionY": 0.1408937,
-    "positionZ": -28.7628384,
+    "positionX": 82.9640656,
+    "positionY": 0.07277435,
+    "positionZ": 7.615152,
     "rotationX": 0.0,
-    "rotationY": -0.08715578,
+    "rotationY": -0.663147748,
     "rotationZ": 0.0,
-    "rotationW": 0.9961947
+    "rotationW": 0.7484886
   },
-  "money": 67,
-  "health": 100.0,
-  "stamina": 300.0,
-  "quests": [],
+  "money": 112,
+  "health": 46.0381737,
+  "stamina": 62.1791573,
+  "quests": [
+    {
+      "questId": "4a52dc390b3a4df98d7b204c23916053",
+      "currentNodeId": "5e718a753c724dfc86b7c15b6d5b6005",
+      "completedNodeIds": [
+        "5ba9f2143c7e4aab9d7b198e65f30c11",
+        "58b867eda2cf49c8a79230dd28ed16cb",
+        "e3d8fb0f217f46a197775692df71919e",
+        "5e718a753c724dfc86b7c15b6d5b6005"
+      ],
+      "state": 1
+    },
+    {
+      "questId": "54a73a2b5e444f8b9d3d643a68cf9152",
+      "currentNodeId": "d0fad39d3f9a418b955984eed8e934fa",
+      "completedNodeIds": [
+        "22de94359667d435bbd069ead0475a08"
+      ],
+      "state": 0
+    }
+  ],
   "inventory": [
     {
-      "itemId": "Chrysanthemums ItemConfig ID ",
-      "count": 4,
+      "itemId": "Larkspur ItemConfig ID",
+      "count": 3,
       "x": 0,
+      "y": 0,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Carrot ItemConfig ID",
+      "count": 9,
+      "x": 1,
+      "y": 0,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Bottle of Water Config ID",
+      "count": 11,
+      "x": 0,
+      "y": 1,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Ring_10 Config ID",
+      "count": 1,
+      "x": 0,
+      "y": 2,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Apple ItemConfig ID",
+      "count": 5,
+      "x": 1,
+      "y": 2,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Beetroot ItemConfig ID",
+      "count": 2,
+      "x": 2,
+      "y": 0,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Stamina potion Config ID",
+      "count": 2,
+      "x": 3,
+      "y": 0,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Piece of cheese Config ID",
+      "count": 4,
+      "x": 4,
+      "y": 0,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Mug of beer Config ID",
+      "count": 2,
+      "x": 5,
       "y": 0,
       "rotated": 0,
       "slot": 0
@@ -74,6 +158,14 @@
       "y": 0,
       "rotated": 0,
       "slot": 9
+    },
+    {
+      "itemId": "Sword 7 Item Config ID",
+      "count": 1,
+      "x": 0,
+      "y": 0,
+      "rotated": 0,
+      "slot": 10
     }
   ],
   "millScenarioStage": 0,
@@ -87,7 +179,7 @@
     {
       "leftFactionId": "free-knights",
       "rightFactionId": "lions",
-      "relation": 0
+      "relation": 50
     },
     {
       "leftFactionId": "lions",

@@ -149,6 +149,39 @@ namespace Quests
             return nodeData != null && GetCurrentNode(questGraph) == nodeData;
         }
 
+        /// <summary>
+        /// Returns whether the quest currently owns, or has already completed, an authored node.
+        /// Scenario owners use this to reconstruct a branch from normal quest progress without
+        /// introducing a parallel persistence format.
+        /// </summary>
+        public bool HasReachedNode(QuestGraph questGraph, QuestNodeData nodeData)
+        {
+            return nodeData != null &&
+                   TryGetProgress(questGraph, out QuestProgress questProgress) &&
+                   (questProgress.CurrentNode == nodeData || questProgress.CompletedNodes.Contains(nodeData));
+        }
+
+        /// <summary>
+        /// Records an authored optional milestone without replacing the quest's current
+        /// objective. This is used for one-time outcomes that can remain available after a
+        /// terminal quest node, such as claiming an earned reward.
+        /// </summary>
+        public bool TryMarkNodeReached(QuestGraph questGraph, QuestNodeData nodeData)
+        {
+            if (!TryGetProgress(questGraph, out QuestProgress questProgress) ||
+                nodeData == null ||
+                !questGraph.ContainsNode(nodeData) ||
+                questProgress.CurrentNode == nodeData ||
+                questProgress.CompletedNodes.Contains(nodeData))
+            {
+                return false;
+            }
+
+            questProgress.MarkNodeReached(nodeData);
+            Changed?.Invoke(new QuestChangeInfo(QuestChangeType.Updated, questGraph));
+            return true;
+        }
+
         public QuestNodeData GetDisplayNode(QuestGraph questGraph)
         {
             if (questGraph == null)
@@ -578,6 +611,11 @@ namespace Quests
                 AddCompletedNode(CurrentNode);
                 IsCompleted = true;
             }
+        }
+
+        public void MarkNodeReached(QuestNodeData nodeData)
+        {
+            AddCompletedNode(nodeData);
         }
 
         private void AddCompletedNode(QuestNodeData nodeData)

@@ -120,13 +120,9 @@ namespace Saves
             return reset;
         }
 
-        public int GetMillScenarioStage() => saveService.GetMillScenarioStage();
-
-        public int GetMillOutcomeFlag(int index) => saveService.GetMillOutcomeFlag(index);
-
-        public void SetMillScenarioState(int stage, System.Collections.Generic.IReadOnlyList<int> outcomeFlags)
+        internal bool TryGetLegacyMillScenario(out int stage, out int outcomeFlags)
         {
-            saveService.SetMillScenarioState(stage, outcomeFlags);
+            return saveService.TryGetLegacyMillScenario(out stage, out outcomeFlags);
         }
 
         private static SavedPlayerPose ToSavedPlayerPose(Pose pose)

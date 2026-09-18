@@ -1,4 +1,5 @@
 using Dialogue;
+using Quests;
 using Quests.Graph;
 using Quests.Graph.Model;
 using UnityEngine;
@@ -22,6 +23,17 @@ namespace Mill
         [SerializeField] private QuestNodeData askAroundNode;
         [SerializeField] private QuestNodeData visitTavernNode;
         [SerializeField] private QuestNodeData reportToGuardFromRumourNode;
+
+        [Header("Persistent scenario stages")]
+        [SerializeField] private QuestNodeData ransomPrincipalDueNode;
+        [SerializeField] private QuestNodeData ransomInterestDueNode;
+        [SerializeField] private QuestNodeData ransomedNode;
+        [SerializeField] private QuestNodeData guardVictoryNode;
+        [SerializeField] private QuestNodeData guardVictoryWithPlayerNode;
+        [SerializeField] private QuestNodeData guardRewardClaimedNode;
+        [SerializeField] private QuestNodeData banditVictoryWithPlayerNode;
+        [SerializeField] private QuestNodeData banditRewardClaimedNode;
+        [SerializeField] private QuestNodeData banditCampRewardClaimedNode;
 
         [Header("Legacy save migration")]
         [SerializeField] private QuestGraph legacyTellMillerFateQuest;
@@ -54,6 +66,15 @@ namespace Mill
         public QuestNodeData AskAroundNode => askAroundNode;
         public QuestNodeData VisitTavernNode => visitTavernNode;
         public QuestNodeData ReportToGuardFromRumourNode => reportToGuardFromRumourNode;
+        public QuestNodeData RansomPrincipalDueNode => ransomPrincipalDueNode;
+        public QuestNodeData RansomInterestDueNode => ransomInterestDueNode;
+        public QuestNodeData RansomedNode => ransomedNode;
+        public QuestNodeData GuardVictoryNode => guardVictoryNode;
+        public QuestNodeData GuardVictoryWithPlayerNode => guardVictoryWithPlayerNode;
+        public QuestNodeData GuardRewardClaimedNode => guardRewardClaimedNode;
+        public QuestNodeData BanditVictoryWithPlayerNode => banditVictoryWithPlayerNode;
+        public QuestNodeData BanditRewardClaimedNode => banditRewardClaimedNode;
+        public QuestNodeData BanditCampRewardClaimedNode => banditCampRewardClaimedNode;
         public QuestGraph LegacyTellMillerFateQuest => legacyTellMillerFateQuest;
         public QuestNodeData LegacyAskAroundNode => legacyAskAroundNode;
         public QuestNodeData LegacyVisitTavernNode => legacyVisitTavernNode;
@@ -70,5 +91,70 @@ namespace Mill
         public DialogueRuntimeFlag MillerFateKnownFlag => millerFateKnownFlag;
         public DialogueRuntimeFlag RansomPrincipalDueFlag => ransomPrincipalDueFlag;
         public DialogueRuntimeFlag RansomInterestDueFlag => ransomInterestDueFlag;
+
+        public MillQuestStage GetStage(QuestController quests)
+        {
+            if (quests == null || !quests.HasQuest(guardInvestigationQuest))
+            {
+                return MillQuestStage.Occupied;
+            }
+
+            QuestNodeData currentNode = quests.GetCurrentNode(guardInvestigationQuest);
+            if (currentNode == ransomPrincipalDueNode)
+            {
+                return MillQuestStage.RansomPrincipalDue;
+            }
+
+            if (currentNode == ransomInterestDueNode)
+            {
+                return MillQuestStage.RansomInterestDue;
+            }
+
+            if (currentNode == guardSquadAwaitingNode)
+            {
+                return MillQuestStage.GuardsPrepared;
+            }
+
+            if (currentNode == helpRetakeMillNode)
+            {
+                return MillQuestStage.AssaultInProgress;
+            }
+
+            if (currentNode == guardAssaultFailedNode || currentNode == banditVictoryWithPlayerNode)
+            {
+                return MillQuestStage.BanditsHeldMill;
+            }
+
+            if (currentNode == ransomedNode || currentNode == guardVictoryNode ||
+                currentNode == guardVictoryWithPlayerNode || currentNode == guardRewardClaimedNode)
+            {
+                return MillQuestStage.Liberated;
+            }
+
+            return currentNode == checkMillNode ? MillQuestStage.Occupied : MillQuestStage.FateKnown;
+        }
+
+        public bool HasReachedNode(QuestController quests, QuestNodeData node)
+        {
+            return quests != null && quests.HasReachedNode(guardInvestigationQuest, node);
+        }
+
+        public bool IsFateKnown(QuestController quests)
+        {
+            MillQuestStage stage = GetStage(quests);
+            return stage != MillQuestStage.Occupied;
+        }
+    }
+
+    public enum MillQuestStage
+    {
+        Occupied = 0,
+        FateKnown = 1,
+        GuardsPrepared = 2,
+        AssaultInProgress = 3,
+        Liberated = 4,
+        BanditsHeldMill = 5,
+        RansomPrincipalDue = 6,
+        RansomInterestDue = 7
     }
 }
