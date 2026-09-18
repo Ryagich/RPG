@@ -45,14 +45,12 @@ namespace NPC
             // Dialogue data is optional for NPCs that only serve as world actors. VContainer
             // does not treat optional constructor parameters as optional registrations, so
             // resolve these dependencies explicitly instead of aborting the NPC scope.
-            characterInfo = resolver.TryResolve<CharacterInfo>(out var resolvedCharacterInfo)
+            this.characterInfo = resolver.TryResolve<CharacterInfo>(out var resolvedCharacterInfo)
                 ? resolvedCharacterInfo
                 : null;
-            dialog = resolver.TryResolve<DialogGraph>(out var resolvedDialog)
+            this.dialog = resolver.TryResolve<DialogGraph>(out var resolvedDialog)
                 ? resolvedDialog
                 : null;
-            this.characterInfo = characterInfo;
-            this.dialog = dialog;
             this.inventory = inventory;
             this.moneyStorage = moneyStorage;
             faction = resolver.TryResolve<FactionConfig>(out var resolvedFaction) ? resolvedFaction : null;

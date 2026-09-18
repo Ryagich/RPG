@@ -27,6 +27,9 @@ namespace Container
         private const string DialogueZoneName = "Dialogue Interactable Zone";
         private const string ForcedDialogueInteractableKey = "Forced Dialogue Interactable";
 
+        [Header("Persistence")]
+        [SerializeField, ReadOnlyInInspector] private string persistentCharacterId;
+        [SerializeField, ReadOnlyInInspector] private bool participatesInPersistence;
         [SerializeField] private Character.CharacterInfo characterInfo;
         [SerializeField] private InventoryConfig inventoryConfig;
         [Header("Visuals")]
@@ -54,6 +57,10 @@ namespace Container
 
         public StateMachineGraph StateMachineGraph => stateMachineGraph;
         public FactionConfig Faction => faction;
+        public string PersistentCharacterId => characterInfo != null && characterInfo.IsUniqueCharacter
+            ? characterInfo.CharacterId
+            : persistentCharacterId;
+        public bool ParticipatesInPersistence => participatesInPersistence;
         public NpcCombatProfile CombatProfile => assignedCombatProfile ?? combatProfileOverride ?? faction?.CombatProfile;
         public bool CanTalk => canTalk;
         public float CurrentHp => currentHp;
@@ -64,6 +71,63 @@ namespace Container
             currentHp = hp;
             currentState = string.IsNullOrWhiteSpace(stateName) ? "None" : stateName;
         }
+
+        private void OnValidate()
+        {
+            if (Application.isPlaying)
+            {
+                return;
+            }
+
+#if UNITY_EDITOR
+            EnsurePersistentCharacterIdInEditor();
+#endif
+        }
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// Assigns an immutable identity to one authored scene instance. Prefab assets deliberately
+        /// remain empty: every scene placement must receive its own identity instead of sharing the
+        /// prefab's value.
+        /// </summary>
+        public bool EnsurePersistentCharacterIdInEditor()
+        {
+            if (UnityEditor.PrefabUtility.IsPartOfPrefabAsset(this))
+            {
+                return false;
+            }
+
+            bool changed = false;
+            if (characterInfo == null || !characterInfo.IsUniqueCharacter)
+            {
+                // This value is an identity of this particular scene placement.  Do not put
+                // a faction, prefab or hierarchy-derived prefix in it: the GUID must remain
+                // independent of all mutable authoring and runtime structure.
+                if (!System.Guid.TryParse(persistentCharacterId, out _))
+                {
+                    persistentCharacterId = System.Guid.NewGuid().ToString("N");
+                    changed = true;
+                }
+            }
+
+            if (!participatesInPersistence)
+            {
+                participatesInPersistence = true;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                UnityEditor.EditorUtility.SetDirty(this);
+                if (UnityEditor.PrefabUtility.IsPartOfPrefabInstance(this))
+                {
+                    UnityEditor.PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+                }
+            }
+
+            return changed;
+        }
+#endif
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -217,6 +281,9 @@ namespace Container
             builder.Register<EquippedWeaponDropService>(Lifetime.Scoped).AsSelf();
             RegisterMoneyStorage(builder);
             builder.Register<QuestController>(Lifetime.Scoped).AsSelf();
+            builder.RegisterEntryPoint<Saves.NpcSaveCoordinator>()
+                   .AsSelf()
+                   .As<System.IDisposable>();
 
         }
 

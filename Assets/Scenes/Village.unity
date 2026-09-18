@@ -7065,8 +7065,16 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: b1b32cb232df44e45bcd5b33a976ca26, type: 2}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: persistentCharacterId
+      value: 009f1083bf0ba3b86004df74e2fa11ad
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: stockRules.Array.size
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: consumeAdditionalStatsOverTime
@@ -30373,6 +30381,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: 0a99765b220e2244490ffa5ba154a28d, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 43c67eceb2dc7d88a23c727072516b75
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -56425,6 +56441,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: 429ef30df9cb2434e9e94affc60b22b5, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 30d1138e7708a5998abb287da7ee47e0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -60082,6 +60106,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 46064ad8fb677ae00f3d55a17036a10c
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -61574,6 +61606,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: cf1777cac7f775e4aa325a5f790de28e, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 6f7b815a3792b6d42be2606b939dba95
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8694549053177683759, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -79617,6 +79657,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: dc98ce5b51f108947b4b8e8bc61ffc22, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 758783278b2e2ba69618664153ca7430
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -80416,6 +80464,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: ecff343ed060aaa478eb7986c01053b1, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: d0e54aa5c9afb099fcfb9242607966bd
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8906461956615659999, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -88530,6 +88586,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: 6522114de404a9d4d928e1722b5a4241, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 4bf9745cf1a4edd607c82d9a7c0bd1f8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -102760,6 +102824,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 5b542e25b0e9c04476f3c248a8e102e8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -118200,6 +118272,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: dc98ce5b51f108947b4b8e8bc61ffc22, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 69bb704b6864908f1d05e3d1465949e6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -122823,6 +122903,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: 6653d223323744ec9004b67f1f3b0977, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 3437d2f3d5b03141dfe961965af3e62b
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8616395921655556689, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -123789,6 +123877,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 1ba9e7cc1376bd0484482f8ad9d139c9
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -126958,6 +127054,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: 9822483d644100b4ab1b1979df7215cd, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 27d20c51b84d02e77e5ea6c743202389
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8616395921655556689, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -145968,6 +146072,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: cf6528545ebe3da47a123a67c14fc54e, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: c64696d1c9dde4557e456e295a1194f5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8616395921655556689, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -147369,7 +147481,15 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 03c24e5a05634ca4a9377fe6c8df2032, type: 2}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: persistentCharacterId
+      value: c6df39edac5663d79b638630a1f71ded
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: stockRules.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: participatesInPersistence
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
@@ -149645,6 +149765,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: 9432273391e34b96bc04faa19e756d07, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 7aff4dd768d5d5810210292890549632
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8616395921655556689, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -150672,6 +150800,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: f9031046576be0241ab2d3ad102926bb, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 2110d6d23dd59a498b87cdc6637f63bb
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8906461956615659999, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -157453,6 +157589,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: 61a5b4cb1f5dc9249acdac4d844e5a1b, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 7757962eeffdf52c9947b50f5f3f843c
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8906461956615659999, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -180329,6 +180473,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: b2f8bada748525c67abfac86f8d20a82
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -190480,6 +190632,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: fb099d126f220b552b448ab39828016b
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -191371,6 +191531,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 49a253acc5b18ac1caadc988055c824f
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -202328,6 +202496,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: b0a6b761f9566bc67ce3ea50dddee0d5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -203598,8 +203774,16 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 1fbd2ac89ab390f4d98224699fa063ce, type: 2}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: persistentCharacterId
+      value: 9147d5552db8a25b64c636e26da5ce22
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: stockRules.Array.size
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: stockRules.Array.data[0].<Category>k__BackingField
@@ -205623,6 +205807,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: 899092b7e7cb0a34a8e1fab8c256e240, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 2269baa54655f5713faee1d190c9a616
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8935143080841483820, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -211509,6 +211701,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: 84bccfbf0c9451b4c85d316c584f56b1, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 69783bfae24a5d32e7adb49f82c84250
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -220671,6 +220871,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: 2001bdea41413af499d7864e71fb4c51, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: b7ea8dfa827c4cc8b99bc11a3c6b3964
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8616395921655556689, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -250295,6 +250503,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 88ceb16af6093929a79d8043f13712b5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -254493,6 +254709,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: 5cabb2db146b82046b06cd0961adfb09, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 12c74b3707700fdfdd1fb7fcd1ebd528
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8906461956615659999, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -255867,9 +256091,6 @@ MonoBehaviour:
   - {fileID: 679368576}
   - {fileID: 1951998394}
   - {fileID: 1094286034}
-  guardInvestigationQuest: {fileID: 11400000, guid: b3000000000000000000000000000001, type: 2}
-  guardHelpRetakeMillNode: {fileID: 11400000, guid: 1d43225673f171e4fbaaa7fce9e7bbe0, type: 2}
-  guardAssaultFailedNode: {fileID: 11400000, guid: 0f1e2d3c4b5a69788796a5b4c3d2e003, type: 2}
   beginAssaultEvent: {fileID: 11400000, guid: e49d8be79b147a3fc6a42f9187845d6b, type: 2}
   claimGuardRewardEvent: {fileID: 11400000, guid: 6b607302b7a487344a8c28b5a4cf6dcf, type: 2}
   claimBanditRewardEvent: {fileID: 11400000, guid: 7ce0c502c0f8cd140aece86d115f7409, type: 2}
@@ -271143,6 +271364,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 10957def91b4fd129b48aeb0793a642a
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -276238,6 +276467,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: 087a9b8c6d891b8418eee903f7b95a9e, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 88765f1833d6c4f8c80d26cebdb29c4d
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8935143080841483820, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -280033,6 +280270,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: 7f173b077bf966c4098c84fa47ef79ae, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 5e8637299137d18ecf1764bb6b452cd6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -286004,8 +286249,16 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 68c43fb3ec9cad848b6222f0adc9e41e, type: 2}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: persistentCharacterId
+      value: 5d579c1c0b96dace3a647f2686aa13a3
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: stockRules.Array.size
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: stockRules.Array.data[0].<Category>k__BackingField
@@ -287348,6 +287601,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: 6522114de404a9d4d928e1722b5a4241, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 3ef95ceea8f098e32e84b366e107bf18
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -292374,6 +292635,14 @@ PrefabInstance:
       propertyPath: itemSetConfigOverride
       value: 
       objectReference: {fileID: 11400000, guid: 1cbaef3ef43249c4c8acc4f861451d42, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 69424029286b77a56f82f7906f9e2268
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -302573,6 +302842,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: dc98ce5b51f108947b4b8e8bc61ffc22, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: d42ba47131f9d26c6d93156e3f05f155
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -303816,6 +304093,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 9aceaa7d063934a4e0d6c4f742f5a9f3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -307441,6 +307726,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: dc98ce5b51f108947b4b8e8bc61ffc22, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: a66308520713aa02eaa1479d3b536cfd
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -308821,8 +309114,16 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: f434123c3fb30844d9eafb2e693c4fd8, type: 2}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: persistentCharacterId
+      value: ebdd819e714102f4126d7868d8b32aae
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: stockRules.Array.size
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: consumeAdditionalStatsOverTime
@@ -314398,8 +314699,16 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: d8ae53f1d8a8c48489c4c82f37db565b, type: 2}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: persistentCharacterId
+      value: dcf187e978d749ce01e34b7754a1ec4a
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: stockRules.Array.size
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
       propertyPath: consumeAdditionalStatsOverTime
@@ -315000,6 +315309,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: cd75b2a8e35e6959bd8ecd8fbb1f672c
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -365478,6 +365795,14 @@ PrefabInstance:
       propertyPath: faction
       value: 
       objectReference: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: persistentCharacterId
+      value: 8ef048bd7cb386e4c04629007c882fcc
+      objectReference: {fileID: 0}
+    - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -382202,6 +382527,14 @@ PrefabInstance:
     - target: {fileID: 6973757959135382267, guid: ae58676d275493441a78925e511e63d3, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7695490816915631517, guid: ae58676d275493441a78925e511e63d3, type: 3}
+      propertyPath: persistentCharacterId
+      value: 530bd03d7bce98894bc21b5546f395e6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7695490816915631517, guid: ae58676d275493441a78925e511e63d3, type: 3}
+      propertyPath: participatesInPersistence
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8546271600265788014, guid: ae58676d275493441a78925e511e63d3, type: 3}
       propertyPath: m_Name

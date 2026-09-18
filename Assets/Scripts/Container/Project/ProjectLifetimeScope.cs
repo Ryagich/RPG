@@ -120,6 +120,7 @@ namespace Container.Project
             builder.RegisterEntryPoint<AudioService>(Lifetime.Singleton).As<IAudioService>().AsSelf();
             builder.Register<SceneLoadingService>(Lifetime.Singleton).AsSelf();
             builder.Register<BootCompletion>(Lifetime.Singleton).AsSelf();
+            builder.Register<NpcCharacterSaveRegistry>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<GameSaveService>(Lifetime.Singleton).AsSelf();
             builder.Register<GameSaveController>(Lifetime.Singleton).AsSelf();
             builder.Register<LocationTransitionContext>(Lifetime.Singleton).AsSelf();

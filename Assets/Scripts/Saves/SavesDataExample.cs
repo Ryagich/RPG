@@ -41,6 +41,36 @@ namespace YG
         public float rotationW;
     }
 
+    [System.Serializable]
+    public struct SavedCharacterPose
+    {
+        public int isValid;
+        public float positionX;
+        public float positionY;
+        public float positionZ;
+        public float rotationX;
+        public float rotationY;
+        public float rotationZ;
+        public float rotationW;
+    }
+
+    /// <summary>
+    /// Persistent state shared by the player and scene NPCs. Runtime objects and Unity asset
+    /// references deliberately do not cross this boundary: items are restored through itemId.
+    /// </summary>
+    [System.Serializable]
+    public class SavedCharacterState
+    {
+        public string characterId;
+        public bool isAlive;
+        public float health;
+        public float stamina;
+        public float water;
+        public float food;
+        public SavedInventoryItem[] inventory;
+        public SavedCharacterPose deathPose;
+    }
+
     public partial class SavesYG
     {
         public bool GameReadyMetricSend;
@@ -51,6 +81,12 @@ namespace YG
         public int money;
         public float health;
         public float stamina;
+        public float water;
+        public float food;
+        // Canonical player state since v6. The primitive fields above are retained only to load
+        // saves written before character state was introduced.
+        public SavedCharacterState playerCharacter;
+        public SavedCharacterState[] npcCharacters;
         public SavedQuestProgress[] quests;
         public SavedInventoryItem[] inventory;
         // Read only by the v3-to-v4 migration. Mill progress is otherwise stored in quests.

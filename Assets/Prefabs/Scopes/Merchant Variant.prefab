@@ -109,7 +109,8 @@ MonoBehaviour:
     TypeName: Container.Game.GameLifetimeScope
   autoRun: 0
   autoInjectGameObjects: []
-  characterInfo: {fileID: 11400000, guid: 3e00ca4ee5487f047ba759a296c3372a, type: 2}
+  persistentCharacterId: 
+  characterInfo: {fileID: 0}
   inventoryConfig: {fileID: 0}
   defaultVisualConfig: {fileID: 11400000, guid: d06f3e2d4c1b7256a789abcdef012345, type: 2}
   canTalk: 1

@@ -26,10 +26,19 @@ namespace Saves
     /// </summary>
     public sealed class GameSaveService : IStartable
     {
-        private const int CurrentVersion = 4;
+        private const int MillQuestSaveVersion = 4;
+        private const int SurvivalStatsSaveVersion = 5;
+        private const int CharacterStateSaveVersion = 6;
+        // Version 6 used a runtime hierarchy path as an NPC identity. Such records cannot be
+        // safely mapped to the immutable scene IDs introduced in version 7, so only that
+        // obsolete NPC portion is discarded during migration.
+        private const int NpcPersistentIdSaveVersion = 7;
+        private const int CurrentVersion = NpcPersistentIdSaveVersion;
+        private const string PlayerCharacterId = "player";
         private readonly BootCompletion bootCompletion;
         private readonly RuntimeFactionRelations factionRelations;
         private readonly DialogueRuntimeFlagRegistry dialogueRuntimeFlags;
+        private readonly NpcCharacterSaveRegistry npcRegistry;
         private readonly System.Threading.Tasks.TaskCompletionSource<bool> ready = new();
 
         public System.Threading.Tasks.Task Ready => ready.Task;
@@ -41,17 +50,20 @@ namespace Saves
         public GameSaveService(
             BootCompletion bootCompletion,
             RuntimeFactionRelations factionRelations,
-            DialogueRuntimeFlagRegistry dialogueRuntimeFlags)
+            DialogueRuntimeFlagRegistry dialogueRuntimeFlags,
+            NpcCharacterSaveRegistry npcRegistry)
         {
             this.bootCompletion = bootCompletion;
             this.factionRelations = factionRelations;
             this.dialogueRuntimeFlags = dialogueRuntimeFlags;
+            this.npcRegistry = npcRegistry;
         }
 
         public async void Start()
         {
             await bootCompletion.WaitAsync();
             EnsureInitialized();
+            MigrateNpcStatesToPersistentIds();
             RestoreFactionRelations(factionRelations, YG2.saves.factionRelations);
             IsReady = true;
             ready.TrySetResult(true);
@@ -79,7 +91,22 @@ namespace Saves
             data.money = money.CurrentMoney.Value;
             data.health = stats.Hp.Value.Value;
             data.stamina = stats.GetStat(StatType.Stamina).Value.Value;
+            data.water = stats.GetStat(StatType.Water).Value.Value;
+            data.food = stats.GetStat(StatType.Food).Value.Value;
             data.inventory = SerializeInventory(inventory);
+            data.playerCharacter = new SavedCharacterState
+            {
+                characterId = PlayerCharacterId,
+                // Player death has its own lifecycle and never participates in NPC corpse restore.
+                isAlive = true,
+                health = data.health,
+                stamina = data.stamina,
+                water = data.water,
+                food = data.food,
+                inventory = data.inventory,
+                deathPose = default
+            };
+            data.npcCharacters = MergeNpcStates(data.npcCharacters, npcRegistry?.CaptureStates());
             data.quests = SerializeQuests(quests);
             data.factionRelations = SerializeFactionRelations(factionRelations);
             // Version 4 stores the mill entirely in the regular quest snapshot. Keep the old
@@ -110,12 +137,39 @@ namespace Saves
                 return false;
             }
 
-            RestoreInventory(inventory, itemStorage, data.inventory);
+            if (data.saveVersion >= CharacterStateSaveVersion && IsPlayerStateValid(data.playerCharacter))
+            {
+                RestoreInventory(inventory, itemStorage, data.playerCharacter.inventory);
+                RestoreCharacterStats(data.playerCharacter, stats);
+            }
+            else
+            {
+                RestoreInventory(inventory, itemStorage, data.inventory);
+                stats.ChangeValue(StatType.Hp, data.health);
+                stats.ChangeValue(StatType.Stamina, data.stamina);
+                if (data.saveVersion >= SurvivalStatsSaveVersion)
+                {
+                    stats.ChangeValue(StatType.Water, data.water);
+                    stats.ChangeValue(StatType.Food, data.food);
+                }
+            }
             money.Set(data.money);
-            stats.ChangeValue(StatType.Hp, data.health);
-            stats.ChangeValue(StatType.Stamina, data.stamina);
             RestoreQuests(quests, questCatalog, data.quests);
             return true;
+        }
+
+        internal bool TryGetSavedNpc(string characterId, out SavedCharacterState savedState)
+        {
+            savedState = null;
+            if (!IsReady || string.IsNullOrWhiteSpace(characterId) || YG2.saves.saveVersion < CurrentVersion ||
+                YG2.saves.npcCharacters == null)
+            {
+                return false;
+            }
+
+            savedState = YG2.saves.npcCharacters.FirstOrDefault(candidate => candidate != null &&
+                string.Equals(candidate.characterId, characterId, StringComparison.Ordinal));
+            return savedState != null;
         }
 
         internal bool TryGetSavedLocation(out string locationId, out string entranceId)
@@ -180,8 +234,28 @@ namespace Saves
             }
 
             YG2.SetDefaultSaves();
-            EnsureInitialized();
-            YG2.saves.quests = Array.Empty<SavedQuestProgress>();
+            // PluginYG constructs a fresh object, but the game owns the semantic meaning of a
+            // new game. Set every application-owned field explicitly so a future field
+            // initializer or PluginYG migration cannot turn a new game into a loadable save.
+            SavesYG data = YG2.saves;
+            data.saveVersion = 0;
+            data.locationId = string.Empty;
+            data.entranceId = string.Empty;
+            data.playerPose = default;
+            data.money = 0;
+            data.health = 0f;
+            data.stamina = 0f;
+            data.water = 0f;
+            data.food = 0f;
+            data.GameReadyMetricSend = false;
+            data.playerCharacter = null;
+            data.npcCharacters = Array.Empty<SavedCharacterState>();
+            data.quests = Array.Empty<SavedQuestProgress>();
+            data.inventory = Array.Empty<SavedInventoryItem>();
+            data.millScenarioStage = 0;
+            data.millOutcomeFlags = Array.Empty<int>();
+            data.factionRelations = Array.Empty<SavedFactionRelation>();
+            npcRegistry?.Clear();
             factionRelations.ResetToDefaults();
             dialogueRuntimeFlags?.Clear();
             Persist();
@@ -207,7 +281,7 @@ namespace Saves
         {
             stage = 0;
             outcomeFlags = 0;
-            if (!IsReady || YG2.saves.saveVersion <= 0 || YG2.saves.saveVersion >= CurrentVersion)
+            if (!IsReady || YG2.saves.saveVersion <= 0 || YG2.saves.saveVersion >= MillQuestSaveVersion)
             {
                 return false;
             }
@@ -218,7 +292,7 @@ namespace Saves
             return stage != 0 || outcomeFlags != 0;
         }
 
-        private static SavedInventoryItem[] SerializeInventory(PlayerInventory inventory)
+        internal static SavedInventoryItem[] SerializeInventory(PlayerInventory inventory)
         {
             return inventory.GetPersistenceSnapshot()
                 .Where(entry => entry.ItemConfig != null && !string.IsNullOrWhiteSpace(entry.ItemConfig.Id) && entry.Count > 0)
@@ -292,7 +366,7 @@ namespace Saves
             relations.Restore(restored);
         }
 
-        private static void RestoreInventory(
+        internal static void RestoreInventory(
             PlayerInventory inventory,
             ItemStorage itemStorage,
             IEnumerable<SavedInventoryItem> savedEntries)
@@ -385,11 +459,107 @@ namespace Saves
         {
             YG2.saves.quests ??= Array.Empty<SavedQuestProgress>();
             YG2.saves.inventory ??= Array.Empty<SavedInventoryItem>();
+            YG2.saves.npcCharacters ??= Array.Empty<SavedCharacterState>();
             YG2.saves.millOutcomeFlags ??= Array.Empty<int>();
             YG2.saves.factionRelations ??= Array.Empty<SavedFactionRelation>();
         }
 
+        private static void MigrateNpcStatesToPersistentIds()
+        {
+            if (YG2.saves.saveVersion <= 0 || YG2.saves.saveVersion >= NpcPersistentIdSaveVersion)
+            {
+                return;
+            }
+
+            YG2.saves.npcCharacters = Array.Empty<SavedCharacterState>();
+        }
+
         private static bool IsFinite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
+
+        internal static SavedCharacterPose ToSavedCharacterPose(Pose pose)
+        {
+            return new SavedCharacterPose
+            {
+                isValid = 1,
+                positionX = pose.position.x,
+                positionY = pose.position.y,
+                positionZ = pose.position.z,
+                rotationX = pose.rotation.x,
+                rotationY = pose.rotation.y,
+                rotationZ = pose.rotation.z,
+                rotationW = pose.rotation.w
+            };
+        }
+
+        internal static bool TryToPose(SavedCharacterPose savedPose, out Pose pose)
+        {
+            pose = default;
+            if (savedPose.isValid == 0 ||
+                !IsFinite(savedPose.positionX) || !IsFinite(savedPose.positionY) || !IsFinite(savedPose.positionZ) ||
+                !IsFinite(savedPose.rotationX) || !IsFinite(savedPose.rotationY) ||
+                !IsFinite(savedPose.rotationZ) || !IsFinite(savedPose.rotationW))
+            {
+                return false;
+            }
+
+            var rotation = new Quaternion(
+                savedPose.rotationX,
+                savedPose.rotationY,
+                savedPose.rotationZ,
+                savedPose.rotationW);
+            float rotationLengthSquared = rotation.x * rotation.x + rotation.y * rotation.y +
+                                          rotation.z * rotation.z + rotation.w * rotation.w;
+            if (rotationLengthSquared < 0.0001f)
+            {
+                return false;
+            }
+
+            pose = new Pose(new Vector3(savedPose.positionX, savedPose.positionY, savedPose.positionZ), rotation.normalized);
+            return true;
+        }
+
+        private static bool IsPlayerStateValid(SavedCharacterState state)
+        {
+            return state != null && string.Equals(state.characterId, PlayerCharacterId, StringComparison.Ordinal);
+        }
+
+        private static void RestoreCharacterStats(SavedCharacterState state, StatsController stats)
+        {
+            stats.ChangeValue(StatType.Hp, state.health);
+            stats.ChangeValue(StatType.Stamina, state.stamina);
+            stats.ChangeValue(StatType.Water, state.water);
+            stats.ChangeValue(StatType.Food, state.food);
+        }
+
+        private static SavedCharacterState[] MergeNpcStates(
+            IEnumerable<SavedCharacterState> existingStates,
+            IEnumerable<SavedCharacterState> currentStates)
+        {
+            var states = new Dictionary<string, SavedCharacterState>(StringComparer.Ordinal);
+            if (existingStates != null)
+            {
+                foreach (SavedCharacterState state in existingStates)
+                {
+                    if (state != null && !string.IsNullOrWhiteSpace(state.characterId))
+                    {
+                        states[state.characterId] = state;
+                    }
+                }
+            }
+
+            if (currentStates != null)
+            {
+                foreach (SavedCharacterState state in currentStates)
+                {
+                    if (state != null && !string.IsNullOrWhiteSpace(state.characterId))
+                    {
+                        states[state.characterId] = state;
+                    }
+                }
+            }
+
+            return states.Values.ToArray();
+        }
 
         private static void Persist()
         {

@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df84776ea5ed4a1c9de4c345cfb016a6, type: 3}
   m_Name: Player Character Info
   m_EditorClassIdentifier: Assembly-CSharp::Character.CharacterInfo
+  isUniqueCharacter: 1
+  characterId: player
   <Name>k__BackingField:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482

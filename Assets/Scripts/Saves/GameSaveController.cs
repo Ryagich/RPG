@@ -109,6 +109,11 @@ namespace Saves
             return saveService.TryGetSavedPlayerPose(out pose);
         }
 
+        public bool TryGetSavedNpc(string characterId, out YG.SavedCharacterState savedState)
+        {
+            return saveService.TryGetSavedNpc(characterId, out savedState);
+        }
+
         public bool ResetToDefaults()
         {
             bool reset = saveService.ResetToDefaults();

@@ -73,6 +73,7 @@ namespace Mill
         private bool playerSupportedBandits;
         private bool assaultOrdersIssued;
         private bool assaultStarted;
+        private bool millLiberatedWithoutQuest;
         private readonly TaskCompletionSource<bool> constructed = new();
 
         [Inject]
@@ -118,6 +119,11 @@ namespace Mill
 
         private void Update()
         {
+            if (TryLiberateMillWithoutQuest())
+            {
+                return;
+            }
+
             if (stage != MillQuestStage.AssaultInProgress)
                 return;
 
@@ -245,6 +251,32 @@ namespace Mill
                         completeQuest: false))
                     runtimeFlags?.Activate(banditVictoryFlag);
             }
+        }
+
+        private bool TryLiberateMillWithoutQuest()
+        {
+            // Clearing the encounter before taking its quest is still a valid world action.
+            // The quest remains absent, while the mill's local residents and fields return to
+            // their ordinary state. Saved NPC deaths reach this check after their scopes restore.
+            if (millLiberatedWithoutQuest || stage != MillQuestStage.Occupied ||
+                quests == null || quests.HasQuest(config.GuardInvestigationQuest) ||
+                !AllDefeated(bandits, varekHolt))
+            {
+                return false;
+            }
+
+            millLiberatedWithoutQuest = true;
+            SetActive(ulrik, true);
+            foreach (FarmField field in millFields)
+            {
+                if (field != null)
+                {
+                    field.enabled = true;
+                }
+            }
+
+            SetExitAvailability(true);
+            return true;
         }
 
         private bool CompleteScenario(Quests.Graph.Model.QuestNodeData outcomeNode, bool completeQuest)

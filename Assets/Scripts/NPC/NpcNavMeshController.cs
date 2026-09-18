@@ -22,6 +22,8 @@ namespace NPC
 
         private bool isFacingLocked;
         private bool isActionMovementLocked;
+        private bool isNavigationDisabled;
+        private bool isInitialized;
         private bool hasMoveRequest;
         private Vector3 lastRequestedDestination;
         private float lastRequestedStoppingDistance;
@@ -59,26 +61,12 @@ namespace NPC
 
         public void Start()
         {
-            if (!IsAgentActive)
-            {
-                return;
-            }
-
-            agent.avoidancePriority = Random.Range(0, 100);
-            agent.updatePosition = characterController == null;
-            agent.updateRotation = characterController == null;
-
-            if (!agent.isOnNavMesh)
-            {
-                WarpToNearestNavMesh(agent.transform.position);
-            }
-
-            agent.nextPosition = agent.transform.position;
+            EnsureAgentIsReady();
         }
 
         public void Tick()
         {
-            if (!IsAgentActive
+            if (!EnsureAgentIsReady()
                 || characterController == null
                 || !characterController.enabled
                 || !characterController.gameObject.activeInHierarchy)
@@ -211,6 +199,7 @@ namespace NPC
 
         public void Disable()
         {
+            isNavigationDisabled = true;
             Stop();
 
             if (agent != null)
@@ -288,12 +277,51 @@ namespace NPC
 
         private bool CanUseAgent()
         {
-            if (!IsAgentActive)
+            if (!EnsureAgentIsReady())
             {
                 return false;
             }
 
             return agent.isOnNavMesh || WarpToNearestNavMesh(agent.transform.position);
+        }
+
+        /// <summary>
+        /// NPC scopes are constructed before the location service builds its runtime NavMesh.
+        /// Their agents therefore stay disabled in authoring data until a valid position exists;
+        /// enabling an agent earlier makes Unity emit an error and leaves it without navigation.
+        /// </summary>
+        private bool EnsureAgentIsReady()
+        {
+            if (agent == null || isNavigationDisabled)
+            {
+                return false;
+            }
+
+            if (!agent.enabled)
+            {
+                if (!NavMesh.SamplePosition(agent.transform.position, out var hit, DefaultSampleRadius, NavMesh.AllAreas))
+                {
+                    return false;
+                }
+
+                agent.enabled = true;
+                if (!agent.isOnNavMesh || !agent.Warp(hit.position))
+                {
+                    agent.enabled = false;
+                    return false;
+                }
+            }
+
+            if (!isInitialized)
+            {
+                agent.avoidancePriority = Random.Range(0, 100);
+                agent.updatePosition = characterController == null;
+                agent.updateRotation = characterController == null;
+                agent.nextPosition = agent.transform.position;
+                isInitialized = true;
+            }
+
+            return true;
         }
 
         private bool CanReuseCurrentPath(Vector3 destination, float stoppingDistance)

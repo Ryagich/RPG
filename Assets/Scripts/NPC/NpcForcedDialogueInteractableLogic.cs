@@ -39,15 +39,21 @@ namespace NPC
             DialogueContext dialogueContext,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber,
-            IObjectResolver resolver,
-            CharacterInfo characterInfo = null,
-            DialogGraph dialog = null)
+            IObjectResolver resolver)
         {
             this.interactable = interactable;
             this.availability = availability;
             this.dialogueController = dialogueController;
-            this.characterInfo = characterInfo;
-            this.dialog = dialog;
+            // Character information is optional for NPCs that only need a forced dialogue
+            // trigger. VContainer resolves constructor arguments as required registrations,
+            // including arguments with C# default values, so optional scene data must be
+            // requested explicitly.
+            this.characterInfo = resolver.TryResolve<CharacterInfo>(out var resolvedCharacterInfo)
+                ? resolvedCharacterInfo
+                : null;
+            this.dialog = resolver.TryResolve<DialogGraph>(out var resolvedDialog)
+                ? resolvedDialog
+                : null;
             this.inventory = inventory;
             this.moneyStorage = moneyStorage;
             faction = resolver.TryResolve<FactionConfig>(out var resolvedFaction) ? resolvedFaction : null;
