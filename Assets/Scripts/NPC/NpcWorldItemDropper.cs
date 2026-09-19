@@ -10,9 +10,9 @@ namespace NPC
     {
         private readonly CharacterWorldItemDropper inner;
 
-        public NpcWorldItemDropper(Transform ownerTransform)
+        public NpcWorldItemDropper(Transform ownerTransform, IWorldItemDropObserver worldItemDropObserver)
         {
-            inner = new CharacterWorldItemDropper(ownerTransform);
+            inner = new CharacterWorldItemDropper(ownerTransform, worldItemDropObserver);
         }
 
         public void Drop(ItemStack itemStack) => inner.Drop(itemStack);

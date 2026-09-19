@@ -29,6 +29,25 @@ namespace YG
     }
 
     [System.Serializable]
+    public struct SavedWorldItem
+    {
+        public string persistentId;
+        public string itemId;
+        public int count;
+        public string locationId;
+        public float positionX;
+        public float positionY;
+        public float positionZ;
+        public float rotationX;
+        public float rotationY;
+        public float rotationZ;
+        public float rotationW;
+        public bool hasLifetime;
+        public float remainingLifetimeSeconds;
+        public bool isSceneAuthored;
+    }
+
+    [System.Serializable]
     public struct SavedPlayerPose
     {
         public int isValid;
@@ -93,5 +112,7 @@ namespace YG
         public int millScenarioStage;
         public int[] millOutcomeFlags;
         public SavedFactionRelation[] factionRelations;
+        public SavedWorldItem[] worldItems;
+        public string[] retiredSceneWorldItemIds;
     }
 }

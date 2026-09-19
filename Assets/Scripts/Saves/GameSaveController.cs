@@ -32,6 +32,7 @@ namespace Saves
 
         public System.Threading.Tasks.Task Ready => saveService.Ready;
         public bool HasSavedData => saveService.HasSavedData;
+        internal event Action CheckpointPreparing;
         public event Action ReadyStateChanged
         {
             add => saveService.ReadyStateChanged += value;
@@ -89,6 +90,7 @@ namespace Saves
 
         public bool SaveFullAtPosition(string locationId, string entranceId, Pose playerPose)
         {
+            CheckpointPreparing?.Invoke();
             return saveService.SavePlayer(
                 locationId,
                 entranceId,
@@ -128,6 +130,17 @@ namespace Saves
         internal bool TryGetLegacyMillScenario(out int stage, out int outcomeFlags)
         {
             return saveService.TryGetLegacyMillScenario(out stage, out outcomeFlags);
+        }
+
+        internal YG.SavedWorldItem[] GetWorldItems() => saveService.GetWorldItems();
+
+        internal string[] GetRetiredSceneWorldItemIds() => saveService.GetRetiredSceneWorldItemIds();
+
+        internal void SetWorldItemState(
+            System.Collections.Generic.IEnumerable<YG.SavedWorldItem> worldItems,
+            System.Collections.Generic.IEnumerable<string> retiredSceneWorldItemIds)
+        {
+            saveService.SetWorldItemState(worldItems, retiredSceneWorldItemIds);
         }
 
         private static SavedPlayerPose ToSavedPlayerPose(Pose pose)

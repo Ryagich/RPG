@@ -35,6 +35,7 @@ namespace Inventory
         private readonly Transform lookTransform;
         private readonly GameModesController gameModesController;
         private readonly InventoryInteractionContext interactionContext;
+        private readonly IWorldItemDropObserver worldItemDropObserver;
         private bool backpackResizePendingAfterHandAction;
         private ItemStack backpackTakenFromSlot;
         private IInventory handSourceInventory;
@@ -54,6 +55,7 @@ namespace Inventory
             Animator animator,
             GameModesController gameModesController,
             InventoryInteractionContext interactionContext,
+            IWorldItemDropObserver worldItemDropObserver,
             ISubscriber<MouseDown> mouseDownSubscriber,
             ISubscriber<MouseUp> mouseUpSubscriber,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
@@ -66,6 +68,7 @@ namespace Inventory
             lookTransform = animator != null ? animator.transform : playerTransform;
             this.gameModesController = gameModesController;
             this.interactionContext = interactionContext;
+            this.worldItemDropObserver = worldItemDropObserver;
 
             playerInventory.Changed.Subscribe(_ => DropPendingOverflowItems());
             mouseDownSubscriber.Subscribe(OnMouseDown);
@@ -714,8 +717,13 @@ namespace Inventory
             var throwForward = GetThrowForward();
             var spawnPosition = playerTransform.position + throwForward * ThrowForwardOffset + Vector3.up * ThrowUpOffset;
             var itemHolder = Object.Instantiate(itemStack.ItemConfig.HandPrefab, spawnPosition, Quaternion.identity);
-            itemHolder.SetCount(itemStack.Count);
+            itemHolder.Initialize(itemStack.ItemConfig, itemStack.Count, itemStack.RuntimeTag);
             itemHolder.CanInteractable = true;
+            if (string.IsNullOrWhiteSpace(itemStack.RuntimeTag))
+            {
+                itemHolder.ConfigurePersistence(usesSave: true, usesLifetime: true);
+                worldItemDropObserver?.RegisterRuntimeDrop(itemHolder);
+            }
 
             if (itemHolder.TryGetComponent<Rigidbody>(out var rigidbody))
             {

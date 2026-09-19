@@ -11,10 +11,12 @@ namespace Inventory
         private const float DropForce = 2.5f;
 
         private readonly Transform ownerTransform;
+        private readonly IWorldItemDropObserver worldItemDropObserver;
 
-        public CharacterWorldItemDropper(Transform ownerTransform)
+        public CharacterWorldItemDropper(Transform ownerTransform, IWorldItemDropObserver worldItemDropObserver)
         {
             this.ownerTransform = ownerTransform;
+            this.worldItemDropObserver = worldItemDropObserver;
         }
 
         public void Drop(ItemStack itemStack)
@@ -36,6 +38,7 @@ namespace Inventory
             var itemHolder = Object.Instantiate(itemStack.ItemConfig.HandPrefab, spawnPosition, Quaternion.identity);
             itemHolder.Initialize(itemStack.ItemConfig, itemStack.Count, itemStack.RuntimeTag);
             itemHolder.CanInteractable = true;
+            RegisterPersistentDrop(itemHolder, itemStack);
 
             if (itemHolder.TryGetComponent<Rigidbody>(out var rigidbody))
             {
@@ -54,6 +57,19 @@ namespace Inventory
             var itemHolder = Object.Instantiate(itemStack.ItemConfig.HandPrefab, position, rotation);
             itemHolder.Initialize(itemStack.ItemConfig, itemStack.Count, itemStack.RuntimeTag);
             itemHolder.CanInteractable = true;
+            RegisterPersistentDrop(itemHolder, itemStack);
+        }
+
+        private void RegisterPersistentDrop(ItemHolder itemHolder, ItemStack itemStack)
+        {
+            // Runtime-tagged stacks are session-owned (for example, training equipment).
+            if (itemHolder == null || !string.IsNullOrWhiteSpace(itemStack?.RuntimeTag))
+            {
+                return;
+            }
+
+            itemHolder.ConfigurePersistence(usesSave: true, usesLifetime: true);
+            worldItemDropObserver?.RegisterRuntimeDrop(itemHolder);
         }
     }
 }

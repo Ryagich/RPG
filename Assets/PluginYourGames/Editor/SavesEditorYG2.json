@@ -1,40 +1,32 @@
 {
-  "idSave": 220,
+  "idSave": 222,
   "GameReadyMetricSend": true,
-  "saveVersion": 7,
+  "saveVersion": 8,
   "locationId": "Mill",
-  "entranceId": "To River",
+  "entranceId": "To Forest",
   "playerPose": {
     "isValid": 1,
-    "positionX": 129.318024,
-    "positionY": 0.27888,
-    "positionZ": -90.26393,
+    "positionX": 128.7204,
+    "positionY": 0.450000048,
+    "positionZ": -52.1345444,
     "rotationX": 0.0,
-    "rotationY": -0.07110539,
+    "rotationY": 0.9934919,
     "rotationZ": 0.0,
-    "rotationW": 0.9974688
+    "rotationW": 0.113903522
   },
   "money": 116,
-  "health": 25.0101337,
-  "stamina": 300.0,
-  "water": 76.40603,
-  "food": 98.9905548,
+  "health": 31.7202873,
+  "stamina": 299.482025,
+  "water": 69.38453,
+  "food": 95.48248,
   "playerCharacter": {
     "characterId": "player",
     "isAlive": true,
-    "health": 25.0101337,
-    "stamina": 300.0,
-    "water": 76.40603,
-    "food": 98.9905548,
+    "health": 31.7202873,
+    "stamina": 299.482025,
+    "water": 69.38453,
+    "food": 95.48248,
     "inventory": [
-      {
-        "itemId": "Ring_09 Config ID",
-        "count": 1,
-        "x": 0,
-        "y": 0,
-        "rotated": 0,
-        "slot": 0
-      },
       {
         "itemId": "Body ItemConfig 6",
         "count": 1,
@@ -797,8 +789,8 @@
           "slot": 0
         },
         {
-          "itemId": "Carrot ItemConfig ID",
-          "count": 10,
+          "itemId": "Bottle of Water Config ID",
+          "count": 8,
           "x": 1,
           "y": 0,
           "rotated": 0,
@@ -814,7 +806,7 @@
         },
         {
           "itemId": "Tomato ItemConfig ID",
-          "count": 7,
+          "count": 12,
           "x": 3,
           "y": 0,
           "rotated": 0,
@@ -846,7 +838,7 @@
         },
         {
           "itemId": "Beetroot ItemConfig ID",
-          "count": 4,
+          "count": 9,
           "x": 0,
           "y": 1,
           "rotated": 0,
@@ -854,7 +846,7 @@
         },
         {
           "itemId": "Broccoli ItemConfig ID",
-          "count": 2,
+          "count": 5,
           "x": 2,
           "y": 1,
           "rotated": 0,
@@ -864,6 +856,14 @@
           "itemId": "Carrot ItemConfig ID",
           "count": 5,
           "x": 3,
+          "y": 1,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Broccoli ItemConfig ID",
+          "count": 2,
+          "x": 1,
           "y": 1,
           "rotated": 0,
           "slot": 0
@@ -1949,17 +1949,25 @@
           "slot": 0
         },
         {
-          "itemId": "Carrot ItemConfig ID",
-          "count": 3,
+          "itemId": "Bottle of Water Config ID",
+          "count": 2,
           "x": 1,
           "y": 0,
           "rotated": 0,
           "slot": 0
         },
         {
-          "itemId": "Legs ItemConfig 2",
+          "itemId": "Ring_09 Config ID",
           "count": 1,
           "x": 2,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 1",
+          "count": 1,
+          "x": 3,
           "y": 0,
           "rotated": 0,
           "slot": 0
@@ -2317,6 +2325,126 @@
           "slot": 0
         },
         {
+          "itemId": "Legs ItemConfig 2",
+          "count": 1,
+          "x": 0,
+          "y": 30,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 2",
+          "count": 1,
+          "x": 2,
+          "y": 30,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 21",
+          "count": 1,
+          "x": 4,
+          "y": 30,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 21",
+          "count": 1,
+          "x": 0,
+          "y": 32,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 2",
+          "count": 1,
+          "x": 2,
+          "y": 32,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 2",
+          "count": 1,
+          "x": 4,
+          "y": 32,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 18",
+          "count": 1,
+          "x": 0,
+          "y": 34,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 18",
+          "count": 1,
+          "x": 2,
+          "y": 34,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 1",
+          "count": 1,
+          "x": 4,
+          "y": 34,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 2",
+          "count": 1,
+          "x": 0,
+          "y": 36,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 8",
+          "count": 1,
+          "x": 2,
+          "y": 36,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 1",
+          "count": 1,
+          "x": 4,
+          "y": 36,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 10",
+          "count": 1,
+          "x": 0,
+          "y": 38,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 10",
+          "count": 1,
+          "x": 2,
+          "y": 38,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 13",
+          "count": 1,
+          "x": 4,
+          "y": 38,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
           "itemId": "Body ItemConfig 8",
           "count": 1,
           "x": 0,
@@ -2419,9 +2547,9 @@
       ],
       "deathPose": {
         "isValid": 1,
-        "positionX": 126.725967,
-        "positionY": 0.4751991,
-        "positionZ": -96.8475,
+        "positionX": 129.011108,
+        "positionY": 0.8198243,
+        "positionZ": -98.71185,
         "rotationX": 0.0,
         "rotationY": 0.94572717,
         "rotationZ": 0.0,
@@ -2495,9 +2623,9 @@
       ],
       "deathPose": {
         "isValid": 1,
-        "positionX": 124.768745,
-        "positionY": 0.488649338,
-        "positionZ": -97.6990051,
+        "positionX": 133.999084,
+        "positionY": 0.4580918,
+        "positionZ": -92.9932556,
         "rotationX": 0.0,
         "rotationY": 0.496218652,
         "rotationZ": 0.0,
@@ -2621,8 +2749,8 @@
           "slot": 0
         },
         {
-          "itemId": "Piece of cheese Config ID",
-          "count": 4,
+          "itemId": "Ring_06 Config ID",
+          "count": 1,
           "x": 1,
           "y": 0,
           "rotated": 0,
@@ -2630,7 +2758,7 @@
         },
         {
           "itemId": "Ring_10 Config ID",
-          "count": 1,
+          "count": 9,
           "x": 2,
           "y": 0,
           "rotated": 0,
@@ -2670,7 +2798,7 @@
         },
         {
           "itemId": "Ring_08 Config ID",
-          "count": 8,
+          "count": 12,
           "x": 0,
           "y": 1,
           "rotated": 0,
@@ -2686,7 +2814,7 @@
         },
         {
           "itemId": "Ring_09 Config ID",
-          "count": 6,
+          "count": 12,
           "x": 2,
           "y": 1,
           "rotated": 0,
@@ -2702,7 +2830,7 @@
         },
         {
           "itemId": "Ring_02 Config ID",
-          "count": 3,
+          "count": 6,
           "x": 4,
           "y": 1,
           "rotated": 0,
@@ -2710,7 +2838,7 @@
         },
         {
           "itemId": "Ring_07 Config ID",
-          "count": 7,
+          "count": 12,
           "x": 5,
           "y": 1,
           "rotated": 0,
@@ -2726,7 +2854,7 @@
         },
         {
           "itemId": "Ring_05 Config ID",
-          "count": 4,
+          "count": 7,
           "x": 0,
           "y": 2,
           "rotated": 0,
@@ -2744,6 +2872,22 @@
           "itemId": "Ring_03 Config ID",
           "count": 2,
           "x": 2,
+          "y": 2,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Ring_08 Config ID",
+          "count": 1,
+          "x": 3,
+          "y": 2,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Ring_09 Config ID",
+          "count": 1,
+          "x": 4,
           "y": 2,
           "rotated": 0,
           "slot": 0
@@ -3275,9 +3419,9 @@
       ],
       "deathPose": {
         "isValid": 1,
-        "positionX": 127.903412,
-        "positionY": 0.4054941,
-        "positionZ": -96.56935,
+        "positionX": 130.511932,
+        "positionY": 0.418729573,
+        "positionZ": -92.40053,
         "rotationX": 0.0,
         "rotationY": 0.999453664,
         "rotationZ": 0.0,
@@ -3470,7 +3614,7 @@
       "inventory": [
         {
           "itemId": "Piece of cheese Config ID",
-          "count": 16,
+          "count": 20,
           "x": 0,
           "y": 0,
           "rotated": 0,
@@ -3494,7 +3638,7 @@
         },
         {
           "itemId": "Bottle of Water Config ID",
-          "count": 7,
+          "count": 13,
           "x": 3,
           "y": 0,
           "rotated": 0,
@@ -3542,7 +3686,7 @@
         },
         {
           "itemId": "Mug of beer Config ID",
-          "count": 16,
+          "count": 20,
           "x": 3,
           "y": 1,
           "rotated": 0,
@@ -3582,7 +3726,7 @@
         },
         {
           "itemId": "Honey Item Config ID",
-          "count": 3,
+          "count": 5,
           "x": 4,
           "y": 2,
           "rotated": 0,
@@ -3622,7 +3766,7 @@
         },
         {
           "itemId": "Baguette Config ID",
-          "count": 1,
+          "count": 4,
           "x": 4,
           "y": 5,
           "rotated": 0,
@@ -3638,7 +3782,7 @@
         },
         {
           "itemId": "Bread Config ID",
-          "count": 1,
+          "count": 5,
           "x": 6,
           "y": 3,
           "rotated": 0,
@@ -3646,9 +3790,33 @@
         },
         {
           "itemId": "Bottle of wine Config ID",
-          "count": 2,
+          "count": 10,
           "x": 6,
           "y": 4,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Honey Item Config ID",
+          "count": 3,
+          "x": 6,
+          "y": 5,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Bread Config ID",
+          "count": 3,
+          "x": 2,
+          "y": 6,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Piece of cheese Config ID",
+          "count": 1,
+          "x": 3,
+          "y": 6,
           "rotated": 0,
           "slot": 0
         },
@@ -3889,16 +4057,16 @@
           "slot": 0
         },
         {
-          "itemId": "Cooked turkey Config ID",
+          "itemId": "Ring_06 Config ID",
           "count": 1,
-          "x": 1,
+          "x": 2,
           "y": 0,
           "rotated": 0,
           "slot": 0
         },
         {
-          "itemId": "Apple ItemConfig ID",
-          "count": 1,
+          "itemId": "Bottle of wine Config ID",
+          "count": 3,
           "x": 3,
           "y": 0,
           "rotated": 0,
@@ -4313,6 +4481,126 @@
           "slot": 0
         },
         {
+          "itemId": "Sword 12 Item Config ID",
+          "count": 1,
+          "x": 2,
+          "y": 32,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Sword 12 Item Config ID",
+          "count": 1,
+          "x": 3,
+          "y": 32,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Sword 7 Item Config ID",
+          "count": 1,
+          "x": 4,
+          "y": 32,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Helm ItemConfig 8",
+          "count": 1,
+          "x": 0,
+          "y": 33,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Helm ItemConfig 9",
+          "count": 1,
+          "x": 5,
+          "y": 34,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Helm ItemConfig 9",
+          "count": 1,
+          "x": 0,
+          "y": 35,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Backpack Item Config ID Test 1",
+          "count": 1,
+          "x": 5,
+          "y": 36,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Backpack Item Config ID Test 1",
+          "count": 1,
+          "x": 0,
+          "y": 37,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Backpack Item Config ID Test 2",
+          "count": 1,
+          "x": 2,
+          "y": 37,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Sword 7 Item Config ID",
+          "count": 1,
+          "x": 4,
+          "y": 37,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Sword 7 Item Config ID",
+          "count": 1,
+          "x": 5,
+          "y": 38,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Sword 12 Item Config ID",
+          "count": 1,
+          "x": 6,
+          "y": 38,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hips ItemConfig 1",
+          "count": 1,
+          "x": 0,
+          "y": 39,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hips ItemConfig 1",
+          "count": 1,
+          "x": 2,
+          "y": 39,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 28",
+          "count": 1,
+          "x": 0,
+          "y": 41,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
           "itemId": "Body ItemConfig 1",
           "count": 1,
           "x": 0,
@@ -4618,7 +4906,7 @@
       "inventory": [
         {
           "itemId": "Mug of beer Config ID",
-          "count": 5,
+          "count": 9,
           "x": 0,
           "y": 0,
           "rotated": 0,
@@ -4642,7 +4930,7 @@
         },
         {
           "itemId": "Bottle of Water Config ID",
-          "count": 3,
+          "count": 6,
           "x": 3,
           "y": 0,
           "rotated": 0,
@@ -4674,7 +4962,7 @@
         },
         {
           "itemId": "Chrysanthemums ItemConfig ID ",
-          "count": 4,
+          "count": 7,
           "x": 0,
           "y": 1,
           "rotated": 0,
@@ -4682,7 +4970,7 @@
         },
         {
           "itemId": "Camomile ItemConfig ID",
-          "count": 3,
+          "count": 5,
           "x": 1,
           "y": 1,
           "rotated": 0,
@@ -4690,7 +4978,7 @@
         },
         {
           "itemId": "Bottle of wine Config ID",
-          "count": 1,
+          "count": 3,
           "x": 2,
           "y": 1,
           "rotated": 0,
@@ -4698,8 +4986,24 @@
         },
         {
           "itemId": "Lupine ItemConfig ID ",
-          "count": 7,
+          "count": 10,
           "x": 3,
+          "y": 1,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Larkspur ItemConfig ID",
+          "count": 5,
+          "x": 4,
+          "y": 1,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Lupine ItemConfig ID ",
+          "count": 1,
+          "x": 5,
           "y": 1,
           "rotated": 0,
           "slot": 0
@@ -5052,14 +5356,6 @@
   "quests": [],
   "inventory": [
     {
-      "itemId": "Ring_09 Config ID",
-      "count": 1,
-      "x": 0,
-      "y": 0,
-      "rotated": 0,
-      "slot": 0
-    },
-    {
       "itemId": "Body ItemConfig 6",
       "count": 1,
       "x": 0,
@@ -5134,5 +5430,24 @@
       "rightFactionId": "bandits",
       "relation": 0
     }
-  ]
+  ],
+  "worldItems": [
+    {
+      "persistentId": "Ring_09 Config ID_aa4fd0dce7fc4da39f4e3323db580b24",
+      "itemId": "Ring_09 Config ID",
+      "count": 1,
+      "locationId": "Mill",
+      "positionX": 129.6199,
+      "positionY": 0.3131651,
+      "positionZ": -56.7472725,
+      "rotationX": 0.7399709,
+      "rotationY": -0.037309,
+      "rotationZ": -0.0395999365,
+      "rotationW": -0.6704349,
+      "hasLifetime": true,
+      "remainingLifetimeSeconds": 594.0,
+      "isSceneAuthored": false
+    }
+  ],
+  "retiredSceneWorldItemIds": []
 }

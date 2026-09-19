@@ -9,6 +9,7 @@ using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 using Inventory.Looting;
+using Inventory;
 using GameAudio;
 using Locations;
 using NPC;
@@ -157,6 +158,10 @@ namespace Container.Game
             builder.RegisterEntryPoint<DialogueExitController>().AsSelf();
             builder.RegisterEntryPoint<DialogueSaveCoordinator>().AsSelf();
             builder.Register<LocationTransitionSaveCoordinator>(Lifetime.Singleton).AsSelf();
+            builder.RegisterEntryPoint<DroppedItemPersistenceService>()
+                   .AsSelf()
+                   .As<IWorldItemDropObserver>()
+                   .As<ITickable>();
             builder.Register<Player.PlayerDeathState>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<GameModesController>().AsSelf();
             builder.RegisterEntryPoint<SoundMessagePlayer>().AsSelf();

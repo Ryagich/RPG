@@ -18,6 +18,7 @@ namespace Loading
         public string TargetSceneName => targetSceneName;
         public bool WaitForInputBeforeActivation => waitForInputBeforeActivation;
         public bool HasPendingRequest => !string.IsNullOrWhiteSpace(targetSceneName);
+        public event System.Action LoadRequested;
 
         public void Load(string targetSceneName)
         {
@@ -38,6 +39,7 @@ namespace Loading
                 targetSceneName,
                 activeSceneName == config.MenuSceneName && targetSceneName != config.MenuSceneName);
 
+            LoadRequested?.Invoke();
             Time.timeScale = 1f;
             SceneManager.LoadScene(config.LoadSceneName);
         }

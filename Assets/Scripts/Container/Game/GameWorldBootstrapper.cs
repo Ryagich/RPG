@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using GameAudio;
 using Localization;
 using Locations;
@@ -21,6 +22,9 @@ namespace Container.Game
         private readonly LocationTransitionService locationTransitions;
         private readonly IAudioService audioService;
         private readonly GameSceneSessionConfiguration sceneSessionConfiguration;
+        private readonly TaskCompletionSource<bool> worldInitialized = new();
+
+        public Task WorldInitialized => worldInitialized.Task;
 
         public GameWorldBootstrapper(
             GameLifetimeScope scope,
@@ -58,6 +62,7 @@ namespace Container.Game
             }
 
             scope.InitializeWorld(locationTransitions, audioService, savedPlayerPose);
+            worldInitialized.TrySetResult(true);
         }
     }
 }

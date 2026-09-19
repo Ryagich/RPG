@@ -33,7 +33,8 @@ namespace Saves
         // safely mapped to the immutable scene IDs introduced in version 7, so only that
         // obsolete NPC portion is discarded during migration.
         private const int NpcPersistentIdSaveVersion = 7;
-        private const int CurrentVersion = NpcPersistentIdSaveVersion;
+        private const int WorldItemsSaveVersion = 8;
+        private const int CurrentVersion = WorldItemsSaveVersion;
         private const string PlayerCharacterId = "player";
         private readonly BootCompletion bootCompletion;
         private readonly RuntimeFactionRelations factionRelations;
@@ -161,7 +162,7 @@ namespace Saves
         internal bool TryGetSavedNpc(string characterId, out SavedCharacterState savedState)
         {
             savedState = null;
-            if (!IsReady || string.IsNullOrWhiteSpace(characterId) || YG2.saves.saveVersion < CurrentVersion ||
+            if (!IsReady || string.IsNullOrWhiteSpace(characterId) || YG2.saves.saveVersion < NpcPersistentIdSaveVersion ||
                 YG2.saves.npcCharacters == null)
             {
                 return false;
@@ -255,6 +256,8 @@ namespace Saves
             data.millScenarioStage = 0;
             data.millOutcomeFlags = Array.Empty<int>();
             data.factionRelations = Array.Empty<SavedFactionRelation>();
+            data.worldItems = Array.Empty<SavedWorldItem>();
+            data.retiredSceneWorldItemIds = Array.Empty<string>();
             npcRegistry?.Clear();
             factionRelations.ResetToDefaults();
             dialogueRuntimeFlags?.Clear();
@@ -271,6 +274,26 @@ namespace Saves
             }
 
             transitionContext.SetPendingTransition(locationId, entranceId);
+        }
+
+        internal SavedWorldItem[] GetWorldItems() => YG2.saves.worldItems ?? Array.Empty<SavedWorldItem>();
+
+        internal string[] GetRetiredSceneWorldItemIds() =>
+            YG2.saves.retiredSceneWorldItemIds ?? Array.Empty<string>();
+
+        /// <summary>
+        /// Updates only the in-memory checkpoint. Complete checkpoint coordinators retain
+        /// ownership of when PluginYG persists it.
+        /// </summary>
+        internal void SetWorldItemState(
+            IEnumerable<SavedWorldItem> worldItems,
+            IEnumerable<string> retiredSceneWorldItemIds)
+        {
+            YG2.saves.worldItems = worldItems?.ToArray() ?? Array.Empty<SavedWorldItem>();
+            YG2.saves.retiredSceneWorldItemIds = retiredSceneWorldItemIds?
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct(StringComparer.Ordinal)
+                .ToArray() ?? Array.Empty<string>();
         }
 
         /// <summary>
@@ -462,6 +485,8 @@ namespace Saves
             YG2.saves.npcCharacters ??= Array.Empty<SavedCharacterState>();
             YG2.saves.millOutcomeFlags ??= Array.Empty<int>();
             YG2.saves.factionRelations ??= Array.Empty<SavedFactionRelation>();
+            YG2.saves.worldItems ??= Array.Empty<SavedWorldItem>();
+            YG2.saves.retiredSceneWorldItemIds ??= Array.Empty<string>();
         }
 
         private static void MigrateNpcStatesToPersistentIds()
