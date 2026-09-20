@@ -1,14 +1,15 @@
 {
-  "idSave": 239,
+  "idSave": 242,
   "GameReadyMetricSend": true,
-  "saveVersion": 9,
+  "advertisingNewGameGraceRemainingSeconds": 0.0,
+  "saveVersion": 10,
   "locationId": "Village",
   "entranceId": "To Forrest",
   "playerPose": {
     "isValid": 1,
-    "positionX": 13.4158049,
-    "positionY": 0.242209375,
-    "positionZ": 8.110797,
+    "positionX": 24.49481,
+    "positionY": 0.410471618,
+    "positionZ": 0.279559016,
     "rotationX": 0.0,
     "rotationY": -0.08715578,
     "rotationZ": 0.0,
@@ -16,16 +17,16 @@
   },
   "money": 83,
   "health": 100.0,
-  "stamina": 281.623535,
-  "water": 99.5199,
-  "food": 59.529068,
+  "stamina": 269.153656,
+  "water": 45.8253632,
+  "food": 32.6783333,
   "playerCharacter": {
     "characterId": "player",
     "isAlive": true,
     "health": 100.0,
-    "stamina": 281.623535,
-    "water": 99.5199,
-    "food": 59.529068,
+    "stamina": 269.153656,
+    "water": 45.8253632,
+    "food": 32.6783333,
     "inventory": [
       {
         "itemId": "Larkspur ItemConfig ID",
@@ -854,7 +855,7 @@
         },
         {
           "itemId": "Bottle of Water Config ID",
-          "count": 8,
+          "count": 10,
           "x": 3,
           "y": 0,
           "rotated": 0,
@@ -982,7 +983,7 @@
         },
         {
           "itemId": "Carrot ItemConfig ID",
-          "count": 3,
+          "count": 8,
           "x": 6,
           "y": 2,
           "rotated": 0,
@@ -3517,6 +3518,70 @@
           "slot": 0
         },
         {
+          "itemId": "Legs ItemConfig 1",
+          "count": 1,
+          "x": 0,
+          "y": 118,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 1",
+          "count": 1,
+          "x": 2,
+          "y": 118,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 2",
+          "count": 1,
+          "x": 4,
+          "y": 118,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 2",
+          "count": 1,
+          "x": 0,
+          "y": 120,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 17",
+          "count": 1,
+          "x": 2,
+          "y": 120,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 4",
+          "count": 1,
+          "x": 4,
+          "y": 120,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 4",
+          "count": 1,
+          "x": 0,
+          "y": 122,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 11",
+          "count": 1,
+          "x": 2,
+          "y": 122,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
           "itemId": "Body ItemConfig 8",
           "count": 1,
           "x": 0,
@@ -3958,7 +4023,7 @@
         },
         {
           "itemId": "Ring_09 Config ID",
-          "count": 9,
+          "count": 12,
           "x": 4,
           "y": 2,
           "rotated": 0,
@@ -4038,7 +4103,7 @@
         },
         {
           "itemId": "Ring_10 Config ID",
-          "count": 2,
+          "count": 8,
           "x": 0,
           "y": 4,
           "rotated": 0,
@@ -4104,6 +4169,14 @@
           "itemId": "Ring_02 Config ID",
           "count": 5,
           "x": 1,
+          "y": 5,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Ring_09 Config ID",
+          "count": 1,
+          "x": 2,
           "y": 5,
           "rotated": 0,
           "slot": 0
@@ -4862,7 +4935,7 @@
         },
         {
           "itemId": "Bottle of Water Config ID",
-          "count": 10,
+          "count": 11,
           "x": 4,
           "y": 0,
           "rotated": 0,
@@ -5030,7 +5103,7 @@
         },
         {
           "itemId": "Piece of cheese Config ID",
-          "count": 15,
+          "count": 17,
           "x": 3,
           "y": 6,
           "rotated": 0,
@@ -5174,7 +5247,7 @@
         },
         {
           "itemId": "Bottle of wine Config ID",
-          "count": 5,
+          "count": 7,
           "x": 6,
           "y": 11,
           "rotated": 0,
@@ -5214,7 +5287,7 @@
         },
         {
           "itemId": "Mug of beer Config ID",
-          "count": 9,
+          "count": 11,
           "x": 6,
           "y": 13,
           "rotated": 0,
@@ -5237,22 +5310,6 @@
           "slot": 0
         },
         {
-          "itemId": "Cooked turkey Config ID",
-          "count": 2,
-          "x": 0,
-          "y": 15,
-          "rotated": 0,
-          "slot": 0
-        },
-        {
-          "itemId": "Cooked turkey Config ID",
-          "count": 1,
-          "x": 2,
-          "y": 16,
-          "rotated": 0,
-          "slot": 0
-        },
-        {
           "itemId": "Honey Item Config ID",
           "count": 5,
           "x": 6,
@@ -5261,10 +5318,10 @@
           "slot": 0
         },
         {
-          "itemId": "Baguette Config ID",
+          "itemId": "Cooked turkey Config ID",
           "count": 2,
-          "x": 4,
-          "y": 16,
+          "x": 0,
+          "y": 15,
           "rotated": 0,
           "slot": 0
         },
@@ -5277,10 +5334,58 @@
           "slot": 0
         },
         {
+          "itemId": "Cooked turkey Config ID",
+          "count": 2,
+          "x": 2,
+          "y": 16,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Baguette Config ID",
+          "count": 5,
+          "x": 4,
+          "y": 16,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
           "itemId": "Honey Item Config ID",
           "count": 4,
           "x": 6,
           "y": 16,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Bread Config ID",
+          "count": 2,
+          "x": 0,
+          "y": 17,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Baguette Config ID",
+          "count": 1,
+          "x": 4,
+          "y": 17,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Cooked turkey Config ID",
+          "count": 2,
+          "x": 0,
+          "y": 18,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Cooked turkey Config ID",
+          "count": 2,
+          "x": 2,
+          "y": 18,
           "rotated": 0,
           "slot": 0
         },
@@ -7321,14 +7426,6 @@
           "slot": 0
         },
         {
-          "itemId": "Sword 12 Item Config ID",
-          "count": 1,
-          "x": 0,
-          "y": 138,
-          "rotated": 0,
-          "slot": 0
-        },
-        {
           "itemId": "Hips ItemConfig 20",
           "count": 1,
           "x": 1,
@@ -7533,6 +7630,30 @@
           "count": 1,
           "x": 0,
           "y": 154,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Helm ItemConfig 5",
+          "count": 1,
+          "x": 2,
+          "y": 154,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Helm ItemConfig 5",
+          "count": 1,
+          "x": 4,
+          "y": 155,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 7",
+          "count": 1,
+          "x": 0,
+          "y": 156,
           "rotated": 0,
           "slot": 0
         },
@@ -7962,7 +8083,7 @@
         },
         {
           "itemId": "Camomile ItemConfig ID",
-          "count": 9,
+          "count": 10,
           "x": 2,
           "y": 2,
           "rotated": 0,
@@ -8013,6 +8134,14 @@
           "count": 6,
           "x": 1,
           "y": 3,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Camomile ItemConfig ID",
+          "count": 3,
+          "x": 3,
+          "y": 0,
           "rotated": 0,
           "slot": 0
         },
@@ -8487,7 +8616,56 @@
       "relation": 0
     }
   ],
-  "worldItems": [],
+  "worldItems": [
+    {
+      "persistentId": "Stamina potion Config ID_12512383e56b48a0a4c7cda04d16d835",
+      "itemId": "Stamina potion Config ID",
+      "count": 1,
+      "locationId": "Village",
+      "positionX": -43.7310448,
+      "positionY": 1.39178,
+      "positionZ": 7.28995657,
+      "rotationX": 0.0023175145,
+      "rotationY": 0.0001600981,
+      "rotationZ": -0.0192431267,
+      "rotationW": 0.9998122,
+      "hasLifetime": false,
+      "remainingLifetimeSeconds": 0.0,
+      "isSceneAuthored": true
+    },
+    {
+      "persistentId": "Stamina potion Config ID_1b3237e26abd47d1bdd4fba498fb628a",
+      "itemId": "Stamina potion Config ID",
+      "count": 1,
+      "locationId": "Village",
+      "positionX": -43.4938431,
+      "positionY": 1.36290717,
+      "positionZ": 8.029527,
+      "rotationX": 0.0112021863,
+      "rotationY": -0.0009518907,
+      "rotationZ": -0.03254336,
+      "rotationW": 0.9994071,
+      "hasLifetime": false,
+      "remainingLifetimeSeconds": 0.0,
+      "isSceneAuthored": true
+    },
+    {
+      "persistentId": "Health potion Config ID_823e9a352e2a4d019aa3384a36197eb1",
+      "itemId": "Health potion Config ID",
+      "count": 1,
+      "locationId": "Village",
+      "positionX": 24.853,
+      "positionY": 1.61918628,
+      "positionZ": -0.796594739,
+      "rotationX": 4.67805449E-07,
+      "rotationY": -1.60362532E-08,
+      "rotationZ": -4.1590414E-07,
+      "rotationW": 1.0,
+      "hasLifetime": false,
+      "remainingLifetimeSeconds": 0.0,
+      "isSceneAuthored": true
+    }
+  ],
   "retiredSceneWorldItemIds": [],
   "farmPlants": [
     {
@@ -8607,10 +8785,10 @@
       "fieldId": "Chrysanthemums_PlantConfig_ID_field_162927accf104d17921df7c8820d93db",
       "locationId": "Forest",
       "plantConfigId": "Chrysanthemums PlantConfig ID",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": 10.3278151,
+      "positionY": 0.269999981,
+      "positionZ": -45.2672043,
       "bodyStageIndex": 1,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -8649,13 +8827,13 @@
       "fieldId": "Camomile_PlantConfig_ID_field_a4753bf1ece74c12a3ce5abecdd42da4",
       "locationId": "Forest",
       "plantConfigId": "Camomile PlantConfig ID",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
-      "bodyStageIndex": 0,
-      "remainingStageSeconds": 26.70712,
-      "isHarvestable": false,
+      "hasPosition": true,
+      "positionX": 88.30336,
+      "positionY": 0.230000019,
+      "positionZ": -109.973549,
+      "bodyStageIndex": 3,
+      "remainingStageSeconds": 0.0,
+      "isHarvestable": true,
       "fruits": []
     },
     {
@@ -8681,9 +8859,9 @@
       "positionX": 83.99434,
       "positionY": 0.230000019,
       "positionZ": -105.283844,
-      "bodyStageIndex": 1,
-      "remainingStageSeconds": 1.8324964,
-      "isHarvestable": false,
+      "bodyStageIndex": 3,
+      "remainingStageSeconds": 0.0,
+      "isHarvestable": true,
       "fruits": []
     },
     {
@@ -9255,7 +9433,158 @@
       "plantConfigId": "Apple PlantConfig",
       "remainingGrowSeconds": 4.0,
       "remainingFallSeconds": 55.0641365,
-      "slots": [],
+      "slots": [
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        },
+        {
+          "isOccupied": false
+        }
+      ],
       "pendingFallenSlotIndices": []
     }
   ]

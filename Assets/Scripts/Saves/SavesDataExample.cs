@@ -142,6 +142,7 @@ namespace YG
     public partial class SavesYG
     {
         public bool GameReadyMetricSend;
+        public float advertisingNewGameGraceRemainingSeconds;
         public int saveVersion;
         public string locationId;
         public string entranceId;

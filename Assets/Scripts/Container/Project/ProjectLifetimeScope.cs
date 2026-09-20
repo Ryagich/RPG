@@ -13,6 +13,7 @@ using Movement;
 using NPC;
 using Player;
 using TargetLock;
+using Telemetry;
 using UI;
 using UI.Configs;
 using UI.Map;
@@ -27,6 +28,7 @@ using Training;
 using Quests;
 using Saves;
 using Mill;
+using Advertising;
 
 namespace Container.Project
 {
@@ -59,6 +61,7 @@ namespace Container.Project
         [field: SerializeField] public FootstepConfig FootstepConfig { get; private set; }
         [field: SerializeField] public AnimationEventSoundConfig AnimationEventSoundConfig { get; private set; }
         [field: SerializeField] public LessonConfig LessonConfig { get; private set; }
+        [field: SerializeField] public AdvertisingConfig AdvertisingConfig { get; private set; }
         [field: SerializeField] public QuestCatalog QuestCatalog { get; private set; }
         [field: SerializeField] public MillQuestProgressionConfig MillQuestProgressionConfig { get; private set; }
         [field: SerializeField] public MillPropertyClaimQuestConfig MillPropertyClaimQuestConfig { get; private set; }
@@ -117,6 +120,8 @@ namespace Container.Project
             builder.RegisterInstance(FootstepConfig).AsSelf();
             builder.RegisterInstance(AnimationEventSoundConfig).AsSelf();
             builder.RegisterInstance(LessonConfig).AsSelf();
+            builder.RegisterInstance(AdvertisingConfig).AsSelf();
+            builder.Register<AdvertisingRuntimeState>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<AudioService>(Lifetime.Singleton).As<IAudioService>().AsSelf();
             builder.Register<SceneLoadingService>(Lifetime.Singleton).AsSelf();
             builder.Register<BootCompletion>(Lifetime.Singleton).AsSelf();
@@ -128,6 +133,7 @@ namespace Container.Project
             builder.Register<DialogueRuntimeFlagRegistry>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<ItemStorage>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<InputBindingOverridesBootstrap>();
+            builder.Register<YandexMetricaTelemetry>(Lifetime.Singleton).As<IGameTelemetry>();
 
             if (QuestCatalog != null)
             {

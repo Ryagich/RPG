@@ -25,6 +25,7 @@ namespace Container.Game
         private readonly TaskCompletionSource<bool> worldInitialized = new();
 
         public Task WorldInitialized => worldInitialized.Task;
+        public event Action LocationTransitionCompleted;
 
         public GameWorldBootstrapper(
             GameLifetimeScope scope,
@@ -61,8 +62,14 @@ namespace Container.Game
                 transitionContext.Clear();
             }
 
+            bool isConfirmedLocationTransition = sceneSessionConfiguration.IsGameplayScene &&
+                                               transitionContext.IsConfirmedGameplayTransition;
             scope.InitializeWorld(locationTransitions, audioService, savedPlayerPose);
             worldInitialized.TrySetResult(true);
+            if (isConfirmedLocationTransition)
+            {
+                LocationTransitionCompleted?.Invoke();
+            }
         }
     }
 }

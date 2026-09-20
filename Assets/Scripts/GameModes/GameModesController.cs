@@ -207,6 +207,16 @@ namespace GameModes
             Cursor.visible = !isGameplayMode;
         }
 
+        /// <summary>
+        /// Re-applies the state owned by the active game mode after an external fullscreen view
+        /// (for example, platform advertising) has changed Unity cursor or time settings.
+        /// </summary>
+        public void RestoreCurrentModeState()
+        {
+            ApplyCursorState(GameMode);
+            ApplyTimeScale(GameMode);
+        }
+
         private static void ApplyTimeScale(GameMode mode)
         {
             Time.timeScale = mode is GameMode.Pause or GameMode.PauseSettings or GameMode.Map or GameMode.Quest or GameMode.Lesson or GameMode.SwitchLocation ? 0f : 1f;

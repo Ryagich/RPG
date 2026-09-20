@@ -35,7 +35,8 @@ namespace Saves
         private const int NpcPersistentIdSaveVersion = 7;
         private const int WorldItemsSaveVersion = 8;
         private const int PlantWorldSaveVersion = 9;
-        private const int CurrentVersion = PlantWorldSaveVersion;
+        private const int AdvertisingSaveVersion = 10;
+        private const int CurrentVersion = AdvertisingSaveVersion;
         private const string PlayerCharacterId = "player";
         private readonly BootCompletion bootCompletion;
         private readonly RuntimeFactionRelations factionRelations;
@@ -250,6 +251,7 @@ namespace Saves
             data.water = 0f;
             data.food = 0f;
             data.GameReadyMetricSend = false;
+            data.advertisingNewGameGraceRemainingSeconds = 0f;
             data.playerCharacter = null;
             data.npcCharacters = Array.Empty<SavedCharacterState>();
             data.quests = Array.Empty<SavedQuestProgress>();
@@ -264,6 +266,23 @@ namespace Saves
             npcRegistry?.Clear();
             factionRelations.ResetToDefaults();
             dialogueRuntimeFlags?.Clear();
+            Persist();
+            return true;
+        }
+
+        internal float GetAdvertisingNewGameGraceRemainingSeconds()
+        {
+            return IsReady ? Mathf.Max(0f, YG2.saves.advertisingNewGameGraceRemainingSeconds) : 0f;
+        }
+
+        internal bool SetAdvertisingNewGameGraceRemainingSeconds(float remainingSeconds)
+        {
+            if (!IsReady)
+            {
+                return false;
+            }
+
+            YG2.saves.advertisingNewGameGraceRemainingSeconds = Mathf.Max(0f, remainingSeconds);
             Persist();
             return true;
         }

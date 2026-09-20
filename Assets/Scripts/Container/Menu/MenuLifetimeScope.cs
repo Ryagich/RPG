@@ -6,6 +6,8 @@ using UI.Pages;
 using UI.UIElements;
 using GameAudio;
 using Saves;
+using Telemetry;
+using Advertising;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -63,6 +65,8 @@ namespace Container.Menu
         private readonly IAudioService audioService;
         private readonly OpeningSlidesPage openingSlidesPage;
         private readonly BootCompletion bootCompletion;
+        private readonly IGameTelemetry telemetry;
+        private readonly AdvertisingRuntimeState advertisingRuntimeState;
         private BasePage currentPage;
 
         public MenuController(
@@ -73,7 +77,9 @@ namespace Container.Menu
             MenuGameplaySettingsPage gameplaySettingsPage,
             OpeningSlidesPage openingSlidesPage,
             IAudioService audioService,
-            BootCompletion bootCompletion)
+            BootCompletion bootCompletion,
+            IGameTelemetry telemetry,
+            AdvertisingRuntimeState advertisingRuntimeState)
         {
             this.sceneLoadingService = sceneLoadingService;
             this.mainPage = mainPage;
@@ -83,6 +89,8 @@ namespace Container.Menu
             this.openingSlidesPage = openingSlidesPage;
             this.audioService = audioService;
             this.bootCompletion = bootCompletion;
+            this.telemetry = telemetry;
+            this.advertisingRuntimeState = advertisingRuntimeState;
         }
 
         public async void Start()
@@ -146,6 +154,8 @@ namespace Container.Menu
                 return;
             }
 
+            telemetry.Track(GameTelemetryEvents.NewGameStarted);
+            advertisingRuntimeState.BeginNewGameGracePeriod();
             LoadGame();
         }
 

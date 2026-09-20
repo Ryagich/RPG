@@ -36,23 +36,34 @@ namespace Locations
     {
         private string targetLocationId;
         private string targetTransitionId;
+        private bool isConfirmedGameplayTransition;
 
         public bool HasPendingTransition => !string.IsNullOrWhiteSpace(targetLocationId)
                                             || !string.IsNullOrWhiteSpace(targetTransitionId);
 
         public string TargetLocationId => targetLocationId;
         public string TargetTransitionId => targetTransitionId;
+        public bool IsConfirmedGameplayTransition => isConfirmedGameplayTransition;
 
         public void SetPendingTransition(string locationId, string transitionId)
         {
             targetLocationId = locationId;
             targetTransitionId = transitionId;
+            isConfirmedGameplayTransition = false;
+        }
+
+        public void SetConfirmedGameplayTransition(string locationId, string transitionId)
+        {
+            targetLocationId = locationId;
+            targetTransitionId = transitionId;
+            isConfirmedGameplayTransition = true;
         }
 
         public void Clear()
         {
             targetLocationId = null;
             targetTransitionId = null;
+            isConfirmedGameplayTransition = false;
         }
     }
 
@@ -198,7 +209,7 @@ namespace Locations
 
         public void ConfirmTransition(VillageLocationTransitionRequest request)
         {
-            transitionContext.SetPendingTransition(request.TargetLocationId, request.TargetTransitionId);
+            transitionContext.SetConfirmedGameplayTransition(request.TargetLocationId, request.TargetTransitionId);
         }
 
         public bool TryGetTransition(string locationId, string transitionId, out VillageLocationTransition transition)

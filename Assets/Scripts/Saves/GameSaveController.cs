@@ -31,6 +31,7 @@ namespace Saves
         }
 
         public System.Threading.Tasks.Task Ready => saveService.Ready;
+        public bool IsReady => saveService.IsReady;
         public bool HasSavedData => saveService.HasSavedData;
         internal event Action CheckpointPreparing;
         internal event Action SaveReset;
@@ -127,6 +128,16 @@ namespace Saves
             }
 
             return reset;
+        }
+
+        public float GetAdvertisingNewGameGraceRemainingSeconds()
+        {
+            return saveService.GetAdvertisingNewGameGraceRemainingSeconds();
+        }
+
+        public bool SetAdvertisingNewGameGraceRemainingSeconds(float remainingSeconds)
+        {
+            return saveService.SetAdvertisingNewGameGraceRemainingSeconds(remainingSeconds);
         }
 
         internal bool TryGetLegacyMillScenario(out int stage, out int outcomeFlags)
