@@ -123,6 +123,7 @@ namespace Container.Project
             builder.Register<NpcCharacterSaveRegistry>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<GameSaveService>(Lifetime.Singleton).AsSelf();
             builder.Register<GameSaveController>(Lifetime.Singleton).AsSelf();
+            builder.RegisterEntryPoint<PlantWorldPersistenceService>(Lifetime.Singleton).AsSelf();
             builder.Register<LocationTransitionContext>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueRuntimeFlagRegistry>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<ItemStorage>(Lifetime.Singleton).AsSelf();

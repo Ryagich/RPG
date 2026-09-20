@@ -34,7 +34,8 @@ namespace Saves
         // obsolete NPC portion is discarded during migration.
         private const int NpcPersistentIdSaveVersion = 7;
         private const int WorldItemsSaveVersion = 8;
-        private const int CurrentVersion = WorldItemsSaveVersion;
+        private const int PlantWorldSaveVersion = 9;
+        private const int CurrentVersion = PlantWorldSaveVersion;
         private const string PlayerCharacterId = "player";
         private readonly BootCompletion bootCompletion;
         private readonly RuntimeFactionRelations factionRelations;
@@ -258,6 +259,8 @@ namespace Saves
             data.factionRelations = Array.Empty<SavedFactionRelation>();
             data.worldItems = Array.Empty<SavedWorldItem>();
             data.retiredSceneWorldItemIds = Array.Empty<string>();
+            data.farmPlants = Array.Empty<SavedFarmPlant>();
+            data.fruitTrees = Array.Empty<SavedFruitTree>();
             npcRegistry?.Clear();
             factionRelations.ResetToDefaults();
             dialogueRuntimeFlags?.Clear();
@@ -294,6 +297,22 @@ namespace Saves
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .Distinct(StringComparer.Ordinal)
                 .ToArray() ?? Array.Empty<string>();
+        }
+
+        internal SavedFarmPlant[] GetFarmPlants() => YG2.saves.farmPlants ?? Array.Empty<SavedFarmPlant>();
+
+        internal SavedFruitTree[] GetFruitTrees() => YG2.saves.fruitTrees ?? Array.Empty<SavedFruitTree>();
+
+        /// <summary>
+        /// Changes only the in-memory save snapshot. Plant growth never decides when the game
+        /// checkpoint is written; that remains GameSaveController's responsibility.
+        /// </summary>
+        internal void SetPlantWorldState(
+            IEnumerable<SavedFarmPlant> farmPlants,
+            IEnumerable<SavedFruitTree> fruitTrees)
+        {
+            YG2.saves.farmPlants = farmPlants?.ToArray() ?? Array.Empty<SavedFarmPlant>();
+            YG2.saves.fruitTrees = fruitTrees?.ToArray() ?? Array.Empty<SavedFruitTree>();
         }
 
         /// <summary>
@@ -487,6 +506,8 @@ namespace Saves
             YG2.saves.factionRelations ??= Array.Empty<SavedFactionRelation>();
             YG2.saves.worldItems ??= Array.Empty<SavedWorldItem>();
             YG2.saves.retiredSceneWorldItemIds ??= Array.Empty<string>();
+            YG2.saves.farmPlants ??= Array.Empty<SavedFarmPlant>();
+            YG2.saves.fruitTrees ??= Array.Empty<SavedFruitTree>();
         }
 
         private static void MigrateNpcStatesToPersistentIds()

@@ -151,6 +151,7 @@ namespace Container.Game
             {
                 builder.RegisterEntryPoint<MillQuestProgressionCoordinator>().AsSelf();
                 builder.RegisterEntryPoint<MillPropertyClaimQuestCoordinator>().AsSelf();
+                builder.RegisterEntryPoint<PlantWorldGameplaySession>().AsSelf();
             }
 
             builder.Register<LootingContext>(Lifetime.Singleton).AsSelf();

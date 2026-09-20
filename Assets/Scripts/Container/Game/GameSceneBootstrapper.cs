@@ -1,6 +1,9 @@
 using Container.Project;
+using Landings.Fields;
+using Landings.Plants;
 using Localization;
 using Locations;
+using Saves;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using VContainer;
@@ -28,6 +31,11 @@ namespace Container.Game
 
             var bootCompletion = projectScope.Container.Resolve<BootCompletion>();
             await bootCompletion.WaitAsync();
+
+            if (isGameplayScene)
+            {
+                RegisterPlantWorldDefinitions(projectScope);
+            }
 
             if (gameScopePrefab == null)
             {
@@ -76,6 +84,26 @@ namespace Container.Game
 
                 scope.parentReference.Object = gameLifetimeScope;
                 scope.Build();
+            }
+        }
+
+        private void RegisterPlantWorldDefinitions(ProjectLifetimeScope projectScope)
+        {
+            var plantWorld = projectScope.Container.Resolve<PlantWorldPersistenceService>();
+            foreach (FarmField field in FindObjectsByType<FarmField>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (field != null && field.gameObject.scene == gameObject.scene)
+                {
+                    field.RegisterPersistenceDefinition(plantWorld, locationSelector);
+                }
+            }
+
+            foreach (AppleTreeFruitGrower tree in FindObjectsByType<AppleTreeFruitGrower>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (tree != null && tree.gameObject.scene == gameObject.scene)
+                {
+                    tree.RegisterPersistenceDefinition(plantWorld, locationSelector);
+                }
             }
         }
     }

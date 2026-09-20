@@ -33,6 +33,7 @@ namespace Saves
         public System.Threading.Tasks.Task Ready => saveService.Ready;
         public bool HasSavedData => saveService.HasSavedData;
         internal event Action CheckpointPreparing;
+        internal event Action SaveReset;
         public event Action ReadyStateChanged
         {
             add => saveService.ReadyStateChanged += value;
@@ -122,6 +123,7 @@ namespace Saves
             if (reset)
             {
                 quests?.ClearRestoredProgress();
+                SaveReset?.Invoke();
             }
 
             return reset;
@@ -141,6 +143,17 @@ namespace Saves
             System.Collections.Generic.IEnumerable<string> retiredSceneWorldItemIds)
         {
             saveService.SetWorldItemState(worldItems, retiredSceneWorldItemIds);
+        }
+
+        internal YG.SavedFarmPlant[] GetFarmPlants() => saveService.GetFarmPlants();
+
+        internal YG.SavedFruitTree[] GetFruitTrees() => saveService.GetFruitTrees();
+
+        internal void SetPlantWorldState(
+            System.Collections.Generic.IEnumerable<YG.SavedFarmPlant> farmPlants,
+            System.Collections.Generic.IEnumerable<YG.SavedFruitTree> fruitTrees)
+        {
+            saveService.SetPlantWorldState(farmPlants, fruitTrees);
         }
 
         private static SavedPlayerPose ToSavedPlayerPose(Pose pose)

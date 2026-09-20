@@ -29,13 +29,17 @@ MonoBehaviour:
   - {fileID: 1928558604182438, guid: 007624b1cde2b434a8166ff9d5e8adcf, type: 3}
   - {fileID: 1106747676239828, guid: 5bef825efcb5f534f8d005ed0e8379cf, type: 3}
   - {fileID: 180557385942098344, guid: 7a278d869cff7a34cb9d1079bf7eaa9c, type: 3}
-  <GrowTime>k__BackingField: {x: 6, y: 7}
-  <TimeBetweenStages>k__BackingField: {x: 3, y: 4}
+  <GrowTime>k__BackingField: {x: 30, y: 45}
+  <TimeBetweenStages>k__BackingField: {x: 20, y: 40}
   <StartPosition>k__BackingField: {x: 0, y: -2, z: 0}
   <TargetPosition>k__BackingField: {x: 0, y: 0, z: 0}
   <PlantSoundsSettings>k__BackingField: {fileID: 11400000, guid: 5d4dc65609c6e9947b97b5c48afd7dcf, type: 2}
   <ItemGivenSound>k__BackingField: {fileID: 11400000, guid: 6daddde243e7fb141a82538068729e6d, type: 2}
   <Type>k__BackingField: 0
+  <TreeFruitGrowInterval>k__BackingField: {x: 4, y: 18}
+  <FruitFallCheckInterval>k__BackingField: {x: 45, y: 90}
+  <FruitFallChancePerCheck>k__BackingField: 0.03
+  <FruitFallChanceOnHit>k__BackingField: 0.2
   references:
     version: 2
     RefIds: []

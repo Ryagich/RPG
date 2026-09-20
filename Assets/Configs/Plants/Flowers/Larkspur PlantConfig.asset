@@ -27,8 +27,8 @@ MonoBehaviour:
   <Stages>k__BackingField:
   - {fileID: 3875006575053518572, guid: aa50bf4661e9863499780f30e2a23473, type: 3}
   - {fileID: 3875006575053518572, guid: ea9eee8dfd66e4d479d3960be4529514, type: 3}
-  <GrowTime>k__BackingField: {x: 1, y: 2}
-  <TimeBetweenStages>k__BackingField: {x: 1, y: 2}
+  <GrowTime>k__BackingField: {x: 20, y: 50}
+  <TimeBetweenStages>k__BackingField: {x: 30, y: 60}
   <StartPosition>k__BackingField: {x: 0, y: -2, z: 0}
   <TargetPosition>k__BackingField: {x: 0, y: 0, z: 0}
   <PlantSoundsSettings>k__BackingField: {fileID: 11400000, guid: 5d4dc65609c6e9947b97b5c48afd7dcf, type: 2}

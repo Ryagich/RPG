@@ -47,6 +47,55 @@ namespace YG
         public bool isSceneAuthored;
     }
 
+    /// <summary>
+    /// Runtime-independent state of one plant on a field. Visual objects are deliberately not
+    /// represented here: fields may be unloaded while this state continues to progress.
+    /// </summary>
+    [System.Serializable]
+    public struct SavedFarmPlant
+    {
+        public string plantId;
+        public string fieldId;
+        public string locationId;
+        public string plantConfigId;
+        public bool hasPosition;
+        public float positionX;
+        public float positionY;
+        public float positionZ;
+        public int bodyStageIndex;
+        public float remainingStageSeconds;
+        public bool isHarvestable;
+        public SavedFarmFruit[] fruits;
+    }
+
+    [System.Serializable]
+    public struct SavedFarmFruit
+    {
+        // -1 means that the point is empty and waiting for the next fruit to start growing.
+        public int stageIndex;
+        public float remainingStageSeconds;
+    }
+
+    /// <summary>Persistent state shared by all instances of an authored fruit tree.</summary>
+    [System.Serializable]
+    public struct SavedFruitTree
+    {
+        public string treeId;
+        public string locationId;
+        public string plantConfigId;
+        public float remainingGrowSeconds;
+        public float remainingFallSeconds;
+        public SavedFruitTreeSlot[] slots;
+        // Falls are retained until the tree location is available to create the physical item.
+        public int[] pendingFallenSlotIndices;
+    }
+
+    [System.Serializable]
+    public struct SavedFruitTreeSlot
+    {
+        public bool isOccupied;
+    }
+
     [System.Serializable]
     public struct SavedPlayerPose
     {
@@ -114,5 +163,7 @@ namespace YG
         public SavedFactionRelation[] factionRelations;
         public SavedWorldItem[] worldItems;
         public string[] retiredSceneWorldItemIds;
+        public SavedFarmPlant[] farmPlants;
+        public SavedFruitTree[] fruitTrees;
     }
 }

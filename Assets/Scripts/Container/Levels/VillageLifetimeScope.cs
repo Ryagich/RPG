@@ -1,4 +1,5 @@
 using Landings.Fields;
+using Landings.Plants;
 using Forest.Bandits;
 using Training;
 using Mill;
@@ -51,19 +52,23 @@ namespace Container.Levels
                 }
             });
 
-            if (farmFields == null)
-            {
-                return;
-            }
-
             builder.RegisterBuildCallback(container =>
             {
-                foreach (var farmField in farmFields)
+                foreach (var farmField in farmFields ?? System.Array.Empty<FarmField>())
                 {
                     if (farmField != null)
                     {
                         container.Inject(farmField);
                     }
+                }
+
+                // Fruit trees are scene visualizers, not DI services. Inject only currently
+                // active trees: inactive locations may already be removed from this scene.
+                foreach (var fruitTree in FindObjectsByType<AppleTreeFruitGrower>(
+                             FindObjectsInactive.Exclude,
+                             FindObjectsSortMode.None))
+                {
+                    container.Inject(fruitTree);
                 }
             });
         }
