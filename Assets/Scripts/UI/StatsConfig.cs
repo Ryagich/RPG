@@ -13,7 +13,6 @@ namespace UI
         // Chill отвечает за сон. Механик дня/ночи и сна пока нет, поэтому системно он выключен,
         // но config оставлен, чтобы вернуть стат без миграции serialized данных.
         [field: SerializeField] public AdditionalPeriodicStat ChillStat { get; private set; }
-        [field: SerializeField] public Stamina StaminaStat { get; private set; }
         [field: SerializeField] public Stat PhysicalDefenseStat { get; private set; } = CreateDefaultProtectionStat();
         [field: SerializeField] public Stat TemperatureDefenseStat { get; private set; } = CreateDefaultStat();
         [field: SerializeField] public Stat PsiDefenseStat { get; private set; } = CreateDefaultStat();
@@ -30,7 +29,6 @@ namespace UI
                 StatType.Water => WaterStat,
                 StatType.Food => FoodStat,
                 StatType.Chill => ChillStat,
-                StatType.Stamina => StaminaStat,
                 StatType.PhysicalDefense => PhysicalDefenseStat ??= CreateDefaultProtectionStat(),
                 StatType.TemperatureDefense => TemperatureDefenseStat ??= CreateDefaultStat(),
                 StatType.PsiDefense => PsiDefenseStat ??= CreateDefaultStat(),
@@ -47,7 +45,6 @@ namespace UI
                 StatType.Water => WaterStat,
                 StatType.Food => FoodStat,
                 StatType.Chill => ChillStat,
-                StatType.Stamina => StaminaStat,
                 _ => throw new System.ArgumentOutOfRangeException(nameof(statType), statType, null)
             };
         }

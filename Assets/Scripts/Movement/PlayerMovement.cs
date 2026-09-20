@@ -203,8 +203,8 @@ namespace Movement
 
         private float GetWeightSpeedMultiplier()
         {
-            var staminaStat = (Stamina)statsController.GetStat(StatType.Stamina);
-            var weightEffect = staminaStat.EvaluateWeightDrainMultiplier(playerInventory.GetMovementSlowdownNormalizedWeight(), 1f);
+            var weightEffect = playerMovementConfig.EvaluateWeightSpeedPenalty(
+                playerInventory.GetMovementSlowdownNormalizedWeight());
             return Mathf.Clamp01(1f - weightEffect * playerMovementConfig.WeightSpeedPenaltyMultiplier);
         }
 

@@ -8,6 +8,7 @@ namespace Stats
     public class StaminaMovementChanger : IStartable, ITickable
     {
         private readonly StatsConfig statsConfig;
+        private readonly StaminaConfig staminaConfig;
         private readonly StatsController statsController;
         private readonly IInventory inventory;
         private readonly ICharacterInventoryCapacity inventoryCapacity;
@@ -18,12 +19,14 @@ namespace Stats
 
         public StaminaMovementChanger(
             StatsConfig statsConfig,
+            StaminaConfig staminaConfig,
             StatsController statsController,
             IInventory inventory,
             ICharacterInventoryCapacity inventoryCapacity,
             IStaminaMovementState movementState)
         {
             this.statsConfig = statsConfig;
+            this.staminaConfig = staminaConfig;
             this.statsController = statsController;
             this.inventory = inventory;
             this.inventoryCapacity = inventoryCapacity;
@@ -65,9 +68,9 @@ namespace Stats
                 return;
             }
 
-            var staminaStat = (Stamina)statsController.GetStat(StatType.Stamina);
-            var drainMultiplier = staminaStat.EvaluateWeightDrainMultiplier(inventoryCapacity.CurrentWeight, inventory.MaxWeight);
-            var drainAmount = inventoryCapacity.CurrentWeight * drainMultiplier;
+            var drainAmount = staminaConfig.EvaluateMovementDrainPerSecond(
+                inventoryCapacity.CurrentWeight,
+                inventory.MaxWeight) * Mathf.Max(statsConfig.PeriodicChangeIntervalSeconds, float.Epsilon);
             if (Mathf.Approximately(drainAmount, 0f))
             {
                 return;
@@ -75,7 +78,7 @@ namespace Stats
 
             if (movementState.IsRunning)
             {
-                drainAmount *= staminaStat.RunDrainMultiplier;
+                drainAmount *= staminaConfig.RunDrainMultiplier;
             }
 
             statsController.AddValue(StatType.Stamina, -drainAmount, StatChangeSource.Periodic);

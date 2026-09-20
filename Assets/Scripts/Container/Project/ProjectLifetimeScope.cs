@@ -29,6 +29,7 @@ using Quests;
 using Saves;
 using Mill;
 using Advertising;
+using Stats;
 
 namespace Container.Project
 {
@@ -42,6 +43,7 @@ namespace Container.Project
         [field: SerializeField] public GravityConfig GravityConfig { get; private set; }
         [field: SerializeField] public UIConfig UIConfig { get; private set; }
         [field: SerializeField] public StatsConfig StatsConfig { get; private set; }
+        [field: SerializeField] public StaminaConfig StaminaConfig { get; private set; }
         [field: SerializeField] public LocalizationConfig LocalizationConfig { get; private set; }
         [field: SerializeField] public InteractableConfig InteractableConfig { get; private set; }
         [field: SerializeField] public InventoryConfig InventoryConfig { get; private set; }
@@ -98,6 +100,7 @@ namespace Container.Project
             builder.RegisterInstance(GravityConfig).AsSelf();
             builder.RegisterInstance(UIConfig).AsSelf();
             builder.RegisterInstance(StatsConfig).AsSelf();
+            builder.RegisterInstance(StaminaConfig).AsSelf();
             builder.RegisterInstance(LocalizationConfig).AsSelf();
             builder.RegisterInstance(InteractableConfig).AsSelf();
             builder.RegisterInstance(InventoryConfig).AsSelf();

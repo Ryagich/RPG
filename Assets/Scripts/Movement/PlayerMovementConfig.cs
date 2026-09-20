@@ -32,6 +32,15 @@ namespace Movement
         [field: Space]
         [field: Header("Weight")]
         [field: SerializeField, Min(0f)] public float WeightSpeedPenaltyMultiplier { get; private set; } = 3f;
+        [field: SerializeField] public AnimationCurve WeightSpeedPenaltyCurve { get; private set; } = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+
+        public float EvaluateWeightSpeedPenalty(float normalizedOverload)
+        {
+            var curveValue = WeightSpeedPenaltyCurve != null
+                ? WeightSpeedPenaltyCurve.Evaluate(Mathf.Clamp01(normalizedOverload))
+                : Mathf.Clamp01(normalizedOverload);
+            return Mathf.Max(0f, curveValue);
+        }
 
         [field: Space]
         [field: Header("Evasion root motion")]

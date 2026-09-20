@@ -36,7 +36,7 @@ namespace Stats
         public Stat Hp => GetStat(StatType.Hp);
         public IObservable<StatChangeInfo> Changed => changed;
 
-        public StatsController(StatsConfig statsConfig)
+        public StatsController(StatsConfig statsConfig, StaminaConfig staminaConfig)
         {
             statsByType = new Dictionary<StatType, Stat>
             {
@@ -46,7 +46,7 @@ namespace Stats
                 // Chill отвечает за сон. Механик дня/ночи и сна пока нет, поэтому другие системы
                 // не используют этот стат, но экземпляр оставлен для совместимости и будущего возврата.
                 [StatType.Chill] = new AdditionalPeriodicStat(statsConfig.GetAdditionalPeriodicStatConfig(StatType.Chill)),
-                [StatType.Stamina] = new Stamina(statsConfig.StaminaStat),
+                [StatType.Stamina] = new Stamina(staminaConfig.Stamina),
                 [StatType.PhysicalDefense] = new (statsConfig.PhysicalDefenseStat),
                 [StatType.TemperatureDefense] = new (statsConfig.TemperatureDefenseStat),
                 [StatType.PsiDefense] = new (statsConfig.PsiDefenseStat),

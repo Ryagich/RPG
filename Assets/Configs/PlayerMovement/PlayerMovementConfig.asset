@@ -24,5 +24,29 @@ MonoBehaviour:
   <RunSpeedChangeRate>k__BackingField: 7
   <SpeedChangeRateBlendSpeed>k__BackingField: 6
   <WeightSpeedPenaltyMultiplier>k__BackingField: 3
+  <WeightSpeedPenaltyCurve>k__BackingField:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0.32467356
+      outSlope: 0.32467356
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.11398839
+    - serializedVersion: 3
+      time: 1
+      value: 0.165
+      inSlope: 0.4463881
+      outSlope: 0.4463881
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.1461221
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   <DodgeRootMotionMultiplier>k__BackingField: 1.75
   <RollRootMotionMultiplier>k__BackingField: 1

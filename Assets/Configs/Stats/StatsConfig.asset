@@ -44,44 +44,6 @@ MonoBehaviour:
     <MinSafePercent>k__BackingField: 0.15
     <PeriodicChange>k__BackingField: -0.1
     <PeriodicHpDamageWhenEmpty>k__BackingField: 0.1
-  <StaminaStat>k__BackingField:
-    <Max>k__BackingField: 300
-    <Min>k__BackingField: 0
-    <Value>k__BackingField:
-      value: 300
-    <MinSafePercent>k__BackingField: 0.05
-    <PeriodicChange>k__BackingField: 0.65
-    <MovingRecoveryPeriodicChange>k__BackingField: 0.2
-    <WeightDrainMultiplierCurve>k__BackingField:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0
-        inSlope: 0.32467356
-        outSlope: 0.32467356
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0.11398839
-      - serializedVersion: 3
-        time: 1
-        value: 0.165
-        inSlope: 0.4463881
-        outSlope: 0.4463881
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.1461221
-        outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    <RunDrainMultiplier>k__BackingField: 1.1
-    <RegenResumeDelayAfterEmptySeconds>k__BackingField: 0.5
-    <LightAttackCost>k__BackingField: 2
-    <HeavyAttackCost>k__BackingField: 4
-    <DodgeCost>k__BackingField: 3
-    <RollCost>k__BackingField: 5
   <PhysicalDefenseStat>k__BackingField:
     <Max>k__BackingField: 1
     <Min>k__BackingField: 0
