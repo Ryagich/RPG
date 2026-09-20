@@ -1,32 +1,32 @@
 {
-  "idSave": 242,
+  "idSave": 243,
   "GameReadyMetricSend": true,
   "advertisingNewGameGraceRemainingSeconds": 0.0,
   "saveVersion": 10,
-  "locationId": "Village",
-  "entranceId": "To Forrest",
+  "locationId": "Forest",
+  "entranceId": "To Village",
   "playerPose": {
     "isValid": 1,
-    "positionX": 24.49481,
-    "positionY": 0.410471618,
-    "positionZ": 0.279559016,
+    "positionX": 53.0,
+    "positionY": 0.45,
+    "positionZ": -22.0,
     "rotationX": 0.0,
-    "rotationY": -0.08715578,
+    "rotationY": 0.7071068,
     "rotationZ": 0.0,
-    "rotationW": 0.9961947
+    "rotationW": 0.7071068
   },
   "money": 83,
   "health": 100.0,
-  "stamina": 269.153656,
-  "water": 45.8253632,
-  "food": 32.6783333,
+  "stamina": 263.4494,
+  "water": 44.545578,
+  "food": 32.0381966,
   "playerCharacter": {
     "characterId": "player",
     "isAlive": true,
     "health": 100.0,
-    "stamina": 269.153656,
-    "water": 45.8253632,
-    "food": 32.6783333,
+    "stamina": 263.4494,
+    "water": 44.545578,
+    "food": 32.0381966,
     "inventory": [
       {
         "itemId": "Larkspur ItemConfig ID",
@@ -855,7 +855,7 @@
         },
         {
           "itemId": "Bottle of Water Config ID",
-          "count": 10,
+          "count": 11,
           "x": 3,
           "y": 0,
           "rotated": 0,
@@ -2086,7 +2086,7 @@
           "slot": 0
         },
         {
-          "itemId": "Ring_08 Config ID",
+          "itemId": "Ring_02 Config ID",
           "count": 1,
           "x": 1,
           "y": 0,
@@ -2094,7 +2094,7 @@
           "slot": 0
         },
         {
-          "itemId": "Ring_09 Config ID",
+          "itemId": "Ring_03 Config ID",
           "count": 1,
           "x": 2,
           "y": 0,
@@ -3582,6 +3582,70 @@
           "slot": 0
         },
         {
+          "itemId": "Legs ItemConfig 1",
+          "count": 1,
+          "x": 4,
+          "y": 122,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 1",
+          "count": 1,
+          "x": 0,
+          "y": 124,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 2",
+          "count": 1,
+          "x": 2,
+          "y": 124,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 2",
+          "count": 1,
+          "x": 4,
+          "y": 124,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 16",
+          "count": 1,
+          "x": 0,
+          "y": 126,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 16",
+          "count": 1,
+          "x": 2,
+          "y": 126,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 12",
+          "count": 1,
+          "x": 4,
+          "y": 126,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 12",
+          "count": 1,
+          "x": 0,
+          "y": 128,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
           "itemId": "Body ItemConfig 8",
           "count": 1,
           "x": 0,
@@ -4063,7 +4127,7 @@
         },
         {
           "itemId": "Ring_04 Config ID",
-          "count": 5,
+          "count": 10,
           "x": 2,
           "y": 3,
           "rotated": 0,
@@ -4127,7 +4191,7 @@
         },
         {
           "itemId": "Ring_06 Config ID",
-          "count": 1,
+          "count": 4,
           "x": 3,
           "y": 4,
           "rotated": 0,
@@ -4135,7 +4199,7 @@
         },
         {
           "itemId": "Ring_05 Config ID",
-          "count": 10,
+          "count": 12,
           "x": 4,
           "y": 4,
           "rotated": 0,
@@ -4175,8 +4239,16 @@
         },
         {
           "itemId": "Ring_09 Config ID",
-          "count": 1,
+          "count": 5,
           "x": 2,
+          "y": 5,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Ring_05 Config ID",
+          "count": 6,
+          "x": 3,
           "y": 5,
           "rotated": 0,
           "slot": 0
@@ -4918,8 +4990,8 @@
           "slot": 0
         },
         {
-          "itemId": "Bread Config ID",
-          "count": 5,
+          "itemId": "Ring_03 Config ID",
+          "count": 1,
           "x": 2,
           "y": 0,
           "rotated": 0,
@@ -4935,7 +5007,7 @@
         },
         {
           "itemId": "Bottle of Water Config ID",
-          "count": 11,
+          "count": 13,
           "x": 4,
           "y": 0,
           "rotated": 0,
@@ -5103,7 +5175,7 @@
         },
         {
           "itemId": "Piece of cheese Config ID",
-          "count": 17,
+          "count": 20,
           "x": 3,
           "y": 6,
           "rotated": 0,
@@ -5247,7 +5319,7 @@
         },
         {
           "itemId": "Bottle of wine Config ID",
-          "count": 7,
+          "count": 10,
           "x": 6,
           "y": 11,
           "rotated": 0,
@@ -5287,7 +5359,7 @@
         },
         {
           "itemId": "Mug of beer Config ID",
-          "count": 11,
+          "count": 16,
           "x": 6,
           "y": 13,
           "rotated": 0,
@@ -5359,7 +5431,7 @@
         },
         {
           "itemId": "Bread Config ID",
-          "count": 2,
+          "count": 5,
           "x": 0,
           "y": 17,
           "rotated": 0,
@@ -5367,7 +5439,7 @@
         },
         {
           "itemId": "Baguette Config ID",
-          "count": 1,
+          "count": 3,
           "x": 4,
           "y": 17,
           "rotated": 0,
@@ -5386,6 +5458,46 @@
           "count": 2,
           "x": 2,
           "y": 18,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Cooked turkey Config ID",
+          "count": 2,
+          "x": 4,
+          "y": 18,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Cooked turkey Config ID",
+          "count": 2,
+          "x": 0,
+          "y": 20,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Cooked turkey Config ID",
+          "count": 1,
+          "x": 2,
+          "y": 20,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Bread Config ID",
+          "count": 2,
+          "x": 1,
+          "y": 17,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Piece of cheese Config ID",
+          "count": 2,
+          "x": 6,
+          "y": 17,
           "rotated": 0,
           "slot": 0
         },
@@ -7426,6 +7538,14 @@
           "slot": 0
         },
         {
+          "itemId": "Sword 7 Item Config ID",
+          "count": 1,
+          "x": 0,
+          "y": 138,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
           "itemId": "Hips ItemConfig 20",
           "count": 1,
           "x": 1,
@@ -7626,6 +7746,14 @@
           "slot": 0
         },
         {
+          "itemId": "Sword 7 Item Config ID",
+          "count": 1,
+          "x": 6,
+          "y": 153,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
           "itemId": "Body ItemConfig 25",
           "count": 1,
           "x": 0,
@@ -7654,6 +7782,62 @@
           "count": 1,
           "x": 0,
           "y": 156,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Sword 12 Item Config ID",
+          "count": 1,
+          "x": 2,
+          "y": 156,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Helm ItemConfig 6",
+          "count": 1,
+          "x": 3,
+          "y": 157,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 26",
+          "count": 1,
+          "x": 0,
+          "y": 158,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 12",
+          "count": 1,
+          "x": 5,
+          "y": 158,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 12",
+          "count": 1,
+          "x": 3,
+          "y": 159,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 14",
+          "count": 1,
+          "x": 0,
+          "y": 160,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Arms ItemConfig 2",
+          "count": 1,
+          "x": 5,
+          "y": 160,
           "rotated": 0,
           "slot": 0
         },
@@ -7963,7 +8147,7 @@
       "inventory": [
         {
           "itemId": "Mug of beer Config ID",
-          "count": 18,
+          "count": 20,
           "x": 0,
           "y": 0,
           "rotated": 0,
@@ -7978,9 +8162,17 @@
           "slot": 0
         },
         {
-          "itemId": "Bottle of Water Config ID",
-          "count": 15,
+          "itemId": "Ring_07 Config ID",
+          "count": 1,
           "x": 2,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Bottle of Water Config ID",
+          "count": 5,
+          "x": 3,
           "y": 0,
           "rotated": 0,
           "slot": 0
@@ -8115,7 +8307,7 @@
         },
         {
           "itemId": "Larkspur ItemConfig ID",
-          "count": 8,
+          "count": 10,
           "x": 6,
           "y": 2,
           "rotated": 0,
@@ -8131,17 +8323,17 @@
         },
         {
           "itemId": "Chrysanthemums ItemConfig ID ",
-          "count": 6,
+          "count": 9,
           "x": 1,
           "y": 3,
           "rotated": 0,
           "slot": 0
         },
         {
-          "itemId": "Camomile ItemConfig ID",
-          "count": 3,
-          "x": 3,
-          "y": 0,
+          "itemId": "Larkspur ItemConfig ID",
+          "count": 1,
+          "x": 2,
+          "y": 3,
           "rotated": 0,
           "slot": 0
         },

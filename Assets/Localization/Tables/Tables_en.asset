@@ -4144,6 +4144,12 @@ MonoBehaviour:
   - m_Id: 99400000000000004
     m_Localized: "That is what I wanted to hear. Stay with the squad and watch the flank. When we see the bandits, we cut them down fast and do not let them touch the miller."
     m_Metadata: {m_Items: []}
+  - m_Id: 99500000000000001
+    m_Localized: YOU DIED
+    m_Metadata: {m_Items: []}
+  - m_Id: 99500000000000002
+    m_Localized: Press any key
+    m_Metadata: {m_Items: []}
   references:
     version: 2
     RefIds: []

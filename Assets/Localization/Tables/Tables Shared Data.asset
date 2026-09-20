@@ -3805,6 +3805,14 @@ MonoBehaviour:
     m_Key: Dialog_Aldren_FirstMeeting_BattleReady
     m_Metadata:
       m_Items: []
+  - m_Id: 99500000000000001
+    m_Key: Death_Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 99500000000000002
+    m_Key: Death_Continue
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
