@@ -17,6 +17,6 @@ MonoBehaviour:
     year: 2026
     month: 9
     day: 20
-  interstitialCooldownSeconds: 1
-  rewardedCooldownSeconds: 1
-  newGameGracePeriodSeconds: 1
+  interstitialCooldownSeconds: 60
+  rewardedCooldownSeconds: 300
+  newGameGracePeriodSeconds: 300
