@@ -366114,8 +366114,8 @@ MonoBehaviour:
   objectsToDestroyOnSceneStart:
   - {fileID: 869122094}
   navMeshSurface: {fileID: 389327572}
-  defaultLocationId: River
-  defaultPlayerTransform: {fileID: 1928894838}
+  defaultLocationId: Castle
+  defaultPlayerTransform: {fileID: 1303929981}
 --- !u!4 &2077356446
 Transform:
   m_ObjectHideFlags: 0

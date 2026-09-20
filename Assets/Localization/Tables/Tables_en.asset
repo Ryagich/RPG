@@ -35,7 +35,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 7531139094003712
-    m_Localized: Eng pls
+    m_Localized: Ren
     m_Metadata:
       m_Items: []
   - m_Id: 7531326545838080
@@ -326,15 +326,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 54301381582688262
-    m_Localized: Have you counted how many spears they have yet?
-    m_Metadata:
-      m_Items: []
-  - m_Id: 54301381582688263
-    m_Localized: No. Should I?
-    m_Metadata:
-      m_Items: []
-  - m_Id: 54301381582688264
-    m_Localized: No. There are plenty without counting.
+    m_Localized: So, Ren. What do you want to talk about?
     m_Metadata:
       m_Items: []
   - m_Id: 54301381582688265

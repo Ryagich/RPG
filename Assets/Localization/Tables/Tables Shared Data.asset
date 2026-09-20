@@ -32,7 +32,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 7531139094003712
-    m_Key: Player_Name_Test
+    m_Key: Character_Player_Name
     m_Metadata:
       m_Items: []
   - m_Id: 7531326545838080
@@ -258,15 +258,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 54301381582688262
-    m_Key: Oswin_Normal_Entry
-    m_Metadata:
-      m_Items: []
-  - m_Id: 54301381582688263
-    m_Key: Oswin_Normal_Answer
-    m_Metadata:
-      m_Items: []
-  - m_Id: 54301381582688264
-    m_Key: Oswin_Normal_Reply
+    m_Key: Oswin_Root_Greeting
     m_Metadata:
       m_Items: []
   - m_Id: 54301381582688265

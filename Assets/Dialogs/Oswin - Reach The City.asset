@@ -15,8 +15,6 @@ MonoBehaviour:
   Nodes:
   - Position: {x: 1014.08386, y: 33.680687}
     Phrase: {fileID: 11400000, guid: 89886865c12e7c147a89adf0209b7542, type: 2}
-  - Position: {x: 1383.4707, y: 31.484617}
-    Phrase: {fileID: 11400000, guid: fdf5f3a75796e764cbec3538fca8fa82, type: 2}
   - Position: {x: 1017.703, y: 543.8376}
     Phrase: {fileID: 11400000, guid: d53841bbdab339c4e8149780b8218f86, type: 2}
   - Position: {x: 1378.3118, y: 476.49353}
