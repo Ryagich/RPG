@@ -3805,6 +3805,22 @@ MonoBehaviour:
     m_Key: Death_Continue
     m_Metadata:
       m_Items: []
+  - m_Id: 99500000000000003
+    m_Key: Dialogue_Trade
+    m_Metadata:
+      m_Items: []
+  - m_Id: 99500000000000004
+    m_Key: Trade_Sell
+    m_Metadata:
+      m_Items: []
+  - m_Id: 99500000000000005
+    m_Key: Trade_Buy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 99500000000000006
+    m_Key: Trade_Exit
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

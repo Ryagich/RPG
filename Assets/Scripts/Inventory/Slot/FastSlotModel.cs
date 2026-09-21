@@ -8,14 +8,12 @@ namespace Inventory.Slot
     {
         public int Index { get; }
         public string ActionName { get; }
-        public string DisplayName { get; }
         public ItemConfig ItemConfig { get; private set; }
 
-        public FastSlotModel(int index, string actionName, string displayName)
+        public FastSlotModel(int index, string actionName)
         {
             Index = index;
             ActionName = actionName;
-            DisplayName = displayName;
         }
 
         public void Assign(ItemConfig itemConfig)

@@ -58,7 +58,7 @@ MonoBehaviour:
   characterInfo: {fileID: 11400000, guid: 3e00ca4ee5487f047ba759a296c3372a, type: 2}
   inventoryConfig: {fileID: 0}
   defaultVisualConfig: {fileID: 11400000, guid: d06f3e2d4c1b7256a789abcdef012345, type: 2}
-  faction: {fileID: 11400000, guid: dc98ce5b51f108947b4b8e8bc61ffc22, type: 2}
+  faction: {fileID: 11400000, guid: b0d1d20fc010f724ab3a4a56bd0ff239, type: 2}
   itemSetConfig: {fileID: 11400000, guid: b4813f0f05057d94690c04ed980b855f, type: 2}
   corpseInteractionRadius: 1.8
 --- !u!143 &8919774632917513484
@@ -3757,6 +3757,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_07
+  gender: 0
 --- !u!1 &9063766246196586 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3230092028089281703, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -3776,6 +3777,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_29
+  gender: 2
 --- !u!1 &19194939402210898 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3222208252489394079, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -3795,6 +3797,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_15
+  gender: 0
 --- !u!1 &27254472164611182 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3212041986795257251, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -3814,6 +3817,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 5
   visualName: Chr_Eyebrow_Male_01
+  gender: 0
 --- !u!1 &28617725739033862 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3212772207320091851, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -3833,6 +3837,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_15
+  gender: 0
 --- !u!1 &36303904854894519 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3203008020215647866, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -3967,6 +3972,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_05
+  gender: 0
 --- !u!1 &81611556769373706 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3301795623500888007, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -3986,6 +3992,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_01
+  gender: 0
 --- !u!1 &92531087545840402 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3295254421040143071, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4005,6 +4012,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_06
+  gender: 0
 --- !u!1 &144381346876525247 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3383143362293867378, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4024,6 +4032,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_02
+  gender: 0
 --- !u!1 &162548701439511551 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3364991332022706738, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4043,6 +4052,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 5
   visualName: Chr_Eyebrow_Male_07
+  gender: 0
 --- !u!1 &190088427278920128 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3337431815192625165, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4062,6 +4072,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_09
+  gender: 0
 --- !u!1 &198528800757335719 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3328991368430808938, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4196,6 +4207,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_08
+  gender: 0
 --- !u!1 &223024661931850231 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3453121102482690106, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4215,6 +4227,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_07
+  gender: 0
 --- !u!1 &273563052922578188 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3402540723674057921, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4234,6 +4247,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_16
+  gender: 0
 --- !u!1 &338026153493385054 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2901246257676183187, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4253,6 +4267,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_07
+  gender: 0
 --- !u!1 &348477824821190503 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2892910042358150826, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4272,6 +4287,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_20
+  gender: 0
 --- !u!1 &375603152516151433 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3010038376830488900, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4291,6 +4307,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_19
+  gender: 0
 --- !u!1 &381692432576815918 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3008316425607154403, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4310,6 +4327,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_06
+  gender: 0
 --- !u!1 &510773999692075679 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3162941839915187026, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4329,6 +4347,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_04
+  gender: 0
 --- !u!1 &527731919920890222 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3143870456289732771, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4348,6 +4367,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_04
+  gender: 0
 --- !u!1 &560815039690244722 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3115310796126858175, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4367,6 +4387,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_28
+  gender: 0
 --- !u!1 &574993389153051549 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3101130316242340432, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4386,6 +4407,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_05
+  gender: 0
 --- !u!1 &578138067681315978 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2663405724309988679, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4405,6 +4427,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_08
+  gender: 0
 --- !u!1 &592852260651080553 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2650824789721002660, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4424,6 +4447,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_11
+  gender: 0
 --- !u!1 &607272334449879068 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2638777466326680017, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4443,6 +4467,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_08
+  gender: 0
 --- !u!1 &624772311573764435 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2618851962256437406, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4462,6 +4487,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_10
+  gender: 0
 --- !u!1 &682873908814531350 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2704880882082013915, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4481,6 +4507,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_13
+  gender: 0
 --- !u!1 &697987625324744103 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2692137639357850730, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4500,6 +4527,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 7
   visualName: Chr_HeadCoverings_No_FacialHair_02
+  gender: 0
 --- !u!1 &706057297426018410 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2684092294086121895, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4519,6 +4547,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_17
+  gender: 0
 --- !u!1 &745057898817720056 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2784736197771700021, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4538,6 +4567,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 29
   visualName: Chr_KneeAttachRight_04
+  gender: 0
 --- !u!1 &745997545463786886 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2786026365287466059, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4557,6 +4587,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_13
+  gender: 0
 --- !u!1 &746191578772886567 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2785658540069420522, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4576,6 +4607,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_13
+  gender: 0
 --- !u!1 &775766120625853375 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2753871776476068466, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4595,6 +4627,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_00
+  gender: 0
 --- !u!1 &861107779381127187 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2810492535228449246, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4614,6 +4647,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_15
+  gender: 0
 --- !u!1 &865347294064520657 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2373942498955625500, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4633,6 +4667,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_14
+  gender: 0
 --- !u!1 &920023476341904179 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2321377585362811646, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4652,6 +4687,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_11
+  gender: 0
 --- !u!1 &942114865141984122 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2441149584489874103, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4671,6 +4707,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_04
+  gender: 0
 --- !u!1 &980993483926087596 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2409026159189200481, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4690,6 +4727,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_04
+  gender: 0
 --- !u!1 &1003080792837517067 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2384669531091191494, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4709,6 +4747,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_21
+  gender: 2
 --- !u!1 &1077944461339889689 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2451651589895109076, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4843,6 +4882,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_03
+  gender: 0
 --- !u!1 &1082605410580402982 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2591130017986788075, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4862,6 +4902,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_06
+  gender: 0
 --- !u!1 &1087475860843405631 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2586431160306993394, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4881,6 +4922,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 19
   visualName: Chr_ElbowAttachLeft_03
+  gender: 0
 --- !u!1 &1096534133937613948 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2577201496475731377, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4900,6 +4942,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_08
+  gender: 2
 --- !u!1 &1171653231651755406 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4373321309442096195, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4919,6 +4962,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_22
+  gender: 0
 --- !u!1 &1200732438474663204 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4348928225471728873, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4938,6 +4982,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_No_Elements_Male_07
+  gender: 0
 --- !u!1 &1214585977215057665 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4334916288589158092, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4957,6 +5002,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_08
+  gender: 0
 --- !u!1 &1216814884250445055 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4328340049882795314, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4976,6 +5022,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_00
+  gender: 0
 --- !u!1 &1242189963632424772 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4453639844964736649, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -4995,6 +5042,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_07
+  gender: 0
 --- !u!1 &1247574680935420159 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4441642596079958322, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5014,6 +5062,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_10
+  gender: 0
 --- !u!1 &1253770427173994333 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4437714043018663568, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5033,6 +5082,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_23
+  gender: 0
 --- !u!1 &1255459244595935389 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4440528820510216528, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5052,6 +5102,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_13
+  gender: 0
 --- !u!1 &1328299648720245076 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4511680597001025689, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5071,6 +5122,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_12
+  gender: 0
 --- !u!1 &1341929997452616255 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4498210776915446770, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5090,6 +5142,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_04
+  gender: 0
 --- !u!1 &1380437192067279851 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4601527254731964966, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5109,6 +5162,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_05
+  gender: 0
 --- !u!1 &1428436338700910481 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4549048693633668700, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5128,6 +5182,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_10
+  gender: 0
 --- !u!1 &1542407180426013191 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4148976134546408394, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5147,6 +5202,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_06
+  gender: 0
 --- !u!1 &1565134261309786985 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4128637257275040420, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5166,6 +5222,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 3
   visualName: Chr_HelmetAttachment_06
+  gender: 0
 --- !u!1 &1566639132734359490 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4129366666442190351, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5185,6 +5242,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_18
+  gender: 0
 --- !u!1 &1581529709627101960 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4107595135178996421, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5204,6 +5262,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 5
   visualName: Chr_Eyebrow_Male_10
+  gender: 0
 --- !u!1 &1596762966170555035 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4241110546551929686, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5223,6 +5282,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_26
+  gender: 0
 --- !u!1 &1664274954238020463 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4317568477965869730, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5242,6 +5302,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_16
+  gender: 0
 --- !u!1 &1696332240398377502 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4285511255760260051, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5261,6 +5322,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_No_Elements_Male_12
+  gender: 0
 --- !u!1 &1712196710109639899 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4265283992696577302, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5280,6 +5342,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_05
+  gender: 0
 --- !u!1 &1723349940822568089 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4258493491095586132, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5414,6 +5477,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_03
+  gender: 0
 --- !u!1 &1735419856500682468 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3811971411218155305, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5433,6 +5497,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_16
+  gender: 0
 --- !u!1 &1750403919034045335 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3799080887929436762, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5452,6 +5517,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_14
+  gender: 0
 --- !u!1 &1764741469904816907 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3787030183402824390, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5471,6 +5537,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_19
+  gender: 0
 --- !u!1 &1817013271186816381 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3874493253377660080, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5490,6 +5557,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_04
+  gender: 0
 --- !u!1 &1833205639647318860 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3856064478333401729, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5509,6 +5577,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_13
+  gender: 0
 --- !u!1 &1837909407117387457 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3851198052080488204, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5528,6 +5597,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_16
+  gender: 0
 --- !u!1 &1860612452870404871 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3828514664442598090, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5547,6 +5617,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_04
+  gender: 0
 --- !u!1 &1909594438399219765 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3923649992679715320, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5566,6 +5637,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_No_Elements_Male_09
+  gender: 0
 --- !u!1 &1910675224006154244 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3924799222930305481, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5585,6 +5657,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_17
+  gender: 2
 --- !u!1 &1944615245418727649 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3895347202041946412, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5604,6 +5677,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_20
+  gender: 0
 --- !u!1 &1955285117647096570 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4022054847804941111, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5623,6 +5697,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_No_Elements_Male_03
+  gender: 0
 --- !u!1 &1962569280606691907 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4021669093611162510, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5642,6 +5717,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_10
+  gender: 0
 --- !u!1 &1964271991372246529 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4013228571765393356, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5661,6 +5737,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_04
+  gender: 0
 --- !u!1 &1966192025806747379 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4015792349892386622, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5680,6 +5757,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_16
+  gender: 0
 --- !u!1 &1971991460501151234 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4012231379004553167, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5699,6 +5777,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_15
+  gender: 0
 --- !u!1 &1972266601425756068 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4011936378083538537, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5718,6 +5797,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_10
+  gender: 0
 --- !u!1 &1989699911090437716 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3994536058263984025, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5737,6 +5817,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_24
+  gender: 2
 --- !u!1 &1995058632300788148 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3989199323058851961, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5756,6 +5837,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_11
+  gender: 0
 --- !u!1 &1995268665540612435 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3982090958027077790, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5775,6 +5857,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_14
+  gender: 0
 --- !u!1 &2018437175969991568 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3526680306249228893, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5794,6 +5877,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_11
+  gender: 0
 --- !u!1 &2076410475804663191 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3468687283656799322, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5813,6 +5897,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_16
+  gender: 0
 --- !u!1 &2078299502791821896 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3468966356110320517, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5832,6 +5917,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_08
+  gender: 0
 --- !u!1 &2090228785184575010 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3599036797109315567, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5851,6 +5937,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_10
+  gender: 0
 --- !u!1 &2139381248465720462 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3549750262414835011, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5870,6 +5957,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_17
+  gender: 0
 --- !u!1 &2143412799969911846 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3552577537307626987, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5889,6 +5977,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 3
   visualName: Chr_HelmetAttachment_05
+  gender: 0
 --- !u!1 &2164809871109067973 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3673063714645130504, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5908,6 +5997,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_05
+  gender: 0
 --- !u!1 &2170211128793820109 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3669738128670802432, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5927,6 +6017,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_08
+  gender: 0
 --- !u!1 &2174126848318600805 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3665833606142549928, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5946,6 +6037,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_04
+  gender: 0
 --- !u!1 &2193039801962994793 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3646960170341741988, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5965,6 +6057,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_10
+  gender: 2
 --- !u!1 &2212098170798459117 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3621271746675499296, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -5984,6 +6077,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_08
+  gender: 0
 --- !u!1 &2233588142553275943 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3606512984686475242, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6003,6 +6097,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 7
   visualName: Chr_HeadCoverings_No_FacialHair_03
+  gender: 0
 --- !u!1 &2241583671241885942 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3740257767962435899, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6022,6 +6117,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 5
   visualName: Chr_Eyebrow_Male_06
+  gender: 0
 --- !u!1 &2245288303439956368 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3736713595406999645, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6041,6 +6137,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_02
+  gender: 0
 --- !u!1 &2246077950890037998 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3735752488567503651, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6060,6 +6157,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_28
+  gender: 2
 --- !u!1 &2272686733270585614 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3709154568612722883, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6079,6 +6177,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 21
   visualName: Chr_ElbowAttachRight_01
+  gender: 0
 --- !u!1 &2299443840329351619 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3682509744497567758, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6098,6 +6197,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_05
+  gender: 0
 --- !u!1 &2308418825037232336 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 935203185663971613, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6232,6 +6332,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_03
+  gender: 0
 --- !u!1 &2418718670627260085 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 964517127412019064, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6251,6 +6352,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_08
+  gender: 0
 --- !u!1 &2428658525307677401 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 956998328699814676, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6270,6 +6372,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 3
   visualName: Chr_HelmetAttachment_09
+  gender: 0
 --- !u!1 &2438518902081988938 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 947155475392594055, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6289,6 +6392,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_02
+  gender: 0
 --- !u!1 &2447888097227458154 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 939846760591650727, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6308,6 +6412,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_05
+  gender: 0
 --- !u!1 &2448832338854891211 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 941152192852977414, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6327,6 +6432,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_15
+  gender: 0
 --- !u!1 &2463306064317297211 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1070958646701661174, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6346,6 +6452,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_01
+  gender: 2
 --- !u!1 &2491849022816385418 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1037929753977573447, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6365,6 +6472,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_09
+  gender: 0
 --- !u!1 &2506779931327188559 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1025268168545691522, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6384,6 +6492,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_03
+  gender: 0
 --- !u!1 &2507009577052897191 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1024862527945102954, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6403,6 +6512,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_15
+  gender: 0
 --- !u!1 &2514761946280304114 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1014891348480668735, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6422,6 +6532,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_13
+  gender: 0
 --- !u!1 &2627356754976733061 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 614068358629285448, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6441,6 +6552,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_10
+  gender: 0
 --- !u!1 &2630984298886892450 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 608133974429213295, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6460,6 +6572,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_09
+  gender: 0
 --- !u!1 &2656063605176277672 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 589865043346830181, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6479,6 +6592,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_06
+  gender: 0
 --- !u!1 &2676882770888076405 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 708637812380796344, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6498,6 +6612,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_16
+  gender: 0
 --- !u!1 &2685425954309738494 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 700072565846353459, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6517,6 +6632,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_14
+  gender: 0
 --- !u!1 &2694170518002388547 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 689113589644486542, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6536,6 +6652,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_10
+  gender: 0
 --- !u!1 &2738566664628146709 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 788960307788168152, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6555,6 +6672,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_27
+  gender: 0
 --- !u!1 &2747506858588532718 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 779894631979927075, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6574,6 +6692,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 29
   visualName: Chr_KneeAttachRight_09
+  gender: 0
 --- !u!1 &2787629365811517651 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 746474683164995870, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6593,6 +6712,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_09
+  gender: 0
 --- !u!1 &2794647536930001576 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 737237697967012709, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6612,6 +6732,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_19
+  gender: 0
 --- !u!1 &2804186645896277741 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 727854719198889760, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6631,6 +6752,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_10
+  gender: 0
 --- !u!1 &2807741910517853666 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 721911311413216303, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6650,6 +6772,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_04
+  gender: 0
 --- !u!1 &2815392924941844218 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 856224981988005687, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6669,6 +6792,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 5
   visualName: Chr_Eyebrow_Male_03
+  gender: 0
 --- !u!1 &2829033585644631824 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 842485296468909789, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6688,6 +6812,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_07
+  gender: 2
 --- !u!1 &2867182215721521281 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 808928226731473228, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6707,6 +6832,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_12
+  gender: 0
 --- !u!1 &2886685821255469203 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 359220974608802142, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6726,6 +6852,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_06
+  gender: 0
 --- !u!1 &2894713151391356819 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 351195701762260574, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6745,6 +6872,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_04
+  gender: 0
 --- !u!1 &2897053117803083621 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 344457826412568232, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6764,6 +6892,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_20
+  gender: 0
 --- !u!1 &2907951428006542508 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 335723290264917345, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6783,6 +6912,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_07
+  gender: 0
 --- !u!1 &2941787117582878308 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 297509341158879145, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6802,6 +6932,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_27
+  gender: 2
 --- !u!1 &2984382662809794266 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 403367794548612887, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6821,6 +6952,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_08
+  gender: 0
 --- !u!1 &3003447732855394912 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 386684133259606957, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6840,6 +6972,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_12
+  gender: 0
 --- !u!1 &3024203115626140718 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 363529684853276131, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6859,6 +6992,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_07
+  gender: 0
 --- !u!1 &3062124671583120325 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 472172956132327944, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6878,6 +7012,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_18
+  gender: 0
 --- !u!1 &3089644552500322438 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 437759278757644619, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6897,6 +7032,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_18
+  gender: 0
 --- !u!1 &3091938530192001058 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 440052390965256687, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6916,6 +7052,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_07
+  gender: 0
 --- !u!1 &3145635375087328978 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 528097987734288159, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6935,6 +7072,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_15
+  gender: 0
 --- !u!1 &3177099095022656983 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 64446964845114394, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6954,6 +7092,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_16
+  gender: 0
 --- !u!1 &3201651087287710703 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 44235913021970978, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6973,6 +7112,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Body_01
+  gender: 0
 --- !u!1 &3213073725549323777 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 28294148557213644, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -6992,6 +7132,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 29
   visualName: Chr_KneeAttachRight_08
+  gender: 0
 --- !u!1 &3217881966640509151 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 25775293008812306, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7011,6 +7152,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_05
+  gender: 0
 --- !u!1 &3219820279630770950 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 26104172726590155, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7030,6 +7172,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_13
+  gender: 0
 --- !u!1 &3229963916264591859 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9156693833054270, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7049,6 +7192,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 5
   visualName: Chr_Eyebrow_Male_09
+  gender: 0
 --- !u!1 &3230145702769273677 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9126497930084992, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7068,6 +7212,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 7
   visualName: Chr_HeadCoverings_No_FacialHair_01
+  gender: 0
 --- !u!1 &3234750437160425428 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6615233829748249, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7087,6 +7232,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_06
+  gender: 0
 --- !u!1 &3238362674945486210 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 947051285824591, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7106,6 +7252,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 5
   visualName: Chr_Eyebrow_Male_04
+  gender: 0
 --- !u!1 &3263852297117553337 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 123898159888038772, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7125,6 +7272,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_07
+  gender: 0
 --- !u!1 &3263993909301424446 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 126010413682301171, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7144,6 +7292,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_09
+  gender: 0
 --- !u!1 &3264314777610876890 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 125687483587780119, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7163,6 +7312,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_04
+  gender: 0
 --- !u!1 &3296664136447909762 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 86622239344358991, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7182,6 +7332,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_02
+  gender: 0
 --- !u!1 &3325421072488464794 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 204315922712602711, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7201,6 +7352,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_19
+  gender: 0
 --- !u!1 &3346896561894443900 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 180483011807699633, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7220,6 +7372,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_02
+  gender: 0
 --- !u!1 &3350152745465243959 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 183951367868170490, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7239,6 +7392,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_09
+  gender: 0
 --- !u!1 &3362225019892296734 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 169625163726833107, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7258,6 +7412,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_06
+  gender: 0
 --- !u!1 &3396577419392201629 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 274919472421640784, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7277,6 +7432,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_01
+  gender: 0
 --- !u!1 &3406395087804091626 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 267496540250662183, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7296,6 +7452,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_15
+  gender: 0
 --- !u!1 &3408093626992217871 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 268069729860544194, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7315,6 +7472,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_15
+  gender: 0
 --- !u!1 &3409173359728045436 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 269219806638179505, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7334,6 +7492,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_03
+  gender: 0
 --- !u!1 &3418666926046730550 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 252816840263201019, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7353,6 +7512,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_12
+  gender: 2
 --- !u!1 &3489519117844019354 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2062340496327266647, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7372,6 +7532,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_04
+  gender: 0
 --- !u!1 &3493539715303879771 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2055945164539796886, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7391,6 +7552,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_11
+  gender: 0
 --- !u!1 &3518491268924651428 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2028754867621371497, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7410,6 +7572,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_05
+  gender: 0
 --- !u!1 &3567684807224625667 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2121567649783948238, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7429,6 +7592,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_21
+  gender: 0
 --- !u!1 &3581863677821396707 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2109640583362416430, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7448,6 +7612,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_22
+  gender: 0
 --- !u!1 &3589803187837912983 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2099291081112776282, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7467,6 +7632,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_19
+  gender: 2
 --- !u!1 &3612921609986342034 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2220285510980130143, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7486,6 +7652,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_17
+  gender: 0
 --- !u!1 &3629606631950734644 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2210511945757949177, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7505,6 +7672,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_37
+  gender: 2
 --- !u!1 &3637281301505973546 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2200462472871458023, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7524,6 +7692,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_11
+  gender: 0
 --- !u!1 &3650434268860907033 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2187436907467003860, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7543,6 +7712,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_01
+  gender: 0
 --- !u!1 &3652049628427888427 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2187917289757675238, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7562,6 +7732,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_13
+  gender: 0
 --- !u!1 &3660479330985687443 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2179467796041437278, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7581,6 +7752,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_01
+  gender: 0
 --- !u!1 &3676367319054576022 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2303222315822989403, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7600,6 +7772,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 3
   visualName: Chr_HelmetAttachment_07
+  gender: 0
 --- !u!1 &3711821058852388993 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2265501314279385420, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7619,6 +7792,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_09
+  gender: 0
 --- !u!1 &3739043688735242622 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2238399566250594483, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7638,6 +7812,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 3
   visualName: Chr_HelmetAttachment_04
+  gender: 0
 --- !u!1 &3741734881980878740 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2242498956868396633, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7657,6 +7832,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_09
+  gender: 0
 --- !u!1 &3757769011297689489 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1789587007876707932, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7676,6 +7852,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_25
+  gender: 0
 --- !u!1 &3811752936264244466 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1735493337855472959, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7695,6 +7872,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_03
+  gender: 0
 --- !u!1 &3826370528462401314 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1867405456687613679, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7714,6 +7892,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_11
+  gender: 0
 --- !u!1 &3830299673021892436 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1861202315939704473, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7733,6 +7912,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_12
+  gender: 0
 --- !u!1 &3831315726542661261 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1862297535398989632, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7870,6 +8050,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_02
+  gender: 0
 --- !u!1 &4015936130730316548 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1966063427359996617, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7889,6 +8070,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_28
+  gender: 0
 --- !u!1 &4023575345652701956 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1956031817003676361, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7908,6 +8090,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_03
+  gender: 0
 --- !u!1 &4035686184651782057 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1509277434458234468, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7927,6 +8110,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_05
+  gender: 0
 --- !u!1 &4109293160985273525 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1582030917596319096, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7946,6 +8130,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_08
+  gender: 0
 --- !u!1 &4153422138989887045 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1535814929436088200, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7965,6 +8150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_05
+  gender: 0
 --- !u!1 &4180898084769983013 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1654558632289289192, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -7984,6 +8170,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_07
+  gender: 0
 --- !u!1 &4182794669679513794 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1657291060253997327, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8003,6 +8190,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 19
   visualName: Chr_ElbowAttachLeft_06
+  gender: 0
 --- !u!1 &4191066755558179620 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1646643891954592489, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8022,6 +8210,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 3
   visualName: Chr_HelmetAttachment_13
+  gender: 0
 --- !u!1 &4206759494439158766 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1626588501320919587, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8041,6 +8230,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_16
+  gender: 2
 --- !u!1 &4220506108439403040 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1612740663397200877, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8060,6 +8250,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 3
   visualName: Chr_HelmetAttachment_03
+  gender: 0
 --- !u!1 &4228309822310956011 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1611828546992869926, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8079,6 +8270,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_01
+  gender: 0
 --- !u!1 &4257332189309282602 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1722259580117188839, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8098,6 +8290,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_11
+  gender: 0
 --- !u!1 &4264344539980799569 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1719911215952902044, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8117,6 +8310,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_10
+  gender: 0
 --- !u!1 &4314198900909108809 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1669913991594035076, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8136,6 +8330,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_02
+  gender: 0
 --- !u!1 &4327520127045314559 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1224368079075020338, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8155,6 +8350,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_16
+  gender: 0
 --- !u!1 &4399358841384006303 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1296488490662452050, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8174,6 +8370,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_09
+  gender: 0
 --- !u!1 &4403517623516019246 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1292474913137071075, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8193,6 +8390,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_02
+  gender: 0
 --- !u!1 &4416055258028178101 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1277718528165172088, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8212,6 +8410,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_03
+  gender: 0
 --- !u!1 &4445239513112461641 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1243852415348959364, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8231,6 +8430,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 19
   visualName: Chr_ElbowAttachLeft_02
+  gender: 0
 --- !u!1 &4446659727436191939 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1244701661543608590, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8250,6 +8450,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_36
+  gender: 2
 --- !u!1 &4448016943270632939 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1245565463491720230, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8269,6 +8470,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_01
+  gender: 0
 --- !u!1 &4462490467980033742 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1233519591804606211, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8288,6 +8490,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_No_Elements_Male_05
+  gender: 0
 --- !u!1 &4466206296592633073 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1227373911398671676, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8307,6 +8510,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_09
+  gender: 0
 --- !u!1 &4472743194593281722 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1360585009806503799, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8326,6 +8530,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_18
+  gender: 2
 --- !u!1 &4489386403336042082 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1350558455947829167, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8345,6 +8550,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_04
+  gender: 2
 --- !u!1 &4494492289170461865 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1345450439759854948, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8364,6 +8570,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_05
+  gender: 0
 --- !u!1 &4526334249887230673 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1306995947578704668, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8383,6 +8590,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_03
+  gender: 0
 --- !u!1 &4550115224274693613 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1429582094308656160, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8402,6 +8610,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_14
+  gender: 0
 --- !u!1 &4555064939238472444 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1424671896919511857, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8421,6 +8630,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_03
+  gender: 0
 --- !u!1 &4567012541281756487 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1410450574035504266, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8440,6 +8650,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_08
+  gender: 0
 --- !u!1 &4599740035968285209 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1379838535140611028, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8459,6 +8670,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_19
+  gender: 0
 --- !u!1 &4606304080849995516 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1377896768288894769, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8478,6 +8690,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_01
+  gender: 0
 --- !u!1 &4611139382650317266 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1372940588878659615, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8497,6 +8710,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_07
+  gender: 0
 --- !u!1 &4615785938321373247 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7853490764177265138, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8516,6 +8730,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_09
+  gender: 0
 --- !u!1 &4676011116431878697 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7788733330283332580, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8535,6 +8750,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_07
+  gender: 0
 --- !u!1 &4676417987304128861 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7788515438039214224, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8554,6 +8770,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_12
+  gender: 0
 --- !u!1 &4678923553383351014 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7790458564725975851, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8573,6 +8790,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_14
+  gender: 0
 --- !u!1 &4693583056787112094 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7913194029899917651, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8592,6 +8810,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_14
+  gender: 0
 --- !u!1 &4740686962853894833 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7870578334776750972, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8611,6 +8830,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_18
+  gender: 0
 --- !u!1 &4772507381389597280 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7982910483098481581, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8630,6 +8850,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_14
+  gender: 0
 --- !u!1 &4807928698364012970 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7947328637678583911, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8649,6 +8870,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_26
+  gender: 0
 --- !u!1 &4848670137807398580 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8050829929727020921, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8668,6 +8890,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_08
+  gender: 0
 --- !u!1 &4876494699104366454 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8025255041831749307, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8687,6 +8910,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_00
+  gender: 0
 --- !u!1 &4879616778901662785 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8017609635957802380, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8706,6 +8930,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 29
   visualName: Chr_KneeAttachRight_07
+  gender: 0
 --- !u!1 &4893049370492294048 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8004091282544654957, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8725,6 +8950,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_13
+  gender: 0
 --- !u!1 &4916680541251383959 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7550330956891462490, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8744,6 +8970,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_10
+  gender: 0
 --- !u!1 &4923867643697583965 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7540911918871608976, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8763,6 +8990,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_03
+  gender: 0
 --- !u!1 &4955293285764235703 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7509497404796741754, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8782,6 +9010,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_11
+  gender: 0
 --- !u!1 &4957848341595700443 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7511568960599987478, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8801,6 +9030,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_02
+  gender: 0
 --- !u!1 &4969104294690119389 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7495796140674447120, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8820,6 +9050,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_05
+  gender: 0
 --- !u!1 &4982179093548481419 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7626816945025585734, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8839,6 +9070,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_22
+  gender: 0
 --- !u!1 &4996082245759152497 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7612775185630337212, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8858,6 +9090,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_14
+  gender: 2
 --- !u!1 &5022305936231949990 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7584471085879086955, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8877,6 +9110,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_24
+  gender: 0
 --- !u!1 &5039584348175760881 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7567058533734798396, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8896,6 +9130,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_06
+  gender: 0
 --- !u!1 &5042829637838011580 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7568332370057549169, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -8915,6 +9150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_11
+  gender: 0
 --- !u!1 &5059686470130834773 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7693338861484913816, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9162,6 +9398,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_05
+  gender: 0
 --- !u!1 &5108039714777968978 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7642823977044678815, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9181,6 +9418,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_14
+  gender: 0
 --- !u!1 &5148204010840395032 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7746680242052900053, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9200,6 +9438,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 19
   visualName: Chr_ElbowAttachLeft_04
+  gender: 0
 --- !u!1 &5168089935745769354 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7731302379313591879, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9219,6 +9458,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_14
+  gender: 0
 --- !u!1 &5173144618520446714 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7726232441233944375, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9238,6 +9478,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 5
   visualName: Chr_Eyebrow_Male_02
+  gender: 0
 --- !u!1 &5195440523052570641 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7271709513488298460, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9257,6 +9498,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_08
+  gender: 0
 --- !u!1 &5205112230287244645 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7264272224401773736, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9276,6 +9518,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_02
+  gender: 0
 --- !u!1 &5212003171475059135 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7252877472746788978, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9295,6 +9538,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_16
+  gender: 0
 --- !u!1 &5212435034856210763 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7252465469546588294, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9314,6 +9558,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_35
+  gender: 2
 --- !u!1 &5232109172228654496 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7237156462139223149, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9333,6 +9578,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_34
+  gender: 2
 --- !u!1 &5292725037004425552 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7313895850496532637, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9352,6 +9598,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_06
+  gender: 0
 --- !u!1 &5309004325450657593 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7304552349715138292, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9371,6 +9618,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 21
   visualName: Chr_ElbowAttachRight_05
+  gender: 0
 --- !u!1 &5340273148656125177 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7417378855059402036, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9390,6 +9638,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_06
+  gender: 0
 --- !u!1 &5340785664461514145 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7416844353399786604, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9409,6 +9658,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_17
+  gender: 0
 --- !u!1 &5384140987126549619 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7371243965413533118, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9428,6 +9678,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_No_Elements_Male_13
+  gender: 0
 --- !u!1 &5392975325980037700 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7360032546711092105, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9447,6 +9698,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_07
+  gender: 0
 --- !u!1 &5398698750571411658 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7358779603321409799, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9466,6 +9718,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_18
+  gender: 0
 --- !u!1 &5413300777496892823 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7488444423659322458, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9485,6 +9738,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_17
+  gender: 0
 --- !u!1 &5424365283097301317 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7472759976575006856, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9504,6 +9758,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_03
+  gender: 0
 --- !u!1 &5436846739469643689 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7458008995243984484, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9523,6 +9778,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_03
+  gender: 0
 --- !u!1 &5451086938537181143 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7446000873164772890, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9542,6 +9798,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_12
+  gender: 0
 --- !u!1 &5468444397161286892 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7426565337715156257, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9676,6 +9933,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_02
+  gender: 2
 --- !u!1 &5473999274751657023 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7423103930045443570, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9695,6 +9953,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 21
   visualName: Chr_ElbowAttachRight_03
+  gender: 0
 --- !u!1 &5491690737403317918 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6973194304848258899, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9714,6 +9973,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_01
+  gender: 0
 --- !u!1 &5492989906905928225 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6974001941644098540, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9733,6 +9993,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_12
+  gender: 0
 --- !u!1 &5506607117221139236 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6960525532972792553, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9752,6 +10013,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_11
+  gender: 0
 --- !u!1 &5513551480419988604 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6951223816760106417, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9771,6 +10033,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_02
+  gender: 0
 --- !u!1 &5521695219031315541 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6940790762064723352, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9790,6 +10053,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_11
+  gender: 0
 --- !u!1 &5533752592132553965 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6933417308514587936, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9809,6 +10073,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_01
+  gender: 0
 --- !u!1 &5537891616742589341 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6929122222107126352, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9828,6 +10093,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_06
+  gender: 2
 --- !u!1 &5619437222114127671 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6994060010854795002, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9847,6 +10113,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_05
+  gender: 0
 --- !u!1 &5640728197239806507 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7112380697242350566, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9866,6 +10133,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_09
+  gender: 0
 --- !u!1 &5660359645966113495 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7097118845449515802, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9885,6 +10153,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_20
+  gender: 0
 --- !u!1 &5682194177535214696 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7073063300190973349, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9904,6 +10173,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_16
+  gender: 0
 --- !u!1 &5690794260317405742 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7064573168554781667, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9923,6 +10193,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_13
+  gender: 0
 --- !u!1 &5695753992085384421 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7203726352623109416, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9942,6 +10213,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_18
+  gender: 0
 --- !u!1 &5709932766950543088 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7191797247469217597, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9961,6 +10233,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 29
   visualName: Chr_KneeAttachRight_06
+  gender: 0
 --- !u!1 &5718625468430108879 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7182968141855383810, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9980,6 +10253,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 3
   visualName: Chr_HelmetAttachment_11
+  gender: 0
 --- !u!1 &5732920619884839730 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7168824654302554879, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -9999,6 +10273,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 7
   visualName: Chr_HeadCoverings_No_FacialHair_04
+  gender: 0
 --- !u!1 &5742781804951441257 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7152227788056864420, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10018,6 +10293,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_10
+  gender: 0
 --- !u!1 &5747222074984795730 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7147662177925277599, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10037,6 +10313,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_01
+  gender: 0
 --- !u!1 &5753988485194286437 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7145491795173584040, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10056,6 +10333,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_02
+  gender: 0
 --- !u!1 &5816960482871576064 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8956070152234872781, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10075,6 +10353,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_05
+  gender: 0
 --- !u!1 &5821351033156619229 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8951523338356580880, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10094,6 +10373,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_07
+  gender: 0
 --- !u!1 &5863382507615358048 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9055982061530949037, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10113,6 +10393,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_19
+  gender: 0
 --- !u!1 &5868114323616945365 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9051142355547749656, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10132,6 +10413,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_01
+  gender: 0
 --- !u!1 &5880974246243755277 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9038388054757199040, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10151,6 +10433,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_11
+  gender: 0
 --- !u!1 &5892628227920244362 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9022247997389113159, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10170,6 +10453,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_22
+  gender: 2
 --- !u!1 &5902184242318329026 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9014906467977882895, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10189,6 +10473,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_08
+  gender: 0
 --- !u!1 &5906118085197023196 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9008637399656721937, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10208,6 +10493,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_01
+  gender: 0
 --- !u!1 &5907758964939927091 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9011482527556438014, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10227,6 +10513,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_15
+  gender: 0
 --- !u!1 &5909233300442700475 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9147501919108887414, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10246,6 +10533,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_13
+  gender: 2
 --- !u!1 &5912328537005139161 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9151151292895399188, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10265,6 +10553,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_18
+  gender: 0
 --- !u!1 &5970379193194011015 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9090701498241642570, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10284,6 +10573,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_10
+  gender: 0
 --- !u!1 &5999856517785700810 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9200961042133704711, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10303,6 +10593,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_12
+  gender: 0
 --- !u!1 &6061937045137110692 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8706574390887063401, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10322,6 +10613,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_17
+  gender: 0
 --- !u!1 &6081619964538771639 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8689103693510504826, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10341,6 +10633,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_26
+  gender: 2
 --- !u!1 &6092609626154617224 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8682633093337178181, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10360,6 +10653,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 29
   visualName: Chr_KneeAttachRight_05
+  gender: 0
 --- !u!1 &6138720667310899789 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8773778482561936256, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10379,6 +10673,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_17
+  gender: 0
 --- !u!1 &6155877742820466238 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8763361482000283635, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10398,6 +10693,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_13
+  gender: 0
 --- !u!1 &6166222362481990640 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8746402204278370877, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10434,6 +10730,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 29
   visualName: Chr_KneeAttachRight_02
+  gender: 0
 --- !u!1 &6190081233278302659 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8724654395790643214, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10453,6 +10750,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_12
+  gender: 0
 --- !u!1 &6258225394126477886 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8802859630780183539, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10472,6 +10770,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_18
+  gender: 0
 --- !u!1 &6282668709265679678 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8918007971011988723, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10491,6 +10790,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_25
+  gender: 0
 --- !u!1 &6304167592439261132 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8903409623300869633, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10510,6 +10810,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 21
   visualName: Chr_ElbowAttachRight_04
+  gender: 0
 --- !u!1 &6327747383980908660 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8872944895970331065, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10529,6 +10830,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_06
+  gender: 0
 --- !u!1 &6348085839980741709 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8424909542051474816, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10548,6 +10850,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_11
+  gender: 0
 --- !u!1 &6355218634293393467 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8413253288433783286, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10567,6 +10870,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_15
+  gender: 0
 --- !u!1 &6397620707604360717 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8375374536904492992, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10586,6 +10890,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_03
+  gender: 2
 --- !u!1 &6420405048454602684 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8496736380841981553, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10605,6 +10910,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_15
+  gender: 0
 --- !u!1 &6430867641988738866 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8488349523661375231, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10624,6 +10930,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 19
   visualName: Chr_ElbowAttachLeft_01
+  gender: 0
 --- !u!1 &6442724450994091686 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8474229855569993579, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10643,6 +10950,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_17
+  gender: 0
 --- !u!1 &6443127561271800900 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8473859726279040393, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10662,6 +10970,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 5
   visualName: Chr_Eyebrow_Male_08
+  gender: 0
 --- !u!1 &6447665651628146421 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8469319647302506296, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10796,6 +11105,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_11
+  gender: 0
 --- !u!1 &6453136119369787208 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8466065790422797957, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10815,6 +11125,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 29
   visualName: Chr_KneeAttachRight_01
+  gender: 0
 --- !u!1 &6484214897498917289 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8435009002877984868, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10834,6 +11145,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_02
+  gender: 0
 --- !u!1 &6510089460095404574 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8551173750387368915, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10853,6 +11165,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_17
+  gender: 0
 --- !u!1 &6534187275284225242 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8529180331801720087, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10872,6 +11185,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_14
+  gender: 0
 --- !u!1 &6550739654082916089 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8510470573297944372, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10891,6 +11205,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_10
+  gender: 0
 --- !u!1 &6575128133470575026 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8632319477252059263, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10910,6 +11225,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_33
+  gender: 2
 --- !u!1 &6582057247305606936 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8623142961398681301, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10929,6 +11245,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_01
+  gender: 0
 --- !u!1 &6621005630872717367 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8579688715008090618, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10948,6 +11265,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 18
   visualName: Chr_ArmLowerLeft_Male_14
+  gender: 0
 --- !u!1 &6627941484487553815 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8577256461104519898, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10967,6 +11285,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_02
+  gender: 0
 --- !u!1 &6632806129324051818 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8142458575837422759, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -10986,6 +11305,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_11
+  gender: 0
 --- !u!1 &6634965787840766047 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8135619533204736402, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11005,6 +11325,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_09
+  gender: 0
 --- !u!1 &6640440187168049212 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8130177986484429297, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11024,6 +11345,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_12
+  gender: 0
 --- !u!1 &6649973296589748640 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8123041949850210413, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11043,6 +11365,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_23
+  gender: 0
 --- !u!1 &6670066177745905972 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8098441066339877113, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11062,6 +11385,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_04
+  gender: 0
 --- !u!1 &6671422517476453202 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8099164869598790303, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11081,6 +11405,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_02
+  gender: 0
 --- !u!1 &6707666151173297846 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8207192619053432699, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11100,6 +11425,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_10
+  gender: 0
 --- !u!1 &6732315178721555770 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8187078046244707575, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11119,6 +11445,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_11
+  gender: 0
 --- !u!1 &6754620994706243404 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8164631290841650817, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11138,6 +11465,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_06
+  gender: 0
 --- !u!1 &6811989901829520092 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8249090789588800273, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11157,6 +11485,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 29
   visualName: Chr_KneeAttachRight_03
+  gender: 0
 --- !u!1 &6823736926085150394 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8232980838501769079, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11176,6 +11505,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_06
+  gender: 0
 --- !u!1 &6827199660226996560 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8236152484977229981, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11195,6 +11525,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_13
+  gender: 0
 --- !u!4 &6834496370720588106 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8226571126625855623, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11219,6 +11550,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_03
+  gender: 0
 --- !u!1 &6855564020694904682 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8345310576373417639, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11238,6 +11570,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_16
+  gender: 0
 --- !u!1 &6877557139081952898 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8323313055376463695, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11257,6 +11590,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_20
+  gender: 0
 --- !u!1 &6885941695363395504 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8321635726317061757, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11276,6 +11610,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_21
+  gender: 0
 --- !u!1 &6921401759922591768 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5547984893805900245, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11295,6 +11630,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_18
+  gender: 0
 --- !u!1 &6935299243210318294 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5533944336433907739, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11314,6 +11650,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_04
+  gender: 0
 --- !u!1 &6956376418080863710 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5510619897235151891, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11333,6 +11670,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_03
+  gender: 0
 --- !u!1 &6969513285737037759 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5497500479829251698, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11352,6 +11690,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_No_Elements_Male_11
+  gender: 0
 --- !u!1 &6982215005503678185 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5482687702283931428, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11371,6 +11710,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_09
+  gender: 2
 --- !u!1 &7006834874355548354 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5606669097417025807, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11390,6 +11730,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_07
+  gender: 0
 --- !u!1 &7061231355798760953 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5552142736482075700, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11409,6 +11750,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_13
+  gender: 0
 --- !u!1 &7078199513823809301 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5677196433580893912, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11428,6 +11770,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_18
+  gender: 0
 --- !u!1 &7093013826879796197 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5664638386953067048, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11447,6 +11790,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_21
+  gender: 0
 --- !u!1 &7143559804053200783 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5751273935998170690, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11466,6 +11810,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_12
+  gender: 0
 --- !u!1 &7174765431188642822 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5720213375694927307, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11485,6 +11830,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_12
+  gender: 0
 --- !u!1 &7195500285339960518 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5703854582117084427, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11504,6 +11850,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_15
+  gender: 0
 --- !u!1 &7197978566013558533 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5699305027678942920, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11523,6 +11870,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_05
+  gender: 0
 --- !u!1 &7207115021501594966 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5257798676922782875, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11542,6 +11890,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_02
+  gender: 0
 --- !u!1 &7227456597717898742 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5241822303401868347, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11561,6 +11910,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_03
+  gender: 0
 --- !u!1 &7227974814908899874 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5241424891007650799, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11580,6 +11930,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_00
+  gender: 0
 --- !u!1 &7262323991294590632 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5204843774484846437, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11599,6 +11950,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_38
+  gender: 2
 --- !u!1 &7284586405727970196 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5326536092696283737, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11618,6 +11970,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_09
+  gender: 0
 --- !u!1 &7303977113389902462 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5309555514589021107, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11637,6 +11990,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_06
+  gender: 0
 --- !u!1 &7312430050908669277 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5298868159056850064, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11656,6 +12010,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_03
+  gender: 0
 --- !u!1 &7327181979220440047 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5286317590193920546, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11715,6 +12070,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_16
+  gender: 0
 --- !u!1 &7385965376510040360 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5364803688777691365, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11734,6 +12090,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_No_Elements_Male_08
+  gender: 0
 --- !u!1 &7422463724999120949 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5472515154831749624, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11753,6 +12110,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_No_Elements_Male_06
+  gender: 0
 --- !u!1 &7466080853909407113 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5435699742357466180, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11772,6 +12130,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_08
+  gender: 0
 --- !u!1 &7477494534533517905 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5419731742702451612, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11791,6 +12150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_12
+  gender: 0
 --- !u!1 &7501263454862776617 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4965908777951604964, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11810,6 +12170,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_17
+  gender: 0
 --- !u!1 &7502307093775664771 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4966951878947499854, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11829,6 +12190,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_31
+  gender: 2
 --- !u!1 &7503446433463466156 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4959092255487512929, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11848,6 +12210,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_21
+  gender: 0
 --- !u!1 &7507030614359449587 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4962386756975146558, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11867,6 +12230,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_18
+  gender: 0
 --- !u!1 &7550386955697383861 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4916796139139645560, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11886,6 +12250,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_00
+  gender: 0
 --- !u!1 &7550398645988536007 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4916738337962133258, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11905,6 +12270,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_10
+  gender: 0
 --- !u!1 &7603101728047758802 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5003499574334739487, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11924,6 +12290,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 29
   visualName: Chr_KneeAttachRight_11
+  gender: 0
 --- !u!1 &7620565647327612189 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4986070775086343376, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11943,6 +12310,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_No_Elements_Male_02
+  gender: 0
 --- !u!1 &7632197662473806297 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4978913768020559892, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11962,6 +12330,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_06
+  gender: 0
 --- !u!1 &7639007902653209440 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5111745906775978669, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -11981,6 +12350,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_17
+  gender: 0
 --- !u!1 &7646993355165860479 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5110520251617160114, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12000,6 +12370,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_15
+  gender: 0
 --- !u!1 &7714599696793033114 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5187134582747885655, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12019,6 +12390,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 7
   visualName: Chr_Head_No_Elements_Male_01
+  gender: 0
 --- !u!1 &7748229266215502194 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5148909118994786495, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12038,6 +12410,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_09
+  gender: 0
 --- !u!1 &7764482963141256529 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5130542233482742940, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12057,6 +12430,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_21
+  gender: 0
 --- !u!1 &7791047044585290854 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4678387776732222891, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12076,6 +12450,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 19
   visualName: Chr_ElbowAttachLeft_05
+  gender: 0
 --- !u!1 &7833707284164455622 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4631195350541567243, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12095,6 +12470,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_08
+  gender: 0
 --- !u!1 &7842148711347587114 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4622747463610180071, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12114,6 +12490,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_19
+  gender: 0
 --- !u!1 &7902063802801358028 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4709183898146909441, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12133,6 +12510,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_00
+  gender: 0
 --- !u!1 &7953895740918061816 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4796983344066884405, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12152,6 +12530,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_24
+  gender: 0
 --- !u!1 &7970593085529822020 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4786931443421624969, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12171,6 +12550,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_01
+  gender: 0
 --- !u!1 &7993925647424908986 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4756792840344749943, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12190,6 +12570,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_11
+  gender: 2
 --- !u!1 &8006690592686898115 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4895094259959190030, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12209,6 +12590,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_23
+  gender: 2
 --- !u!1 &8020508107320944436 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4881116148025446137, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12228,6 +12610,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 3
   visualName: Chr_HelmetAttachment_12
+  gender: 0
 --- !u!1 &8055916702531285774 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4845865950823111363, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12247,6 +12630,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 29
   visualName: Chr_KneeAttachRight_10
+  gender: 0
 --- !u!1 &8066576698498499944 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4828307554730372261, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12266,6 +12650,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 3
   visualName: Chr_HelmetAttachment_01
+  gender: 0
 --- !u!1 &8088253844491126125 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6686971213961456800, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12285,6 +12670,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_07
+  gender: 0
 --- !u!1 &8089279180087614124 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6679190543214211937, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12304,6 +12690,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_07
+  gender: 0
 --- !u!1 &8092583592593490434 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6682502927678647247, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12323,6 +12710,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_09
+  gender: 0
 --- !u!1 &8093360318862483653 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6675109473493829896, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12342,6 +12730,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_13
+  gender: 0
 --- !u!1 &8138754522861148513 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6629596590825124012, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12361,6 +12750,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_00
+  gender: 0
 --- !u!1 &8146278193267061430 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6773062255392725883, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12380,6 +12770,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_16
+  gender: 0
 --- !u!1 &8152053343342126156 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6760551428114795905, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12399,6 +12790,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_04
+  gender: 0
 --- !u!4 &8162753232496792943 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6752101139935607970, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12423,6 +12815,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_05
+  gender: 2
 --- !u!1 &8175918282821720947 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6738817410671735486, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12442,6 +12835,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_10
+  gender: 0
 --- !u!1 &8184209468346072897 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6730493033640121996, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12461,6 +12855,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_32
+  gender: 2
 --- !u!1 &8188865213280917170 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6725868075231625087, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12480,6 +12875,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_14
+  gender: 0
 --- !u!1 &8189005720274501316 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6725727710190098185, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12499,6 +12895,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_12
+  gender: 0
 --- !u!1 &8191371543139871284 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6727882941682402297, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12518,6 +12915,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_09
+  gender: 0
 --- !u!1 &8217409192717920782 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6843711085162300355, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12537,6 +12935,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_03
+  gender: 0
 --- !u!1 &8240494736269331570 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6822877199959647679, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12556,6 +12955,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_No_Elements_Male_10
+  gender: 0
 --- !u!1 &8266578335619021509 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6794645227701883656, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12575,6 +12975,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 21
   visualName: Chr_ElbowAttachRight_06
+  gender: 0
 --- !u!1 &8268097273021295681 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6795239483331888524, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12594,6 +12995,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_19
+  gender: 0
 --- !u!1 &8347377619214238227 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6855731322719316958, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12613,6 +13015,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_13
+  gender: 0
 --- !u!1 &8349113178605691042 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6858321237574715759, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12632,6 +13035,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_20
+  gender: 0
 --- !u!1 &8349401444982062814 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6858046032663697171, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12651,6 +13055,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_11
+  gender: 0
 --- !u!1 &8357612281123113327 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6849852925761724578, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12670,6 +13075,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_06
+  gender: 0
 --- !u!1 &8366738841608546904 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6408345479371932565, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12689,6 +13095,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 13
   visualName: Chr_ShoulderAttachLeft_14
+  gender: 0
 --- !u!1 &8387472200996434182 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6383269045027772619, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12708,6 +13115,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_19
+  gender: 0
 --- !u!1 &8436966781040301694 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6477729261734477747, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12727,6 +13135,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_06
+  gender: 0
 --- !u!1 &8445682947727566687 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6469054742941896338, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12746,6 +13155,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_17
+  gender: 0
 --- !u!1 &8479569834713993625 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6439829922881304660, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12765,6 +13175,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_20
+  gender: 0
 --- !u!1 &8493305955214516266 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6426051879406324199, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12784,6 +13195,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 21
   visualName: Chr_ElbowAttachRight_02
+  gender: 0
 --- !u!1 &8577994390769689980 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6627201419804232881, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12803,6 +13215,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_13
+  gender: 0
 --- !u!1 &8621962300023563440 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6581159698895818109, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12822,6 +13235,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 20
   visualName: Chr_ArmLowerRight_Male_00
+  gender: 0
 --- !u!1 &8646406012874521383 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6561059189766247146, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12841,6 +13255,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_17
+  gender: 0
 --- !u!1 &8651539538499485202 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6116967705854187487, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12860,6 +13275,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_01
+  gender: 0
 --- !u!1 &8678949263471119819 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6089560179637888006, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12879,6 +13295,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 15
   visualName: Chr_ShoulderAttachRight_05
+  gender: 0
 --- !u!1 &8680795458324551836 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6092180205696840017, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12898,6 +13315,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 23
   visualName: Chr_HandRight_Male_08
+  gender: 0
 --- !u!1 &8685288633357952849 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6087726612746489500, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12917,6 +13335,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_04
+  gender: 0
 --- !u!1 &8695075401921816725 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6077812090397180248, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12936,6 +13355,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_30
+  gender: 2
 --- !u!1 &8696265836007769076 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6079001141476092473, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12955,6 +13375,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 6
   visualName: Chr_FacialHair_Male_12
+  gender: 0
 --- !u!1 &8723491311394513452 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6188990181414783969, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12974,6 +13395,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_No_Hair_01
+  gender: 0
 --- !u!1 &8738446901461086106 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6176290858246653527, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -12993,6 +13415,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_15
+  gender: 2
 --- !u!1 &8776321019905326008 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6140769763405304437, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13012,6 +13435,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_09
+  gender: 0
 --- !u!1 &8798142823025264099 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6263078468190825518, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13031,6 +13455,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 30
   visualName: Chr_LegRight_Male_00
+  gender: 0
 --- !u!1 &8876249602178804390 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6331323421538534251, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13050,6 +13475,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_15
+  gender: 0
 --- !u!1 &8925721872568089525 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6281725604943450744, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13069,6 +13495,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 22
   visualName: Chr_HandLeft_Male_07
+  gender: 0
 --- !u!1 &8934247649012285583 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6273362556371642690, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13088,6 +13515,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_25
+  gender: 2
 --- !u!1 &8945323174986490583 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5825275207255329562, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13107,6 +13535,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_07
+  gender: 0
 --- !u!1 &8947036565533740769 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5825941293081716524, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13126,6 +13555,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_27
+  gender: 0
 --- !u!1 &8976603467829211581 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5791886047017457776, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13145,6 +13575,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 4
   visualName: Chr_Hair_20
+  gender: 2
 --- !u!1 &8979475975731437885 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5795610677550500080, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13164,6 +13595,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_No_Elements_Male_04
+  gender: 0
 --- !u!1 &8981618906124193341 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5789019058536753136, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13183,6 +13615,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_04
+  gender: 0
 --- !u!1 &8984405085982675567 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5790679368058436514, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13202,6 +13635,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 2
   visualName: Chr_HeadCoverings_Base_Hair_01
+  gender: 0
 --- !u!1 &8990365868788337957 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5780254641209435368, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13221,6 +13655,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_10
+  gender: 0
 --- !u!1 &9015591634962739885 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5903783929165667168, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13240,6 +13675,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 5
   visualName: Chr_Eyebrow_Male_05
+  gender: 0
 --- !u!1 &9015918552645701424 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5903478868755785469, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13259,6 +13695,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 3
   visualName: Chr_HelmetAttachment_08
+  gender: 0
 --- !u!1 &9051382005498409049 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5868000224536156564, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13278,6 +13715,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_18
+  gender: 0
 --- !u!1 &9093855882889891249 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5962899333878916220, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13297,6 +13735,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 11
   visualName: Chr_Hips_Male_12
+  gender: 0
 --- !u!1 &9106533878140833852 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5950183882570512881, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13316,6 +13755,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 8
   visualName: Chr_Torso_Male_01
+  gender: 0
 --- !u!1 &9129338173440954375 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5927379587320723914, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13335,6 +13775,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 17
   visualName: Chr_ArmUpperRight_Male_02
+  gender: 0
 --- !u!1 &9131583407483907824 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5929624827233453885, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13354,6 +13795,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 16
   visualName: Chr_ArmUpperLeft_Male_02
+  gender: 0
 --- !u!1 &9165310735758595928 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6035418794242653845, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13373,6 +13815,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 3
   visualName: Chr_HelmetAttachment_10
+  gender: 0
 --- !u!1 &9165584860487599377 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6035129413907279068, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13392,6 +13835,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 1
   visualName: Chr_Head_Male_00
+  gender: 0
 --- !u!1 &9169306230600671784 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6038288650070985701, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13411,6 +13855,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 10
   visualName: Chr_BackAttachment_14
+  gender: 0
 --- !u!1 &9174471923816545770 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6026345700258386983, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13430,6 +13875,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 31
   visualName: Chr_LegLeft_Male_17
+  gender: 0
 --- !u!1 &9181502280694597376 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6023735247097966285, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13449,6 +13895,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 27
   visualName: Chr_KneeAttachLeft_08
+  gender: 0
 --- !u!1 &9191966284573011103 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6008866526691378514, guid: 502b9a0d5718b4046a3d5e3fd2381cca, type: 3}
@@ -13468,3 +13915,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Inventory.CharacterBodyPartVisual
   bodyPart: 3
   visualName: Chr_HelmetAttachment_02
+  gender: 0

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Inventory.Inventories;
 using Inventory.Slot;
+using Input;
 using MessagePipe;
 using Messages;
 using Stats;
@@ -54,6 +55,8 @@ namespace UI.UIElements
         private readonly StatFiller hpFiller;
         private readonly global::Inventory.InventoryConfig inventoryConfig;
         private readonly PlayerInventory playerInventory;
+        private readonly InputConfig inputConfig;
+        private readonly TMPro.TMP_FontAsset fastSlotLabelFont;
         private readonly CompositeDisposable inputDisposables = new();
         private readonly CompositeDisposable holderDisposables = new();
         private readonly Dictionary<StatType, VisibilityState> statVisibilityStates = new();
@@ -76,6 +79,8 @@ namespace UI.UIElements
             StatFillers statFillers,
             global::Inventory.InventoryConfig inventoryConfig,
             PlayerInventory playerInventory,
+            InputConfig inputConfig,
+            TMPro.TMP_FontAsset fastSlotLabelFont,
             ISubscriber<ShowStatsInputMessage> showStatsInputSubscriber,
             ISubscriber<FastSlotInputMessage> fastSlotInputSubscriber = null)
         {
@@ -85,6 +90,8 @@ namespace UI.UIElements
             hpFiller = statFillers.Get(StatType.Hp);
             this.inventoryConfig = inventoryConfig;
             this.playerInventory = playerInventory;
+            this.inputConfig = inputConfig;
+            this.fastSlotLabelFont = fastSlotLabelFont;
 
             showStatsInputSubscriber.Subscribe(OnShowStatsInputChanged).AddTo(inputDisposables);
             fastSlotInputSubscriber?.Subscribe(OnFastSlotInput).AddTo(inputDisposables);
@@ -259,7 +266,7 @@ namespace UI.UIElements
 
         private void DrawFastSlot(SlotView slotView, FastSlotModel model)
         {
-            PageUiUtilities.DrawFastSlotItem(slotView, model, playerInventory.HasAnyInventoryItem(model?.ItemConfig));
+            PageUiUtilities.DrawFastSlotItem(slotView, model, playerInventory.HasAnyInventoryItem(model?.ItemConfig), inputConfig, fastSlotLabelFont);
         }
 
         private void OnShowStatsInputChanged(ShowStatsInputMessage message)

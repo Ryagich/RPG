@@ -1,33 +1,65 @@
 {
-  "idSave": 543,
-  "GameReadyMetricSend": false,
+  "idSave": 548,
+  "GameReadyMetricSend": true,
   "advertisingNewGameGraceRemainingSeconds": 0.0,
   "saveVersion": 10,
-  "locationId": "Castle",
-  "entranceId": "",
+  "locationId": "Tavern",
+  "entranceId": "To Castle",
   "playerPose": {
     "isValid": 1,
-    "positionX": -100.574677,
-    "positionY": 0.0694130659,
-    "positionZ": -173.953445,
+    "positionX": -52.1970444,
+    "positionY": 0.0877893,
+    "positionZ": -82.10703,
     "rotationX": 0.0,
-    "rotationY": -0.7891332,
+    "rotationY": 0.455456257,
     "rotationZ": 0.0,
-    "rotationW": 0.6142222
+    "rotationW": 0.890258253
   },
-  "money": 112,
+  "money": 98,
   "health": 100.0,
   "stamina": 300.0,
-  "water": 41.7760429,
-  "food": 70.90599,
+  "water": 1.64704418,
+  "food": 50.8419724,
   "playerCharacter": {
     "characterId": "player",
     "isAlive": true,
     "health": 100.0,
     "stamina": 300.0,
-    "water": 41.7760429,
-    "food": 70.90599,
+    "water": 1.64704418,
+    "food": 50.8419724,
     "inventory": [
+      {
+        "itemId": "Stamina potion Config ID",
+        "count": 1,
+        "x": 1,
+        "y": 1,
+        "rotated": 0,
+        "slot": 0
+      },
+      {
+        "itemId": "Bread Config ID",
+        "count": 2,
+        "x": 1,
+        "y": 2,
+        "rotated": 0,
+        "slot": 0
+      },
+      {
+        "itemId": "Ring_01 Config ID",
+        "count": 1,
+        "x": 0,
+        "y": 2,
+        "rotated": 0,
+        "slot": 0
+      },
+      {
+        "itemId": "Bottle of Water Config ID",
+        "count": 7,
+        "x": 0,
+        "y": 0,
+        "rotated": 0,
+        "slot": 0
+      },
       {
         "itemId": "Body ItemConfig 6",
         "count": 1,
@@ -607,7 +639,7 @@
       "inventory": [
         {
           "itemId": "Bottle of Water Config ID",
-          "count": 3,
+          "count": 4,
           "x": 0,
           "y": 0,
           "rotated": 0,
@@ -615,8 +647,40 @@
         },
         {
           "itemId": "Tomato ItemConfig ID",
-          "count": 5,
+          "count": 10,
           "x": 1,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Ring_04 Config ID",
+          "count": 1,
+          "x": 2,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Ring_02 Config ID",
+          "count": 1,
+          "x": 3,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Ring_03 Config ID",
+          "count": 1,
+          "x": 4,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Bottle of Water Config ID",
+          "count": 4,
+          "x": 5,
           "y": 0,
           "rotated": 0,
           "slot": 0
@@ -624,32 +688,32 @@
         {
           "itemId": "Broccoli ItemConfig ID",
           "count": 5,
-          "x": 2,
+          "x": 6,
           "y": 0,
           "rotated": 0,
           "slot": 0
         },
         {
           "itemId": "Carrot ItemConfig ID",
-          "count": 5,
-          "x": 3,
-          "y": 0,
-          "rotated": 0,
-          "slot": 0
-        },
-        {
-          "itemId": "Apple ItemConfig ID",
           "count": 4,
-          "x": 4,
-          "y": 0,
+          "x": 0,
+          "y": 1,
           "rotated": 0,
           "slot": 0
         },
         {
           "itemId": "Beetroot ItemConfig ID",
-          "count": 5,
-          "x": 5,
-          "y": 0,
+          "count": 1,
+          "x": 1,
+          "y": 1,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Apple ItemConfig ID",
+          "count": 3,
+          "x": 2,
+          "y": 1,
           "rotated": 0,
           "slot": 0
         },
@@ -1083,9 +1147,57 @@
         },
         {
           "itemId": "Larkspur ItemConfig ID",
-          "count": 4,
+          "count": 10,
           "x": 1,
           "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Ring_02 Config ID",
+          "count": 1,
+          "x": 2,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Camomile ItemConfig ID",
+          "count": 7,
+          "x": 3,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Bottle of Water Config ID",
+          "count": 5,
+          "x": 4,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Mug of beer Config ID",
+          "count": 2,
+          "x": 5,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Larkspur ItemConfig ID",
+          "count": 1,
+          "x": 6,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Bottle of wine Config ID",
+          "count": 2,
+          "x": 0,
+          "y": 1,
           "rotated": 0,
           "slot": 0
         },
@@ -2558,6 +2670,174 @@
           "slot": 0
         },
         {
+          "itemId": "Legs ItemConfig 2",
+          "count": 1,
+          "x": 0,
+          "y": 4,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 1",
+          "count": 1,
+          "x": 2,
+          "y": 4,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 8",
+          "count": 1,
+          "x": 4,
+          "y": 4,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 8",
+          "count": 1,
+          "x": 0,
+          "y": 6,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 5",
+          "count": 1,
+          "x": 2,
+          "y": 6,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 6",
+          "count": 1,
+          "x": 4,
+          "y": 6,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 6",
+          "count": 1,
+          "x": 0,
+          "y": 8,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 2",
+          "count": 1,
+          "x": 2,
+          "y": 8,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 2",
+          "count": 1,
+          "x": 4,
+          "y": 8,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 2",
+          "count": 1,
+          "x": 0,
+          "y": 10,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 1",
+          "count": 1,
+          "x": 2,
+          "y": 10,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 17",
+          "count": 1,
+          "x": 4,
+          "y": 10,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 17",
+          "count": 1,
+          "x": 0,
+          "y": 12,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 13",
+          "count": 1,
+          "x": 2,
+          "y": 12,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 13",
+          "count": 1,
+          "x": 4,
+          "y": 12,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 2",
+          "count": 1,
+          "x": 0,
+          "y": 14,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Legs ItemConfig 1",
+          "count": 1,
+          "x": 2,
+          "y": 14,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 21",
+          "count": 1,
+          "x": 4,
+          "y": 14,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 4",
+          "count": 1,
+          "x": 0,
+          "y": 16,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 4",
+          "count": 1,
+          "x": 2,
+          "y": 16,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hat ItemConfig 17",
+          "count": 1,
+          "x": 4,
+          "y": 16,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
           "itemId": "Body ItemConfig 8",
           "count": 1,
           "x": 0,
@@ -2622,6 +2902,46 @@
           "count": 8,
           "x": 2,
           "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Bottle of Water Config ID",
+          "count": 3,
+          "x": 3,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Ring_10 Config ID",
+          "count": 5,
+          "x": 4,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Ring_09 Config ID",
+          "count": 4,
+          "x": 5,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Ring_01 Config ID",
+          "count": 9,
+          "x": 6,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Ring_04 Config ID",
+          "count": 9,
+          "x": 0,
+          "y": 1,
           "rotated": 0,
           "slot": 0
         },
@@ -2810,16 +3130,16 @@
           "slot": 0
         },
         {
-          "itemId": "Honey Item Config ID",
-          "count": 2,
+          "itemId": "Ring_05 Config ID",
+          "count": 1,
           "x": 1,
           "y": 0,
           "rotated": 0,
           "slot": 0
         },
         {
-          "itemId": "Apple ItemConfig ID",
-          "count": 5,
+          "itemId": "Bottle of Water Config ID",
+          "count": 4,
           "x": 2,
           "y": 0,
           "rotated": 0,
@@ -2886,6 +3206,342 @@
           "count": 1,
           "x": 2,
           "y": 4,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Sword 7 Item Config ID",
+          "count": 1,
+          "x": 5,
+          "y": 4,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Sword 12 Item Config ID",
+          "count": 1,
+          "x": 6,
+          "y": 4,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hips ItemConfig 2",
+          "count": 1,
+          "x": 0,
+          "y": 5,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hips ItemConfig 2",
+          "count": 1,
+          "x": 2,
+          "y": 6,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hips ItemConfig 4",
+          "count": 1,
+          "x": 0,
+          "y": 7,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hips ItemConfig 4",
+          "count": 1,
+          "x": 2,
+          "y": 8,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 16",
+          "count": 1,
+          "x": 0,
+          "y": 9,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 16",
+          "count": 1,
+          "x": 4,
+          "y": 9,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Sword 12 Item Config ID",
+          "count": 1,
+          "x": 6,
+          "y": 9,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 3",
+          "count": 1,
+          "x": 2,
+          "y": 10,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 3",
+          "count": 1,
+          "x": 0,
+          "y": 11,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hips ItemConfig 18",
+          "count": 1,
+          "x": 4,
+          "y": 11,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hips ItemConfig 18",
+          "count": 1,
+          "x": 2,
+          "y": 12,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hips ItemConfig 19",
+          "count": 1,
+          "x": 0,
+          "y": 13,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hips ItemConfig 19",
+          "count": 1,
+          "x": 4,
+          "y": 13,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hips ItemConfig 27",
+          "count": 1,
+          "x": 2,
+          "y": 14,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Sword 12 Item Config ID",
+          "count": 1,
+          "x": 6,
+          "y": 14,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Sword 7 Item Config ID",
+          "count": 1,
+          "x": 0,
+          "y": 15,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Sword 7 Item Config ID",
+          "count": 1,
+          "x": 1,
+          "y": 15,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 22",
+          "count": 1,
+          "x": 4,
+          "y": 15,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 18",
+          "count": 1,
+          "x": 2,
+          "y": 16,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 9",
+          "count": 1,
+          "x": 4,
+          "y": 17,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 9",
+          "count": 1,
+          "x": 2,
+          "y": 18,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 3",
+          "count": 1,
+          "x": 4,
+          "y": 19,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Sword 7 Item Config ID",
+          "count": 1,
+          "x": 6,
+          "y": 19,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 3",
+          "count": 1,
+          "x": 0,
+          "y": 20,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 1",
+          "count": 1,
+          "x": 2,
+          "y": 20,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 1",
+          "count": 1,
+          "x": 4,
+          "y": 21,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 27",
+          "count": 1,
+          "x": 0,
+          "y": 22,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 27",
+          "count": 1,
+          "x": 2,
+          "y": 22,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Sword 12 Item Config ID",
+          "count": 1,
+          "x": 4,
+          "y": 23,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 24",
+          "count": 1,
+          "x": 0,
+          "y": 24,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hips ItemConfig 7",
+          "count": 1,
+          "x": 2,
+          "y": 24,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hips ItemConfig 7",
+          "count": 1,
+          "x": 5,
+          "y": 24,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hips ItemConfig 12",
+          "count": 1,
+          "x": 0,
+          "y": 26,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 19",
+          "count": 1,
+          "x": 2,
+          "y": 26,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 19",
+          "count": 1,
+          "x": 5,
+          "y": 26,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 15",
+          "count": 1,
+          "x": 0,
+          "y": 28,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 15",
+          "count": 1,
+          "x": 2,
+          "y": 28,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Body ItemConfig 25",
+          "count": 1,
+          "x": 4,
+          "y": 28,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Hips ItemConfig 12",
+          "count": 1,
+          "x": 0,
+          "y": 30,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Helm ItemConfig 10",
+          "count": 1,
+          "x": 2,
+          "y": 30,
           "rotated": 0,
           "slot": 0
         },
@@ -3543,7 +4199,7 @@
       "inventory": [
         {
           "itemId": "Piece of cheese Config ID",
-          "count": 2,
+          "count": 3,
           "x": 0,
           "y": 0,
           "rotated": 0,
@@ -3551,25 +4207,81 @@
         },
         {
           "itemId": "Bread Config ID",
-          "count": 1,
+          "count": 5,
           "x": 1,
           "y": 0,
           "rotated": 0,
           "slot": 0
         },
         {
-          "itemId": "Mug of beer Config ID",
-          "count": 5,
+          "itemId": "Ring_02 Config ID",
+          "count": 1,
           "x": 2,
           "y": 0,
           "rotated": 0,
           "slot": 0
         },
         {
-          "itemId": "Bottle of wine Config ID",
+          "itemId": "Ring_07 Config ID",
           "count": 1,
           "x": 3,
           "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Honey Item Config ID",
+          "count": 1,
+          "x": 4,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Cooked turkey Config ID",
+          "count": 2,
+          "x": 5,
+          "y": 0,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Baguette Config ID",
+          "count": 5,
+          "x": 0,
+          "y": 1,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Bottle of wine Config ID",
+          "count": 10,
+          "x": 3,
+          "y": 1,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Mug of beer Config ID",
+          "count": 6,
+          "x": 4,
+          "y": 1,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Baguette Config ID",
+          "count": 3,
+          "x": 0,
+          "y": 2,
+          "rotated": 0,
+          "slot": 0
+        },
+        {
+          "itemId": "Bread Config ID",
+          "count": 1,
+          "x": 2,
+          "y": 2,
           "rotated": 0,
           "slot": 0
         },
@@ -4028,13 +4740,45 @@
   ],
   "quests": [
     {
-      "questId": "c250f917e27947e381db2080fb2685fc",
-      "currentNodeId": "b4930ecc19e1468fbfd9ef61e728faf0",
+      "questId": "accb6d97d0df47248d32b6dbc5e0a058",
+      "currentNodeId": "fec8e6aa439e487f8fe73e5a2adc5a30",
       "completedNodeIds": [],
       "state": 0
     }
   ],
   "inventory": [
+    {
+      "itemId": "Stamina potion Config ID",
+      "count": 1,
+      "x": 1,
+      "y": 1,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Bread Config ID",
+      "count": 2,
+      "x": 1,
+      "y": 2,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Ring_01 Config ID",
+      "count": 1,
+      "x": 0,
+      "y": 2,
+      "rotated": 0,
+      "slot": 0
+    },
+    {
+      "itemId": "Bottle of Water Config ID",
+      "count": 7,
+      "x": 0,
+      "y": 0,
+      "rotated": 0,
+      "slot": 0
+    },
     {
       "itemId": "Body ItemConfig 6",
       "count": 1,
@@ -4100,10 +4844,139 @@
     {
       "leftFactionId": "lions",
       "rightFactionId": "bandits",
-      "relation": -200
+      "relation": 0
     }
   ],
-  "worldItems": [],
+  "worldItems": [
+    {
+      "persistentId": "Body ItemConfig 21_666e1c79ccc14fe6b8fab318111deb05",
+      "itemId": "Body ItemConfig 21",
+      "count": 1,
+      "locationId": "Tavern",
+      "positionX": -51.8236771,
+      "positionY": 3.07459617,
+      "positionZ": -77.73776,
+      "rotationX": 1.20278E-07,
+      "rotationY": -0.9626676,
+      "rotationZ": 5.87453144E-07,
+      "rotationW": -0.270686656,
+      "hasLifetime": false,
+      "remainingLifetimeSeconds": 0.0,
+      "isSceneAuthored": true
+    },
+    {
+      "persistentId": "Apple ItemConfig ID_9e26e2d042a2413dbb71d07b9fb68afd",
+      "itemId": "Apple ItemConfig ID",
+      "count": 1,
+      "locationId": "Tavern",
+      "positionX": -61.2439957,
+      "positionY": 0.09049392,
+      "positionZ": -87.59268,
+      "rotationX": -0.446894765,
+      "rotationY": 0.2609697,
+      "rotationZ": -0.7383671,
+      "rotationW": -0.432428122,
+      "hasLifetime": false,
+      "remainingLifetimeSeconds": 0.0,
+      "isSceneAuthored": true
+    },
+    {
+      "persistentId": "Cooked turkey Config ID_e603d7047c99409ca2ee083ecf820f22",
+      "itemId": "Cooked turkey Config ID",
+      "count": 1,
+      "locationId": "Tavern",
+      "positionX": -59.7992554,
+      "positionY": 0.9910474,
+      "positionZ": -93.24982,
+      "rotationX": 0.0007960127,
+      "rotationY": -0.000216573477,
+      "rotationZ": 0.0003883387,
+      "rotationW": 0.9999996,
+      "hasLifetime": false,
+      "remainingLifetimeSeconds": 0.0,
+      "isSceneAuthored": true
+    },
+    {
+      "persistentId": "Baguette Config ID_9228c264eaea41e7867ca57ee7222d0a",
+      "itemId": "Baguette Config ID",
+      "count": 1,
+      "locationId": "Tavern",
+      "positionX": -57.5078049,
+      "positionY": 0.9275054,
+      "positionZ": -90.8418045,
+      "rotationX": -0.03270455,
+      "rotationY": 0.00013011694,
+      "rotationZ": 0.05303561,
+      "rotationW": 0.998056948,
+      "hasLifetime": false,
+      "remainingLifetimeSeconds": 0.0,
+      "isSceneAuthored": true
+    },
+    {
+      "persistentId": "Apple ItemConfig ID_69818873b879499081e6819e56095274",
+      "itemId": "Apple ItemConfig ID",
+      "count": 1,
+      "locationId": "Tavern",
+      "positionX": -60.97672,
+      "positionY": 0.09241024,
+      "positionZ": -87.5623,
+      "rotationX": 0.881458044,
+      "rotationY": 0.209895819,
+      "rotationZ": -0.004320562,
+      "rotationW": 0.423032939,
+      "hasLifetime": false,
+      "remainingLifetimeSeconds": 0.0,
+      "isSceneAuthored": true
+    },
+    {
+      "persistentId": "Mug of beer Config ID_10168ba0ac3b4738a4439b104e4eca4e",
+      "itemId": "Mug of beer Config ID",
+      "count": 1,
+      "locationId": "Tavern",
+      "positionX": -59.45016,
+      "positionY": 1.0805577,
+      "positionZ": -93.15054,
+      "rotationX": 0.000811006,
+      "rotationY": -5.97536564E-05,
+      "rotationZ": 0.0003971039,
+      "rotationW": 0.9999996,
+      "hasLifetime": false,
+      "remainingLifetimeSeconds": 0.0,
+      "isSceneAuthored": true
+    },
+    {
+      "persistentId": "Apple ItemConfig ID_4e5df7a79ce74af784748d92fb664582",
+      "itemId": "Apple ItemConfig ID",
+      "count": 1,
+      "locationId": "Tavern",
+      "positionX": -60.8618355,
+      "positionY": -0.015664205,
+      "positionZ": -87.63028,
+      "rotationX": -0.040152248,
+      "rotationY": -0.117126971,
+      "rotationZ": 0.0137170237,
+      "rotationW": 0.99221015,
+      "hasLifetime": false,
+      "remainingLifetimeSeconds": 0.0,
+      "isSceneAuthored": true
+    },
+    {
+      "persistentId": "Bottle of wine Config ID_1430c9bbbdff41aebf5305361e5fc72e",
+      "itemId": "Bottle of wine Config ID",
+      "count": 1,
+      "locationId": "Tavern",
+      "positionX": -56.2053261,
+      "positionY": 1.06978881,
+      "positionZ": -90.30904,
+      "rotationX": 0.000816160464,
+      "rotationY": -0.000124692917,
+      "rotationZ": 7.7626144E-05,
+      "rotationW": 0.9999997,
+      "hasLifetime": false,
+      "remainingLifetimeSeconds": 0.0,
+      "isSceneAuthored": true
+    }
+  ],
   "retiredSceneWorldItemIds": [],
   "farmPlants": [
     {
@@ -4181,10 +5054,10 @@
       "fieldId": "Chrysanthemums_PlantConfig_ID_field_162927accf104d17921df7c8820d93db",
       "locationId": "Forest",
       "plantConfigId": "Chrysanthemums PlantConfig ID",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": 13.1983786,
+      "positionY": 0.269999981,
+      "positionZ": -45.593277,
       "bodyStageIndex": 1,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4195,10 +5068,10 @@
       "fieldId": "Chrysanthemums_PlantConfig_ID_field_162927accf104d17921df7c8820d93db",
       "locationId": "Forest",
       "plantConfigId": "Chrysanthemums PlantConfig ID",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": 8.698039,
+      "positionY": 0.269999981,
+      "positionZ": -52.00004,
       "bodyStageIndex": 1,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4209,10 +5082,10 @@
       "fieldId": "Chrysanthemums_PlantConfig_ID_field_162927accf104d17921df7c8820d93db",
       "locationId": "Forest",
       "plantConfigId": "Chrysanthemums PlantConfig ID",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": 24.9116383,
+      "positionY": 0.269999981,
+      "positionZ": -39.0019379,
       "bodyStageIndex": 1,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4448,10 +5321,10 @@
       "fieldId": "Tomato_FruitPlantConfig_field_e3d3e47a75cf4cdeae7b0e5e378f6b8e",
       "locationId": "Village",
       "plantConfigId": "Broccoli PlantConfig",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": -42.3172836,
+      "positionY": 0.179336756,
+      "positionZ": 0.998203039,
       "bodyStageIndex": 3,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4462,10 +5335,10 @@
       "fieldId": "Tomato_FruitPlantConfig_field_e3d3e47a75cf4cdeae7b0e5e378f6b8e",
       "locationId": "Village",
       "plantConfigId": "Broccoli PlantConfig",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": -43.5374527,
+      "positionY": 0.179336756,
+      "positionZ": 5.2346487,
       "bodyStageIndex": 3,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4476,10 +5349,10 @@
       "fieldId": "Tomato_FruitPlantConfig_field_e3d3e47a75cf4cdeae7b0e5e378f6b8e",
       "locationId": "Village",
       "plantConfigId": "Broccoli PlantConfig",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": -43.3562355,
+      "positionY": 0.179336756,
+      "positionZ": 0.6299676,
       "bodyStageIndex": 3,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4490,10 +5363,10 @@
       "fieldId": "Tomato_FruitPlantConfig_field_e3d3e47a75cf4cdeae7b0e5e378f6b8e",
       "locationId": "Village",
       "plantConfigId": "Broccoli PlantConfig",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": -42.61451,
+      "positionY": 0.179336756,
+      "positionZ": 0.300931454,
       "bodyStageIndex": 3,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4504,10 +5377,10 @@
       "fieldId": "Tomato_FruitPlantConfig_field_e3d3e47a75cf4cdeae7b0e5e378f6b8e",
       "locationId": "Village",
       "plantConfigId": "Broccoli PlantConfig",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": -42.453,
+      "positionY": 0.179336756,
+      "positionZ": 4.65596533,
       "bodyStageIndex": 3,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4518,10 +5391,10 @@
       "fieldId": "Camomile_PlantConfig_ID_field_a4753bf1ece74c12a3ce5abecdd42da4",
       "locationId": "Forest",
       "plantConfigId": "Camomile PlantConfig ID",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": 78.53257,
+      "positionY": 0.230000019,
+      "positionZ": -105.357544,
       "bodyStageIndex": 3,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4532,10 +5405,10 @@
       "fieldId": "Camomile_PlantConfig_ID_field_a4753bf1ece74c12a3ce5abecdd42da4",
       "locationId": "Forest",
       "plantConfigId": "Camomile PlantConfig ID",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": 79.1375961,
+      "positionY": 0.230000019,
+      "positionZ": -99.89796,
       "bodyStageIndex": 3,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4546,10 +5419,10 @@
       "fieldId": "Camomile_PlantConfig_ID_field_a4753bf1ece74c12a3ce5abecdd42da4",
       "locationId": "Forest",
       "plantConfigId": "Camomile PlantConfig ID",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": 83.81361,
+      "positionY": 0.230000019,
+      "positionZ": -104.400856,
       "bodyStageIndex": 3,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4560,10 +5433,10 @@
       "fieldId": "Lupine_PlantConfig_ID_field_5f6a0df5c79d4ccfaab320e6c0bfb6f1",
       "locationId": "Village",
       "plantConfigId": "Lupine PlantConfig ID",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": 41.16736,
+      "positionY": 0.149999976,
+      "positionZ": 41.07403,
       "bodyStageIndex": 3,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4574,10 +5447,10 @@
       "fieldId": "Lupine_PlantConfig_ID_field_5f6a0df5c79d4ccfaab320e6c0bfb6f1",
       "locationId": "Village",
       "plantConfigId": "Lupine PlantConfig ID",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": 44.4553566,
+      "positionY": 0.149999976,
+      "positionZ": 47.3139038,
       "bodyStageIndex": 3,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4588,10 +5461,10 @@
       "fieldId": "Lupine_PlantConfig_ID_field_5f6a0df5c79d4ccfaab320e6c0bfb6f1",
       "locationId": "Village",
       "plantConfigId": "Lupine PlantConfig ID",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": 35.94922,
+      "positionY": 0.149999976,
+      "positionZ": 46.16277,
       "bodyStageIndex": 3,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4602,10 +5475,10 @@
       "fieldId": "Broccoli_PlantConfig_field_8c5ea805fa394139ba0099a59a5fa331",
       "locationId": "River",
       "plantConfigId": "Larkspur PlantConfig ID",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": 87.912384,
+      "positionY": 0.149999976,
+      "positionZ": -129.341461,
       "bodyStageIndex": 1,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4616,10 +5489,10 @@
       "fieldId": "Broccoli_PlantConfig_field_8c5ea805fa394139ba0099a59a5fa331",
       "locationId": "River",
       "plantConfigId": "Larkspur PlantConfig ID",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": 94.21924,
+      "positionY": 0.149999976,
+      "positionZ": -132.236343,
       "bodyStageIndex": 1,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,
@@ -4630,10 +5503,10 @@
       "fieldId": "Broccoli_PlantConfig_field_8c5ea805fa394139ba0099a59a5fa331",
       "locationId": "River",
       "plantConfigId": "Larkspur PlantConfig ID",
-      "hasPosition": false,
-      "positionX": 0.0,
-      "positionY": 0.0,
-      "positionZ": 0.0,
+      "hasPosition": true,
+      "positionX": 69.0137253,
+      "positionY": 0.149999976,
+      "positionZ": -130.782333,
       "bodyStageIndex": 1,
       "remainingStageSeconds": 0.0,
       "isHarvestable": true,

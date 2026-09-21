@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Localization;
 
 namespace Loading
 {
@@ -7,7 +8,7 @@ namespace Loading
     {
         [field: SerializeField] public string LoadSceneName { get; private set; } = "Load Scene";
         [field: SerializeField] public string MenuSceneName { get; private set; } = "Menu";
-        [field: SerializeField] public string PressAnyKeyText { get; private set; } = "Press any key";
+        [field: SerializeField] public LocalizedString PressAnyKeyText { get; private set; } = new("Tables", "Death_Continue");
 
         [field: Space]
         [field: SerializeField, Min(0.01f)] public float SimpleAnimationFrameSeconds { get; private set; } = 0.18f;

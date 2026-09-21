@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using Loading;
+using Localization;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -176,7 +177,7 @@ namespace UI.UIElements
                 return;
             }
 
-            PercentOfLoadText.text = config != null ? config.PressAnyKeyText : "Press any key";
+            PercentOfLoadText.text = config?.PressAnyKeyText.GetLocalizedStringCached() ?? string.Empty;
             float blinkSpeed = config != null ? config.ReadyTextBlinkSpeed : 1.25f;
             float minAlpha = config != null ? config.ReadyTextMinAlpha : 0.45f;
             float maxAlpha = config != null ? config.ReadyTextMaxAlpha : 0.95f;

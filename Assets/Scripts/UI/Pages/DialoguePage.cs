@@ -3,6 +3,7 @@ using Dialogs.Graph;
 using Dialogs.Graph.Model;
 using GameModes;
 using Inventory.Inventories;
+using Input;
 using Localization;
 using MessagePipe;
 using Messages;
@@ -61,6 +62,7 @@ namespace UI.Pages
             StatsController statsController,
             StatFillers statFillers,
             global::Inventory.InventoryConfig inventoryConfig,
+            InputConfig inputConfig,
             PlayerStatsHudContinuity playerStatsHudContinuity,
             DialogueContext dialogueContext,
             DialogueAnswerProvider dialogueAnswerProvider,
@@ -87,6 +89,8 @@ namespace UI.Pages
                 statFillers,
                 inventoryConfig,
                 playerInventory,
+                inputConfig,
+                uiConfig.FastSlotLabelFont,
                 showStatsInputSubscriber);
             this.playerStatsHudContinuity = playerStatsHudContinuity;
             this.dialogueContext = dialogueContext;

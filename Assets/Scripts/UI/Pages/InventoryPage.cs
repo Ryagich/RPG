@@ -6,6 +6,7 @@ using Inventory;
 using Inventory.Grid;
 using Inventory.Inventories;
 using Inventory.Slot;
+using Input;
 using TMPro;
 using UI.Configs;
 using UniRx;
@@ -65,6 +66,7 @@ namespace UI.Pages
         private readonly ColorsConfig colorsConfig;
         private readonly StatIconsConfig statIconsConfig;
         private readonly PlayerInventory playerInventory;
+        private readonly InputConfig inputConfig;
         private readonly InventoryHandController inventoryHandController;
         private readonly MoneyStorage playerMoneyStorage;
         private readonly CharacterInfo characterInfo;
@@ -130,6 +132,7 @@ namespace UI.Pages
                 ColorsConfig colorsConfig,
                 StatIconsConfig statIconsConfig,
                 Canvas canvas,
+                InputConfig inputConfig,
                 PlayerInventory playerInventory,
                 InventoryHandController inventoryHandController,
                 MoneyStorage playerMoneyStorage,
@@ -148,6 +151,7 @@ namespace UI.Pages
             this.colorsConfig = colorsConfig;
             this.statIconsConfig = statIconsConfig;
             this.canvas = canvas;
+            this.inputConfig = inputConfig;
             this.playerInventory = playerInventory;
             this.inventoryHandController = inventoryHandController;
             this.playerMoneyStorage = playerMoneyStorage;
@@ -583,7 +587,7 @@ namespace UI.Pages
 
         private void DrawFastSlotItem(SlotView slotView, FastSlotModel fastSlotModel)
         {
-            PageUiUtilities.DrawFastSlotItem(slotView, fastSlotModel, playerInventory.HasAnyInventoryItem(fastSlotModel?.ItemConfig));
+            PageUiUtilities.DrawFastSlotItem(slotView, fastSlotModel, playerInventory.HasAnyInventoryItem(fastSlotModel?.ItemConfig), inputConfig, uiConfig.FastSlotLabelFont);
         }
 
         private void DrawStatsHolderFastSlots()
@@ -593,10 +597,10 @@ namespace UI.Pages
                 return;
             }
 
-            PageUiUtilities.DrawFastSlotItem(statsHolder.FastSlot1, playerInventory.FastSlot1, playerInventory.HasAnyInventoryItem(playerInventory.FastSlot1.ItemConfig));
-            PageUiUtilities.DrawFastSlotItem(statsHolder.FastSlot2, playerInventory.FastSlot2, playerInventory.HasAnyInventoryItem(playerInventory.FastSlot2.ItemConfig));
-            PageUiUtilities.DrawFastSlotItem(statsHolder.FastSlot3, playerInventory.FastSlot3, playerInventory.HasAnyInventoryItem(playerInventory.FastSlot3.ItemConfig));
-            PageUiUtilities.DrawFastSlotItem(statsHolder.FastSlot4, playerInventory.FastSlot4, playerInventory.HasAnyInventoryItem(playerInventory.FastSlot4.ItemConfig));
+            PageUiUtilities.DrawFastSlotItem(statsHolder.FastSlot1, playerInventory.FastSlot1, playerInventory.HasAnyInventoryItem(playerInventory.FastSlot1.ItemConfig), inputConfig, uiConfig.FastSlotLabelFont);
+            PageUiUtilities.DrawFastSlotItem(statsHolder.FastSlot2, playerInventory.FastSlot2, playerInventory.HasAnyInventoryItem(playerInventory.FastSlot2.ItemConfig), inputConfig, uiConfig.FastSlotLabelFont);
+            PageUiUtilities.DrawFastSlotItem(statsHolder.FastSlot3, playerInventory.FastSlot3, playerInventory.HasAnyInventoryItem(playerInventory.FastSlot3.ItemConfig), inputConfig, uiConfig.FastSlotLabelFont);
+            PageUiUtilities.DrawFastSlotItem(statsHolder.FastSlot4, playerInventory.FastSlot4, playerInventory.HasAnyInventoryItem(playerInventory.FastSlot4.ItemConfig), inputConfig, uiConfig.FastSlotLabelFont);
         }
 
         private bool TryGetSnappedPositionInSlot(Vector2 screenPoint, Camera eventCamera, RectTransform dragParentRect, out Vector2 snappedPosition)

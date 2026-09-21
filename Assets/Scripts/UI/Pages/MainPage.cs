@@ -151,6 +151,8 @@ namespace UI.Pages
                 statFillers,
                 inventoryConfig,
                 playerInventory,
+                inputConfig,
+                uiConfig.FastSlotLabelFont,
                 showStatsInputSubscriber,
                 fastSlotInputSubscriber);
             showStatsInputSubscriber.Subscribe(OnShowStatsInputChanged);
@@ -306,7 +308,7 @@ namespace UI.Pages
 
         private void DrawFastSlot(SlotView slotView, FastSlotModel fastSlotModel)
         {
-            PageUiUtilities.DrawFastSlotItem(slotView, fastSlotModel, playerInventory.HasAnyInventoryItem(fastSlotModel?.ItemConfig));
+            PageUiUtilities.DrawFastSlotItem(slotView, fastSlotModel, playerInventory.HasAnyInventoryItem(fastSlotModel?.ItemConfig), inputConfig, uiConfig.FastSlotLabelFont);
         }
 
         private void RefreshStatFill(StatType statType)

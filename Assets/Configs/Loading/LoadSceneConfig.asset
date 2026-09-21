@@ -14,7 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Loading.LoadSceneConfig
   <LoadSceneName>k__BackingField: Load Scene
   <MenuSceneName>k__BackingField: Menu
-  <PressAnyKeyText>k__BackingField: Press any key
+  <PressAnyKeyText>k__BackingField:
+    m_TableReference:
+      m_TableCollectionName: Tables
+    m_TableEntryReference:
+      m_KeyId: 99500000000000002
+      m_Key:
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   <SimpleAnimationFrameSeconds>k__BackingField: 0.01
   <ReadyTextBlinkSpeed>k__BackingField: 1.25
   <ReadyTextMinAlpha>k__BackingField: 0.45

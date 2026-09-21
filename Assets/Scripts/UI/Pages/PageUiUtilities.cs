@@ -6,6 +6,7 @@ using Factions;
 using Inventory.Item;
 using Inventory.Inventories;
 using Inventory.Slot;
+using Input;
 using Localization;
 using TMPro;
 using Stats;
@@ -77,6 +78,11 @@ namespace UI.Pages
 
             if (currentCharacterInfo == null)
             {
+                if (infoAboutPlayer.Name != null)
+                {
+                    infoAboutPlayer.Name.text = string.Empty;
+                }
+
                 return;
             }
 
@@ -529,7 +535,12 @@ namespace UI.Pages
             itemGrabRects.Add(itemImageRect);
         }
 
-        public static void DrawFastSlotItem(SlotView slotView, FastSlotModel fastSlotModel, bool isAvailable)
+        public static void DrawFastSlotItem(
+            SlotView slotView,
+            FastSlotModel fastSlotModel,
+            bool isAvailable,
+            InputConfig inputConfig,
+            TMP_FontAsset labelFont)
         {
             if (!slotView)
             {
@@ -557,7 +568,15 @@ namespace UI.Pages
                 canvasGroup.interactable = false;
             }
 
-            CreateFastSlotLabel(slotRect, fastSlotModel?.DisplayName);
+            CreateFastSlotLabel(slotRect, GetFastSlotBindingDisplayName(fastSlotModel, inputConfig), labelFont);
+        }
+
+        private static string GetFastSlotBindingDisplayName(FastSlotModel fastSlotModel, InputConfig inputConfig)
+        {
+            var action = inputConfig?.Movement?.action?.actionMap?.FindAction(fastSlotModel?.ActionName, false);
+            return action == null || action.bindings.Count == 0
+                ? string.Empty
+                : InputRebinder.GetLocalizedBindingDisplayName(action.bindings[0]);
         }
 
         public static void SetPopupRaycastState(RectTransform popupRect, bool blocksRaycasts)
@@ -2276,7 +2295,7 @@ namespace UI.Pages
             }
         }
 
-        private static void CreateFastSlotLabel(RectTransform parent, string labelText)
+        private static void CreateFastSlotLabel(RectTransform parent, string labelText, TMP_FontAsset labelFont)
         {
             if (parent == null || string.IsNullOrWhiteSpace(labelText))
             {
@@ -2293,6 +2312,7 @@ namespace UI.Pages
             labelRect.sizeDelta = new Vector2(54f, 20f);
 
             var label = labelObject.GetComponent<TextMeshProUGUI>();
+            label.font = labelFont;
             label.text = labelText;
             label.alignment = TextAlignmentOptions.BottomLeft;
             label.fontSize = 18;

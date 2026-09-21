@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45b0b280a4ad4034874ed3ba2bde5226, type: 3}
   m_Name: FactionRelationsConfig
   m_EditorClassIdentifier: Assembly-CSharp::Factions.FactionRelationsConfig
-  hostileBelowRelation: -50
-  friendlyAboveRelation: 50
+  hostileBelowRelation: -100
+  friendlyAboveRelation: 100
   relations:
   - leftFaction: {fileID: 11400000, guid: 63a73ee957d79554e82c1bc3d1f71ea4, type: 2}
     rightFaction: {fileID: 11400000, guid: b0d1d20fc010f724ab3a4a56bd0ff239, type: 2}

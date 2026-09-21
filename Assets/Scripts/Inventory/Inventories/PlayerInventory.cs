@@ -48,10 +48,10 @@ namespace Inventory.Inventories
         public SlotModel BackpackSlot = new(ItemType.Backpack, SlotStackLimitType.SingleItem);
         public SlotModel LeftWeaponSlot = new(ItemType.Weapon, SlotStackLimitType.SingleItem);
         public SlotModel RightWeaponSlot = new(ItemType.Weapon, SlotStackLimitType.SingleItem);
-        public FastSlotModel FastSlot1 { get; } = new(1, "FastSlot1", "F1");
-        public FastSlotModel FastSlot2 { get; } = new(2, "FastSlot2", "F2");
-        public FastSlotModel FastSlot3 { get; } = new(3, "FastSlot3", "F3");
-        public FastSlotModel FastSlot4 { get; } = new(4, "FastSlot4", "F4");
+        public FastSlotModel FastSlot1 { get; } = new(1, "FastSlot1");
+        public FastSlotModel FastSlot2 { get; } = new(2, "FastSlot2");
+        public FastSlotModel FastSlot3 { get; } = new(3, "FastSlot3");
+        public FastSlotModel FastSlot4 { get; } = new(4, "FastSlot4");
         public Vector2Int BaseInventorySize => inventoryConfig.Size;
 
         public PlayerInventory(InventoryConfig inventoryConfig)

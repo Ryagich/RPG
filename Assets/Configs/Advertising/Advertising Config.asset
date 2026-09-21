@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fe487d98f544c3e817b6b9dd06a6e28, type: 3}
   m_Name: Advertising Config
   m_EditorClassIdentifier: Assembly-CSharp::Advertising.AdvertisingConfig
-  enabledForBuild: 1
+  enabledForBuild: 0
   advertisingStartDate:
     year: 2026
     month: 9

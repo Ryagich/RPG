@@ -9,6 +9,7 @@ using Inventory.Inventories;
 using Inventory.Item;
 using Inventory.Looting;
 using Inventory.Slot;
+using Input;
 using Localization;
 using Messages;
 using Money;
@@ -53,6 +54,7 @@ namespace UI.Pages
         private readonly ColorsConfig colorsConfig;
         private readonly StatIconsConfig statIconsConfig;
         private readonly PlayerInventory playerInventory;
+        private readonly InputConfig inputConfig;
         private readonly InventoryHandController inventoryHandController;
         private readonly MoneyStorage playerMoneyStorage;
         private readonly Character.CharacterInfo playerCharacterInfo;
@@ -119,6 +121,7 @@ namespace UI.Pages
             ColorsConfig colorsConfig,
             StatIconsConfig statIconsConfig,
             Canvas canvas,
+            InputConfig inputConfig,
             PlayerInventory playerInventory,
             InventoryHandController inventoryHandController,
             MoneyStorage playerMoneyStorage,
@@ -135,6 +138,7 @@ namespace UI.Pages
             this.colorsConfig = colorsConfig;
             this.statIconsConfig = statIconsConfig;
             this.canvas = canvas;
+            this.inputConfig = inputConfig;
             this.playerInventory = playerInventory;
             this.inventoryHandController = inventoryHandController;
             this.playerCharacterInfo = playerCharacterInfo;
@@ -837,7 +841,7 @@ namespace UI.Pages
 
         private void DrawFastSlotItem(SlotView slotView, FastSlotModel fastSlotModel)
         {
-            PageUiUtilities.DrawFastSlotItem(slotView, fastSlotModel, playerInventory.HasAnyInventoryItem(fastSlotModel?.ItemConfig));
+            PageUiUtilities.DrawFastSlotItem(slotView, fastSlotModel, playerInventory.HasAnyInventoryItem(fastSlotModel?.ItemConfig), inputConfig, uiConfig.FastSlotLabelFont);
         }
 
         private void DrawItems(IInventory inventory, InventoryView inventoryView)
