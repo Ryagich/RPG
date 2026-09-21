@@ -203,7 +203,12 @@ namespace UI.Pages
                   + itemCenterPosition.y * gridLayoutGroup.spacing.y));
         }
 
-        public static RectTransform CreateItemImage(Transform parent, ItemStack itemStack, string namePrefix, Vector2? stackAnchorAreaSize = null)
+        public static RectTransform CreateItemImage(
+            Transform parent,
+            ItemStack itemStack,
+            string namePrefix,
+            TMP_FontAsset stackCountFont,
+            Vector2? stackAnchorAreaSize = null)
         {
             var itemConfig = itemStack.ItemConfig;
             var itemImageObject = new GameObject($"{namePrefix} [{itemConfig.Id}]", typeof(RectTransform));
@@ -218,7 +223,7 @@ namespace UI.Pages
 
             if (itemStack.Count > 1)
             {
-                CreateStackCountLabel(itemImageRect, itemStack.Count, stackAnchorAreaSize ?? itemImageRect.sizeDelta);
+                CreateStackCountLabel(itemImageRect, itemStack.Count, stackAnchorAreaSize ?? itemImageRect.sizeDelta, stackCountFont);
             }
 
             return itemImageRect;
@@ -450,6 +455,7 @@ namespace UI.Pages
                 RectTransform existingHandSlotRect,
                 RectTransform canvasRect,
                 ItemStack handItemStack,
+                TMP_FontAsset stackCountFont,
                 Vector2? stackAnchorAreaSize = null
             )
         {
@@ -476,7 +482,7 @@ namespace UI.Pages
 
             if (handItemStack.Count > 1)
             {
-                CreateStackCountLabel(handSlotRect, handItemStack.Count, stackAnchorAreaSize ?? handSlotRect.sizeDelta);
+                CreateStackCountLabel(handSlotRect, handItemStack.Count, stackAnchorAreaSize ?? handSlotRect.sizeDelta, stackCountFont);
             }
 
             return handSlotRect;
@@ -507,7 +513,8 @@ namespace UI.Pages
                 SlotView slotView,
                 SlotModel slotModel,
                 ICollection<RectTransform> itemRects,
-                ICollection<RectTransform> itemGrabRects
+                ICollection<RectTransform> itemGrabRects,
+                TMP_FontAsset stackCountFont
             )
         {
             if (!slotView)
@@ -527,7 +534,7 @@ namespace UI.Pages
                 return;
             }
 
-            var itemImageRect = CreateItemImage(slotRect, slotModel.ItemStack, "Slot Item");
+            var itemImageRect = CreateItemImage(slotRect, slotModel.ItemStack, "Slot Item", stackCountFont);
             itemImageRect.anchorMin = new Vector2(0.5f, 0.5f);
             itemImageRect.anchorMax = new Vector2(0.5f, 0.5f);
             itemImageRect.anchoredPosition = Vector2.zero;
@@ -556,7 +563,7 @@ namespace UI.Pages
             ClearChildren(slotRect);
             if (fastSlotModel?.ItemConfig != null)
             {
-                var itemImageRect = CreateItemImage(slotRect, new ItemStack(fastSlotModel.ItemConfig), "Fast Slot Item");
+                var itemImageRect = CreateItemImage(slotRect, new ItemStack(fastSlotModel.ItemConfig), "Fast Slot Item", labelFont);
                 itemImageRect.anchorMin = new Vector2(0.5f, 0.5f);
                 itemImageRect.anchorMax = new Vector2(0.5f, 0.5f);
                 itemImageRect.anchoredPosition = Vector2.zero;
@@ -1094,7 +1101,7 @@ namespace UI.Pages
             popupRect.anchoredPosition = anchoredPosition;
         }
 
-        private static void CreateStackCountLabel(RectTransform parent, int count, Vector2 anchorAreaSize)
+        private static void CreateStackCountLabel(RectTransform parent, int count, Vector2 anchorAreaSize, TMP_FontAsset stackCountFont)
         {
             var labelObject = new GameObject("Stack Count", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
             var labelRect = labelObject.GetComponent<RectTransform>();
@@ -1106,6 +1113,7 @@ namespace UI.Pages
             labelRect.sizeDelta = new Vector2(72f, 30f);
 
             var label = labelObject.GetComponent<TextMeshProUGUI>();
+            label.font = stackCountFont;
             label.text = count.ToString(CultureInfo.InvariantCulture);
             label.alignment = TextAlignmentOptions.BottomRight;
             label.fontSize = 24;

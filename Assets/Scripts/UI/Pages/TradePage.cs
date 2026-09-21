@@ -1283,7 +1283,7 @@ namespace UI.Pages
             foreach (var item in inventory.Items)
             {
                 var itemGrabSize = PageUiUtilities.GetItemGrabSize(gridLayoutGroup, item.ItemStack.Size);
-                var itemImageRect = PageUiUtilities.CreateItemImage(inventoryView.ContentForItems, item.ItemStack, "Item", itemGrabSize);
+                var itemImageRect = PageUiUtilities.CreateItemImage(inventoryView.ContentForItems, item.ItemStack, "Item", uiConfig.FastSlotLabelFont, itemGrabSize);
                 itemRects.Add(itemImageRect);
                 popupTargets.Add(new PopupTarget
                 {
@@ -1329,7 +1329,7 @@ namespace UI.Pages
         private void DrawSlotItem(SlotView slotView, SlotModel slotModel)
         {
             PageUiUtilities.SetSlotBlockedState(slotView, slotModel == playerInventory.FaceSlot && playerInventory.IsFaceSlotBlocked);
-            PageUiUtilities.DrawSlotItem(slotView, slotModel, itemRects, itemGrabRects);
+            PageUiUtilities.DrawSlotItem(slotView, slotModel, itemRects, itemGrabRects, uiConfig.FastSlotLabelFont);
             if (slotView == null || slotModel?.ItemStack?.ItemConfig == null)
             {
                 return;
@@ -1357,7 +1357,7 @@ namespace UI.Pages
         private void DrawHandSlot()
         {
             var handItemStack = playerInventory.HandSlot.Value?.ItemStack;
-            handSlotRect = PageUiUtilities.DrawHandSlot(handSlotRect, canvasRect, handItemStack, GetHandStackAnchorAreaSize(handItemStack));
+            handSlotRect = PageUiUtilities.DrawHandSlot(handSlotRect, canvasRect, handItemStack, uiConfig.FastSlotLabelFont, GetHandStackAnchorAreaSize(handItemStack));
             if (handSlotRect)
             {
                 UpdateHandSlotPosition();
