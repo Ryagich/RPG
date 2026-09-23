@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fe487d98f544c3e817b6b9dd06a6e28, type: 3}
   m_Name: Advertising Config
   m_EditorClassIdentifier: Assembly-CSharp::Advertising.AdvertisingConfig
-  enabledForBuild: 0
+  enabledForBuild: 1
   advertisingStartDate:
     year: 2026
     month: 9
-    day: 20
-  interstitialCooldownSeconds: 60
-  rewardedCooldownSeconds: 300
-  newGameGracePeriodSeconds: 300
+    day: 26
+  interstitialCooldownSeconds: 90
+  rewardedCooldownSeconds: 540
+  newGameGracePeriodSeconds: 310
