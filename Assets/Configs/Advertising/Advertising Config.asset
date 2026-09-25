@@ -15,8 +15,8 @@ MonoBehaviour:
   enabledForBuild: 1
   advertisingStartDate:
     year: 2026
-    month: 9
-    day: 26
+    month: 10
+    day: 1
   interstitialCooldownSeconds: 90
   rewardedCooldownSeconds: 540
   newGameGracePeriodSeconds: 310

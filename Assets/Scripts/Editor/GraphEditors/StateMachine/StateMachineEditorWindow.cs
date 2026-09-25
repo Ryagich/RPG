@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 
 namespace StateMachine.Graph.Editor
 {
-    public class StateMachineEditorWindow : EditorWindow, IRetainedGraphCanvasHost<Node, Transition>
+    public class StateMachineEditorWindow : GraphEditorWindowBase
     {
         private const string StatesPathKey = "StateMachineEditor_StatesPath";
         private const string TransitionsPathKey = "StateMachineEditor_TransitionsPath";
@@ -29,8 +29,7 @@ namespace StateMachine.Graph.Editor
         private readonly Dictionary<Node, Rect> nodeRects = new();
         private readonly Dictionary<State, Node> stateToNodeLookup = new();
         private readonly Dictionary<Transition, CachedConnectionRoute> connectionRouteCache = new();
-        private readonly HashSet<Node> graphNodeSet = new();
-        private readonly List<Node> staleNodeRects = new();
+        private readonly GraphEditorNodeLayoutSynchronizer<Node> nodeLayoutSynchronizer = new();
 
         private bool isSelectingTargetNode;
         private bool isControlsPanelExpanded = true;
@@ -39,7 +38,7 @@ namespace StateMachine.Graph.Editor
         private Transition pendingTransition;
         private Node sourceNodeForSelection;
         private Node activeConnectionNode;
-        private readonly List<EditorStyleTextOverride> editorStyleTextOverrides = new();
+        private readonly GraphEditorStyleTextOverrides styleTextOverrides = new();
         private GUIStyle lightWindowStyle;
         private GUIStyle lightHelpBoxStyle;
         private GUIStyle lightButtonStyle;
@@ -57,10 +56,8 @@ namespace StateMachine.Graph.Editor
         private Texture2D lightTextFieldTexture;
         private GUISkin lightSkin;
 
-        private float zoom = 1f;
-        private Vector2 panOffset = Vector2.zero;
-        private bool useLightTheme;
         private RetainedGraphCanvas<Node, Transition> toolkitCanvas;
+        private DelegatingRetainedGraphCanvasAdapter<Node, Transition> canvasAdapter;
         private IMGUIContainer toolkitControls;
         private bool toolkitUiActive;
 
@@ -73,49 +70,72 @@ namespace StateMachine.Graph.Editor
         private void CreateGUI()
         {
             toolkitUiActive = true;
-            rootVisualElement.Clear();
-            rootVisualElement.style.flexGrow = 1f;
-            rootVisualElement.style.backgroundColor = WindowBackgroundColor;
-
-            toolkitCanvas = new RetainedGraphCanvas<Node, Transition>(this);
-            rootVisualElement.Add(toolkitCanvas);
-
-            toolkitControls = new IMGUIContainer(DrawToolkitControls)
-            {
-                name = "state-machine-editor-controls"
-            };
-            toolkitControls.style.position = Position.Absolute;
-            toolkitControls.style.left = 0f;
-            toolkitControls.style.top = 0f;
-            toolkitControls.style.width = OverlayPanelWidth;
-            toolkitControls.style.bottom = 0f;
-            rootVisualElement.Add(toolkitControls);
+            canvasAdapter = CreateCanvasAdapter();
+            toolkitCanvas = new RetainedGraphCanvas<Node, Transition>(
+                canvasAdapter,
+                canvasAdapter,
+                canvasAdapter,
+                canvasAdapter,
+                canvasAdapter,
+                canvasAdapter);
+            toolkitControls = GraphEditorWindowUi.BuildRoot(
+                rootVisualElement,
+                toolkitCanvas,
+                "state-machine-editor-controls",
+                OverlayPanelWidth,
+                WindowBackgroundColor,
+                DrawToolkitControls);
 
             toolkitCanvas.RebuildNow();
         }
 
         private void OnEnable()
         {
-            statesFolderPath = EditorPrefs.GetString(StatesPathKey, "Assets/States");
-            transitionsFolderPath = EditorPrefs.GetString(TransitionsPathKey, "Assets/Transitions");
-            useLightTheme = EditorPrefs.GetBool(ThemeKey, false);
-            EditorApplication.projectChanged += HandleProjectChanged;
+            statesFolderPath = GraphEditorPreferences.LoadFolder(StatesPathKey, "Assets/States");
+            transitionsFolderPath = GraphEditorPreferences.LoadFolder(TransitionsPathKey, "Assets/Transitions");
+            useLightTheme = GraphEditorPreferences.LoadTheme(ThemeKey);
+            GraphEditorAssetChangeTracker.AssetsChanged += HandleTrackedAssetsChanged;
         }
 
         private void OnDisable()
         {
-            EditorApplication.projectChanged -= HandleProjectChanged;
+            GraphEditorAssetChangeTracker.AssetsChanged -= HandleTrackedAssetsChanged;
             toolkitUiActive = false;
             toolkitCanvas = null;
+            canvasAdapter = null;
             toolkitControls = null;
         }
 
-        private void HandleProjectChanged()
+        private void HandleTrackedAssetsChanged(IReadOnlyCollection<string> changedAssetPaths)
         {
-            graphStructureDirty = true;
+            if (!HasRelevantAssetChange(changedAssetPaths))
+            {
+                return;
+            }
+
             InvalidateConnectionRouteCache();
-            RefreshToolkitCanvas(true);
-            Repaint();
+            bool graphAssetChanged = currentGraph != null &&
+                changedAssetPaths.Contains(AssetDatabase.GetAssetPath(currentGraph));
+            RefreshToolkitCanvas(graphAssetChanged || HasMissingStateReference());
+        }
+
+        private bool HasRelevantAssetChange(IReadOnlyCollection<string> changedAssetPaths)
+        {
+            return GraphEditorAssetChangeFilter.HasRelevantChange(
+                changedAssetPaths,
+                currentGraph != null ? AssetDatabase.GetAssetPath(currentGraph) : null,
+                statesFolderPath,
+                transitionsFolderPath);
+        }
+
+        private bool HasMissingStateReference()
+        {
+            return currentGraph != null && currentGraph.Nodes.Any(node =>
+                node == null ||
+                node.State == null ||
+                !AssetDatabase.Contains(node.State) ||
+                (node.State.Transitions != null && node.State.Transitions.Any(transition =>
+                    transition == null || !AssetDatabase.Contains(transition))));
         }
 
         private void OnGUI()
@@ -125,15 +145,8 @@ namespace StateMachine.Graph.Editor
                 return;
             }
 
-            Color previousBackgroundColor = GUI.backgroundColor;
-            Color previousContentColor = GUI.contentColor;
-            GUISkin previousSkin = GUI.skin;
-
-            try
+            using (BeginThemedGuiScope())
             {
-                ApplyThemeGuiColors();
-                ApplyThemeSkin();
-                ApplyThemeEditorStyleTextOverrides();
                 DrawWindowBackground();
 
                 if (currentGraph == null)
@@ -147,105 +160,71 @@ namespace StateMachine.Graph.Editor
                 DrawGraphArea();
                 DrawControlsOverlay();
             }
-            finally
-            {
-                RestoreThemeEditorStyleTextOverrides();
-                GUI.skin = previousSkin;
-                GUI.backgroundColor = previousBackgroundColor;
-                GUI.contentColor = previousContentColor;
-            }
         }
 
         private void DrawToolkitControls()
         {
-            Color previousBackgroundColor = GUI.backgroundColor;
-            Color previousContentColor = GUI.contentColor;
-            GUISkin previousSkin = GUI.skin;
-
-            try
+            using (BeginThemedGuiScope())
             {
-                ApplyThemeGuiColors();
-                ApplyThemeSkin();
-                ApplyThemeEditorStyleTextOverrides();
                 DrawControlsOverlay();
-            }
-            finally
-            {
-                RestoreThemeEditorStyleTextOverrides();
-                GUI.skin = previousSkin;
-                GUI.backgroundColor = previousBackgroundColor;
-                GUI.contentColor = previousContentColor;
             }
         }
 
         private void DrawToolkitNode(Node node)
         {
-            Color previousBackgroundColor = GUI.backgroundColor;
-            Color previousContentColor = GUI.contentColor;
-            GUISkin previousSkin = GUI.skin;
-
-            try
+            using (BeginThemedGuiScope())
             {
-                ApplyThemeGuiColors();
-                ApplyThemeSkin();
-                ApplyThemeEditorStyleTextOverrides();
                 DrawNodeWindow(node, false);
-            }
-            finally
-            {
-                RestoreThemeEditorStyleTextOverrides();
-                GUI.skin = previousSkin;
-                GUI.backgroundColor = previousBackgroundColor;
-                GUI.contentColor = previousContentColor;
             }
         }
 
         private void RefreshToolkitCanvas(bool rebuild = false)
         {
-            if (toolkitCanvas == null)
-            {
-                return;
-            }
-
-            if (rebuild)
-            {
-                toolkitCanvas.RequestRebuild();
-            }
-            else
-            {
-                toolkitCanvas.RefreshGraphAppearance();
-            }
-
-            toolkitControls?.MarkDirtyRepaint();
-            rootVisualElement.style.backgroundColor = WindowBackgroundColor;
+            GraphEditorWindowUi.Refresh(
+                rootVisualElement,
+                toolkitCanvas,
+                toolkitControls,
+                WindowBackgroundColor,
+                rebuild);
         }
 
-        string IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphEmptyStateMessage =>
-            "Create or load a state machine graph.";
-
-        bool IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphHasGraph => currentGraph != null;
-        Vector2 IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphNodeSize => NodeSize;
-
-        float IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphZoom
+        private DelegatingRetainedGraphCanvasAdapter<Node, Transition> CreateCanvasAdapter()
         {
-            get => zoom;
-            set => zoom = value;
+            return new DelegatingRetainedGraphCanvasAdapter<Node, Transition>(
+                "Create or load a state machine graph.",
+                NodeSize,
+                () => currentGraph != null,
+                PrepareRetainedGraph,
+                ClearRetainedNodeRects,
+                GetRetainedGraphNodes,
+                GetRetainedGraphConnections,
+                GetRetainedNodePosition,
+                SetRetainedNodePosition,
+                SetRetainedNodeRect,
+                GetRetainedNodeTitle,
+                GetRetainedNodeTint,
+                IsRetainedNodeTargetable,
+                DrawRetainedNode,
+                DeleteRetainedNode,
+                SelectRetainedNode,
+                ClearRetainedNodeSelection,
+                TrySelectRetainedTarget,
+                MarkRetainedNodePositionDirty,
+                ClampRetainedGraphPan,
+                DrawRetainedConnection,
+                () => zoom,
+                value => zoom = value,
+                () => panOffset,
+                value => panOffset = value,
+                () => isSelectingTargetNode,
+                () => CanvasBackgroundColor,
+                () => PanelBackgroundColor,
+                () => MinorGridColor,
+                () => MajorGridColor,
+                () => GetSelectionOverlayColor(false));
         }
 
-        Vector2 IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphPanOffset
-        {
-            get => panOffset;
-            set => panOffset = value;
-        }
-
-        bool IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphIsSelectingTarget => isSelectingTargetNode;
-        Color IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphCanvasColor => CanvasBackgroundColor;
-        Color IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphPanelColor => PanelBackgroundColor;
-        Color IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphMinorGridColor => MinorGridColor;
-        Color IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphMajorGridColor => MajorGridColor;
-        Color IRetainedGraphCanvasHost<Node, Transition>.RetainedGraphTargetBorderColor => GetSelectionOverlayColor(false);
-
-        void IRetainedGraphCanvasHost<Node, Transition>.PrepareRetainedGraph()
+        void PrepareRetainedGraph()
         {
             if (currentGraph == null)
             {
@@ -262,19 +241,19 @@ namespace StateMachine.Graph.Editor
             SynchronizeNodeRects();
         }
 
-        void IRetainedGraphCanvasHost<Node, Transition>.ClearRetainedNodeRects()
+        void ClearRetainedNodeRects()
         {
             nodeRects.Clear();
             stateToNodeLookup.Clear();
         }
 
-        IEnumerable<Node> IRetainedGraphCanvasHost<Node, Transition>.GetRetainedGraphNodes()
+        IEnumerable<Node> GetRetainedGraphNodes()
         {
             return currentGraph?.Nodes ?? Enumerable.Empty<Node>();
         }
 
         IEnumerable<RetainedGraphConnection<Node, Transition>>
-            IRetainedGraphCanvasHost<Node, Transition>.GetRetainedGraphConnections()
+            GetRetainedGraphConnections()
         {
             if (currentGraph == null)
             {
@@ -302,57 +281,57 @@ namespace StateMachine.Graph.Editor
             }
         }
 
-        Vector2 IRetainedGraphCanvasHost<Node, Transition>.GetRetainedNodePosition(Node node)
+        Vector2 GetRetainedNodePosition(Node node)
         {
             return node.Position;
         }
 
-        void IRetainedGraphCanvasHost<Node, Transition>.SetRetainedNodePosition(Node node, Vector2 position)
+        void SetRetainedNodePosition(Node node, Vector2 position)
         {
             node.Position = position;
         }
 
-        void IRetainedGraphCanvasHost<Node, Transition>.SetRetainedNodeRect(Node node, Rect rect)
+        void SetRetainedNodeRect(Node node, Rect rect)
         {
             nodeRects[node] = rect;
         }
 
-        string IRetainedGraphCanvasHost<Node, Transition>.GetRetainedNodeTitle(Node node)
+        string GetRetainedNodeTitle(Node node)
         {
             return GetNodeTitle(node);
         }
 
-        Color IRetainedGraphCanvasHost<Node, Transition>.GetRetainedNodeTint(Node node)
+        Color GetRetainedNodeTint(Node node)
         {
             return GetNodeTint(node);
         }
 
-        bool IRetainedGraphCanvasHost<Node, Transition>.IsRetainedNodeTargetable(Node node)
+        bool IsRetainedNodeTargetable(Node node)
         {
             return node != null && node != sourceNodeForSelection && node.State != null;
         }
 
-        void IRetainedGraphCanvasHost<Node, Transition>.DrawRetainedNode(Node node)
+        void DrawRetainedNode(Node node)
         {
             DrawToolkitNode(node);
         }
 
-        void IRetainedGraphCanvasHost<Node, Transition>.DeleteRetainedNode(Node node)
+        void DeleteRetainedNode(Node node)
         {
             DeleteNode(node, false);
         }
 
-        void IRetainedGraphCanvasHost<Node, Transition>.SelectRetainedNode(Node node)
+        void SelectRetainedNode(Node node)
         {
             activeConnectionNode = node;
         }
 
-        void IRetainedGraphCanvasHost<Node, Transition>.ClearRetainedNodeSelection()
+        void ClearRetainedNodeSelection()
         {
             activeConnectionNode = null;
         }
 
-        bool IRetainedGraphCanvasHost<Node, Transition>.TrySelectRetainedTarget(Node node)
+        bool TrySelectRetainedTarget(Node node)
         {
             if (!isSelectingTargetNode || pendingTransition == null ||
                 node == null || node == sourceNodeForSelection || node.State == null)
@@ -366,17 +345,17 @@ namespace StateMachine.Graph.Editor
             return true;
         }
 
-        void IRetainedGraphCanvasHost<Node, Transition>.MarkRetainedGraphDirty()
+        void MarkRetainedNodePositionDirty()
         {
-            MarkDirty(currentGraph);
+            MarkNodePositionDirty();
         }
 
-        void IRetainedGraphCanvasHost<Node, Transition>.ClampRetainedGraphPan(float workspaceWidth, float workspaceHeight)
+        void ClampRetainedGraphPan(float workspaceWidth, float workspaceHeight)
         {
             ClampPanToWorkspace(workspaceWidth, workspaceHeight);
         }
 
-        void IRetainedGraphCanvasHost<Node, Transition>.DrawRetainedConnection(
+        void DrawRetainedConnection(
             Painter2D painter,
             Transition transition,
             Node sourceNode,
@@ -485,7 +464,7 @@ namespace StateMachine.Graph.Editor
 
             if (DrawButton(new Rect(padding + contentWidth - 80f, y, 70f, 20f), "Save"))
             {
-                EditorPrefs.SetString(StatesPathKey, statesFolderPath);
+                GraphEditorPreferences.SaveFolder(StatesPathKey, statesFolderPath);
             }
 
             y += 28f;
@@ -501,7 +480,7 @@ namespace StateMachine.Graph.Editor
 
             if (DrawButton(new Rect(padding + contentWidth - 80f, y, 70f, 20f), "Save"))
             {
-                EditorPrefs.SetString(TransitionsPathKey, transitionsFolderPath);
+                GraphEditorPreferences.SaveFolder(TransitionsPathKey, transitionsFolderPath);
             }
 
             y += 36f;
@@ -509,7 +488,7 @@ namespace StateMachine.Graph.Editor
             if (DrawButton(new Rect(padding, y, contentWidth, buttonHeight), GetThemeToggleLabel()))
             {
                 useLightTheme = !useLightTheme;
-                EditorPrefs.SetBool(ThemeKey, useLightTheme);
+                GraphEditorPreferences.SaveTheme(ThemeKey, useLightTheme);
                 Repaint();
             }
 
@@ -583,45 +562,26 @@ namespace StateMachine.Graph.Editor
 
         private void PickFolder(string title, ref string folderPath, string prefsKey)
         {
-            string selected = EditorUtility.OpenFolderPanel(title, "Assets", "");
-            if (string.IsNullOrEmpty(selected))
+            if (!GraphEditorAssetService.TryPickAssetsFolder(title, folderPath, out string selectedPath))
             {
                 return;
             }
 
-            if (!selected.StartsWith(Application.dataPath))
-            {
-                EditorUtility.DisplayDialog(
-                    "Invalid Folder",
-                    "Please select a folder inside your Assets directory.",
-                    "OK");
-                return;
-            }
-
-            folderPath = "Assets" + selected.Substring(Application.dataPath.Length);
-            EditorPrefs.SetString(prefsKey, folderPath);
+            folderPath = selectedPath;
+            GraphEditorPreferences.SaveFolder(prefsKey, folderPath);
         }
 
         private void CreateNewGraph()
         {
             currentGraph = CreateInstance<StateMachineGraph>();
-            ProjectWindowUtil.CreateAsset(currentGraph, "NewStateMachineGraph.asset");
+            GraphEditorAssetService.CreateProjectAsset(currentGraph, "NewStateMachineGraph.asset", "Create state machine graph");
             RefreshToolkitCanvas(true);
         }
 
         private void LoadGraph()
         {
-            string path = EditorUtility.OpenFilePanel("Load State Machine Graph", "Assets", "asset");
-            if (string.IsNullOrEmpty(path))
+            if (!GraphEditorAssetService.TryLoadAsset("Load State Machine Graph", out currentGraph))
             {
-                return;
-            }
-
-            path = "Assets" + path.Replace(Application.dataPath, "");
-            currentGraph = AssetDatabase.LoadAssetAtPath<StateMachineGraph>(path);
-            if (currentGraph == null)
-            {
-                EditorUtility.DisplayDialog("Invalid Asset", "Selected asset is not a StateMachineGraph.", "OK");
                 return;
             }
 
@@ -649,50 +609,24 @@ namespace StateMachine.Graph.Editor
             }
 
             string fileName = $"State_{currentGraph.Nodes.Count}.asset";
-            string targetPath = AssetDatabase.GenerateUniqueAssetPath(Path.Combine(statesFolderPath, fileName));
-
             var state = CreateInstance<State>();
-            state.name = Path.GetFileNameWithoutExtension(targetPath);
-
-            AssetDatabase.CreateAsset(state, targetPath);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
+            GraphEditorAssetService.CreateAsset(state, statesFolderPath, fileName, "Create state");
 
             var newNode = new Node(state)
             {
                 Position = GetCenteredNodePosition(NodeSize)
             };
 
+            GraphEditorAssetService.MarkDirty(currentGraph, "Add state node");
             currentGraph.Nodes.Add(newNode);
             MarkDirty(currentGraph);
             RefreshToolkitCanvas(true);
 
-            EditorGUIUtility.PingObject(state);
-            Selection.activeObject = state;
         }
 
         private bool EnsureFolderExists(string folderPath, string emptyPathMessage)
         {
-            if (string.IsNullOrWhiteSpace(folderPath))
-            {
-                EditorUtility.DisplayDialog("Path not set", emptyPathMessage, "OK");
-                return false;
-            }
-
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-
-            return true;
-        }
-
-        private Vector2 GetCenteredNodePosition(Vector2 nodeSize)
-        {
-            Vector2 screenCenter = new Vector2(position.width / 2f, position.height / 2f);
-            Vector2 graphCenter = (screenCenter - panOffset) / zoom;
-            graphCenter.y += 120f;
-            return graphCenter - nodeSize * 0.5f;
+            return GraphEditorAssetService.EnsureFolderExists(folderPath, emptyPathMessage);
         }
 
         private void DrawGraphArea()
@@ -707,8 +641,8 @@ namespace StateMachine.Graph.Editor
             transitionAnchorPositions.Clear();
 
             Event currentEvent = Event.current;
-            HandleZoom(currentEvent);
-            HandlePan(currentEvent);
+            HandleZoom(currentEvent, ZoomMin, ZoomMax, WorkspaceWidth, WorkspaceHeight);
+            HandlePan(currentEvent, WorkspaceWidth, WorkspaceHeight);
             Rect visibleGraphRect = GraphEditorCanvasUtility.GetVisibleGraphRect(position, panOffset, zoom);
 
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.ExpandHeight(true));
@@ -777,54 +711,16 @@ namespace StateMachine.Graph.Editor
 
         private void SynchronizeNodeRects()
         {
-            graphNodeSet.Clear();
-            staleNodeRects.Clear();
             stateToNodeLookup.Clear();
-            bool layoutChanged = false;
-
             foreach (Node node in currentGraph.Nodes)
             {
-                if (node == null)
-                {
-                    continue;
-                }
-
-                graphNodeSet.Add(node);
-                if (node.State != null)
+                if (node?.State != null)
                 {
                     stateToNodeLookup[node.State] = node;
                 }
-
-                if (!nodeRects.TryGetValue(node, out Rect rect))
-                {
-                    nodeRects[node] = new Rect(node.Position, NodeSize);
-                    layoutChanged = true;
-                    continue;
-                }
-
-                if (rect.position != node.Position)
-                {
-                    rect.position = node.Position;
-                    nodeRects[node] = rect;
-                    layoutChanged = true;
-                }
             }
 
-            foreach (Node node in nodeRects.Keys)
-            {
-                if (!graphNodeSet.Contains(node))
-                {
-                    staleNodeRects.Add(node);
-                }
-            }
-
-            foreach (Node node in staleNodeRects)
-            {
-                nodeRects.Remove(node);
-                layoutChanged = true;
-            }
-
-            if (layoutChanged)
+            if (nodeLayoutSynchronizer.Synchronize(currentGraph.Nodes, nodeRects, node => node.Position, NodeSize))
             {
                 InvalidateConnectionRouteCache();
             }
@@ -868,37 +764,6 @@ namespace StateMachine.Graph.Editor
             {
                 MarkDirty(currentGraph);
             }
-        }
-
-        private void HandleZoom(Event currentEvent)
-        {
-            if (currentEvent.type != EventType.ScrollWheel)
-            {
-                return;
-            }
-
-            float zoomDelta = -currentEvent.delta.y * 0.05f;
-            float oldZoom = zoom;
-            zoom = Mathf.Clamp(zoom + zoomDelta, ZoomMin, ZoomMax);
-
-            Vector2 windowCenter = new Vector2(position.width / 2f, position.height / 2f);
-            panOffset = (panOffset - windowCenter) * (zoom / oldZoom) + windowCenter;
-
-            ClampPanToWorkspace(WorkspaceWidth, WorkspaceHeight);
-            currentEvent.Use();
-        }
-
-        private void HandlePan(Event currentEvent)
-        {
-            if (currentEvent.type != EventType.MouseDrag || currentEvent.button != 1)
-            {
-                return;
-            }
-
-            panOffset += currentEvent.delta;
-            ClampPanToWorkspace(WorkspaceWidth, WorkspaceHeight);
-            currentEvent.Use();
-            Repaint();
         }
 
         private void DrawNodeMarkers(Rect visibleGraphRect)
@@ -1423,7 +1288,7 @@ namespace StateMachine.Graph.Editor
 
         private static Rect ExpandRect(Rect rect, float margin)
         {
-            return Rect.MinMaxRect(rect.xMin - margin, rect.yMin - margin, rect.xMax + margin, rect.yMax + margin);
+            return GraphConnectionGeometry.Expand(rect, margin);
         }
 
         private static bool IsPointInsideAnyRect(Vector2 point, IReadOnlyList<Rect> rects)
@@ -1533,15 +1398,12 @@ namespace StateMachine.Graph.Editor
 
         private static bool ApproximatelyEqual(Vector2 a, Vector2 b)
         {
-            return Mathf.Approximately(a.x, b.x) && Mathf.Approximately(a.y, b.y);
+            return GraphConnectionGeometry.ApproximatelyEqual(a, b);
         }
 
         private static bool RectApproximatelyEqual(Rect a, Rect b)
         {
-            return Mathf.Approximately(a.x, b.x) &&
-                   Mathf.Approximately(a.y, b.y) &&
-                   Mathf.Approximately(a.width, b.width) &&
-                   Mathf.Approximately(a.height, b.height);
+            return GraphConnectionGeometry.ApproximatelyEqual(a, b);
         }
 
         private readonly struct CachedConnectionRoute
@@ -1622,35 +1484,6 @@ namespace StateMachine.Graph.Editor
             }
 
             Handles.EndGUI();
-        }
-
-        private void ClampPanToWorkspace(float workspaceWidth, float workspaceHeight)
-        {
-            float viewWidth = position.width;
-            float viewHeight = position.height;
-
-            float minX = viewWidth - workspaceWidth * zoom;
-            float maxX = 0f;
-            float minY = viewHeight - workspaceHeight * zoom;
-            float maxY = 0f;
-
-            if (workspaceWidth * zoom <= viewWidth)
-            {
-                panOffset.x = Mathf.Round((viewWidth - workspaceWidth * zoom) * 0.5f);
-            }
-            else
-            {
-                panOffset.x = Mathf.Clamp(panOffset.x, minX, maxX);
-            }
-
-            if (workspaceHeight * zoom <= viewHeight)
-            {
-                panOffset.y = Mathf.Round((viewHeight - workspaceHeight * zoom) * 0.5f);
-            }
-            else
-            {
-                panOffset.y = Mathf.Clamp(panOffset.y, minY, maxY);
-            }
         }
 
         private void DrawNodeWindow(Node node, bool allowWindowDrag = true)
@@ -2012,15 +1845,14 @@ namespace StateMachine.Graph.Editor
             }
 
             string fileName = $"{state.name}_Transition_{state.Transitions.Count}.asset";
-            string targetPath = AssetDatabase.GenerateUniqueAssetPath(Path.Combine(transitionsFolderPath, fileName));
-
             var newTransition = CreateInstance<Transition>();
-            newTransition.name = Path.GetFileNameWithoutExtension(targetPath);
+            GraphEditorAssetService.CreateAsset(
+                newTransition,
+                transitionsFolderPath,
+                fileName,
+                "Create state transition");
 
-            AssetDatabase.CreateAsset(newTransition, targetPath);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-
+            GraphEditorAssetService.MarkDirty(state, "Add state transition");
             state.Transitions.Add(newTransition);
             MarkDirty(state);
         }
@@ -2028,6 +1860,7 @@ namespace StateMachine.Graph.Editor
         private void RemoveTransition(State state, int removeTransitionIndex)
         {
             Transition removedTransition = state.Transitions[removeTransitionIndex];
+            GraphEditorAssetService.MarkDirty(state, "Remove state transition");
             state.Transitions.RemoveAt(removeTransitionIndex);
             MarkDirty(state);
 
@@ -2044,13 +1877,12 @@ namespace StateMachine.Graph.Editor
 
                     if (confirm)
                     {
-                        AssetDatabase.DeleteAsset(path);
+                        GraphEditorAssetService.DeleteAsset(removedTransition, "Delete state transition");
                     }
                 }
             }
 
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
+            GraphEditorAssetService.FlushChanges();
             Selection.activeObject = null;
             GUIUtility.ExitGUI();
         }
@@ -2072,18 +1904,14 @@ namespace StateMachine.Graph.Editor
                 {
                     DeleteOwnedTransitions(node.State);
 
-                    string statePath = AssetDatabase.GetAssetPath(node.State);
-                    if (!string.IsNullOrEmpty(statePath))
-                    {
-                        AssetDatabase.DeleteAsset(statePath);
-                    }
+                    GraphEditorAssetService.DeleteAsset(node.State, "Delete state");
                 }
             }
 
+            GraphEditorAssetService.MarkDirty(currentGraph, "Delete state node");
             currentGraph.Nodes.Remove(node);
             MarkDirty(currentGraph);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
+            GraphEditorAssetService.FlushChanges();
             RefreshToolkitCanvas(true);
             if (exitGui)
             {
@@ -2157,13 +1985,10 @@ namespace StateMachine.Graph.Editor
                     continue;
                 }
 
-                string transitionPath = AssetDatabase.GetAssetPath(transition);
-                if (!string.IsNullOrEmpty(transitionPath))
-                {
-                    AssetDatabase.DeleteAsset(transitionPath);
-                }
+                GraphEditorAssetService.DeleteAsset(transition, "Delete state transition");
             }
 
+            GraphEditorAssetService.MarkDirty(state, "Delete owned state transitions");
             state.Transitions.Clear();
             MarkDirty(state);
         }
@@ -2304,6 +2129,14 @@ namespace StateMachine.Graph.Editor
             InvalidateConnectionRouteCache();
         }
 
+        private void MarkNodePositionDirty()
+        {
+            if (currentGraph != null)
+            {
+                EditorUtility.SetDirty(currentGraph);
+            }
+        }
+
         private string GetThemeToggleLabel()
         {
             return useLightTheme ? "Switch to Night Theme" : "Switch to Light Theme";
@@ -2342,57 +2175,28 @@ namespace StateMachine.Graph.Editor
 
         private void ApplyThemeEditorStyleTextOverrides()
         {
-            if (!useLightTheme || Event.current.type != EventType.Repaint)
+            if (!useLightTheme)
             {
                 return;
             }
-
-            editorStyleTextOverrides.Clear();
-            OverrideEditorStyleTextColor(EditorStyles.label);
-            OverrideEditorStyleTextColor(EditorStyles.boldLabel);
-            OverrideEditorStyleTextColor(EditorStyles.miniLabel);
-            OverrideEditorStyleTextColor(EditorStyles.miniBoldLabel);
-            OverrideEditorStyleTextColor(EditorStyles.wordWrappedLabel);
-            OverrideEditorStyleTextColor(EditorStyles.wordWrappedMiniLabel);
-            OverrideEditorStyleTextColor(EditorStyles.centeredGreyMiniLabel);
-            OverrideEditorStyleTextColor(EditorStyles.foldout);
-            OverrideEditorStyleTextColor(EditorStyles.toggle);
-            OverrideEditorStyleTextColor(EditorStyles.textField);
-            OverrideEditorStyleTextColor(EditorStyles.textArea);
-            OverrideEditorStyleTextColor(EditorStyles.popup);
-            OverrideEditorStyleTextColor(EditorStyles.miniButton);
-            OverrideEditorStyleTextColor(EditorStyles.miniButtonLeft);
-            OverrideEditorStyleTextColor(EditorStyles.miniButtonMid);
-            OverrideEditorStyleTextColor(EditorStyles.miniButtonRight);
-            OverrideEditorStyleTextColor(EditorStyles.objectField);
-            OverrideEditorStyleTextColor(EditorStyles.objectFieldThumb);
-            OverrideEditorStyleTextColor(EditorStyles.helpBox);
+            styleTextOverrides.ApplyForLightTheme();
         }
 
         private void RestoreThemeEditorStyleTextOverrides()
         {
-            if (editorStyleTextOverrides.Count == 0)
-            {
-                return;
-            }
-
-            for (int i = editorStyleTextOverrides.Count - 1; i >= 0; i--)
-            {
-                editorStyleTextOverrides[i].Restore();
-            }
-
-            editorStyleTextOverrides.Clear();
+            styleTextOverrides.Restore();
         }
 
-        private void OverrideEditorStyleTextColor(GUIStyle style)
+        protected override void ApplyThemedGuiState()
         {
-            if (style == null)
-            {
-                return;
-            }
+            ApplyThemeGuiColors();
+            ApplyThemeSkin();
+            ApplyThemeEditorStyleTextOverrides();
+        }
 
-            editorStyleTextOverrides.Add(new EditorStyleTextOverride(style));
-            SetStyleTextColor(style, Color.black);
+        protected override void RestoreThemedGuiState()
+        {
+            RestoreThemeEditorStyleTextOverrides();
         }
 
         private bool DrawButton(Rect rect, string label)
@@ -2634,92 +2438,17 @@ namespace StateMachine.Graph.Editor
 
         private static void ApplyThemeState(GUIStyleState state, Texture2D backgroundTexture, Color textColor)
         {
-            state.background = backgroundTexture;
-            state.scaledBackgrounds = new[] { backgroundTexture };
-            state.textColor = textColor;
-        }
-
-        private static void SetStyleTextColor(GUIStyle style, Color color)
-        {
-            style.normal.textColor = color;
-            style.hover.textColor = color;
-            style.active.textColor = color;
-            style.focused.textColor = color;
-            style.onNormal.textColor = color;
-            style.onHover.textColor = color;
-            style.onActive.textColor = color;
-            style.onFocused.textColor = color;
+            GraphEditorGuiStyleUtility.ApplyState(state, backgroundTexture, textColor);
         }
 
         private static GUIStyle[] AppendOrReplaceStyle(GUIStyle[] styles, GUIStyle style)
         {
-            if (styles == null || styles.Length == 0)
-            {
-                return new[] { style };
-            }
-
-            for (int i = 0; i < styles.Length; i++)
-            {
-                if (styles[i] != null && styles[i].name == style.name)
-                {
-                    styles[i] = style;
-                    return styles;
-                }
-            }
-
-            GUIStyle[] result = new GUIStyle[styles.Length + 1];
-            styles.CopyTo(result, 0);
-            result[styles.Length] = style;
-            return result;
+            return GraphEditorGuiStyleUtility.AppendOrReplace(styles, style);
         }
 
         private static Texture2D CreateSolidTexture(Color color)
         {
-            var texture = new Texture2D(1, 1, TextureFormat.RGBA32, false)
-            {
-                hideFlags = HideFlags.HideAndDontSave
-            };
-            texture.SetPixel(0, 0, color);
-            texture.Apply();
-            return texture;
-        }
-
-        private readonly struct EditorStyleTextOverride
-        {
-            private readonly GUIStyle style;
-            private readonly Color normal;
-            private readonly Color hover;
-            private readonly Color active;
-            private readonly Color focused;
-            private readonly Color onNormal;
-            private readonly Color onHover;
-            private readonly Color onActive;
-            private readonly Color onFocused;
-
-            public EditorStyleTextOverride(GUIStyle style)
-            {
-                this.style = style;
-                normal = style.normal.textColor;
-                hover = style.hover.textColor;
-                active = style.active.textColor;
-                focused = style.focused.textColor;
-                onNormal = style.onNormal.textColor;
-                onHover = style.onHover.textColor;
-                onActive = style.onActive.textColor;
-                onFocused = style.onFocused.textColor;
-            }
-
-            public void Restore()
-            {
-                style.normal.textColor = normal;
-                style.hover.textColor = hover;
-                style.active.textColor = active;
-                style.focused.textColor = focused;
-                style.onNormal.textColor = onNormal;
-                style.onHover.textColor = onHover;
-                style.onActive.textColor = onActive;
-                style.onFocused.textColor = onFocused;
-            }
+            return GraphEditorGuiStyleUtility.CreateSolidTexture(color);
         }
 
         private Color PanelBackgroundColor => useLightTheme

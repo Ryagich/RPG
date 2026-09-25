@@ -2,6 +2,13 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f017ef0dab3961d4d9cc460c84f52c76, type: 3}
   m_Name: Corvin Veyr - Mill Claim
   m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.DialogGraph
@@ -36,8 +43,9 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: a5000000000000000000000000000011, type: 2}
   - Position: {x: 0, y: 1890}
     Phrase: {fileID: 11400000, guid: a5000000000000000000000000000012, type: 2}
-  - Position: {x: 350, y: 1720}
+  - Position: {x: 1271.2115, y: 711.5154}
     Phrase: {fileID: 11400000, guid: a5000000000000000000000000000013, type: 2}
   - Position: {x: 350, y: 1960}
     Phrase: {fileID: 11400000, guid: a5000000000000000000000000000014, type: 2}
   <EntryPhrase>k__BackingField: {fileID: 11400000, guid: a5000000000000000000000000000001, type: 2}
+  suppressCheckpointOnClose: 0
