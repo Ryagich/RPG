@@ -436,15 +436,6 @@ namespace Dialogs.Graph.Editor
                 bool pickPressed = DrawMiniButton("O", GUILayout.Width(22f));
                 GUI.backgroundColor = previousBackground;
 
-                Rect localButtonRect = GUILayoutUtility.GetLastRect();
-                if (ownerNode != null && nodeRects.TryGetValue(ownerNode, out Rect nodeRect) && i < phrase.Answers.Count)
-                {
-                    Vector2 localCenter = new Vector2(
-                        localButtonRect.x + localButtonRect.width * 0.5f,
-                        localButtonRect.y + localButtonRect.height * 0.5f);
-                    answerAnchorPositions[phrase.Answers[i]] = nodeRect.position + localCenter;
-                }
-
                 if (pickPressed && i < phrase.Answers.Count)
                 {
                     targetSelection.Begin(phrase, phrase.Answers[i]);

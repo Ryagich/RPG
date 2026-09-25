@@ -39,7 +39,6 @@ namespace Dialogs.Graph.Editor
         private Vector2 scrollPos;
         private string dialogsFolderPath;
         private string phrasesFolderPath;
-        private readonly Dictionary<DialogAnswer, Vector2> answerAnchorPositions = new();
         private readonly Dictionary<DialogNode, Rect> nodeRects = new();
         private readonly GraphEditorNodeLayoutSynchronizer<DialogNode> nodeLayoutSynchronizer = new();
         private readonly DialogGraphIndex graphIndex = new();
@@ -416,7 +415,6 @@ namespace Dialogs.Graph.Editor
             }
 
             SynchronizeNodeRects();
-            answerAnchorPositions.Clear();
             HandleZoom(currentEvent, ZoomMin, ZoomMax, WorkspaceWidth, WorkspaceHeight);
             HandlePan(currentEvent, WorkspaceWidth, WorkspaceHeight);
             Rect visibleGraphRect = GraphEditorCanvasUtility.GetVisibleGraphRect(position, panOffset, zoom);
@@ -702,10 +700,7 @@ namespace Dialogs.Graph.Editor
                 return;
             }
 
-            Vector2 startPos = answer != null && answerAnchorPositions.TryGetValue(answer, out Vector2 anchorPosition)
-                ? anchorPosition
-                : new Vector2(sourceRect.xMax - 12f, sourceRect.center.y);
-            Vector2 endPos = DialogConnectionRouter.GetNearestSideCenter(targetRect, startPos);
+            (Vector2 startPos, Vector2 endPos) = DialogConnectionRouter.GetConnectionAnchors(sourceRect, targetRect);
             (Vector2 startTangent, Vector2 endTangent) = GetOrBuildConnectionTangents(
                 answer,
                 startPos,

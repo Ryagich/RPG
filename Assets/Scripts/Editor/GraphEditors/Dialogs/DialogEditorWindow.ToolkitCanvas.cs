@@ -1019,10 +1019,10 @@ namespace Dialogs.Graph.Editor
                     return;
                 }
 
-                Vector2 startPos = new Vector2(sourceRect.xMax - 12f, sourceRect.center.y);
-                Vector2 endPos = DialogConnectionRouter.GetNearestSideCenter(targetRect, startPos);
+                (Vector2 startPos, Vector2 endPos) = DialogConnectionRouter.GetConnectionAnchors(sourceRect, targetRect);
+                Vector2 startDirection = DialogConnectionRouter.GetConnectionDirectionForRectPoint(sourceRect, startPos);
                 Vector2 endDirection = DialogConnectionRouter.GetConnectionDirectionForRectPoint(targetRect, endPos);
-                Vector2 startTangent = startPos + Vector2.right * 60f;
+                Vector2 startTangent = startPos + startDirection * 60f;
                 Vector2 endTangent = endPos + endDirection * 60f;
 
                 if (!canvas.IsDraggingNode(sourceNode) && !canvas.IsDraggingNode(targetNode))

@@ -157,8 +157,9 @@ namespace Dialogs.Graph.Editor
             Rect targetRect,
             IReadOnlyList<Rect> obstacles)
         {
+            Vector2 startDirection = GetConnectionDirectionForRectPoint(sourceRect, startPos);
             Vector2 endDirection = GetConnectionDirectionForRectPoint(targetRect, endPos);
-            Vector2 defaultStartTangent = startPos + Vector2.right * 60f;
+            Vector2 defaultStartTangent = startPos + startDirection * 60f;
             Vector2 defaultEndTangent = endPos + endDirection * 60f;
 
             if (!IsBezierBlocked(startPos, defaultStartTangent, defaultEndTangent, endPos, obstacles))
@@ -367,6 +368,18 @@ namespace Dialogs.Graph.Editor
         internal static Vector2 GetNearestSideCenter(Rect rect, Vector2 point)
         {
             return GraphConnectionGeometry.GetNearestSideCenter(rect, point);
+        }
+
+        /// <summary>
+        /// Chooses one port on each node independently: the centre of the edge nearest
+        /// to the other node.  Thus a connection always leaves and enters through the
+        /// closest facing edges, never through an arbitrary control inside a node.
+        /// </summary>
+        internal static (Vector2 Start, Vector2 End) GetConnectionAnchors(Rect sourceRect, Rect targetRect)
+        {
+            return (
+                GetNearestSideCenter(sourceRect, targetRect.center),
+                GetNearestSideCenter(targetRect, sourceRect.center));
         }
 
         internal static Vector2 GetConnectionDirectionForRectPoint(Rect rect, Vector2 point)
