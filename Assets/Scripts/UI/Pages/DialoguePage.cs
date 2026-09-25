@@ -35,12 +35,11 @@ namespace UI.Pages
         private readonly PlayerStatsHudContinuity playerStatsHudContinuity;
         private readonly DialogueContext dialogueContext;
         private readonly DialogueAnswerProvider dialogueAnswerProvider;
+        private readonly DialogueAnswerExecutionService dialogueAnswerExecutionService;
         private readonly CharacterInfo playerCharacterInfo;
         private readonly PlayerInventory playerInventory;
-        private readonly MoneyStorage playerMoneyStorage;
         private readonly QuestController questController;
         private readonly LocalizationConfig localizationConfig;
-        private readonly DialogueRuntimeFlagRegistry runtimeFlags;
         private readonly RectTransform canvasRect;
         private readonly IObjectResolver resolver;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
@@ -66,12 +65,11 @@ namespace UI.Pages
             PlayerStatsHudContinuity playerStatsHudContinuity,
             DialogueContext dialogueContext,
             DialogueAnswerProvider dialogueAnswerProvider,
+            DialogueAnswerExecutionService dialogueAnswerExecutionService,
             CharacterInfo playerCharacterInfo,
             PlayerInventory playerInventory,
-            MoneyStorage playerMoneyStorage,
             QuestController questController,
             LocalizationConfig localizationConfig,
-            DialogueRuntimeFlagRegistry runtimeFlags,
             Canvas canvas,
             IObjectResolver resolver,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
@@ -95,12 +93,11 @@ namespace UI.Pages
             this.playerStatsHudContinuity = playerStatsHudContinuity;
             this.dialogueContext = dialogueContext;
             this.dialogueAnswerProvider = dialogueAnswerProvider;
+            this.dialogueAnswerExecutionService = dialogueAnswerExecutionService;
             this.playerCharacterInfo = playerCharacterInfo;
             this.playerInventory = playerInventory;
-            this.playerMoneyStorage = playerMoneyStorage;
             this.questController = questController;
             this.localizationConfig = localizationConfig;
-            this.runtimeFlags = runtimeFlags;
             this.resolver = resolver;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
             this.dialogueExitRequestedPublisher = dialogueExitRequestedPublisher;
@@ -273,11 +270,10 @@ namespace UI.Pages
                 answer.ContinueForcedDialogueAfterExit,
                 answer.Conditions);
 
-            if (!TryExecuteConditions(
+            if (!dialogueAnswerExecutionService.TryExecute(
                     answer.HasConditions,
                     answer.Conditions,
-                    out var immediateNotifications,
-                    out var deferredNotifications))
+                    out var executionEffects))
             {
                 DialogueFlowTrace.AnswerRejected(answer.Text, answer.Conditions);
                 return;
@@ -287,7 +283,7 @@ namespace UI.Pages
                 GetCharacterName(playerCharacterInfo, "Player"),
                 answer.Text);
 
-            AddNotifications(immediateNotifications);
+            AddNotifications(CreateExecutionNotifications(executionEffects, false));
 
             if (answer.NextPhrase != null)
             {
@@ -297,7 +293,7 @@ namespace UI.Pages
                     dialogueContext.CurrentPhraseText);
             }
 
-            AddNotifications(deferredNotifications);
+            AddNotifications(CreateExecutionNotifications(executionEffects, true));
 
             PublishGameplayEvents(answer.GameplayEvents, $"answer:{dialogueContext.CurrentPhrase?.name}");
 
@@ -318,17 +314,6 @@ namespace UI.Pages
             }
 
             ShowAnswers(answer.NextPhrase);
-        }
-
-        private bool AreConditionsSatisfied(bool hasConditions, System.Collections.Generic.IReadOnlyList<DialogAnswerCondition> conditions)
-        {
-            return DialogueAnswerAvailability.AreConditionsSatisfied(
-                hasConditions,
-                conditions,
-                playerInventory,
-                playerMoneyStorage,
-                questController,
-                runtimeFlags);
         }
 
         private void PublishGameplayEvents(
@@ -390,124 +375,6 @@ namespace UI.Pages
             isQuestChangeSubscribed = false;
         }
 
-        private bool TryExecuteConditions(
-            bool hasConditions,
-            System.Collections.Generic.IReadOnlyList<DialogAnswerCondition> conditions,
-            out System.Collections.Generic.List<DialogNotificationData> immediateNotifications,
-            out System.Collections.Generic.List<DialogNotificationData> deferredNotifications)
-        {
-            immediateNotifications = new System.Collections.Generic.List<DialogNotificationData>();
-            deferredNotifications = new System.Collections.Generic.List<DialogNotificationData>();
-
-            if (!hasConditions || conditions == null)
-            {
-                return true;
-            }
-
-            foreach (var condition in conditions)
-            {
-                if (condition == null)
-                {
-                    continue;
-                }
-
-                switch (condition.Type)
-                {
-                    case DialogAnswerConditionType.GiveMoney:
-                    {
-                        var amount = Mathf.Abs(condition.MoneyAmount);
-                        playerMoneyStorage.Add(amount);
-                        deferredNotifications.Add(CreateMoneyNotification(localizationConfig.MoneyReceived.GetLocalizedStringCached(), amount));
-                        DialogueFlowTrace.ConditionApplied(condition);
-                        break;
-                    }
-                    case DialogAnswerConditionType.TakeMoney:
-                    {
-                        var amount = Mathf.Abs(condition.MoneyAmount);
-                        if (!playerMoneyStorage.TrySpend(amount))
-                        {
-                            return false;
-                        }
-
-                        immediateNotifications.Add(CreateMoneyNotification(localizationConfig.MoneyLost.GetLocalizedStringCached(), amount));
-                        DialogueFlowTrace.ConditionApplied(condition);
-                        break;
-                    }
-                    case DialogAnswerConditionType.TakeMoneyMax:
-                    {
-                        var amount = playerMoneyStorage.SpendUpTo(Mathf.Abs(condition.MoneyAmount));
-                        immediateNotifications.Add(CreateMoneyNotification(localizationConfig.MoneyLost.GetLocalizedStringCached(), amount));
-                        DialogueFlowTrace.ConditionApplied(condition);
-                        break;
-                    }
-                    case DialogAnswerConditionType.TakeItemIfHas:
-                    {
-                        var itemCount = Mathf.Abs(condition.ItemCount);
-                        if (!playerInventory.TryConsumeItemCount(condition.ItemConfig, itemCount))
-                        {
-                            return false;
-                        }
-
-                        immediateNotifications.Add(CreateItemNotification(localizationConfig.ItemLost.GetLocalizedStringCached(), condition.ItemConfig, itemCount));
-                        DialogueFlowTrace.ConditionApplied(condition);
-                        break;
-                    }
-                    case DialogAnswerConditionType.CheckQuestStep:
-                        if (!questController.CanExecuteTransition(condition.QuestGraph, condition.QuestTransition))
-                        {
-                            return false;
-                        }
-
-                        DialogueFlowTrace.ConditionApplied(condition);
-                        break;
-                    case DialogAnswerConditionType.AddQuest:
-                        if (questController.TryAddQuest(condition.QuestGraph))
-                        {
-                            deferredNotifications.Add(CreateQuestNotification(QuestNotificationType.New, condition.QuestGraph));
-                        }
-
-                        DialogueFlowTrace.ConditionApplied(condition);
-                        break;
-                    case DialogAnswerConditionType.CanAddQuest:
-                        if (!questController.CanAddQuest(condition.QuestGraph))
-                        {
-                            return false;
-                        }
-
-                        DialogueFlowTrace.ConditionApplied(condition);
-                        break;
-                    case DialogAnswerConditionType.DoQuestStep:
-                        if (!questController.TryExecuteTransition(condition.QuestGraph, condition.QuestTransition))
-                        {
-                            return false;
-                        }
-
-                        deferredNotifications.Add(CreateQuestNotification(QuestNotificationType.Update, condition.QuestGraph));
-                        DialogueFlowTrace.ConditionApplied(condition);
-                        break;
-                    case DialogAnswerConditionType.DoQuestEnd:
-                        if (!questController.TryCompleteNode(condition.QuestGraph, condition.QuestNode))
-                        {
-                            return false;
-                        }
-
-                        deferredNotifications.Add(CreateQuestNotification(QuestNotificationType.Completed, condition.QuestGraph));
-                        DialogueFlowTrace.ConditionApplied(condition);
-                        break;
-                    case DialogAnswerConditionType.ClearRuntimeFlag:
-                        runtimeFlags?.Deactivate(condition.RuntimeFlag);
-                        DialogueFlowTrace.ConditionApplied(condition);
-                        break;
-                    case DialogAnswerConditionType.SetRuntimeFlag:
-                        runtimeFlags?.Activate(condition.RuntimeFlag);
-                        DialogueFlowTrace.ConditionApplied(condition);
-                        break;
-                }
-            }
-
-            return true;
-        }
-
         private void AddPhrase(string speakerName, string phraseText)
         {
             var phraseContainer = resolver.Instantiate(uiConfig.PhraseContainer, dialogueContainer.DialogueContent);
@@ -529,6 +396,54 @@ namespace UI.Pages
             {
                 AddNotification(notification);
             }
+        }
+
+        private System.Collections.Generic.List<DialogNotificationData> CreateExecutionNotifications(
+            System.Collections.Generic.IReadOnlyList<DialogueAnswerExecutionEffect> effects,
+            bool deferred)
+        {
+            var notifications = new System.Collections.Generic.List<DialogNotificationData>();
+            if (effects == null)
+            {
+                return notifications;
+            }
+
+            foreach (DialogueAnswerExecutionEffect effect in effects)
+            {
+                if (effect.IsDeferred != deferred)
+                {
+                    continue;
+                }
+
+                switch (effect.Type)
+                {
+                    case DialogueAnswerExecutionEffectType.MoneyReceived:
+                        notifications.Add(CreateMoneyNotification(localizationConfig.MoneyReceived.GetLocalizedStringCached(), effect.Amount));
+                        break;
+                    case DialogueAnswerExecutionEffectType.MoneyLost:
+                        notifications.Add(CreateMoneyNotification(localizationConfig.MoneyLost.GetLocalizedStringCached(), effect.Amount));
+                        break;
+                    case DialogueAnswerExecutionEffectType.ItemLost:
+                        notifications.Add(CreateItemNotification(localizationConfig.ItemLost.GetLocalizedStringCached(), effect.Item, effect.Amount));
+                        break;
+                    case DialogueAnswerExecutionEffectType.QuestChanged:
+                        notifications.Add(CreateQuestNotification(ToQuestNotificationType(effect.QuestEffectType), effect.Quest));
+                        break;
+                }
+            }
+
+            return notifications;
+        }
+
+        private static QuestNotificationType ToQuestNotificationType(DialogueQuestEffectType effectType)
+        {
+            return effectType switch
+            {
+                DialogueQuestEffectType.Added => QuestNotificationType.New,
+                DialogueQuestEffectType.Updated => QuestNotificationType.Update,
+                DialogueQuestEffectType.Completed => QuestNotificationType.Completed,
+                _ => QuestNotificationType.Update
+            };
         }
 
         private void AddNotification(DialogNotificationData notification)

@@ -17,6 +17,7 @@ namespace UI
             builder.RegisterInstance(Canvas).As<Canvas>();
             builder.RegisterEntryPoint<QuestNotificationService>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueAnswerProvider>(Lifetime.Singleton).AsSelf();
+            builder.Register<DialogueAnswerExecutionService>(Lifetime.Singleton).AsSelf();
             builder.Register<PlayerStatsHudContinuity>(Lifetime.Singleton);
 
             builder.Register<MainPage>(Lifetime.Singleton);

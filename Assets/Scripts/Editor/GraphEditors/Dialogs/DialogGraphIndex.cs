@@ -40,7 +40,7 @@ namespace Dialogs.Graph.Editor
                 }
 
                 nodesByPhrase[node.Phrase] = node;
-                foreach (DialogAnswer answer in node.Phrase.Answers)
+                foreach (DialogAnswer answer in node.Phrase.GetAuthoredAnswers())
                 {
                     if (answer?.NextPhrase != null)
                     {

@@ -34,7 +34,7 @@ namespace Dialogs.Graph.Editor
                 activeConnectionNode != node)
             {
                 activeConnectionNode = node;
-                toolkitCanvas?.RefreshConnectionHighlights();
+                toolkitCanvas?.RefreshGraphAppearance();
             }
 
             EditorGUI.BeginDisabledGroup(targetSelection.IsActive);
@@ -773,7 +773,10 @@ namespace Dialogs.Graph.Editor
 
             phrasesWithDirtyLayout.Add(phrase);
             phrasesAwaitingRepaintAfterLayout.Remove(phrase);
-            toolkitCanvas?.InvalidateNodeLayout(phrase);
+            if (graphIndex.TryGetNode(phrase, out DialogNode node))
+            {
+                toolkitCanvas?.RequestNodeLayoutRefresh(node);
+            }
             Repaint();
         }
 

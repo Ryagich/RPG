@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 
 namespace StateMachine.Graph.Editor
 {
-    public class StateMachineEditorWindow : GraphEditorWindowBase
+    public partial class StateMachineEditorWindow : GraphEditorWindowBase
     {
         private const string StatesPathKey = "StateMachineEditor_StatesPath";
         private const string TransitionsPathKey = "StateMachineEditor_TransitionsPath";
@@ -25,7 +25,6 @@ namespace StateMachine.Graph.Editor
         private Vector2 scrollPos;
         private string statesFolderPath;
         private string transitionsFolderPath;
-        private readonly Dictionary<Transition, Vector2> transitionAnchorPositions = new();
         private readonly Dictionary<Node, Rect> nodeRects = new();
         private readonly Dictionary<State, Node> stateToNodeLookup = new();
         private readonly Dictionary<Transition, CachedConnectionRoute> connectionRouteCache = new();
@@ -364,12 +363,11 @@ namespace StateMachine.Graph.Editor
             Rect targetRect,
             bool isDragging)
         {
-            Vector2 startPosition = new(sourceRect.xMax - 12f, sourceRect.center.y);
+            (Vector2 startPosition, Vector2 endPosition) = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect);
             Vector2[] routePoints;
 
             if (isDragging)
             {
-                Vector2 endPosition = targetRect.center;
                 routePoints = new[] { startPosition, endPosition };
             }
             else
@@ -396,16 +394,8 @@ namespace StateMachine.Graph.Editor
 
             Vector2 end = routePoints[routePoints.Length - 1];
             Vector2 direction = end - routePoints[routePoints.Length - 2];
-            Vector2 normalizedDirection = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.right;
-            Vector2 right = new(-normalizedDirection.y, normalizedDirection.x);
-            Vector2 arrowBase = end - normalizedDirection * 18f;
             painter.fillColor = color;
-            painter.BeginPath();
-            painter.MoveTo(end);
-            painter.LineTo(arrowBase + right * 7.5f);
-            painter.LineTo(arrowBase - right * 7.5f);
-            painter.ClosePath();
-            painter.Fill();
+            GraphConnectionDrawing.DrawArrow(painter, end, direction);
         }
 
         private void DrawEmptyState()
@@ -638,7 +628,6 @@ namespace StateMachine.Graph.Editor
             }
 
             SynchronizeNodeRects();
-            transitionAnchorPositions.Clear();
 
             Event currentEvent = Event.current;
             HandleZoom(currentEvent, ZoomMin, ZoomMax, WorkspaceWidth, WorkspaceHeight);
@@ -687,7 +676,7 @@ namespace StateMachine.Graph.Editor
 
                 nodeRects[node] = rect;
                 node.Position = rect.position;
-                if (!RectApproximatelyEqual(previousRect, rect))
+                if (!GraphConnectionGeometry.ApproximatelyEqual(previousRect, rect))
                 {
                     InvalidateConnectionRouteCache();
                 }
@@ -711,14 +700,7 @@ namespace StateMachine.Graph.Editor
 
         private void SynchronizeNodeRects()
         {
-            stateToNodeLookup.Clear();
-            foreach (Node node in currentGraph.Nodes)
-            {
-                if (node?.State != null)
-                {
-                    stateToNodeLookup[node.State] = node;
-                }
-            }
+            GraphEditorNodeLookup.Rebuild(currentGraph.Nodes, stateToNodeLookup, node => node.State);
 
             if (nodeLayoutSynchronizer.Synchronize(currentGraph.Nodes, nodeRects, node => node.Position, NodeSize))
             {
@@ -739,26 +721,8 @@ namespace StateMachine.Graph.Editor
                 return;
             }
 
-            EnsureGraphNodes();
-
-            bool graphChanged = false;
-
-            for (int i = currentGraph.Nodes.Count - 1; i >= 0; i--)
-            {
-                Node node = currentGraph.Nodes[i];
-                if (node == null)
-                {
-                    currentGraph.Nodes.RemoveAt(i);
-                    graphChanged = true;
-                    continue;
-                }
-
-                if (node.State == null || !AssetDatabase.Contains(node.State))
-                {
-                    currentGraph.Nodes.RemoveAt(i);
-                    graphChanged = true;
-                }
-            }
+            bool graphChanged = StateGraphStructureOperations.EnsureNodes(currentGraph);
+            graphChanged |= StateGraphStructureOperations.RemoveMissingNodes(currentGraph);
 
             if (graphChanged)
             {
@@ -831,16 +795,12 @@ namespace StateMachine.Graph.Editor
                         continue;
                     }
 
-                    Vector2 startPos;
-                    if (!transitionAnchorPositions.TryGetValue(transition, out startPos))
-                    {
-                        startPos = new Vector2(sourceRect.xMax - 12f, sourceRect.center.y);
-                    }
+                    Vector2 startPos = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect).Start;
 
                     Handles.color = GetConnectionColor(node, targetNode);
                     Vector2[] routePoints = GetOrBuildConnectionRoute(transition, startPos, sourceRect, targetRect);
-                    DrawSmoothedConnection(routePoints);
-                    DrawConnectionArrow(routePoints);
+                    GraphOrthogonalConnectionRouter.DrawSmoothedConnection(routePoints);
+                    GraphOrthogonalConnectionRouter.DrawConnectionArrow(routePoints);
                 }
             }
 
@@ -855,14 +815,14 @@ namespace StateMachine.Graph.Editor
         {
             if (connectionRouteCache.TryGetValue(transition, out CachedConnectionRoute cachedRoute) &&
                 cachedRoute.LayoutVersion == connectionLayoutVersion &&
-                ApproximatelyEqual(cachedRoute.StartPos, startPos) &&
-                RectApproximatelyEqual(cachedRoute.SourceRect, sourceRect) &&
-                RectApproximatelyEqual(cachedRoute.TargetRect, targetRect))
+                GraphConnectionGeometry.ApproximatelyEqual(cachedRoute.StartPos, startPos) &&
+                GraphConnectionGeometry.ApproximatelyEqual(cachedRoute.SourceRect, sourceRect) &&
+                GraphConnectionGeometry.ApproximatelyEqual(cachedRoute.TargetRect, targetRect))
             {
                 return cachedRoute.RoutePoints;
             }
 
-            Vector2[] routePoints = BuildConnectionRoute(startPos, sourceRect, targetRect, nodeRects.Values);
+            Vector2[] routePoints = GraphOrthogonalConnectionRouter.BuildConnectionRoute(startPos, sourceRect, targetRect, nodeRects.Values);
             connectionRouteCache[transition] = new CachedConnectionRoute(
                 connectionLayoutVersion,
                 startPos,
@@ -874,16 +834,13 @@ namespace StateMachine.Graph.Editor
 
         private void HandleConnectionHighlightSelection(Event currentEvent)
         {
-            if (isSelectingTargetNode ||
-                currentEvent.rawType != EventType.MouseDown ||
-                currentEvent.button != 0)
-            {
-                return;
-            }
-
             Vector2 graphMousePosition = GetGraphMousePosition(currentEvent.mousePosition);
-            bool clickedNode = nodeRects.Any(pair => pair.Value.Contains(graphMousePosition));
-            if (!clickedNode && activeConnectionNode != null)
+            if (GraphEditorConnectionPresentation.ShouldClearSelection(
+                    isSelectingTargetNode,
+                    currentEvent,
+                    graphMousePosition,
+                    nodeRects,
+                    activeConnectionNode))
             {
                 activeConnectionNode = null;
                 Repaint();
@@ -892,22 +849,13 @@ namespace StateMachine.Graph.Editor
 
         private Color GetConnectionColor(Node sourceNode, Node targetNode)
         {
-            if (activeConnectionNode == null)
-            {
-                return PrimaryConnectionColor;
-            }
-
-            if (sourceNode == activeConnectionNode)
-            {
-                return SourceHighlightConnectionColor;
-            }
-
-            if (targetNode == activeConnectionNode)
-            {
-                return TargetHighlightConnectionColor;
-            }
-
-            return PrimaryConnectionColor;
+            return GraphEditorConnectionPresentation.GetColor(
+                sourceNode,
+                targetNode,
+                activeConnectionNode,
+                PrimaryConnectionColor,
+                SourceHighlightConnectionColor,
+                TargetHighlightConnectionColor);
         }
 
         private Vector2 GetGraphMousePosition(Vector2 mousePosition)
@@ -915,11 +863,31 @@ namespace StateMachine.Graph.Editor
             return (mousePosition - panOffset) / zoom;
         }
 
-        private static Vector2[] BuildConnectionRoute(Vector2 startPos, Rect sourceRect, Rect targetRect, IEnumerable<Rect> allNodeRects)
+    }
+
+    /// <summary>
+    /// Domain-independent orthogonal routing used by the state-machine editor.
+    /// The editor owns connection caching; this type owns only route geometry.
+    /// </summary>
+    internal static class GraphOrthogonalConnectionRouter
+    {
+        private readonly struct ConnectionPort
+        {
+            public ConnectionPort(Vector2 edgePoint, Vector2 outerPoint)
+            {
+                EdgePoint = edgePoint;
+                OuterPoint = outerPoint;
+            }
+
+            public Vector2 EdgePoint { get; }
+            public Vector2 OuterPoint { get; }
+        }
+
+        public static Vector2[] BuildConnectionRoute(Vector2 startPos, Rect sourceRect, Rect targetRect, IEnumerable<Rect> allNodeRects)
         {
             const float clearance = 28f;
 
-            ConnectionPort startPort = GetSourcePort(startPos, sourceRect, targetRect, clearance);
+            ConnectionPort startPort = GetSourcePort(sourceRect, targetRect, clearance);
             ConnectionPort endPort = GetTargetPort(sourceRect, targetRect, clearance);
 
             List<Rect> obstacles = allNodeRects
@@ -962,7 +930,7 @@ namespace StateMachine.Graph.Editor
             return SimplifyRoute(fullRoute);
         }
 
-        private static void DrawConnectionArrow(IReadOnlyList<Vector2> routePoints)
+        public static void DrawConnectionArrow(IReadOnlyList<Vector2> routePoints)
         {
             if (routePoints == null || routePoints.Count < 2)
             {
@@ -977,13 +945,10 @@ namespace StateMachine.Graph.Editor
                 return;
             }
 
-            Vector2 perpendicular = new Vector2(-direction.y, direction.x);
-            Vector2 arrowBase1 = arrowTip - direction * 13f + perpendicular * 5.5f;
-            Vector2 arrowBase2 = arrowTip - direction * 13f - perpendicular * 5.5f;
-            Handles.DrawAAConvexPolygon(arrowTip, arrowBase1, arrowBase2);
+            GraphConnectionDrawing.DrawArrow(arrowTip, direction, 13f, 5.5f);
         }
 
-        private static void DrawSmoothedConnection(IReadOnlyList<Vector2> routePoints)
+        public static void DrawSmoothedConnection(IReadOnlyList<Vector2> routePoints)
         {
             if (routePoints == null || routePoints.Count < 2)
             {
@@ -1222,68 +1187,18 @@ namespace StateMachine.Graph.Editor
             }
         }
 
-        private static ConnectionPort GetSourcePort(Vector2 startPos, Rect sourceRect, Rect targetRect, float clearance)
+        private static ConnectionPort GetSourcePort(Rect sourceRect, Rect targetRect, float clearance)
         {
-            bool preferHorizontal = Mathf.Abs(targetRect.center.x - sourceRect.center.x) >= Mathf.Abs(targetRect.center.y - sourceRect.center.y);
-            if (preferHorizontal)
-            {
-                if (targetRect.center.x >= sourceRect.center.x)
-                {
-                    return new ConnectionPort(
-                        new Vector2(sourceRect.xMax, startPos.y),
-                        new Vector2(sourceRect.xMax + clearance, startPos.y));
-                }
-
-                return new ConnectionPort(
-                    new Vector2(sourceRect.xMin, startPos.y),
-                    new Vector2(sourceRect.xMin - clearance, startPos.y));
-            }
-
-            if (targetRect.center.y >= sourceRect.center.y)
-            {
-                return new ConnectionPort(
-                    new Vector2(startPos.x, sourceRect.yMax),
-                    new Vector2(startPos.x, sourceRect.yMax + clearance));
-            }
-
-            return new ConnectionPort(
-                new Vector2(startPos.x, sourceRect.yMin),
-                new Vector2(startPos.x, sourceRect.yMin - clearance));
+            Vector2 edgePoint = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect).Start;
+            Vector2 direction = GraphConnectionGeometry.GetDirectionForRectPoint(sourceRect, edgePoint);
+            return new ConnectionPort(edgePoint, edgePoint + direction * clearance);
         }
 
         private static ConnectionPort GetTargetPort(Rect sourceRect, Rect targetRect, float clearance)
         {
-            Vector2 sourceCenter = sourceRect.center;
-            ConnectionPort[] candidatePorts =
-            {
-                new(
-                    new Vector2(targetRect.xMin, targetRect.center.y),
-                    new Vector2(targetRect.xMin - clearance, targetRect.center.y)),
-                new(
-                    new Vector2(targetRect.xMax, targetRect.center.y),
-                    new Vector2(targetRect.xMax + clearance, targetRect.center.y)),
-                new(
-                    new Vector2(targetRect.center.x, targetRect.yMin),
-                    new Vector2(targetRect.center.x, targetRect.yMin - clearance)),
-                new(
-                    new Vector2(targetRect.center.x, targetRect.yMax),
-                    new Vector2(targetRect.center.x, targetRect.yMax + clearance))
-            };
-
-            ConnectionPort bestPort = candidatePorts[0];
-            float bestDistance = Vector2.SqrMagnitude(sourceCenter - bestPort.EdgePoint);
-
-            for (int i = 1; i < candidatePorts.Length; i++)
-            {
-                float distance = Vector2.SqrMagnitude(sourceCenter - candidatePorts[i].EdgePoint);
-                if (distance < bestDistance)
-                {
-                    bestDistance = distance;
-                    bestPort = candidatePorts[i];
-                }
-            }
-
-            return bestPort;
+            Vector2 edgePoint = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect).End;
+            Vector2 direction = GraphConnectionGeometry.GetDirectionForRectPoint(targetRect, edgePoint);
+            return new ConnectionPort(edgePoint, edgePoint + direction * clearance);
         }
 
         private static Rect ExpandRect(Rect rect, float margin)
@@ -1405,6 +1320,11 @@ namespace StateMachine.Graph.Editor
         {
             return GraphConnectionGeometry.ApproximatelyEqual(a, b);
         }
+
+    }
+
+    public partial class StateMachineEditorWindow
+    {
 
         private readonly struct CachedConnectionRoute
         {
@@ -1680,15 +1600,6 @@ namespace StateMachine.Graph.Editor
                 bool pickPressed = DrawMiniButton("O", GUILayout.Width(22f));
                 GUI.backgroundColor = previousBackground;
 
-                Rect localButtonRect = GUILayoutUtility.GetLastRect();
-                if (nodeRects.TryGetValue(ownerNode, out Rect nodeRect))
-                {
-                    Vector2 localCenter = new Vector2(
-                        localButtonRect.x + localButtonRect.width * 0.5f,
-                        localButtonRect.y + localButtonRect.height * 0.5f);
-                    transitionAnchorPositions[transition] = nodeRect.position + localCenter;
-                }
-
                 if (pickPressed)
                 {
                     isSelectingTargetNode = true;
@@ -1921,24 +1832,7 @@ namespace StateMachine.Graph.Editor
 
         private void RemoveStateReferences(State state)
         {
-            foreach (Node otherNode in currentGraph.Nodes)
-            {
-                if (otherNode.State == null)
-                {
-                    continue;
-                }
-
-                EnsureCollections(otherNode.State);
-
-                foreach (Transition transition in otherNode.State.Transitions)
-                {
-                    if (transition != null && transition.TargetState == state)
-                    {
-                        transition.TargetState = null;
-                        MarkDirty(transition);
-                    }
-                }
-            }
+            StateGraphReferenceOperations.RemoveIncomingReferences(currentGraph, state);
 
             if ((sourceNodeForSelection != null && sourceNodeForSelection.State == state) ||
                 (pendingTransition != null && pendingTransition.TargetState == state))
@@ -1949,97 +1843,37 @@ namespace StateMachine.Graph.Editor
 
         private void ReplaceStateReferences(State oldState, State newState)
         {
-            if (oldState == null || oldState == newState)
-            {
-                return;
-            }
-
-            foreach (Node node in currentGraph.Nodes)
-            {
-                if (node.State == null)
-                {
-                    continue;
-                }
-
-                EnsureCollections(node.State);
-
-                foreach (Transition transition in node.State.Transitions)
-                {
-                    if (transition != null && transition.TargetState == oldState)
-                    {
-                        transition.TargetState = newState;
-                        MarkDirty(transition);
-                    }
-                }
-            }
+            StateGraphReferenceOperations.ReplaceIncomingReferences(currentGraph, oldState, newState);
         }
 
         private void DeleteOwnedTransitions(State state)
         {
-            EnsureCollections(state);
-
-            foreach (Transition transition in state.Transitions.ToList())
-            {
-                if (transition == null)
-                {
-                    continue;
-                }
-
-                GraphEditorAssetService.DeleteAsset(transition, "Delete state transition");
-            }
-
-            GraphEditorAssetService.MarkDirty(state, "Delete owned state transitions");
-            state.Transitions.Clear();
-            MarkDirty(state);
+            StateGraphReferenceOperations.DeleteOwnedTransitions(state);
         }
 
         private void EnsureGraphNodes()
         {
-            if (currentGraph == null)
-            {
-                return;
-            }
-
-            if (currentGraph.Nodes == null)
-            {
-                currentGraph.Nodes = new List<Node>();
-                MarkDirty(currentGraph);
-            }
+            if (StateGraphStructureOperations.EnsureNodes(currentGraph)) MarkDirty(currentGraph);
         }
 
         private State GetStartState()
         {
-            return currentGraph != null &&
-                   currentGraph.Nodes.Count > 0 &&
-                   currentGraph.Nodes[0] != null
-                ? currentGraph.Nodes[0].State
-                : null;
+            return StateGraphStructureOperations.GetStartState(currentGraph);
         }
 
         private bool ContainsState(State state)
         {
-            return currentGraph.Nodes.Any(node => node.State == state);
+            return StateGraphStructureOperations.ContainsState(currentGraph, state);
         }
 
         private bool IsStartNode(Node node)
         {
-            return currentGraph != null &&
-                   currentGraph.Nodes.Count > 0 &&
-                   currentGraph.Nodes[0] == node &&
-                   node.State != null;
+            return StateGraphStructureOperations.IsStartNode(currentGraph, node);
         }
 
         private bool IsOrphanState(State state)
         {
-            if (state == null || GetStartState() == state)
-            {
-                return false;
-            }
-
-            return !currentGraph.Nodes
-                .Where(node => node.State != null)
-                .SelectMany(node => node.State.Transitions ?? new List<Transition>())
-                .Any(transition => transition != null && transition.TargetState == state);
+            return StateGraphStructureOperations.IsOrphanState(currentGraph, state);
         }
 
         private void MoveNodeToFront(Node node)

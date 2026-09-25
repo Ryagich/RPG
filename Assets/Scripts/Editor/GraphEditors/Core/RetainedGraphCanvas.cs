@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 namespace EditorTools
@@ -125,26 +124,23 @@ namespace EditorTools
         private readonly IRetainedGraphCanvasNodePresenter<TNode> nodePresenter;
         private readonly IRetainedGraphCanvasInteraction<TNode> interaction;
         private readonly IRetainedGraphCanvasConnectionRenderer<TNode, TConnection> connectionRenderer;
+        private readonly GraphEditorViewportController viewportController = new();
         private VisualElement graphContent;
         private Label emptyState;
         private readonly Dictionary<TNode, NodeElement> nodeElements = new();
         private readonly Dictionary<TNode, Rect> nodeRects = new();
         private readonly HashSet<TNode> nodesWithPendingGeometry = new();
-        private readonly HashSet<TNode> visibleNodes = new();
-        private readonly HashSet<TNode> pendingVisualNodes = new();
+        private readonly GraphNodeVirtualizer<TNode> nodeVirtualizer = new();
         private readonly List<TNode> nodesToRemove = new();
-        private ConnectionLayer connectionLayer;
-        private ConnectionLayer dragConnectionLayer;
+        private RetainedGraphConnectionLayer<TNode, TConnection> connectionLayer;
+        private RetainedGraphConnectionLayer<TNode, TConnection> dragConnectionLayer;
         private GridElement gridElement;
-        private TNode draggedNode;
+        private readonly GraphNodeDragState<TNode> dragState = new();
         private bool rebuildScheduled;
         private bool geometryRefreshScheduled;
+        private bool connectionRefreshScheduled;
         private bool visibleNodeCreationScheduled;
         private bool connectionsNeedRefreshAfterVirtualizedCreation;
-        private bool isPanning;
-        private int panPointerId = -1;
-        private Vector2 panStartPointer;
-        private Vector2 panStartOffset;
 
         /// <summary>
         /// Creates a canvas from independently-owned roles. Domain editors should use this
@@ -210,7 +206,7 @@ namespace EditorTools
 
         public bool IsDraggingNode(TNode node)
         {
-            return ReferenceEquals(draggedNode, node);
+            return dragState.IsDragging(node);
         }
 
         public void RebuildNow()
@@ -220,12 +216,12 @@ namespace EditorTools
             nodeElements.Clear();
             nodeRects.Clear();
             nodesWithPendingGeometry.Clear();
-            visibleNodes.Clear();
-            pendingVisualNodes.Clear();
+            nodeVirtualizer.Clear();
             nodesToRemove.Clear();
             connectionLayer = null;
             dragConnectionLayer = null;
             gridElement = null;
+            dragState.Clear();
             source.ClearRetainedNodeRects();
 
             if (!source.RetainedGraphHasGraph)
@@ -264,15 +260,28 @@ namespace EditorTools
                 connections.Add(connection);
             }
 
-            connectionLayer = new ConnectionLayer(this, connections);
+            connectionLayer = CreateConnectionLayer(connections);
             graphContent.Insert(1, connectionLayer);
-            dragConnectionLayer = new ConnectionLayer(this, connections);
+            dragConnectionLayer = CreateConnectionLayer(connections);
             dragConnectionLayer.HideAll();
             graphContent.Insert(2, dragConnectionLayer);
 
             ApplyViewTransform();
             RefreshVisibleNodeElements();
             RefreshGraphAppearance();
+        }
+
+        private RetainedGraphConnectionLayer<TNode, TConnection> CreateConnectionLayer(
+            IReadOnlyList<RetainedGraphConnection<TNode, TConnection>> connections)
+        {
+            return new RetainedGraphConnectionLayer<TNode, TConnection>(
+                connections,
+                GetVisibleGraphRect,
+                node => nodeRects.TryGetValue(node, out Rect rect) ? rect : (Rect?)null,
+                IsDraggingNode,
+                connectionRenderer,
+                WorkspaceWidth,
+                WorkspaceHeight);
         }
 
         public void RequestRebuild()
@@ -314,6 +323,19 @@ namespace EditorTools
             }
         }
 
+        /// <summary>
+        /// Requests a layout pass for one visible node after its IMGUI content changed its
+        /// desired size. The editor owns the domain-to-node lookup; this canvas owns the
+        /// retained visual lifecycle.
+        /// </summary>
+        public void RequestNodeLayoutRefresh(TNode node)
+        {
+            if (node != null && nodeElements.TryGetValue(node, out NodeElement nodeElement))
+            {
+                nodeElement.RequestContentLayoutRefresh();
+            }
+        }
+
         private void NotifyNodeGeometryChanged(NodeElement nodeElement)
         {
             if (!nodeElements.ContainsKey(nodeElement.Node))
@@ -323,14 +345,16 @@ namespace EditorTools
 
             // Drag updates the graph rect directly. Ignore incidental layout notifications
             // while the node is represented by a visual transform.
-            if (ReferenceEquals(draggedNode, nodeElement.Node))
+            if (dragState.IsDragging(nodeElement.Node))
             {
                 return;
             }
 
             nodePresenter.SetRetainedNodeRect(nodeElement.Node, nodeElement.GetGraphRect());
             nodeRects[nodeElement.Node] = nodeElement.GetGraphRect();
-            if (pendingVisualNodes.Count > 0 || visibleNodeCreationScheduled)
+            connectionLayer?.UpdateConnectionsFor(nodeElement.Node);
+            dragConnectionLayer?.UpdateConnectionsFor(nodeElement.Node);
+            if (nodeVirtualizer.HasPendingNodes || visibleNodeCreationScheduled)
             {
                 connectionsNeedRefreshAfterVirtualizedCreation = true;
                 return;
@@ -357,7 +381,7 @@ namespace EditorTools
             }
 
             interaction.SelectRetainedNode(nodeElement.Node);
-            draggedNode = nodeElement.Node;
+            dragState.Begin(nodeElement.Node, nodePresenter.GetRetainedNodePosition(nodeElement.Node));
             connectionLayer?.ExcludeNode(nodeElement.Node);
             dragConnectionLayer?.IncludeNode(nodeElement.Node);
             connectionLayer?.MarkDirtyRepaint();
@@ -367,16 +391,18 @@ namespace EditorTools
 
         private void MoveNode(NodeElement nodeElement, Vector2 graphPosition)
         {
-            if (!ReferenceEquals(draggedNode, nodeElement.Node))
+            if (!dragState.TrySetPreview(
+                    nodeElement.Node,
+                    graphPosition,
+                    nodePresenter.RetainedGraphNodeSize,
+                    WorkspaceWidth,
+                    WorkspaceHeight,
+                    NodeHeaderHeight,
+                    out Vector2 clampedPosition))
             {
                 return;
             }
 
-            Vector2 nodeSize = nodePresenter.RetainedGraphNodeSize;
-            Vector2 clampedPosition = new(
-                Mathf.Clamp(graphPosition.x, 0f, WorkspaceWidth - nodeSize.x),
-                Mathf.Clamp(graphPosition.y, 0f, WorkspaceHeight - NodeHeaderHeight));
-            nodePresenter.SetRetainedNodePosition(nodeElement.Node, clampedPosition);
             nodeElement.SetDragPosition(clampedPosition);
             nodePresenter.SetRetainedNodeRect(nodeElement.Node, nodeElement.GetGraphRect());
             nodeRects[nodeElement.Node] = nodeElement.GetGraphRect();
@@ -385,16 +411,20 @@ namespace EditorTools
 
         private void EndNodeDrag(NodeElement nodeElement)
         {
-            if (!ReferenceEquals(draggedNode, nodeElement.Node))
+            if (!dragState.IsDragging(nodeElement.Node))
             {
                 return;
             }
 
-            nodeElement.CommitDragPosition(nodePresenter.GetRetainedNodePosition(nodeElement.Node));
+            Vector2 committedPosition = dragState.GetCommittedPosition(nodePresenter.GetRetainedNodePosition(nodeElement.Node));
+            nodePresenter.SetRetainedNodePosition(nodeElement.Node, committedPosition);
+            nodeElement.CommitDragPosition(committedPosition);
             nodePresenter.SetRetainedNodeRect(nodeElement.Node, nodeElement.GetGraphRect());
             nodeRects[nodeElement.Node] = nodeElement.GetGraphRect();
+            connectionLayer?.UpdateConnectionsFor(nodeElement.Node);
+            dragConnectionLayer?.UpdateConnectionsFor(nodeElement.Node);
             interaction.MarkRetainedNodePositionDirty();
-            draggedNode = null;
+            dragState.Clear();
             connectionLayer?.ClearNodeFilter();
             dragConnectionLayer?.HideAll();
             connectionLayer?.MarkDirtyRepaint();
@@ -403,9 +433,9 @@ namespace EditorTools
 
         private void RefreshConnectionsFor(TNode node)
         {
-            if (draggedNode != null)
+            if (dragState.DraggedNode != null)
             {
-                if (ReferenceEquals(draggedNode, node))
+                if (dragState.IsDragging(node))
                 {
                     dragConnectionLayer?.MarkDirtyRepaint();
                 }
@@ -423,6 +453,21 @@ namespace EditorTools
         {
             connectionLayer?.MarkDirtyRepaint();
             dragConnectionLayer?.MarkDirtyRepaint();
+        }
+
+        private void ScheduleConnectionRefresh()
+        {
+            if (connectionRefreshScheduled)
+            {
+                return;
+            }
+
+            connectionRefreshScheduled = true;
+            schedule.Execute(() =>
+            {
+                connectionRefreshScheduled = false;
+                RefreshConnections();
+            }).ExecuteLater(16);
         }
 
         private void FlushPendingGeometryChanges()
@@ -447,28 +492,28 @@ namespace EditorTools
                 return;
             }
 
-            if (evt.button != 1 || isPanning)
+            if (evt.button != 1 || viewportController.IsPanning)
             {
                 return;
             }
 
-            isPanning = true;
-            panPointerId = evt.pointerId;
-            panStartPointer = new Vector2(evt.position.x, evt.position.y);
-            panStartOffset = viewport.RetainedGraphPanOffset;
+            viewportController.BeginPan(
+                evt.pointerId,
+                new Vector2(evt.position.x, evt.position.y),
+                viewport.RetainedGraphPanOffset);
             this.CapturePointer(evt.pointerId);
             evt.StopPropagation();
         }
 
         private void HandlePointerMove(PointerMoveEvent evt)
         {
-            if (!isPanning || evt.pointerId != panPointerId || !this.HasPointerCapture(evt.pointerId))
+            if (!viewportController.IsPanning || !this.HasPointerCapture(evt.pointerId) ||
+                !viewportController.TryGetPannedOffset(evt.pointerId, new Vector2(evt.position.x, evt.position.y), out Vector2 offset))
             {
                 return;
             }
 
-            Vector2 pointerPosition = new(evt.position.x, evt.position.y);
-            viewport.RetainedGraphPanOffset = panStartOffset + (pointerPosition - panStartPointer);
+            viewport.RetainedGraphPanOffset = offset;
             viewport.ClampRetainedGraphPan(WorkspaceWidth, WorkspaceHeight);
             ApplyViewTransform();
             evt.StopPropagation();
@@ -486,7 +531,7 @@ namespace EditorTools
 
         private void EndPan(int pointerId)
         {
-            if (!isPanning || pointerId != panPointerId)
+            if (!viewportController.EndPan(pointerId))
             {
                 return;
             }
@@ -496,23 +541,25 @@ namespace EditorTools
                 this.ReleasePointer(pointerId);
             }
 
-            isPanning = false;
-            panPointerId = -1;
         }
 
         private void HandleWheel(WheelEvent evt)
         {
-            float oldZoom = viewport.RetainedGraphZoom;
-            float newZoom = Mathf.Clamp(oldZoom - evt.delta.y * 0.05f, ZoomMin, ZoomMax);
-            if (Mathf.Approximately(oldZoom, newZoom))
+            if (!GraphEditorViewportController.TryZoomToCursor(
+                    viewport.RetainedGraphZoom,
+                    viewport.RetainedGraphPanOffset,
+                    new Vector2(evt.mousePosition.x, evt.mousePosition.y),
+                    evt.delta.y,
+                    ZoomMin,
+                    ZoomMax,
+                    out float newZoom,
+                    out Vector2 newOffset))
             {
                 return;
             }
 
-            Vector2 mousePosition = new(evt.mousePosition.x, evt.mousePosition.y);
-            Vector2 graphPoint = (mousePosition - viewport.RetainedGraphPanOffset) / oldZoom;
             viewport.RetainedGraphZoom = newZoom;
-            viewport.RetainedGraphPanOffset = mousePosition - graphPoint * newZoom;
+            viewport.RetainedGraphPanOffset = newOffset;
             viewport.ClampRetainedGraphPan(WorkspaceWidth, WorkspaceHeight);
             ApplyViewTransform();
             evt.StopPropagation();
@@ -526,6 +573,12 @@ namespace EditorTools
             graphContent.style.scale = new Scale(new Vector2(viewport.RetainedGraphZoom, viewport.RetainedGraphZoom));
             gridElement?.MarkDirtyRepaint();
             RefreshVisibleNodeElements();
+            ScheduleConnectionRefresh();
+        }
+
+        private Vector2 GetEffectiveNodePosition(TNode node)
+        {
+            return dragState.GetEffectivePosition(node, nodePresenter.GetRetainedNodePosition(node));
         }
 
         private Rect GetVisibleGraphRect()
@@ -549,23 +602,7 @@ namespace EditorTools
             visibleRect.xMax += VirtualizationMargin;
             visibleRect.yMax += VirtualizationMargin;
 
-            visibleNodes.Clear();
-            foreach (KeyValuePair<TNode, Rect> pair in nodeRects)
-            {
-                if (ReferenceEquals(pair.Key, draggedNode) || pair.Value.Overlaps(visibleRect))
-                {
-                    visibleNodes.Add(pair.Key);
-                }
-            }
-
-            nodesToRemove.Clear();
-            foreach (TNode node in nodeElements.Keys)
-            {
-                if (!visibleNodes.Contains(node))
-                {
-                    nodesToRemove.Add(node);
-                }
-            }
+            nodeVirtualizer.Reconcile(nodeRects, nodeElements, dragState.DraggedNode, visibleRect, nodesToRemove);
 
             foreach (TNode node in nodesToRemove)
             {
@@ -573,21 +610,12 @@ namespace EditorTools
                 nodeElements.Remove(node);
             }
 
-            pendingVisualNodes.RemoveWhere(node => !visibleNodes.Contains(node));
-            foreach (TNode node in visibleNodes)
-            {
-                if (!nodeElements.ContainsKey(node))
-                {
-                    pendingVisualNodes.Add(node);
-                }
-            }
-
             ScheduleVisibleNodeCreation();
         }
 
         private void ScheduleVisibleNodeCreation()
         {
-            if (visibleNodeCreationScheduled || pendingVisualNodes.Count == 0)
+            if (visibleNodeCreationScheduled || !nodeVirtualizer.HasPendingNodes)
             {
                 return;
             }
@@ -600,23 +628,16 @@ namespace EditorTools
         {
             visibleNodeCreationScheduled = false;
             int created = 0;
-            while (created < VirtualizedNodeCreationBudget && pendingVisualNodes.Count > 0)
+            while (created < VirtualizedNodeCreationBudget && nodeVirtualizer.TryTakeNext(nodeElements, out TNode node))
             {
-                TNode node = pendingVisualNodes.First();
-                pendingVisualNodes.Remove(node);
                 created++;
-                if (!visibleNodes.Contains(node) || nodeElements.ContainsKey(node))
-                {
-                    continue;
-                }
-
                 var nodeElement = new NodeElement(this, node);
                 nodeElements[node] = nodeElement;
                 graphContent.Add(nodeElement);
             }
 
             ScheduleVisibleNodeCreation();
-            if (pendingVisualNodes.Count == 0 && connectionsNeedRefreshAfterVirtualizedCreation)
+            if (!nodeVirtualizer.HasPendingNodes && connectionsNeedRefreshAfterVirtualizedCreation)
             {
                 connectionsNeedRefreshAfterVirtualizedCreation = false;
                 RefreshConnections();
@@ -641,7 +662,7 @@ namespace EditorTools
                 Node = node;
                 name = "retained-graph-node";
                 usageHints = UsageHints.DynamicTransform;
-                Vector2 nodePosition = canvas.nodePresenter.GetRetainedNodePosition(node);
+                Vector2 nodePosition = canvas.GetEffectiveNodePosition(node);
                 layoutPosition = nodePosition;
                 Vector2 nodeSize = canvas.nodePresenter.RetainedGraphNodeSize;
                 style.position = Position.Absolute;
@@ -713,7 +734,7 @@ namespace EditorTools
                 Vector2 nodeSize = canvas.nodePresenter.RetainedGraphNodeSize;
                 float width = layout.width > 0f ? layout.width : nodeSize.x;
                 float height = layout.height > 0f ? layout.height : nodeSize.y;
-                return new Rect(canvas.nodePresenter.GetRetainedNodePosition(Node), new Vector2(width, height));
+                return new Rect(canvas.GetEffectiveNodePosition(Node), new Vector2(width, height));
             }
 
             public void SetGraphPosition(Vector2 position)
@@ -747,6 +768,11 @@ namespace EditorTools
                 content.MarkDirtyRepaint();
             }
 
+            public void RequestContentLayoutRefresh()
+            {
+                content.MarkDirtyLayout();
+            }
+
             public void RefreshTargetSelection()
             {
                 if (!canvas.viewport.RetainedGraphIsSelectingTarget)
@@ -770,7 +796,7 @@ namespace EditorTools
             {
                 dragPointerId = evt.pointerId;
                 dragStartPointer = new Vector2(evt.position.x, evt.position.y);
-                dragStartPosition = canvas.nodePresenter.GetRetainedNodePosition(Node);
+                dragStartPosition = canvas.GetEffectiveNodePosition(Node);
                 header.CapturePointer(evt.pointerId);
             }
 
@@ -823,114 +849,6 @@ namespace EditorTools
 
                 dragPointerId = -1;
                 canvas.EndNodeDrag(this);
-            }
-        }
-
-        private sealed class ConnectionLayer : VisualElement
-        {
-            private readonly RetainedGraphCanvas<TNode, TConnection> canvas;
-            private readonly IReadOnlyList<RetainedGraphConnection<TNode, TConnection>> connections;
-            private TNode excludedNode;
-            private TNode includedNode;
-            private bool includesOnlyNode;
-
-            public ConnectionLayer(
-                RetainedGraphCanvas<TNode, TConnection> canvas,
-                IReadOnlyList<RetainedGraphConnection<TNode, TConnection>> connections)
-            {
-                this.canvas = canvas;
-                this.connections = connections;
-                name = "retained-graph-connections";
-                pickingMode = PickingMode.Ignore;
-                style.position = Position.Absolute;
-                style.left = 0f;
-                style.top = 0f;
-                style.width = WorkspaceWidth;
-                style.height = WorkspaceHeight;
-                generateVisualContent += DrawConnection;
-            }
-
-            public bool IsConnectedTo(TNode node)
-            {
-                foreach (RetainedGraphConnection<TNode, TConnection> connection in connections)
-                {
-                    if (ReferenceEquals(connection.Source, node) || ReferenceEquals(connection.Target, node))
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            public void ExcludeNode(TNode node)
-            {
-                excludedNode = node;
-                includedNode = null;
-                includesOnlyNode = false;
-            }
-
-            public void IncludeNode(TNode node)
-            {
-                includedNode = node;
-                excludedNode = null;
-                includesOnlyNode = true;
-            }
-
-            public void ClearNodeFilter()
-            {
-                excludedNode = null;
-                includedNode = null;
-                includesOnlyNode = false;
-            }
-
-            public void HideAll()
-            {
-                excludedNode = null;
-                includedNode = null;
-                includesOnlyNode = true;
-            }
-
-            private void DrawConnection(MeshGenerationContext context)
-            {
-                foreach (RetainedGraphConnection<TNode, TConnection> connection in connections)
-                {
-                    bool isConnectedToExcludedNode = excludedNode != null &&
-                        (ReferenceEquals(connection.Source, excludedNode) || ReferenceEquals(connection.Target, excludedNode));
-                    bool isConnectedToIncludedNode = includedNode != null &&
-                        (ReferenceEquals(connection.Source, includedNode) || ReferenceEquals(connection.Target, includedNode));
-                    if (isConnectedToExcludedNode ||
-                        (includesOnlyNode && (includedNode == null || !isConnectedToIncludedNode)))
-                    {
-                        continue;
-                    }
-
-                    if (!canvas.nodeRects.TryGetValue(connection.Source, out Rect sourceRect) ||
-                        !canvas.nodeRects.TryGetValue(connection.Target, out Rect targetRect))
-                    {
-                        continue;
-                    }
-
-                    const float routeMargin = 100f;
-                    Rect connectionBounds = Rect.MinMaxRect(
-                        Mathf.Min(sourceRect.xMin, targetRect.xMin) - routeMargin,
-                        Mathf.Min(sourceRect.yMin, targetRect.yMin) - routeMargin,
-                        Mathf.Max(sourceRect.xMax, targetRect.xMax) + routeMargin,
-                        Mathf.Max(sourceRect.yMax, targetRect.yMax) + routeMargin);
-                    if (!connectionBounds.Overlaps(canvas.GetVisibleGraphRect()))
-                    {
-                        continue;
-                    }
-
-                    canvas.connectionRenderer.DrawRetainedConnection(
-                        context.painter2D,
-                        connection.Connection,
-                        connection.Source,
-                        connection.Target,
-                        sourceRect,
-                        targetRect,
-                        canvas.IsDraggingNode(connection.Source) || canvas.IsDraggingNode(connection.Target));
-                }
             }
         }
 

@@ -87,7 +87,8 @@ namespace Dialogs.Graph.Editor
         private Texture2D lightTextFieldTexture;
         private GUISkin lightSkin;
 
-        private DialogToolkitCanvas toolkitCanvas;
+        private RetainedGraphCanvas<DialogNode, DialogCanvasConnection> toolkitCanvas;
+        private DelegatingRetainedGraphCanvasAdapter<DialogNode, DialogCanvasConnection> canvasAdapter;
         private IMGUIContainer toolkitControls;
         private bool toolkitUiActive;
 
@@ -100,7 +101,14 @@ namespace Dialogs.Graph.Editor
         private void CreateGUI()
         {
             toolkitUiActive = true;
-            toolkitCanvas = new DialogToolkitCanvas(this);
+            canvasAdapter = CreateCanvasAdapter();
+            toolkitCanvas = new RetainedGraphCanvas<DialogNode, DialogCanvasConnection>(
+                canvasAdapter,
+                canvasAdapter,
+                canvasAdapter,
+                canvasAdapter,
+                canvasAdapter,
+                canvasAdapter);
             toolkitControls = GraphEditorWindowUi.BuildRoot(
                 rootVisualElement,
                 toolkitCanvas,
@@ -125,6 +133,7 @@ namespace Dialogs.Graph.Editor
             GraphEditorAssetChangeTracker.AssetsChanged -= HandleTrackedAssetsChanged;
             toolkitUiActive = false;
             toolkitCanvas = null;
+            canvasAdapter = null;
             toolkitControls = null;
         }
 
@@ -518,29 +527,8 @@ namespace Dialogs.Graph.Editor
                 return;
             }
 
-            bool graphChanged = false;
-
-            for (int i = currentGraph.Nodes.Count - 1; i >= 0; i--)
-            {
-                DialogNode node = currentGraph.Nodes[i];
-                if (node == null)
-                {
-                    currentGraph.Nodes.RemoveAt(i);
-                    graphChanged = true;
-                    continue;
-                }
-
-                if (node.Phrase == null || !AssetDatabase.Contains(node.Phrase))
-                {
-                    if (currentGraph.IsEntryPhrase(node.Phrase))
-                    {
-                        currentGraph.SetEntryPhrase(null);
-                    }
-
-                    currentGraph.Nodes.RemoveAt(i);
-                    graphChanged = true;
-                }
-            }
+            bool graphChanged = DialogGraphStructureOperations.EnsureNodes(currentGraph);
+            graphChanged |= DialogGraphStructureOperations.RemoveMissingNodes(currentGraph);
 
             if (graphChanged)
             {
@@ -717,7 +705,7 @@ namespace Dialogs.Graph.Editor
             }
 
             Handles.DrawBezier(startPos, endPos, startTangent, endTangent, connectionColor, null, 3f);
-            DialogConnectionRouter.DrawConnectionArrow(endPos, endPos - endTangent);
+            GraphConnectionDrawing.DrawArrow(endPos, endPos - endTangent);
         }
 
         private static IEnumerable<DialogAnswer> GetConnectionAnswers(DialogPhrase phrase)
@@ -768,16 +756,13 @@ namespace Dialogs.Graph.Editor
 
         private void HandleConnectionHighlightSelection(Event currentEvent)
         {
-            if (targetSelection.IsActive ||
-                currentEvent.rawType != EventType.MouseDown ||
-                currentEvent.button != 0)
-            {
-                return;
-            }
-
             Vector2 graphMousePosition = GetGraphMousePosition(currentEvent.mousePosition);
-            bool clickedNode = nodeRects.Any(pair => pair.Value.Contains(graphMousePosition));
-            if (!clickedNode && activeConnectionNode != null)
+            if (GraphEditorConnectionPresentation.ShouldClearSelection(
+                    targetSelection.IsActive,
+                    currentEvent,
+                    graphMousePosition,
+                    nodeRects,
+                    activeConnectionNode))
             {
                 activeConnectionNode = null;
                 Repaint();
@@ -786,22 +771,13 @@ namespace Dialogs.Graph.Editor
 
         private Color GetConnectionColor(DialogNode sourceNode, DialogNode targetNode)
         {
-            if (activeConnectionNode == null)
-            {
-                return PrimaryConnectionColor;
-            }
-
-            if (sourceNode == activeConnectionNode)
-            {
-                return SourceHighlightConnectionColor;
-            }
-
-            if (targetNode == activeConnectionNode)
-            {
-                return TargetHighlightConnectionColor;
-            }
-
-            return PrimaryConnectionColor;
+            return GraphEditorConnectionPresentation.GetColor(
+                sourceNode,
+                targetNode,
+                activeConnectionNode,
+                PrimaryConnectionColor,
+                SourceHighlightConnectionColor,
+                TargetHighlightConnectionColor);
         }
 
         private (Vector2 StartTangent, Vector2 EndTangent) GetOrBuildConnectionTangents(
@@ -835,7 +811,7 @@ namespace Dialogs.Graph.Editor
                 }
             }
 
-            (Vector2 startTangent, Vector2 endTangent) = DialogConnectionRouter.ResolveConnectionTangents(
+            (Vector2 startTangent, Vector2 endTangent) = GraphBezierConnectionRouter.ResolveTangents(
                 startPos,
                 endPos,
                 sourceRect,
@@ -974,33 +950,10 @@ namespace Dialogs.Graph.Editor
 
         private void RemovePhraseReferences(DialogPhrase phrase)
         {
-            if (currentGraph.IsEntryPhrase(phrase))
+            foreach (DialogPhrase changedPhrase in DialogGraphReferenceOperations.RemoveIncomingReferences(currentGraph, phrase))
             {
-                currentGraph.SetEntryPhrase(null);
-            }
-
-            foreach (DialogNode otherNode in currentGraph.Nodes)
-            {
-                if (otherNode.Phrase == null)
-                {
-                    continue;
-                }
-
-                bool phraseChanged = false;
-                foreach (DialogAnswer answer in otherNode.Phrase.Answers)
-                {
-                    if (answer != null && answer.NextPhrase == phrase)
-                    {
-                        answer.SetNextPhrase(null);
-                        phraseChanged = true;
-                    }
-                }
-
-                if (phraseChanged)
-                {
-                    MarkDirty(otherNode.Phrase);
-                    InvalidatePhraseDisplayName(otherNode.Phrase);
-                }
+                MarkDirty(changedPhrase);
+                InvalidatePhraseDisplayName(changedPhrase);
             }
 
             if (targetSelection.SourcePhrase == phrase || targetSelection.PendingAnswer != null && targetSelection.PendingAnswer.NextPhrase == phrase)
@@ -1016,43 +969,13 @@ namespace Dialogs.Graph.Editor
                 return;
             }
 
-            foreach (DialogNode node in currentGraph.Nodes)
+            foreach (DialogPhrase changedPhrase in DialogGraphReferenceOperations.ReplaceIncomingReferences(
+                         currentGraph,
+                         oldPhrase,
+                         newPhrase))
             {
-                if (node.Phrase == null)
-                {
-                    continue;
-                }
-
-                bool phraseChanged = false;
-                foreach (DialogAnswer answer in node.Phrase.Answers)
-                {
-                    if (answer != null && answer.NextPhrase == oldPhrase)
-                    {
-                        answer.SetNextPhrase(newPhrase);
-                        phraseChanged = true;
-                    }
-                }
-
-                foreach (DialogAnswer navigationAnswer in new[]
-                         {
-                             node.Phrase.QuestAnswer,
-                             node.Phrase.ConversationAnswer,
-                             node.Phrase.ConversationReturnAnswer,
-                             node.Phrase.DialogueExitAnswer
-                         })
-                {
-                    if (navigationAnswer != null && navigationAnswer.NextPhrase == oldPhrase)
-                    {
-                        navigationAnswer.SetNextPhrase(newPhrase);
-                        phraseChanged = true;
-                    }
-                }
-
-                if (phraseChanged)
-                {
-                    MarkDirty(node.Phrase);
-                    InvalidatePhraseDisplayName(node.Phrase);
-                }
+                MarkDirty(changedPhrase);
+                InvalidatePhraseDisplayName(changedPhrase);
             }
 
             InvalidateGraphCaches();
@@ -1160,37 +1083,6 @@ namespace Dialogs.Graph.Editor
         private string GetPhraseDisplayName(DialogPhrase phrase)
         {
             return phraseDisplayNames.Get(phrase);
-
-            SerializedObject phraseObject = new SerializedObject(phrase);
-            SerializedProperty textProperty = phraseObject.FindProperty("text");
-            SerializedProperty tableReferenceProperty = textProperty?.FindPropertyRelative("m_TableReference");
-            SerializedProperty tableCollectionNameProperty = tableReferenceProperty?.FindPropertyRelative("m_TableCollectionName");
-            SerializedProperty entryReferenceProperty = textProperty?.FindPropertyRelative("m_TableEntryReference");
-            SerializedProperty keyProperty = entryReferenceProperty?.FindPropertyRelative("m_Key");
-            SerializedProperty keyIdProperty = entryReferenceProperty?.FindPropertyRelative("m_KeyId");
-
-            if (tableCollectionNameProperty == null || string.IsNullOrWhiteSpace(tableCollectionNameProperty.stringValue))
-            {
-                return "\u041d\u0435\u0442 \u0441\u0442\u0440\u043e\u043a\u0438: " + phrase.name;
-            }
-
-            if ((keyProperty == null || string.IsNullOrWhiteSpace(keyProperty.stringValue)) &&
-                (keyIdProperty == null || keyIdProperty.longValue == 0))
-            {
-                return "\u041d\u0435\u0442 \u0441\u0442\u0440\u043e\u043a\u0438: " + phrase.name;
-            }
-
-            if (keyProperty != null && !string.IsNullOrWhiteSpace(keyProperty.stringValue))
-            {
-                return keyProperty.stringValue;
-            }
-
-            if (keyIdProperty != null && keyIdProperty.longValue != 0)
-            {
-                return $"Key {keyIdProperty.longValue}";
-            }
-
-            return $"Нет строки: {phrase.name}";
         }
 
         private void CancelTargetSelection(bool repaint = true)

@@ -36,7 +36,6 @@ namespace Quests.Graph.Editor
         private Vector2 scrollPos;
         private string nodesFolderPath;
         private string transitionsFolderPath;
-        private readonly Dictionary<QuestTransition, Vector2> transitionAnchorPositions = new();
         private readonly Dictionary<QuestNode, Rect> nodeRects = new();
         private readonly Dictionary<QuestNodeData, QuestNode> nodeDataToNodeLookup = new();
         private readonly Dictionary<QuestTransition, CachedConnectionTangents> connectionTangentsCache = new();
@@ -357,10 +356,10 @@ namespace Quests.Graph.Editor
             Rect targetRect,
             bool isDragging)
         {
-            Vector2 startPosition = new(sourceRect.xMax - 12f, sourceRect.center.y);
-            Vector2 endPosition = GetNearestSideCenter(targetRect, startPosition);
+            (Vector2 startPosition, Vector2 endPosition) = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect);
+            Vector2 startDirection = GetConnectionDirectionForRectPoint(sourceRect, startPosition);
             Vector2 endDirection = GetConnectionDirectionForRectPoint(targetRect, endPosition);
-            Vector2 startTangent = startPosition + Vector2.right * 60f;
+            Vector2 startTangent = startPosition + startDirection * 60f;
             Vector2 endTangent = endPosition + endDirection * 60f;
 
             if (!isDragging)
@@ -666,7 +665,6 @@ namespace Quests.Graph.Editor
             }
 
             SynchronizeNodeRects();
-            transitionAnchorPositions.Clear();
 
             Event currentEvent = Event.current;
             HandleZoom(currentEvent, ZoomMin, ZoomMax, WorkspaceWidth, WorkspaceHeight);
@@ -737,14 +735,7 @@ namespace Quests.Graph.Editor
 
         private void SynchronizeNodeRects()
         {
-            nodeDataToNodeLookup.Clear();
-            foreach (QuestNode node in currentGraph.Nodes)
-            {
-                if (node?.NodeData != null)
-                {
-                    nodeDataToNodeLookup[node.NodeData] = node;
-                }
-            }
+            GraphEditorNodeLookup.Rebuild(currentGraph.Nodes, nodeDataToNodeLookup, node => node.NodeData);
 
             if (nodeLayoutSynchronizer.Synchronize(currentGraph.Nodes, nodeRects, node => node.Position, NodeSize))
             {
@@ -765,25 +756,8 @@ namespace Quests.Graph.Editor
                 return;
             }
 
-            EnsureGraphNodes();
-            bool graphChanged = false;
-
-            for (int i = currentGraph.Nodes.Count - 1; i >= 0; i--)
-            {
-                QuestNode node = currentGraph.Nodes[i];
-                if (node == null)
-                {
-                    currentGraph.Nodes.RemoveAt(i);
-                    graphChanged = true;
-                    continue;
-                }
-
-                if (node.NodeData == null || !AssetDatabase.Contains(node.NodeData))
-                {
-                    currentGraph.Nodes.RemoveAt(i);
-                    graphChanged = true;
-                }
-            }
+            bool graphChanged = QuestGraphStructureOperations.EnsureNodes(currentGraph);
+            graphChanged |= QuestGraphStructureOperations.RemoveMissingNodes(currentGraph);
 
             if (graphChanged)
             {
@@ -856,10 +830,7 @@ namespace Quests.Graph.Editor
                         continue;
                     }
 
-                    Vector2 startPos = transitionAnchorPositions.TryGetValue(transition, out Vector2 anchorPosition)
-                        ? anchorPosition
-                        : new Vector2(sourceRect.xMax - 12f, sourceRect.center.y);
-                    Vector2 endPos = GetNearestSideCenter(targetRect, startPos);
+                    (Vector2 startPos, Vector2 endPos) = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect);
 
                     Handles.color = GetConnectionColor(node, targetNode);
                     (Vector2 startTangent, Vector2 endTangent) = GetOrBuildConnectionTangents(
@@ -872,7 +843,7 @@ namespace Quests.Graph.Editor
                         targetNode);
 
                     Handles.DrawBezier(startPos, endPos, startTangent, endTangent, Handles.color, null, 4.5f);
-                    DrawConnectionArrow(endPos, endPos - endTangent);
+                    GraphConnectionDrawing.DrawArrow(endPos, endPos - endTangent);
                 }
             }
 
@@ -906,7 +877,7 @@ namespace Quests.Graph.Editor
                 }
             }
 
-            (Vector2 startTangent, Vector2 endTangent) = ResolveConnectionTangents(
+            (Vector2 startTangent, Vector2 endTangent) = GraphBezierConnectionRouter.ResolveTangents(
                 startPos,
                 endPos,
                 sourceRect,
@@ -925,16 +896,13 @@ namespace Quests.Graph.Editor
 
         private void HandleConnectionHighlightSelection(Event currentEvent)
         {
-            if (isSelectingTargetNode ||
-                currentEvent.rawType != EventType.MouseDown ||
-                currentEvent.button != 0)
-            {
-                return;
-            }
-
             Vector2 graphMousePosition = GetGraphMousePosition(currentEvent.mousePosition);
-            bool clickedNode = nodeRects.Any(pair => pair.Value.Contains(graphMousePosition));
-            if (!clickedNode && activeConnectionNode != null)
+            if (GraphEditorConnectionPresentation.ShouldClearSelection(
+                    isSelectingTargetNode,
+                    currentEvent,
+                    graphMousePosition,
+                    nodeRects,
+                    activeConnectionNode))
             {
                 activeConnectionNode = null;
                 Repaint();
@@ -943,22 +911,13 @@ namespace Quests.Graph.Editor
 
         private Color GetConnectionColor(QuestNode sourceNode, QuestNode targetNode)
         {
-            if (activeConnectionNode == null)
-            {
-                return PrimaryConnectionColor;
-            }
-
-            if (sourceNode == activeConnectionNode)
-            {
-                return SourceHighlightConnectionColor;
-            }
-
-            if (targetNode == activeConnectionNode)
-            {
-                return TargetHighlightConnectionColor;
-            }
-
-            return PrimaryConnectionColor;
+            return GraphEditorConnectionPresentation.GetColor(
+                sourceNode,
+                targetNode,
+                activeConnectionNode,
+                PrimaryConnectionColor,
+                SourceHighlightConnectionColor,
+                TargetHighlightConnectionColor);
         }
 
         private void DrawTargetSelectionOverlay(Rect visibleGraphRect)
@@ -1206,15 +1165,6 @@ namespace Quests.Graph.Editor
                 bool pickPressed = DrawMiniButton("O", GUILayout.Width(22f));
                 GUI.backgroundColor = previousBackground;
 
-                Rect localButtonRect = GUILayoutUtility.GetLastRect();
-                if (nodeRects.TryGetValue(ownerNode, out Rect nodeRect))
-                {
-                    Vector2 localCenter = new Vector2(
-                        localButtonRect.x + localButtonRect.width * 0.5f,
-                        localButtonRect.y + localButtonRect.height * 0.5f);
-                    transitionAnchorPositions[transition] = nodeRect.position + localCenter;
-                }
-
                 if (pickPressed)
                 {
                     isSelectingTargetNode = true;
@@ -1424,24 +1374,7 @@ namespace Quests.Graph.Editor
 
         private void RemoveNodeReferences(QuestNodeData nodeData)
         {
-            foreach (QuestNode otherNode in currentGraph.Nodes)
-            {
-                if (otherNode.NodeData == null)
-                {
-                    continue;
-                }
-
-                EnsureCollections(otherNode.NodeData);
-
-                foreach (QuestTransition transition in otherNode.NodeData.Transitions)
-                {
-                    if (transition != null && transition.TargetNode == nodeData)
-                    {
-                        transition.SetTargetNode(null);
-                        MarkDirty(transition);
-                    }
-                }
-            }
+            QuestGraphReferenceOperations.RemoveIncomingReferences(currentGraph, nodeData);
 
             if ((sourceNodeForSelection != null && sourceNodeForSelection.NodeData == nodeData) ||
                 (pendingTransition != null && pendingTransition.TargetNode == nodeData))
@@ -1452,97 +1385,37 @@ namespace Quests.Graph.Editor
 
         private void ReplaceNodeReferences(QuestNodeData oldNode, QuestNodeData newNode)
         {
-            if (oldNode == null || oldNode == newNode)
-            {
-                return;
-            }
-
-            foreach (QuestNode node in currentGraph.Nodes)
-            {
-                if (node.NodeData == null)
-                {
-                    continue;
-                }
-
-                EnsureCollections(node.NodeData);
-
-                foreach (QuestTransition transition in node.NodeData.Transitions)
-                {
-                    if (transition != null && transition.TargetNode == oldNode)
-                    {
-                        transition.SetTargetNode(newNode);
-                        MarkDirty(transition);
-                    }
-                }
-            }
+            QuestGraphReferenceOperations.ReplaceIncomingReferences(currentGraph, oldNode, newNode);
         }
 
         private void DeleteOwnedTransitions(QuestNodeData nodeData)
         {
-            EnsureCollections(nodeData);
-
-            foreach (QuestTransition transition in nodeData.Transitions.ToList())
-            {
-                if (transition == null)
-                {
-                    continue;
-                }
-
-                GraphEditorAssetService.DeleteAsset(transition, "Delete quest transition");
-            }
-
-            GraphEditorAssetService.MarkDirty(nodeData, "Delete owned quest transitions");
-            nodeData.Transitions.Clear();
-            MarkDirty(nodeData);
+            QuestGraphReferenceOperations.DeleteOwnedTransitions(nodeData);
         }
 
         private void EnsureGraphNodes()
         {
-            if (currentGraph == null)
-            {
-                return;
-            }
-
-            if (currentGraph.Nodes == null)
-            {
-                currentGraph.Nodes = new List<QuestNode>();
-                MarkDirty(currentGraph);
-            }
+            if (QuestGraphStructureOperations.EnsureNodes(currentGraph)) MarkDirty(currentGraph);
         }
 
         private QuestNodeData GetStartNode()
         {
-            return currentGraph != null &&
-                   currentGraph.Nodes.Count > 0 &&
-                   currentGraph.Nodes[0] != null
-                ? currentGraph.Nodes[0].NodeData
-                : null;
+            return QuestGraphStructureOperations.GetStartNode(currentGraph);
         }
 
         private bool ContainsNode(QuestNodeData nodeData)
         {
-            return currentGraph.Nodes.Any(node => node.NodeData == nodeData);
+            return QuestGraphStructureOperations.ContainsNode(currentGraph, nodeData);
         }
 
         private bool IsStartNode(QuestNode node)
         {
-            return currentGraph != null &&
-                   currentGraph.Nodes.Count > 0 &&
-                   currentGraph.Nodes[0] == node &&
-                   node.NodeData != null;
+            return QuestGraphStructureOperations.IsStartNode(currentGraph, node);
         }
 
         private bool IsOrphanNode(QuestNodeData nodeData)
         {
-            if (nodeData == null || GetStartNode() == nodeData)
-            {
-                return false;
-            }
-
-            return !currentGraph.Nodes
-                .Where(node => node.NodeData != null)
-                .SelectMany(node => node.NodeData.Transitions ?? new List<QuestTransition>())
-                .Any(transition => transition != null && transition.TargetNode == nodeData);
+            return QuestGraphStructureOperations.IsOrphanNode(currentGraph, nodeData);
         }
 
         private void MoveNodeToFront(QuestNode node)
@@ -2229,32 +2102,12 @@ namespace Quests.Graph.Editor
 
         private void ReleaseNodeOwnershipIfUnused(QuestNodeData nodeData)
         {
-            if (nodeData == null || currentGraph == null || currentGraph.Nodes.Any(node => node.NodeData == nodeData))
-            {
-                return;
-            }
-
-            nodeData.ClearOwnerGraph(currentGraph);
-            MarkDirty(nodeData);
+            QuestGraphReferenceOperations.ReleaseOwnershipIfUnused(currentGraph, nodeData);
         }
 
         private void ClaimUnownedNodes()
         {
-            if (currentGraph == null)
-            {
-                return;
-            }
-
-            foreach (QuestNode node in currentGraph.Nodes)
-            {
-                if (node?.NodeData == null || node.NodeData.OwnerGraph != null)
-                {
-                    continue;
-                }
-
-                node.NodeData.SetOwnerGraph(currentGraph);
-                MarkDirty(node.NodeData);
-            }
+            QuestGraphReferenceOperations.ClaimUnownedNodes(currentGraph);
         }
 
         private void MarkDirty(UnityEngine.Object target)
@@ -2283,20 +2136,6 @@ namespace Quests.Graph.Editor
                 (mousePosition.y - panOffset.y) / zoom);
         }
 
-        private static void DrawConnectionArrow(Vector2 tipPosition, Vector2 direction)
-        {
-            Vector2 normalizedDirection = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.right;
-            Vector2 right = new Vector2(-normalizedDirection.y, normalizedDirection.x);
-            Vector2 arrowBase = tipPosition - normalizedDirection * 18f;
-            Vector3[] arrow =
-            {
-                tipPosition,
-                arrowBase + right * 7.5f,
-                arrowBase - right * 7.5f
-            };
-            Handles.DrawAAConvexPolygon(arrow);
-        }
-
         private static (Vector2 StartTangent, Vector2 EndTangent) ResolveConnectionTangents(
             Vector2 startPos,
             Vector2 endPos,
@@ -2304,8 +2143,9 @@ namespace Quests.Graph.Editor
             Rect targetRect,
             IReadOnlyList<Rect> obstacles)
         {
+            Vector2 startDirection = GetConnectionDirectionForRectPoint(sourceRect, startPos);
             Vector2 endDirection = GetConnectionDirectionForRectPoint(targetRect, endPos);
-            Vector2 defaultStartTangent = startPos + Vector2.right * 60f;
+            Vector2 defaultStartTangent = startPos + startDirection * 60f;
             Vector2 defaultEndTangent = endPos + endDirection * 60f;
 
             if (!IsBezierBlocked(startPos, defaultStartTangent, defaultEndTangent, endPos, obstacles))

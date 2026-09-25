@@ -65,5 +65,29 @@ namespace Dialogs.Graph.Model
                     ? conversationAnswer
                     : null;
         }
+
+        /// <summary>
+        /// Enumerates every authored link owned by this phrase. This is broader than the
+        /// answers visible in one dialogue state, because graph maintenance must preserve
+        /// links injected by the dialogue flow as well.
+        /// </summary>
+        public IEnumerable<DialogAnswer> GetAuthoredAnswers()
+        {
+            if (answers != null)
+            {
+                foreach (DialogAnswer answer in answers)
+                {
+                    if (answer != null)
+                    {
+                        yield return answer;
+                    }
+                }
+            }
+
+            if (questAnswer != null) yield return questAnswer;
+            if (conversationAnswer != null) yield return conversationAnswer;
+            if (conversationReturnAnswer != null) yield return conversationReturnAnswer;
+            if (dialogueExitAnswer != null) yield return dialogueExitAnswer;
+        }
     }
 }

@@ -15,7 +15,7 @@ MonoBehaviour:
   Nodes:
   - Position: {x: 360, y: 220}
     Phrase: {fileID: 11400000, guid: 42ce98afdc7180544a7aa9b29ea678e7, type: 2}
-  - Position: {x: 750, y: 220}
+  - Position: {x: 751.3333, y: 43.333344}
     Phrase: {fileID: 11400000, guid: ab22210ad7b38a74eb6637026263ec7d, type: 2}
   - Position: {x: 1140, y: 220}
     Phrase: {fileID: 11400000, guid: df4e5796eb77e13469934038ead2492e, type: 2}
@@ -89,6 +89,5 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: e7182b51ff1c4fe4a9a4a1505bf02881, type: 2}
   - Position: {x: 1900, y: 600}
     Phrase: {fileID: 11400000, guid: e7192b51ff1c4fe4a9a4a1505bf02881, type: 2}
-  - Position: {x: 3100, y: 440}
-    Phrase: {fileID: 11400000, guid: e7302b51ff1c4fe4a9a4a1505bf02881, type: 2}
   <EntryPhrase>k__BackingField: {fileID: 11400000, guid: 42ce98afdc7180544a7aa9b29ea678e7, type: 2}
+  suppressCheckpointOnClose: 0

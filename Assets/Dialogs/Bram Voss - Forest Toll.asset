@@ -27,13 +27,13 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: 1c0e920b88d44a158528e992c6cc8c41, type: 2}
   - Position: {x: 650, y: 580}
     Phrase: {fileID: 11400000, guid: ffe4b39caba076d4fa81ce303452b9f6, type: 2}
-  - Position: {x: 1450, y: 120}
+  - Position: {x: 1957.5632, y: 31.316536}
     Phrase: {fileID: 11400000, guid: c63d672c3e724b27a8bb177bfb9ea177, type: 2}
-  - Position: {x: 1450, y: 400}
+  - Position: {x: 1463.3335, y: 9.5238495}
     Phrase: {fileID: 11400000, guid: 62a2d801a3cf4221b3e46e2c0f93e472, type: 2}
   - Position: {x: 1050, y: 700}
     Phrase: {fileID: 11400000, guid: 358f62de04de40a0a65dd238bc005261, type: 2}
-  - Position: {x: 1450, y: 620}
+  - Position: {x: 1617.6191, y: 778.0953}
     Phrase: {fileID: 11400000, guid: 71910a7419d4441c80e8f39a96e19522, type: 2}
   - Position: {x: 1450, y: 760}
     Phrase: {fileID: 11400000, guid: 88278b83765f4421a051bef14a0fb4a7, type: 2}
@@ -41,11 +41,11 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: 7c78dbfb0ed144e8a406914b2d8ee4a2, type: 2}
   - Position: {x: 1050, y: 1060}
     Phrase: {fileID: 11400000, guid: b13779e32bed4cedb004c87dc521af95, type: 2}
-  - Position: {x: 1450, y: 1060}
+  - Position: {x: 1451.9048, y: 1567.6189}
     Phrase: {fileID: 11400000, guid: 610065c556424f49acc7c7ebb9066e95, type: 2}
-  - Position: {x: 1850, y: 900}
+  - Position: {x: 1974.762, y: 1064.7618}
     Phrase: {fileID: 11400000, guid: 11000000000000000000000000000024, type: 2}
-  - Position: {x: 2250, y: 900}
+  - Position: {x: 2311.9048, y: 937.1428}
     Phrase: {fileID: 11400000, guid: 11000000000000000000000000000025, type: 2}
   - Position: {x: 330.19604, y: 826.2745}
     Phrase: {fileID: 11400000, guid: e7122b51ff1c4fe4a9a4a1505bf02881, type: 2}

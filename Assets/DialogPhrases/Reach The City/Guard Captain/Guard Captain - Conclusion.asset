@@ -21,8 +21,10 @@ MonoBehaviour:
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []
+  alternativeTexts: []
   isForcedDialoguePhrase: 0
-  restoresExitAbility: 1
+  forcedDialoguePriority: 0
+  restoresExitAbility: 0
   isQuestPhrase: 0
   questAnswer:
     text:
@@ -35,8 +37,68 @@ MonoBehaviour:
       m_WaitForCompletion: 0
       m_LocalVariables: []
     nextPhrase: {fileID: 0}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
     hasConditions: 0
     conditions: []
+  isConversationTopic: 0
+  conversationAnswer:
+    text:
+      m_TableReference:
+        m_TableCollectionName: 
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 0}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 0
+    conditions: []
+  isConversationReturnAction: 0
+  conversationReturnAnswer:
+    text:
+      m_TableReference:
+        m_TableCollectionName: 
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 0}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 0
+    conditions: []
+  isDialogueExitAction: 0
+  dialogueExitAnswer:
+    text:
+      m_TableReference:
+        m_TableCollectionName: 
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 0}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 0
+    conditions: []
+  hasGameplayEvents: 0
+  gameplayEvents: []
   answers: []
   references:
     version: 2

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Corvin Veyr - Mill Claim
   m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.DialogGraph
   Nodes:
-  - Position: {x: 0, y: 0}
+  - Position: {x: 34.358967, y: 139.48718}
     Phrase: {fileID: 11400000, guid: a5000000000000000000000000000001, type: 2}
   - Position: {x: 400, y: -240}
     Phrase: {fileID: 11400000, guid: a4400000000000000000000000000001, type: 2}
@@ -21,15 +21,15 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: a4400000000000000000000000000002, type: 2}
   - Position: {x: 800, y: -120}
     Phrase: {fileID: 11400000, guid: a4400000000000000000000000000003, type: 2}
-  - Position: {x: 350, y: 0}
+  - Position: {x: 98.235306, y: 715.29407}
     Phrase: {fileID: 11400000, guid: a5000000000000000000000000000002, type: 2}
   - Position: {x: 350, y: 240}
     Phrase: {fileID: 11400000, guid: a5000000000000000000000000000003, type: 2}
-  - Position: {x: 850, y: 140}
+  - Position: {x: 1020.1961, y: 23.921562}
     Phrase: {fileID: 11400000, guid: a5000000000000000000000000000004, type: 2}
-  - Position: {x: 850, y: 360}
+  - Position: {x: 1022.549, y: 511.37256}
     Phrase: {fileID: 11400000, guid: a5000000000000000000000000000005, type: 2}
-  - Position: {x: 350, y: 520}
+  - Position: {x: 684.6667, y: 262}
     Phrase: {fileID: 11400000, guid: a5000000000000000000000000000006, type: 2}
   - Position: {x: 350, y: 760}
     Phrase: {fileID: 11400000, guid: a5000000000000000000000000000007, type: 2}
@@ -43,7 +43,7 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: a5000000000000000000000000000011, type: 2}
   - Position: {x: 0, y: 1890}
     Phrase: {fileID: 11400000, guid: a5000000000000000000000000000012, type: 2}
-  - Position: {x: 1271.2115, y: 711.5154}
+  - Position: {x: 1348.6038, y: 22.162437}
     Phrase: {fileID: 11400000, guid: a5000000000000000000000000000013, type: 2}
   - Position: {x: 350, y: 1960}
     Phrase: {fileID: 11400000, guid: a5000000000000000000000000000014, type: 2}
