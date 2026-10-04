@@ -50,6 +50,7 @@ MonoBehaviour:
   <StatsHolder>k__BackingField: {fileID: 7495129228834389673, guid: ab9f6ea1b64d2cf48b6efc688c9e249f, type: 3}
   <FastSlotLabelFont>k__BackingField: {fileID: 11400000, guid: fcfcd7da3c44c554db6791d28dd79a59, type: 2}
   <QuestDescription>k__BackingField: {fileID: 6341268475938172045, guid: ef4384eb9fcbf2040ac6937b77db2a82, type: 3}
+  <Compass>k__BackingField: {fileID: 770000000000000002, guid: b3f7c1d95a2e48f0a6c4d81e37b5290f, type: 3}
   <PopupRect>k__BackingField: {fileID: 2905255636178868728, guid: 12b0999af4e93bf418857b096b6cc62b, type: 3}
   <InventoryHoverPopupRect>k__BackingField: {fileID: 1006068283565412751, guid: bb60a85470fc02441b54fd01f7fcc185, type: 3}
   <InventoryHoverWeightIcon>k__BackingField: {fileID: 21300000, guid: 99b3031eaf8575048b562049f962ae4a, type: 3}

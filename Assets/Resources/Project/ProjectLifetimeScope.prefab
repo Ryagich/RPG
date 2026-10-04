@@ -61,6 +61,7 @@ MonoBehaviour:
   <ColorsConfig>k__BackingField: {fileID: 11400000, guid: 063c0d25c66a34b4a8329a35699fa5b2, type: 2}
   <StatIconsConfig>k__BackingField: {fileID: 11400000, guid: 50f9a09c9214a8b4581f8c2cfbaa1810, type: 2}
   <MapConfig>k__BackingField: {fileID: 11400000, guid: a9fb77d7cddf4f5c8f3f74a2c9d886ad, type: 2}
+  <CompassConfig>k__BackingField: {fileID: 11400000, guid: 9c3f1a7b2e5d4468a1f0b7c9d2e4a618, type: 2}
   <TargetLockConfig>k__BackingField: {fileID: 11400000, guid: 0dc24276d11c421e9473fe8fd41716d7, type: 2}
   <NpcVisionConfig>k__BackingField: {fileID: 11400000, guid: 56f204f2acef1b6499be8a1ee97e0f57, type: 2}
   <NpcItemPickupConfig>k__BackingField: {fileID: 11400000, guid: 0ea9d6f20eb7ab847b5e33cb28edf3ca, type: 2}

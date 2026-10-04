@@ -53,12 +53,13 @@ namespace UI.Configs
         [field: SerializeField] public PhraseContainer PhraseContainer { get; private set; }
         [field: SerializeField] public Button AnswerButton { get; private set; }
         [field: SerializeField] public NotificationInDialog NotificationInDialog { get; private set; }
-        
+
         // Game
         [field: SerializeField] public StatsHolder StatsHolder { get; private set; }
         [field: SerializeField] public TMP_FontAsset FastSlotLabelFont { get; private set; }
         [field: SerializeField] public QuestDescriptionHolder QuestDescription { get; private set; }
-        
+        [field: SerializeField] public RectTransform Compass { get; private set; }
+
         // Popups
         [field: SerializeField] public RectTransform PopupRect { get; private set; }
         [field: SerializeField] public RectTransform InventoryHoverPopupRect { get; private set; }
@@ -81,5 +82,10 @@ namespace UI.Configs
         [field: SerializeField] public RectTransform QuestPopup { get; private set; }
         [field: SerializeField] public RectTransform Quest { get; private set; }
         [field: SerializeField] public RectTransform Task { get; private set; }
+
+
+
+
+
     }
 }

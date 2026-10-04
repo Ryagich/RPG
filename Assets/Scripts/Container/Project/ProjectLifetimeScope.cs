@@ -15,6 +15,7 @@ using Player;
 using TargetLock;
 using Telemetry;
 using UI;
+using UI.Compass;
 using UI.Configs;
 using UI.Map;
 using UnityEngine;
@@ -50,6 +51,7 @@ namespace Container.Project
         [field: SerializeField] public ColorsConfig ColorsConfig { get; private set; }
         [field: SerializeField] public StatIconsConfig StatIconsConfig { get; private set; }
         [field: SerializeField] public MapConfig MapConfig { get; private set; }
+        [field: SerializeField] public CompassConfig CompassConfig { get; private set; }
         [field: SerializeField] public TargetLockConfig TargetLockConfig { get; private set; }
         [field: SerializeField] public NpcVisionConfig NpcVisionConfig { get; private set; }
         [field: SerializeField] public NpcItemPickupConfig NpcItemPickupConfig { get; private set; }
@@ -107,6 +109,7 @@ namespace Container.Project
             builder.RegisterInstance(ColorsConfig).AsSelf();
             builder.RegisterInstance(StatIconsConfig).AsSelf();
             builder.RegisterInstance(MapConfig).AsSelf();
+            builder.RegisterInstance(CompassConfig).AsSelf();
             builder.RegisterInstance(TargetLockConfig).AsSelf();
             builder.RegisterInstance(NpcVisionConfig).AsSelf();
             builder.RegisterInstance(NpcItemPickupConfig).AsSelf();

@@ -18,6 +18,8 @@ using VContainer;
 using VContainer.Unity;
 using Utils;
 
+using UI.Compass;
+
 namespace UI.Pages
 {
     // ReSharper disable once ClassNeverInstantiated.Global
@@ -75,7 +77,8 @@ namespace UI.Pages
         private readonly CompositeDisposable drawDisposables = new();
         private readonly Dictionary<StatType, StatVisibilityState> statVisibilityStates = new();
         private readonly Dictionary<FastSlotModel, StatVisibilityState> fastSlotVisibilityStates = new();
-
+        private readonly Camera camera;
+        private readonly CompassConfig compassConfig;
         public override PageType Type { get; } = PageType.MainGame;
 
         private RectTransform contentRect;
@@ -124,7 +127,9 @@ namespace UI.Pages
                 QuestObjectiveOverrideContext questObjectiveOverride,
                 PlayerStatsHudContinuity playerStatsHudContinuity,
                 ISubscriber<ShowStatsInputMessage> showStatsInputSubscriber,
-                ISubscriber<FastSlotInputMessage> fastSlotInputSubscriber
+                ISubscriber<FastSlotInputMessage> fastSlotInputSubscriber,
+                Camera camera,
+                CompassConfig compassConfig
             )
         {
             this.resolver = resolver;
@@ -142,7 +147,8 @@ namespace UI.Pages
             this.questController = questController;
             this.questObjectiveOverride = questObjectiveOverride;
             this.playerStatsHudContinuity = playerStatsHudContinuity;
-
+            this.camera = camera;
+            this.compassConfig = compassConfig;
             canvasRect = canvas.GetComponent<RectTransform>();
 
             playerStatsHud = new PlayerStatsHud(
@@ -159,6 +165,23 @@ namespace UI.Pages
             questController.Changed += OnQuestChanged;
             questObjectiveOverride.Changed += OnQuestObjectiveOverrideChanged;
         }
+        // ------ ВОТ ТУТ рисовка компаса
+        private void DrawCompass()  
+        {
+            RectTransform compassRect = resolver.Instantiate(uiConfig.Compass, contentRect);
+            compassRect.name = $"{uiConfig.Compass.name} | {Type}";
+
+            if (compassRect.TryGetComponent(out CompassHolder holder) &&
+                compassRect.TryGetComponent(out CompassController controller) &&
+                holder.Direction != null)
+            {
+                controller.Initialize(camera?.transform, holder.Direction, compassConfig);
+            }
+            else
+            {
+                Debug.LogError($"[Compass] Missing components/references on {compassRect.name}");
+            }
+        }
 
         public override void Draw()
         {
@@ -167,7 +190,7 @@ namespace UI.Pages
 
             statsHolder = resolver.Instantiate(uiConfig.StatsHolder, contentRect);
             statsHolder.name = $"{uiConfig.StatsHolder.name} | {Type}";
-
+            DrawCompass();
             if (uiConfig.QuestDescription != null)
             {
                 questDescriptionHolder = resolver.Instantiate(uiConfig.QuestDescription, contentRect);
