@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NPC.NpcVisionConfig
   <ViewDistance>k__BackingField: 8
   <ViewAngle>k__BackingField: 90
+  <ViewHeight>k__BackingField: 2
   <AttackViewDistance>k__BackingField: 1.7
   <AttackViewAngle>k__BackingField: 120
   <UseLineOfSight>k__BackingField: 1
   <VisionOccluderMask>k__BackingField:
+    serializedVersion: 2
     m_Bits: 4294967291
   <DrawVisionForAllNpcs>k__BackingField: 1

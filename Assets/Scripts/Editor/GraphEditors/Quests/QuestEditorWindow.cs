@@ -39,6 +39,7 @@ namespace Quests.Graph.Editor
         private readonly Dictionary<QuestNode, Rect> nodeRects = new();
         private readonly Dictionary<QuestNodeData, QuestNode> nodeDataToNodeLookup = new();
         private readonly Dictionary<QuestTransition, CachedConnectionTangents> connectionTangentsCache = new();
+        private readonly GraphEditorConnectionAnchorRegistry<QuestTransition> transitionPickerAnchors = new();
         private readonly List<Rect> connectionObstacleRects = new();
         private readonly GUIContent localizedPreviewContent = new();
         private readonly GraphEditorNodeLayoutSynchronizer<QuestNode> nodeLayoutSynchronizer = new();
@@ -234,6 +235,7 @@ namespace Quests.Graph.Editor
         {
             nodeRects.Clear();
             nodeDataToNodeLookup.Clear();
+            transitionPickerAnchors.Clear();
         }
 
         IEnumerable<QuestNode> GetRetainedGraphNodes()
@@ -251,20 +253,26 @@ namespace Quests.Graph.Editor
 
             foreach (QuestNode sourceNode in currentGraph.Nodes)
             {
-                if (sourceNode?.NodeData == null)
+                foreach (RetainedGraphConnection<QuestNode, QuestTransition> connection in GetRetainedGraphConnectionsFrom(sourceNode))
                 {
-                    continue;
+                    yield return connection;
                 }
+            }
+        }
 
-                EnsureCollections(sourceNode.NodeData);
-                foreach (QuestTransition transition in sourceNode.NodeData.Transitions)
+        IEnumerable<RetainedGraphConnection<QuestNode, QuestTransition>> GetRetainedGraphConnectionsFrom(QuestNode sourceNode)
+        {
+            if (sourceNode?.NodeData == null)
+            {
+                yield break;
+            }
+
+            EnsureCollections(sourceNode.NodeData);
+            foreach (QuestTransition transition in sourceNode.NodeData.Transitions)
+            {
+                if (transition?.TargetNode != null &&
+                    nodeDataToNodeLookup.TryGetValue(transition.TargetNode, out QuestNode targetNode))
                 {
-                    if (transition?.TargetNode == null ||
-                        !nodeDataToNodeLookup.TryGetValue(transition.TargetNode, out QuestNode targetNode))
-                    {
-                        continue;
-                    }
-
                     yield return new RetainedGraphConnection<QuestNode, QuestTransition>(
                         sourceNode,
                         targetNode,
@@ -333,6 +341,7 @@ namespace Quests.Graph.Editor
 
             pendingTransition.SetTargetNode(node.NodeData);
             MarkDirty(pendingTransition);
+            toolkitCanvas?.RebuildConnectionsGradually();
             CancelTargetSelection(false);
             return true;
         }
@@ -356,7 +365,8 @@ namespace Quests.Graph.Editor
             Rect targetRect,
             bool isDragging)
         {
-            (Vector2 startPosition, Vector2 endPosition) = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect);
+            (Vector2 defaultStart, Vector2 endPosition) = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect);
+            Vector2 startPosition = transitionPickerAnchors.Resolve(transition, sourceRect, defaultStart);
             Vector2 startDirection = GetConnectionDirectionForRectPoint(sourceRect, startPosition);
             Vector2 endDirection = GetConnectionDirectionForRectPoint(targetRect, endPosition);
             Vector2 startTangent = startPosition + startDirection * 60f;
@@ -374,25 +384,13 @@ namespace Quests.Graph.Editor
                     targetNode);
             }
 
-            Color color = GetConnectionColor(sourceNode, targetNode);
-            painter.strokeColor = color;
-            painter.lineWidth = 4.5f;
-            painter.BeginPath();
-            painter.MoveTo(startPosition);
-            painter.BezierCurveTo(startTangent, endTangent, endPosition);
-            painter.Stroke();
-
-            Vector2 direction = endPosition - endTangent;
-            Vector2 normalizedDirection = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.right;
-            Vector2 right = new(-normalizedDirection.y, normalizedDirection.x);
-            Vector2 arrowBase = endPosition - normalizedDirection * 18f;
-            painter.fillColor = color;
-            painter.BeginPath();
-            painter.MoveTo(endPosition);
-            painter.LineTo(arrowBase + right * 7.5f);
-            painter.LineTo(arrowBase - right * 7.5f);
-            painter.ClosePath();
-            painter.Fill();
+            GraphConnectionDrawing.DrawBezier(
+                painter,
+                startPosition,
+                startTangent,
+                endTangent,
+                endPosition,
+                GetConnectionColor(sourceNode, targetNode));
         }
 
         private void DrawEmptyState()
@@ -1164,6 +1162,7 @@ namespace Quests.Graph.Editor
                 GUI.backgroundColor = missingLink ? DangerButtonColor : LinkButtonColor;
                 bool pickPressed = DrawMiniButton("O", GUILayout.Width(22f));
                 GUI.backgroundColor = previousBackground;
+                transitionPickerAnchors.Record(transition, GUILayoutUtility.GetLastRect());
 
                 if (pickPressed)
                 {

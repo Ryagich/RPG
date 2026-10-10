@@ -166,6 +166,10 @@ MonoBehaviour:
     m_Localized: Bandits
     m_Metadata:
       m_Items: []
+  - m_Id: 40000000000000006
+    m_Localized: Free Knights
+    m_Metadata:
+      m_Items: []
   - m_Id: 50000000000000001
     m_Localized: Do you want to travel to another location?
     m_Metadata:
@@ -2062,6 +2066,9 @@ MonoBehaviour:
     m_Metadata: {m_Items: []}
   - m_Id: 40000000000000004
     m_Localized: Mages
+    m_Metadata: {m_Items: []}
+  - m_Id: 40000000000000005
+    m_Localized: Monster
     m_Metadata: {m_Items: []}
   - m_Id: 94000000000000010
     m_Localized: Erdan Vell

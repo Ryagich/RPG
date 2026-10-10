@@ -129,5 +129,51 @@ namespace Combat
                     finalDamage,
                     hit.Point));
         }
+
+        /// <summary>
+        /// Applies a non-weapon physical contact hit, for example a creature's body attack.
+        /// The method intentionally preserves the same body-part multiplier, armour reduction,
+        /// HP mutation, and damage notification as a weapon hit. Such a hit has no inventory
+        /// weapon or character attacker, so weapon-only combat retaliation remains unaffected.
+        /// </summary>
+        public void ReceiveDirectHit(BodyHitbox hitbox, float baseDamage, Vector3 point)
+        {
+            if (hitbox == null || baseDamage <= 0f)
+            {
+                return;
+            }
+
+            var bodyMultiplier = Mathf.Max(0f, hitbox.DamageMultiplier);
+            var physicalDefense = PhysicalDefenseCalculator.ResolveProtection(inventory, hitbox.BodyPart);
+            var mitigatedDamage = baseDamage * bodyMultiplier * (1f - physicalDefense);
+            if (mitigatedDamage <= 0f)
+            {
+                return;
+            }
+
+            var hp = statsController.Hp;
+            var previousHp = hp.Value.Value;
+            statsController.AddValue(StatType.Hp, -mitigatedDamage, StatChangeSource.Combat);
+            var finalDamage = Mathf.Max(0f, previousHp - hp.Value.Value);
+            if (finalDamage <= 0f)
+            {
+                return;
+            }
+
+            damagedPublisher.Publish(
+                new CharacterDamagedMessage(
+                    ownerTransform.gameObject,
+                    ownerTransform,
+                    null,
+                    null,
+                    false,
+                    null,
+                    hitbox.BodyPart,
+                    baseDamage,
+                    bodyMultiplier,
+                    physicalDefense,
+                    finalDamage,
+                    point));
+        }
     }
 }

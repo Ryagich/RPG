@@ -17,7 +17,7 @@ namespace StateMachine.Conditions
                 return false;
             }
 
-            var sensor = context.GetService<NpcVisionSensor>();
+            var sensor = context.GetService<CharacterVisionSensor>();
             var vision = context.GetService<NpcVision>();
             var nav = context.GetService<NpcNavMeshController>();
             var config = context.GetService<NpcItemPickupConfig>();
@@ -35,8 +35,9 @@ namespace StateMachine.Conditions
             context.GetService<NpcItemInterest>()?.UpdateEstimatedPickupTime(ourEta);
 
             sensor.PruneInvalidCandidates();
-            foreach (var other in sensor.NpcCandidates)
+            foreach (var candidate in sensor.TargetCandidates)
             {
+                var other = candidate != null ? candidate.GetComponentInParent<NpcItemInterest>() : null;
                 if (other == null
                  || other.gameObject == context.Owner
                  || other.TargetItem != targetItem

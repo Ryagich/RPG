@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: NpcBaseStateMachineGraph
   m_EditorClassIdentifier: Assembly-CSharp::StateMachine.Graph.StateMachineGraph
   Nodes:
+  - Position: {x: 160, y: -180}
+    State: {fileID: 11400000, guid: c31c40382af2aea48bb99df39ca1330d, type: 2}
   - Position: {x: 160, y: 180}
     State: {fileID: 11400000, guid: c85cb7d2e06c4c04eaf222688dcf9148, type: 2}
   - Position: {x: 520, y: 80}
@@ -25,8 +27,6 @@ MonoBehaviour:
     State: {fileID: 11400000, guid: 0a7108d9d41668648a5ed6f17cda9d7e, type: 2}
   - Position: {x: 520, y: 330}
     State: {fileID: 11400000, guid: 413246e9c5ad21449bd917f3be8d5579, type: 2}
-  - Position: {x: 160, y: -180}
-    State: {fileID: 11400000, guid: c31c40382af2aea48bb99df39ca1330d, type: 2}
   - Position: {x: 520, y: -180}
     State: {fileID: 11400000, guid: b501f515a4bdd0f43aae8f75b345d1f8, type: 2}
   - Position: {x: 860, y: -180}

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Bram Voss - Forest Toll
   m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.DialogGraph
   Nodes:
-  - Position: {x: 250, y: 180}
+  - Position: {x: 192.74512, y: 118.039215}
     Phrase: {fileID: 11400000, guid: a162aecd7d5f41d42affb328d6ec48a4, type: 2}
   - Position: {x: 650, y: 80}
     Phrase: {fileID: 11400000, guid: ebb3718b407cb914bae38dc5722dda38, type: 2}
@@ -41,13 +41,13 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: 7c78dbfb0ed144e8a406914b2d8ee4a2, type: 2}
   - Position: {x: 1050, y: 1060}
     Phrase: {fileID: 11400000, guid: b13779e32bed4cedb004c87dc521af95, type: 2}
-  - Position: {x: 1451.9048, y: 1567.6189}
+  - Position: {x: 1430.0864, y: 1428.225}
     Phrase: {fileID: 11400000, guid: 610065c556424f49acc7c7ebb9066e95, type: 2}
-  - Position: {x: 1974.762, y: 1064.7618}
+  - Position: {x: 1894.7617, y: 1646.58}
     Phrase: {fileID: 11400000, guid: 11000000000000000000000000000024, type: 2}
-  - Position: {x: 2311.9048, y: 937.1428}
+  - Position: {x: 2435.541, y: 921.3853}
     Phrase: {fileID: 11400000, guid: 11000000000000000000000000000025, type: 2}
-  - Position: {x: 330.19604, y: 826.2745}
+  - Position: {x: 204.48177, y: 871.9888}
     Phrase: {fileID: 11400000, guid: e7122b51ff1c4fe4a9a4a1505bf02881, type: 2}
   - Position: {x: 1000, y: 900}
     Phrase: {fileID: 11400000, guid: e7132b51ff1c4fe4a9a4a1505bf02881, type: 2}
@@ -55,7 +55,7 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: e7142b51ff1c4fe4a9a4a1505bf02881, type: 2}
   - Position: {x: 1000, y: 1080}
     Phrase: {fileID: 11400000, guid: e7152b51ff1c4fe4a9a4a1505bf02881, type: 2}
-  - Position: {x: 600, y: 1260}
+  - Position: {x: 1021.8182, y: 1874.5454}
     Phrase: {fileID: 11400000, guid: e7162b51ff1c4fe4a9a4a1505bf02881, type: 2}
   - Position: {x: 1000, y: 1260}
     Phrase: {fileID: 11400000, guid: e7172b51ff1c4fe4a9a4a1505bf02881, type: 2}

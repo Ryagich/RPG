@@ -28,7 +28,10 @@ namespace StateMachine.Graph.Editor
         private readonly Dictionary<Node, Rect> nodeRects = new();
         private readonly Dictionary<State, Node> stateToNodeLookup = new();
         private readonly Dictionary<Transition, CachedConnectionRoute> connectionRouteCache = new();
+        private readonly Dictionary<Transition, CachedConnectionTangents> retainedConnectionTangentsCache = new();
+        private readonly GraphEditorConnectionAnchorRegistry<Transition> transitionPickerAnchors = new();
         private readonly GraphEditorNodeLayoutSynchronizer<Node> nodeLayoutSynchronizer = new();
+        private readonly List<Rect> connectionObstacleRects = new();
 
         private bool isSelectingTargetNode;
         private bool isControlsPanelExpanded = true;
@@ -244,6 +247,7 @@ namespace StateMachine.Graph.Editor
         {
             nodeRects.Clear();
             stateToNodeLookup.Clear();
+            transitionPickerAnchors.Clear();
         }
 
         IEnumerable<Node> GetRetainedGraphNodes()
@@ -261,20 +265,26 @@ namespace StateMachine.Graph.Editor
 
             foreach (Node sourceNode in currentGraph.Nodes)
             {
-                if (sourceNode?.State == null)
+                foreach (RetainedGraphConnection<Node, Transition> connection in GetRetainedGraphConnectionsFrom(sourceNode))
                 {
-                    continue;
+                    yield return connection;
                 }
+            }
+        }
 
-                EnsureCollections(sourceNode.State);
-                foreach (Transition transition in sourceNode.State.Transitions)
+        IEnumerable<RetainedGraphConnection<Node, Transition>> GetRetainedGraphConnectionsFrom(Node sourceNode)
+        {
+            if (sourceNode?.State == null)
+            {
+                yield break;
+            }
+
+            EnsureCollections(sourceNode.State);
+            foreach (Transition transition in sourceNode.State.Transitions)
+            {
+                if (transition?.TargetState != null &&
+                    stateToNodeLookup.TryGetValue(transition.TargetState, out Node targetNode))
                 {
-                    if (transition?.TargetState == null ||
-                        !stateToNodeLookup.TryGetValue(transition.TargetState, out Node targetNode))
-                    {
-                        continue;
-                    }
-
                     yield return new RetainedGraphConnection<Node, Transition>(sourceNode, targetNode, transition);
                 }
             }
@@ -340,6 +350,7 @@ namespace StateMachine.Graph.Editor
 
             pendingTransition.TargetState = node.State;
             MarkDirty(pendingTransition);
+            toolkitCanvas?.RebuildConnectionsGradually();
             CancelTargetSelection(false);
             return true;
         }
@@ -363,39 +374,23 @@ namespace StateMachine.Graph.Editor
             Rect targetRect,
             bool isDragging)
         {
-            (Vector2 startPosition, Vector2 endPosition) = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect);
-            Vector2[] routePoints;
-
-            if (isDragging)
+            (Vector2 defaultStart, Vector2 endPosition) = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect);
+            Vector2 startPosition = transitionPickerAnchors.ResolvePickerPoint(transition, sourceRect, defaultStart);
+            Vector2 startTangent = startPosition + GraphConnectionGeometry.GetDirectionForRectPoint(sourceRect, startPosition) * 60f;
+            Vector2 endTangent = endPosition + GraphConnectionGeometry.GetDirectionForRectPoint(targetRect, endPosition) * 60f;
+            if (!isDragging)
             {
-                routePoints = new[] { startPosition, endPosition };
-            }
-            else
-            {
-                routePoints = GetOrBuildConnectionRoute(transition, startPosition, sourceRect, targetRect);
+                (startTangent, endTangent) = GetOrBuildRetainedConnectionTangents(
+                    transition, startPosition, endPosition, sourceRect, targetRect, sourceNode, targetNode);
             }
 
-            if (routePoints == null || routePoints.Length < 2)
-            {
-                return;
-            }
-
-            Color color = GetConnectionColor(sourceNode, targetNode);
-            painter.strokeColor = color;
-            painter.lineWidth = 4f;
-            painter.BeginPath();
-            painter.MoveTo(routePoints[0]);
-            for (int index = 1; index < routePoints.Length; index++)
-            {
-                painter.LineTo(routePoints[index]);
-            }
-
-            painter.Stroke();
-
-            Vector2 end = routePoints[routePoints.Length - 1];
-            Vector2 direction = end - routePoints[routePoints.Length - 2];
-            painter.fillColor = color;
-            GraphConnectionDrawing.DrawArrow(painter, end, direction);
+            GraphConnectionDrawing.DrawBezier(
+                painter,
+                startPosition,
+                startTangent,
+                endTangent,
+                endPosition,
+                GetConnectionColor(sourceNode, targetNode));
         }
 
         private void DrawEmptyState()
@@ -711,6 +706,7 @@ namespace StateMachine.Graph.Editor
         private void InvalidateConnectionRouteCache()
         {
             connectionRouteCache.Clear();
+            retainedConnectionTangentsCache.Clear();
             connectionLayoutVersion++;
         }
 
@@ -795,7 +791,8 @@ namespace StateMachine.Graph.Editor
                         continue;
                     }
 
-                    Vector2 startPos = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect).Start;
+                    Vector2 defaultStart = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect).Start;
+                    Vector2 startPos = transitionPickerAnchors.ResolvePickerPoint(transition, sourceRect, defaultStart);
 
                     Handles.color = GetConnectionColor(node, targetNode);
                     Vector2[] routePoints = GetOrBuildConnectionRoute(transition, startPos, sourceRect, targetRect);
@@ -830,6 +827,49 @@ namespace StateMachine.Graph.Editor
                 targetRect,
                 routePoints);
             return routePoints;
+        }
+
+        private (Vector2 StartTangent, Vector2 EndTangent) GetOrBuildRetainedConnectionTangents(
+            Transition transition,
+            Vector2 startPosition,
+            Vector2 endPosition,
+            Rect sourceRect,
+            Rect targetRect,
+            Node sourceNode,
+            Node targetNode)
+        {
+            if (retainedConnectionTangentsCache.TryGetValue(transition, out CachedConnectionTangents cachedTangents) &&
+                cachedTangents.LayoutVersion == connectionLayoutVersion &&
+                GraphConnectionGeometry.ApproximatelyEqual(cachedTangents.StartPosition, startPosition) &&
+                GraphConnectionGeometry.ApproximatelyEqual(cachedTangents.SourceRect, sourceRect) &&
+                GraphConnectionGeometry.ApproximatelyEqual(cachedTangents.TargetRect, targetRect))
+            {
+                return (cachedTangents.StartTangent, cachedTangents.EndTangent);
+            }
+
+            connectionObstacleRects.Clear();
+            foreach (KeyValuePair<Node, Rect> pair in nodeRects)
+            {
+                if (!ReferenceEquals(pair.Key, sourceNode) && !ReferenceEquals(pair.Key, targetNode))
+                {
+                    connectionObstacleRects.Add(GraphConnectionGeometry.Expand(pair.Value, 8f));
+                }
+            }
+
+            (Vector2 startTangent, Vector2 endTangent) = GraphBezierConnectionRouter.ResolveTangents(
+                startPosition,
+                endPosition,
+                sourceRect,
+                targetRect,
+                connectionObstacleRects);
+            retainedConnectionTangentsCache[transition] = new CachedConnectionTangents(
+                connectionLayoutVersion,
+                startPosition,
+                sourceRect,
+                targetRect,
+                startTangent,
+                endTangent);
+            return (startTangent, endTangent);
         }
 
         private void HandleConnectionHighlightSelection(Event currentEvent)
@@ -887,7 +927,7 @@ namespace StateMachine.Graph.Editor
         {
             const float clearance = 28f;
 
-            ConnectionPort startPort = GetSourcePort(sourceRect, targetRect, clearance);
+            ConnectionPort startPort = GetSourcePort(sourceRect, startPos, clearance);
             ConnectionPort endPort = GetTargetPort(sourceRect, targetRect, clearance);
 
             List<Rect> obstacles = allNodeRects
@@ -1187,11 +1227,11 @@ namespace StateMachine.Graph.Editor
             }
         }
 
-        private static ConnectionPort GetSourcePort(Rect sourceRect, Rect targetRect, float clearance)
+        private static ConnectionPort GetSourcePort(Rect sourceRect, Vector2 startPos, float clearance)
         {
-            Vector2 edgePoint = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect).Start;
-            Vector2 direction = GraphConnectionGeometry.GetDirectionForRectPoint(sourceRect, edgePoint);
-            return new ConnectionPort(edgePoint, edgePoint + direction * clearance);
+            Vector2 borderPoint = GraphConnectionGeometry.GetNearestBorderPoint(sourceRect, startPos);
+            Vector2 direction = GraphConnectionGeometry.GetDirectionForRectPoint(sourceRect, borderPoint);
+            return new ConnectionPort(startPos, borderPoint + direction * clearance);
         }
 
         private static ConnectionPort GetTargetPort(Rect sourceRect, Rect targetRect, float clearance)
@@ -1342,6 +1382,32 @@ namespace StateMachine.Graph.Editor
             public Rect SourceRect { get; }
             public Rect TargetRect { get; }
             public Vector2[] RoutePoints { get; }
+        }
+
+        private readonly struct CachedConnectionTangents
+        {
+            public CachedConnectionTangents(
+                int layoutVersion,
+                Vector2 startPosition,
+                Rect sourceRect,
+                Rect targetRect,
+                Vector2 startTangent,
+                Vector2 endTangent)
+            {
+                LayoutVersion = layoutVersion;
+                StartPosition = startPosition;
+                SourceRect = sourceRect;
+                TargetRect = targetRect;
+                StartTangent = startTangent;
+                EndTangent = endTangent;
+            }
+
+            public int LayoutVersion { get; }
+            public Vector2 StartPosition { get; }
+            public Rect SourceRect { get; }
+            public Rect TargetRect { get; }
+            public Vector2 StartTangent { get; }
+            public Vector2 EndTangent { get; }
         }
 
         private readonly struct ConnectionPort
@@ -1599,6 +1665,7 @@ namespace StateMachine.Graph.Editor
                 GUI.backgroundColor = missingLink ? DangerButtonColor : LinkButtonColor;
                 bool pickPressed = DrawMiniButton("O", GUILayout.Width(22f));
                 GUI.backgroundColor = previousBackground;
+                transitionPickerAnchors.Record(transition, GUILayoutUtility.GetLastRect());
 
                 if (pickPressed)
                 {
@@ -1918,7 +1985,10 @@ namespace StateMachine.Graph.Editor
             }
 
             string prefix = IsStartNode(node) ? "[Start] " : string.Empty;
-            return prefix + node.State.name;
+            string stateName = string.IsNullOrWhiteSpace(node.State.Name)
+                ? node.State.name
+                : node.State.Name;
+            return prefix + stateName;
         }
 
         private void CancelTargetSelection(bool repaint = true)

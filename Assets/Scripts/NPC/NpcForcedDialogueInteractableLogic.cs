@@ -31,7 +31,7 @@ namespace NPC
         private IDisposable gameModeChangedSubscription;
 
         public NpcForcedDialogueInteractableLogic(
-            [Key("Forced Dialogue Interactable")] Interactable.Interactable interactable,
+            Interactable.Interactable interactable,
             NpcForcedDialogueAvailability availability,
             NpcDialogueController dialogueController,
             IInventory inventory,
@@ -69,48 +69,39 @@ namespace NPC
                 return;
             }
 
-            interactable.Interacted += OnInteracted;
-            interactable.EndInteracted += OnEndInteracted;
             dialogueController.DialogueInterrupted += OnDialogueInterrupted;
             gameModeChangedSubscription = gameModeChangedSubscriber.Subscribe(OnGameModeChanged);
         }
 
         public void Dispose()
         {
-            if (interactable != null)
-            {
-                interactable.Interacted -= OnInteracted;
-                interactable.EndInteracted -= OnEndInteracted;
-            }
-
             dialogueController.DialogueInterrupted -= OnDialogueInterrupted;
             gameModeChangedSubscription?.Dispose();
             gameModeChangedSubscription = null;
         }
 
-        private void OnInteracted(LifetimeScope interactorScope)
-        {
-            TryOpenForcedDialogue(interactorScope);
-        }
-
-        private void OnEndInteracted(LifetimeScope _)
+        public bool EndInteraction()
         {
             DialogueFlowTrace.ForcedZoneState("end-interacted", interactable);
             availability.NotifyInteractorLeftZone();
 
-            if (dialogueContext.CurrentTarget != interactable || !dialogueContext.CanExitDialogue)
+            if (dialogueContext.CurrentTarget != interactable ||
+                !dialogueContext.IsForcedDialogue ||
+                !dialogueContext.CanExitDialogue)
             {
-                return;
+                return dialogueContext.CurrentTarget == interactable && dialogueContext.IsForcedDialogue;
             }
 
             dialogueContext.Clear();
             dialogueController.EndDialogue();
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Game));
+            return true;
         }
 
         private void OnGameModeChanged(GameModeChangedMessage message)
         {
             if (message.GameMode != GameMode.Game || dialogueContext.CurrentTarget != interactable ||
+                !dialogueContext.IsForcedDialogue ||
                 !dialogueContext.CanExitDialogue)
             {
                 return;
@@ -134,7 +125,7 @@ namespace NPC
             availability.AllowImmediateNextDialogue();
         }
 
-        private bool TryOpenForcedDialogue(LifetimeScope interactorScope)
+        public bool TryOpenForcedDialogue(LifetimeScope interactorScope)
         {
             if (!availability.TryGetForcedPhrase(interactorScope, out DialogPhrase forcedPhrase))
             {
@@ -164,7 +155,7 @@ namespace NPC
 
         private void OnDialogueInterrupted()
         {
-            if (dialogueContext.CurrentTarget != interactable)
+            if (dialogueContext.CurrentTarget != interactable || !dialogueContext.IsForcedDialogue)
             {
                 return;
             }

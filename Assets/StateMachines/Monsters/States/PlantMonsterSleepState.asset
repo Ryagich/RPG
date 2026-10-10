@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf29600a98724efea7cca5403fff2012, type: 3}
+  m_Name: PlantMonsterSleepState
+  m_EditorClassIdentifier: Assembly-CSharp::StateMachine.Graph.Model.State
+  <Name>k__BackingField: Return to planted sleep
+  Behaviours:
+  - {fileID: 11400000, guid: 41be14d4367ee93438ed4d6878e355ce, type: 2}
+  Transitions:
+  - {fileID: 11400000, guid: 8f1e4b4526771ce4fa02553bbd6faf1b, type: 2}
+  - {fileID: 11400000, guid: a48c2734b82163a4793e8183b87394eb, type: 2}
+  - {fileID: 11400000, guid: 28aa4ccd50b17284ea933a3037a985c8, type: 2}
+  references:
+    version: 2
+    RefIds: []

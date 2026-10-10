@@ -186,10 +186,7 @@ namespace Inventory
         public void LockMovementFromAnimationEvent()
         {
             isCombatActionLocked = true;
-            if (IsEvasionInProgress())
-            {
-                targetLockController?.SetAutomaticFacingPaused(this, true);
-            }
+            targetLockController?.SetAutomaticFacingPaused(this, true);
 
             playerMovement?.ChangeState(false);
             playerAnimationController?.SetLocomotionLocked(true);
@@ -206,10 +203,7 @@ namespace Inventory
                 playerMovement?.ChangeState(true);
             }
 
-            if (completedEvasion)
-            {
-                targetLockController?.SetAutomaticFacingPaused(this, false);
-            }
+            targetLockController?.SetAutomaticFacingPaused(this, false);
 
             playerAnimationController?.SetLocomotionLocked(false);
             if (completedEvasion)

@@ -14,6 +14,7 @@ namespace TargetLock
     public sealed class TargetLockController : IStartable, ITickable, IDisposable
     {
         private const float DirectionEpsilon = 0.001f;
+        private const int LineOfSightHitBufferSize = 16;
 
         private readonly TargetLockConfig config;
         private readonly PlayerMovementConfig playerMovementConfig;
@@ -27,10 +28,15 @@ namespace TargetLock
         private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
         private readonly CompositeDisposable disposables = new();
         private readonly HashSet<object> automaticFacingPauseSources = new();
+        private readonly RaycastHit[] lineOfSightHits = new RaycastHit[LineOfSightHitBufferSize];
+        // Target acquisition runs from Tick while the player has no target. Reuse this list so
+        // an empty lock does not allocate once per frame, and score each candidate only once.
+        private readonly List<TargetLockTarget> scoredCandidates = new();
 
         private GameMode currentGameMode = GameMode.Game;
         private TargetLockControlMode observedControlMode = TargetLockControlMode.Off;
         private float invalidCurrentTargetTime;
+        private float nextAutomaticTargetSearchTime;
 
         public TargetLockController(
             TargetLockConfig config,
@@ -170,12 +176,15 @@ namespace TargetLock
 
             if (CurrentTarget == null || !IsMaintainedTarget(CurrentTarget))
             {
-                if (!TryLockBestTarget(Mode))
+                if (!TryLockBestTarget(Mode, force: true))
                 {
                     return false;
                 }
             }
 
+            // This is a one-shot alignment before the animation starts. A per-frame turn
+            // speed would only rotate for a single frame, after which LockMovement pauses
+            // automatic facing and leaves the character visibly under-rotated.
             return RotateVisualTowardsTarget(Mode == TargetLockMode.Hard);
         }
 
@@ -298,7 +307,7 @@ namespace TargetLock
             {
                 Mode = nextMode;
                 invalidCurrentTargetTime = 0f;
-                TryLockBestTarget(nextMode);
+                TryLockBestTarget(nextMode, force: true);
                 UpdateCameraTarget();
                 return;
             }
@@ -335,11 +344,6 @@ namespace TargetLock
                     continue;
                 }
 
-                if (!TryGetScore(candidate, out _))
-                {
-                    continue;
-                }
-
                 var viewport = camera.WorldToViewportPoint(candidate.AimPosition);
                 var delta = (viewport.x - currentViewport.x) * direction;
 
@@ -364,12 +368,20 @@ namespace TargetLock
             Lock(selected != null ? selected : wrapped, Mode);
         }
 
-        private bool TryLockBestTarget(TargetLockMode mode)
+        private bool TryLockBestTarget(TargetLockMode mode, bool force = false)
         {
             if (mode == TargetLockMode.Disabled)
             {
                 return false;
             }
+
+            if (!force && Time.time < nextAutomaticTargetSearchTime)
+            {
+                return false;
+            }
+
+            var interval = config != null ? config.TargetAcquisitionInterval : 0.12f;
+            nextAutomaticTargetSearchTime = Time.time + Mathf.Max(0.02f, interval);
 
             var candidates = GetCandidates();
             TargetLockTarget bestTarget = null;
@@ -377,10 +389,7 @@ namespace TargetLock
 
             foreach (var candidate in candidates)
             {
-                if (!TryGetScore(candidate, out var score))
-                {
-                    continue;
-                }
+                TryGetScore(candidate, out var score);
 
                 if (score < bestScore)
                 {
@@ -400,17 +409,17 @@ namespace TargetLock
 
         private List<TargetLockTarget> GetCandidates()
         {
-            var candidates = new List<TargetLockTarget>(targetRegistry.Targets.Count);
+            scoredCandidates.Clear();
 
             foreach (var target in targetRegistry.Targets)
             {
-                if (IsSearchCandidate(target))
+                if (TryGetScore(target, out _))
                 {
-                    candidates.Add(target);
+                    scoredCandidates.Add(target);
                 }
             }
 
-            return candidates;
+            return scoredCandidates;
         }
 
         private bool TryGetScore(TargetLockTarget target, out float score)
@@ -418,6 +427,11 @@ namespace TargetLock
             score = 0f;
 
             if (camera == null)
+            {
+                return false;
+            }
+
+            if (!IsValidTarget(target) || GetPlayerDistance(target) > config.SearchRadius)
             {
                 return false;
             }
@@ -436,7 +450,8 @@ namespace TargetLock
                 return false;
             }
 
-            if (GetPlayerAngle(target) > config.MaxPlayerAngle)
+            var playerAngle = GetPlayerAngle(target);
+            if (playerAngle > config.MaxPlayerAngle)
             {
                 return false;
             }
@@ -450,19 +465,12 @@ namespace TargetLock
                 new Vector2(viewport.x, viewport.y),
                 new Vector2(0.5f, 0.5f));
             var distanceNormalized = Mathf.Clamp01(GetPlayerDistance(target) / Mathf.Max(config.SearchRadius, 0.01f));
-            var facingNormalized = Mathf.Clamp01(GetPlayerAngle(target) / Mathf.Max(config.MaxPlayerAngle, 0.01f));
+            var facingNormalized = Mathf.Clamp01(playerAngle / Mathf.Max(config.MaxPlayerAngle, 0.01f));
 
             score = centerDistance * config.CenterWeight
                   + distanceNormalized * config.DistanceWeight
                   + facingNormalized * config.PlayerFacingWeight;
             return true;
-        }
-
-        private bool IsSearchCandidate(TargetLockTarget target)
-        {
-            return IsValidTarget(target)
-                && GetPlayerDistance(target) <= config.SearchRadius
-                && HasLineOfSight(target);
         }
 
         private bool IsValidTarget(TargetLockTarget target)
@@ -529,36 +537,53 @@ namespace TargetLock
                 return true;
             }
 
-            var hits = Physics.RaycastAll(
+            var hitCount = Physics.RaycastNonAlloc(
                 origin,
                 direction / distance,
+                lineOfSightHits,
                 distance,
                 config.LineOfSightMask,
                 QueryTriggerInteraction.Ignore);
-            Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
-            foreach (var hit in hits)
+            if (hitCount == lineOfSightHits.Length)
             {
-                var hitTransform = hit.transform;
-                if (hitTransform == null)
-                {
-                    continue;
-                }
-
-                if (hitTransform == playerTransform || hitTransform.IsChildOf(playerTransform))
-                {
-                    continue;
-                }
-
-                if (hitTransform == target.transform || hitTransform.IsChildOf(target.transform))
-                {
-                    return true;
-                }
-
-                return false;
+                // Preserve correctness in unusually dense collider stacks. This path allocates,
+                // but only when the fixed reusable buffer is insufficient.
+                var overflowHits = Physics.RaycastAll(
+                    origin,
+                    direction / distance,
+                    distance,
+                    config.LineOfSightMask,
+                    QueryTriggerInteraction.Ignore);
+                return IsFirstRelevantHitTarget(target, overflowHits, overflowHits.Length);
             }
 
-            return true;
+            return IsFirstRelevantHitTarget(target, lineOfSightHits, hitCount);
+        }
+
+        private bool IsFirstRelevantHitTarget(TargetLockTarget target, RaycastHit[] hits, int hitCount)
+        {
+            var closestDistance = float.PositiveInfinity;
+            Transform closestTransform = null;
+            for (var index = 0; index < hitCount; index++)
+            {
+                var hit = hits[index];
+                var hitTransform = hit.transform;
+                if (hitTransform == null
+                 || hitTransform == playerTransform
+                 || hitTransform.IsChildOf(playerTransform)
+                 || hit.distance >= closestDistance)
+                {
+                    continue;
+                }
+
+                closestDistance = hit.distance;
+                closestTransform = hitTransform;
+            }
+
+            return closestTransform == null
+                   || closestTransform == target.transform
+                   || closestTransform.IsChildOf(target.transform);
         }
 
         private void Lock(TargetLockTarget target, TargetLockMode mode)
@@ -584,7 +609,7 @@ namespace TargetLock
 
             Mode = mode;
             invalidCurrentTargetTime = 0f;
-            if (!TryLockBestTarget(mode))
+            if (!TryLockBestTarget(mode, force: true))
             {
                 UpdateCameraTarget();
             }
@@ -602,6 +627,7 @@ namespace TargetLock
             CurrentTarget = null;
             Mode = TargetLockMode.Disabled;
             invalidCurrentTargetTime = 0f;
+            nextAutomaticTargetSearchTime = 0f;
             cameraMotor.SetTargetLockTarget(null);
         }
 
@@ -611,6 +637,14 @@ namespace TargetLock
         }
 
         private bool RotateVisualTowardsTarget(bool immediate)
+        {
+            var maxDegrees = immediate
+                ? float.PositiveInfinity
+                : playerMovementConfig.WalkRotationSpeed * Time.deltaTime;
+            return RotateVisualTowardsTarget(maxDegrees);
+        }
+
+        private bool RotateVisualTowardsTarget(float maxDegrees)
         {
             if (visualTransform == null || CurrentTarget == null)
             {
@@ -626,12 +660,10 @@ namespace TargetLock
             }
 
             var targetRotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
-            visualTransform.rotation = immediate
-                ? targetRotation
-                : Quaternion.RotateTowards(
-                    visualTransform.rotation,
-                    targetRotation,
-                    playerMovementConfig.WalkRotationSpeed * Time.deltaTime);
+            visualTransform.rotation = Quaternion.RotateTowards(
+                visualTransform.rotation,
+                targetRotation,
+                Mathf.Max(0f, maxDegrees));
             return true;
         }
     }

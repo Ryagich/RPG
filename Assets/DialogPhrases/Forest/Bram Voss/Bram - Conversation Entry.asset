@@ -29,7 +29,7 @@ MonoBehaviour:
   questAnswer:
     text:
       m_TableReference:
-        m_TableCollectionName:
+        m_TableCollectionName: 
       m_TableEntryReference:
         m_KeyId: 0
         m_Key: 
@@ -47,7 +47,7 @@ MonoBehaviour:
   conversationAnswer:
     text:
       m_TableReference:
-        m_TableCollectionName:
+        m_TableCollectionName: 
       m_TableEntryReference:
         m_KeyId: 0
         m_Key: 
@@ -65,7 +65,7 @@ MonoBehaviour:
   conversationReturnAnswer:
     text:
       m_TableReference:
-        m_TableCollectionName:
+        m_TableCollectionName: 
       m_TableEntryReference:
         m_KeyId: 0
         m_Key: 
@@ -83,7 +83,7 @@ MonoBehaviour:
   dialogueExitAnswer:
     text:
       m_TableReference:
-        m_TableCollectionName:
+        m_TableCollectionName: 
       m_TableEntryReference:
         m_KeyId: 0
         m_Key: 
@@ -99,7 +99,39 @@ MonoBehaviour:
     conditions: []
   hasGameplayEvents: 0
   gameplayEvents: []
-  answers: []
+  answers:
+  - text:
+      m_TableReference:
+        m_TableCollectionName: 
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 0}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 0
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 0
+    conditions: []
+  - text:
+      m_TableReference:
+        m_TableCollectionName: 
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 11400000, guid: ffe4b39caba076d4fa81ce303452b9f6, type: 2}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 0
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 0
+    conditions: []
   references:
     version: 2
     RefIds: []

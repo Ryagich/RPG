@@ -24,7 +24,8 @@ namespace NPC
         private readonly Animator animator;
         private readonly NpcNavMeshController navMeshController;
         private readonly NpcVision npcVision;
-        private readonly NpcVisionSensor npcVisionSensor;
+        private readonly NpcItemVisionSensor itemVisionSensor;
+        private readonly CharacterVisionSensor characterVisionSensor;
         private readonly NpcItemInterest itemInterest;
         private readonly NpcInventoryPlanner inventoryPlanner;
         private readonly NpcItemPickupService itemPickupService;
@@ -66,7 +67,8 @@ namespace NPC
             Animator animator,
             NpcNavMeshController navMeshController,
             NpcVision npcVision,
-            NpcVisionSensor npcVisionSensor,
+            NpcItemVisionSensor itemVisionSensor,
+            CharacterVisionSensor characterVisionSensor,
             NpcItemInterest itemInterest,
             NpcInventoryPlanner inventoryPlanner,
             NpcItemPickupService itemPickupService,
@@ -89,7 +91,8 @@ namespace NPC
             this.animator = animator;
             this.navMeshController = navMeshController;
             this.npcVision = npcVision;
-            this.npcVisionSensor = npcVisionSensor;
+            this.itemVisionSensor = itemVisionSensor;
+            this.characterVisionSensor = characterVisionSensor;
             this.itemInterest = itemInterest;
             this.inventoryPlanner = inventoryPlanner;
             this.itemPickupService = itemPickupService;
@@ -124,7 +127,8 @@ namespace NPC
             context.SetService(animator);
             context.SetService(navMeshController);
             context.SetService(npcVision);
-            context.SetService(npcVisionSensor);
+            context.SetService(itemVisionSensor);
+            context.SetService(characterVisionSensor);
             context.SetService(itemInterest);
             context.SetService(inventoryPlanner);
             context.SetService(itemPickupService);

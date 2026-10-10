@@ -21,7 +21,7 @@ using Saves;
 
 namespace Container
 {
-    public class PlayerLifetimeScope : LifetimeScope
+    public class PlayerLifetimeScope : LifetimeScope, IFactionMember
     {
         private const string CorpseZoneName = "Corpse Interactable Zone";
 

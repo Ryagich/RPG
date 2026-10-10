@@ -19,6 +19,7 @@ MonoBehaviour:
   <MaxPlayerAngle>k__BackingField: 135
   <BreakScreenAngle>k__BackingField: 135
   <LostTargetGraceSeconds>k__BackingField: 0.45
+  <TargetAcquisitionInterval>k__BackingField: 0.12
   <LineOfSightOriginOffset>k__BackingField: {x: 0, y: 1.4, z: 0}
   <LineOfSightMask>k__BackingField:
     serializedVersion: 2

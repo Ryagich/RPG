@@ -60,6 +60,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Merchant Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 7853551085710077333, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
+      propertyPath: m_Radius
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 8581743272927355521, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
       propertyPath: canTalk
       value: 1
@@ -77,17 +81,6 @@ PrefabInstance:
       insertIndex: 1
       addedObject: {fileID: 9143284009748708437}
   m_SourcePrefab: {fileID: 100100000, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
---- !u!114 &2415590476626714061 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 712188980136653328, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
-  m_PrefabInstance: {fileID: 2911527302575222749}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea093bae76d94729bf3a705a563bf7cf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Interactable.Interactable
 --- !u!1 &4685570308425216345 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7593543931042045572, guid: b9239e3ae40a52a4f82d0e45233c46c2, type: 3}
@@ -109,7 +102,8 @@ MonoBehaviour:
     TypeName: Container.Game.GameLifetimeScope
   autoRun: 0
   autoInjectGameObjects: []
-  persistentCharacterId: 
+  persistentCharacterId: cbd91fcaf2f14f91a15c1a34fea62d70
+  participatesInPersistence: 1
   characterInfo: {fileID: 0}
   inventoryConfig: {fileID: 0}
   defaultVisualConfig: {fileID: 11400000, guid: d06f3e2d4c1b7256a789abcdef012345, type: 2}
@@ -120,8 +114,6 @@ MonoBehaviour:
   consumeAdditionalStatsOverTime: 0
   itemSetConfigOverride: {fileID: 0}
   combatProfileOverride: {fileID: 0}
-  dialogueInteractionRadius: 1.8
-  forcedDialogueInteractable: {fileID: 2415590476626714061}
   currentHp: 0
   currentState: Not Started
   stockRules:

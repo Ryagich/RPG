@@ -20,9 +20,12 @@ namespace EditorTools
         private readonly Func<TNode, bool> isDraggingNode;
         private readonly IRetainedGraphCanvasConnectionRenderer<TNode, TConnection> connectionRenderer;
         private readonly List<int> candidateConnectionIndices = new();
+        private readonly List<TNode> sourceNodes = new();
+        private readonly HashSet<TNode> revealedSourceNodes = new();
         private TNode excludedNode;
         private TNode includedNode;
         private bool includesOnlyNode;
+        private int nextSourceNodeIndex;
 
         public RetainedGraphConnectionLayer(
             IReadOnlyList<RetainedGraphConnection<TNode, TConnection>> connections,
@@ -39,6 +42,13 @@ namespace EditorTools
             this.isDraggingNode = isDraggingNode;
             this.connectionRenderer = connectionRenderer;
             spatialIndex = new GraphConnectionSpatialIndex<TNode, TConnection>(connections, getNodeRect);
+            foreach (RetainedGraphConnection<TNode, TConnection> connection in connections)
+            {
+                if (connection.Source != null && !sourceNodes.Contains(connection.Source))
+                {
+                    sourceNodes.Add(connection.Source);
+                }
+            }
             name = "retained-graph-connections";
             pickingMode = PickingMode.Ignore;
             style.position = Position.Absolute;
@@ -52,6 +62,28 @@ namespace EditorTools
         public bool IsConnectedTo(TNode node) => spatialIndex.IsConnectedTo(node);
 
         public void UpdateConnectionsFor(TNode node) => spatialIndex.UpdateConnectionsFor(node);
+
+        public bool RevealNextSourceNode()
+        {
+            if (nextSourceNodeIndex >= sourceNodes.Count)
+            {
+                return false;
+            }
+
+            revealedSourceNodes.Add(sourceNodes[nextSourceNodeIndex++]);
+            MarkDirtyRepaint();
+            return nextSourceNodeIndex < sourceNodes.Count;
+        }
+
+        public void RevealAllSourceNodes()
+        {
+            foreach (TNode sourceNode in sourceNodes)
+            {
+                revealedSourceNodes.Add(sourceNode);
+            }
+
+            nextSourceNodeIndex = sourceNodes.Count;
+        }
 
         public void ExcludeNode(TNode node)
         {
@@ -95,6 +127,10 @@ namespace EditorTools
             foreach (int index in candidateConnectionIndices)
             {
                 RetainedGraphConnection<TNode, TConnection> connection = connections[index];
+                if (!revealedSourceNodes.Contains(connection.Source))
+                {
+                    continue;
+                }
                 bool isConnectedToExcludedNode = excludedNode != null &&
                     (ReferenceEquals(connection.Source, excludedNode) || ReferenceEquals(connection.Target, excludedNode));
                 bool isConnectedToIncludedNode = includedNode != null &&

@@ -1,0 +1,9 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7832425705348469e4c719f701b8f78, type: 3}
+  m_Name: PlantMonsterSearchConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Monsters.PlantMonsterSearchConfig
+  <ReachedDistance>k__BackingField: 1.2

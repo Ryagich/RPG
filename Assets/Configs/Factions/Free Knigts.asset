@@ -17,7 +17,7 @@ MonoBehaviour:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
     m_TableEntryReference:
-      m_KeyId: 40000000000000002
+      m_KeyId: 40000000000000006
       m_Key: 
     m_FallbackState: 0
     m_WaitForCompletion: 0

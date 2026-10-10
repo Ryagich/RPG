@@ -9,7 +9,10 @@ namespace NPC
     {
         private const float DefaultSampleRadius = 2f;
         private const float VelocityThreshold = 0.01f;
-        private const float DestinationReuseDistance = 0.08f;
+        // Keep the same bounded path-refresh contract as monster navigation. Agents may ask
+        // for a moving target every tick, but full NavMesh path calculation is not per-frame.
+        private const float DestinationReuseDistance = 0.25f;
+        private const float PathRefreshInterval = 0.15f;
         private const string DirectionXParameter = "DirectionX";
         private const string DirectionYParameter = "DirectionY";
         private const string IsRunParameter = "IsRun";
@@ -27,6 +30,7 @@ namespace NPC
         private bool hasMoveRequest;
         private Vector3 lastRequestedDestination;
         private float lastRequestedStoppingDistance;
+        private float nextPathRefreshTime;
 
         public NpcNavMeshController(NavMeshAgent agent, CharacterController characterController, Animator animator)
         {
@@ -112,6 +116,14 @@ namespace NPC
                 return false;
             }
 
+            var resolvedStoppingDistance = Mathf.Max(0f, stoppingDistance ?? defaultStoppingDistance);
+            if (CanReuseCurrentPath(destination, resolvedStoppingDistance))
+            {
+                agent.isStopped = false;
+                agent.stoppingDistance = resolvedStoppingDistance;
+                return true;
+            }
+
             if (!NavMesh.SamplePosition(destination, out var hit, sampleRadius, NavMesh.AllAreas))
             {
                 return false;
@@ -126,14 +138,6 @@ namespace NPC
                 return false;
             }
 
-            var resolvedStoppingDistance = Mathf.Max(0f, stoppingDistance ?? defaultStoppingDistance);
-            if (CanReuseCurrentPath(hit.position, resolvedStoppingDistance))
-            {
-                agent.isStopped = false;
-                agent.stoppingDistance = resolvedStoppingDistance;
-                return true;
-            }
-
             agent.isStopped = false;
             agent.stoppingDistance = resolvedStoppingDistance;
             agent.updatePosition = characterController == null;
@@ -142,8 +146,9 @@ namespace NPC
             if (didSetPath)
             {
                 hasMoveRequest = true;
-                lastRequestedDestination = hit.position;
+                lastRequestedDestination = destination;
                 lastRequestedStoppingDistance = resolvedStoppingDistance;
+                nextPathRefreshTime = Time.time + PathRefreshInterval;
             }
 
             return didSetPath;
@@ -337,8 +342,13 @@ namespace NPC
 
             var destinationDelta = destination - lastRequestedDestination;
             destinationDelta.y = 0f;
+            if (Mathf.Abs(stoppingDistance - lastRequestedStoppingDistance) > 0.01f)
+            {
+                return false;
+            }
+
             return destinationDelta.sqrMagnitude <= DestinationReuseDistance * DestinationReuseDistance
-                && Mathf.Abs(stoppingDistance - lastRequestedStoppingDistance) <= 0.01f;
+                   || Time.time < nextPathRefreshTime;
         }
 
         private void ClearMoveRequest()
@@ -346,6 +356,7 @@ namespace NPC
             hasMoveRequest = false;
             lastRequestedDestination = default;
             lastRequestedStoppingDistance = default;
+            nextPathRefreshTime = 0f;
         }
 
         private bool IsAgentActive =>

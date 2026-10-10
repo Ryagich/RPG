@@ -22,6 +22,8 @@ namespace TargetLock
         [field: SerializeField, Range(1f, 180f)] public float MaxPlayerAngle { get; private set; } = 135f;
         [field: SerializeField, Range(1f, 180f)] public float BreakScreenAngle { get; private set; } = 135f;
         [field: SerializeField, Min(0f)] public float LostTargetGraceSeconds { get; private set; } = 0.45f;
+        [field: SerializeField, Min(0.02f), Tooltip("Minimum time between automatic scans while target lock is armed without a target.")]
+        public float TargetAcquisitionInterval { get; private set; } = 0.12f;
         [field: SerializeField] public Vector3 LineOfSightOriginOffset { get; private set; } = new(0f, 1.4f, 0f);
         [field: SerializeField] public LayerMask LineOfSightMask { get; private set; } = ~0;
         [field: SerializeField, Min(0f)] public float CenterWeight { get; private set; } = 1f;

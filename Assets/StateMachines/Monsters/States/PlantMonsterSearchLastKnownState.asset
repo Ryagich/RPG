@@ -1,0 +1,15 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_Script: {fileID: 11500000, guid: cf29600a98724efea7cca5403fff2012, type: 3}
+  m_Name: PlantMonsterSearchLastKnownState
+  m_EditorClassIdentifier: Assembly-CSharp::StateMachine.Graph.Model.State
+  <Name>k__BackingField: Search last known enemy position
+  Behaviours:
+  - {fileID: 11400000, guid: 7ec8e98bf1724d589cfaec26b92dbde2, type: 2}
+  Transitions:
+  - {fileID: 11400000, guid: 2ee274858a8e49e5a89a39f48dfd2734, type: 2}
+  - {fileID: 11400000, guid: c534530cbbec40c2bc6f769b3698e4ce, type: 2}
+  - {fileID: 11400000, guid: 627708d5edb740da8b46604c97df62c3, type: 2}
+  - {fileID: 11400000, guid: 90b6a18c4d86405c9137228a9f3dd25c, type: 2}

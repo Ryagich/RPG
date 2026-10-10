@@ -3,13 +3,35 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8790978157e23cc4186df7e90601f3fa, type: 3}
   m_Name: Mill Property - Bribe Accepted
   m_EditorClassIdentifier: Assembly-CSharp::Quests.Graph.Model.QuestNodeData
   persistentId: 8a3e9d881dbd4896998c4b2a1bbacb0d
   editorTitle: Mill Property - Bribe Accepted
-  localizedName: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 99200000000000321, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
-  localizedDescription: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 99200000000000322, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+  localizedName:
+    m_TableReference:
+      m_TableCollectionName: GUID
+    m_TableEntryReference:
+      m_KeyId: 99200000000000321
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  localizedDescription:
+    m_TableReference:
+      m_TableCollectionName: GUID
+    m_TableEntryReference:
+      m_KeyId: 99200000000000322
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
   icon: {fileID: 0}
   mapTargetSource: 0
   sceneMapTargetId: 
@@ -21,5 +43,8 @@ MonoBehaviour:
   availabilityRequirements: []
   hasCompletionResults: 0
   completionResults: []
-  transitions: []
-  references: {version: 2, RefIds: []}
+  transitions:
+  - {fileID: 11400000, guid: d3b8de6e82010704cb1c5eb3b619cc72, type: 2}
+  references:
+    version: 2
+    RefIds: []

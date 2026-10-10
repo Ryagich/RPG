@@ -169,6 +169,14 @@ MonoBehaviour:
     m_Key: Faction_Mages
     m_Metadata:
       m_Items: []
+  - m_Id: 40000000000000005
+    m_Key: Faction_Monsters
+    m_Metadata:
+      m_Items: []
+  - m_Id: 40000000000000006
+    m_Key: Faction_Free_Knights
+    m_Metadata:
+      m_Items: []
   - m_Id: 50000000000000001
     m_Key: Switch_Location_Title
     m_Metadata:

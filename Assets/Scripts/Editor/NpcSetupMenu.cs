@@ -691,17 +691,7 @@ namespace EditorTools
                     return;
                 }
 
-                var forcedDialogueInteractable = ConfigureNpcDialogueZone(root);
-                var npcScopeObject = new SerializedObject(npcScope);
-                var forcedDialogueInteractableProperty = npcScopeObject.FindProperty("forcedDialogueInteractable");
-                if (forcedDialogueInteractableProperty == null)
-                {
-                    Debug.LogError($"{nameof(NpcLifetimeScope)} does not expose the forced dialogue zone reference.");
-                    return;
-                }
-
-                forcedDialogueInteractableProperty.objectReferenceValue = forcedDialogueInteractable;
-                npcScopeObject.ApplyModifiedPropertiesWithoutUndo();
+                ConfigureNpcInteractionZones(root, null);
                 PrefabUtility.SaveAsPrefabAsset(root, NpcPrefabPath);
                 Debug.Log($"Updated dialogue zones in {NpcPrefabPath}");
             }
@@ -849,21 +839,6 @@ namespace EditorTools
 
                 npcVisionObject.ApplyModifiedPropertiesWithoutUndo();
 
-                var npcVisionSensor = root.GetComponent<NpcVisionSensor>();
-                if (npcVisionSensor == null)
-                {
-                    npcVisionSensor = root.AddComponent<NpcVisionSensor>();
-                }
-
-                var npcVisionSensorObject = new SerializedObject(npcVisionSensor);
-                var sensorConfigProperty = npcVisionSensorObject.FindProperty("config");
-                if (sensorConfigProperty != null)
-                {
-                    sensorConfigProperty.objectReferenceValue = visionConfig;
-                }
-
-                npcVisionSensorObject.ApplyModifiedPropertiesWithoutUndo();
-
                 if (root.GetComponent<NpcItemInterest>() == null)
                 {
                     root.AddComponent<NpcItemInterest>();
@@ -889,14 +864,12 @@ namespace EditorTools
                 }
 
                 ConfigureNpcNavMeshAgent(navMeshAgent);
-                var forcedDialogueInteractable = ConfigureNpcDialogueZone(root);
-                npcScopeObject.Update();
-                var forcedDialogueInteractableProperty = npcScopeObject.FindProperty("forcedDialogueInteractable");
-                if (forcedDialogueInteractableProperty != null)
+                if (root.GetComponent<NpcForcedDialogueAvailability>() == null)
                 {
-                    forcedDialogueInteractableProperty.objectReferenceValue = forcedDialogueInteractable;
-                    npcScopeObject.ApplyModifiedPropertiesWithoutUndo();
+                    root.AddComponent<NpcForcedDialogueAvailability>();
                 }
+
+                ConfigureNpcInteractionZones(root, visionConfig);
 
                 MoveComponentAfterTransform(npcScope);
 
@@ -995,10 +968,11 @@ namespace EditorTools
             agent.autoBraking = true;
         }
 
-        private static Interactable.Interactable ConfigureNpcDialogueZone(GameObject root)
+        private static void ConfigureNpcInteractionZones(GameObject root, NpcVisionConfig visionConfig)
         {
             const string dialogueZoneName = "Dialogue Interactable Zone";
             const string forcedDialogueZoneName = "Forced Dialogue Interactable Zone";
+            const string visionZoneName = "Vision Sensor Zone";
             var zoneTransform = root.transform.Find(dialogueZoneName);
             if (zoneTransform == null)
             {
@@ -1027,42 +1001,94 @@ namespace EditorTools
             trigger.center = Vector3.zero;
             trigger.radius = 1.8f;
 
+            ConfigureZoneMesh(zoneTransform, trigger.radius);
+
             var forcedZoneTransform = root.transform.Find(forcedDialogueZoneName);
-            if (forcedZoneTransform == null)
+            if (forcedZoneTransform != null)
             {
-                var forcedZoneObject = new GameObject(forcedDialogueZoneName);
-                forcedZoneTransform = forcedZoneObject.transform;
-                forcedZoneTransform.SetParent(root.transform, false);
+                Object.DestroyImmediate(forcedZoneTransform.gameObject);
             }
 
-            forcedZoneTransform.localPosition = new Vector3(0f, 1f, 0f);
-            forcedZoneTransform.localRotation = Quaternion.identity;
-            forcedZoneTransform.localScale = Vector3.one;
-            if (interactableLayer >= 0)
+            var legacyItemSensor = root.GetComponent<NpcItemVisionSensor>();
+            if (legacyItemSensor != null)
             {
-                forcedZoneTransform.gameObject.layer = interactableLayer;
+                Object.DestroyImmediate(legacyItemSensor);
             }
 
-            var forcedTrigger = forcedZoneTransform.GetComponent<SphereCollider>();
-            if (forcedTrigger == null)
+            var legacyCharacterSensor = root.GetComponent<CharacterVisionSensor>();
+            if (legacyCharacterSensor != null)
             {
-                forcedTrigger = forcedZoneTransform.gameObject.AddComponent<SphereCollider>();
+                Object.DestroyImmediate(legacyCharacterSensor);
             }
 
-            forcedTrigger.isTrigger = true;
-            forcedTrigger.center = Vector3.zero;
-            forcedTrigger.radius = 3.5f;
-
-            var forcedInteractable = forcedZoneTransform.GetComponent<Interactable.Interactable>()
-                                     ?? forcedZoneTransform.gameObject.AddComponent<Interactable.Interactable>();
-            forcedInteractable.InteractionMode = Interactable.InteractionMode.Automatic;
-
-            if (forcedZoneTransform.GetComponent<NpcForcedDialogueAvailability>() == null)
+            var rootCollider = root.GetComponent<SphereCollider>();
+            if (rootCollider != null)
             {
-                forcedZoneTransform.gameObject.AddComponent<NpcForcedDialogueAvailability>();
+                Object.DestroyImmediate(rootCollider);
             }
 
-            return forcedInteractable;
+            var legacyVisionZone = root.transform.Find(visionZoneName);
+            if (legacyVisionZone != null)
+            {
+                Object.DestroyImmediate(legacyVisionZone.gameObject);
+            }
+
+            var itemVisionSensor = root.GetComponent<NpcItemVisionSensor>()
+                                   ?? root.gameObject.AddComponent<NpcItemVisionSensor>();
+            var itemSensorObject = new SerializedObject(itemVisionSensor);
+            var sensorConfigProperty = itemSensorObject.FindProperty("config");
+            var previewMaterialProperty = itemSensorObject.FindProperty("previewMaterial");
+            if (sensorConfigProperty != null && visionConfig != null)
+            {
+                sensorConfigProperty.objectReferenceValue = visionConfig;
+            }
+
+            if (previewMaterialProperty != null)
+            {
+                previewMaterialProperty.objectReferenceValue = AssetDatabase.LoadAssetAtPath<Material>("Assets/Content/Materials/Work.mat");
+            }
+
+            itemSensorObject.ApplyModifiedPropertiesWithoutUndo();
+
+            var characterVisionSensor = root.GetComponent<CharacterVisionSensor>()
+                                        ?? root.gameObject.AddComponent<CharacterVisionSensor>();
+            var characterSensorObject = new SerializedObject(characterVisionSensor);
+            sensorConfigProperty = characterSensorObject.FindProperty("config");
+            previewMaterialProperty = characterSensorObject.FindProperty("previewMaterial");
+            if (sensorConfigProperty != null && visionConfig != null)
+            {
+                sensorConfigProperty.objectReferenceValue = visionConfig;
+            }
+
+            if (previewMaterialProperty != null)
+            {
+                previewMaterialProperty.objectReferenceValue = AssetDatabase.LoadAssetAtPath<Material>("Assets/Content/Materials/Work.mat");
+            }
+
+            characterSensorObject.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void ConfigureZoneMesh(Transform zoneTransform, float radius)
+        {
+            const string meshName = "Zone Mesh";
+            var meshTransform = zoneTransform.Find(meshName);
+            if (meshTransform == null)
+            {
+                var meshObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                meshObject.name = meshName;
+                Object.DestroyImmediate(meshObject.GetComponent<Collider>());
+                meshTransform = meshObject.transform;
+                meshTransform.SetParent(zoneTransform, false);
+            }
+
+            meshTransform.localPosition = Vector3.zero;
+            meshTransform.localRotation = Quaternion.identity;
+            meshTransform.localScale = Vector3.one * (radius * 2f);
+            var meshRenderer = meshTransform.GetComponent<MeshRenderer>();
+            if (meshRenderer != null)
+            {
+                meshRenderer.sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Content/Materials/Interactable.mat");
+            }
         }
 
         private static void EnsureFolder(string folderPath)

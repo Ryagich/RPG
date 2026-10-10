@@ -137,12 +137,7 @@ namespace Dialogs.Graph.Editor
 
         private bool TryHandleTargetPhraseSelection(DialogNode node)
         {
-            if (!targetSelection.IsActive || targetSelection.PendingAnswer == null)
-            {
-                return false;
-            }
-
-            if (node.Phrase == null)
+            if (!IsTargetPhraseSelectable(node?.Phrase))
             {
                 return false;
             }
@@ -435,6 +430,11 @@ namespace Dialogs.Graph.Editor
                 GUI.backgroundColor = missingLink ? DangerButtonColor : LinkButtonColor;
                 bool pickPressed = DrawMiniButton("O", GUILayout.Width(22f));
                 GUI.backgroundColor = previousBackground;
+
+                if (i < phrase.Answers.Count)
+                {
+                    answerPickerAnchors.Record(phrase.Answers[i], GUILayoutUtility.GetLastRect());
+                }
 
                 if (pickPressed && i < phrase.Answers.Count)
                 {

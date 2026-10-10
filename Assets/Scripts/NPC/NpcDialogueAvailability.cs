@@ -1,4 +1,5 @@
 using Interactable;
+using Dialogue;
 using Inventory.Looting;
 using UnityEngine;
 using VContainer;
@@ -7,20 +8,38 @@ using VContainer.Unity;
 namespace NPC
 {
     [DisallowMultipleComponent]
-    public sealed class NpcDialogueAvailability : MonoBehaviour, IInteractableAvailability
+    public sealed class NpcDialogueAvailability : MonoBehaviour, IInteractableAvailability, IInteractableModeProvider
     {
         private NpcDialogueController dialogueController;
         private CorpseLootController corpseLootController;
+        private NpcForcedDialogueAvailability forcedDialogueAvailability;
+        private DialogueContext dialogueContext;
 
         [Inject]
-        public void Construct(NpcDialogueController dialogueController, CorpseLootController corpseLootController)
+        public void Construct(
+            NpcDialogueController dialogueController,
+            CorpseLootController corpseLootController,
+            NpcForcedDialogueAvailability forcedDialogueAvailability,
+            DialogueContext dialogueContext)
         {
             this.dialogueController = dialogueController;
             this.corpseLootController = corpseLootController;
+            this.forcedDialogueAvailability = forcedDialogueAvailability;
+            this.dialogueContext = dialogueContext;
         }
 
         public bool IsInteractableAvailable(LifetimeScope interactorScope)
         {
+            if (dialogueContext?.IsForcedDialogue == true)
+            {
+                return false;
+            }
+
+            if (HasForcedDialogue(interactorScope))
+            {
+                return true;
+            }
+
             if (corpseLootController?.IsLootable == true)
             {
                 return true;
@@ -32,6 +51,19 @@ namespace NPC
             // again on the next physics tick.
             return dialogueController != null &&
                    (dialogueController.IsDialogueRequested || dialogueController.CanStartDialogue(interactorScope));
+        }
+
+        public InteractionMode GetInteractionMode(LifetimeScope interactorScope)
+        {
+            return HasForcedDialogue(interactorScope)
+                ? InteractionMode.Automatic
+                : InteractionMode.Manual;
+        }
+
+        private bool HasForcedDialogue(LifetimeScope interactorScope)
+        {
+            return forcedDialogueAvailability != null
+                && forcedDialogueAvailability.TryGetForcedPhrase(interactorScope, out _);
         }
     }
 }

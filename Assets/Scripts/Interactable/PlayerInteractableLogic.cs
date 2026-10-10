@@ -28,6 +28,7 @@ namespace Interactable
         public readonly ReactiveCollection<Interactable> Interactables = new();
         private readonly List<Interactable> nearbyInteractables = new();
         private List<Interactable> activeInteractables = new();
+        private readonly Dictionary<Interactable, InteractionMode> knownInteractionModes = new();
         private readonly CompositeDisposable disposables = new();
 
         public PlayerInteractableLogic
@@ -68,6 +69,10 @@ namespace Interactable
         private void OnDestroyed(Interactable interactable)
         {
             nearbyInteractables.Remove(interactable);
+            if (!ReferenceEquals(interactable, null))
+            {
+                knownInteractionModes.Remove(interactable);
+            }
             if (Interactables.Contains(interactable))
             {
                 Interactables.Remove(interactable);
@@ -82,9 +87,13 @@ namespace Interactable
         private void Remove(InteractableEndMessage msg)
         {
             nearbyInteractables.Remove(msg.Interactable);
+            var interactionMode = knownInteractionModes.TryGetValue(msg.Interactable, out var knownMode)
+                ? knownMode
+                : GetInteractionMode(msg.Interactable);
+            knownInteractionModes.Remove(msg.Interactable);
             Interactables.Remove(msg.Interactable);
             msg.Interactable.Destroyed -= OnDestroyed;
-            if (msg.Interactable.InteractionMode is InteractionMode.Manual)
+            if (interactionMode is InteractionMode.Manual)
             {
                 EndManualInteraction(msg.Interactable);
             }
@@ -111,7 +120,7 @@ namespace Interactable
             var newActives = new List<Interactable>();
             if (manualT > config.TimeBetweenInteractions)
             {
-                foreach (var interactable in Interactables.Where(i => i.InteractionMode is InteractionMode.Manual
+                foreach (var interactable in Interactables.Where(i => GetInteractionMode(i) is InteractionMode.Manual
                                                                    && IsInteractableAvailable(i)
                                                                    && !activeInteractables.Contains(i)))
                 {
@@ -190,7 +199,7 @@ namespace Interactable
 
             if (t > config.TimeBetweenInteractions)
             {
-                foreach (var interactable in Interactables.Where(i => i.InteractionMode is InteractionMode.Automatic
+                foreach (var interactable in Interactables.Where(i => GetInteractionMode(i) is InteractionMode.Automatic
                                                                    && IsInteractableAvailable(i)))
                 {
                     interactable.Interact(scope);
@@ -229,6 +238,19 @@ namespace Interactable
 
             foreach (var interactable in available)
             {
+                var interactionMode = GetInteractionMode(interactable);
+                if (knownInteractionModes.TryGetValue(interactable, out var previousMode) &&
+                    previousMode != interactionMode &&
+                    Interactables.Contains(interactable))
+                {
+                    // The prompt is driven by collection notifications. Reinsert the same
+                    // interactable when its mode changes so the UI immediately switches
+                    // between automatic and manual interaction without a zone re-entry.
+                    Interactables.Remove(interactable);
+                    Interactables.Add(interactable);
+                }
+
+                knownInteractionModes[interactable] = interactionMode;
                 if (!Interactables.Contains(interactable))
                 {
                     Interactables.Add(interactable);
@@ -253,6 +275,17 @@ namespace Interactable
 
             var availability = interactable.GetComponent<IInteractableAvailability>();
             return availability == null || availability.IsInteractableAvailable(scope);
+        }
+
+        public InteractionMode GetInteractionMode(Interactable interactable)
+        {
+            if (interactable == null)
+            {
+                return InteractionMode.Manual;
+            }
+
+            var provider = interactable.GetComponent<IInteractableModeProvider>();
+            return provider?.GetInteractionMode(scope) ?? interactable.InteractionMode;
         }
     }
 }

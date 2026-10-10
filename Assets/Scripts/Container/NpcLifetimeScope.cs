@@ -22,10 +22,9 @@ using VContainer.Unity;
 
 namespace Container
 {
-    public class NpcLifetimeScope : LifetimeScope
+    public class NpcLifetimeScope : LifetimeScope, IFactionMember
     {
         private const string DialogueZoneName = "Dialogue Interactable Zone";
-        private const string ForcedDialogueInteractableKey = "Forced Dialogue Interactable";
 
         [Header("Persistence")]
         [SerializeField, ReadOnlyInInspector] private string persistentCharacterId;
@@ -49,8 +48,6 @@ namespace Container
         [Header("Combat AI")]
         [Tooltip("If empty, this NPC uses the combat profile assigned to its faction.")]
         [SerializeField] private NpcCombatProfile combatProfileOverride;
-        [SerializeField, Min(0.1f)] private float dialogueInteractionRadius = 1.8f;
-        [SerializeField] private Interactable.Interactable forcedDialogueInteractable;
         [SerializeField, ReadOnlyInInspector] private float currentHp;
         [SerializeField, ReadOnlyInInspector] private string currentState = "Not Started";
         private NpcCombatProfile assignedCombatProfile;
@@ -133,6 +130,26 @@ namespace Container
         {
             assignedCombatProfile = combatProfileOverride ?? faction?.GetRandomCombatProfile();
 
+            var itemVisionSensor = GetItemVisionSensor();
+            if (itemVisionSensor == null)
+            {
+                Debug.LogError($"{nameof(NpcLifetimeScope)} on {name} requires a root {nameof(NpcItemVisionSensor)}.", this);
+                return;
+            }
+
+            var characterVisionSensor = GetCharacterVisionSensor();
+            if (characterVisionSensor == null)
+            {
+                Debug.LogError($"{nameof(NpcLifetimeScope)} on {name} requires a root {nameof(CharacterVisionSensor)}.", this);
+                return;
+            }
+
+            if (!HasDialogueInteractionZone())
+            {
+                Debug.LogError($"{nameof(NpcLifetimeScope)} on {name} requires a child '{DialogueZoneName}' with a {nameof(SphereCollider)}.", this);
+                return;
+            }
+
             builder.RegisterComponentInHierarchy<CharacterController>().UnderTransform(transform).AsSelf();
             builder.RegisterComponentInHierarchy<Animator>().UnderTransform(transform).AsSelf();
 
@@ -145,8 +162,8 @@ namespace Container
             builder.RegisterComponentInHierarchy<PlayerWeaponAnimationEventReceiver>().UnderTransform(transform).AsSelf();
             var npcVision = GetComponent<NpcVision>() ?? gameObject.AddComponent<NpcVision>();
             builder.RegisterComponent(npcVision).AsSelf();
-            var npcVisionSensor = GetComponent<NpcVisionSensor>() ?? gameObject.AddComponent<NpcVisionSensor>();
-            builder.RegisterComponent(npcVisionSensor).AsSelf();
+            builder.RegisterComponent(itemVisionSensor).AsSelf();
+            builder.RegisterComponent(characterVisionSensor).AsSelf();
             var npcItemInterest = GetComponent<NpcItemInterest>() ?? gameObject.AddComponent<NpcItemInterest>();
             builder.RegisterComponent(npcItemInterest).AsSelf();
             var targetLockTarget = GetComponent<TargetLockTarget>() ?? gameObject.AddComponent<TargetLockTarget>();
@@ -156,17 +173,14 @@ namespace Container
             builder.RegisterComponent(interactable).AsSelf();
             var dialogueAvailability = GetComponent<NpcDialogueAvailability>() ?? gameObject.AddComponent<NpcDialogueAvailability>();
             builder.RegisterComponent(dialogueAvailability).AsSelf();
+            var forcedDialogueAvailability = GetComponent<NpcForcedDialogueAvailability>() ?? gameObject.AddComponent<NpcForcedDialogueAvailability>();
+            builder.RegisterComponent(forcedDialogueAvailability).AsSelf();
             var questMapTarget = GetComponent<QuestMapTarget>();
             if (questMapTarget != null)
             {
                 builder.RegisterComponent(questMapTarget).AsSelf();
             }
 
-            EnsureDialogueInteractionZone();
-            // A forced dialogue zone only has meaning for an NPC with a dialogue graph.  The
-            // availability component depends on that graph, so registering it without one
-            // aborts construction of the entire NPC scope before its initial loadout can run.
-            bool hasForcedDialogueZone = dialog != null && RegisterForcedDialogueZone(builder);
             var navMeshAgent = GetComponent<NavMeshAgent>() ?? gameObject.AddComponent<NavMeshAgent>();
             builder.RegisterComponent(navMeshAgent).AsSelf();
             builder.RegisterEntryPoint<NpcNavMeshController>().AsSelf().As<IStaminaMovementState>();
@@ -274,10 +288,7 @@ namespace Container
                    .As<System.IDisposable>();
             builder.Register<NpcDialogueController>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<NpcDialogueInteractableLogic>().AsSelf();
-            if (hasForcedDialogueZone)
-            {
-                builder.RegisterEntryPoint<NpcForcedDialogueInteractableLogic>().AsSelf();
-            }
+            builder.RegisterEntryPoint<NpcForcedDialogueInteractableLogic>().AsSelf();
             builder.Register<EquippedWeaponDropService>(Lifetime.Scoped).AsSelf();
             RegisterMoneyStorage(builder);
             builder.Register<QuestController>(Lifetime.Scoped).AsSelf();
@@ -302,56 +313,20 @@ namespace Container
             builder.Register(_ => new MoneyStorage(0), Lifetime.Scoped).AsSelf();
         }
 
-        private void EnsureDialogueInteractionZone()
+        private bool HasDialogueInteractionZone()
         {
             var zoneTransform = transform.Find(DialogueZoneName);
-            if (zoneTransform == null)
-            {
-                var zoneObject = new GameObject(DialogueZoneName);
-                zoneTransform = zoneObject.transform;
-                zoneTransform.SetParent(transform, false);
-                zoneTransform.localPosition = new Vector3(0f, 1f, 0f);
-            }
-
-            var interactableLayer = LayerMask.NameToLayer("Interactable");
-            if (interactableLayer >= 0)
-            {
-                zoneTransform.gameObject.layer = interactableLayer;
-            }
-
-            var trigger = zoneTransform.GetComponent<SphereCollider>();
-            if (trigger == null)
-            {
-                trigger = zoneTransform.gameObject.AddComponent<SphereCollider>();
-            }
-
-            trigger.isTrigger = true;
-            trigger.center = Vector3.zero;
-            trigger.radius = dialogueInteractionRadius;
+            return zoneTransform != null && zoneTransform.GetComponent<SphereCollider>() != null;
         }
 
-        private bool RegisterForcedDialogueZone(IContainerBuilder builder)
+        private NpcItemVisionSensor GetItemVisionSensor()
         {
-            if (forcedDialogueInteractable == null)
-            {
-                Debug.LogError(
-                    $"{nameof(NpcLifetimeScope)} on {name} requires a reference to Forced Dialogue Interactable Zone.",
-                    this);
-                return false;
-            }
+            return GetComponent<NpcItemVisionSensor>();
+        }
 
-            var forcedDialogueAvailability = forcedDialogueInteractable.GetComponent<NpcForcedDialogueAvailability>();
-            if (forcedDialogueAvailability == null)
-            {
-                Debug.LogError(
-                    $"{nameof(forcedDialogueInteractable)} on {name} requires {nameof(NpcForcedDialogueAvailability)}.",
-                    forcedDialogueInteractable);
-                return false;
-            }
-
-            builder.RegisterInstance(forcedDialogueInteractable).Keyed(ForcedDialogueInteractableKey);
-            builder.RegisterComponent(forcedDialogueAvailability).AsSelf();
-            return true;
+        private CharacterVisionSensor GetCharacterVisionSensor()
+        {
+            return GetComponent<CharacterVisionSensor>();
         }
     }
 }

@@ -151,7 +151,7 @@ namespace Combat
             OnReactionEnded();
         }
 
-        private void TriggerHitReactionAnimation(Vector3 hitPoint, Transform attackerTransform)
+        protected virtual void TriggerHitReactionAnimation(Vector3 hitPoint, Transform attackerTransform)
         {
             if (animator == null)
             {

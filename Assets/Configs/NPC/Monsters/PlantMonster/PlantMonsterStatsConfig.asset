@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9caed7d4c3f430c95c205cdf3b38214, type: 3}
+  m_Name: PlantMonsterStatsConfig
+  m_EditorClassIdentifier: Assembly-CSharp::UI.StatsConfig
+  <HpStat>k__BackingField:
+    <Max>k__BackingField: 15
+    <Min>k__BackingField: 0
+    <Value>k__BackingField:
+      value: 100
+    <MinSafePercent>k__BackingField: 0.15
+    <PeriodicChange>k__BackingField: 0.01
+    <RegenResumeDelayAfterDamageSeconds>k__BackingField: 2
+  <WaterStat>k__BackingField:
+    <Max>k__BackingField: 100
+    <Min>k__BackingField: 0
+    <Value>k__BackingField:
+      value: 100
+    <MinSafePercent>k__BackingField: 0.15
+    <PeriodicChange>k__BackingField: -0.01
+    <PeriodicHpDamageWhenEmpty>k__BackingField: 0.1
+  <FoodStat>k__BackingField:
+    <Max>k__BackingField: 100
+    <Min>k__BackingField: 0
+    <Value>k__BackingField:
+      value: 100
+    <MinSafePercent>k__BackingField: 0.15
+    <PeriodicChange>k__BackingField: -0.005
+    <PeriodicHpDamageWhenEmpty>k__BackingField: 0.1
+  <ChillStat>k__BackingField:
+    <Max>k__BackingField: 100
+    <Min>k__BackingField: 0
+    <Value>k__BackingField:
+      value: 100
+    <MinSafePercent>k__BackingField: 0.15
+    <PeriodicChange>k__BackingField: -0.1
+    <PeriodicHpDamageWhenEmpty>k__BackingField: 0.1
+  <PhysicalDefenseStat>k__BackingField:
+    <Max>k__BackingField: 1
+    <Min>k__BackingField: 0
+    <Value>k__BackingField:
+      value: 0.1
+  <TemperatureDefenseStat>k__BackingField:
+    <Max>k__BackingField: 100
+    <Min>k__BackingField: 0
+    <Value>k__BackingField:
+      value: 5
+  <PsiDefenseStat>k__BackingField:
+    <Max>k__BackingField: 100
+    <Min>k__BackingField: 0
+    <Value>k__BackingField:
+      value: 5
+  <MagicDefenseStat>k__BackingField:
+    <Max>k__BackingField: 100
+    <Min>k__BackingField: 0
+    <Value>k__BackingField:
+      value: 5
+  <PeriodicChangeIntervalSeconds>k__BackingField: 0.1
+  <FillSpeed>k__BackingField: 0.01
+  <FllLerpSpeed>k__BackingField: 0.035
+  <FadeOutTime>k__BackingField: 3
+  <ShowTime>k__BackingField: 3
+  <AlphaRestoreTime>k__BackingField: 1.25
+  <MinHeartbeat>k__BackingField: 80
+  <MaxHeartbeat>k__BackingField: 190
+  <Sharpness>k__BackingField: 3
+  <HeartDefSize>k__BackingField: 0.9
+  <HeartMaxSize>k__BackingField: 1
+  <HeartbeatTempoMultiplier>k__BackingField: 1
+  <BloodScreenAlphaMultiplier>k__BackingField: 1
+  <HpFullColor>k__BackingField: {r: 1, g: 1, b: 1, a: 1}
+  <HpRecoveryColor>k__BackingField: {r: 0, g: 1, b: 0, a: 1}
+  <HpDecreaseColor>k__BackingField: {r: 1, g: 0, b: 0, a: 1}
+  <Warning>k__BackingField: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}

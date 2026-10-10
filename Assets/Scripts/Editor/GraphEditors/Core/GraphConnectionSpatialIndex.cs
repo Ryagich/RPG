@@ -157,6 +157,7 @@ namespace EditorTools
             }
         }
 
+
         private bool TryGetConnectionBounds(int index, out Rect bounds)
         {
             RetainedGraphConnection<TNode, TConnection> connection = connections[index];

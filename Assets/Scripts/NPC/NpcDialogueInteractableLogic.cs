@@ -26,6 +26,7 @@ namespace NPC
         private readonly DialogueContext dialogueContext;
         private readonly LootingContext lootingContext;
         private readonly CorpseLootController corpseLootController;
+        private readonly NpcForcedDialogueInteractableLogic forcedDialogueInteractableLogic;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
         private bool isLootingInteractionActive;
 
@@ -37,6 +38,7 @@ namespace NPC
             DialogueContext dialogueContext,
             LootingContext lootingContext,
             CorpseLootController corpseLootController,
+            NpcForcedDialogueInteractableLogic forcedDialogueInteractableLogic,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
             IObjectResolver resolver)
         {
@@ -57,6 +59,7 @@ namespace NPC
             this.dialogueContext = dialogueContext;
             this.lootingContext = lootingContext;
             this.corpseLootController = corpseLootController;
+            this.forcedDialogueInteractableLogic = forcedDialogueInteractableLogic;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
         }
 
@@ -79,6 +82,11 @@ namespace NPC
         private void OnInteracted(LifetimeScope interactorScope)
         {
             DialogueFlowTrace.NormalDialogueInteraction("interacted", interactable);
+            if (forcedDialogueInteractableLogic.TryOpenForcedDialogue(interactorScope))
+            {
+                return;
+            }
+
             if (corpseLootController?.IsLootable == true && corpseLootController.LootInventory != null)
             {
                 isLootingInteractionActive = true;
@@ -101,6 +109,11 @@ namespace NPC
         private void OnEndInteracted(LifetimeScope _)
         {
             DialogueFlowTrace.NormalDialogueInteraction("end-interacted", interactable);
+            if (forcedDialogueInteractableLogic.EndInteraction())
+            {
+                return;
+            }
+
             if (isLootingInteractionActive)
             {
                 if (lootingContext.CurrentTargetInventory == corpseLootController?.LootInventory)

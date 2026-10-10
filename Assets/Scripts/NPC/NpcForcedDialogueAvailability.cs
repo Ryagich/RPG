@@ -13,7 +13,7 @@ using VContainer.Unity;
 namespace NPC
 {
     [DisallowMultipleComponent]
-    public sealed class NpcForcedDialogueAvailability : MonoBehaviour, IInteractableAvailability
+    public sealed class NpcForcedDialogueAvailability : MonoBehaviour
     {
         [SerializeField, Tooltip("Allows this automatic dialogue zone to open a forced dialogue only once per GameObject activation.")]
         private bool allowOnlyOneForcedDialoguePerActivation;

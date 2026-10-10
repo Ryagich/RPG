@@ -19,6 +19,7 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: 2fb2dbfc0afb54346b0901d0948e5e49, type: 2}
   - Position: {x: 1101.0194, y: 328.03906}
     Phrase: {fileID: 11400000, guid: 6f702fc1cac2cdf418d8e3212e8ba742, type: 2}
-  - Position: {x: 700.3919, y: 318.2352}
+  - Position: {x: 540.39197, y: 116.90187}
     Phrase: {fileID: 11400000, guid: 9ef9d13472ae65a44b5ea0f6a87348ce, type: 2}
   <EntryPhrase>k__BackingField: {fileID: 11400000, guid: 6f702fc1cac2cdf418d8e3212e8ba742, type: 2}
+  suppressCheckpointOnClose: 0

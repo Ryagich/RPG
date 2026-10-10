@@ -53,7 +53,11 @@ namespace Dialogs.Graph.Editor
             SynchronizeNodeRects();
         }
 
-        private void ClearRetainedNodeRects() => nodeRects.Clear();
+        private void ClearRetainedNodeRects()
+        {
+            nodeRects.Clear();
+            answerPickerAnchors.Clear();
+        }
 
         private IEnumerable<DialogNode> GetRetainedGraphNodes() =>
             currentGraph?.Nodes ?? Enumerable.Empty<DialogNode>();
@@ -63,17 +67,25 @@ namespace Dialogs.Graph.Editor
             if (currentGraph == null) yield break;
             foreach (DialogNode sourceNode in currentGraph.Nodes)
             {
-                if (sourceNode?.Phrase == null) continue;
-                foreach (DialogAnswer answer in GetConnectionAnswers(sourceNode.Phrase))
-                    if (answer?.NextPhrase != null && graphIndex.TryGetNode(answer.NextPhrase, out DialogNode targetNode))
-                        yield return new RetainedGraphConnection<DialogNode, DialogCanvasConnection>(
-                            sourceNode, targetNode, new DialogCanvasConnection(answer, false));
-
-                foreach (DialogPhrase returnAction in GetImplicitConversationReturnActions(sourceNode.Phrase))
-                    if (graphIndex.TryGetNode(returnAction, out DialogNode targetNode))
-                        yield return new RetainedGraphConnection<DialogNode, DialogCanvasConnection>(
-                            sourceNode, targetNode, new DialogCanvasConnection(null, true));
+                foreach (RetainedGraphConnection<DialogNode, DialogCanvasConnection> connection in GetRetainedGraphConnectionsFrom(sourceNode))
+                {
+                    yield return connection;
+                }
             }
+        }
+
+        private IEnumerable<RetainedGraphConnection<DialogNode, DialogCanvasConnection>> GetRetainedGraphConnectionsFrom(DialogNode sourceNode)
+        {
+            if (sourceNode?.Phrase == null) yield break;
+            foreach (DialogAnswer answer in GetConnectionAnswers(sourceNode.Phrase))
+                if (answer?.NextPhrase != null && graphIndex.TryGetNode(answer.NextPhrase, out DialogNode targetNode))
+                    yield return new RetainedGraphConnection<DialogNode, DialogCanvasConnection>(
+                        sourceNode, targetNode, new DialogCanvasConnection(answer, false));
+
+            foreach (DialogPhrase returnAction in GetImplicitConversationReturnActions(sourceNode.Phrase))
+                if (graphIndex.TryGetNode(returnAction, out DialogNode targetNode))
+                    yield return new RetainedGraphConnection<DialogNode, DialogCanvasConnection>(
+                        sourceNode, targetNode, new DialogCanvasConnection(null, true));
         }
 
         private Vector2 GetRetainedNodePosition(DialogNode node) => node.Position;
@@ -81,7 +93,7 @@ namespace Dialogs.Graph.Editor
         private void SetRetainedNodeRect(DialogNode node, Rect rect) => nodeRects[node] = rect;
         private string GetRetainedNodeTitle(DialogNode node) => GetNodeTitle(node);
         private Color GetRetainedNodeTint(DialogNode node) => GetNodeTint(node);
-        private bool IsRetainedNodeTargetable(DialogNode node) => node?.Phrase != null;
+        private bool IsRetainedNodeTargetable(DialogNode node) => IsTargetPhraseSelectable(node?.Phrase);
         private void DrawRetainedNode(DialogNode node) => DrawToolkitNode(node);
         private void DeleteRetainedNode(DialogNode node) => DeleteNode(node, false);
         private void SelectRetainedNode(DialogNode node) => activeConnectionNode = node;
@@ -92,9 +104,10 @@ namespace Dialogs.Graph.Editor
 
         private bool TrySelectRetainedTarget(DialogNode node)
         {
-            if (!targetSelection.IsActive || targetSelection.PendingAnswer == null || node?.Phrase == null) return false;
+            if (!IsTargetPhraseSelectable(node?.Phrase)) return false;
             targetSelection.PendingAnswer.SetNextPhrase(node.Phrase);
             MarkDirty(targetSelection.SourcePhrase);
+            toolkitCanvas?.RebuildConnectionsGradually();
             CancelTargetSelection(false);
             return true;
         }
@@ -103,7 +116,8 @@ namespace Dialogs.Graph.Editor
             Painter2D painter, DialogCanvasConnection connection, DialogNode sourceNode, DialogNode targetNode,
             Rect sourceRect, Rect targetRect, bool isDragging)
         {
-            (Vector2 startPosition, Vector2 endPosition) = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect);
+            (Vector2 defaultStart, Vector2 endPosition) = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect);
+            Vector2 startPosition = answerPickerAnchors.Resolve(connection.Answer, sourceRect, defaultStart);
             Vector2 startTangent = startPosition + GraphConnectionGeometry.GetDirectionForRectPoint(sourceRect, startPosition) * 60f;
             Vector2 endTangent = endPosition + GraphConnectionGeometry.GetDirectionForRectPoint(targetRect, endPosition) * 60f;
             if (!isDragging)
@@ -112,14 +126,8 @@ namespace Dialogs.Graph.Editor
 
             Color color = GetConnectionColor(sourceNode, targetNode);
             if (connection.IsImplicit) color = Color.Lerp(color, new Color(0.76f, 0.82f, 0.94f), 0.6f);
-            painter.strokeColor = color;
-            painter.lineWidth = 3f;
-            painter.BeginPath();
-            painter.MoveTo(startPosition);
-            painter.BezierCurveTo(startTangent, endTangent, endPosition);
-            painter.Stroke();
-            painter.fillColor = color;
-            GraphConnectionDrawing.DrawArrow(painter, endPosition, endPosition - endTangent);
+            GraphConnectionDrawing.DrawBezier(
+                painter, startPosition, startTangent, endTangent, endPosition, color);
         }
     }
 }

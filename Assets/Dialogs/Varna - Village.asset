@@ -3,6 +3,12 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f017ef0dab3961d4d9cc460c84f52c76, type: 3}
   m_Name: Varna - Village
   m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.DialogGraph
@@ -25,12 +31,13 @@ MonoBehaviour:
     Phrase: {fileID: 11400000, guid: a4c00000000000000000000000000007, type: 2}
   - Position: {x: 350, y: 1000}
     Phrase: {fileID: 11400000, guid: a4c00000000000000000000000000008, type: 2}
-  - Position: {x: 350, y: 1240}
+  - Position: {x: 1149.9021, y: 923.62744}
     Phrase: {fileID: 11400000, guid: a4c00000000000000000000000000009, type: 2}
-  - Position: {x: 350, y: 1480}
+  - Position: {x: 1165.4845, y: 1493.0305}
     Phrase: {fileID: 11400000, guid: a4c00000000000000000000000000010, type: 2}
-  - Position: {x: 0, y: 1740}
+  - Position: {x: 802.0562, y: 1490.7532}
     Phrase: {fileID: 11400000, guid: a4c00000000000000000000000000011, type: 2}
-  - Position: {x: 0, y: 1890}
+  - Position: {x: 350.59793, y: 1489.8093}
     Phrase: {fileID: 11400000, guid: a4c00000000000000000000000000012, type: 2}
   <EntryPhrase>k__BackingField: {fileID: 11400000, guid: a4c00000000000000000000000000001, type: 2}
+  suppressCheckpointOnClose: 0

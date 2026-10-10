@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf29600a98724efea7cca5403fff2012, type: 3}
+  m_Name: PlantMonsterApproachTargetState
+  m_EditorClassIdentifier: Assembly-CSharp::StateMachine.Graph.Model.State
+  <Name>k__BackingField: Chase visible enemy
+  Behaviours:
+  - {fileID: 11400000, guid: 63052c42a2041df498cd7b70cfc4ee86, type: 2}
+  Transitions:
+  - {fileID: 11400000, guid: a464a69802cccab458db3eeff39bd4c0, type: 2}
+  - {fileID: 11400000, guid: 2cdc4b0d2e5107e40b4992627e4b591e, type: 2}
+  - {fileID: 11400000, guid: 2b7d9774b7d065941a187c72c8ef7094, type: 2}
+  - {fileID: 11400000, guid: 5df31f43396ec3a489fef7fcdc7988de, type: 2}
+  references:
+    version: 2
+    RefIds: []

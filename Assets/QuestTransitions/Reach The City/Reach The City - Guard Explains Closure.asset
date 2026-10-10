@@ -17,3 +17,4 @@ MonoBehaviour:
   conditions: []
   hasResults: 0
   results: []
+  executeAutomaticallyWhenAvailable: 0

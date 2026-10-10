@@ -57,7 +57,7 @@ namespace UI
         private void Update()
         {
             var shouldBeVisible =
-                playerInteractableLogic.Interactables.Any(i => i.InteractionMode is InteractionMode.Manual)
+                playerInteractableLogic.Interactables.Any(i => playerInteractableLogic.GetInteractionMode(i) is InteractionMode.Manual)
              || itemHolderInteractableLogic.Items.Any(i => i.CanInteractable);
 
             if (shouldBeVisible == isVisible || interactableCanvasGroup == null)

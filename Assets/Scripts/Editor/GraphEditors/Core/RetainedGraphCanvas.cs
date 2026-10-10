@@ -139,6 +139,8 @@ namespace EditorTools
         private bool rebuildScheduled;
         private bool geometryRefreshScheduled;
         private bool connectionRefreshScheduled;
+        private bool connectionRevealScheduled;
+        private int connectionRevealGeneration;
         private bool visibleNodeCreationScheduled;
         private bool connectionsNeedRefreshAfterVirtualizedCreation;
 
@@ -248,27 +250,39 @@ namespace EditorTools
                 nodePresenter.SetRetainedNodeRect(node, nodeRects[node]);
             }
 
-            var connections = new List<RetainedGraphConnection<TNode, TConnection>>();
-            foreach (RetainedGraphConnection<TNode, TConnection> connection in source.GetRetainedGraphConnections())
-            {
-                if (connection.Source == null || connection.Target == null || connection.Connection == null ||
-                    !nodeRects.ContainsKey(connection.Source) || !nodeRects.ContainsKey(connection.Target))
-                {
-                    continue;
-                }
-
-                connections.Add(connection);
-            }
-
-            connectionLayer = CreateConnectionLayer(connections);
-            graphContent.Insert(1, connectionLayer);
-            dragConnectionLayer = CreateConnectionLayer(connections);
-            dragConnectionLayer.HideAll();
-            graphContent.Insert(2, dragConnectionLayer);
+            ReplaceConnectionLayers(CollectConnections());
 
             ApplyViewTransform();
             RefreshVisibleNodeElements();
+            StartProgressiveConnectionReveal();
             RefreshGraphAppearance();
+        }
+
+        private List<RetainedGraphConnection<TNode, TConnection>> CollectConnections()
+        {
+            var connections = new List<RetainedGraphConnection<TNode, TConnection>>();
+            foreach (RetainedGraphConnection<TNode, TConnection> connection in source.GetRetainedGraphConnections())
+            {
+                if (connection.Source != null && connection.Target != null && connection.Connection != null &&
+                    nodeRects.ContainsKey(connection.Source) && nodeRects.ContainsKey(connection.Target))
+                {
+                    connections.Add(connection);
+                }
+            }
+
+            return connections;
+        }
+
+        private void ReplaceConnectionLayers(IReadOnlyList<RetainedGraphConnection<TNode, TConnection>> connections)
+        {
+            connectionLayer?.RemoveFromHierarchy();
+            dragConnectionLayer?.RemoveFromHierarchy();
+            connectionLayer = CreateConnectionLayer(connections);
+            graphContent.Insert(1, connectionLayer);
+            dragConnectionLayer = CreateConnectionLayer(connections);
+            dragConnectionLayer.RevealAllSourceNodes();
+            dragConnectionLayer.HideAll();
+            graphContent.Insert(2, dragConnectionLayer);
         }
 
         private RetainedGraphConnectionLayer<TNode, TConnection> CreateConnectionLayer(
@@ -374,7 +388,6 @@ namespace EditorTools
                 if (interaction.TrySelectRetainedTarget(nodeElement.Node))
                 {
                     RefreshTargetSelection();
-                    RefreshConnections();
                 }
 
                 return;
@@ -453,6 +466,55 @@ namespace EditorTools
         {
             connectionLayer?.MarkDirtyRepaint();
             dragConnectionLayer?.MarkDirtyRepaint();
+        }
+
+        /// <summary>Replaces all connection visuals while preserving the existing node visuals.</summary>
+        public void RebuildConnectionsGradually()
+        {
+            if (!source.RetainedGraphHasGraph || graphContent == null)
+            {
+                return;
+            }
+
+            source.PrepareRetainedGraph();
+            ReplaceConnectionLayers(CollectConnections());
+            StartProgressiveConnectionReveal();
+        }
+
+        private void StartProgressiveConnectionReveal()
+        {
+            connectionRevealGeneration++;
+            ScheduleNextConnectionReveal(connectionRevealGeneration);
+        }
+
+        private void ScheduleNextConnectionReveal(int generation)
+        {
+            if (connectionRevealScheduled)
+            {
+                return;
+            }
+
+            connectionRevealScheduled = true;
+            schedule.Execute(() =>
+            {
+                connectionRevealScheduled = false;
+                if (generation != connectionRevealGeneration)
+                {
+                    ScheduleNextConnectionReveal(connectionRevealGeneration);
+                    return;
+                }
+
+                if (nodeVirtualizer.HasPendingNodes || visibleNodeCreationScheduled)
+                {
+                    ScheduleNextConnectionReveal(generation);
+                    return;
+                }
+
+                if (connectionLayer != null && connectionLayer.RevealNextSourceNode())
+                {
+                    ScheduleNextConnectionReveal(generation);
+                }
+            }).ExecuteLater(0);
         }
 
         private void ScheduleConnectionRefresh()
@@ -651,6 +713,7 @@ namespace EditorTools
             private readonly Label title;
             private readonly Button removeButton;
             private readonly IMGUIContainer content;
+            private readonly Label targetSelectionMarker;
             private int dragPointerId = -1;
             private Vector2 dragStartPointer;
             private Vector2 dragStartPosition;
@@ -719,12 +782,26 @@ namespace EditorTools
                 content.style.paddingBottom = 5f;
                 hierarchy.Add(content);
 
+                targetSelectionMarker = new Label("+") { name = "retained-graph-target-marker" };
+                targetSelectionMarker.pickingMode = PickingMode.Ignore;
+                targetSelectionMarker.style.position = Position.Absolute;
+                targetSelectionMarker.style.left = 0f;
+                targetSelectionMarker.style.top = 0f;
+                targetSelectionMarker.style.right = 0f;
+                targetSelectionMarker.style.bottom = 0f;
+                targetSelectionMarker.style.unityTextAlign = TextAnchor.MiddleCenter;
+                targetSelectionMarker.style.fontSize = 52f;
+                targetSelectionMarker.style.unityFontStyleAndWeight = FontStyle.Bold;
+                targetSelectionMarker.RegisterCallback<PointerDownEvent>(HandleTargetSelectionMarkerPointerDown);
+                hierarchy.Add(targetSelectionMarker);
+
                 header.RegisterCallback<PointerDownEvent>(HandleHeaderPointerDown);
                 header.RegisterCallback<PointerMoveEvent>(HandleHeaderPointerMove);
                 header.RegisterCallback<PointerUpEvent>(HandleHeaderPointerUp);
                 header.RegisterCallback<PointerCaptureOutEvent>(HandleHeaderPointerCaptureOut);
                 RegisterCallback<GeometryChangedEvent>(_ => canvas.NotifyNodeGeometryChanged(this));
                 RefreshAppearance();
+                RefreshTargetSelection();
             }
 
             public TNode Node { get; }
@@ -778,6 +855,8 @@ namespace EditorTools
                 if (!canvas.viewport.RetainedGraphIsSelectingTarget)
                 {
                     style.opacity = 1f;
+                    targetSelectionMarker.style.display = DisplayStyle.None;
+                    targetSelectionMarker.pickingMode = PickingMode.Ignore;
                     style.borderTopColor = canvas.appearance.RetainedGraphMinorGridColor;
                     style.borderBottomColor = canvas.appearance.RetainedGraphMinorGridColor;
                     style.borderLeftColor = canvas.appearance.RetainedGraphMinorGridColor;
@@ -785,7 +864,13 @@ namespace EditorTools
                     return;
                 }
 
-                style.opacity = canvas.nodePresenter.IsRetainedNodeTargetable(Node) ? 1f : 0.45f;
+                bool isTargetable = canvas.nodePresenter.IsRetainedNodeTargetable(Node);
+                style.opacity = isTargetable ? 1f : 0.45f;
+                targetSelectionMarker.style.display = isTargetable ? DisplayStyle.Flex : DisplayStyle.None;
+                targetSelectionMarker.pickingMode = isTargetable ? PickingMode.Position : PickingMode.Ignore;
+                targetSelectionMarker.style.color = canvas.appearance.RetainedGraphPanelColor.grayscale < 0.5f
+                    ? Color.white
+                    : Color.black;
                 style.borderTopColor = canvas.appearance.RetainedGraphTargetBorderColor;
                 style.borderBottomColor = canvas.appearance.RetainedGraphTargetBorderColor;
                 style.borderLeftColor = canvas.appearance.RetainedGraphTargetBorderColor;
@@ -809,6 +894,24 @@ namespace EditorTools
 
                 canvas.BeginNodeDrag(this, evt);
                 evt.StopPropagation();
+            }
+
+            private void HandleTargetSelectionMarkerPointerDown(PointerDownEvent evt)
+            {
+                if (!canvas.viewport.RetainedGraphIsSelectingTarget || evt.button != 0)
+                {
+                    return;
+                }
+
+                if (canvas.nodePresenter.IsRetainedNodeTargetable(Node) &&
+                    canvas.interaction.TrySelectRetainedTarget(Node))
+                {
+                    canvas.RefreshTargetSelection();
+                }
+
+                // The marker deliberately sits above the IMGUI content, so it owns the
+                // click while a connection target is being selected.
+                evt.StopImmediatePropagation();
             }
 
             private void HandleHeaderPointerMove(PointerMoveEvent evt)

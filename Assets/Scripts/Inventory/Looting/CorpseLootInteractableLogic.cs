@@ -24,12 +24,13 @@ namespace Inventory.Looting
             CorpseLootController corpseLootController,
             LootingContext lootingContext,
             IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
-            IObjectResolver resolver,
-            CharacterInfo characterInfo = null)
+            IObjectResolver resolver)
         {
             this.interactable = interactable;
             this.corpseLootController = corpseLootController;
-            this.characterInfo = characterInfo;
+            characterInfo = resolver.TryResolve<CharacterInfo>(out var resolvedCharacterInfo)
+                ? resolvedCharacterInfo
+                : null;
             faction = resolver.TryResolve<FactionConfig>(out var resolvedFaction) ? resolvedFaction : null;
             this.lootingContext = lootingContext;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;

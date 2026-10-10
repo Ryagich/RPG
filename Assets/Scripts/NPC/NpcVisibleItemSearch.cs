@@ -26,7 +26,7 @@ namespace NPC
                 return false;
             }
 
-            var sensor = context.GetService<NpcVisionSensor>();
+            var sensor = context.GetService<NpcItemVisionSensor>();
             var vision = context.GetService<NpcVision>();
             var planner = context.GetService<NpcInventoryPlanner>();
             if (sensor == null || vision == null || planner == null)

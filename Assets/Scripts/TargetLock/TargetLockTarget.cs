@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Factions;
 using UnityEngine;
 using VContainer;
 
@@ -40,14 +41,17 @@ namespace TargetLock
         [SerializeField] private Vector3 aimOffset = new(0f, 1.35f, 0f);
 
         private ITargetLockTargetRegistry registry;
+        private FactionConfig faction;
 
         public Transform AimTransform => aimPoint != null ? aimPoint : transform;
         public Vector3 AimPosition => aimPoint != null ? aimPoint.position : transform.position + aimOffset;
         public bool IsTargetable => isActiveAndEnabled && gameObject.activeInHierarchy;
+        public FactionConfig Faction => faction;
 
         [Inject]
         public void Construct(ITargetLockTargetRegistry targetRegistry)
         {
+            CacheFaction();
             if (registry == targetRegistry)
             {
                 return;
@@ -59,6 +63,20 @@ namespace TargetLock
             {
                 registry.Register(this);
             }
+        }
+
+        private void CacheFaction()
+        {
+            foreach (var component in GetComponentsInParent<MonoBehaviour>(true))
+            {
+                if (component is IFactionMember factionMember && factionMember.Faction != null)
+                {
+                    faction = factionMember.Faction;
+                    return;
+                }
+            }
+
+            faction = null;
         }
 
         private void OnEnable()

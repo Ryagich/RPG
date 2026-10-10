@@ -16,21 +16,50 @@ namespace EditorTools
     {
         public static Vector2 GetNearestSideCenter(Rect rect, Vector2 point)
         {
-            float leftDistance = Mathf.Abs(point.x - rect.xMin);
-            float rightDistance = Mathf.Abs(point.x - rect.xMax);
-            float topDistance = Mathf.Abs(point.y - rect.yMin);
-            float bottomDistance = Mathf.Abs(point.y - rect.yMax);
-
-            if (Mathf.Min(leftDistance, rightDistance) < Mathf.Min(topDistance, bottomDistance))
+            Vector2 direction = point - rect.center;
+            if (direction.sqrMagnitude <= 0.0001f)
             {
-                return leftDistance <= rightDistance
-                    ? new Vector2(rect.xMin, rect.center.y)
-                    : new Vector2(rect.xMax, rect.center.y);
+                return new Vector2(rect.xMax, rect.center.y);
             }
 
-            return topDistance <= bottomDistance
-                ? new Vector2(rect.center.x, rect.yMin)
-                : new Vector2(rect.center.x, rect.yMax);
+            // Choose the edge reached first by a ray from the node centre to the other
+            // node's centre. Comparing distances to the four edges picks the wrong edge
+            // for diagonal connections when nodes have different aspect ratios.
+            float horizontalProgress = Mathf.Abs(direction.x) / Mathf.Max(rect.width * 0.5f, 0.0001f);
+            float verticalProgress = Mathf.Abs(direction.y) / Mathf.Max(rect.height * 0.5f, 0.0001f);
+            if (horizontalProgress >= verticalProgress)
+            {
+                return new Vector2(direction.x >= 0f ? rect.xMax : rect.xMin, rect.center.y);
+            }
+
+            return new Vector2(rect.center.x, direction.y >= 0f ? rect.yMax : rect.yMin);
+        }
+
+        /// <summary>Returns the point on a node border closest to an authored control inside it.</summary>
+        public static Vector2 GetNearestBorderPoint(Rect rect, Vector2 point)
+        {
+            float leftDistance = Mathf.Abs(point.x - rect.xMin);
+            float rightDistance = Mathf.Abs(rect.xMax - point.x);
+            float topDistance = Mathf.Abs(point.y - rect.yMin);
+            float bottomDistance = Mathf.Abs(rect.yMax - point.y);
+
+            float nearestDistance = Mathf.Min(Mathf.Min(leftDistance, rightDistance), Mathf.Min(topDistance, bottomDistance));
+            if (Mathf.Approximately(nearestDistance, leftDistance))
+            {
+                return new Vector2(rect.xMin, Mathf.Clamp(point.y, rect.yMin, rect.yMax));
+            }
+
+            if (Mathf.Approximately(nearestDistance, rightDistance))
+            {
+                return new Vector2(rect.xMax, Mathf.Clamp(point.y, rect.yMin, rect.yMax));
+            }
+
+            if (Mathf.Approximately(nearestDistance, topDistance))
+            {
+                return new Vector2(Mathf.Clamp(point.x, rect.xMin, rect.xMax), rect.yMin);
+            }
+
+            return new Vector2(Mathf.Clamp(point.x, rect.xMin, rect.xMax), rect.yMax);
         }
 
         public static Vector2 GetDirectionForRectPoint(Rect rect, Vector2 point)
@@ -126,6 +155,32 @@ namespace EditorTools
     /// <summary>Shared arrowhead rendering for both IMGUI and retained graph canvases.</summary>
     internal static class GraphConnectionDrawing
     {
+        public const float ConnectionLineWidth = 3f;
+
+        /// <summary>
+        /// Draws the standard graph connection used by every retained-mode editor.
+        /// Geometry (anchors and tangents) remains the responsibility of the caller;
+        /// stroke weight and arrowhead are deliberately shared presentation rules.
+        /// </summary>
+        public static void DrawBezier(
+            Painter2D painter,
+            Vector2 startPosition,
+            Vector2 startTangent,
+            Vector2 endTangent,
+            Vector2 endPosition,
+            Color color)
+        {
+            painter.strokeColor = color;
+            painter.lineWidth = ConnectionLineWidth;
+            painter.BeginPath();
+            painter.MoveTo(startPosition);
+            painter.BezierCurveTo(startTangent, endTangent, endPosition);
+            painter.Stroke();
+
+            painter.fillColor = color;
+            DrawArrow(painter, endPosition, endPosition - endTangent);
+        }
+
         public static void DrawArrow(Vector2 tipPosition, Vector2 direction, float length = 18f, float halfWidth = 7.5f)
         {
             Vector2 normalizedDirection = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.right;

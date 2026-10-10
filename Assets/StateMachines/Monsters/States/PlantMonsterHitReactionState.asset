@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf29600a98724efea7cca5403fff2012, type: 3}
+  m_Name: PlantMonsterHitReactionState
+  m_EditorClassIdentifier: Assembly-CSharp::StateMachine.Graph.Model.State
+  <Name>k__BackingField: React to hit
+  Behaviours:
+  - {fileID: 11400000, guid: 384973d359abede44b60607eb6ca4668, type: 2}
+  Transitions:
+  - {fileID: 11400000, guid: b23e36343238e534199c10397255de16, type: 2}
+  - {fileID: 11400000, guid: b1c2d3e4f5a60718293b4c5d6e7f8091, type: 2}
+  - {fileID: 11400000, guid: 2f062649ad9b2b347a80c7dd30b332d9, type: 2}
+  references:
+    version: 2
+    RefIds: []

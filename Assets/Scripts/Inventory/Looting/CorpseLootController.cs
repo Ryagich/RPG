@@ -4,6 +4,7 @@ using Inventory.Inventories;
 using Inventory.Item;
 using UniRx;
 using UnityEngine;
+using VContainer;
 
 namespace Inventory.Looting
 {
@@ -11,6 +12,7 @@ namespace Inventory.Looting
     public sealed class CorpseLootController : MonoBehaviour
     {
         [SerializeField, Min(0f)] private float followDeadZone = 0.05f;
+        [SerializeField] private GameObject corpseLootZone;
 
         private IEquipmentInventory sourceInventory;
         private Player.PlayerRagdollController ragdollController;
@@ -23,18 +25,32 @@ namespace Inventory.Looting
         [VContainer.Inject]
         public void Construct(
             IEquipmentInventory sourceInventory,
-            Player.PlayerRagdollController ragdollController,
-            CharacterVisualRoot visualRoot)
+            IObjectResolver resolver)
         {
             this.sourceInventory = sourceInventory;
-            this.ragdollController = ragdollController;
-            this.visualRoot = visualRoot;
+            ragdollController = resolver.TryResolve<Player.PlayerRagdollController>(out var resolvedRagdoll)
+                ? resolvedRagdoll
+                : null;
+            visualRoot = resolver.TryResolve<CharacterVisualRoot>(out var resolvedVisualRoot)
+                ? resolvedVisualRoot
+                : null;
             lootInventory = new GridOnlyInventory(sourceInventory);
         }
 
         public void ActivateCorpse()
         {
             IsLootable = sourceInventory != null;
+            SetCorpseLootZoneActive(IsLootable);
+        }
+
+        /// <summary>
+        /// Assigns the authored interaction zone for this corpse. A living character must
+        /// never expose that zone, so it is disabled until <see cref="ActivateCorpse"/>.
+        /// </summary>
+        public void ConfigureLootZone(GameObject lootZone)
+        {
+            corpseLootZone = lootZone;
+            SetCorpseLootZoneActive(IsLootable);
         }
 
         private void LateUpdate()
@@ -71,6 +87,14 @@ namespace Inventory.Looting
             return ragdollController != null
                 ? ragdollController.GetTopRagdollRootUnder(transform)
                 : null;
+        }
+
+        private void SetCorpseLootZoneActive(bool isActive)
+        {
+            if (corpseLootZone != null)
+            {
+                corpseLootZone.SetActive(isActive);
+            }
         }
 
         private sealed class GridOnlyInventory : ITiledInventory

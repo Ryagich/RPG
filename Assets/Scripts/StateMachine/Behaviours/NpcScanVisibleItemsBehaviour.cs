@@ -25,7 +25,7 @@ namespace StateMachine.Behaviours
                 return;
             }
 
-            var sensor = context.GetService<NpcVisionSensor>();
+            var sensor = context.GetService<NpcItemVisionSensor>();
             var vision = context.GetService<NpcVision>();
             var config = context.GetService<NpcItemPickupConfig>();
             if (sensor == null || vision == null || config == null)

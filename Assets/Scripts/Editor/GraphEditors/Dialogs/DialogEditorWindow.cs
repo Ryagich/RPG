@@ -51,6 +51,7 @@ namespace Dialogs.Graph.Editor
         private bool graphStructureDirty = true;
         private readonly Dictionary<DialogAnswer, CachedConnectionRoute> connectionRouteCache = new();
         private readonly Dictionary<ImplicitConnectionRouteKey, CachedConnectionRoute> implicitConnectionRouteCache = new();
+        private readonly GraphEditorConnectionAnchorRegistry<DialogAnswer> answerPickerAnchors = new();
         private readonly List<Rect> connectionObstacleRects = new();
         private int connectionLayoutVersion;
 
@@ -865,7 +866,7 @@ namespace Dialogs.Graph.Editor
 
             foreach (DialogNode node in currentGraph.Nodes)
             {
-                if (node.Phrase == null)
+                if (!IsTargetPhraseSelectable(node.Phrase))
                 {
                     continue;
                 }
@@ -960,6 +961,14 @@ namespace Dialogs.Graph.Editor
             {
                 CancelTargetSelection();
             }
+        }
+
+        private bool IsTargetPhraseSelectable(DialogPhrase phrase)
+        {
+            return targetSelection.IsActive &&
+                   targetSelection.PendingAnswer != null &&
+                   phrase != null &&
+                   phrase != targetSelection.SourcePhrase;
         }
 
         private void ReplacePhraseReferences(DialogPhrase oldPhrase, DialogPhrase newPhrase)
