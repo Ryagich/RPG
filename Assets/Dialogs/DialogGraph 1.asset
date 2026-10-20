@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: DialogGraph 1
   m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.DialogGraph
   Nodes:
-  - Position: {x: 1522.8628, y: 290.98038}
+  - Position: {x: 1521.6506, y: 584.3137}
     Phrase: {fileID: 11400000, guid: 4337390c93dfa9b4db1fdebe80f0e3d6, type: 2}
-  - Position: {x: 1498.47, y: 566.1565}
+  - Position: {x: 1097.2578, y: 911.611}
     Phrase: {fileID: 11400000, guid: 2fb2dbfc0afb54346b0901d0948e5e49, type: 2}
   - Position: {x: 1101.0194, y: 328.03906}
     Phrase: {fileID: 11400000, guid: 6f702fc1cac2cdf418d8e3212e8ba742, type: 2}
-  - Position: {x: 540.39197, y: 116.90187}
+  - Position: {x: 705.2405, y: 544.78064}
     Phrase: {fileID: 11400000, guid: 9ef9d13472ae65a44b5ea0f6a87348ce, type: 2}
   <EntryPhrase>k__BackingField: {fileID: 11400000, guid: 6f702fc1cac2cdf418d8e3212e8ba742, type: 2}
   suppressCheckpointOnClose: 0

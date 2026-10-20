@@ -3,30 +3,37 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f017ef0dab3961d4d9cc460c84f52c76, type: 3}
   m_Name: Harn - Village
   m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.DialogGraph
   Nodes:
-  - Position: {x: 0, y: 0}
+  - Position: {x: 1261.6091, y: 100.90957}
     Phrase: {fileID: 11400000, guid: a4900000000000000000000000000001, type: 2}
   - Position: {x: 350, y: -250}
     Phrase: {fileID: 11400000, guid: 210186c1ee044ec3801088af59e7bc1b, type: 2}
-  - Position: {x: 350, y: 0}
+  - Position: {x: 1321.3334, y: 833.3334}
     Phrase: {fileID: 11400000, guid: a4900000000000000000000000000002, type: 2}
-  - Position: {x: 350, y: 240}
+  - Position: {x: 112.89853, y: 566.95654}
     Phrase: {fileID: 11400000, guid: a4900000000000000000000000000003, type: 2}
   - Position: {x: 850, y: 140}
     Phrase: {fileID: 11400000, guid: a4900000000000000000000000000004, type: 2}
   - Position: {x: 850, y: 360}
     Phrase: {fileID: 11400000, guid: a4900000000000000000000000000005, type: 2}
-  - Position: {x: 350, y: 520}
+  - Position: {x: 1682.381, y: 625.7143}
     Phrase: {fileID: 11400000, guid: a4900000000000000000000000000006, type: 2}
-  - Position: {x: 350, y: 760}
+  - Position: {x: 495.7143, y: 717.1429}
     Phrase: {fileID: 11400000, guid: a4900000000000000000000000000007, type: 2}
-  - Position: {x: 350, y: 1000}
+  - Position: {x: 948.0952, y: 1020}
     Phrase: {fileID: 11400000, guid: a4900000000000000000000000000008, type: 2}
-  - Position: {x: 0, y: 1250}
+  - Position: {x: 2072.634, y: 153.77615}
     Phrase: {fileID: 11400000, guid: a4900000000000000000000000000009, type: 2}
-  - Position: {x: 0, y: 1400}
+  - Position: {x: 2003.31, y: 1213.5664}
     Phrase: {fileID: 11400000, guid: a4900000000000000000000000000010, type: 2}
   <EntryPhrase>k__BackingField: {fileID: 11400000, guid: a4900000000000000000000000000001, type: 2}
+  suppressCheckpointOnClose: 0

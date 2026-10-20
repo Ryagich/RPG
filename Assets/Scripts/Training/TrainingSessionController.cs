@@ -16,7 +16,6 @@ using Quests.Graph;
 using Quests.Graph.Model;
 using Stats;
 using TargetLock;
-using Telemetry;
 using UnityEngine;
 using VContainer;
 
@@ -110,7 +109,6 @@ namespace Training
         private IPublisher<MouseDown> mouseDownPublisher;
         private IPublisher<WeaponSlotInputMessage> weaponSlotInputPublisher;
         private INonLethalCombatSessionRegistry nonLethalCombatSessions;
-        private IGameTelemetry telemetry;
         private GameObject spawnedOpponent;
         private PlayerLifetimeScope playerScope;
         private NpcLifetimeScope opponentScope;
@@ -178,8 +176,7 @@ namespace Training
             IPublisher<RollInputMessage> rollInputPublisher,
             IPublisher<MouseDown> mouseDownPublisher,
             IPublisher<WeaponSlotInputMessage> weaponSlotInputPublisher,
-            INonLethalCombatSessionRegistry nonLethalCombatSessions,
-            IGameTelemetry telemetry)
+            INonLethalCombatSessionRegistry nonLethalCombatSessions)
         {
             dialogueEventSubscription?.Dispose();
             dialogueEventSubscription = dialogueEventSubscriber.Subscribe(OnDialogueGameplayEvent);
@@ -208,7 +205,6 @@ namespace Training
             this.mouseDownPublisher = mouseDownPublisher;
             this.weaponSlotInputPublisher = weaponSlotInputPublisher;
             this.nonLethalCombatSessions = nonLethalCombatSessions;
-            this.telemetry = telemetry;
         }
 
         private void OnDestroy()
@@ -662,10 +658,6 @@ namespace Training
             playerSheathedForEnding = false;
             opponentSheathedForEnding = false;
             sessionOutcome = outcome;
-            if (sessionKind == SessionKind.Tutorial && sessionOutcome == SessionOutcome.PlayerWon)
-            {
-                telemetry.Track(GameTelemetryEvents.OswinTrainingCompleted);
-            }
             SetOutcomeDialogueFlag();
             lessonContext.Clear();
             CompleteTutorialQuestIfNeeded();

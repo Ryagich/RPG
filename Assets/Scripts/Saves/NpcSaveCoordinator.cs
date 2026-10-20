@@ -5,7 +5,6 @@ using Stats;
 using UniRx;
 using UnityEngine;
 using VContainer.Unity;
-using YG;
 
 namespace Saves
 {

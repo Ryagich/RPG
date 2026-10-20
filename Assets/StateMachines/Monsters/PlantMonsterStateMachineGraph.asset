@@ -13,21 +13,21 @@ MonoBehaviour:
   m_Name: PlantMonsterStateMachineGraph
   m_EditorClassIdentifier: Assembly-CSharp::StateMachine.Graph.StateMachineGraph
   Nodes:
-  - Position: {x: 1543.1904, y: 283.5714}
+  - Position: {x: 3401.6143, y: 1056.1774}
     State: {fileID: 11400000, guid: ebc1763b364ba514f9e22c035ad7fdd8, type: 2}
-  - Position: {x: 485.7143, y: 321.90475}
+  - Position: {x: 1803.29, y: 1159.4805}
     State: {fileID: 11400000, guid: 1e4200f1f37dc264cbf759a5f716690a, type: 2}
-  - Position: {x: 870, y: 180}
+  - Position: {x: 2466.6663, y: 803.33325}
     State: {fileID: 11400000, guid: ecd86eafc9d0b9e4bbe1ea7313a2e308, type: 2}
-  - Position: {x: 1753.3334, y: 1136.3333}
+  - Position: {x: 3385.333, y: 2253.6665}
     State: {fileID: 11400000, guid: dce8ddddb8dcf064a94274cecbaae81e, type: 2}
-  - Position: {x: 2258.6665, y: 529.6666}
+  - Position: {x: 4301.333, y: 1374.9998}
     State: {fileID: 11400000, guid: 272c44532424f5e45bdd06776176f287, type: 2}
-  - Position: {x: 1256.3333, y: 1146.3333}
+  - Position: {x: 2624.333, y: 2252.9995}
     State: {fileID: 11400000, guid: df2456ef1e119424b92d560aaf28a3bd, type: 2}
-  - Position: {x: 561.6666, y: 1201.6667}
+  - Position: {x: 1971.6664, y: 2206.6665}
     State: {fileID: 11400000, guid: 47017a3b83b20b44a8468eb35f11b417, type: 2}
-  - Position: {x: 2119.3333, y: 154.12122}
+  - Position: {x: 3924.6663, y: 892.7877}
     State: {fileID: 11400000, guid: f1a2b3c4d5e6f708192a3b4c5d6e7f80, type: 2}
-  - Position: {x: 1350, y: 650}
+  - Position: {x: 2846.9692, y: 944.7877}
     State: {fileID: 11400000, guid: e85a3b36e42245d9bf9ac63127bb7f2e, type: 2}

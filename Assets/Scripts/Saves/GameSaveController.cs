@@ -6,7 +6,6 @@ using Money;
 using Quests;
 using Stats;
 using UnityEngine;
-using YG;
 
 namespace Saves
 {
@@ -113,7 +112,7 @@ namespace Saves
             return saveService.TryGetSavedPlayerPose(out pose);
         }
 
-        public bool TryGetSavedNpc(string characterId, out YG.SavedCharacterState savedState)
+        public bool TryGetSavedNpc(string characterId, out SavedCharacterState savedState)
         {
             return saveService.TryGetSavedNpc(characterId, out savedState);
         }
@@ -130,39 +129,29 @@ namespace Saves
             return reset;
         }
 
-        public float GetAdvertisingNewGameGraceRemainingSeconds()
-        {
-            return saveService.GetAdvertisingNewGameGraceRemainingSeconds();
-        }
-
-        public bool SetAdvertisingNewGameGraceRemainingSeconds(float remainingSeconds)
-        {
-            return saveService.SetAdvertisingNewGameGraceRemainingSeconds(remainingSeconds);
-        }
-
         internal bool TryGetLegacyMillScenario(out int stage, out int outcomeFlags)
         {
             return saveService.TryGetLegacyMillScenario(out stage, out outcomeFlags);
         }
 
-        internal YG.SavedWorldItem[] GetWorldItems() => saveService.GetWorldItems();
+        internal SavedWorldItem[] GetWorldItems() => saveService.GetWorldItems();
 
         internal string[] GetRetiredSceneWorldItemIds() => saveService.GetRetiredSceneWorldItemIds();
 
         internal void SetWorldItemState(
-            System.Collections.Generic.IEnumerable<YG.SavedWorldItem> worldItems,
+            System.Collections.Generic.IEnumerable<SavedWorldItem> worldItems,
             System.Collections.Generic.IEnumerable<string> retiredSceneWorldItemIds)
         {
             saveService.SetWorldItemState(worldItems, retiredSceneWorldItemIds);
         }
 
-        internal YG.SavedFarmPlant[] GetFarmPlants() => saveService.GetFarmPlants();
+        internal SavedFarmPlant[] GetFarmPlants() => saveService.GetFarmPlants();
 
-        internal YG.SavedFruitTree[] GetFruitTrees() => saveService.GetFruitTrees();
+        internal SavedFruitTree[] GetFruitTrees() => saveService.GetFruitTrees();
 
         internal void SetPlantWorldState(
-            System.Collections.Generic.IEnumerable<YG.SavedFarmPlant> farmPlants,
-            System.Collections.Generic.IEnumerable<YG.SavedFruitTree> fruitTrees)
+            System.Collections.Generic.IEnumerable<SavedFarmPlant> farmPlants,
+            System.Collections.Generic.IEnumerable<SavedFruitTree> fruitTrees)
         {
             saveService.SetPlantWorldState(farmPlants, fruitTrees);
         }

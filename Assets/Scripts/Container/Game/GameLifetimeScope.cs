@@ -20,8 +20,6 @@ using UI.Inventory;
 using Training;
 using Mill;
 using Saves;
-using Telemetry;
-using Advertising;
 
 namespace Container.Game
 {
@@ -149,7 +147,6 @@ namespace Container.Game
             builder.Register<InputHandler>(Lifetime.Singleton).AsSelf().As<IStartable>();
 
             builder.RegisterEntryPoint<GameWorldBootstrapper>().AsSelf();
-            builder.RegisterEntryPoint<AdvertisingService>().AsSelf();
             if (sceneSessionConfiguration.IsGameplayScene)
             {
                 builder.RegisterEntryPoint<MillQuestProgressionCoordinator>().AsSelf();
@@ -159,9 +156,6 @@ namespace Container.Game
 
             builder.Register<LootingContext>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueContext>(Lifetime.Singleton).AsSelf();
-            builder.RegisterEntryPoint<QuestTelemetryTracker>();
-            builder.RegisterEntryPoint<PlayerDeathTelemetryTracker>();
-            builder.RegisterEntryPoint<LocationTelemetryTracker>();
             builder.RegisterEntryPoint<DialogueExitController>().AsSelf();
             builder.RegisterEntryPoint<DialogueSaveCoordinator>().AsSelf();
             builder.Register<LocationTransitionSaveCoordinator>(Lifetime.Singleton).AsSelf();

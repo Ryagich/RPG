@@ -209,7 +209,7 @@ namespace GameModes
 
         /// <summary>
         /// Re-applies the state owned by the active game mode after an external fullscreen view
-        /// (for example, platform advertising) has changed Unity cursor or time settings.
+        /// has changed Unity cursor or time settings.
         /// </summary>
         public void RestoreCurrentModeState()
         {

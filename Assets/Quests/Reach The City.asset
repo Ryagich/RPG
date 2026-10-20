@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd8aa668e44a9644fa3bb8f03b7724ca, type: 3}
   m_Name: Reach The City
   m_EditorClassIdentifier: Assembly-CSharp::Quests.Graph.QuestGraph
+  persistentId: 2bb8dd23eb4d419fb0b8cea7da762f3f
   title:
     m_TableReference:
       m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
@@ -31,6 +32,7 @@ MonoBehaviour:
     m_WaitForCompletion: 0
     m_LocalVariables: []
   icon: {fileID: 0}
+  keepCompletedInJournal: 1
   Nodes:
   - Position: {x: 520, y: 360}
     NodeData: {fileID: 11400000, guid: 87e544c7ab7310e4796453c331df847c, type: 2}

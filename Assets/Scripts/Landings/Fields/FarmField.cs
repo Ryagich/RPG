@@ -112,7 +112,7 @@ namespace Landings.Fields
 
         private void SynchronizeVisuals()
         {
-            IReadOnlyList<YG.SavedFarmPlant> plants = plantWorld.GetFieldPlants(persistentId);
+            IReadOnlyList<SavedFarmPlant> plants = plantWorld.GetFieldPlants(persistentId);
             if (plants.Count == 0)
             {
                 return;
@@ -130,13 +130,13 @@ namespace Landings.Fields
                 RemoveVisual(visualId);
             }
 
-            foreach (YG.SavedFarmPlant plant in plants)
+            foreach (SavedFarmPlant plant in plants)
             {
                 SynchronizePlant(plant);
             }
         }
 
-        private void SynchronizePlant(YG.SavedFarmPlant plant)
+        private void SynchronizePlant(SavedFarmPlant plant)
         {
             if (plantConfig == null || plantConfig.Stages == null || plantConfig.Stages.Count == 0)
             {
@@ -176,7 +176,7 @@ namespace Landings.Fields
             }
         }
 
-        private GameObject CreateBodyVisual(YG.SavedFarmPlant plant, int stageIndex, bool riseFromGround)
+        private GameObject CreateBodyVisual(SavedFarmPlant plant, int stageIndex, bool riseFromGround)
         {
             Vector3 plantPosition = ToPosition(plant);
             GameObject prefab = plantConfig.Stages[stageIndex];
@@ -221,14 +221,14 @@ namespace Landings.Fields
             visual.Collectable = itemHolder;
         }
 
-        private void SynchronizeFruitVisuals(PlantVisual visual, YG.SavedFarmPlant plant, FruitPlantConfig config)
+        private void SynchronizeFruitVisuals(PlantVisual visual, SavedFarmPlant plant, FruitPlantConfig config)
         {
             Transform fruitPlaces = FindChildRecursive(visual.Root.transform, "FruitPlaces") ?? visual.Root.transform;
             int slotCount = Mathf.Min(plant.fruits?.Length ?? 0, Mathf.Max(1, fruitPlaces.childCount));
             for (int index = 0; index < slotCount; index++)
             {
                 Transform point = fruitPlaces.childCount == 0 ? fruitPlaces : fruitPlaces.GetChild(index);
-                YG.SavedFarmFruit fruit = plant.fruits[index];
+                SavedFarmFruit fruit = plant.fruits[index];
                 visual.Fruits.TryGetValue(index, out FruitVisual fruitVisual);
 
                 if (fruit.stageIndex < 0 || config.FruitStages == null || config.FruitStages.Count == 0)
@@ -456,7 +456,7 @@ namespace Landings.Fields
             }
         }
 
-        private List<Vector3> BuildPlantPositions(IReadOnlyList<YG.SavedFarmPlant> plants)
+        private List<Vector3> BuildPlantPositions(IReadOnlyList<SavedFarmPlant> plants)
         {
             int count = plants.Count;
             var candidates = new List<Vector3>();
@@ -678,7 +678,7 @@ namespace Landings.Fields
             return null;
         }
 
-        private static Vector3 ToPosition(YG.SavedFarmPlant plant) =>
+        private static Vector3 ToPosition(SavedFarmPlant plant) =>
             new(plant.positionX, plant.positionY, plant.positionZ);
 
         private static float RandomInterval(Vector2 interval)

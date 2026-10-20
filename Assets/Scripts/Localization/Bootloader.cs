@@ -1,55 +1,49 @@
-﻿using System.Threading;
+using System.Threading;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
+using Saves;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using VContainer.Unity;
-using YG;
-using YG.Insides;
-
-// using YG;
-// using YG.Insides;
 
 namespace Localization
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class Bootloader : IStartable
+    public sealed class Bootloader : IStartable
     {
         private readonly BootCompletion bootCompletion;
+        private readonly LocalSaveStore saveStore;
 
-        public Bootloader(BootCompletion bootCompletion)
+        public Bootloader(BootCompletion bootCompletion, LocalSaveStore saveStore)
         {
             this.bootCompletion = bootCompletion;
+            this.saveStore = saveStore;
         }
 
         public async void Start()
         {
             await StartAsync();
         }
-        
+
         public async UniTask StartAsync(CancellationToken cancellation = default)
         {
-            Debug.Log($"Bootloader starting: YG2Enabled={YG2.isSDKEnabled}");
-            
-            await YG2Awaiter.WaitForSDKDataAsync();
-            
-            Debug.Log("Waiting for SDK data");
+            saveStore.Load();
+            await LocalizationSettings.InitializationOperation;
 
-            YG2.InitMetrica();
-            YG2.GetAuth();
-            YG2.GetLanguage();
-            
-            Debug.Log($"Configuring language: '{YG2.lang}'");
-            YGInsides.LoadProgress();
-            
-            await LocalizationHelper.InvalidateAsync(YG2.lang);
-            LocalizationAwaiter.SignalReady();
-            YG2.GameReadyAPI();
-
-            if (!YG2.saves.GameReadyMetricSend)
+            string languageCode = saveStore.Data.languageCode;
+            if (string.IsNullOrWhiteSpace(languageCode))
             {
-                YG2.MetricaSend("GameReady");
-                YG2.saves.GameReadyMetricSend = true;
+                Locale systemLocale = new SystemLocaleSelector().GetStartupLocale(LocalizationSettings.AvailableLocales);
+                if (systemLocale != null)
+                {
+                    LocalizationSettings.SelectedLocale = systemLocale;
+                    languageCode = systemLocale.Identifier.Code;
+                    saveStore.Data.languageCode = languageCode;
+                    saveStore.Save();
+                }
             }
-            
+
+            await LocalizationHelper.InvalidateAsync(languageCode);
+            LocalizationAwaiter.SignalReady();
             bootCompletion.Signal();
         }
     }

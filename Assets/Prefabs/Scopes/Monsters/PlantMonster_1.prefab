@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 7123456789012345690}
   - component: {fileID: 5310814510161613626}
   - component: {fileID: 8565410629952670481}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: PlantMonster_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -39,8 +39,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1794930471298294352}
   - {fileID: 7427635511783722966}
@@ -3798,7 +3798,7 @@ GameObject:
   - component: {fileID: 2955309378792232772}
   - component: {fileID: 9000000000000000214}
   - component: {fileID: 9000000000000000215}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: FlowerBones06
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3865,7 +3865,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6105299633478180963}
   - component: {fileID: 4780346653278023559}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Vines 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3961,7 +3961,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8812327063998420531}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: PollenBones02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3993,7 +3993,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 229395906996018160}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones11
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4027,7 +4027,7 @@ GameObject:
   - component: {fileID: 4028602500849710693}
   - component: {fileID: 415568291784479071}
   - component: {fileID: 5766621272665237256}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Point01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4094,7 +4094,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1875127349933135051}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG045
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4127,7 +4127,7 @@ GameObject:
   - component: {fileID: 6686957674608469516}
   - component: {fileID: 4991406299290559749}
   - component: {fileID: 5214966972116748062}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: FlowerBones03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4262,7 +4262,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4896386986149569129}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4294,7 +4294,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3004024214514530105}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG042
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4328,7 +4328,7 @@ GameObject:
   - component: {fileID: 1479712173888624052}
   - component: {fileID: 9000000000000000222}
   - component: {fileID: 9000000000000000223}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: FlowerBones10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4397,7 +4397,7 @@ GameObject:
   - component: {fileID: 3936016399433991749}
   - component: {fileID: 7806569116867482166}
   - component: {fileID: 9000000000000000206}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: PlantBone01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4464,7 +4464,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7371361911677088226}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG041
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4496,7 +4496,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7600501894310545349}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: PlantBone00
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4530,7 +4530,7 @@ GameObject:
   - component: {fileID: 8992298790303259601}
   - component: {fileID: 9000000000000000218}
   - component: {fileID: 9000000000000000219}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: FlowerBones08
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4597,7 +4597,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3670220892169701686}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: PlantBone02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4629,7 +4629,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2555200686041303311}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG033
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4661,7 +4661,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5456873910197060744}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: PollenBones06
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4693,7 +4693,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2386653150028621421}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: PollenBones07
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4725,7 +4725,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5599938166051147029}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones18
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4757,7 +4757,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 52191052020049671}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG015
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4789,7 +4789,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6540459264437272536}
   - component: {fileID: 4176610100824613592}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Leaves_LP
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4910,7 +4910,7 @@ GameObject:
   - component: {fileID: 8745302926559019294}
   - component: {fileID: 6379166585235445732}
   - component: {fileID: 828975075821299663}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Point03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4977,7 +4977,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8452137330025626767}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5008,7 +5008,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7348780270461676620}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones20
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5039,7 +5039,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1498395633190076359}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG011
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5071,7 +5071,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 969181249450470870}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones19
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5103,7 +5103,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3914798365552079665}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: PollenBones03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5135,7 +5135,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1446285937716350898}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: PollenBones08
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5278,7 +5278,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1794930471298294352}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Flower_LP
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5320,7 +5320,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8117570676433289956}
   - component: {fileID: 4481306745928063227}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Vines 4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5433,7 +5433,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3511583611008043154}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: PlantBone03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5467,7 +5467,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6133924220405993281}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5499,7 +5499,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5413458338068910419}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones14
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5531,7 +5531,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8834086396676666154}
   - component: {fileID: 4694531960864056563}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Vines
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5648,7 +5648,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1077227065858203998}
   - component: {fileID: 4055200878465569671}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Plant_LP
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5803,7 +5803,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1150518476712036855}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5834,7 +5834,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6412472227371043273}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones13
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5866,7 +5866,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8381202215391761867}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones17
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6024,7 +6024,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6847138658473654218}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones09
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6056,7 +6056,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3700938389065523628}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones12
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6087,7 +6087,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 210758367276674095}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones11
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6119,7 +6119,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7776439663049789322}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG043
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6151,7 +6151,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1774185635957843216}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIGHub
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6187,7 +6187,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9133338019379310197}
   - component: {fileID: 5587110480345294369}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Flowers_LP
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6314,7 +6314,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7109243064992833500}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones09
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6346,7 +6346,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1658814506116065288}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG025
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6377,7 +6377,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5137083871840556007}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones06
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6410,7 +6410,7 @@ GameObject:
   - component: {fileID: 4871538525274720017}
   - component: {fileID: 9000000000000000212}
   - component: {fileID: 9000000000000000213}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: FlowerBones05
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6479,7 +6479,7 @@ GameObject:
   - component: {fileID: 9101330636139205808}
   - component: {fileID: 9000000000000000220}
   - component: {fileID: 9000000000000000221}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: FlowerBones09
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6545,7 +6545,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1870540346146497444}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6577,7 +6577,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3003840085279645553}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones07
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6611,7 +6611,7 @@ GameObject:
   - component: {fileID: 3330138396529308105}
   - component: {fileID: 9000000000000000226}
   - component: {fileID: 9000000000000000227}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: FlowerBones12
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6677,7 +6677,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5807067170603096803}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegsDummy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6709,7 +6709,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1777573047875110479}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones15
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6741,7 +6741,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7041839398871157449}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG022
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6773,7 +6773,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5424448477810407438}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones15
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6805,7 +6805,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7801381176101019725}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6837,7 +6837,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7427635511783722966}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: PlantRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6870,7 +6870,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5907400291304015193}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones08
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6901,7 +6901,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 980683236542728401}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones08
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6933,7 +6933,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 962237104501356816}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: PollenBones01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6967,7 +6967,7 @@ GameObject:
   - component: {fileID: 7982001687282828560}
   - component: {fileID: 1560883535518406770}
   - component: {fileID: 7821385369153266907}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: FlowerBones02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7034,7 +7034,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6888147318583800791}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG032
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7066,7 +7066,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4689230753921449185}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG014
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7099,7 +7099,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4546751967179938721}
   - component: {fileID: 7665259990582887155}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Pollens_LP
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7201,7 +7201,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8279074854473426722}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones07
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7233,7 +7233,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5474863191603172608}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: PollenBones04
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7264,7 +7264,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8033957384816705423}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG023
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7298,7 +7298,7 @@ GameObject:
   - component: {fileID: 2569876292759666648}
   - component: {fileID: 9000000000000000216}
   - component: {fileID: 9000000000000000217}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: FlowerBones07
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7365,7 +7365,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7800153575925232343}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG044
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7397,7 +7397,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5921919039540606310}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones16
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7428,7 +7428,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6627121664647834290}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Point00
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7474,7 +7474,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8724523492407991150}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones13
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7506,7 +7506,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 408110312528381984}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones04
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7538,7 +7538,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7671554399446945101}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG034
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7570,7 +7570,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 430171124822367391}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: PlantBone04
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7602,7 +7602,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4199925609173830257}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Point04
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7636,7 +7636,7 @@ GameObject:
   - component: {fileID: 6020193445309890316}
   - component: {fileID: 8347557377416885775}
   - component: {fileID: 7050255236112821062}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Point02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7703,7 +7703,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3601499315515394396}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG024
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7736,7 +7736,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8172494850823793379}
   - component: {fileID: 4891633194447250470}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Spikes_LP
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7879,7 +7879,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1128731292679450189}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG035
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7911,7 +7911,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1117632203667087995}
   - component: {fileID: 238774608236330699}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Teeth
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8023,7 +8023,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6046476653834426976}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG021
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8055,7 +8055,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5535066108938565508}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG013
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8087,7 +8087,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8750707935584639531}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8118,7 +8118,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4419652140847239124}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: PollenBones05
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8150,7 +8150,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4338623988937446974}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones14
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8183,7 +8183,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5091884156731901608}
   - component: {fileID: 346490318625561391}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Vines 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8292,7 +8292,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7754112305357943307}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones04
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8325,7 +8325,7 @@ GameObject:
   - component: {fileID: 4279444203472912835}
   - component: {fileID: 9000000000000000210}
   - component: {fileID: 9000000000000000211}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: FlowerBones04
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8392,7 +8392,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 981570832564313717}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8424,7 +8424,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5191978458118475876}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones16
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8456,7 +8456,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2115042151951226421}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG012
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8490,7 +8490,7 @@ GameObject:
   - component: {fileID: 4654085715948505952}
   - component: {fileID: 9000000000000000224}
   - component: {fileID: 9000000000000000225}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: FlowerBones11
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8557,7 +8557,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 301162723130212607}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones05
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8589,7 +8589,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7177462449467804172}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones12
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8621,7 +8621,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4446131401628745238}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LeafBones05
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8653,7 +8653,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1531630284250349698}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: LegRIG031
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8685,7 +8685,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7741252529398814049}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: ArmBones06
   m_TagString: Untagged
   m_Icon: {fileID: 0}

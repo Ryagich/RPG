@@ -141,7 +141,7 @@ namespace Landings.Plants
 
         private void SynchronizeVisuals()
         {
-            if (!plantWorld.TryGetFruitTree(persistentId, out YG.SavedFruitTree state))
+            if (!plantWorld.TryGetFruitTree(persistentId, out SavedFruitTree state))
             {
                 return;
             }

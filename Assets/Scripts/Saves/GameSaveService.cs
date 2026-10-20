@@ -15,12 +15,11 @@ using Locations;
 using Stats;
 using UnityEngine;
 using VContainer.Unity;
-using YG;
 
 namespace Saves
 {
     /// <summary>
-    /// Infrastructure adapter between runtime player state and PluginYG's primitive save object.
+    /// Infrastructure adapter between runtime player state and the local save snapshot.
     /// It owns no quest or location rules; callers provide the state that their domain has
     /// already reached.
     /// </summary>
@@ -35,18 +34,18 @@ namespace Saves
         private const int NpcPersistentIdSaveVersion = 7;
         private const int WorldItemsSaveVersion = 8;
         private const int PlantWorldSaveVersion = 9;
-        private const int AdvertisingSaveVersion = 10;
-        private const int CurrentVersion = AdvertisingSaveVersion;
+        private const int CurrentVersion = 10;
         private const string PlayerCharacterId = "player";
         private readonly BootCompletion bootCompletion;
         private readonly RuntimeFactionRelations factionRelations;
         private readonly DialogueRuntimeFlagRegistry dialogueRuntimeFlags;
         private readonly NpcCharacterSaveRegistry npcRegistry;
+        private readonly LocalSaveStore saveStore;
         private readonly System.Threading.Tasks.TaskCompletionSource<bool> ready = new();
 
         public System.Threading.Tasks.Task Ready => ready.Task;
         public bool IsReady { get; private set; }
-        public bool HasSavedData => IsReady && YG2.saves.saveVersion > 0;
+        public bool HasSavedData => IsReady && saveStore.Data.saveVersion > 0;
 
         public event Action ReadyStateChanged;
 
@@ -54,20 +53,23 @@ namespace Saves
             BootCompletion bootCompletion,
             RuntimeFactionRelations factionRelations,
             DialogueRuntimeFlagRegistry dialogueRuntimeFlags,
-            NpcCharacterSaveRegistry npcRegistry)
+            NpcCharacterSaveRegistry npcRegistry,
+            LocalSaveStore saveStore)
         {
             this.bootCompletion = bootCompletion;
             this.factionRelations = factionRelations;
             this.dialogueRuntimeFlags = dialogueRuntimeFlags;
             this.npcRegistry = npcRegistry;
+            this.saveStore = saveStore;
         }
 
         public async void Start()
         {
             await bootCompletion.WaitAsync();
+            saveStore.Load();
             EnsureInitialized();
             MigrateNpcStatesToPersistentIds();
-            RestoreFactionRelations(factionRelations, YG2.saves.factionRelations);
+            RestoreFactionRelations(factionRelations, saveStore.Data.factionRelations);
             IsReady = true;
             ready.TrySetResult(true);
             ReadyStateChanged?.Invoke();
@@ -87,7 +89,7 @@ namespace Saves
                 return false;
             }
 
-            SavesYG data = YG2.saves;
+            GameSaveData data = saveStore.Data;
             data.locationId = locationId ?? string.Empty;
             data.entranceId = entranceId ?? string.Empty;
             data.playerPose = playerPose;
@@ -134,7 +136,7 @@ namespace Saves
                 return false;
             }
 
-            SavesYG data = YG2.saves;
+            GameSaveData data = saveStore.Data;
             if (data.saveVersion <= 0)
             {
                 return false;
@@ -164,13 +166,13 @@ namespace Saves
         internal bool TryGetSavedNpc(string characterId, out SavedCharacterState savedState)
         {
             savedState = null;
-            if (!IsReady || string.IsNullOrWhiteSpace(characterId) || YG2.saves.saveVersion < NpcPersistentIdSaveVersion ||
-                YG2.saves.npcCharacters == null)
+            if (!IsReady || string.IsNullOrWhiteSpace(characterId) || saveStore.Data.saveVersion < NpcPersistentIdSaveVersion ||
+                saveStore.Data.npcCharacters == null)
             {
                 return false;
             }
 
-            savedState = YG2.saves.npcCharacters.FirstOrDefault(candidate => candidate != null &&
+            savedState = saveStore.Data.npcCharacters.FirstOrDefault(candidate => candidate != null &&
                 string.Equals(candidate.characterId, characterId, StringComparison.Ordinal));
             return savedState != null;
         }
@@ -179,25 +181,25 @@ namespace Saves
         {
             locationId = null;
             entranceId = null;
-            if (!IsReady || YG2.saves.saveVersion <= 0 || string.IsNullOrWhiteSpace(YG2.saves.locationId))
+            if (!IsReady || saveStore.Data.saveVersion <= 0 || string.IsNullOrWhiteSpace(saveStore.Data.locationId))
             {
                 return false;
             }
 
-            locationId = YG2.saves.locationId;
-            entranceId = YG2.saves.entranceId;
+            locationId = saveStore.Data.locationId;
+            entranceId = saveStore.Data.entranceId;
             return true;
         }
 
         internal bool TryGetSavedPlayerPose(out Pose pose)
         {
             pose = default;
-            if (!IsReady || YG2.saves.saveVersion <= 0)
+            if (!IsReady || saveStore.Data.saveVersion <= 0)
             {
                 return false;
             }
 
-            SavedPlayerPose savedPose = YG2.saves.playerPose;
+            SavedPlayerPose savedPose = saveStore.Data.playerPose;
             if (savedPose.isValid == 0 ||
                 !IsFinite(savedPose.positionX) || !IsFinite(savedPose.positionY) || !IsFinite(savedPose.positionZ) ||
                 !IsFinite(savedPose.rotationX) || !IsFinite(savedPose.rotationY) ||
@@ -225,7 +227,7 @@ namespace Saves
         }
 
         /// <summary>
-        /// Replaces the persisted game snapshot with PluginYG's default save object.
+        /// Replaces the persisted game snapshot with a fresh project-owned save object.
         /// Runtime faction state is reset as well because the project scope survives a return
         /// to the main menu.
         /// </summary>
@@ -236,11 +238,11 @@ namespace Saves
                 return false;
             }
 
-            YG2.SetDefaultSaves();
-            // PluginYG constructs a fresh object, but the game owns the semantic meaning of a
-            // new game. Set every application-owned field explicitly so a future field
-            // initializer or PluginYG migration cannot turn a new game into a loadable save.
-            SavesYG data = YG2.saves;
+            GameSaveData data = new GameSaveData
+            {
+                languageCode = saveStore.Data.languageCode
+            };
+            saveStore.Replace(data);
             data.saveVersion = 0;
             data.locationId = string.Empty;
             data.entranceId = string.Empty;
@@ -250,8 +252,6 @@ namespace Saves
             data.stamina = 0f;
             data.water = 0f;
             data.food = 0f;
-            data.GameReadyMetricSend = false;
-            data.advertisingNewGameGraceRemainingSeconds = 0f;
             data.playerCharacter = null;
             data.npcCharacters = Array.Empty<SavedCharacterState>();
             data.quests = Array.Empty<SavedQuestProgress>();
@@ -270,23 +270,6 @@ namespace Saves
             return true;
         }
 
-        internal float GetAdvertisingNewGameGraceRemainingSeconds()
-        {
-            return IsReady ? Mathf.Max(0f, YG2.saves.advertisingNewGameGraceRemainingSeconds) : 0f;
-        }
-
-        internal bool SetAdvertisingNewGameGraceRemainingSeconds(float remainingSeconds)
-        {
-            if (!IsReady)
-            {
-                return false;
-            }
-
-            YG2.saves.advertisingNewGameGraceRemainingSeconds = Mathf.Max(0f, remainingSeconds);
-            Persist();
-            return true;
-        }
-
         internal void RestoreLocationTransition(LocationTransitionContext transitionContext)
         {
             if (transitionContext == null || transitionContext.HasPendingTransition ||
@@ -298,10 +281,10 @@ namespace Saves
             transitionContext.SetPendingTransition(locationId, entranceId);
         }
 
-        internal SavedWorldItem[] GetWorldItems() => YG2.saves.worldItems ?? Array.Empty<SavedWorldItem>();
+        internal SavedWorldItem[] GetWorldItems() => saveStore.Data.worldItems ?? Array.Empty<SavedWorldItem>();
 
         internal string[] GetRetiredSceneWorldItemIds() =>
-            YG2.saves.retiredSceneWorldItemIds ?? Array.Empty<string>();
+            saveStore.Data.retiredSceneWorldItemIds ?? Array.Empty<string>();
 
         /// <summary>
         /// Updates only the in-memory checkpoint. Complete checkpoint coordinators retain
@@ -311,16 +294,16 @@ namespace Saves
             IEnumerable<SavedWorldItem> worldItems,
             IEnumerable<string> retiredSceneWorldItemIds)
         {
-            YG2.saves.worldItems = worldItems?.ToArray() ?? Array.Empty<SavedWorldItem>();
-            YG2.saves.retiredSceneWorldItemIds = retiredSceneWorldItemIds?
+            saveStore.Data.worldItems = worldItems?.ToArray() ?? Array.Empty<SavedWorldItem>();
+            saveStore.Data.retiredSceneWorldItemIds = retiredSceneWorldItemIds?
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .Distinct(StringComparer.Ordinal)
                 .ToArray() ?? Array.Empty<string>();
         }
 
-        internal SavedFarmPlant[] GetFarmPlants() => YG2.saves.farmPlants ?? Array.Empty<SavedFarmPlant>();
+        internal SavedFarmPlant[] GetFarmPlants() => saveStore.Data.farmPlants ?? Array.Empty<SavedFarmPlant>();
 
-        internal SavedFruitTree[] GetFruitTrees() => YG2.saves.fruitTrees ?? Array.Empty<SavedFruitTree>();
+        internal SavedFruitTree[] GetFruitTrees() => saveStore.Data.fruitTrees ?? Array.Empty<SavedFruitTree>();
 
         /// <summary>
         /// Changes only the in-memory save snapshot. Plant growth never decides when the game
@@ -330,8 +313,8 @@ namespace Saves
             IEnumerable<SavedFarmPlant> farmPlants,
             IEnumerable<SavedFruitTree> fruitTrees)
         {
-            YG2.saves.farmPlants = farmPlants?.ToArray() ?? Array.Empty<SavedFarmPlant>();
-            YG2.saves.fruitTrees = fruitTrees?.ToArray() ?? Array.Empty<SavedFruitTree>();
+            saveStore.Data.farmPlants = farmPlants?.ToArray() ?? Array.Empty<SavedFarmPlant>();
+            saveStore.Data.fruitTrees = fruitTrees?.ToArray() ?? Array.Empty<SavedFruitTree>();
         }
 
         /// <summary>
@@ -342,13 +325,13 @@ namespace Saves
         {
             stage = 0;
             outcomeFlags = 0;
-            if (!IsReady || YG2.saves.saveVersion <= 0 || YG2.saves.saveVersion >= MillQuestSaveVersion)
+            if (!IsReady || saveStore.Data.saveVersion <= 0 || saveStore.Data.saveVersion >= MillQuestSaveVersion)
             {
                 return false;
             }
 
-            stage = YG2.saves.millScenarioStage;
-            int[] savedFlags = YG2.saves.millOutcomeFlags;
+            stage = saveStore.Data.millScenarioStage;
+            int[] savedFlags = saveStore.Data.millOutcomeFlags;
             outcomeFlags = savedFlags != null && savedFlags.Length > 0 ? savedFlags[0] : 0;
             return stage != 0 || outcomeFlags != 0;
         }
@@ -516,27 +499,27 @@ namespace Saves
             return completedNodes;
         }
 
-        private static void EnsureInitialized()
+        private void EnsureInitialized()
         {
-            YG2.saves.quests ??= Array.Empty<SavedQuestProgress>();
-            YG2.saves.inventory ??= Array.Empty<SavedInventoryItem>();
-            YG2.saves.npcCharacters ??= Array.Empty<SavedCharacterState>();
-            YG2.saves.millOutcomeFlags ??= Array.Empty<int>();
-            YG2.saves.factionRelations ??= Array.Empty<SavedFactionRelation>();
-            YG2.saves.worldItems ??= Array.Empty<SavedWorldItem>();
-            YG2.saves.retiredSceneWorldItemIds ??= Array.Empty<string>();
-            YG2.saves.farmPlants ??= Array.Empty<SavedFarmPlant>();
-            YG2.saves.fruitTrees ??= Array.Empty<SavedFruitTree>();
+            saveStore.Data.quests ??= Array.Empty<SavedQuestProgress>();
+            saveStore.Data.inventory ??= Array.Empty<SavedInventoryItem>();
+            saveStore.Data.npcCharacters ??= Array.Empty<SavedCharacterState>();
+            saveStore.Data.millOutcomeFlags ??= Array.Empty<int>();
+            saveStore.Data.factionRelations ??= Array.Empty<SavedFactionRelation>();
+            saveStore.Data.worldItems ??= Array.Empty<SavedWorldItem>();
+            saveStore.Data.retiredSceneWorldItemIds ??= Array.Empty<string>();
+            saveStore.Data.farmPlants ??= Array.Empty<SavedFarmPlant>();
+            saveStore.Data.fruitTrees ??= Array.Empty<SavedFruitTree>();
         }
 
-        private static void MigrateNpcStatesToPersistentIds()
+        private void MigrateNpcStatesToPersistentIds()
         {
-            if (YG2.saves.saveVersion <= 0 || YG2.saves.saveVersion >= NpcPersistentIdSaveVersion)
+            if (saveStore.Data.saveVersion <= 0 || saveStore.Data.saveVersion >= NpcPersistentIdSaveVersion)
             {
                 return;
             }
 
-            YG2.saves.npcCharacters = Array.Empty<SavedCharacterState>();
+            saveStore.Data.npcCharacters = Array.Empty<SavedCharacterState>();
         }
 
         private static bool IsFinite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
@@ -626,9 +609,9 @@ namespace Saves
             return states.Values.ToArray();
         }
 
-        private static void Persist()
+        private void Persist()
         {
-            YG2.SaveProgress();
+            saveStore.Save();
         }
     }
 }

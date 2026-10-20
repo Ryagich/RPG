@@ -7,7 +7,6 @@ using Inventory.Item;
 using Inventory.Slot;
 using Inventory.Storage;
 using UnityEngine;
-using YG;
 
 namespace Saves
 {

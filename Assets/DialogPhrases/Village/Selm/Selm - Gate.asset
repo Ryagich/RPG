@@ -2,10 +2,47 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cab1eab763ecf6f4c96f41d14656eb42, type: 3}
   m_Name: Selm - Gate
   m_EditorClassIdentifier: Assembly-CSharp::Dialogs.Graph.Model.DialogPhrase
-  text: {m_TableReference: {m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482}, m_TableEntryReference: {m_KeyId: 99200000000000264, m_Key: }, m_FallbackState: 0, m_WaitForCompletion: 0, m_LocalVariables: []}
+  text:
+    m_TableReference:
+      m_TableCollectionName: GUID
+    m_TableEntryReference:
+      m_KeyId: 99200000000000264
+      m_Key: 
+    m_FallbackState: 0
+    m_WaitForCompletion: 0
+    m_LocalVariables: []
+  alternativeTexts: []
+  isForcedDialoguePhrase: 1
+  forcedDialoguePriority: 0
+  restoresExitAbility: 0
+  isQuestPhrase: 0
+  questAnswer:
+    text:
+      m_TableReference:
+        m_TableCollectionName: 
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 0}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 0
+    conditions: []
   isConversationTopic: 0
   conversationAnswer:
     text:
@@ -13,15 +50,56 @@ MonoBehaviour:
         m_TableCollectionName: GUID:bf30f5dd6628f424e86623c160908482
       m_TableEntryReference:
         m_KeyId: 99200000000000263
-        m_Key:
+        m_Key: 
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    nextPhrase: {fileID: 11400000, guid: a4e00000000000000000000000000006, type: 2}
+    nextPhrase: {fileID: 11400000}
     forceExitAfterAnswer: 0
     continueForcedDialogueAfterExit: 1
     hasGameplayEvents: 0
     gameplayEvents: []
     hasConditions: 0
     conditions: []
+  isConversationReturnAction: 0
+  conversationReturnAnswer:
+    text:
+      m_TableReference:
+        m_TableCollectionName: 
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 0}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 0
+    conditions: []
+  isDialogueExitAction: 0
+  dialogueExitAnswer:
+    text:
+      m_TableReference:
+        m_TableCollectionName: 
+      m_TableEntryReference:
+        m_KeyId: 0
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    nextPhrase: {fileID: 0}
+    forceExitAfterAnswer: 0
+    continueForcedDialogueAfterExit: 1
+    hasGameplayEvents: 0
+    gameplayEvents: []
+    hasConditions: 0
+    conditions: []
+  hasGameplayEvents: 0
+  gameplayEvents: []
   answers: []
+  references:
+    version: 2
+    RefIds: []

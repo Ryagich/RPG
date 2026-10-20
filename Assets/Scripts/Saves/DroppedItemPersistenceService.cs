@@ -10,7 +10,6 @@ using Locations;
 using UnityEngine;
 using VContainer.Unity;
 using Object = UnityEngine.Object;
-using YG;
 
 namespace Saves
 {

@@ -4,7 +4,6 @@ using System.Linq;
 using Landings.Plants.PlantConfigs;
 using UnityEngine;
 using VContainer.Unity;
-using YG;
 
 namespace Saves
 {
