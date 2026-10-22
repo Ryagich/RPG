@@ -18,6 +18,7 @@ namespace UI.UIElements
         [field: SerializeField] public Button ToGameButton { get; private set; }
         [field: SerializeField] public Button ContinueButton { get; private set; }
         [field: SerializeField] public Button ToDevelopButton { get; private set; }
+        [field: SerializeField] public Button DemoButton { get; private set; }
         [field: SerializeField] public Button SettingsButton { get; private set; }
 
         [SerializeField, Min(0f)] private float fadeOutTime = 1f;

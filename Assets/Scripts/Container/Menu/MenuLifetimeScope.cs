@@ -54,6 +54,7 @@ namespace Container.Menu
     {
         private const string DevelopSceneName = "Develop";
         private const string GameSceneName = "Village";
+        private const string DemoSceneName = "Demo";
 
         private readonly SceneLoadingService sceneLoadingService;
         private readonly MenuMainPage mainPage;
@@ -97,6 +98,7 @@ namespace Container.Menu
             mainPage.NewGameRequested += StartNewGame;
             mainPage.ContinueRequested += LoadGame;
             mainPage.DevelopRequested += LoadDevelop;
+            mainPage.DemoRequested += LoadDemo;
             mainPage.SettingsRequested += ShowSettings;
             SubscribeSettingsPage(bindingsSettingsPage);
             SubscribeSettingsPage(soundsSettingsPage);
@@ -117,6 +119,7 @@ namespace Container.Menu
             mainPage.NewGameRequested -= StartNewGame;
             mainPage.ContinueRequested -= LoadGame;
             mainPage.DevelopRequested -= LoadDevelop;
+            mainPage.DemoRequested -= LoadDemo;
             mainPage.SettingsRequested -= ShowSettings;
             UnsubscribeSettingsPage(bindingsSettingsPage);
             UnsubscribeSettingsPage(soundsSettingsPage);
@@ -137,6 +140,12 @@ namespace Container.Menu
         {
             audioService.StopMainMenuMusic();
             sceneLoadingService.Load(GameSceneName);
+        }
+
+        private void LoadDemo()
+        {
+            audioService.StopMainMenuMusic();
+            sceneLoadingService.Load(DemoSceneName);
         }
 
         private void StartNewGame()
@@ -209,6 +218,7 @@ namespace Container.Menu
         public event System.Action NewGameRequested;
         public event System.Action ContinueRequested;
         public event System.Action DevelopRequested;
+        public event System.Action DemoRequested;
         public event System.Action SettingsRequested;
 
         public MenuMainPage(UIConfig uiConfig, GameSaveController saveController, Canvas canvas, IObjectResolver resolver)
@@ -245,6 +255,7 @@ namespace Container.Menu
             menuUI.ToGameButton.onClick.AddListener(OnGameRequested);
             menuUI.ContinueButton.onClick.AddListener(OnContinueRequested);
             menuUI.ToDevelopButton.onClick.AddListener(OnDevelopRequested);
+            menuUI.DemoButton.onClick.AddListener(OnDemoRequested);
             menuUI.SettingsButton.onClick.AddListener(OnSettingsRequested);
             saveController.ReadyStateChanged += RefreshContinueAvailability;
             RefreshContinueAvailability();
@@ -262,6 +273,7 @@ namespace Container.Menu
                 menuUI.ToGameButton.onClick.RemoveListener(OnGameRequested);
                 menuUI.ContinueButton.onClick.RemoveListener(OnContinueRequested);
                 menuUI.ToDevelopButton.onClick.RemoveListener(OnDevelopRequested);
+                menuUI.DemoButton.onClick.RemoveListener(OnDemoRequested);
                 menuUI.SettingsButton.onClick.RemoveListener(OnSettingsRequested);
             }
 
@@ -304,6 +316,7 @@ namespace Container.Menu
         }
 
         private void OnDevelopRequested() => DevelopRequested?.Invoke();
+        private void OnDemoRequested() => DemoRequested?.Invoke();
         private void OnSettingsRequested() => SettingsRequested?.Invoke();
 
         private void RefreshContinueAvailability()
