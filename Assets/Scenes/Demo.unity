@@ -14,10 +14,10 @@ OcclusionCullingSettings:
 RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
-  m_Fog: 0
-  m_FogColor: {r: 1, g: 0.79962724, b: 0.6367924, a: 1}
-  m_FogMode: 1
-  m_FogDensity: 0.001
+  m_Fog: 1
+  m_FogColor: {r: 0.59607846, g: 0.58431375, b: 0.5372549, a: 1}
+  m_FogMode: 2
+  m_FogDensity: 0.003
   m_LinearFogStart: 0
   m_LinearFogEnd: 2000
   m_AmbientSkyColor: {r: 0.62, g: 0.72, b: 0.86, a: 1}
@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1.15
   m_AmbientMode: 1
   m_SubtractiveShadowColor: {r: 0.55, g: 0.6, b: 0.72, a: 1}
-  m_SkyboxMaterial: {fileID: 2100000, guid: 00dbff31a96e66f428619b4d521831a4, type: 2}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 9f1adf70f0347244d9cc27b3761fcee1, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -94,7 +94,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 0}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: 6ae32cb2c1161c44aba47a2dd89833e7, type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -268593,7 +268593,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 2000
-  field of view: 50
+  field of view: 41.7
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -268619,13 +268619,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 509157734}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.037862476, y: -0.8570739, z: 0.07024694, w: -0.5089757}
-  m_LocalPosition: {x: -83.88395, y: 16.194082, z: 51.32082}
+  m_LocalRotation: {x: -0.03613675, y: -0.47215354, z: 0.019376365, w: -0.8805622}
+  m_LocalPosition: {x: -15.178587, y: 2.5846403, z: -6.944745}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 18.592001, y: -168.75201, z: 1.3570001}
+  m_LocalEulerAnglesHint: {x: 4.7, y: -303.6, z: 0}
 --- !u!114 &509157741
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -897827,6 +897827,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Env_Fog_Ring_01 (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 6216691667786144519, guid: 4ddb5313f19796442b505f8ba4d4378e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6705279916964200893, guid: 4ddb5313f19796442b505f8ba4d4378e, type: 3}
       propertyPath: m_RootOrder
       value: 40
@@ -913579,6 +913583,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Env_Fog_Ring_01
       objectReference: {fileID: 0}
+    - target: {fileID: 6216691667786144519, guid: 4ddb5313f19796442b505f8ba4d4378e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6705279916964200893, guid: 4ddb5313f19796442b505f8ba4d4378e, type: 3}
       propertyPath: m_RootOrder
       value: 39
@@ -913589,7 +913597,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6705279916964200893, guid: 4ddb5313f19796442b505f8ba4d4378e, type: 3}
       propertyPath: m_LocalScale.y
-      value: 45
+      value: 37.18
       objectReference: {fileID: 0}
     - target: {fileID: 6705279916964200893, guid: 4ddb5313f19796442b505f8ba4d4378e, type: 3}
       propertyPath: m_LocalScale.z
@@ -913601,7 +913609,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6705279916964200893, guid: 4ddb5313f19796442b505f8ba4d4378e, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -70
+      value: -77.8
       objectReference: {fileID: 0}
     - target: {fileID: 6705279916964200893, guid: 4ddb5313f19796442b505f8ba4d4378e, type: 3}
       propertyPath: m_LocalPosition.z
@@ -985871,7 +985879,7 @@ Light:
   serializedVersion: 12
   m_Type: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 2.5
+  m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -1037821,7 +1037829,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2002887995
 Transform:
   m_ObjectHideFlags: 0

@@ -2,20 +2,25 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Tree_Mat_03
   m_Shader: {fileID: 4800000, guid: 6697e1f185bc8b840a2f02567abf15b5, type: 3}
-  m_ShaderKeywords: 
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _FROSTINGSWITCH_ON
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -167,6 +172,7 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
     - _AlphaCutoff: 0.5
     - _Big_Wave: 10
@@ -179,13 +185,13 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _EmissiveAmount: 0
+    - _EmissiveAmount: 0.84
     - _FlatColourSwitch: 0
     - _Float0: 0.5
     - _Float1: 0.05
     - _FrostingFalloff: 0.8
-    - _FrostingHeight: 1.8
-    - _FrostingSwitch: 0
+    - _FrostingHeight: 1.69
+    - _FrostingSwitch: 1
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -208,7 +214,7 @@ Material:
     - _LeafNoiseAmount: 0.017
     - _LeafNoiseScale: 1
     - _LeafNormalAmount: 0.5
-    - _LeafSmoothness: 0.2
+    - _LeafSmoothness: 0.038
     - _Metallic: 0.132
     - _Mode: 0
     - _NormalAmount: 0.5
@@ -261,11 +267,11 @@ Material:
     - _Color0: {r: 1, g: 1, b: 1, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Emissive2Colour: {r: 0, g: 0, b: 0, a: 0}
-    - _EmissiveColour: {r: 0, g: 0, b: 0, a: 0}
+    - _EmissiveColour: {r: 0, g: 0, b: 0, a: 1}
     - _FrostingColour: {r: 0.46930414, g: 0.496, b: 0.09592452, a: 0}
     - _GustHighlight: {r: 0.1132075, g: 0.1132075, b: 0.1132075, a: 0}
     - _GustSmoothing: {r: 0.5, g: 0.5, b: 0.5, a: 0}
-    - _LeafBaseColour: {r: 0, g: 0, b: 0, a: 0}
+    - _LeafBaseColour: {r: 0.24390353, g: 0.5943396, b: 0.2867568, a: 0}
     - _LeafNoiseColour: {r: 0.258, g: 0.39, b: 0, a: 0}
     - _LeafNoiseLargeColour: {r: 0.333, g: 0.2526207, b: 0, a: 0}
     - _LeafTint: {r: 0.07843138, g: 0.02015968, b: 0, a: 0}
@@ -276,3 +282,4 @@ Material:
     - _TrunkNoiseColour: {r: 0, g: 0, b: 0, a: 0}
     - _TrunkTint: {r: 0.07843138, g: 0.02015968, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
