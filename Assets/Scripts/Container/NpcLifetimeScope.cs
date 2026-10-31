@@ -1,4 +1,5 @@
 using Combat;
+using CharacterAnimation;
 using Dialogs.Graph;
 using Factions;
 using Inventory;
@@ -152,6 +153,13 @@ namespace Container
 
             builder.RegisterComponentInHierarchy<CharacterController>().UnderTransform(transform).AsSelf();
             builder.RegisterComponentInHierarchy<Animator>().UnderTransform(transform).AsSelf();
+            var animator = GetComponentInChildren<Animator>(true);
+            if (animator != null)
+            {
+                var footIk = animator.GetComponent<CharacterFootIkRuntime>()
+                             ?? animator.gameObject.AddComponent<CharacterFootIkRuntime>();
+                builder.RegisterComponent(footIk).AsSelf();
+            }
 
             var ragdollController = GetComponent<PlayerRagdollController>() ?? gameObject.AddComponent<PlayerRagdollController>();
             builder.RegisterComponent(ragdollController).AsSelf();

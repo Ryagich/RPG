@@ -1,5 +1,6 @@
 using CameraScripts;
 using Combat;
+using CharacterAnimation;
 using Factions;
 using Interactable;
 using Inventory;
@@ -42,6 +43,13 @@ namespace Container
         {
             builder.RegisterComponentInHierarchy<CharacterController>().UnderTransform(transform).AsSelf();
             builder.RegisterComponentInHierarchy<Animator>().UnderTransform(transform).AsSelf();
+            var animator = GetComponentInChildren<Animator>(true);
+            if (animator != null)
+            {
+                var footIk = animator.GetComponent<CharacterFootIkRuntime>()
+                             ?? animator.gameObject.AddComponent<CharacterFootIkRuntime>();
+                builder.RegisterComponent(footIk).AsSelf();
+            }
             var ragdollController = GetComponent<PlayerRagdollController>() ?? gameObject.AddComponent<PlayerRagdollController>();
             builder.RegisterComponent(ragdollController).AsSelf();
             builder.RegisterComponentInHierarchy<CharacterVisualRoot>().UnderTransform(transform).AsSelf();

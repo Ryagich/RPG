@@ -51,6 +51,7 @@ MonoBehaviour:
   <InputConfig>k__BackingField: {fileID: 11400000, guid: dfe59a2337fa82844aaeeffcb218cfc1, type: 2}
   <CameraConfig>k__BackingField: {fileID: 11400000, guid: 5a1160e670d77fd4a93cecdcf011a805, type: 2}
   <PlayerMovementConfig>k__BackingField: {fileID: 11400000, guid: b1630b8c62dfa3545a9aa62c3b2310e1, type: 2}
+  <FootIkConfig>k__BackingField: {fileID: 11400000, guid: a2e5105580ef4f17a7b8628c070706a1, type: 2}
   <GravityConfig>k__BackingField: {fileID: 11400000, guid: 585e9272bd2a2fd48b498ec705d82936, type: 2}
   <UIConfig>k__BackingField: {fileID: 11400000, guid: 9a8de918ae5a2374e9c6b6f80731575a, type: 2}
   <StatsConfig>k__BackingField: {fileID: 11400000, guid: 1bd56eaa46a359a4f974395bfa35f427, type: 2}

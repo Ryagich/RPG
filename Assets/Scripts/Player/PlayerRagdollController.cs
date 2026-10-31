@@ -12,6 +12,8 @@ namespace Player
         private Collider[] ragdollColliders = Array.Empty<Collider>();
         private bool isDeathRagdollActive;
 
+        public bool IsDeathRagdollActive => isDeathRagdollActive;
+
         private void Awake()
         {
             CacheRagdollParts();
