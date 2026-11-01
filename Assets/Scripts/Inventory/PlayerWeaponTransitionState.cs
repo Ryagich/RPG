@@ -54,5 +54,14 @@ namespace Inventory
             CurrentKind = WeaponAnimationKind.None;
             return true;
         }
+
+        public void Reset()
+        {
+            IsAnimationInProgress = false;
+            HasEnteredSheatheState = false;
+            HasAttachmentBlendStarted = false;
+            ShouldPreservePoseForDraw = false;
+            CurrentKind = WeaponAnimationKind.None;
+        }
     }
 }

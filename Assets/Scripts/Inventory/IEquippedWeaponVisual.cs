@@ -7,5 +7,6 @@ namespace Inventory
     {
         bool TryGetCurrentWeaponSlot(out SlotModel slot);
         bool TryGetCurrentWeaponPose(out Vector3 position, out Quaternion rotation);
+        void HideWeaponVisual();
     }
 }
