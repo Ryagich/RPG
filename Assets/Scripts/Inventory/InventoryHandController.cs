@@ -78,6 +78,28 @@ namespace Inventory
 
         public void Start() { }
 
+        /// <summary>
+        /// Returns the held stack to the source recorded when it was taken. This is intentionally
+        /// domain-neutral so a closing interaction can settle its own lifetime safely.
+        /// </summary>
+        public bool TryReturnHeldItemToSource()
+        {
+            var itemStack = playerInventory.HandSlot.Value?.ItemStack;
+            if (itemStack == null)
+            {
+                return true;
+            }
+
+            if (!TryReturnToHandSource(itemStack))
+            {
+                return false;
+            }
+
+            ClearHand();
+            ProcessDelayedBackpackResize();
+            return true;
+        }
+
         private void OnMouseDown(MouseDown message)
         {
             if (actionState.IsActionBlocked)
@@ -145,7 +167,7 @@ namespace Inventory
                 return;
             }
 
-            if (!TryTakeFromHoveredTile(message.Button, out var hoveredInventory, out var itemInInventory, out var itemStack))
+            if (!TryTakeInventoryItemAtPointer(message.Button, out var hoveredInventory, out var itemInInventory, out var itemStack))
             {
                 return;
             }
@@ -321,6 +343,14 @@ namespace Inventory
                 return;
             }
 
+            // MessagePipe subscriber order is not a lifecycle contract. While the trade page is
+            // still active, its cancellation service must return the held stack to the recorded
+            // owner before this generic fallback is allowed to store anything in player inventory.
+            if (interactionContext.ActiveTradePage != null)
+            {
+                return;
+            }
+
             var itemStack = playerInventory.HandSlot.Value.ItemStack;
             RestoreHandSourceOrientation(itemStack);
             if (TryStoreOrDrop(itemStack, playerInventory.TryAdd(itemStack)))
@@ -333,14 +363,11 @@ namespace Inventory
 
         private bool TryAddToHoveredTile(ItemStack itemStack)
         {
-            if (!interactionContext.TryGetHoveredInventory(out var hoveredInventory, out _))
-            {
-                return false;
-            }
-
             var interactionPage = GetCurrentInteractionPage();
             var pointer = Pointer.current;
-            if (interactionPage == null || pointer == null)
+            if (interactionPage == null
+                || pointer == null
+                || !interactionPage.TryGetInventoryAt(pointer.position.ReadValue(), out var hoveredInventory))
             {
                 return false;
             }
@@ -378,7 +405,6 @@ namespace Inventory
                 return false;
             }
 
-            interactionContext.ActiveTradePage?.ConsumeSellOriginIfAny(itemStack, handSourceInventory);
             ClearHand();
             return true;
         }
@@ -444,7 +470,7 @@ namespace Inventory
             return playerInventory.TryTakeFromSlot(slotModel, countToTake, out itemStack);
         }
 
-        private bool TryTakeFromHoveredTile(
+        private bool TryTakeInventoryItemAtPointer(
             MouseButtonType button,
             out IInventory hoveredInventory,
             out ItemInInventory itemInInventory,
@@ -453,13 +479,19 @@ namespace Inventory
             hoveredInventory = null;
             itemInInventory = null;
             itemStack = null;
-            if (!interactionContext.TryGetHoveredInventory(out hoveredInventory, out var hoveredTile)
-             || !hoveredInventory.TryGet(hoveredTile, out itemInInventory))
+            var pointer = Pointer.current;
+            var interactionPage = GetCurrentInteractionPage();
+            if (pointer == null
+                || interactionPage == null
+                || !interactionPage.TryGetInventoryItemAt(pointer.position.ReadValue(), out hoveredInventory, out itemInInventory)
+                || !hoveredInventory.CanGet(itemInInventory))
             {
                 hoveredInventory = null;
                 itemInInventory = null;
                 return false;
             }
+
+            hoveredInventory.Remove(itemInInventory);
 
             if (button == MouseButtonType.Left || itemInInventory.Count <= 1)
             {
@@ -551,7 +583,6 @@ namespace Inventory
 
             if (tradePage.CanMoveToPlayerSlot(handSourceInventory, handSourceSlot) && TryAddToHoveredSlot(itemStack))
             {
-                tradePage.ConsumeSellOriginIfAny(itemStack, handSourceInventory);
                 return true;
             }
 
@@ -560,21 +591,11 @@ namespace Inventory
                 return true;
             }
 
-            if (interactionContext.TryGetHoveredInventory(out var hoveredInventory, out _)
+            if (tradePage.TryGetInventoryAt(pointer.position.ReadValue(), out var hoveredInventory)
              && tradePage.CanMoveToInventory(handSourceInventory, handSourceSlot, hoveredInventory))
             {
-                var previousCount = itemStack.Count;
                 if (TryAddToHoveredTile(itemStack))
                 {
-                    if (tradePage.IsSellInventory(hoveredInventory))
-                    {
-                        tradePage.RegisterMoveIntoSell(itemStack, previousCount, hoveredInventory, handSourceInventory, handSourceSlot, handSourcePosition);
-                    }
-                    else
-                    {
-                        tradePage.ConsumeSellOriginIfAny(new ItemStack(itemStack.ItemConfig, previousCount, itemStack.IsRotated), handSourceInventory);
-                    }
-
                     return true;
                 }
             }
@@ -583,7 +604,6 @@ namespace Inventory
              && tradePage.CanMoveToInventory(handSourceInventory, handSourceSlot, playerInventory)
              && TryStoreOrDrop(itemStack, tradePage.TryAddToPlayerInventory(itemStack)))
             {
-                tradePage.ConsumeSellOriginIfAny(itemStack, handSourceInventory);
                 return true;
             }
 
@@ -591,13 +611,11 @@ namespace Inventory
              && tradePage.CanMoveToInventory(handSourceInventory, handSourceSlot, tradePage.GetTargetInventory())
              && TryStoreOrDrop(itemStack, tradePage.GetTargetInventory().TryAdd(itemStack), tradePage.GetTargetInventory()))
             {
-                tradePage.ConsumeSellOriginIfAny(itemStack, handSourceInventory);
                 return true;
             }
 
             if (TryReturnToHandSource(itemStack))
             {
-                tradePage.ConsumeSellOriginIfAny(itemStack, handSourceInventory);
                 ClearHand();
                 return true;
             }
@@ -606,11 +624,10 @@ namespace Inventory
             var sourceInventory = sourceIsPlayer ? playerInventory : tradePage.GetTargetInventory();
             if (sourceInventory != null && TryStoreOrDrop(itemStack, sourceInventory.TryAdd(itemStack), sourceInventory))
             {
-                tradePage.ConsumeSellOriginIfAny(itemStack, handSourceInventory);
                 return true;
             }
 
-            if (tradePage.TryAddToSourceSellInventory(itemStack, handSourceInventory, handSourceSlot, handSourcePosition))
+            if (tradePage.TryAddToSourceSellInventory(itemStack, handSourceInventory, handSourceSlot))
             {
                 ClearHand();
                 return true;
@@ -621,7 +638,9 @@ namespace Inventory
 
         private bool TryReturnToHandSource(ItemStack itemStack)
         {
-            if (handSourceSlot != null && playerInventory.TryPlaceInSlot(handSourceSlot, itemStack, out var remainderStack, out var replacedStack))
+            if (handSourceInventory == playerInventory
+                && handSourceSlot != null
+                && playerInventory.TryPlaceInSlot(handSourceSlot, itemStack, out var remainderStack, out var replacedStack))
             {
                 if (replacedStack != null)
                 {
@@ -840,6 +859,169 @@ namespace Inventory
             statsController.AddValue(StatType.Stamina, itemConfig.StaminaStat);
             // Chill отвечает за сон. Механик дня/ночи и сна пока нет, поэтому usable items
             // не меняют этот стат, но данные оставлены для будущего возврата.
+        }
+    }
+
+    /// <summary>
+    /// Applies explicit inventory-page commands (use, move and drop) without any page or popup
+    /// dependency. The hand controller remains the owner of the actual equip/use operation.
+    /// </summary>
+    public sealed class InventoryItemActionService
+    {
+        private readonly PlayerInventory playerInventory;
+        private readonly InventoryHandController inventoryHandController;
+
+        public InventoryItemActionService(PlayerInventory playerInventory, InventoryHandController inventoryHandController)
+        {
+            this.playerInventory = playerInventory ?? throw new ArgumentNullException(nameof(playerInventory));
+            this.inventoryHandController = inventoryHandController ?? throw new ArgumentNullException(nameof(inventoryHandController));
+        }
+
+        public bool CanMoveSlotToGrid(SlotModel slotModel)
+        {
+            return slotModel?.ItemStack?.ItemConfig != null && playerInventory.CanMoveSlotItemToGrid(slotModel);
+        }
+
+        public bool TryMoveSlotToGrid(SlotModel slotModel)
+        {
+            return slotModel?.ItemStack?.ItemConfig != null && playerInventory.TryMoveSlotItemToGrid(slotModel);
+        }
+
+        public bool TryUseInventoryItem(IInventory sourceInventory, ItemInInventory itemInInventory, Func<ItemStack, ItemStack> tryStoreOverflow = null)
+        {
+            if (sourceInventory == null || itemInInventory?.ItemStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            return itemInInventory.ItemStack.ItemConfig.ItemType == ItemType.Usable
+                ? TryUseUsableInventoryItem(sourceInventory, itemInInventory)
+                : TryUseEquippableInventoryItem(sourceInventory, itemInInventory, tryStoreOverflow);
+        }
+
+        public bool TryUseSlotItem(SlotModel slotModel, Func<ItemStack, ItemStack> tryStoreOverflow = null)
+        {
+            if (slotModel?.ItemStack?.ItemConfig == null || !playerInventory.TryTakeFromSlot(slotModel, out var itemStack))
+            {
+                return false;
+            }
+
+            if (inventoryHandController.TryUseFromInventory(itemStack, tryStoreOverflow))
+            {
+                return true;
+            }
+
+            RestorePlayerSlot(slotModel, itemStack);
+            return false;
+        }
+
+        public bool TryDropInventoryItem(ItemInInventory itemInInventory, int count)
+        {
+            if (itemInInventory?.ItemStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            var itemConfig = itemInInventory.ItemConfig;
+            var isRotated = itemInInventory.ItemStack.IsRotated;
+            var originalPosition = itemInInventory.Position;
+            var currentCount = itemInInventory.Count;
+            var dropCount = Mathf.Clamp(count, 1, currentCount);
+            var remainingCount = currentCount - dropCount;
+
+            playerInventory.Remove(itemInInventory);
+            if (remainingCount > 0)
+            {
+                playerInventory.Add(new ItemStack(itemConfig, remainingCount, isRotated), originalPosition);
+            }
+
+            inventoryHandController.Drop(new ItemStack(itemConfig, dropCount, isRotated));
+            return true;
+        }
+
+        public bool TryDropSlotItem(SlotModel slotModel, int count)
+        {
+            if (slotModel?.ItemStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            var dropCount = Mathf.Clamp(count, 1, slotModel.ItemStack.Count);
+            if (!playerInventory.TryTakeFromSlot(slotModel, dropCount, out var itemStack))
+            {
+                return false;
+            }
+
+            if (slotModel.ItemType == ItemType.Backpack)
+            {
+                foreach (var droppedItem in playerInventory.RebuildInventoryFromCurrentBackpack())
+                {
+                    inventoryHandController.Drop(droppedItem);
+                }
+            }
+
+            inventoryHandController.Drop(itemStack);
+            return true;
+        }
+
+        private bool TryUseUsableInventoryItem(IInventory sourceInventory, ItemInInventory itemInInventory)
+        {
+            var sourceStack = itemInInventory.ItemStack;
+            var itemConfig = sourceStack.ItemConfig;
+            var isRotated = sourceStack.IsRotated;
+            var originalPosition = itemInInventory.Position;
+            var originalCount = sourceStack.Count;
+            var usedStack = new ItemStack(itemConfig, 1, isRotated);
+
+            sourceInventory.Remove(itemInInventory);
+            if (!inventoryHandController.TryUseFromInventory(usedStack))
+            {
+                sourceInventory.Add(new ItemStack(itemConfig, originalCount, isRotated), originalPosition);
+                return false;
+            }
+
+            if (originalCount > 1)
+            {
+                sourceInventory.Add(new ItemStack(itemConfig, originalCount - 1, isRotated), originalPosition);
+            }
+
+            return true;
+        }
+
+        private bool TryUseEquippableInventoryItem(IInventory sourceInventory, ItemInInventory itemInInventory, Func<ItemStack, ItemStack> tryStoreOverflow)
+        {
+            var itemStack = itemInInventory.ItemStack.Clone();
+            var originalPosition = itemInInventory.Position;
+            sourceInventory.Remove(itemInInventory);
+
+            if (inventoryHandController.TryUseFromInventory(itemStack, tryStoreOverflow))
+            {
+                return true;
+            }
+
+            sourceInventory.Add(itemStack, originalPosition);
+            return false;
+        }
+
+        private void RestorePlayerSlot(SlotModel slotModel, ItemStack itemStack)
+        {
+            playerInventory.TryPlaceInSlot(slotModel, itemStack, out var remainderStack, out var replacedStack);
+            StoreOrDrop(replacedStack);
+            StoreOrDrop(remainderStack);
+        }
+
+        private void StoreOrDrop(ItemStack itemStack)
+        {
+            if (itemStack == null)
+            {
+                return;
+            }
+
+            var remainder = playerInventory.TryAdd(itemStack);
+            if (remainder != null)
+            {
+                inventoryHandController.Drop(remainder);
+            }
         }
     }
 }

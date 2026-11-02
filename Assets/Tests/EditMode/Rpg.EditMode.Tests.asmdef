@@ -1,0 +1,9 @@
+{
+    "name": "Rpg.EditMode.Tests",
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
+}

@@ -151,6 +151,7 @@ namespace Container
             builder.RegisterEntryPoint<QuestAutomaticTransitionService>().AsSelf();
             builder.RegisterEntryPoint<PlayerSaveCoordinator>().AsSelf();
             builder.RegisterEntryPoint<InventoryHandController>().AsSelf();
+            builder.Register<Trade.TradeHandInteractionService>(Lifetime.Singleton);
             builder.RegisterEntryPoint<PlayerFastSlotsController>().AsSelf();
             builder.Register<PlayerWeaponDrawingBlockState>(Lifetime.Scoped).AsSelf();
             builder.Register<PlayerWeaponInHandController>(Lifetime.Singleton)
