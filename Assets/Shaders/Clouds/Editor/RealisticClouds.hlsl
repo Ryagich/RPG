@@ -1,10 +1,10 @@
-#ifndef RPG_CUMULUS_CLOUDS_INCLUDED
-#define RPG_CUMULUS_CLOUDS_INCLUDED
+#ifndef RPG_REALISTIC_CLOUDS_INCLUDED
+#define RPG_REALISTIC_CLOUDS_INCLUDED
 
 #include "CloudSmoothNoise.hlsl"
 
 // Support including jitter must stay below cell spacing for the 3x3 search.
-float4 CumulusCloudField(float2 p, float detailAmount)
+float4 RealisticCloudField(float2 p, float detailAmount)
 {
     float detail = saturate(detailAmount * 2.0);
     float2 cell = floor(p / 6.0);
@@ -48,8 +48,8 @@ float4 CumulusCloudField(float2 p, float detailAmount)
     return float4(density, tint, gradient);
 }
 
-#define RPG_CLOUD_FRACTAL_FUNCTION FractalCumulusCloudField
-#define RPG_CLOUD_FRACTAL_BASIS CumulusCloudField
+#define RPG_CLOUD_FRACTAL_FUNCTION FractalRealisticCloudField
+#define RPG_CLOUD_FRACTAL_BASIS RealisticCloudField
 #include "CloudFractal.hlsl"
 
 #endif

@@ -42,8 +42,7 @@ namespace EditorTools
                 {
                     CloudBakeShape.Faceted => "GenerateFaceted",
                     CloudBakeShape.Rounded => "GenerateRounded",
-                    CloudBakeShape.RealisticCirrus => "GenerateCirrus",
-                    CloudBakeShape.RealisticCumulus => "GenerateCumulus",
+                    CloudBakeShape.Realistic => "GenerateRealistic",
                     _ => throw new ArgumentOutOfRangeException(nameof(settings), "Unknown cloud shape.")
                 };
                 int kernel = generator.FindKernel(kernelName);

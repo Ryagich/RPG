@@ -7,8 +7,7 @@ namespace EditorTools
     {
         Faceted = 0,
         Rounded = 1,
-        [InspectorName("Realistic Cirrus")] RealisticCirrus = 2,
-        [InspectorName("Realistic Cumulus")] RealisticCumulus = 3
+        Realistic = 3
     }
 
     [Serializable]
@@ -55,6 +54,6 @@ namespace EditorTools
 
         // Period, surface type, completed bake, reserved.
         public Vector4 Parameters => new Vector4(Period,
-            Shape == CloudBakeShape.Rounded || Shape == CloudBakeShape.RealisticCumulus ? 1f : 0f, 1f, 0f);
+            Shape == CloudBakeShape.Rounded || Shape == CloudBakeShape.Realistic ? 1f : 0f, 1f, 0f);
     }
 }

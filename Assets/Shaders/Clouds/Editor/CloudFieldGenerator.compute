@@ -1,12 +1,9 @@
 #pragma kernel GenerateFaceted CLOUD_FIELD_FACETED
 #pragma kernel GenerateRounded CLOUD_FIELD_ROUNDED
-#pragma kernel GenerateCirrus CLOUD_FIELD_CIRRUS
-#pragma kernel GenerateCumulus CLOUD_FIELD_CUMULUS
+#pragma kernel GenerateRealistic CLOUD_FIELD_REALISTIC
 
-#if defined(CLOUD_FIELD_CIRRUS)
-#include "CirrusClouds.hlsl"
-#elif defined(CLOUD_FIELD_CUMULUS)
-#include "CumulusClouds.hlsl"
+#if defined(CLOUD_FIELD_REALISTIC)
+#include "RealisticClouds.hlsl"
 #elif defined(CLOUD_FIELD_ROUNDED)
 #include "RoundedClouds.hlsl"
 #else
@@ -24,10 +21,8 @@ float _Persistence;
 float4 RawField(float2 p)
 {
     CloudFractalSettings settings = MakeCloudFractalSettings(_Iterations, _Lacunarity, _Persistence);
-    #if defined(CLOUD_FIELD_CIRRUS)
-    return FractalCirrusCloudField(p, _Detail, settings);
-    #elif defined(CLOUD_FIELD_CUMULUS)
-    return FractalCumulusCloudField(p, _Detail, settings);
+    #if defined(CLOUD_FIELD_REALISTIC)
+    return FractalRealisticCloudField(p, _Detail, settings);
     #elif defined(CLOUD_FIELD_ROUNDED)
     return FractalRoundedCloudField(p, _Detail, settings);
     #else
@@ -70,7 +65,4 @@ void GenerateFaceted(uint3 id : SV_DispatchThreadID) { WriteField(id); }
 void GenerateRounded(uint3 id : SV_DispatchThreadID) { WriteField(id); }
 
 [numthreads(8, 8, 1)]
-void GenerateCirrus(uint3 id : SV_DispatchThreadID) { WriteField(id); }
-
-[numthreads(8, 8, 1)]
-void GenerateCumulus(uint3 id : SV_DispatchThreadID) { WriteField(id); }
+void GenerateRealistic(uint3 id : SV_DispatchThreadID) { WriteField(id); }
