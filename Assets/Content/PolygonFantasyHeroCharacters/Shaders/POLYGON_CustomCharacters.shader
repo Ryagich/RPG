@@ -132,7 +132,9 @@ Shader "Shader Graphs/POLYGON_CustomCharacters"
                 float3 positionWS : TEXCOORD1;
                 float3 normalWS : TEXCOORD2;
                 half fogFactor : TEXCOORD3;
+            #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
                 float4 shadowCoord : TEXCOORD4;
+            #endif
                 DECLARE_LIGHTMAP_OR_SH(staticLightmapUV, vertexSH, 5);
             #ifdef DYNAMICLIGHTMAP_ON
                 float2 dynamicLightmapUV : TEXCOORD7;
@@ -198,7 +200,13 @@ Shader "Shader Graphs/POLYGON_CustomCharacters"
                 inputData.positionWS = input.positionWS;
                 inputData.normalWS = NormalizeNormalPerPixel(input.normalWS);
                 inputData.viewDirectionWS = GetWorldSpaceNormalizeViewDir(input.positionWS);
+            #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
                 inputData.shadowCoord = input.shadowCoord;
+            #elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+                inputData.shadowCoord = TransformWorldToShadowCoord(inputData.positionWS);
+            #else
+                inputData.shadowCoord = float4(0.0, 0.0, 0.0, 0.0);
+            #endif
                 inputData.fogCoord = input.fogFactor;
                 inputData.vertexLighting = half3(0.0h, 0.0h, 0.0h);
                 inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
@@ -225,7 +233,9 @@ Shader "Shader Graphs/POLYGON_CustomCharacters"
                 output.normalWS = normalInputs.normalWS;
                 output.uv = TRANSFORM_TEX(input.uv, _Texture);
                 output.fogFactor = ComputeFogFactor(positionInputs.positionCS.z);
-                output.shadowCoord = TransformWorldToShadowCoord(positionInputs.positionWS);
+            #if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
+                output.shadowCoord = GetShadowCoord(positionInputs);
+            #endif
                 OUTPUT_LIGHTMAP_UV(input.staticLightmapUV, unity_LightmapST, output.staticLightmapUV);
             #ifdef DYNAMICLIGHTMAP_ON
                 output.dynamicLightmapUV = input.dynamicLightmapUV.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
