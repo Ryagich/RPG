@@ -30,7 +30,8 @@ namespace Movement
         private bool wantsToRun;
         private bool isRunning;
         private bool isRunAllowed = true;
-        private float currentSpeedChangeRate;
+        private float currentAccelerationRate;
+        private float currentDecelerationRate;
 
         [SuppressMessage("ReSharper", "ParameterHidesMember")]
         private PlayerMovement
@@ -53,7 +54,8 @@ namespace Movement
             this.playerInventory = playerInventory;
             this.statsController = statsController;
             this.targetLockController = targetLockController;
-            currentSpeedChangeRate = playerMovementConfig.WalkSpeedChangeRate;
+            currentAccelerationRate = playerMovementConfig.WalkSpeedChangeRate;
+            currentDecelerationRate = playerMovementConfig.WalkDecelerationRate;
         }
 
         public void Tick()
@@ -66,18 +68,31 @@ namespace Movement
 
             ApplyStaminaRestrictions();
 
-            var targetSpeedChangeRate = isRunning
+            var targetAccelerationRate = isRunning
                 ? playerMovementConfig.RunSpeedChangeRate
                 : playerMovementConfig.WalkSpeedChangeRate;
-            currentSpeedChangeRate = Mathf.MoveTowards(
-                currentSpeedChangeRate,
-                targetSpeedChangeRate,
+            currentAccelerationRate = Mathf.MoveTowards(
+                currentAccelerationRate,
+                targetAccelerationRate,
                 playerMovementConfig.SpeedChangeRateBlendSpeed * Time.deltaTime);
+
+            if (targetVelocity.sqrMagnitude > InputThreshold)
+            {
+                // Remember the movement mode that produced the momentum. Releasing both
+                // the movement and run buttons in the same frame must still decelerate as a run.
+                currentDecelerationRate = isRunning
+                    ? playerMovementConfig.RunDecelerationRate
+                    : playerMovementConfig.WalkDecelerationRate;
+            }
+
+            var velocityChangeRate = targetVelocity.sqrMagnitude > InputThreshold
+                ? currentAccelerationRate
+                : currentDecelerationRate;
 
             currentVelocity = Vector2.MoveTowards(
                 currentVelocity,
                 targetVelocity,
-                currentSpeedChangeRate * Time.deltaTime);
+                velocityChangeRate * Time.deltaTime);
 
             if (currentVelocity.sqrMagnitude <= InputThreshold)
             {
@@ -103,7 +118,8 @@ namespace Movement
                 currentVelocity = Vector2.zero;
                 wantsToRun = false;
                 isRunning = false;
-                currentSpeedChangeRate = playerMovementConfig.WalkSpeedChangeRate;
+                currentAccelerationRate = playerMovementConfig.WalkSpeedChangeRate;
+                currentDecelerationRate = playerMovementConfig.WalkDecelerationRate;
                 return;
             }
 

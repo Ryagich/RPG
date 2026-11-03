@@ -24,10 +24,20 @@ namespace Movement
         [field: SerializeField] public float RunRotationSpeed { get; private set; } = 900f;
 
         [field: Space]
-        [field: Header("Acceleration")]
-        [field: SerializeField] public float WalkSpeedChangeRate { get; private set; } = 5f;
-        [field: SerializeField] public float RunSpeedChangeRate { get; private set; } = 7f;
-        [field: SerializeField] public float SpeedChangeRateBlendSpeed { get; private set; } = 6f;
+        [field: Header("Velocity response")]
+        [field: Tooltip("How quickly movement reaches the requested walking speed, in input units per second.")]
+        [field: SerializeField, Min(0.01f)] public float WalkSpeedChangeRate { get; private set; } = 3.5f;
+        [field: Tooltip("How quickly movement reaches the requested running speed, in input units per second.")]
+        [field: SerializeField, Min(0.01f)] public float RunSpeedChangeRate { get; private set; } = 4.5f;
+        [field: Tooltip("How quickly acceleration adapts when switching between walking and running.")]
+        [field: SerializeField, Min(0.01f)] public float SpeedChangeRateBlendSpeed { get; private set; } = 6f;
+
+        [field: Space]
+        [field: Header("Deceleration")]
+        [field: Tooltip("How quickly walking momentum fades after movement input is released.")]
+        [field: SerializeField, Min(0.01f)] public float WalkDecelerationRate { get; private set; } = 2.5f;
+        [field: Tooltip("How quickly running momentum fades after movement input is released.")]
+        [field: SerializeField, Min(0.01f)] public float RunDecelerationRate { get; private set; } = 3.5f;
 
         [field: Space]
         [field: Header("Weight")]

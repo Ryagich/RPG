@@ -60,10 +60,14 @@ namespace Movement
             }
 
             var movementInput = playerMovement.CurrentVelocity;
+            var isRunning = playerMovement.IsRunning;
 
             if (!isGameplayActive || movementInput.sqrMagnitude <= InputThreshold)
             {
-                ApplyLocomotionParameters(Vector2.zero, false);
+                // Keep the requested locomotion mode while momentum crosses zero. Otherwise a
+                // forward-to-backward run can briefly trigger the Run -> Walk transition before
+                // the next frame restores Run, despite continuous run input.
+                ApplyLocomotionParameters(Vector2.zero, isGameplayActive && isRunning);
                 return;
             }
 
@@ -74,7 +78,7 @@ namespace Movement
                 Mathf.Clamp(localMoveDirection.x, -1f, 1f),
                 Mathf.Clamp(localMoveDirection.z, -1f, 1f));
 
-            ApplyLocomotionParameters(directionalInput, playerMovement.IsRunning);
+            ApplyLocomotionParameters(directionalInput, isRunning);
         }
 
         private void OnGameModeChanged(GameModeChangedMessage msg)
@@ -106,9 +110,9 @@ namespace Movement
             currentDirectionalY = directionalInput.y;
             currentIsRun = isRunning;
 
-            // Keep these as float parameters even though the current tree mostly uses -1/0/1.
-            // Future input may become analog (virtual stick / gamepad), and this preserves that path
-            // without forcing another Animator parameter migration later.
+            // CurrentVelocity carries both the physical direction and its normalized magnitude.
+            // The blend tree uses the magnitude to reflect acceleration and braking, so it must
+            // not be normalized here.
             animator.SetFloat(DirectionXParameter, currentDirectionalX);
             animator.SetFloat(DirectionYParameter, currentDirectionalY);
             animator.SetBool(IsRunParameter, currentIsRun);

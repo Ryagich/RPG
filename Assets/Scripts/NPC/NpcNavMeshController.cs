@@ -31,6 +31,7 @@ namespace NPC
         private Vector3 lastRequestedDestination;
         private float lastRequestedStoppingDistance;
         private float nextPathRefreshTime;
+        private Vector3 currentPlanarVelocity;
 
         public NpcNavMeshController(NavMeshAgent agent, CharacterController characterController, Animator animator)
         {
@@ -41,11 +42,15 @@ namespace NPC
             defaultSpeed = agent != null ? agent.speed : 0f;
         }
 
-        public Vector3 Velocity => IsAgentActiveAndOnNavMesh ? agent.velocity : Vector3.zero;
+        /// <summary>
+        /// Actual planar movement velocity. The controller moves the CharacterController
+        /// manually, so NavMeshAgent.velocity is not a reliable representation of displacement.
+        /// </summary>
+        public Vector3 Velocity => currentPlanarVelocity;
         public bool HasPath => IsAgentActiveAndOnNavMesh && agent.hasPath;
         public bool IsMoving => IsAgentActiveAndOnNavMesh
                                 && !agent.isStopped
-                                && agent.desiredVelocity.sqrMagnitude > VelocityThreshold;
+                                && currentPlanarVelocity.sqrMagnitude > VelocityThreshold;
         public bool IsRunning => IsAgentActiveAndOnNavMesh && agent.speed > defaultSpeed + VelocityThreshold;
         public bool IsFacingLocked => isFacingLocked;
         public bool IsActionMovementLocked => isActionMovementLocked;
@@ -75,38 +80,52 @@ namespace NPC
                 || !characterController.enabled
                 || !characterController.gameObject.activeInHierarchy)
             {
+                ResetMotion();
                 return;
             }
 
             if (!agent.isOnNavMesh)
             {
+                ResetMotion();
                 WarpToNearestNavMesh(agent.transform.position);
                 return;
             }
 
             agent.nextPosition = agent.transform.position;
-            if (isActionMovementLocked || agent.isStopped || agent.pathPending || !agent.hasPath)
+            if (isActionMovementLocked || agent.isStopped)
             {
+                ResetMotion();
                 UpdateAnimator(Vector3.zero);
                 return;
             }
 
-            var desiredVelocity = agent.desiredVelocity;
-            desiredVelocity.y = 0f;
-            if (desiredVelocity.sqrMagnitude <= VelocityThreshold)
+            var targetVelocity = agent.pathPending || !agent.hasPath
+                ? Vector3.zero
+                : agent.desiredVelocity;
+            targetVelocity.y = 0f;
+
+            // The NavMeshAgent owns pathfinding and its acceleration setting. This controller
+            // owns physical displacement, so apply the same acceleration to the velocity used
+            // by CharacterController.Move instead of snapping to the requested velocity.
+            var velocityChangeRate = Mathf.Max(0.01f, agent.acceleration);
+            currentPlanarVelocity = Vector3.MoveTowards(
+                currentPlanarVelocity,
+                targetVelocity,
+                velocityChangeRate * Time.deltaTime);
+
+            if (currentPlanarVelocity.sqrMagnitude <= VelocityThreshold)
             {
-                UpdateAnimator(Vector3.zero);
+                currentPlanarVelocity = Vector3.zero;
+                UpdateAnimator(Vector3.zero, hasMovementIntent: agent.hasPath && !agent.pathPending);
                 return;
             }
 
-            var facingDirection = GetFacingDirection(desiredVelocity);
-            RotateToMovementDirection(facingDirection);
+            RotateToMovementDirection(currentPlanarVelocity);
 
-            var maxStep = Mathf.Max(0.01f, agent.speed) * Time.deltaTime;
-            var displacement = Vector3.ClampMagnitude(desiredVelocity, maxStep);
+            var displacement = currentPlanarVelocity * Time.deltaTime;
             characterController.Move(displacement);
             agent.nextPosition = agent.transform.position;
-            UpdateAnimator(displacement / Mathf.Max(Time.deltaTime, 0.0001f));
+            UpdateAnimator(currentPlanarVelocity);
         }
 
         public bool MoveTo(Vector3 destination, float sampleRadius = DefaultSampleRadius, float? stoppingDistance = null)
@@ -191,12 +210,14 @@ namespace NPC
         {
             if (!IsAgentActiveAndOnNavMesh)
             {
+                ResetMotion();
                 ClearMoveRequest();
                 return;
             }
 
             agent.ResetPath();
             agent.isStopped = true;
+            ResetMotion();
 
             ClearMoveRequest();
             UpdateAnimator(Vector3.zero);
@@ -276,6 +297,7 @@ namespace NPC
 
         private bool Warp(Vector3 position)
         {
+            ResetMotion();
             ClearMoveRequest();
             return agent.Warp(position);
         }
@@ -359,6 +381,11 @@ namespace NPC
             nextPathRefreshTime = 0f;
         }
 
+        private void ResetMotion()
+        {
+            currentPlanarVelocity = Vector3.zero;
+        }
+
         private bool IsAgentActive =>
             agent != null
             && agent.isActiveAndEnabled;
@@ -366,24 +393,6 @@ namespace NPC
         private bool IsAgentActiveAndOnNavMesh =>
             IsAgentActive
             && agent.isOnNavMesh;
-
-        private Vector3 GetFacingDirection(Vector3 fallbackDirection)
-        {
-            if (agent == null)
-            {
-                return fallbackDirection;
-            }
-
-            var direction = agent.steeringTarget - agent.transform.position;
-            direction.y = 0f;
-            if (direction.sqrMagnitude > VelocityThreshold)
-            {
-                return direction;
-            }
-
-            fallbackDirection.y = 0f;
-            return fallbackDirection;
-        }
 
         private void RotateToMovementDirection(Vector3 direction)
         {
@@ -399,7 +408,7 @@ namespace NPC
                 Mathf.Max(0f, agent.angularSpeed) * Time.deltaTime);
         }
 
-        private void UpdateAnimator(Vector3 worldVelocity)
+        private void UpdateAnimator(Vector3 worldVelocity, bool hasMovementIntent = false)
         {
             if (animator == null)
             {
@@ -412,11 +421,13 @@ namespace NPC
             {
                 animator.SetFloat(DirectionXParameter, 0f);
                 animator.SetFloat(DirectionYParameter, 0f);
-                animator.SetBool(IsRunParameter, false);
+                animator.SetBool(IsRunParameter, hasMovementIntent);
                 return;
             }
 
-            var localVelocity = animator.transform.InverseTransformDirection(planarVelocity.normalized);
+            var maxSpeed = Mathf.Max(0.01f, agent != null ? agent.speed : planarVelocity.magnitude);
+            var normalizedVelocity = Vector3.ClampMagnitude(planarVelocity / maxSpeed, 1f);
+            var localVelocity = animator.transform.InverseTransformDirection(normalizedVelocity);
             animator.SetFloat(DirectionXParameter, Mathf.Clamp(localVelocity.x, -1f, 1f));
             animator.SetFloat(DirectionYParameter, Mathf.Clamp(localVelocity.z, -1f, 1f));
             animator.SetBool(IsRunParameter, true);
