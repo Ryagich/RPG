@@ -39,7 +39,6 @@ namespace Demo
             }
             if (lookSuspended)
             {
-                // Escape or an external unlock keeps the cursor free until a left click.
                 if (!mouse.leftButton.wasPressedThisFrame)
                     return;
                 lookSuspended = false;
@@ -57,7 +56,7 @@ namespace Demo
 
             if (!justCaptured)
             {
-                // Mouse delta is already per-frame displacement, so it needs no deltaTime.
+                // Mouse delta is already per frame; do not multiply by deltaTime.
                 Vector2 look = mouse.delta.ReadValue() * lookSensitivity;
                 yaw = Mathf.Repeat(yaw + look.x, 360f);
                 pitch = Mathf.Clamp(pitch - look.y, -89f, 89f);
@@ -94,8 +93,7 @@ namespace Demo
                 return;
             flying = false;
             capturedMouse = null;
-            // Unity can restore the old lock mode on focus loss before this callback.
-            // Preserve a different mode selected by another cursor owner.
+            // Do not overwrite a lock mode set by another cursor owner.
             if (Cursor.lockState == CursorLockMode.Locked || Cursor.lockState == previousCursorLock)
             {
                 Cursor.lockState = previousCursorLock;

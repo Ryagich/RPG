@@ -6,37 +6,48 @@ Shader "RPG/Skybox/Low Poly Clouds"
         _ZenithColor ("Zenith", Color) = (0.12, 0.36, 0.68, 1)
         _HorizonColor ("Horizon", Color) = (0.65, 0.81, 0.88, 1)
         _GroundColor ("Below Horizon", Color) = (0.24, 0.29, 0.32, 1)
-        _SkyGradient ("Sky Gradient", Range(0.2, 4)) = 0.65
-        _Exposure ("Exposure", Range(0, 8)) = 1
+        _SkyGradient ("Sky Gradient", Range(0.01, 16)) = 0.65
+        _Exposure ("Exposure", Range(0, 32)) = 1
 
-        [Header(Cloud Shape and Lighting)]
+        [Header(Cloud Lighting and Projection)]
         _CloudLightColor ("Lit Facets", Color) = (1, 0.97, 0.88, 1)
         _CloudShadowColor ("Shaded Facets", Color) = (0.42, 0.54, 0.66, 1)
         _CloudProjectionBlend ("Projection Blend (Flat To Dome)", Range(0, 1)) = 1
-        _CloudDomeCurvature ("Dome Curvature", Range(0.15, 1.5)) = 0.75
-        _CloudVolume ("Apparent Thickness", Range(0, 3)) = 1.4
+        _CloudDomeCurvature ("Dome Curvature", Range(0.01, 8)) = 0.75
+        _CloudVolume ("Apparent Thickness", Range(0, 12)) = 1.4
         _CloudLighting ("Sun Lighting", Range(0, 1)) = 0.7
-        _CloudRimStrength ("Sunlit Edges", Range(0, 1)) = 0.2
-        _FacetContrast ("Facet Contrast", Range(0, 1)) = 0.45
-        _CloudHorizonFade ("Horizon Fade Height", Range(0.05, 0.5)) = 0.16
+        _CloudRimStrength ("Sunlit Edges", Range(0, 4)) = 0.2
+        _FacetContrast ("Facet Contrast", Range(0, 4)) = 0.45
+        _CloudHorizonFade ("Horizon Fade Height", Range(0.021, 1)) = 0.16
+
+        [Header(Cloud Blur)]
+        [Toggle(_CLOUD_BLUR)] _CloudBlur ("Enable Cloud Blur", Float) = 0
+        _CloudBlurRadius ("Blur Radius", Range(0, 0.5)) = 0.015
+
+        [Header(Baked Cloud Textures)]
+        [NoScaleOffset] _CloudField ("Near Baked Field", 2D) = "black" {}
+        [NoScaleOffset] _UpperCloudField ("Distant Baked Field", 2D) = "black" {}
+        [HideInInspector] _CloudFieldParams ("Near Bake Metadata", Vector) = (32, 0, 0, 0)
+        [HideInInspector] _UpperCloudFieldParams ("Distant Bake Metadata", Vector) = (32, 0, 0, 0)
 
         [Header(Near Cloud Layer)]
-        _CloudCoverage ("Coverage", Range(0, 1)) = 0.48
-        _CloudScale ("Cloud Frequency", Range(0.2, 12)) = 2.2
-        _CloudDetail ("Shape Detail", Range(0, 1)) = 0.28
+        _CloudCoverageMin ("Coverage Min", Range(0, 1)) = 0.47
+        _CloudCoverageMax ("Coverage Max", Range(0, 1)) = 0.57
+        _CloudScale ("Cloud Frequency", Range(0.01, 64)) = 2.2
         _CloudOpacity ("Opacity", Range(0, 1)) = 1
         _WindDirection ("Wind Direction (Degrees)", Range(0, 360)) = 25
-        _WindSpeed ("Wind Speed", Range(0, 0.2)) = 0.015
-        _CloudWindStretch ("Stretch Along Wind", Range(0.25, 8)) = 1
+        _WindSpeed ("Wind Speed", Range(-2, 2)) = 0.015
+        _CloudWindStretch ("Stretch Along Wind", Range(0.01, 64)) = 1
         _CloudOffset ("Pattern Offset (XY)", Vector) = (13.7, 9.2, 0, 0)
 
         [Header(Distant Cloud Layer)]
-        _UpperCloudCoverage ("Coverage", Range(0, 1)) = 0.32
-        _UpperCloudScale ("Cloud Frequency", Range(0.2, 12)) = 4.5
+        _UpperCloudCoverageMin ("Coverage Min", Range(0, 1)) = 0.63
+        _UpperCloudCoverageMax ("Coverage Max", Range(0, 1)) = 0.73
+        _UpperCloudScale ("Cloud Frequency", Range(0.01, 64)) = 4.5
         _UpperCloudOpacity ("Opacity (Zero Disables Layer)", Range(0, 1)) = 0.65
         _UpperCloudWindDirection ("Wind Direction (Degrees)", Range(0, 360)) = 315
-        _UpperCloudWindSpeed ("Wind Speed", Range(0, 0.2)) = 0.012
-        _UpperCloudWindStretch ("Stretch Along Wind", Range(0.25, 8)) = 2
+        _UpperCloudWindSpeed ("Wind Speed", Range(-2, 2)) = 0.012
+        _UpperCloudWindStretch ("Stretch Along Wind", Range(0.01, 64)) = 2
         _UpperCloudOffset ("Pattern Offset (XY)", Vector) = (-17.2, 35.6, 0, 0)
         _UpperCloudHaze ("Distance Haze", Range(0, 1)) = 0.3
 
@@ -45,11 +56,11 @@ Shader "RPG/Skybox/Low Poly Clouds"
         _SunAzimuth ("Manual Azimuth (Degrees)", Range(0, 360)) = 135
         _SunElevation ("Manual Elevation (Degrees)", Range(-90, 90)) = 35
         [HDR] _SunColor ("Sun Color", Color) = (1, 0.82, 0.5, 1)
-        _SunIntensity ("Sun Intensity", Range(0, 20)) = 4
+        _SunIntensity ("Sun Intensity", Range(0, 100)) = 4
         _SunDiskVisibility ("Sun Disk Visibility", Range(0, 1)) = 1
-        _SunRadius ("Sun Radius (Degrees)", Range(0.1, 10)) = 1.5
-        _SunHaloSize ("Halo Radius Multiplier", Range(1, 16)) = 6
-        _SunHaloIntensity ("Halo Intensity", Range(0, 2)) = 0.15
+        _SunRadius ("Sun Radius (Degrees)", Range(0.01, 45)) = 1.5
+        _SunHaloSize ("Halo Radius Multiplier", Range(1, 64)) = 6
+        _SunHaloIntensity ("Halo Intensity", Range(0, 8)) = 0.15
     }
 
     SubShader
@@ -75,6 +86,7 @@ Shader "RPG/Skybox/Low Poly Clouds"
             #pragma vertex Vert
             #pragma fragment Frag
             #pragma multi_compile_instancing
+            #pragma shader_feature_local_fragment _ _CLOUD_BLUR
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
@@ -87,11 +99,15 @@ Shader "RPG/Skybox/Low Poly Clouds"
                 float4 _CloudOffset;
                 float4 _UpperCloudOffset;
                 float4 _SunColor;
+                float4 _CloudFieldParams;
+                float4 _UpperCloudFieldParams;
+                float _CloudCoverageMin;
+                float _CloudCoverageMax;
+                float _UpperCloudCoverageMin;
+                float _UpperCloudCoverageMax;
                 float _SkyGradient;
                 float _Exposure;
-                float _CloudCoverage;
                 float _CloudScale;
-                float _CloudDetail;
                 float _CloudProjectionBlend;
                 float _CloudDomeCurvature;
                 float _CloudVolume;
@@ -100,10 +116,10 @@ Shader "RPG/Skybox/Low Poly Clouds"
                 float _FacetContrast;
                 float _CloudOpacity;
                 float _CloudHorizonFade;
+                float _CloudBlurRadius;
                 float _WindDirection;
                 float _WindSpeed;
                 float _CloudWindStretch;
-                float _UpperCloudCoverage;
                 float _UpperCloudScale;
                 float _UpperCloudOpacity;
                 float _UpperCloudWindDirection;
@@ -119,6 +135,11 @@ Shader "RPG/Skybox/Low Poly Clouds"
                 float _SunHaloSize;
                 float _SunHaloIntensity;
             CBUFFER_END
+
+            TEXTURE2D(_CloudField);
+            SAMPLER(sampler_CloudField);
+            TEXTURE2D(_UpperCloudField);
+            SAMPLER(sampler_UpperCloudField);
 
             struct Attributes
             {
@@ -144,68 +165,35 @@ Shader "RPG/Skybox/Low Poly Clouds"
                 return output;
             }
 
-            float Hash21(float2 p)
-            {
-                float3 p3 = frac(float3(p.x, p.y, p.x) * 0.1031);
-                p3 += dot(p3, p3.yzx + 33.33);
-                return frac((p3.x + p3.y) * p3.z);
-            }
-
-            // Equilateral triangle lattice: continuous linear density gives polygonal
-            // silhouettes. Its analytic gradient is constant on each facet and
-            // supplies a fake surface normal without additional noise evaluations.
-            // Returns density, face mean, and density gradient in input coordinates.
-            float4 TriangleNoise(float2 p)
-            {
-                float2 lattice = float2(p.x - p.y * 0.577350269, p.y * 1.154700538);
-                float2 cell = floor(lattice);
-                float2 f = frac(lattice);
-                float upper = step(1.0, f.x + f.y);
-                float a = Hash21(cell + upper);
-                float b = Hash21(cell + float2(1, 0));
-                float c = Hash21(cell + float2(0, 1));
-                float3 weights = lerp(float3(1.0 - f.x - f.y, f.x, f.y),
-                    float3(f.x + f.y - 1.0, 1.0 - f.y, 1.0 - f.x), upper);
-                float density = dot(float3(a, b, c), weights);
-                float2 latticeGradient = lerp(float2(b - a, c - a), float2(a - c, a - b), upper);
-                float2 gradient = float2(latticeGradient.x,
-                    latticeGradient.y * 1.154700538 - latticeGradient.x * 0.577350269);
-                return float4(density, (a + b + c) / 3.0, gradient);
-            }
+            #include "Clouds/CloudFieldSampling.hlsl"
 
             float4 CloudLayer(float2 domeUV, float3 direction, float3 sunDirection,
-                float coverage, float scale, float opacity, float windAngle, float speed,
-                float stretch, float2 offset, float detailAmount)
+                float2 coverage, float scale, float opacity, float windAngle, float speed,
+                float stretch, float2 offset, bool distantLayer)
             {
-                // Material-uniform branches: derivatives remain valid, and disabled
-                // layers/detail do not need their noise evaluations.
-                [branch] if (opacity <= 0.0 || coverage <= 0.0)
+                // Metadata Z marks a completed bake.
+                float4 parameters = distantLayer ? _UpperCloudFieldParams : _CloudFieldParams;
+                [branch] if (opacity <= 0.0 || parameters.z < 0.5)
                     return 0.0;
 
                 float2 wind = float2(cos(radians(windAngle)), sin(radians(windAngle)));
                 float2 acrossWind = float2(-wind.y, wind.x);
                 float safeStretch = max(stretch, 0.01);
                 float2 cloudUV = float2(dot(domeUV, wind), dot(domeUV, acrossWind)) * scale;
-                // Stretch the moving pattern, so changing its length does not change
-                // the speed of its features across the sky.
+                // Apply movement before stretch to preserve feature speed.
                 cloudUV.x = (cloudUV.x - _Time.y * speed) / safeStretch;
                 cloudUV += offset;
-                float4 field = TriangleNoise(cloudUV);
-                [branch] if (detailAmount > 0.0)
-                {
-                    float4 detail = TriangleNoise(cloudUV * 2.03 + float2(7.1, 3.8));
-                    detail.zw *= 2.03;
-                    field = lerp(field, detail, detailAmount);
-                }
-
-                float threshold = lerp(1.01, -0.01, coverage);
-                float edgeAA = max(fwidth(field.x), 0.0001);
-                float mask = smoothstep(threshold - edgeAA, threshold + edgeAA, field.x);
-                mask = lerp(mask, 1.0, step(1.0, coverage));
+                float2 limits = saturate(float2(min(coverage.x, coverage.y), max(coverage.x, coverage.y)));
+                float threshold = limits.x;
+                float2 fieldUV = cloudUV / max(parameters.x, 0.01);
+                // Let the repeat sampler wrap: frac here would break mip derivatives.
+                float4 field = distantLayer
+                    ? SAMPLE_TEXTURE2D(_UpperCloudField, sampler_UpperCloudField, fieldUV)
+                    : SAMPLE_TEXTURE2D(_CloudField, sampler_CloudField, fieldUV);
+                field = CloudFieldToSurface(field, threshold, parameters.y);
+                float mask = CloudCoverageMask(field.x, limits);
                 mask *= smoothstep(0.02, max(_CloudHorizonFade, 0.021), direction.y) * opacity;
 
-                // Rotate the height gradient back out of wind coordinates, accounting
-                // for the independent length scale. The normal follows the curved dome.
                 float2 slope = wind * (field.z / safeStretch) + acrossWind * field.w;
                 float normalCurvature = _CloudDomeCurvature * saturate(_CloudProjectionBlend);
                 float3 domeNormal = normalize(float3(direction.x * normalCurvature,
@@ -230,6 +218,8 @@ Shader "RPG/Skybox/Low Poly Clouds"
                 return float4(color, mask);
             }
 
+            #include "Clouds/CloudLayerBlur.hlsl"
+
             float3 SunDirection()
             {
                 float azimuth = radians(_SunAzimuth);
@@ -237,7 +227,6 @@ Shader "RPG/Skybox/Low Poly Clouds"
                 float3 manualDirection = float3(sin(azimuth) * cos(elevation),
                     sin(elevation), cos(azimuth) * cos(elevation));
                 float mainLengthSq = dot(_MainLightPosition.xyz, _MainLightPosition.xyz);
-                // A scene without a directional light still has a usable sun.
                 float follow = step(0.5, _UseMainLight) * (1.0 - step(0.5, _MainLightPosition.w))
                     * step(0.0001, mainLengthSq);
                 return lerp(manualDirection,
@@ -264,28 +253,25 @@ Shader "RPG/Skybox/Low Poly Clouds"
                 sky += _SunColor.rgb * _SunIntensity
                     * (sunDisk + halo * _SunHaloIntensity) * aboveHorizon * saturate(_SunDiskVisibility);
 
-                // Curved dome projection stays finite at the horizon and has no
-                // longitude seam or zenith pinch. Curvature 1 is stereographic.
                 float curvature = max(_CloudDomeCurvature, 0.01);
                 float2 domeUV = direction.xz * (1.0 + curvature) / (max(direction.y, 0.0) + curvature);
-                // Blend coordinates before sampling, so transitioning projections
-                // does not render the cloud patterns twice.
                 float2 flatUV = direction.xz / max(direction.y, 0.04);
                 float2 cloudUV = lerp(flatUV, domeUV, saturate(_CloudProjectionBlend));
-                float4 distant = CloudLayer(cloudUV, direction, sunDirection,
-                    _UpperCloudCoverage, _UpperCloudScale, _UpperCloudOpacity,
+                float4 distant = RenderCloudLayer(cloudUV, direction, sunDirection,
+                    float2(_UpperCloudCoverageMin, _UpperCloudCoverageMax), _UpperCloudScale, _UpperCloudOpacity,
                     _UpperCloudWindDirection, _UpperCloudWindSpeed, _UpperCloudWindStretch,
-                    _UpperCloudOffset.xy, 0.0);
+                    _UpperCloudOffset.xy, true);
                 distant.rgb = lerp(distant.rgb, skyBackground, _UpperCloudHaze);
                 sky = lerp(sky, distant.rgb, distant.a);
-                float4 nearCloud = CloudLayer(cloudUV, direction, sunDirection,
-                    _CloudCoverage, _CloudScale, _CloudOpacity,
+                float4 nearCloud = RenderCloudLayer(cloudUV, direction, sunDirection,
+                    float2(_CloudCoverageMin, _CloudCoverageMax), _CloudScale, _CloudOpacity,
                     _WindDirection, _WindSpeed, _CloudWindStretch,
-                    _CloudOffset.xy, _CloudDetail * 0.5);
+                    _CloudOffset.xy, false);
                 return half4(lerp(sky, nearCloud.rgb, nearCloud.a) * _Exposure, 1.0);
             }
             ENDHLSL
         }
     }
     Fallback Off
+    CustomEditor "EditorTools.CloudSkyboxShaderGUI"
 }

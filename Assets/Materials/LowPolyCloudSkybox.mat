@@ -11,7 +11,8 @@ Material:
   m_Shader: {fileID: 4800000, guid: c91717f01e744b71924b8473ad8bcb6b, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _CLOUD_BLUR
   m_InvalidKeywords:
   - _USEMAINLIGHT_ON
   m_LightmapFlags: 4
@@ -23,46 +24,60 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs: []
+    m_TexEnvs:
+    - _CloudField:
+        m_Texture: {fileID: 2800000, guid: c7c685be3262d0149a407aa0137a6f91, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _UpperCloudField:
+        m_Texture: {fileID: 2800000, guid: 9fb428e9c804ccf45a53b1eddfaf15b7, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _CloudCoverage: 0.468
-    - _CloudDetail: 0
+    - _CloudBlur: 1
+    - _CloudBlurRadius: 0.0065
+    - _CloudCoverageMax: 0.324
+    - _CloudCoverageMin: 0.072
     - _CloudDomeCurvature: 0.75
-    - _CloudHorizonFade: 0.16
-    - _CloudLighting: 0.7
-    - _CloudOpacity: 0.6
-    - _CloudProjectionBlend: 0.894
-    - _CloudRimStrength: 0.2
-    - _CloudScale: 3.29
-    - _CloudVolume: 1.4
-    - _CloudWindStretch: 1
+    - _CloudHorizonFade: 0.338
+    - _CloudLighting: 0.921
+    - _CloudOpacity: 0.45
+    - _CloudProjectionBlend: 0.759
+    - _CloudRimStrength: 0.11
+    - _CloudScale: 7.54
+    - _CloudVolume: 1.2
+    - _CloudWindStretch: 2.02
     - _Exposure: 1
-    - _FacetContrast: 0.188
+    - _FacetContrast: 0.734
     - _SkyGradient: 0.65
     - _SunAzimuth: 135
+    - _SunDiskVisibility: 1
     - _SunElevation: 35
     - _SunHaloIntensity: 0.15
     - _SunHaloSize: 1
     - _SunIntensity: 20
     - _SunRadius: 0.73
-    - _UpperCloudCoverage: 0.459
-    - _UpperCloudHaze: 0.3
-    - _UpperCloudOpacity: 0.472
-    - _UpperCloudScale: 4.99
-    - _UpperCloudWindDirection: 315
-    - _UpperCloudWindSpeed: 0.078
-    - _UpperCloudWindStretch: 3.69
+    - _UpperCloudCoverageMax: 0.468
+    - _UpperCloudCoverageMin: 0
+    - _UpperCloudHaze: 0.09
+    - _UpperCloudOpacity: 0.161
+    - _UpperCloudScale: 4.19
+    - _UpperCloudWindDirection: 79
+    - _UpperCloudWindSpeed: 0.0784
+    - _UpperCloudWindStretch: 8
     - _UseMainLight: 1
-    - _WindDirection: 25
-    - _WindSpeed: 0.091
+    - _WindDirection: 95
+    - _WindSpeed: 0.2
     m_Colors:
+    - _CloudFieldParams: {r: 32, g: 1, b: 1, a: 0}
     - _CloudLightColor: {r: 1, g: 0.97, b: 0.88, a: 1}
     - _CloudOffset: {r: 13.7, g: 9.2, b: 0, a: 0}
     - _CloudShadowColor: {r: 0.42, g: 0.54, b: 0.66, a: 1}
     - _GroundColor: {r: 0.24, g: 0.29, b: 0.32, a: 1}
     - _HorizonColor: {r: 0.65, g: 0.81, b: 0.88, a: 1}
     - _SunColor: {r: 7.999999, g: 5.360168, b: 0.624, a: 1}
+    - _UpperCloudFieldParams: {r: 32, g: 1, b: 1, a: 0}
     - _UpperCloudOffset: {r: -17.2, g: 35.6, b: 0, a: 0}
     - _ZenithColor: {r: 0.12, g: 0.36, b: 0.68, a: 1}
   m_BuildTextureStacks: []

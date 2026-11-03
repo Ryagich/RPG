@@ -1,0 +1,76 @@
+#pragma kernel GenerateFaceted CLOUD_FIELD_FACETED
+#pragma kernel GenerateRounded CLOUD_FIELD_ROUNDED
+#pragma kernel GenerateCirrus CLOUD_FIELD_CIRRUS
+#pragma kernel GenerateCumulus CLOUD_FIELD_CUMULUS
+
+#if defined(CLOUD_FIELD_CIRRUS)
+#include "CirrusClouds.hlsl"
+#elif defined(CLOUD_FIELD_CUMULUS)
+#include "CumulusClouds.hlsl"
+#elif defined(CLOUD_FIELD_ROUNDED)
+#include "RoundedClouds.hlsl"
+#else
+#include "FacetedClouds.hlsl"
+#endif
+
+RWTexture2D<float4> _Result;
+int _Resolution;
+float _Period;
+float _Detail;
+float _Iterations;
+float _Lacunarity;
+float _Persistence;
+
+float4 RawField(float2 p)
+{
+    CloudFractalSettings settings = MakeCloudFractalSettings(_Iterations, _Lacunarity, _Persistence);
+    #if defined(CLOUD_FIELD_CIRRUS)
+    return FractalCirrusCloudField(p, _Detail, settings);
+    #elif defined(CLOUD_FIELD_CUMULUS)
+    return FractalCumulusCloudField(p, _Detail, settings);
+    #elif defined(CLOUD_FIELD_ROUNDED)
+    return FractalRoundedCloudField(p, _Detail, settings);
+    #else
+    return FractalFacetedCloudField(p, _Detail, settings);
+    #endif
+}
+
+float4 BlendField(float4 a, float4 b, float weight, float2 weightGradient)
+{
+    float4 field = lerp(a, b, weight);
+    // Include the blend weight's derivative to keep lighting seamless.
+    field.zw += (b.x - a.x) * weightGradient;
+    return field;
+}
+
+// Zero endpoint derivatives keep the repeated tile's gradient continuous.
+float4 PeriodicField(float2 uv)
+{
+    float2 p = uv * _Period;
+    float2 weight = uv * uv * (3.0 - 2.0 * uv);
+    float2 gradient = 6.0 * uv * (1.0 - uv) / _Period;
+    float4 bottom = BlendField(RawField(p), RawField(p - float2(_Period, 0)),
+        weight.x, float2(gradient.x, 0));
+    float4 top = BlendField(RawField(p - float2(0, _Period)), RawField(p - _Period),
+        weight.x, float2(gradient.x, 0));
+    return BlendField(bottom, top, weight.y, float2(0, gradient.y));
+}
+
+void WriteField(uint3 id)
+{
+    if (id.x >= (uint)_Resolution || id.y >= (uint)_Resolution)
+        return;
+    _Result[id.xy] = PeriodicField((float2(id.xy) + 0.5) / _Resolution);
+}
+
+[numthreads(8, 8, 1)]
+void GenerateFaceted(uint3 id : SV_DispatchThreadID) { WriteField(id); }
+
+[numthreads(8, 8, 1)]
+void GenerateRounded(uint3 id : SV_DispatchThreadID) { WriteField(id); }
+
+[numthreads(8, 8, 1)]
+void GenerateCirrus(uint3 id : SV_DispatchThreadID) { WriteField(id); }
+
+[numthreads(8, 8, 1)]
+void GenerateCumulus(uint3 id : SV_DispatchThreadID) { WriteField(id); }

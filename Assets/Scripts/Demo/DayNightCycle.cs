@@ -238,9 +238,7 @@ namespace World
             if (lightPath == LightPathMode.FullOrbit)
                 return Mathf.LerpAngle(from, to, fraction);
 
-            // Sample the same daytime trajectory in reverse at night. Do not
-            // interpolate Dusk -> Night rotation: angular wrapping could choose
-            // the lower half of the orbit, and Night is an appearance preset here.
+            // Reverse the day arc; interpolating through Night can wrap below the horizon.
             float dayTime = time < 0.25f ? 0.5f - time : time > 0.75f ? 1.5f - time : time;
             if (dayTime <= 0.5f)
                 return Mathf.LerpAngle(dawn.sunRotation, day.sunRotation, (dayTime - 0.25f) * 4f);
@@ -269,6 +267,7 @@ namespace World
         {
             if (controlledSun == null || runtimeSkybox == null)
                 return;
+            CloudSkyboxParameters.Apply(sourceSkybox, runtimeSkybox);
             LightingSettings value = EvaluateLighting();
             controlledSun.transform.rotation = Quaternion.Euler(value.sunRotation, sunAzimuth, 0f);
             Vector3 direction = -controlledSun.transform.forward;
@@ -380,7 +379,7 @@ namespace World
                 controlledSun.color = previousLightColor;
                 controlledSun.intensity = previousIntensity;
             }
-            // Restore the scene which owns the preview, even after an editor scene/stage change.
+            // Restore preview settings in their owning scene.
             Scene activeScene = SceneManager.GetActiveScene();
             if (settingsScene.IsValid() && settingsScene.isLoaded)
             {
@@ -422,7 +421,7 @@ namespace World
         private volatile bool previewRefreshRequested = true;
         private bool savingScene;
 
-        // Loading can call OnValidate off the main thread; only set a flag here.
+        // OnValidate may run off the main thread.
         private void OnValidate() => RequestPreview();
         private void RequestPreview() => previewRefreshRequested = true;
 
@@ -441,7 +440,8 @@ namespace World
                 return;
             }
             bool rebind = NeedsRebind();
-            if (!previewRefreshRequested && !rebind)
+            if (!previewRefreshRequested && !rebind
+                && !CloudSkyboxParameters.HaveChanges(sourceSkybox, runtimeSkybox))
                 return;
             previewRefreshRequested = false;
             if (rebind)
