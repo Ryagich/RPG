@@ -28,6 +28,7 @@ namespace Inventory
         {
             if (!TryGetCurrentWeaponSlot(out var slot))
             {
+                weaponVisual?.HideWeaponVisual();
                 return;
             }
 
@@ -42,10 +43,12 @@ namespace Inventory
 
             if (!inventory.TryTakeFromSlot(slot, out var weaponStack))
             {
+                weaponVisual?.HideWeaponVisual();
                 return;
             }
 
             dropper.DropAt(weaponStack, position, rotation);
+            weaponVisual?.HideWeaponVisual();
         }
 
         private bool TryGetCurrentWeaponSlot(out SlotModel slot)

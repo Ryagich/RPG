@@ -279,6 +279,13 @@ namespace Inventory
             weaponVisual.Dispose();
         }
 
+        public void HideWeaponVisual()
+        {
+            endDamageWindow?.Invoke();
+            transitionState.Reset();
+            weaponVisual.Destroy();
+        }
+
         private WeaponTransitionOutcome ReconcileWithoutSelectedWeapon()
         {
             if (DisplayMode == WeaponDisplayMode.RightHand && CurrentItemConfig != null)

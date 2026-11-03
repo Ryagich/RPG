@@ -36,6 +36,7 @@ namespace Inventory
 
         private bool isInitialized;
         private bool hasPendingPresentationReconciliation;
+        private bool isWeaponVisualHidden;
 
         public PlayerWeaponInHandController
             (
@@ -304,6 +305,15 @@ namespace Inventory
             return weaponTransitions.TryGetCurrentWeaponPose(out position, out rotation);
         }
 
+        public void HideWeaponVisual()
+        {
+            isWeaponVisualHidden = true;
+            hasPendingPresentationReconciliation = false;
+            weaponIntent.RequestSheathe();
+            ResetAnimatorRequests();
+            weaponTransitions.HideWeaponVisual();
+        }
+
         private void OnWeaponSlotInput(WeaponSlotInputMessage message)
         {
             if (weaponDrawingBlockState.IsWeaponDrawingBlocked)
@@ -443,6 +453,11 @@ namespace Inventory
 
         private void ReconcileWeaponPresentation()
         {
+            if (isWeaponVisualHidden)
+            {
+                return;
+            }
+
             if (!CanReconcileWeaponPresentation())
             {
                 RequestPresentationReconciliation();

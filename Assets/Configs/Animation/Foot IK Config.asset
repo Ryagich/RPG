@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f856bd4cf2d45cba7a07b456fea8412, type: 3}
+  m_Name: Foot IK Config
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterAnimation.FootIkConfig
+  groundLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  footRadius: 0.08
+  footHeight: 0.04
+  rayStartOffset: 0.45
+  rayDistance: 1.2
+  maximumFootOffset: 0.65
+  footProbeSpan: 0.22
+  minimumGroundProbes: 2
+  maximumProbeHeightDifference: 0.18
+  probeEdgePenalty: 0.05
+  probeSlopePenalty: 0.002
+  flatSurfaceHeightTolerance: 0.025
+  flatSurfaceAngleTolerance: 1
+  footLiftStart: 0.025
+  footLiftEnd: 0.12
+  maximumFootRotationAngle: 25
+  interpolationSpeed: 18
+  contactWeightSpeed: 16
+  ikEnterSpeed: 10
+  ikExitSpeed: 14
+  pelvisMaximumOffset: 0.3

@@ -26,6 +26,13 @@ namespace UI.Pages
 {
     internal static class PageUiUtilities
     {
+        public static Camera GetEventCamera(Canvas canvas)
+        {
+            return canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay
+                ? canvas.worldCamera
+                : null;
+        }
+
         // Chill отвечает за сон. До появления дня/ночи и сна не показываем его в usable item UI,
         // но сам StatType и serialized данные остаются в проекте.
         private static readonly StatType[] UsablePopupStatTypes = { StatType.Hp, StatType.Water, StatType.Food, StatType.Stamina };

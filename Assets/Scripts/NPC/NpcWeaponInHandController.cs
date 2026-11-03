@@ -63,6 +63,7 @@ namespace NPC
         private bool isAttackInProgress;
         private bool isAttackStartNotificationPending;
         private bool isEvasionDirectionLocked;
+        private bool isWeaponVisualHidden;
         private int currentRenderedSlotIndex;
         private WeaponDisplayMode currentDisplayMode;
         private readonly int fullBodyLayerIndex;
@@ -448,8 +449,22 @@ namespace NPC
             return false;
         }
 
+        public void HideWeaponVisual()
+        {
+            isWeaponVisualHidden = true;
+            isWeaponDrawn = false;
+            CompleteSheatheAnimation();
+            DestroyCurrentWeaponInstance();
+            currentWeaponItemConfig = null;
+        }
+
         private void RefreshWeaponInHand()
         {
+            if (isWeaponVisualHidden)
+            {
+                return;
+            }
+
             var selectedWeapon = GetSelectedWeaponItemConfig(out var selectedSlotIndex);
             var displayMode = selectedWeapon == null
                 ? WeaponDisplayMode.None
