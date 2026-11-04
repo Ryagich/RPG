@@ -127932,7 +127932,7 @@ PrefabInstance:
     - target: {fileID: 5862777521056687919, guid: 236cce36376db1240bd5e68d040f6f02, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: a4e6104902ad9e44aab3f718f7388be4, type: 2}
+      objectReference: {fileID: 2100000, guid: a8e98486f28e45649aaa72cebc2be357, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -939803,7 +939803,7 @@ MonoBehaviour:
   sun: {fileID: 1898619740}
   skyboxMaterial: {fileID: 2100000, guid: a553141a349760b479ac30db198558e6, type: 2}
   volume: {fileID: 423528678}
-  timeOfDay: 0
+  timeOfDay: 0.505
   cycleDuration: 120
   animate: 1
   previewInEditor: 1
