@@ -56,7 +56,7 @@ namespace Dialogs.Graph.Editor
         private void ClearRetainedNodeRects()
         {
             nodeRects.Clear();
-            answerPickerAnchors.Clear();
+            connectionPresenter.ClearNodePresentationState();
         }
 
         private IEnumerable<DialogNode> GetRetainedGraphNodes() =>
@@ -116,18 +116,18 @@ namespace Dialogs.Graph.Editor
             Painter2D painter, DialogCanvasConnection connection, DialogNode sourceNode, DialogNode targetNode,
             Rect sourceRect, Rect targetRect, bool isDragging)
         {
-            (Vector2 defaultStart, Vector2 endPosition) = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect);
-            Vector2 startPosition = answerPickerAnchors.Resolve(connection.Answer, sourceRect, defaultStart);
-            Vector2 startTangent = startPosition + GraphConnectionGeometry.GetDirectionForRectPoint(sourceRect, startPosition) * 60f;
-            Vector2 endTangent = endPosition + GraphConnectionGeometry.GetDirectionForRectPoint(targetRect, endPosition) * 60f;
-            if (!isDragging)
-                (startTangent, endTangent) = GetOrBuildConnectionTangents(
-                    connection.Answer, startPosition, endPosition, sourceRect, targetRect, sourceNode, targetNode);
-
             Color color = GetConnectionColor(sourceNode, targetNode);
             if (connection.IsImplicit) color = Color.Lerp(color, new Color(0.76f, 0.82f, 0.94f), 0.6f);
-            GraphConnectionDrawing.DrawBezier(
-                painter, startPosition, startTangent, endTangent, endPosition, color);
+            connectionPresenter.DrawRetainedConnection(
+                painter,
+                connection.Answer,
+                sourceNode,
+                targetNode,
+                sourceRect,
+                targetRect,
+                isDragging,
+                nodeRects,
+                color);
         }
     }
 }

@@ -212,6 +212,63 @@ namespace EditorTools
     /// </summary>
     internal static class GraphBezierConnectionRouter
     {
+        /// <summary>
+        /// Bounded-cost route for dense editor graphs. It keeps the normal Bezier when the
+        /// direct corridor is clear and otherwise takes one deterministic lane around the
+        /// first blocking node, avoiding the exhaustive candidate search below.
+        /// </summary>
+        public static (Vector2 StartTangent, Vector2 EndTangent) ResolveTangentsFast(
+            Vector2 startPos,
+            Vector2 endPos,
+            Rect sourceRect,
+            Rect targetRect,
+            IReadOnlyList<Rect> obstacles)
+        {
+            Vector2 startDirection = GraphConnectionGeometry.GetDirectionForRectPoint(sourceRect, startPos);
+            Vector2 endDirection = GraphConnectionGeometry.GetDirectionForRectPoint(targetRect, endPos);
+            float handleLength = Mathf.Clamp(Vector2.Distance(startPos, endPos) * .35f, 60f, 180f);
+            Vector2 defaultStart = startPos + startDirection * handleLength;
+            Vector2 defaultEnd = endPos + endDirection * handleLength;
+
+            Rect corridor = Rect.MinMaxRect(
+                Mathf.Min(startPos.x, endPos.x), Mathf.Min(startPos.y, endPos.y),
+                Mathf.Max(startPos.x, endPos.x), Mathf.Max(startPos.y, endPos.y));
+            Rect blockingObstacle = default;
+            bool hasBlockingObstacle = false;
+            foreach (Rect obstacle in obstacles)
+            {
+                if (corridor.Overlaps(obstacle))
+                {
+                    blockingObstacle = obstacle;
+                    hasBlockingObstacle = true;
+                    break;
+                }
+            }
+
+            if (!hasBlockingObstacle)
+            {
+                return (defaultStart, defaultEnd);
+            }
+
+            float laneMargin = Mathf.Clamp(Vector2.Distance(startPos, endPos) * .15f, 48f, 120f);
+            if (Mathf.Abs(endPos.x - startPos.x) >= Mathf.Abs(endPos.y - startPos.y))
+            {
+                float laneY = startPos.y <= blockingObstacle.center.y
+                    ? blockingObstacle.yMin - laneMargin
+                    : blockingObstacle.yMax + laneMargin;
+                return (
+                    new Vector2(Mathf.Lerp(startPos.x, endPos.x, .25f), laneY),
+                    new Vector2(Mathf.Lerp(startPos.x, endPos.x, .75f), laneY));
+            }
+
+            float laneX = startPos.x <= blockingObstacle.center.x
+                ? blockingObstacle.xMin - laneMargin
+                : blockingObstacle.xMax + laneMargin;
+            return (
+                new Vector2(laneX, Mathf.Lerp(startPos.y, endPos.y, .25f)),
+                new Vector2(laneX, Mathf.Lerp(startPos.y, endPos.y, .75f)));
+        }
+
         public static (Vector2 StartTangent, Vector2 EndTangent) ResolveTangents(
             Vector2 startPos,
             Vector2 endPos,

@@ -24,7 +24,11 @@ namespace StateMachine.Graph.Editor
             }
         }
 
-        public static void DeleteOwnedTransitions(State state)
+        /// <summary>
+        /// Deletes only transition assets that cease to have project-wide references when the
+        /// owning State is removed. Shared transition assets are intentionally retained.
+        /// </summary>
+        public static void DeleteUnsharedTransitions(State state)
         {
             if (state == null)
             {
@@ -34,15 +38,18 @@ namespace StateMachine.Graph.Editor
             EnsureTransitions(state);
             foreach (Transition transition in state.Transitions.ToList())
             {
-                if (transition != null)
+                if (transition != null && StateGraphTransitionReferenceIndex.CountReferencesOutside(state, transition) == 0)
                 {
                     GraphEditorAssetService.DeleteAsset(transition, "Delete state transition");
                 }
             }
 
-            GraphEditorAssetService.MarkDirty(state, "Delete owned state transitions");
+            GraphEditorAssetService.MarkDirty(state, "Remove state transition references");
             state.Transitions.Clear();
         }
+
+        public static bool CanDeleteTransitionAsset(Transition transition) =>
+            transition != null && StateGraphTransitionReferenceIndex.CountReferencesOutside(null, transition) == 0;
 
         private static void UpdateIncomingReferences(
             StateMachineGraph graph,

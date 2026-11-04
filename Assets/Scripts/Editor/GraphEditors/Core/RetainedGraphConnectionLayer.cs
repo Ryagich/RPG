@@ -63,15 +63,21 @@ namespace EditorTools
 
         public void UpdateConnectionsFor(TNode node) => spatialIndex.UpdateConnectionsFor(node);
 
-        public bool RevealNextSourceNode()
+        public bool RevealNextSourceNodes(int sourceBudget)
         {
-            if (nextSourceNodeIndex >= sourceNodes.Count)
+            int revealCount = Mathf.Max(1, sourceBudget);
+            bool revealedAny = false;
+            while (revealCount-- > 0 && nextSourceNodeIndex < sourceNodes.Count)
             {
-                return false;
+                revealedSourceNodes.Add(sourceNodes[nextSourceNodeIndex++]);
+                revealedAny = true;
             }
 
-            revealedSourceNodes.Add(sourceNodes[nextSourceNodeIndex++]);
-            MarkDirtyRepaint();
+            if (revealedAny)
+            {
+                MarkDirtyRepaint();
+            }
+
             return nextSourceNodeIndex < sourceNodes.Count;
         }
 

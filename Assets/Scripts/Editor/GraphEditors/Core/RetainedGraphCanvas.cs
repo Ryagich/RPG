@@ -117,6 +117,8 @@ namespace EditorTools
         // viewport exist, while domain node geometry remains available for edges.
         private const float VirtualizationMargin = 240f;
         private const int VirtualizedNodeCreationBudget = 1;
+        private const int ConnectionRevealSourceBudget = 4;
+        private const long ConnectionCullingRefreshDelayMs = 80;
 
         private readonly IRetainedGraphCanvasViewport viewport;
         private readonly IRetainedGraphCanvasAppearance appearance;
@@ -210,6 +212,8 @@ namespace EditorTools
         {
             return dragState.IsDragging(node);
         }
+
+        public Rect VisibleGraphRect => GetVisibleGraphRect();
 
         public void RebuildNow()
         {
@@ -350,6 +354,18 @@ namespace EditorTools
             }
         }
 
+        /// <summary>Invalidates only one node's IMGUI content without rebuilding the canvas.</summary>
+        public void RequestNodeContentRepaint(TNode node)
+        {
+            if (node != null && nodeElements.TryGetValue(node, out NodeElement nodeElement))
+            {
+                nodeElement.RequestContentRepaint();
+            }
+        }
+
+        /// <summary>Schedules one connection repaint without rebuilding nodes or connection indexes.</summary>
+        public void RequestConnectionRepaint() => ScheduleConnectionRefresh();
+
         private void NotifyNodeGeometryChanged(NodeElement nodeElement)
         {
             if (!nodeElements.ContainsKey(nodeElement.Node))
@@ -415,6 +431,9 @@ namespace EditorTools
             {
                 return;
             }
+
+            clampedPosition = dragState.ConstrainPreviewToViewport(
+                GetVisibleGraphRect(), nodePresenter.RetainedGraphNodeSize, NodeHeaderHeight);
 
             nodeElement.SetDragPosition(clampedPosition);
             nodePresenter.SetRetainedNodeRect(nodeElement.Node, nodeElement.GetGraphRect());
@@ -510,11 +529,11 @@ namespace EditorTools
                     return;
                 }
 
-                if (connectionLayer != null && connectionLayer.RevealNextSourceNode())
+                if (connectionLayer != null && connectionLayer.RevealNextSourceNodes(ConnectionRevealSourceBudget))
                 {
                     ScheduleNextConnectionReveal(generation);
                 }
-            }).ExecuteLater(0);
+            }).ExecuteLater(16);
         }
 
         private void ScheduleConnectionRefresh()
@@ -529,7 +548,7 @@ namespace EditorTools
             {
                 connectionRefreshScheduled = false;
                 RefreshConnections();
-            }).ExecuteLater(16);
+            }).ExecuteLater(ConnectionCullingRefreshDelayMs);
         }
 
         private void FlushPendingGeometryChanges()
@@ -848,6 +867,12 @@ namespace EditorTools
             public void RequestContentLayoutRefresh()
             {
                 content.MarkDirtyLayout();
+            }
+
+            public void RequestContentRepaint()
+            {
+                content.MarkDirtyLayout();
+                content.MarkDirtyRepaint();
             }
 
             public void RefreshTargetSelection()

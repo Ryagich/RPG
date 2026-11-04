@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using EditorTools;
 using StateMachine.Graph.Model;
@@ -9,7 +8,7 @@ using UnityEngine.UIElements;
 
 namespace StateMachine.Graph.Editor
 {
-    public partial class StateMachineEditorWindow : GraphEditorWindowBase
+    public partial class StateMachineEditorWindow : GraphEditorWindowBase, IStateMachineNodeInspectorHost
     {
         private const string StatesPathKey = "StateMachineEditor_StatesPath";
         private const string TransitionsPathKey = "StateMachineEditor_TransitionsPath";
@@ -22,46 +21,31 @@ namespace StateMachine.Graph.Editor
         private static readonly Vector2 NodeSize = new(320f, 220f);
 
         private StateMachineGraph currentGraph;
-        private Vector2 scrollPos;
         private string statesFolderPath;
         private string transitionsFolderPath;
         private readonly Dictionary<Node, Rect> nodeRects = new();
         private readonly Dictionary<State, Node> stateToNodeLookup = new();
-        private readonly Dictionary<Transition, CachedConnectionRoute> connectionRouteCache = new();
-        private readonly Dictionary<Transition, CachedConnectionTangents> retainedConnectionTangentsCache = new();
-        private readonly GraphEditorConnectionAnchorRegistry<Transition> transitionPickerAnchors = new();
         private readonly GraphEditorNodeLayoutSynchronizer<Node> nodeLayoutSynchronizer = new();
-        private readonly List<Rect> connectionObstacleRects = new();
+        private readonly StateMachineGraphConnectionPresenter connectionPresenter = new();
+        private readonly HashSet<Node> expandedNodes = new();
 
         private bool isSelectingTargetNode;
-        private bool isControlsPanelExpanded = true;
+        private readonly GraphEditorOverlayPanelState controlsPanel = new();
         private bool graphStructureDirty = true;
-        private int connectionLayoutVersion;
+        private bool graphValidationDirty = true;
+        private IReadOnlyList<GraphEditorValidationIssue> cachedGraphValidationIssues;
         private Transition pendingTransition;
         private Node sourceNodeForSelection;
         private Node activeConnectionNode;
-        private readonly GraphEditorStyleTextOverrides styleTextOverrides = new();
-        private GUIStyle lightWindowStyle;
-        private GUIStyle lightHelpBoxStyle;
-        private GUIStyle lightButtonStyle;
-        private GUIStyle lightMiniButtonStyle;
-        private GUIStyle lightPopupStyle;
-        private GUIStyle lightTextFieldStyle;
-        private GUIStyle lightMiniBoldLabelStyle;
-        private GUIStyle lightMiniLabelStyle;
-        private GUIStyle lightCenteredMiniLabelStyle;
-        private Texture2D lightWindowTexture;
-        private Texture2D lightHelpBoxTexture;
-        private Texture2D lightButtonTexture;
-        private Texture2D lightButtonHoverTexture;
-        private Texture2D lightButtonActiveTexture;
-        private Texture2D lightTextFieldTexture;
-        private GUISkin lightSkin;
+        private GraphEditorTheme theme;
+        private StateMachineNodeInspector nodeInspector;
 
         private RetainedGraphCanvas<Node, Transition> toolkitCanvas;
         private DelegatingRetainedGraphCanvasAdapter<Node, Transition> canvasAdapter;
         private IMGUIContainer toolkitControls;
-        private bool toolkitUiActive;
+
+        private GraphEditorTheme Theme => theme ??= new GraphEditorTheme(() => useLightTheme);
+        private StateMachineNodeInspector NodeInspector => nodeInspector ??= new StateMachineNodeInspector(this);
 
         [MenuItem("Tools/State Machine Editor")]
         public static void Open()
@@ -71,7 +55,6 @@ namespace StateMachine.Graph.Editor
 
         private void CreateGUI()
         {
-            toolkitUiActive = true;
             canvasAdapter = CreateCanvasAdapter();
             toolkitCanvas = new RetainedGraphCanvas<Node, Transition>(
                 canvasAdapter,
@@ -88,6 +71,7 @@ namespace StateMachine.Graph.Editor
                 WindowBackgroundColor,
                 DrawToolkitControls);
 
+            UpdateControlsInputWidth();
             toolkitCanvas.RebuildNow();
         }
 
@@ -102,7 +86,9 @@ namespace StateMachine.Graph.Editor
         private void OnDisable()
         {
             GraphEditorAssetChangeTracker.AssetsChanged -= HandleTrackedAssetsChanged;
-            toolkitUiActive = false;
+            theme?.Dispose();
+            theme = null;
+            nodeInspector = null;
             toolkitCanvas = null;
             canvasAdapter = null;
             toolkitControls = null;
@@ -116,6 +102,7 @@ namespace StateMachine.Graph.Editor
             }
 
             InvalidateConnectionRouteCache();
+            graphValidationDirty = true;
             bool graphAssetChanged = currentGraph != null &&
                 changedAssetPaths.Contains(AssetDatabase.GetAssetPath(currentGraph));
             RefreshToolkitCanvas(graphAssetChanged || HasMissingStateReference());
@@ -140,30 +127,6 @@ namespace StateMachine.Graph.Editor
                     transition == null || !AssetDatabase.Contains(transition))));
         }
 
-        private void OnGUI()
-        {
-            if (toolkitUiActive)
-            {
-                return;
-            }
-
-            using (BeginThemedGuiScope())
-            {
-                DrawWindowBackground();
-
-                if (currentGraph == null)
-                {
-                    DrawEmptyState();
-                    DrawControlsOverlay();
-                    return;
-                }
-
-                EnsureGraphNodes();
-                DrawGraphArea();
-                DrawControlsOverlay();
-            }
-        }
-
         private void DrawToolkitControls()
         {
             using (BeginThemedGuiScope())
@@ -176,7 +139,7 @@ namespace StateMachine.Graph.Editor
         {
             using (BeginThemedGuiScope())
             {
-                DrawNodeWindow(node, false);
+                DrawNodeWindow(node);
             }
         }
 
@@ -247,7 +210,7 @@ namespace StateMachine.Graph.Editor
         {
             nodeRects.Clear();
             stateToNodeLookup.Clear();
-            transitionPickerAnchors.Clear();
+            connectionPresenter.ClearNodePresentationState();
         }
 
         IEnumerable<Node> GetRetainedGraphNodes()
@@ -332,6 +295,11 @@ namespace StateMachine.Graph.Editor
 
         void SelectRetainedNode(Node node)
         {
+            if (activeConnectionNode == node)
+            {
+                return;
+            }
+
             activeConnectionNode = node;
         }
 
@@ -374,33 +342,18 @@ namespace StateMachine.Graph.Editor
             Rect targetRect,
             bool isDragging)
         {
-            (Vector2 defaultStart, Vector2 endPosition) = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect);
-            Vector2 startPosition = transitionPickerAnchors.ResolvePickerPoint(transition, sourceRect, defaultStart);
-            Vector2 startTangent = startPosition + GraphConnectionGeometry.GetDirectionForRectPoint(sourceRect, startPosition) * 60f;
-            Vector2 endTangent = endPosition + GraphConnectionGeometry.GetDirectionForRectPoint(targetRect, endPosition) * 60f;
-            if (!isDragging)
-            {
-                (startTangent, endTangent) = GetOrBuildRetainedConnectionTangents(
-                    transition, startPosition, endPosition, sourceRect, targetRect, sourceNode, targetNode);
-            }
-
-            GraphConnectionDrawing.DrawBezier(
+            connectionPresenter.DrawRetainedConnection(
                 painter,
-                startPosition,
-                startTangent,
-                endTangent,
-                endPosition,
+                transition,
+                sourceNode,
+                targetNode,
+                sourceRect,
+                targetRect,
+                isDragging,
+                activeConnectionNode != null &&
+                (ReferenceEquals(sourceNode, activeConnectionNode) || ReferenceEquals(targetNode, activeConnectionNode)),
+                nodeRects,
                 GetConnectionColor(sourceNode, targetNode));
-        }
-
-        private void DrawEmptyState()
-        {
-            Rect contentRect = new Rect(12f, 12f, position.width - 24f, 52f);
-            EditorGUI.DrawRect(contentRect, PanelBackgroundColor);
-            GUI.Box(contentRect, GUIContent.none, HelpBoxStyle);
-            EditorGUI.LabelField(
-                new Rect(contentRect.x + 10f, contentRect.y + 10f, contentRect.width - 20f, 32f),
-                "Create or load a state machine graph.");
         }
 
         private void DrawControlsOverlay()
@@ -414,17 +367,17 @@ namespace StateMachine.Graph.Editor
             float panelY = position.height - panelHeight;
             Rect panelRect = new Rect(0f, panelY, OverlayPanelWidth, panelHeight);
 
-            float toggleX = isControlsPanelExpanded
-                ? panelRect.xMax - toggleButtonWidth * 0.5f
-                : collapsedToggleLeftOffset;
-            float toggleY = panelRect.y + panelRect.height * 0.5f - toggleButtonHeight * 0.5f;
-            Rect toggleRect = new Rect(toggleX, toggleY, toggleButtonWidth, toggleButtonHeight);
+            Rect toggleRect = controlsPanel.GetToggleRect(
+                panelRect,
+                toggleButtonWidth,
+                toggleButtonHeight,
+                collapsedToggleLeftOffset);
 
-            if (!isControlsPanelExpanded)
+            if (!controlsPanel.IsExpanded)
             {
                 if (DrawButton(toggleRect, ">"))
                 {
-                    isControlsPanelExpanded = true;
+                    SetControlsPanelExpanded(true);
                 }
 
                 return;
@@ -502,6 +455,15 @@ namespace StateMachine.Graph.Editor
             EditorGUI.EndDisabledGroup();
             y += buttonHeight + spacing;
 
+            EditorGUI.BeginDisabledGroup(currentGraph == null);
+            if (DrawButton(new Rect(padding, y, contentWidth, buttonHeight), "Bring Nodes Into View"))
+            {
+                BringNodesIntoView();
+            }
+
+            EditorGUI.EndDisabledGroup();
+            y += buttonHeight + spacing;
+
             if (currentGraph != null)
             {
                 State startState = GetStartState();
@@ -523,6 +485,8 @@ namespace StateMachine.Graph.Editor
 
                 EditorGUI.EndDisabledGroup();
                 y += buttonHeight + spacing;
+
+                DrawValidationSummary(padding, ref y, contentWidth);
             }
 
             if (isSelectingTargetNode)
@@ -541,8 +505,38 @@ namespace StateMachine.Graph.Editor
 
             if (DrawButton(toggleRect, "<"))
             {
-                isControlsPanelExpanded = false;
+                SetControlsPanelExpanded(false);
             }
+        }
+
+        private void SetControlsPanelExpanded(bool isExpanded)
+        {
+            controlsPanel.SetExpanded(isExpanded, toolkitControls, OverlayPanelWidth);
+        }
+
+        private void UpdateControlsInputWidth()
+        {
+            if (toolkitControls != null)
+            {
+                controlsPanel.ApplyInputWidth(toolkitControls, OverlayPanelWidth);
+            }
+        }
+
+        private void DrawValidationSummary(float x, ref float y, float width)
+        {
+            IReadOnlyList<GraphEditorValidationIssue> issues = GetGraphValidationIssues();
+            if (issues.Count == 0)
+            {
+                return;
+            }
+
+            int errorCount = issues.Count(issue => issue.Severity == GraphEditorValidationSeverity.Error);
+            MessageType type = errorCount > 0 ? MessageType.Error : MessageType.Warning;
+            string summary = errorCount > 0
+                ? $"Graph validation: {errorCount} error(s), {issues.Count - errorCount} warning(s)."
+                : $"Graph validation: {issues.Count} warning(s).";
+            EditorGUI.HelpBox(new Rect(x, y, width, 40f), summary, type);
+            y += 46f;
         }
 
         private void PickFolder(string title, ref string folderPath, string prefsKey)
@@ -558,8 +552,7 @@ namespace StateMachine.Graph.Editor
 
         private void CreateNewGraph()
         {
-            currentGraph = CreateInstance<StateMachineGraph>();
-            GraphEditorAssetService.CreateProjectAsset(currentGraph, "NewStateMachineGraph.asset", "Create state machine graph");
+            currentGraph = StateMachineGraphEditorCommands.CreateGraph();
             RefreshToolkitCanvas(true);
         }
 
@@ -588,109 +581,13 @@ namespace StateMachine.Graph.Editor
 
             EnsureGraphNodes();
 
-            if (!EnsureFolderExists(statesFolderPath, "Please specify the folder for saving states."))
+            if (StateMachineGraphEditorCommands.TryCreateState(
+                    currentGraph, statesFolderPath, GetCenteredNodePosition(NodeSize), out _))
             {
-                return;
+                MarkDirty(currentGraph);
+                RefreshToolkitCanvas(true);
             }
 
-            string fileName = $"State_{currentGraph.Nodes.Count}.asset";
-            var state = CreateInstance<State>();
-            GraphEditorAssetService.CreateAsset(state, statesFolderPath, fileName, "Create state");
-
-            var newNode = new Node(state)
-            {
-                Position = GetCenteredNodePosition(NodeSize)
-            };
-
-            GraphEditorAssetService.MarkDirty(currentGraph, "Add state node");
-            currentGraph.Nodes.Add(newNode);
-            MarkDirty(currentGraph);
-            RefreshToolkitCanvas(true);
-
-        }
-
-        private bool EnsureFolderExists(string folderPath, string emptyPathMessage)
-        {
-            return GraphEditorAssetService.EnsureFolderExists(folderPath, emptyPathMessage);
-        }
-
-        private void DrawGraphArea()
-        {
-            if (graphStructureDirty)
-            {
-                CleanupGraph();
-                graphStructureDirty = false;
-            }
-
-            SynchronizeNodeRects();
-
-            Event currentEvent = Event.current;
-            HandleZoom(currentEvent, ZoomMin, ZoomMax, WorkspaceWidth, WorkspaceHeight);
-            HandlePan(currentEvent, WorkspaceWidth, WorkspaceHeight);
-            Rect visibleGraphRect = GraphEditorCanvasUtility.GetVisibleGraphRect(position, panOffset, zoom);
-
-            scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.ExpandHeight(true));
-            GUI.EndClip();
-            GUI.EndClip();
-            GUI.BeginClip(new Rect(Vector2.zero, new Vector2(WorkspaceWidth, WorkspaceHeight)));
-            GUI.BeginClip(new Rect(Vector2.zero, new Vector2(WorkspaceWidth, WorkspaceHeight)));
-
-            Matrix4x4 oldMatrix = GUI.matrix;
-            GUI.matrix = Matrix4x4.TRS(panOffset, Quaternion.identity, Vector3.one * zoom);
-
-            if (currentEvent.type == EventType.Repaint)
-            {
-                GraphEditorCanvasUtility.DrawBackgroundGrid(
-                    visibleGraphRect,
-                    CanvasBackgroundColor,
-                    MinorGridColor,
-                    MajorGridColor);
-            }
-
-            EditorGUI.BeginDisabledGroup(isSelectingTargetNode);
-            BeginWindows();
-
-            for (int i = 0; i < currentGraph.Nodes.Count; i++)
-            {
-                Node node = currentGraph.Nodes[i];
-                if (node == null || !nodeRects.TryGetValue(node, out Rect rect))
-                {
-                    continue;
-                }
-
-                if (!GraphEditorCanvasUtility.IsAtLeastPartiallyVisible(rect, visibleGraphRect))
-                {
-                    continue;
-                }
-
-                Color previousColor = GUI.color;
-                GUI.color = GetNodeTint(node);
-                Rect previousRect = rect;
-                rect = GUILayout.Window(i, rect, _ => DrawNodeWindow(node), GetNodeTitle(node), NodeWindowStyle);
-                GUI.color = previousColor;
-
-                nodeRects[node] = rect;
-                node.Position = rect.position;
-                if (!GraphConnectionGeometry.ApproximatelyEqual(previousRect, rect))
-                {
-                    InvalidateConnectionRouteCache();
-                }
-            }
-
-            EndWindows();
-            HandleConnectionHighlightSelection(currentEvent);
-            EditorGUI.EndDisabledGroup();
-
-            if (currentEvent.type == EventType.Repaint)
-            {
-                DrawNodeMarkers(visibleGraphRect);
-                DrawConnections();
-            }
-
-            DrawTargetSelectionOverlay(visibleGraphRect);
-
-            GUI.matrix = oldMatrix;
-            EditorGUILayout.EndScrollView();
         }
 
         private void SynchronizeNodeRects()
@@ -705,9 +602,7 @@ namespace StateMachine.Graph.Editor
 
         private void InvalidateConnectionRouteCache()
         {
-            connectionRouteCache.Clear();
-            retainedConnectionTangentsCache.Clear();
-            connectionLayoutVersion++;
+            connectionPresenter.InvalidateRoutes();
         }
 
         private void CleanupGraph()
@@ -726,167 +621,6 @@ namespace StateMachine.Graph.Editor
             }
         }
 
-        private void DrawNodeMarkers(Rect visibleGraphRect)
-        {
-            foreach (KeyValuePair<Node, Rect> pair in nodeRects)
-            {
-                Node node = pair.Key;
-                if (node.State == null)
-                {
-                    continue;
-                }
-
-                if (!GraphEditorCanvasUtility.IsAtLeastPartiallyVisible(pair.Value, visibleGraphRect))
-                {
-                    continue;
-                }
-
-                Rect badgeRect = new Rect(pair.Value.x + 6f, pair.Value.y + 6f, 18f, 18f);
-                Color previous = GUI.backgroundColor;
-
-                if (IsStartNode(node))
-                {
-                    GUI.backgroundColor = StartBadgeColor;
-                    GUI.Box(badgeRect, "S");
-                }
-                else if (IsOrphanState(node.State))
-                {
-                    GUI.backgroundColor = WarningBadgeColor;
-                    GUI.Box(badgeRect, "!");
-                }
-
-                GUI.backgroundColor = previous;
-            }
-        }
-
-        private void DrawConnections()
-        {
-            Handles.BeginGUI();
-
-            foreach (Node node in currentGraph.Nodes)
-            {
-                State state = node.State;
-                if (state == null)
-                {
-                    continue;
-                }
-
-                EnsureCollections(state);
-
-                foreach (Transition transition in state.Transitions)
-                {
-                    if (transition == null || transition.TargetState == null)
-                    {
-                        continue;
-                    }
-
-                    if (!stateToNodeLookup.TryGetValue(transition.TargetState, out Node targetNode))
-                    {
-                        continue;
-                    }
-
-                    if (!nodeRects.TryGetValue(node, out Rect sourceRect) ||
-                        !nodeRects.TryGetValue(targetNode, out Rect targetRect))
-                    {
-                        continue;
-                    }
-
-                    Vector2 defaultStart = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect).Start;
-                    Vector2 startPos = transitionPickerAnchors.ResolvePickerPoint(transition, sourceRect, defaultStart);
-
-                    Handles.color = GetConnectionColor(node, targetNode);
-                    Vector2[] routePoints = GetOrBuildConnectionRoute(transition, startPos, sourceRect, targetRect);
-                    GraphOrthogonalConnectionRouter.DrawSmoothedConnection(routePoints);
-                    GraphOrthogonalConnectionRouter.DrawConnectionArrow(routePoints);
-                }
-            }
-
-            Handles.EndGUI();
-        }
-
-        private Vector2[] GetOrBuildConnectionRoute(
-            Transition transition,
-            Vector2 startPos,
-            Rect sourceRect,
-            Rect targetRect)
-        {
-            if (connectionRouteCache.TryGetValue(transition, out CachedConnectionRoute cachedRoute) &&
-                cachedRoute.LayoutVersion == connectionLayoutVersion &&
-                GraphConnectionGeometry.ApproximatelyEqual(cachedRoute.StartPos, startPos) &&
-                GraphConnectionGeometry.ApproximatelyEqual(cachedRoute.SourceRect, sourceRect) &&
-                GraphConnectionGeometry.ApproximatelyEqual(cachedRoute.TargetRect, targetRect))
-            {
-                return cachedRoute.RoutePoints;
-            }
-
-            Vector2[] routePoints = GraphOrthogonalConnectionRouter.BuildConnectionRoute(startPos, sourceRect, targetRect, nodeRects.Values);
-            connectionRouteCache[transition] = new CachedConnectionRoute(
-                connectionLayoutVersion,
-                startPos,
-                sourceRect,
-                targetRect,
-                routePoints);
-            return routePoints;
-        }
-
-        private (Vector2 StartTangent, Vector2 EndTangent) GetOrBuildRetainedConnectionTangents(
-            Transition transition,
-            Vector2 startPosition,
-            Vector2 endPosition,
-            Rect sourceRect,
-            Rect targetRect,
-            Node sourceNode,
-            Node targetNode)
-        {
-            if (retainedConnectionTangentsCache.TryGetValue(transition, out CachedConnectionTangents cachedTangents) &&
-                cachedTangents.LayoutVersion == connectionLayoutVersion &&
-                GraphConnectionGeometry.ApproximatelyEqual(cachedTangents.StartPosition, startPosition) &&
-                GraphConnectionGeometry.ApproximatelyEqual(cachedTangents.SourceRect, sourceRect) &&
-                GraphConnectionGeometry.ApproximatelyEqual(cachedTangents.TargetRect, targetRect))
-            {
-                return (cachedTangents.StartTangent, cachedTangents.EndTangent);
-            }
-
-            connectionObstacleRects.Clear();
-            foreach (KeyValuePair<Node, Rect> pair in nodeRects)
-            {
-                if (!ReferenceEquals(pair.Key, sourceNode) && !ReferenceEquals(pair.Key, targetNode))
-                {
-                    connectionObstacleRects.Add(GraphConnectionGeometry.Expand(pair.Value, 8f));
-                }
-            }
-
-            (Vector2 startTangent, Vector2 endTangent) = GraphBezierConnectionRouter.ResolveTangents(
-                startPosition,
-                endPosition,
-                sourceRect,
-                targetRect,
-                connectionObstacleRects);
-            retainedConnectionTangentsCache[transition] = new CachedConnectionTangents(
-                connectionLayoutVersion,
-                startPosition,
-                sourceRect,
-                targetRect,
-                startTangent,
-                endTangent);
-            return (startTangent, endTangent);
-        }
-
-        private void HandleConnectionHighlightSelection(Event currentEvent)
-        {
-            Vector2 graphMousePosition = GetGraphMousePosition(currentEvent.mousePosition);
-            if (GraphEditorConnectionPresentation.ShouldClearSelection(
-                    isSelectingTargetNode,
-                    currentEvent,
-                    graphMousePosition,
-                    nodeRects,
-                    activeConnectionNode))
-            {
-                activeConnectionNode = null;
-                Repaint();
-            }
-        }
-
         private Color GetConnectionColor(Node sourceNode, Node targetNode)
         {
             return GraphEditorConnectionPresentation.GetColor(
@@ -898,636 +632,34 @@ namespace StateMachine.Graph.Editor
                 TargetHighlightConnectionColor);
         }
 
-        private Vector2 GetGraphMousePosition(Vector2 mousePosition)
-        {
-            return (mousePosition - panOffset) / zoom;
-        }
-
-    }
-
-    /// <summary>
-    /// Domain-independent orthogonal routing used by the state-machine editor.
-    /// The editor owns connection caching; this type owns only route geometry.
-    /// </summary>
-    internal static class GraphOrthogonalConnectionRouter
-    {
-        private readonly struct ConnectionPort
-        {
-            public ConnectionPort(Vector2 edgePoint, Vector2 outerPoint)
-            {
-                EdgePoint = edgePoint;
-                OuterPoint = outerPoint;
-            }
-
-            public Vector2 EdgePoint { get; }
-            public Vector2 OuterPoint { get; }
-        }
-
-        public static Vector2[] BuildConnectionRoute(Vector2 startPos, Rect sourceRect, Rect targetRect, IEnumerable<Rect> allNodeRects)
-        {
-            const float clearance = 28f;
-
-            ConnectionPort startPort = GetSourcePort(sourceRect, startPos, clearance);
-            ConnectionPort endPort = GetTargetPort(sourceRect, targetRect, clearance);
-
-            List<Rect> obstacles = allNodeRects
-                .Select(rect => ExpandRect(rect, clearance))
-                .ToList();
-
-            List<Vector2> routedPoints = FindOrthogonalPath(startPort.OuterPoint, endPort.OuterPoint, obstacles);
-            if (routedPoints == null || routedPoints.Count == 0)
-            {
-                return SimplifyRoute(new[]
-                {
-                    startPos,
-                    startPort.OuterPoint,
-                    endPort.OuterPoint,
-                    endPort.EdgePoint
-                });
-            }
-
-            var fullRoute = new List<Vector2>(routedPoints.Count + 3) { startPos };
-            if (!ApproximatelyEqual(startPos, startPort.OuterPoint))
-            {
-                fullRoute.Add(startPort.OuterPoint);
-            }
-
-            for (int i = 1; i < routedPoints.Count; i++)
-            {
-                fullRoute.Add(routedPoints[i]);
-            }
-
-            if (!ApproximatelyEqual(fullRoute[fullRoute.Count - 1], endPort.OuterPoint))
-            {
-                fullRoute.Add(endPort.OuterPoint);
-            }
-
-            if (!ApproximatelyEqual(endPort.OuterPoint, endPort.EdgePoint))
-            {
-                fullRoute.Add(endPort.EdgePoint);
-            }
-
-            return SimplifyRoute(fullRoute);
-        }
-
-        public static void DrawConnectionArrow(IReadOnlyList<Vector2> routePoints)
-        {
-            if (routePoints == null || routePoints.Count < 2)
-            {
-                return;
-            }
-
-            Vector2 arrowTip = routePoints[routePoints.Count - 1];
-            Vector2 previousPoint = routePoints[routePoints.Count - 2];
-            Vector2 direction = (arrowTip - previousPoint).normalized;
-            if (direction.sqrMagnitude < Mathf.Epsilon)
-            {
-                return;
-            }
-
-            GraphConnectionDrawing.DrawArrow(arrowTip, direction, 13f, 5.5f);
-        }
-
-        public static void DrawSmoothedConnection(IReadOnlyList<Vector2> routePoints)
-        {
-            if (routePoints == null || routePoints.Count < 2)
-            {
-                return;
-            }
-
-            const float lineWidth = 3.5f;
-            const float cornerRadius = 22f;
-
-            if (routePoints.Count == 2)
-            {
-                Handles.DrawAAPolyLine(lineWidth, routePoints.Select(point => (Vector3)point).ToArray());
-                return;
-            }
-
-            Vector2 currentStart = routePoints[0];
-
-            for (int i = 1; i < routePoints.Count - 1; i++)
-            {
-                Vector2 corner = routePoints[i];
-                Vector2 previous = routePoints[i - 1];
-                Vector2 next = routePoints[i + 1];
-
-                Vector2 incomingDirection = (corner - previous).normalized;
-                Vector2 outgoingDirection = (next - corner).normalized;
-
-                float incomingLength = Vector2.Distance(previous, corner);
-                float outgoingLength = Vector2.Distance(corner, next);
-                float radius = Mathf.Min(cornerRadius, incomingLength * 0.5f, outgoingLength * 0.5f);
-
-                if (radius <= 0.01f || ApproximatelyEqual(incomingDirection, outgoingDirection))
-                {
-                    Handles.DrawAAPolyLine(lineWidth, new Vector3[] { currentStart, corner });
-                    currentStart = corner;
-                    continue;
-                }
-
-                Vector2 curveStart = corner - incomingDirection * radius;
-                Vector2 curveEnd = corner + outgoingDirection * radius;
-
-                Handles.DrawAAPolyLine(lineWidth, new Vector3[] { currentStart, curveStart });
-
-                Handles.DrawBezier(
-                    curveStart,
-                    curveEnd,
-                    curveStart + incomingDirection * radius,
-                    curveEnd - outgoingDirection * radius,
-                    Handles.color,
-                    null,
-                    lineWidth);
-
-                currentStart = curveEnd;
-            }
-
-            Handles.DrawAAPolyLine(lineWidth, new Vector3[] { currentStart, routePoints[routePoints.Count - 1] });
-        }
-
-        private static List<Vector2> FindOrthogonalPath(Vector2 startPoint, Vector2 endPoint, IReadOnlyList<Rect> obstacles)
-        {
-            var xCoords = new List<float>();
-            var yCoords = new List<float>();
-
-            AddUniqueCoordinate(xCoords, startPoint.x);
-            AddUniqueCoordinate(xCoords, endPoint.x);
-            AddUniqueCoordinate(yCoords, startPoint.y);
-            AddUniqueCoordinate(yCoords, endPoint.y);
-
-            foreach (Rect obstacle in obstacles)
-            {
-                AddUniqueCoordinate(xCoords, obstacle.xMin);
-                AddUniqueCoordinate(xCoords, obstacle.xMax);
-                AddUniqueCoordinate(yCoords, obstacle.yMin);
-                AddUniqueCoordinate(yCoords, obstacle.yMax);
-            }
-
-            var points = new List<Vector2>();
-            var pointIndex = new Dictionary<string, int>();
-
-            foreach (float x in xCoords)
-            {
-                foreach (float y in yCoords)
-                {
-                    Vector2 point = new Vector2(x, y);
-                    if (IsPointInsideAnyRect(point, obstacles))
-                    {
-                        continue;
-                    }
-
-                    pointIndex[GetPointKey(point)] = points.Count;
-                    points.Add(point);
-                }
-            }
-
-            if (!TryGetPointIndex(pointIndex, startPoint, out int startIndex))
-            {
-                return null;
-            }
-
-            int endIndex = TryGetPointIndex(pointIndex, endPoint, out int resolvedEndIndex)
-                ? resolvedEndIndex
-                : -1;
-
-            var adjacency = new List<int>[points.Count];
-            for (int i = 0; i < adjacency.Length; i++)
-            {
-                adjacency[i] = new List<int>();
-            }
-
-            foreach (float y in yCoords)
-            {
-                List<int> row = points
-                    .Select((point, index) => new { point, index })
-                    .Where(item => Mathf.Approximately(item.point.y, y))
-                    .OrderBy(item => item.point.x)
-                    .Select(item => item.index)
-                    .ToList();
-
-                ConnectAdjacentPoints(row, points, adjacency, obstacles);
-            }
-
-            foreach (float x in xCoords)
-            {
-                List<int> column = points
-                    .Select((point, index) => new { point, index })
-                    .Where(item => Mathf.Approximately(item.point.x, x))
-                    .OrderBy(item => item.point.y)
-                    .Select(item => item.index)
-                    .ToList();
-
-                ConnectAdjacentPoints(column, points, adjacency, obstacles);
-            }
-
-            return FindShortestPath(points, adjacency, startIndex, endIndex, endPoint);
-        }
-
-        private static List<Vector2> FindShortestPath(
-            IReadOnlyList<Vector2> points,
-            IReadOnlyList<int>[] adjacency,
-            int startIndex,
-            int endIndex,
-            Vector2 targetPoint)
-        {
-            float[] distances = Enumerable.Repeat(float.PositiveInfinity, points.Count).ToArray();
-            int[] previous = Enumerable.Repeat(-1, points.Count).ToArray();
-            bool[] visited = new bool[points.Count];
-
-            distances[startIndex] = 0f;
-            int bestReachableIndex = startIndex;
-            float bestReachableDistanceToEnd = Vector2.Distance(points[startIndex], targetPoint);
-
-            while (true)
-            {
-                int current = -1;
-                float bestDistance = float.PositiveInfinity;
-                float bestHeuristic = float.PositiveInfinity;
-
-                for (int i = 0; i < points.Count; i++)
-                {
-                    if (visited[i] || float.IsPositiveInfinity(distances[i]))
-                    {
-                        continue;
-                    }
-
-                    float heuristic = distances[i] + Vector2.Distance(points[i], targetPoint);
-                    if (heuristic < bestHeuristic || Mathf.Approximately(heuristic, bestHeuristic) && distances[i] < bestDistance)
-                    {
-                        current = i;
-                        bestDistance = distances[i];
-                        bestHeuristic = heuristic;
-                    }
-                }
-
-                if (current == -1)
-                {
-                    return ReconstructPath(points, previous, bestReachableIndex);
-                }
-
-                if (endIndex >= 0 && current == endIndex)
-                {
-                    return ReconstructPath(points, previous, endIndex);
-                }
-
-                visited[current] = true;
-                float currentDistanceToEnd = Vector2.Distance(points[current], targetPoint);
-                if (currentDistanceToEnd + 0.01f < bestReachableDistanceToEnd ||
-                    Mathf.Approximately(currentDistanceToEnd, bestReachableDistanceToEnd) && distances[current] < distances[bestReachableIndex])
-                {
-                    bestReachableDistanceToEnd = currentDistanceToEnd;
-                    bestReachableIndex = current;
-                }
-
-                foreach (int neighbor in adjacency[current])
-                {
-                    if (visited[neighbor])
-                    {
-                        continue;
-                    }
-
-                    float candidateDistance = distances[current] + Vector2.Distance(points[current], points[neighbor]);
-                    if (candidateDistance + 0.01f < distances[neighbor])
-                    {
-                        distances[neighbor] = candidateDistance;
-                        previous[neighbor] = current;
-                    }
-                }
-            }
-        }
-
-        private static List<Vector2> ReconstructPath(IReadOnlyList<Vector2> points, IReadOnlyList<int> previous, int endIndex)
-        {
-            var path = new List<Vector2>();
-            for (int node = endIndex; node != -1; node = previous[node])
-            {
-                path.Add(points[node]);
-            }
-
-            path.Reverse();
-            return path;
-        }
-
-        private static void ConnectAdjacentPoints(
-            IReadOnlyList<int> indices,
-            IReadOnlyList<Vector2> points,
-            IList<int>[] adjacency,
-            IReadOnlyList<Rect> obstacles)
-        {
-            for (int i = 0; i < indices.Count - 1; i++)
-            {
-                int a = indices[i];
-                int b = indices[i + 1];
-                if (!IsOrthogonalSegmentBlocked(points[a], points[b], obstacles))
-                {
-                    adjacency[a].Add(b);
-                    adjacency[b].Add(a);
-                }
-            }
-        }
-
-        private static ConnectionPort GetSourcePort(Rect sourceRect, Vector2 startPos, float clearance)
-        {
-            Vector2 borderPoint = GraphConnectionGeometry.GetNearestBorderPoint(sourceRect, startPos);
-            Vector2 direction = GraphConnectionGeometry.GetDirectionForRectPoint(sourceRect, borderPoint);
-            return new ConnectionPort(startPos, borderPoint + direction * clearance);
-        }
-
-        private static ConnectionPort GetTargetPort(Rect sourceRect, Rect targetRect, float clearance)
-        {
-            Vector2 edgePoint = GraphConnectionGeometry.GetConnectionAnchors(sourceRect, targetRect).End;
-            Vector2 direction = GraphConnectionGeometry.GetDirectionForRectPoint(targetRect, edgePoint);
-            return new ConnectionPort(edgePoint, edgePoint + direction * clearance);
-        }
-
-        private static Rect ExpandRect(Rect rect, float margin)
-        {
-            return GraphConnectionGeometry.Expand(rect, margin);
-        }
-
-        private static bool IsPointInsideAnyRect(Vector2 point, IReadOnlyList<Rect> rects)
-        {
-            const float epsilon = 0.01f;
-            foreach (Rect rect in rects)
-            {
-                if (point.x > rect.xMin + epsilon && point.x < rect.xMax - epsilon &&
-                    point.y > rect.yMin + epsilon && point.y < rect.yMax - epsilon)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private static bool IsOrthogonalSegmentBlocked(Vector2 start, Vector2 end, IReadOnlyList<Rect> rects)
-        {
-            const float epsilon = 0.01f;
-            if (!Mathf.Approximately(start.x, end.x) && !Mathf.Approximately(start.y, end.y))
-            {
-                return true;
-            }
-
-            foreach (Rect rect in rects)
-            {
-                if (Mathf.Approximately(start.y, end.y))
-                {
-                    float y = start.y;
-                    float minX = Mathf.Min(start.x, end.x);
-                    float maxX = Mathf.Max(start.x, end.x);
-                    bool overlapsY = y > rect.yMin + epsilon && y < rect.yMax - epsilon;
-                    bool overlapsX = maxX > rect.xMin + epsilon && minX < rect.xMax - epsilon;
-                    if (overlapsY && overlapsX)
-                    {
-                        return true;
-                    }
-                }
-                else
-                {
-                    float x = start.x;
-                    float minY = Mathf.Min(start.y, end.y);
-                    float maxY = Mathf.Max(start.y, end.y);
-                    bool overlapsX = x > rect.xMin + epsilon && x < rect.xMax - epsilon;
-                    bool overlapsY = maxY > rect.yMin + epsilon && minY < rect.yMax - epsilon;
-                    if (overlapsX && overlapsY)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        private static void AddUniqueCoordinate(List<float> coordinates, float value)
-        {
-            if (coordinates.All(existing => !Mathf.Approximately(existing, value)))
-            {
-                coordinates.Add(value);
-            }
-        }
-
-        private static bool TryGetPointIndex(IReadOnlyDictionary<string, int> pointIndex, Vector2 point, out int index)
-        {
-            return pointIndex.TryGetValue(GetPointKey(point), out index);
-        }
-
-        private static string GetPointKey(Vector2 point)
-        {
-            return $"{point.x:F3}|{point.y:F3}";
-        }
-
-        private static Vector2[] SimplifyRoute(IEnumerable<Vector2> points)
-        {
-            var simplified = new List<Vector2>();
-
-            foreach (Vector2 point in points)
-            {
-                if (simplified.Count == 0 || !ApproximatelyEqual(simplified[simplified.Count - 1], point))
-                {
-                    simplified.Add(point);
-                }
-            }
-
-            int index = 1;
-            while (index < simplified.Count - 1)
-            {
-                Vector2 previous = simplified[index - 1];
-                Vector2 current = simplified[index];
-                Vector2 next = simplified[index + 1];
-
-                bool sameX = Mathf.Approximately(previous.x, current.x) && Mathf.Approximately(current.x, next.x);
-                bool sameY = Mathf.Approximately(previous.y, current.y) && Mathf.Approximately(current.y, next.y);
-                if (sameX || sameY)
-                {
-                    simplified.RemoveAt(index);
-                    continue;
-                }
-
-                index++;
-            }
-
-            return simplified.ToArray();
-        }
-
-        private static bool ApproximatelyEqual(Vector2 a, Vector2 b)
-        {
-            return GraphConnectionGeometry.ApproximatelyEqual(a, b);
-        }
-
-        private static bool RectApproximatelyEqual(Rect a, Rect b)
-        {
-            return GraphConnectionGeometry.ApproximatelyEqual(a, b);
-        }
-
     }
 
     public partial class StateMachineEditorWindow
     {
 
-        private readonly struct CachedConnectionRoute
+        private void DrawNodeWindow(Node node)
         {
-            public CachedConnectionRoute(int layoutVersion, Vector2 startPos, Rect sourceRect, Rect targetRect, Vector2[] routePoints)
-            {
-                LayoutVersion = layoutVersion;
-                StartPos = startPos;
-                SourceRect = sourceRect;
-                TargetRect = targetRect;
-                RoutePoints = routePoints;
-            }
-
-            public int LayoutVersion { get; }
-            public Vector2 StartPos { get; }
-            public Rect SourceRect { get; }
-            public Rect TargetRect { get; }
-            public Vector2[] RoutePoints { get; }
-        }
-
-        private readonly struct CachedConnectionTangents
-        {
-            public CachedConnectionTangents(
-                int layoutVersion,
-                Vector2 startPosition,
-                Rect sourceRect,
-                Rect targetRect,
-                Vector2 startTangent,
-                Vector2 endTangent)
-            {
-                LayoutVersion = layoutVersion;
-                StartPosition = startPosition;
-                SourceRect = sourceRect;
-                TargetRect = targetRect;
-                StartTangent = startTangent;
-                EndTangent = endTangent;
-            }
-
-            public int LayoutVersion { get; }
-            public Vector2 StartPosition { get; }
-            public Rect SourceRect { get; }
-            public Rect TargetRect { get; }
-            public Vector2 StartTangent { get; }
-            public Vector2 EndTangent { get; }
-        }
-
-        private readonly struct ConnectionPort
-        {
-            public ConnectionPort(Vector2 edgePoint, Vector2 outerPoint)
-            {
-                EdgePoint = edgePoint;
-                OuterPoint = outerPoint;
-            }
-
-            public Vector2 EdgePoint { get; }
-            public Vector2 OuterPoint { get; }
-        }
-
-        private void DrawTargetSelectionOverlay(Rect visibleGraphRect)
-        {
-            if (!isSelectingTargetNode || pendingTransition == null)
-            {
-                return;
-            }
-
-            Handles.BeginGUI();
-
-            foreach (Node node in currentGraph.Nodes)
-            {
-                if (node == sourceNodeForSelection || node.State == null)
-                {
-                    continue;
-                }
-
-                if (!nodeRects.TryGetValue(node, out Rect rect) ||
-                    !GraphEditorCanvasUtility.IsAtLeastPartiallyVisible(rect, visibleGraphRect))
-                {
-                    continue;
-                }
-
-                bool isHovered = rect.Contains(Event.current.mousePosition);
-                EditorGUI.DrawRect(rect, GetSelectionOverlayColor(isHovered));
-
-                GUIStyle style = new GUIStyle(GUI.skin.label)
-                {
-                    alignment = TextAnchor.MiddleCenter,
-                    fontSize = 52,
-                    fontStyle = FontStyle.Bold,
-                    normal = { textColor = SelectionOverlayTextColor }
-                };
-
-                GUI.Label(rect, "+", style);
-
-                if ((Event.current.rawType == EventType.MouseDown || Event.current.rawType == EventType.MouseUp) &&
-                    rect.Contains(Event.current.mousePosition))
-                {
-                    pendingTransition.TargetState = node.State;
-                    MarkDirty(pendingTransition);
-                    CancelTargetSelection(false);
-                    Event.current.Use();
-                    GUIUtility.ExitGUI();
-                    return;
-                }
-            }
-
-            Handles.EndGUI();
-        }
-
-        private void DrawNodeWindow(Node node, bool allowWindowDrag = true)
-        {
-            if (!isSelectingTargetNode &&
-                Event.current.rawType == EventType.MouseDown &&
-                Event.current.button == 0 &&
-                activeConnectionNode != node)
-            {
-                activeConnectionNode = node;
-                RefreshToolkitCanvas();
-                Repaint();
-            }
-
             EditorGUI.BeginDisabledGroup(isSelectingTargetNode);
 
-            Rect removeButtonRect = new Rect(298f, 5f, 16f, 16f);
-            if (allowWindowDrag && DrawMiniButton(removeButtonRect, "x"))
+            if (!expandedNodes.Contains(node))
             {
-                DeleteNode(node);
+                DrawCollapsedNodeSummary(node);
                 EditorGUI.EndDisabledGroup();
                 return;
             }
 
-            EditorGUI.BeginChangeCheck();
-            var newState = (State)EditorGUILayout.ObjectField(node.State, typeof(State), false);
-            if (EditorGUI.EndChangeCheck())
-            {
-                if (newState != null && currentGraph.Nodes.Exists(n => n != node && n.State == newState))
-                {
-                    EditorUtility.DisplayDialog(
-                        "Duplicate State Detected",
-                        $"State \"{newState.name}\" is already assigned to another node.",
-                        "OK");
-                }
-                else
-                {
-                    ReplaceStateReferences(node.State, newState);
-                    node.State = newState;
-                    MarkDirty(currentGraph);
-                    RefreshToolkitCanvas(true);
-                }
-            }
+            NodeInspector.Draw(node);
 
             if (node.State == null)
             {
-                EditorGUILayout.HelpBox("No state assigned.", MessageType.Warning);
-                if (allowWindowDrag)
+                if (DrawButton("Collapse"))
                 {
-                    GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+                    SetNodeExpanded(node, false);
                 }
 
                 EditorGUI.EndDisabledGroup();
                 return;
             }
-
-            EnsureCollections(node.State);
-            DrawStateEditor(node.State, node);
 
             if (DrawButton(IsStartNode(node) ? "Start State" : "Set As Start"))
             {
@@ -1541,308 +673,78 @@ namespace StateMachine.Graph.Editor
                     MessageType.Warning);
             }
 
+            if (DrawButton("Collapse"))
+            {
+                SetNodeExpanded(node, false);
+            }
+
             EditorGUI.EndDisabledGroup();
-            if (allowWindowDrag)
+        }
+
+        private void DrawCollapsedNodeSummary(Node node)
+        {
+            NodeInspector.DrawCollapsed(node);
+
+            if (DrawButton("Expand"))
             {
-                GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
+                SetNodeExpanded(node, true);
             }
         }
 
-        private void DrawStateEditor(State state, Node ownerNode)
+        private void SetNodeExpanded(Node node, bool isExpanded)
         {
-            SerializedObject stateObject = new SerializedObject(state);
-            stateObject.Update();
-
-            SerializedProperty nameProperty = stateObject.FindProperty("<Name>k__BackingField");
-            if (nameProperty != null)
-            {
-                EditorGUILayout.PropertyField(nameProperty, new GUIContent("Name"), true);
-            }
-
-            if (stateObject.hasModifiedProperties)
-            {
-                stateObject.ApplyModifiedProperties();
-                MarkDirty(state);
-            }
-
-            EditorGUILayout.Space(4f);
-            EditorGUILayout.LabelField("Behaviours", MiniBoldLabelStyle);
-            DrawBehavioursSection(state);
-
-            EditorGUILayout.Space(4f);
-            EditorGUILayout.LabelField("Transitions", MiniBoldLabelStyle);
-            DrawTransitionsSection(state, ownerNode);
-        }
-
-        private void DrawBehavioursSection(State state)
-        {
-            EnsureCollections(state);
-
-            int removeBehaviourIndex = -1;
-
-            for (int i = 0; i < state.Behaviours.Count; i++)
-            {
-                EditorGUILayout.BeginHorizontal();
-
-                EditorGUI.BeginChangeCheck();
-                var newBehaviour = (BaseBehaviour)EditorGUILayout.ObjectField(
-                    state.Behaviours[i],
-                    typeof(BaseBehaviour),
-                    false,
-                    GUILayout.ExpandWidth(true));
-                if (EditorGUI.EndChangeCheck())
-                {
-                    state.Behaviours[i] = newBehaviour;
-                    MarkDirty(state);
-                }
-
-                if (DrawMiniButton("X", GUILayout.Width(22f)))
-                {
-                    removeBehaviourIndex = i;
-                }
-
-                EditorGUILayout.EndHorizontal();
-            }
-
-            if (state.Behaviours.Count == 0)
-            {
-                EditorGUILayout.LabelField("- none -", MiniLabelStyle);
-            }
-
-            if (DrawButton("+ Add Behaviour"))
-            {
-                state.Behaviours.Add(null);
-                MarkDirty(state);
-            }
-
-            if (removeBehaviourIndex >= 0)
-            {
-                state.Behaviours.RemoveAt(removeBehaviourIndex);
-                MarkDirty(state);
-            }
-        }
-
-        private void DrawTransitionsSection(State state, Node ownerNode)
-        {
-            EnsureCollections(state);
-            CleanupMissingTransitions(state);
-
-            int removeTransitionIndex = -1;
-
-            for (int i = 0; i < state.Transitions.Count; i++)
-            {
-                Transition transition = state.Transitions[i];
-                if (transition == null || !AssetDatabase.Contains(transition))
-                {
-                    continue;
-                }
-
-                bool missingLink = transition.TargetState == null;
-                bool targetOutsideGraph = transition.TargetState != null && !ContainsState(transition.TargetState);
-
-                Color previousColor = GUI.color;
-                if (missingLink)
-                {
-                    GUI.color = MissingLinkPanelTint;
-                }
-                else if (targetOutsideGraph)
-                {
-                    GUI.color = OutsideGraphPanelTint;
-                }
-
-                EditorGUILayout.BeginVertical(HelpBoxStyle);
-                GUI.color = previousColor;
-
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField($"Transition {i + 1}", MiniBoldLabelStyle);
-
-                if (DrawMiniButton("X", GUILayout.Width(22f)))
-                {
-                    removeTransitionIndex = i;
-                }
-
-                Color previousBackground = GUI.backgroundColor;
-                GUI.backgroundColor = missingLink ? DangerButtonColor : LinkButtonColor;
-                bool pickPressed = DrawMiniButton("O", GUILayout.Width(22f));
-                GUI.backgroundColor = previousBackground;
-                transitionPickerAnchors.Record(transition, GUILayoutUtility.GetLastRect());
-
-                if (pickPressed)
-                {
-                    isSelectingTargetNode = true;
-                    pendingTransition = transition;
-                    sourceNodeForSelection = ownerNode;
-                    RefreshToolkitCanvas();
-                }
-
-                EditorGUILayout.EndHorizontal();
-
-                DrawTransitionAssetField(state, i);
-
-                transition = state.Transitions[i];
-                if (transition != null)
-                {
-                    DrawTransitionInspector(transition);
-
-                    if (transition.TargetState == null)
-                    {
-                        EditorGUILayout.HelpBox("Target state is not assigned for this transition.", MessageType.Error);
-                    }
-                    else if (!ContainsState(transition.TargetState))
-                    {
-                        EditorGUILayout.HelpBox("Target state is not added to the current graph.", MessageType.Warning);
-                    }
-                }
-
-                EditorGUILayout.EndVertical();
-                EditorGUILayout.Space(2f);
-            }
-
-            if (DrawButton("+ Add Transition"))
-            {
-                CreateTransitionAsset(state);
-            }
-
-            if (removeTransitionIndex >= 0 && removeTransitionIndex < state.Transitions.Count)
-            {
-                RemoveTransition(state, removeTransitionIndex);
-            }
-        }
-
-        private void DrawTransitionAssetField(State state, int index)
-        {
-            Transition transition = state.Transitions[index];
-
-            EditorGUI.BeginChangeCheck();
-            var newTransition = (Transition)EditorGUILayout.ObjectField("Asset", transition, typeof(Transition), false);
-            if (!EditorGUI.EndChangeCheck())
+            if (node == null || (isExpanded ? !expandedNodes.Add(node) : !expandedNodes.Remove(node)))
             {
                 return;
             }
 
-            if (newTransition == null)
+            if (connectionPresenter.ClearTransitionPickers(node.State))
             {
-                state.Transitions[index] = null;
-                MarkDirty(state);
-                return;
+                toolkitCanvas?.RequestConnectionRepaint();
             }
 
-            bool duplicateInOtherState = currentGraph.Nodes.Any(node =>
-                node.State != null &&
-                node.State != state &&
-                node.State.Transitions != null &&
-                node.State.Transitions.Contains(newTransition));
-
-            bool duplicateInSameState = false;
-            for (int i = 0; i < state.Transitions.Count; i++)
-            {
-                if (i != index && state.Transitions[i] == newTransition)
-                {
-                    duplicateInSameState = true;
-                    break;
-                }
-            }
-
-            if (duplicateInOtherState)
-            {
-                EditorUtility.DisplayDialog(
-                    "Duplicate Transition Detected",
-                    $"Transition \"{newTransition.name}\" is already used in another state.",
-                    "OK");
-                return;
-            }
-
-            if (duplicateInSameState)
-            {
-                EditorUtility.DisplayDialog(
-                    "Duplicate Transition Detected",
-                    $"Transition \"{newTransition.name}\" already exists in this state.",
-                    "OK");
-                return;
-            }
-
-            state.Transitions[index] = newTransition;
-            MarkDirty(state);
+            toolkitCanvas?.RequestNodeContentRepaint(node);
         }
 
-        private void DrawTransitionInspector(Transition transition)
+        private void BringNodesIntoView()
         {
-            SerializedObject transitionObject = new SerializedObject(transition);
-            transitionObject.Update();
-
-            SerializedProperty typeProperty = transitionObject.FindProperty("<Type>k__BackingField");
-            SerializedProperty conditionsProperty = transitionObject.FindProperty("<Conditions>k__BackingField");
-            SerializedProperty actionsProperty = transitionObject.FindProperty("<ActionOnTransitions>k__BackingField");
-            SerializedProperty targetStateProperty = transitionObject.FindProperty("TargetState");
-
-            if (typeProperty != null)
-            {
-                DrawEnumPropertyField(typeProperty);
-            }
-
-            if (targetStateProperty != null)
-            {
-                EditorGUILayout.PropertyField(targetStateProperty);
-            }
-
-            if (conditionsProperty != null)
-            {
-                EditorGUILayout.PropertyField(conditionsProperty, true);
-            }
-
-            if (actionsProperty != null)
-            {
-                EditorGUILayout.PropertyField(actionsProperty, true);
-            }
-
-            if (transitionObject.hasModifiedProperties)
-            {
-                transitionObject.ApplyModifiedProperties();
-                MarkDirty(transition);
-            }
-        }
-
-        private void CleanupMissingTransitions(State state)
-        {
-            for (int i = state.Transitions.Count - 1; i >= 0; i--)
-            {
-                Transition transition = state.Transitions[i];
-                if (transition == null || !AssetDatabase.Contains(transition))
-                {
-                    state.Transitions.RemoveAt(i);
-                    MarkDirty(state);
-                }
-            }
-        }
-
-        private void CreateTransitionAsset(State state)
-        {
-            if (!EnsureFolderExists(transitionsFolderPath, "Please specify the folder for saving transitions."))
+            if (currentGraph?.Nodes == null || toolkitCanvas == null)
             {
                 return;
             }
 
-            string fileName = $"{state.name}_Transition_{state.Transitions.Count}.asset";
-            var newTransition = CreateInstance<Transition>();
-            GraphEditorAssetService.CreateAsset(
-                newTransition,
-                transitionsFolderPath,
-                fileName,
-                "Create state transition");
+            Rect accessibleViewport = toolkitCanvas.VisibleGraphRect;
+            float zoomFactor = Mathf.Max(zoom, 0.0001f);
+            float controlsWidth = controlsPanel.IsExpanded
+                ? OverlayPanelWidth
+                : GraphEditorOverlayPanelState.CollapsedInputWidth;
+            accessibleViewport.xMin += controlsWidth / zoomFactor + 12f;
+            accessibleViewport.xMax -= 12f;
+            accessibleViewport.yMin += 12f;
+            accessibleViewport.yMax -= 12f;
 
-            GraphEditorAssetService.MarkDirty(state, "Add state transition");
-            state.Transitions.Add(newTransition);
-            MarkDirty(state);
+            int recoveredCount = GraphEditorNodePositionRecovery.ClampToViewport(
+                currentGraph.Nodes,
+                node => node.Position,
+                (node, position) => node.Position = position,
+                accessibleViewport,
+                NodeSize,
+                24f);
+            if (recoveredCount == 0)
+            {
+                return;
+            }
+
+            MarkDirty(currentGraph);
+            RefreshToolkitCanvas(true);
         }
 
         private void RemoveTransition(State state, int removeTransitionIndex)
         {
-            Transition removedTransition = state.Transitions[removeTransitionIndex];
-            GraphEditorAssetService.MarkDirty(state, "Remove state transition");
-            state.Transitions.RemoveAt(removeTransitionIndex);
+            Transition removedTransition = StateMachineGraphEditorCommands.RemoveTransitionReference(state, removeTransitionIndex);
             MarkDirty(state);
 
-            if (removedTransition != null)
+            if (removedTransition != null && StateGraphReferenceOperations.CanDeleteTransitionAsset(removedTransition))
             {
                 string path = AssetDatabase.GetAssetPath(removedTransition);
                 if (!string.IsNullOrEmpty(path))
@@ -1867,6 +769,7 @@ namespace StateMachine.Graph.Editor
 
         private void DeleteNode(Node node, bool exitGui = true)
         {
+            expandedNodes.Remove(node);
             bool shouldDeleteStateAsset = node.State != null &&
                                           EditorUtility.DisplayDialog(
                                               "Delete State?",
@@ -1880,14 +783,13 @@ namespace StateMachine.Graph.Editor
 
                 if (shouldDeleteStateAsset)
                 {
-                    DeleteOwnedTransitions(node.State);
+                    StateGraphReferenceOperations.DeleteUnsharedTransitions(node.State);
 
                     GraphEditorAssetService.DeleteAsset(node.State, "Delete state");
                 }
             }
 
-            GraphEditorAssetService.MarkDirty(currentGraph, "Delete state node");
-            currentGraph.Nodes.Remove(node);
+            StateMachineGraphEditorCommands.RemoveNode(currentGraph, node);
             MarkDirty(currentGraph);
             GraphEditorAssetService.FlushChanges();
             RefreshToolkitCanvas(true);
@@ -1913,9 +815,62 @@ namespace StateMachine.Graph.Editor
             StateGraphReferenceOperations.ReplaceIncomingReferences(currentGraph, oldState, newState);
         }
 
-        private void DeleteOwnedTransitions(State state)
+        StateMachineGraph IStateMachineNodeInspectorHost.CurrentGraph => currentGraph;
+        GraphEditorTheme IStateMachineNodeInspectorHost.Theme => Theme;
+
+        bool IStateMachineNodeInspectorHost.ContainsState(State state) => ContainsState(state);
+
+        bool IStateMachineNodeInspectorHost.TryAssignState(Node node, State state)
         {
-            StateGraphReferenceOperations.DeleteOwnedTransitions(state);
+            if (state != null && currentGraph.Nodes.Exists(candidate => candidate != node && candidate.State == state))
+            {
+                EditorUtility.DisplayDialog(
+                    "Duplicate State Detected",
+                    $"State \"{state.name}\" is already assigned to another node.",
+                    "OK");
+                return false;
+            }
+
+            ReplaceStateReferences(node.State, state);
+            node.State = state;
+            MarkDirty(currentGraph);
+            RefreshToolkitCanvas(true);
+            return true;
+        }
+
+        void IStateMachineNodeInspectorHost.MarkInspectorAssetDirty(UnityEngine.Object asset) => MarkDirty(asset);
+
+        void IStateMachineNodeInspectorHost.NotifyTransitionTargetChanged(Transition transition)
+        {
+            InvalidateConnectionRouteCache();
+            toolkitCanvas?.RebuildConnectionsGradually();
+        }
+
+        void IStateMachineNodeInspectorHost.BeginTransitionTargetSelection(Transition transition, Node sourceNode)
+        {
+            isSelectingTargetNode = true;
+            pendingTransition = transition;
+            sourceNodeForSelection = sourceNode;
+            RefreshToolkitCanvas();
+        }
+
+        void IStateMachineNodeInspectorHost.CreateTransition(State state)
+        {
+            if (StateMachineGraphEditorCommands.TryCreateTransition(state, transitionsFolderPath))
+            {
+                MarkDirty(state);
+                RefreshToolkitCanvas(true);
+            }
+        }
+
+        void IStateMachineNodeInspectorHost.RemoveTransition(State state, int index) => RemoveTransition(state, index);
+
+        void IStateMachineNodeInspectorHost.RecordTransitionPicker(Transition transition, Rect pickerRect)
+        {
+            if (connectionPresenter.RecordTransitionPicker(transition, pickerRect))
+            {
+                toolkitCanvas?.RequestConnectionRepaint();
+            }
         }
 
         private void EnsureGraphNodes()
@@ -2030,7 +985,18 @@ namespace StateMachine.Graph.Editor
             }
 
             EditorUtility.SetDirty(target);
-            InvalidateConnectionRouteCache();
+            graphValidationDirty = true;
+        }
+
+        private IReadOnlyList<GraphEditorValidationIssue> GetGraphValidationIssues()
+        {
+            if (graphValidationDirty || cachedGraphValidationIssues == null)
+            {
+                cachedGraphValidationIssues = StateMachineGraphValidator.Validate(currentGraph);
+                graphValidationDirty = false;
+            }
+
+            return cachedGraphValidationIssues;
         }
 
         private void MarkNodePositionDirty()
@@ -2041,67 +1007,14 @@ namespace StateMachine.Graph.Editor
             }
         }
 
-        private string GetThemeToggleLabel()
-        {
-            return useLightTheme ? "Switch to Night Theme" : "Switch to Light Theme";
-        }
+        private string GetThemeToggleLabel() => Theme.GetThemeToggleLabel();
 
-        private void ApplyThemeGuiColors()
-        {
-            if (!useLightTheme)
-            {
-                return;
-            }
+        private void DrawWindowBackground() =>
+            Theme.DrawWindowBackground(new Rect(0f, 0f, position.width, position.height));
 
-            GUI.backgroundColor = ControlBackgroundColor;
-            GUI.contentColor = ControlContentColor;
-        }
+        protected override void ApplyThemedGuiState() => Theme.ApplyGuiState();
 
-        private void ApplyThemeSkin()
-        {
-            if (!useLightTheme)
-            {
-                return;
-            }
-
-            GUI.skin = LightSkin;
-        }
-
-        private void DrawWindowBackground()
-        {
-            if (Event.current.type != EventType.Repaint)
-            {
-                return;
-            }
-
-            EditorGUI.DrawRect(new Rect(0f, 0f, position.width, position.height), WindowBackgroundColor);
-        }
-
-        private void ApplyThemeEditorStyleTextOverrides()
-        {
-            if (!useLightTheme)
-            {
-                return;
-            }
-            styleTextOverrides.ApplyForLightTheme();
-        }
-
-        private void RestoreThemeEditorStyleTextOverrides()
-        {
-            styleTextOverrides.Restore();
-        }
-
-        protected override void ApplyThemedGuiState()
-        {
-            ApplyThemeGuiColors();
-            ApplyThemeSkin();
-            ApplyThemeEditorStyleTextOverrides();
-        }
-
-        protected override void RestoreThemedGuiState()
-        {
-            RestoreThemeEditorStyleTextOverrides();
-        }
+        protected override void RestoreThemedGuiState() => Theme.RestoreGuiState();
 
         private bool DrawButton(Rect rect, string label)
         {
@@ -2123,193 +1036,15 @@ namespace StateMachine.Graph.Editor
             return GUILayout.Button(label, MiniButtonStyle, options);
         }
 
-        private GUIStyle NodeWindowStyle => useLightTheme
-            ? lightWindowStyle ??= CreateNodeWindowStyle()
-            : GUI.skin.window;
-
-        private GUIStyle HelpBoxStyle => useLightTheme
-            ? lightHelpBoxStyle ??= CreateHelpBoxStyle()
-            : EditorStyles.helpBox;
-
-        private GUIStyle ButtonStyle => useLightTheme
-            ? lightButtonStyle ??= CreateButtonStyle(GUI.skin.button)
-            : GUI.skin.button;
-
-        private GUIStyle MiniButtonStyle => useLightTheme
-            ? lightMiniButtonStyle ??= CreateButtonStyle(EditorStyles.miniButton)
-            : EditorStyles.miniButton;
-
-        private GUIStyle PopupStyle => useLightTheme
-            ? lightPopupStyle ??= CreatePopupStyle()
-            : EditorStyles.popup;
-
-        private GUIStyle TextFieldStyle => useLightTheme
-            ? lightTextFieldStyle ??= CreateTextInputStyle(EditorStyles.textField)
-            : EditorStyles.textField;
-
-        private GUIStyle MiniBoldLabelStyle => useLightTheme
-            ? lightMiniBoldLabelStyle ??= CreateLabelStyle(EditorStyles.miniBoldLabel)
-            : EditorStyles.miniBoldLabel;
-
-        private GUIStyle MiniLabelStyle => useLightTheme
-            ? lightMiniLabelStyle ??= CreateLabelStyle(EditorStyles.miniLabel, MutedContentColor)
-            : EditorStyles.miniLabel;
-
-        private GUIStyle CenteredMiniLabelStyle => useLightTheme
-            ? lightCenteredMiniLabelStyle ??= CreateLabelStyle(EditorStyles.centeredGreyMiniLabel, MutedContentColor)
-            : EditorStyles.centeredGreyMiniLabel;
-
-        private GUISkin LightSkin => lightSkin ??= CreateLightSkin();
-
-        private GUIStyle CreateNodeWindowStyle()
-        {
-            lightWindowTexture ??= CreateSolidTexture(new Color(0.95f, 0.96f, 0.98f, 1f));
-
-            var style = new GUIStyle(GUI.skin.window);
-            ApplyThemeState(style.normal, lightWindowTexture, ControlContentColor);
-            ApplyThemeState(style.hover, lightWindowTexture, ControlContentColor);
-            ApplyThemeState(style.active, lightWindowTexture, ControlContentColor);
-            ApplyThemeState(style.focused, lightWindowTexture, ControlContentColor);
-            ApplyThemeState(style.onNormal, lightWindowTexture, ControlContentColor);
-            ApplyThemeState(style.onHover, lightWindowTexture, ControlContentColor);
-            ApplyThemeState(style.onActive, lightWindowTexture, ControlContentColor);
-            ApplyThemeState(style.onFocused, lightWindowTexture, ControlContentColor);
-
-            return style;
-        }
-
-        private GUIStyle CreateHelpBoxStyle()
-        {
-            lightHelpBoxTexture ??= CreateSolidTexture(new Color(0.96f, 0.95f, 0.92f, 1f));
-
-            var style = new GUIStyle(EditorStyles.helpBox);
-            ApplyThemeState(style.normal, lightHelpBoxTexture, ControlContentColor);
-            ApplyThemeState(style.hover, lightHelpBoxTexture, ControlContentColor);
-            ApplyThemeState(style.active, lightHelpBoxTexture, ControlContentColor);
-            ApplyThemeState(style.focused, lightHelpBoxTexture, ControlContentColor);
-
-            return style;
-        }
-
-        private GUIStyle CreateButtonStyle(GUIStyle sourceStyle)
-        {
-            lightButtonTexture ??= CreateSolidTexture(new Color(0.94f, 0.92f, 0.88f, 1f));
-            lightButtonHoverTexture ??= CreateSolidTexture(new Color(0.91f, 0.89f, 0.85f, 1f));
-            lightButtonActiveTexture ??= CreateSolidTexture(new Color(0.87f, 0.85f, 0.81f, 1f));
-
-            var style = new GUIStyle(sourceStyle);
-            ApplyThemeState(style.normal, lightButtonTexture, ControlContentColor);
-            ApplyThemeState(style.hover, lightButtonHoverTexture, ControlContentColor);
-            ApplyThemeState(style.active, lightButtonActiveTexture, ControlContentColor);
-            ApplyThemeState(style.focused, lightButtonHoverTexture, ControlContentColor);
-            ApplyThemeState(style.onNormal, lightButtonTexture, ControlContentColor);
-            ApplyThemeState(style.onHover, lightButtonHoverTexture, ControlContentColor);
-            ApplyThemeState(style.onActive, lightButtonActiveTexture, ControlContentColor);
-            ApplyThemeState(style.onFocused, lightButtonHoverTexture, ControlContentColor);
-
-            return style;
-        }
-
-        private GUIStyle CreateTextInputStyle(GUIStyle sourceStyle)
-        {
-            lightTextFieldTexture ??= CreateSolidTexture(new Color(0.98f, 0.97f, 0.95f, 1f));
-
-            var style = new GUIStyle(sourceStyle);
-            ApplyThemeState(style.normal, lightTextFieldTexture, ControlContentColor);
-            ApplyThemeState(style.hover, lightTextFieldTexture, ControlContentColor);
-            ApplyThemeState(style.active, lightTextFieldTexture, ControlContentColor);
-            ApplyThemeState(style.focused, lightTextFieldTexture, ControlContentColor);
-            ApplyThemeState(style.onNormal, lightTextFieldTexture, ControlContentColor);
-            ApplyThemeState(style.onHover, lightTextFieldTexture, ControlContentColor);
-            ApplyThemeState(style.onActive, lightTextFieldTexture, ControlContentColor);
-            ApplyThemeState(style.onFocused, lightTextFieldTexture, ControlContentColor);
-
-            return style;
-        }
-
-        private GUIStyle CreatePopupStyle()
-        {
-            var style = CreateButtonStyle(EditorStyles.popup);
-            style.alignment = TextAnchor.MiddleLeft;
-            return style;
-        }
-
-        private GUISkin CreateLightSkin()
-        {
-            GUISkin sourceSkin = GUI.skin;
-            GUISkin skin = UnityEngine.Object.Instantiate(sourceSkin);
-            skin.label = CreateLabelStyle(sourceSkin.label);
-            skin.button = CreateButtonStyle(sourceSkin.button);
-            skin.textField = CreateTextInputStyle(sourceSkin.textField);
-            skin.textArea = CreateTextInputStyle(sourceSkin.textArea);
-            skin.box = CreateHelpBoxStyle();
-            skin.window = CreateNodeWindowStyle();
-            skin.toggle = CreateLabelStyle(sourceSkin.toggle);
-            skin.settings.selectionColor = new Color(0.77f, 0.84f, 0.93f, 1f);
-            skin.settings.cursorColor = ControlContentColor;
-
-            skin.customStyles = RegisterLightCustomStyles(sourceSkin, skin.customStyles);
-
-            return skin;
-        }
-
-        private GUIStyle[] RegisterLightCustomStyles(GUISkin sourceSkin, GUIStyle[] styles)
-        {
-            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectField", lightTextFieldTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectFieldButton", lightButtonTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "IN ObjectField", lightTextFieldTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "IN ObjectFieldText", lightTextFieldTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "Popup", lightButtonTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "IN Popup", lightButtonTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "MiniPopup", lightButtonTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "MiniPullDown", lightButtonTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "DropDown", lightButtonTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "DropDownButton", lightButtonTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectFieldThumb", lightTextFieldTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectFieldMiniThumb", lightTextFieldTexture);
-            return styles;
-        }
-
-        private GUIStyle[] RegisterNamedStyle(GUISkin sourceSkin, GUIStyle[] styles, string styleName, Texture2D backgroundTexture)
-        {
-            GUIStyle style = sourceSkin.FindStyle(styleName);
-            return style != null
-                ? AppendOrReplaceStyle(styles, CreateNamedStyle(style, styleName, backgroundTexture))
-                : styles;
-        }
-
-        private GUIStyle CreateLabelStyle(GUIStyle sourceStyle)
-        {
-            return CreateLabelStyle(sourceStyle, ControlContentColor);
-        }
-
-        private GUIStyle CreateLabelStyle(GUIStyle sourceStyle, Color textColor)
-        {
-            var style = new GUIStyle(sourceStyle);
-            style.normal.textColor = textColor;
-            style.hover.textColor = textColor;
-            style.active.textColor = textColor;
-            style.focused.textColor = textColor;
-            style.onNormal.textColor = textColor;
-            style.onHover.textColor = textColor;
-            style.onActive.textColor = textColor;
-            style.onFocused.textColor = textColor;
-            return style;
-        }
-
-        private GUIStyle CreateNamedStyle(GUIStyle sourceStyle, string styleName, Texture2D backgroundTexture)
-        {
-            var style = new GUIStyle(sourceStyle) { name = styleName };
-            ApplyThemeState(style.normal, backgroundTexture, ControlContentColor);
-            ApplyThemeState(style.hover, backgroundTexture, ControlContentColor);
-            ApplyThemeState(style.active, backgroundTexture, ControlContentColor);
-            ApplyThemeState(style.focused, backgroundTexture, ControlContentColor);
-            ApplyThemeState(style.onNormal, backgroundTexture, ControlContentColor);
-            ApplyThemeState(style.onHover, backgroundTexture, ControlContentColor);
-            ApplyThemeState(style.onActive, backgroundTexture, ControlContentColor);
-            ApplyThemeState(style.onFocused, backgroundTexture, ControlContentColor);
-            return style;
-        }
+        private GUIStyle NodeWindowStyle => Theme.NodeWindowStyle;
+        private GUIStyle HelpBoxStyle => Theme.HelpBoxStyle;
+        private GUIStyle ButtonStyle => Theme.ButtonStyle;
+        private GUIStyle MiniButtonStyle => Theme.MiniButtonStyle;
+        private GUIStyle PopupStyle => Theme.PopupStyle;
+        private GUIStyle TextFieldStyle => Theme.TextFieldStyle;
+        private GUIStyle MiniBoldLabelStyle => Theme.MiniBoldLabelStyle;
+        private GUIStyle MiniLabelStyle => Theme.MiniLabelStyle;
+        private GUIStyle CenteredMiniLabelStyle => Theme.CenteredMiniLabelStyle;
 
         private void DrawEnumPropertyField(SerializedProperty property, string label = null)
         {
@@ -2340,106 +1075,23 @@ namespace StateMachine.Graph.Editor
             }
         }
 
-        private static void ApplyThemeState(GUIStyleState state, Texture2D backgroundTexture, Color textColor)
-        {
-            GraphEditorGuiStyleUtility.ApplyState(state, backgroundTexture, textColor);
-        }
-
-        private static GUIStyle[] AppendOrReplaceStyle(GUIStyle[] styles, GUIStyle style)
-        {
-            return GraphEditorGuiStyleUtility.AppendOrReplace(styles, style);
-        }
-
-        private static Texture2D CreateSolidTexture(Color color)
-        {
-            return GraphEditorGuiStyleUtility.CreateSolidTexture(color);
-        }
-
-        private Color PanelBackgroundColor => useLightTheme
-            ? new Color(0.96f, 0.95f, 0.92f, 1f)
-            : new Color(0.18f, 0.18f, 0.18f, 1f);
-
-        private Color CanvasBackgroundColor => useLightTheme
-            ? new Color(0.98f, 0.97f, 0.95f, 1f)
-            : new Color(0.13f, 0.13f, 0.13f, 1f);
-
-        private Color MinorGridColor => useLightTheme
-            ? new Color(0.35f, 0.40f, 0.48f, 0.18f)
-            : new Color(0.25f, 0.25f, 0.25f, 0.35f);
-
-        private Color MajorGridColor => useLightTheme
-            ? new Color(0.32f, 0.37f, 0.46f, 0.30f)
-            : new Color(0.25f, 0.25f, 0.25f, 0.60f);
-
-        private Color PrimaryConnectionColor => useLightTheme
-            ? new Color(0.30f, 0.28f, 0.24f, 0.98f)
-            : new Color(0.96f, 0.96f, 0.96f, 0.98f);
-
-        private Color SourceHighlightConnectionColor => useLightTheme
-            ? new Color(0.18f, 0.18f, 0.18f, 0.98f)
-            : new Color(1f, 1f, 1f, 0.98f);
-
-        private Color TargetHighlightConnectionColor => useLightTheme
-            ? new Color(0.86f, 0.18f, 0.18f, 0.98f)
-            : new Color(1f, 0.28f, 0.28f, 0.98f);
-
-        private Color ControlBackgroundColor => useLightTheme
-            ? new Color(0.96f, 0.95f, 0.92f, 1f)
-            : Color.white;
-
-        private Color ControlContentColor => useLightTheme
-            ? Color.black
-            : Color.white;
-
-        private Color MutedContentColor => useLightTheme
-            ? Color.black
-            : new Color(0.75f, 0.75f, 0.75f, 1f);
-
-        private Color WindowBackgroundColor => useLightTheme
-            ? new Color(0.97f, 0.96f, 0.94f, 1f)
-            : new Color(0.22f, 0.22f, 0.22f, 1f);
-
-        private Color DangerButtonColor => useLightTheme
-            ? new Color(0.88f, 0.32f, 0.32f, 1f)
-            : new Color(1f, 0.40f, 0.40f, 1f);
-
-        private Color LinkButtonColor => useLightTheme
-            ? new Color(0.84f, 0.62f, 0.18f, 1f)
-            : new Color(1f, 0.70f, 0.20f, 1f);
-
-        private Color StartBadgeColor => useLightTheme
-            ? new Color(0.22f, 0.60f, 0.26f, 1f)
-            : new Color(0.20f, 0.70f, 0.25f, 1f);
-
-        private Color WarningBadgeColor => useLightTheme
-            ? new Color(0.84f, 0.56f, 0.14f, 1f)
-            : new Color(1f, 0.60f, 0.15f, 1f);
-
-        private Color MissingLinkPanelTint => useLightTheme
-            ? new Color(1f, 0.86f, 0.86f, 1f)
-            : new Color(1f, 0.75f, 0.75f, 1f);
-
-        private Color OutsideGraphPanelTint => useLightTheme
-            ? new Color(1f, 0.93f, 0.78f, 1f)
-            : new Color(1f, 0.90f, 0.65f, 1f);
-
-        private Color StartNodeTint => useLightTheme
-            ? new Color(0.84f, 0.95f, 0.84f, 1f)
-            : new Color(0.82f, 1f, 0.82f, 1f);
-
-        private Color OrphanNodeTint => useLightTheme
-            ? new Color(0.98f, 0.90f, 0.74f, 1f)
-            : new Color(1f, 0.92f, 0.72f, 1f);
-
-        private Color SelectionOverlayTextColor => useLightTheme
-            ? new Color(0.10f, 0.16f, 0.12f, 1f)
-            : Color.white;
-
-        private Color GetSelectionOverlayColor(bool isHovered)
-        {
-            return useLightTheme
-                ? new Color(0.18f, 0.65f, 0.24f, isHovered ? 0.32f : 0.18f)
-                : new Color(0f, 0.75f, 0.20f, isHovered ? 0.45f : 0.25f);
-        }
+        private Color PanelBackgroundColor => Theme.PanelBackgroundColor;
+        private Color WindowBackgroundColor => Theme.WindowBackgroundColor;
+        private Color CanvasBackgroundColor => Theme.CanvasBackgroundColor;
+        private Color MinorGridColor => Theme.MinorGridColor;
+        private Color MajorGridColor => Theme.MajorGridColor;
+        private Color PrimaryConnectionColor => Theme.PrimaryConnectionColor;
+        private Color SourceHighlightConnectionColor => Theme.SourceHighlightConnectionColor;
+        private Color TargetHighlightConnectionColor => Theme.TargetHighlightConnectionColor;
+        private Color DangerButtonColor => Theme.DangerButtonColor;
+        private Color LinkButtonColor => Theme.LinkButtonColor;
+        private Color StartBadgeColor => Theme.StartBadgeColor;
+        private Color WarningBadgeColor => Theme.WarningBadgeColor;
+        private Color MissingLinkPanelTint => Theme.MissingLinkPanelTint;
+        private Color OutsideGraphPanelTint => Theme.OutsideGraphPanelTint;
+        private Color StartNodeTint => Theme.StartNodeTint;
+        private Color OrphanNodeTint => Theme.OrphanNodeTint;
+        private Color SelectionOverlayTextColor => Theme.SelectionOverlayTextColor;
+        private Color GetSelectionOverlayColor(bool isHovered) => Theme.GetSelectionOverlayColor(isHovered);
     }
 }

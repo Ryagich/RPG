@@ -19,7 +19,7 @@ using UnityEngine.UIElements;
 
 namespace Dialogs.Graph.Editor
 {
-    public partial class DialogEditorWindow : GraphEditorWindowBase
+    public partial class DialogEditorWindow : GraphEditorWindowBase, IDialogPhraseNodeInspectorHost
     {
         private const string PreferredPreviewLocale = "ru";
         private const string DialogsPathKey = "DialogEditor_DialogsPath";
@@ -36,7 +36,6 @@ namespace Dialogs.Graph.Editor
         private const float AccentLineWidth = 1.5f;
 
         private DialogGraph currentGraph;
-        private Vector2 scrollPos;
         private string dialogsFolderPath;
         private string phrasesFolderPath;
         private readonly Dictionary<DialogNode, Rect> nodeRects = new();
@@ -49,11 +48,7 @@ namespace Dialogs.Graph.Editor
         private readonly GUIContent localizedPreviewContent = new();
         private readonly DialogAnswerFoldoutState answerFoldoutState = new();
         private bool graphStructureDirty = true;
-        private readonly Dictionary<DialogAnswer, CachedConnectionRoute> connectionRouteCache = new();
-        private readonly Dictionary<ImplicitConnectionRouteKey, CachedConnectionRoute> implicitConnectionRouteCache = new();
-        private readonly GraphEditorConnectionAnchorRegistry<DialogAnswer> answerPickerAnchors = new();
-        private readonly List<Rect> connectionObstacleRects = new();
-        private int connectionLayoutVersion;
+        private readonly DialogGraphConnectionPresenter connectionPresenter = new();
 
         private static System.Collections.ObjectModel.ReadOnlyCollection<StringTableCollection> cachedStringTableCollections;
         private static string[] cachedStringTableOptions;
@@ -63,35 +58,15 @@ namespace Dialogs.Graph.Editor
         private static List<QuestNodeData> cachedTerminalQuestNodes;
 
         private readonly DialogTargetSelectionState targetSelection = new();
-        private bool isControlsPanelExpanded = true;
         private DialogNode activeConnectionNode;
-        private readonly GraphEditorStyleTextOverrides styleTextOverrides = new();
-        private GUIStyle lightWindowStyle;
-        private GUIStyle lightHelpBoxStyle;
-        private GUIStyle lightButtonStyle;
-        private GUIStyle lightMiniButtonStyle;
-        private GUIStyle lightPopupStyle;
-        private GUIStyle lightTextFieldStyle;
-        private GUIStyle lightLabelStyle;
-        private GUIStyle lightFoldoutStyle;
-        private GUIStyle lightBoldLabelStyle;
-        private GUIStyle lightMiniBoldLabelStyle;
-        private GUIStyle lightMiniLabelStyle;
-        private GUIStyle lightWordWrappedMiniLabelStyle;
-        private GUIStyle lightCenteredMiniLabelStyle;
-        private GUIStyle lightPreviewLabelStyle;
-        private Texture2D lightWindowTexture;
-        private Texture2D lightHelpBoxTexture;
-        private Texture2D lightButtonTexture;
-        private Texture2D lightButtonHoverTexture;
-        private Texture2D lightButtonActiveTexture;
-        private Texture2D lightTextFieldTexture;
-        private GUISkin lightSkin;
+        private GraphEditorTheme theme;
+        private readonly GraphEditorOverlayPanelState controlsPanel = new();
 
         private RetainedGraphCanvas<DialogNode, DialogCanvasConnection> toolkitCanvas;
         private DelegatingRetainedGraphCanvasAdapter<DialogNode, DialogCanvasConnection> canvasAdapter;
         private IMGUIContainer toolkitControls;
-        private bool toolkitUiActive;
+
+        private GraphEditorTheme Theme => theme ??= new GraphEditorTheme(() => useLightTheme);
 
         [MenuItem("Tools/Dialog Editor")]
         public static void Open()
@@ -101,7 +76,6 @@ namespace Dialogs.Graph.Editor
 
         private void CreateGUI()
         {
-            toolkitUiActive = true;
             canvasAdapter = CreateCanvasAdapter();
             toolkitCanvas = new RetainedGraphCanvas<DialogNode, DialogCanvasConnection>(
                 canvasAdapter,
@@ -118,6 +92,7 @@ namespace Dialogs.Graph.Editor
                 WindowBackgroundColor,
                 DrawToolkitControls);
 
+            UpdateControlsInputWidth();
             toolkitCanvas.RebuildNow();
         }
 
@@ -132,33 +107,11 @@ namespace Dialogs.Graph.Editor
         private void OnDisable()
         {
             GraphEditorAssetChangeTracker.AssetsChanged -= HandleTrackedAssetsChanged;
-            toolkitUiActive = false;
+            theme?.Dispose();
+            theme = null;
             toolkitCanvas = null;
             canvasAdapter = null;
             toolkitControls = null;
-        }
-
-        private void OnGUI()
-        {
-            if (toolkitUiActive)
-            {
-                return;
-            }
-
-            using (BeginThemedGuiScope())
-            {
-                DrawWindowBackground();
-
-                if (currentGraph == null)
-                {
-                    DrawEmptyState();
-                    DrawControlsOverlay();
-                    return;
-                }
-
-                DrawGraphArea();
-                DrawControlsOverlay();
-            }
         }
 
         private void DrawToolkitControls()
@@ -209,17 +162,17 @@ namespace Dialogs.Graph.Editor
             float panelX = 0f;
             Rect panelRect = new Rect(panelX, panelY, OverlayPanelWidth, panelHeight);
 
-            float toggleX = isControlsPanelExpanded
-                ? panelRect.xMax - toggleButtonWidth * 0.5f
-                : collapsedToggleLeftOffset;
-            float toggleY = panelRect.y + panelRect.height * 0.5f - toggleButtonHeight * 0.5f;
-            Rect toggleRect = new Rect(toggleX, toggleY, toggleButtonWidth, toggleButtonHeight);
+            Rect toggleRect = controlsPanel.GetToggleRect(
+                panelRect,
+                toggleButtonWidth,
+                toggleButtonHeight,
+                collapsedToggleLeftOffset);
 
-            if (!isControlsPanelExpanded)
+            if (!controlsPanel.IsExpanded)
             {
                 if (DrawButton(toggleRect, ">"))
                 {
-                    isControlsPanelExpanded = true;
+                    SetControlsPanelExpanded(true);
                 }
 
                 return;
@@ -318,6 +271,8 @@ namespace Dialogs.Graph.Editor
 
                 EditorGUI.EndDisabledGroup();
                 y += buttonHeight + spacing;
+                y += GraphEditorValidationGui.DrawSummary(
+                    padding, y, contentWidth, DialogGraphValidator.Validate(currentGraph));
             }
 
             if (targetSelection.IsActive)
@@ -336,8 +291,18 @@ namespace Dialogs.Graph.Editor
 
             if (DrawButton(toggleRect, "<"))
             {
-                isControlsPanelExpanded = false;
+                SetControlsPanelExpanded(false);
             }
+        }
+
+        private void SetControlsPanelExpanded(bool isExpanded)
+        {
+            controlsPanel.SetExpanded(isExpanded, toolkitControls, OverlayPanelWidth);
+        }
+
+        private void UpdateControlsInputWidth()
+        {
+            controlsPanel.ApplyInputWidth(toolkitControls, OverlayPanelWidth);
         }
 
         private void PickFolder(string title, ref string folderPath, string prefsKey)
@@ -353,14 +318,11 @@ namespace Dialogs.Graph.Editor
 
         private void CreateNewGraph()
         {
-            if (!EnsureFolderExists(dialogsFolderPath, "Please specify the folder for saving dialogs."))
+            if (DialogGraphEditorCommands.TryCreateGraph(dialogsFolderPath, out DialogGraph graph))
             {
-                return;
+                currentGraph = graph;
+                InvalidateGraphStructure();
             }
-
-            currentGraph = CreateInstance<DialogGraph>();
-            GraphEditorAssetService.CreateAsset(currentGraph, dialogsFolderPath, "DialogGraph.asset", "Create dialog graph");
-            InvalidateGraphStructure();
         }
 
         private void LoadGraph()
@@ -384,129 +346,15 @@ namespace Dialogs.Graph.Editor
                 return;
             }
 
-            if (!EnsureFolderExists(phrasesFolderPath, "Please specify the folder for saving phrases."))
+            if (DialogGraphEditorCommands.TryCreatePhrase(
+                    currentGraph,
+                    phrasesFolderPath,
+                    GetCenteredNodePosition(new Vector2(DialogNodeWidth, 220f)),
+                    out _))
             {
-                return;
+                MarkDirty(currentGraph);
+                InvalidateGraphStructure();
             }
-
-            string fileName = $"DialogPhrase_{currentGraph.Nodes.Count}.asset";
-            var phrase = CreateInstance<DialogPhrase>();
-            GraphEditorAssetService.CreateAsset(phrase, phrasesFolderPath, fileName, "Create dialog phrase");
-
-            var newNode = new DialogNode(phrase)
-            {
-                Position = GetCenteredNodePosition(new Vector2(DialogNodeWidth, 220f))
-            };
-
-            GraphEditorAssetService.MarkDirty(currentGraph, "Add dialog phrase");
-            currentGraph.Nodes.Add(newNode);
-            MarkDirty(currentGraph);
-            InvalidateGraphStructure();
-
-        }
-
-        private bool EnsureFolderExists(string folderPath, string emptyPathMessage)
-        {
-            return GraphEditorAssetService.EnsureFolderExists(folderPath, emptyPathMessage);
-        }
-
-        private void DrawGraphArea()
-        {
-            Event currentEvent = Event.current;
-            if (graphStructureDirty)
-            {
-                CleanupGraph();
-                graphStructureDirty = false;
-            }
-
-            if (graphIndex.IsDirty)
-            {
-                RebuildGraphCaches();
-            }
-
-            SynchronizeNodeRects();
-            HandleZoom(currentEvent, ZoomMin, ZoomMax, WorkspaceWidth, WorkspaceHeight);
-            HandlePan(currentEvent, WorkspaceWidth, WorkspaceHeight);
-            Rect visibleGraphRect = GraphEditorCanvasUtility.GetVisibleGraphRect(position, panOffset, zoom);
-
-            scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.ExpandHeight(true));
-            GUI.EndClip();
-            GUI.EndClip();
-            GUI.BeginClip(new Rect(Vector2.zero, new Vector2(WorkspaceWidth, WorkspaceHeight)));
-            GUI.BeginClip(new Rect(Vector2.zero, new Vector2(WorkspaceWidth, WorkspaceHeight)));
-
-            Matrix4x4 oldMatrix = GUI.matrix;
-            GUI.matrix = Matrix4x4.TRS(panOffset, Quaternion.identity, Vector3.one * zoom);
-
-            if (currentEvent.type == EventType.Repaint)
-            {
-                GraphEditorCanvasUtility.DrawBackgroundGrid(
-                    visibleGraphRect,
-                    CanvasBackgroundColor,
-                    MinorGridColor,
-                    MajorGridColor);
-            }
-
-            BeginWindows();
-
-            for (int i = 0; i < currentGraph.Nodes.Count; i++)
-            {
-                DialogNode node = currentGraph.Nodes[i];
-                if (node == null || !nodeRects.TryGetValue(node, out Rect rect))
-                {
-                    continue;
-                }
-
-                if (!GraphEditorCanvasUtility.IsAtLeastPartiallyVisible(rect, visibleGraphRect))
-                {
-                    continue;
-                }
-
-                Color previousColor = GUI.color;
-                GUI.color = GetNodeTint(node);
-                Rect previousRect = rect;
-                bool shouldRecalculateLayout = phrasesWithDirtyLayout.Contains(node.Phrase);
-                if (shouldRecalculateLayout)
-                {
-                    rect.height = 0f;
-                }
-
-                rect = GUILayout.Window(i, rect, _ => DrawNodeWindow(node), GetNodeTitle(node), NodeWindowStyle);
-                GUI.color = previousColor;
-
-                nodeRects[node] = rect;
-                node.Position = rect.position;
-                if (!RectApproximatelyEqual(previousRect, rect))
-                {
-                    InvalidateConnectionRouteCache();
-                }
-
-                // Keep the reset through the subsequent Repaint: Layout calculates the natural
-                // size and Repaint returns it, including when a node has just become smaller.
-                if (shouldRecalculateLayout && currentEvent.type == EventType.Layout)
-                {
-                    phrasesAwaitingRepaintAfterLayout.Add(node.Phrase);
-                }
-                else if (shouldRecalculateLayout && currentEvent.type == EventType.Repaint &&
-                         phrasesAwaitingRepaintAfterLayout.Remove(node.Phrase))
-                {
-                    phrasesWithDirtyLayout.Remove(node.Phrase);
-                }
-            }
-
-            EndWindows();
-            HandleConnectionHighlightSelection(currentEvent);
-
-            if (currentEvent.type == EventType.Repaint)
-            {
-                DrawNodeMarkers(visibleGraphRect);
-                DrawConnections();
-            }
-
-            DrawTargetSelectionOverlay(visibleGraphRect);
-
-            GUI.matrix = oldMatrix;
-            EditorGUILayout.EndScrollView();
         }
 
         private void SynchronizeNodeRects()
@@ -564,9 +412,7 @@ namespace Dialogs.Graph.Editor
 
         private void InvalidateConnectionRouteCache()
         {
-            connectionRouteCache.Clear();
-            implicitConnectionRouteCache.Clear();
-            connectionLayoutVersion++;
+            connectionPresenter.InvalidateRoutes();
         }
 
         private static void InvalidateStaticEditorCaches()
@@ -611,102 +457,6 @@ namespace Dialogs.Graph.Editor
         {
             return currentGraph != null && currentGraph.Nodes.Any(node =>
                 node == null || node.Phrase == null || !AssetDatabase.Contains(node.Phrase));
-        }
-
-        private void DrawNodeMarkers(Rect visibleGraphRect)
-        {
-            foreach (KeyValuePair<DialogNode, Rect> pair in nodeRects)
-            {
-                DialogNode node = pair.Key;
-                if (node.Phrase == null || !GraphEditorCanvasUtility.IsAtLeastPartiallyVisible(pair.Value, visibleGraphRect))
-                {
-                    continue;
-                }
-
-                Rect badgeRect = new Rect(pair.Value.x + 6f, pair.Value.y + 6f, 18f, 18f);
-                Color previous = GUI.backgroundColor;
-
-                if (currentGraph.IsEntryPhrase(node.Phrase))
-                {
-                    GUI.backgroundColor = StartBadgeColor;
-                    GUI.Box(badgeRect, "S");
-                }
-                else if (IsOrphanPhrase(node.Phrase))
-                {
-                    GUI.backgroundColor = WarningBadgeColor;
-                    GUI.Box(badgeRect, "!");
-                }
-
-                GUI.backgroundColor = previous;
-            }
-        }
-
-        private void DrawConnections()
-        {
-            Handles.BeginGUI();
-
-            foreach (KeyValuePair<DialogNode, Rect> pair in nodeRects)
-            {
-                DialogNode node = pair.Key;
-                DialogPhrase phrase = node.Phrase;
-                if (phrase == null)
-                {
-                    continue;
-                }
-
-                foreach (DialogAnswer answer in GetConnectionAnswers(phrase))
-                {
-                    DrawConnection(node, answer, false);
-                }
-
-                foreach (DialogPhrase returnAction in GetImplicitConversationReturnActions(phrase))
-                {
-                    if (graphIndex.TryGetNode(returnAction, out DialogNode targetNode))
-                    {
-                        DrawConnection(node, null, targetNode, true);
-                    }
-                }
-            }
-
-            Handles.EndGUI();
-        }
-
-        private void DrawConnection(DialogNode sourceNode, DialogAnswer answer, bool isImplicit)
-        {
-            if (answer?.NextPhrase == null || !graphIndex.TryGetNode(answer.NextPhrase, out DialogNode targetNode))
-            {
-                return;
-            }
-
-            DrawConnection(sourceNode, answer, targetNode, isImplicit);
-        }
-
-        private void DrawConnection(DialogNode sourceNode, DialogAnswer answer, DialogNode targetNode, bool isImplicit)
-        {
-            if (!nodeRects.TryGetValue(sourceNode, out Rect sourceRect) ||
-                !nodeRects.TryGetValue(targetNode, out Rect targetRect))
-            {
-                return;
-            }
-
-            (Vector2 startPos, Vector2 endPos) = DialogConnectionRouter.GetConnectionAnchors(sourceRect, targetRect);
-            (Vector2 startTangent, Vector2 endTangent) = GetOrBuildConnectionTangents(
-                answer,
-                startPos,
-                endPos,
-                sourceRect,
-                targetRect,
-                sourceNode,
-                targetNode);
-
-            Color connectionColor = GetConnectionColor(sourceNode, targetNode);
-            if (isImplicit)
-            {
-                connectionColor = Color.Lerp(connectionColor, new Color(0.76f, 0.82f, 0.94f), 0.6f);
-            }
-
-            Handles.DrawBezier(startPos, endPos, startTangent, endTangent, connectionColor, null, 3f);
-            GraphConnectionDrawing.DrawArrow(endPos, endPos - endTangent);
         }
 
         private static IEnumerable<DialogAnswer> GetConnectionAnswers(DialogPhrase phrase)
@@ -755,21 +505,6 @@ namespace Dialogs.Graph.Editor
             }
         }
 
-        private void HandleConnectionHighlightSelection(Event currentEvent)
-        {
-            Vector2 graphMousePosition = GetGraphMousePosition(currentEvent.mousePosition);
-            if (GraphEditorConnectionPresentation.ShouldClearSelection(
-                    targetSelection.IsActive,
-                    currentEvent,
-                    graphMousePosition,
-                    nodeRects,
-                    activeConnectionNode))
-            {
-                activeConnectionNode = null;
-                Repaint();
-            }
-        }
-
         private Color GetConnectionColor(DialogNode sourceNode, DialogNode targetNode)
         {
             return GraphEditorConnectionPresentation.GetColor(
@@ -779,138 +514,6 @@ namespace Dialogs.Graph.Editor
                 PrimaryConnectionColor,
                 SourceHighlightConnectionColor,
                 TargetHighlightConnectionColor);
-        }
-
-        private (Vector2 StartTangent, Vector2 EndTangent) GetOrBuildConnectionTangents(
-            DialogAnswer answer,
-            Vector2 startPos,
-            Vector2 endPos,
-            Rect sourceRect,
-            Rect targetRect,
-            DialogNode sourceNode,
-            DialogNode targetNode)
-        {
-            ImplicitConnectionRouteKey implicitKey = new(sourceNode, targetNode);
-            bool hasCachedRoute = answer != null
-                ? connectionRouteCache.TryGetValue(answer, out CachedConnectionRoute cachedRoute)
-                : implicitConnectionRouteCache.TryGetValue(implicitKey, out cachedRoute);
-            if (hasCachedRoute &&
-                cachedRoute.LayoutVersion == connectionLayoutVersion &&
-                ApproximatelyEqual(cachedRoute.StartPos, startPos) &&
-                RectApproximatelyEqual(cachedRoute.SourceRect, sourceRect) &&
-                RectApproximatelyEqual(cachedRoute.TargetRect, targetRect))
-            {
-                return (cachedRoute.StartTangent, cachedRoute.EndTangent);
-            }
-
-            connectionObstacleRects.Clear();
-            foreach (KeyValuePair<DialogNode, Rect> pair in nodeRects)
-            {
-                if (pair.Key != sourceNode && pair.Key != targetNode)
-                {
-                    connectionObstacleRects.Add(DialogConnectionRouter.ExpandRect(pair.Value, 8f));
-                }
-            }
-
-            (Vector2 startTangent, Vector2 endTangent) = GraphBezierConnectionRouter.ResolveTangents(
-                startPos,
-                endPos,
-                sourceRect,
-                targetRect,
-                connectionObstacleRects);
-            if (answer != null)
-            {
-                connectionRouteCache[answer] = new CachedConnectionRoute(
-                    connectionLayoutVersion,
-                    startPos,
-                    sourceRect,
-                    targetRect,
-                    startTangent,
-                    endTangent);
-            }
-            else
-            {
-                implicitConnectionRouteCache[implicitKey] = new CachedConnectionRoute(
-                    connectionLayoutVersion,
-                    startPos,
-                    sourceRect,
-                    targetRect,
-                    startTangent,
-                    endTangent);
-            }
-
-            return (startTangent, endTangent);
-        }
-
-
-        private static bool ApproximatelyEqual(Vector2 a, Vector2 b)
-        {
-            return GraphConnectionGeometry.ApproximatelyEqual(a, b);
-        }
-
-        private static bool RectApproximatelyEqual(Rect a, Rect b)
-        {
-            return GraphConnectionGeometry.ApproximatelyEqual(a, b);
-        }
-
-
-        private void DrawTargetSelectionOverlay(Rect visibleGraphRect)
-        {
-            if (!targetSelection.IsActive || targetSelection.PendingAnswer == null)
-            {
-                return;
-            }
-
-            Handles.BeginGUI();
-            Vector2 graphMousePosition = GetGraphMousePosition(Event.current.mousePosition);
-
-            foreach (DialogNode node in currentGraph.Nodes)
-            {
-                if (!IsTargetPhraseSelectable(node.Phrase))
-                {
-                    continue;
-                }
-
-                if (!nodeRects.TryGetValue(node, out Rect rect) ||
-                    !GraphEditorCanvasUtility.IsAtLeastPartiallyVisible(rect, visibleGraphRect))
-                {
-                    continue;
-                }
-
-                bool isHovered = rect.Contains(graphMousePosition);
-                EditorGUI.DrawRect(rect, GetSelectionOverlayColor(isHovered));
-
-                GUIStyle style = new GUIStyle(GUI.skin.label)
-                {
-                    alignment = TextAnchor.MiddleCenter,
-                    fontSize = 52,
-                    fontStyle = FontStyle.Bold,
-                    normal = { textColor = SelectionOverlayTextColor }
-                };
-
-                GUI.Label(rect, "+", style);
-
-                if ((Event.current.rawType == EventType.MouseDown || Event.current.rawType == EventType.MouseUp) &&
-                    rect.Contains(graphMousePosition))
-                {
-                    targetSelection.PendingAnswer.SetNextPhrase(node.Phrase);
-                    MarkDirty(targetSelection.SourcePhrase);
-                    InvalidateGraphCaches();
-                    CancelTargetSelection(false);
-                    Event.current.Use();
-                    GUIUtility.ExitGUI();
-                    return;
-                }
-            }
-
-            Handles.EndGUI();
-        }
-
-        private Vector2 GetGraphMousePosition(Vector2 mousePosition)
-        {
-            return new Vector2(
-                (mousePosition.x - panOffset.x) / zoom,
-                (mousePosition.y - panOffset.y) / zoom);
         }
 
         private void DeleteNode(DialogNode node, bool exitGui = true)
@@ -1124,318 +727,39 @@ namespace Dialogs.Graph.Editor
             }
         }
 
-        private string GetThemeToggleLabel()
-        {
-            return useLightTheme ? "Switch to Night Theme" : "Switch to Light Theme";
-        }
+        private string GetThemeToggleLabel() => Theme.GetThemeToggleLabel();
 
-        private void ApplyThemeGuiColors()
-        {
-            if (!useLightTheme)
-            {
-                return;
-            }
+        protected override void ApplyThemedGuiState() => Theme.ApplyGuiState();
 
-            GUI.backgroundColor = ControlBackgroundColor;
-            GUI.contentColor = ControlContentColor;
-        }
+        protected override void RestoreThemedGuiState() => Theme.RestoreGuiState();
 
-        private void ApplyThemeSkin()
-        {
-            if (!useLightTheme)
-            {
-                return;
-            }
+        private void DrawWindowBackground() =>
+            Theme.DrawWindowBackground(new Rect(0f, 0f, position.width, position.height));
 
-            GUI.skin = LightSkin;
-        }
+        private bool DrawButton(Rect rect, string label) => GUI.Button(rect, label, ButtonStyle);
 
-        private void DrawWindowBackground()
-        {
-            if (Event.current.type != EventType.Repaint)
-            {
-                return;
-            }
+        private bool DrawMiniButton(Rect rect, string label) => GUI.Button(rect, label, MiniButtonStyle);
 
-            EditorGUI.DrawRect(new Rect(0f, 0f, position.width, position.height), WindowBackgroundColor);
-        }
+        private bool DrawButton(string label, params GUILayoutOption[] options) =>
+            GUILayout.Button(label, ButtonStyle, options);
 
-        private void ApplyThemeEditorStyleTextOverrides()
-        {
-            if (!useLightTheme)
-            {
-                return;
-            }
-            styleTextOverrides.ApplyForLightTheme();
-        }
+        private bool DrawMiniButton(string label, params GUILayoutOption[] options) =>
+            GUILayout.Button(label, MiniButtonStyle, options);
 
-        private void RestoreThemeEditorStyleTextOverrides()
-        {
-            styleTextOverrides.Restore();
-        }
-
-        protected override void ApplyThemedGuiState()
-        {
-            ApplyThemeGuiColors();
-            ApplyThemeSkin();
-            ApplyThemeEditorStyleTextOverrides();
-        }
-
-        protected override void RestoreThemedGuiState()
-        {
-            RestoreThemeEditorStyleTextOverrides();
-        }
-
-        private bool DrawButton(Rect rect, string label)
-        {
-            return GUI.Button(rect, label, ButtonStyle);
-        }
-
-        private bool DrawMiniButton(Rect rect, string label)
-        {
-            return GUI.Button(rect, label, MiniButtonStyle);
-        }
-
-        private bool DrawButton(string label, params GUILayoutOption[] options)
-        {
-            return GUILayout.Button(label, ButtonStyle, options);
-        }
-
-        private bool DrawMiniButton(string label, params GUILayoutOption[] options)
-        {
-            return GUILayout.Button(label, MiniButtonStyle, options);
-        }
-
-        private GUIStyle NodeWindowStyle => useLightTheme
-            ? lightWindowStyle ??= CreateNodeWindowStyle()
-            : GUI.skin.window;
-
-        private GUIStyle HelpBoxStyle => useLightTheme
-            ? lightHelpBoxStyle ??= CreateHelpBoxStyle()
-            : EditorStyles.helpBox;
-
-        private GUIStyle ButtonStyle => useLightTheme
-            ? lightButtonStyle ??= CreateButtonStyle(GUI.skin.button)
-            : GUI.skin.button;
-
-        private GUIStyle MiniButtonStyle => useLightTheme
-            ? lightMiniButtonStyle ??= CreateButtonStyle(EditorStyles.miniButton)
-            : EditorStyles.miniButton;
-
-        private GUIStyle PopupStyle => useLightTheme
-            ? lightPopupStyle ??= CreatePopupStyle()
-            : EditorStyles.popup;
-
-        private GUIStyle TextFieldStyle => useLightTheme
-            ? lightTextFieldStyle ??= CreateTextInputStyle(EditorStyles.textField)
-            : EditorStyles.textField;
-
-        private GUIStyle LabelStyle => useLightTheme
-            ? lightLabelStyle ??= CreateLabelStyle(EditorStyles.label)
-            : EditorStyles.label;
-
-        private GUIStyle FoldoutStyle => useLightTheme
-            ? lightFoldoutStyle ??= CreateLabelStyle(EditorStyles.foldout)
-            : EditorStyles.foldout;
-
-        private GUIStyle BoldLabelStyle => useLightTheme
-            ? lightBoldLabelStyle ??= CreateLabelStyle(EditorStyles.boldLabel)
-            : EditorStyles.boldLabel;
-
-        private GUIStyle MiniBoldLabelStyle => useLightTheme
-            ? lightMiniBoldLabelStyle ??= CreateLabelStyle(EditorStyles.miniBoldLabel)
-            : EditorStyles.miniBoldLabel;
-
-        private GUIStyle MiniLabelStyle => useLightTheme
-            ? lightMiniLabelStyle ??= CreateLabelStyle(EditorStyles.miniLabel, MutedContentColor)
-            : EditorStyles.miniLabel;
-
-        private GUIStyle WordWrappedMiniLabelStyle => useLightTheme
-            ? lightWordWrappedMiniLabelStyle ??= CreateLabelStyle(EditorStyles.wordWrappedMiniLabel, MutedContentColor)
-            : EditorStyles.wordWrappedMiniLabel;
-
-        private GUIStyle CenteredMiniLabelStyle => useLightTheme
-            ? lightCenteredMiniLabelStyle ??= CreateLabelStyle(EditorStyles.centeredGreyMiniLabel, MutedContentColor)
-            : EditorStyles.centeredGreyMiniLabel;
-
-        private GUIStyle PreviewLabelStyle => useLightTheme
-            ? lightPreviewLabelStyle ??= CreatePreviewTextStyle()
-            : EditorStyles.wordWrappedLabel;
-
-        private GUISkin LightSkin => lightSkin ??= CreateLightSkin();
-
-        private GUIStyle CreateNodeWindowStyle()
-        {
-            lightWindowTexture ??= CreateSolidTexture(new Color(0.95f, 0.96f, 0.98f, 1f));
-
-            var style = new GUIStyle(GUI.skin.window);
-            ApplyThemeState(style.normal, lightWindowTexture, ControlContentColor);
-            ApplyThemeState(style.hover, lightWindowTexture, ControlContentColor);
-            ApplyThemeState(style.active, lightWindowTexture, ControlContentColor);
-            ApplyThemeState(style.focused, lightWindowTexture, ControlContentColor);
-            ApplyThemeState(style.onNormal, lightWindowTexture, ControlContentColor);
-            ApplyThemeState(style.onHover, lightWindowTexture, ControlContentColor);
-            ApplyThemeState(style.onActive, lightWindowTexture, ControlContentColor);
-            ApplyThemeState(style.onFocused, lightWindowTexture, ControlContentColor);
-
-            return style;
-        }
-
-        private GUIStyle CreateHelpBoxStyle()
-        {
-            lightHelpBoxTexture ??= CreateSolidTexture(new Color(0.96f, 0.95f, 0.92f, 1f));
-
-            var style = new GUIStyle(EditorStyles.helpBox);
-            ApplyThemeState(style.normal, lightHelpBoxTexture, ControlContentColor);
-            ApplyThemeState(style.hover, lightHelpBoxTexture, ControlContentColor);
-            ApplyThemeState(style.active, lightHelpBoxTexture, ControlContentColor);
-            ApplyThemeState(style.focused, lightHelpBoxTexture, ControlContentColor);
-
-            return style;
-        }
-
-        private GUIStyle CreateButtonStyle(GUIStyle sourceStyle)
-        {
-            lightButtonTexture ??= CreateSolidTexture(new Color(0.94f, 0.92f, 0.88f, 1f));
-            lightButtonHoverTexture ??= CreateSolidTexture(new Color(0.91f, 0.89f, 0.85f, 1f));
-            lightButtonActiveTexture ??= CreateSolidTexture(new Color(0.87f, 0.85f, 0.81f, 1f));
-
-            var style = new GUIStyle(sourceStyle);
-            ApplyThemeState(style.normal, lightButtonTexture, ControlContentColor);
-            ApplyThemeState(style.hover, lightButtonHoverTexture, ControlContentColor);
-            ApplyThemeState(style.active, lightButtonActiveTexture, ControlContentColor);
-            ApplyThemeState(style.focused, lightButtonHoverTexture, ControlContentColor);
-            ApplyThemeState(style.onNormal, lightButtonTexture, ControlContentColor);
-            ApplyThemeState(style.onHover, lightButtonHoverTexture, ControlContentColor);
-            ApplyThemeState(style.onActive, lightButtonActiveTexture, ControlContentColor);
-            ApplyThemeState(style.onFocused, lightButtonHoverTexture, ControlContentColor);
-
-            return style;
-        }
-
-        private GUIStyle CreateTextInputStyle(GUIStyle sourceStyle)
-        {
-            lightTextFieldTexture ??= CreateSolidTexture(new Color(0.98f, 0.97f, 0.95f, 1f));
-
-            var style = new GUIStyle(sourceStyle);
-            ApplyThemeState(style.normal, lightTextFieldTexture, ControlContentColor);
-            ApplyThemeState(style.hover, lightTextFieldTexture, ControlContentColor);
-            ApplyThemeState(style.active, lightTextFieldTexture, ControlContentColor);
-            ApplyThemeState(style.focused, lightTextFieldTexture, ControlContentColor);
-            ApplyThemeState(style.onNormal, lightTextFieldTexture, ControlContentColor);
-            ApplyThemeState(style.onHover, lightTextFieldTexture, ControlContentColor);
-            ApplyThemeState(style.onActive, lightTextFieldTexture, ControlContentColor);
-            ApplyThemeState(style.onFocused, lightTextFieldTexture, ControlContentColor);
-
-            return style;
-        }
-
-        private GUIStyle CreatePopupStyle()
-        {
-            var style = CreateButtonStyle(EditorStyles.popup);
-            style.alignment = TextAnchor.MiddleLeft;
-            return style;
-        }
-
-        private GUIStyle CreatePreviewTextStyle()
-        {
-            var style = new GUIStyle(EditorStyles.wordWrappedLabel)
-            {
-                fontSize = 12,
-                wordWrap = true,
-                richText = false,
-                padding = new RectOffset(6, 6, 4, 4)
-            };
-
-            style.normal.textColor = ControlContentColor;
-            style.hover.textColor = ControlContentColor;
-            style.active.textColor = ControlContentColor;
-            style.focused.textColor = ControlContentColor;
-            return style;
-        }
-
-        private GUISkin CreateLightSkin()
-        {
-            GUISkin sourceSkin = GUI.skin;
-            GUISkin skin = UnityEngine.Object.Instantiate(sourceSkin);
-            skin.label = CreateLabelStyle(sourceSkin.label);
-            skin.button = CreateButtonStyle(sourceSkin.button);
-            skin.textField = CreateTextInputStyle(sourceSkin.textField);
-            skin.textArea = CreateTextInputStyle(sourceSkin.textArea);
-            skin.box = CreateHelpBoxStyle();
-            skin.window = CreateNodeWindowStyle();
-            skin.toggle = CreateLabelStyle(sourceSkin.toggle);
-            skin.settings.selectionColor = new Color(0.77f, 0.84f, 0.93f, 1f);
-            skin.settings.cursorColor = ControlContentColor;
-
-            skin.customStyles = RegisterLightCustomStyles(sourceSkin, skin.customStyles);
-
-            return skin;
-        }
-
-        private GUIStyle[] RegisterLightCustomStyles(GUISkin sourceSkin, GUIStyle[] styles)
-        {
-            styles = RegisterNamedStyle(sourceSkin, styles, "TextField", lightTextFieldTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "TextArea", lightTextFieldTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "IN TextField", lightTextFieldTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectField", lightTextFieldTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectFieldButton", lightButtonTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "IN ObjectField", lightTextFieldTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "IN ObjectFieldText", lightTextFieldTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "Popup", lightButtonTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "IN Popup", lightButtonTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "MiniPopup", lightButtonTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "MiniPullDown", lightButtonTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "DropDown", lightButtonTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "DropDownButton", lightButtonTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectFieldThumb", lightTextFieldTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "ObjectFieldMiniThumb", lightTextFieldTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "SearchTextField", lightTextFieldTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "ToolbarSearchTextField", lightTextFieldTexture);
-            styles = RegisterNamedStyle(sourceSkin, styles, "ToolbarSeachTextField", lightTextFieldTexture);
-            return styles;
-        }
-
-        private GUIStyle[] RegisterNamedStyle(GUISkin sourceSkin, GUIStyle[] styles, string styleName, Texture2D backgroundTexture)
-        {
-            GUIStyle style = sourceSkin.FindStyle(styleName);
-            return style != null
-                ? AppendOrReplaceStyle(styles, CreateNamedStyle(style, styleName, backgroundTexture))
-                : styles;
-        }
-
-        private GUIStyle CreateLabelStyle(GUIStyle sourceStyle)
-        {
-            return CreateLabelStyle(sourceStyle, ControlContentColor);
-        }
-
-        private GUIStyle CreateLabelStyle(GUIStyle sourceStyle, Color textColor)
-        {
-            var style = new GUIStyle(sourceStyle);
-            style.normal.textColor = textColor;
-            style.hover.textColor = textColor;
-            style.active.textColor = textColor;
-            style.focused.textColor = textColor;
-            style.onNormal.textColor = textColor;
-            style.onHover.textColor = textColor;
-            style.onActive.textColor = textColor;
-            style.onFocused.textColor = textColor;
-            return style;
-        }
-
-        private GUIStyle CreateNamedStyle(GUIStyle sourceStyle, string styleName, Texture2D backgroundTexture)
-        {
-            var style = new GUIStyle(sourceStyle) { name = styleName };
-            ApplyThemeState(style.normal, backgroundTexture, ControlContentColor);
-            ApplyThemeState(style.hover, backgroundTexture, ControlContentColor);
-            ApplyThemeState(style.active, backgroundTexture, ControlContentColor);
-            ApplyThemeState(style.focused, backgroundTexture, ControlContentColor);
-            ApplyThemeState(style.onNormal, backgroundTexture, ControlContentColor);
-            ApplyThemeState(style.onHover, backgroundTexture, ControlContentColor);
-            ApplyThemeState(style.onActive, backgroundTexture, ControlContentColor);
-            ApplyThemeState(style.onFocused, backgroundTexture, ControlContentColor);
-            return style;
-        }
+        private GUIStyle NodeWindowStyle => Theme.NodeWindowStyle;
+        private GUIStyle HelpBoxStyle => Theme.HelpBoxStyle;
+        private GUIStyle ButtonStyle => Theme.ButtonStyle;
+        private GUIStyle MiniButtonStyle => Theme.MiniButtonStyle;
+        private GUIStyle PopupStyle => Theme.PopupStyle;
+        private GUIStyle TextFieldStyle => Theme.TextFieldStyle;
+        private GUIStyle LabelStyle => Theme.LabelStyle;
+        private GUIStyle FoldoutStyle => Theme.FoldoutStyle;
+        private GUIStyle BoldLabelStyle => Theme.BoldLabelStyle;
+        private GUIStyle MiniBoldLabelStyle => Theme.MiniBoldLabelStyle;
+        private GUIStyle MiniLabelStyle => Theme.MiniLabelStyle;
+        private GUIStyle WordWrappedMiniLabelStyle => Theme.WordWrappedMiniLabelStyle;
+        private GUIStyle CenteredMiniLabelStyle => Theme.CenteredMiniLabelStyle;
+        private GUIStyle PreviewLabelStyle => Theme.PreviewLabelStyle;
 
         private void DrawEnumPropertyField(SerializedProperty property, string label)
         {
@@ -1491,11 +815,6 @@ namespace Dialogs.Graph.Editor
             Rect totalRect = EditorGUILayout.GetControlRect();
             Rect fieldRect = EditorGUI.PrefixLabel(totalRect, new GUIContent(label), LabelStyle);
             return EditorGUI.Popup(fieldRect, selectedIndex, options, PopupStyle);
-        }
-
-        private static void ApplyThemeState(GUIStyleState state, Texture2D backgroundTexture, Color textColor)
-        {
-            GraphEditorGuiStyleUtility.ApplyState(state, backgroundTexture, textColor);
         }
 
         private static void SetStyleTextColor(GUIStyle style, Color color)
@@ -1564,16 +883,6 @@ namespace Dialogs.Graph.Editor
             }
         }
 
-        private static GUIStyle[] AppendOrReplaceStyle(GUIStyle[] styles, GUIStyle style)
-        {
-            return GraphEditorGuiStyleUtility.AppendOrReplace(styles, style);
-        }
-
-        private static Texture2D CreateSolidTexture(Color color)
-        {
-            return GraphEditorGuiStyleUtility.CreateSolidTexture(color);
-        }
-
         private readonly struct EditorStyleTextOverride
         {
             private readonly GUIStyle style;
@@ -1612,123 +921,31 @@ namespace Dialogs.Graph.Editor
             }
         }
 
-        private Color PanelBackgroundColor => useLightTheme
-            ? new Color(0.96f, 0.95f, 0.92f, 1f)
-            : new Color(0.18f, 0.18f, 0.18f, 1f);
-
-        private Color CanvasBackgroundColor => useLightTheme
-            ? new Color(0.98f, 0.97f, 0.95f, 1f)
-            : new Color(0.13f, 0.13f, 0.13f, 1f);
-
-        private Color MinorGridColor => useLightTheme
-            ? new Color(0.35f, 0.40f, 0.48f, 0.18f)
-            : new Color(0.25f, 0.25f, 0.25f, 0.35f);
-
-        private Color MajorGridColor => useLightTheme
-            ? new Color(0.32f, 0.37f, 0.46f, 0.30f)
-            : new Color(0.25f, 0.25f, 0.25f, 0.60f);
-
-        private Color PrimaryConnectionColor => useLightTheme
-            ? new Color(0.30f, 0.28f, 0.24f, 0.98f)
-            : new Color(0.96f, 0.96f, 0.96f, 0.98f);
-
-        private Color SourceHighlightConnectionColor => useLightTheme
-            ? new Color(0.18f, 0.18f, 0.18f, 0.98f)
-            : new Color(1f, 1f, 1f, 0.98f);
-
-        private Color TargetHighlightConnectionColor => useLightTheme
-            ? new Color(0.86f, 0.18f, 0.18f, 0.98f)
-            : new Color(1f, 0.28f, 0.28f, 0.98f);
-
-        private Color ControlBackgroundColor => useLightTheme
-            ? new Color(0.96f, 0.95f, 0.92f, 1f)
-            : Color.white;
-
-        private Color ControlContentColor => useLightTheme
-            ? Color.black
-            : Color.white;
-
-        private Color MutedContentColor => useLightTheme
-            ? Color.black
-            : new Color(0.75f, 0.75f, 0.75f, 1f);
-
-        private Color WindowBackgroundColor => useLightTheme
-            ? new Color(0.97f, 0.96f, 0.94f, 1f)
-            : new Color(0.22f, 0.22f, 0.22f, 1f);
-
-        private Color DangerButtonColor => useLightTheme
-            ? new Color(0.88f, 0.32f, 0.32f, 1f)
-            : new Color(1f, 0.40f, 0.40f, 1f);
-
-        private Color LinkButtonColor => useLightTheme
-            ? new Color(0.84f, 0.62f, 0.18f, 1f)
-            : new Color(1f, 0.70f, 0.20f, 1f);
-
-        private Color StartBadgeColor => useLightTheme
-            ? new Color(0.22f, 0.60f, 0.26f, 1f)
-            : new Color(0.20f, 0.70f, 0.25f, 1f);
-
-        private Color WarningBadgeColor => useLightTheme
-            ? new Color(0.84f, 0.56f, 0.14f, 1f)
-            : new Color(1f, 0.60f, 0.15f, 1f);
-
-        private Color StartNodeTint => useLightTheme
-            ? new Color(0.84f, 0.95f, 0.84f, 1f)
-            : new Color(0.82f, 1f, 0.82f, 1f);
-
-        private Color QuestNodeTint => useLightTheme
-            ? new Color(0.84f, 0.90f, 0.98f, 1f)
-            : new Color(0.80f, 0.90f, 1f, 1f);
-
-        private Color OrphanNodeTint => useLightTheme
-            ? new Color(0.98f, 0.90f, 0.74f, 1f)
-            : new Color(1f, 0.92f, 0.72f, 1f);
-
-        private Color SelectionOverlayTextColor => useLightTheme
-            ? new Color(0.10f, 0.16f, 0.12f, 1f)
-            : Color.white;
-
-        private Color DangerAccentColor => useLightTheme
-            ? new Color(0.82f, 0.30f, 0.30f, 1f)
-            : new Color(0.92f, 0.34f, 0.34f, 1f);
-
-        private Color WarningAccentColor => useLightTheme
-            ? new Color(0.78f, 0.52f, 0.12f, 1f)
-            : new Color(0.95f, 0.66f, 0.22f, 1f);
-
-        private Color ConditionAccentColor => useLightTheme
-            ? new Color(0.21f, 0.52f, 0.72f, 1f)
-            : new Color(0.26f, 0.63f, 0.86f, 1f);
-
-        private Color RewardAccentColor => useLightTheme
-            ? new Color(0.31f, 0.65f, 0.35f, 1f)
-            : new Color(0.38f, 0.78f, 0.42f, 1f);
-
-        private Color ItemAccentColor => useLightTheme
-            ? new Color(0.20f, 0.66f, 0.64f, 1f)
-            : new Color(0.24f, 0.78f, 0.76f, 1f);
-
-        private Color StrongDividerColor => useLightTheme
-            ? new Color(0f, 0f, 0f, 0.12f)
-            : new Color(1f, 1f, 1f, 0.12f);
-
-        private Color SectionDividerColor => useLightTheme
-            ? new Color(0f, 0f, 0f, 0.10f)
-            : new Color(1f, 1f, 1f, 0.10f);
-
-        private Color SoftDividerColor => useLightTheme
-            ? new Color(0f, 0f, 0f, 0.08f)
-            : new Color(1f, 1f, 1f, 0.08f);
-
-        private Color SoftestDividerColor => useLightTheme
-            ? new Color(0f, 0f, 0f, 0.06f)
-            : new Color(1f, 1f, 1f, 0.06f);
-
-        private Color GetSelectionOverlayColor(bool isHovered)
-        {
-            return useLightTheme
-                ? new Color(0.18f, 0.65f, 0.24f, isHovered ? 0.32f : 0.18f)
-                : new Color(0f, 0.75f, 0.20f, isHovered ? 0.45f : 0.25f);
-        }
+        private Color PanelBackgroundColor => Theme.PanelBackgroundColor;
+        private Color CanvasBackgroundColor => Theme.CanvasBackgroundColor;
+        private Color MinorGridColor => Theme.MinorGridColor;
+        private Color MajorGridColor => Theme.MajorGridColor;
+        private Color PrimaryConnectionColor => Theme.PrimaryConnectionColor;
+        private Color SourceHighlightConnectionColor => Theme.SourceHighlightConnectionColor;
+        private Color TargetHighlightConnectionColor => Theme.TargetHighlightConnectionColor;
+        private Color WindowBackgroundColor => Theme.WindowBackgroundColor;
+        private Color DangerButtonColor => Theme.DangerButtonColor;
+        private Color LinkButtonColor => Theme.LinkButtonColor;
+        private Color StartBadgeColor => Theme.StartBadgeColor;
+        private Color WarningBadgeColor => Theme.WarningBadgeColor;
+        private Color StartNodeTint => Theme.StartNodeTint;
+        private Color QuestNodeTint => Theme.QuestNodeTint;
+        private Color OrphanNodeTint => Theme.OrphanNodeTint;
+        private Color SelectionOverlayTextColor => Theme.SelectionOverlayTextColor;
+        private Color DangerAccentColor => Theme.DangerAccentColor;
+        private Color WarningAccentColor => Theme.WarningAccentColor;
+        private Color ConditionAccentColor => Theme.ConditionAccentColor;
+        private Color RewardAccentColor => Theme.RewardAccentColor;
+        private Color ItemAccentColor => Theme.ItemAccentColor;
+        private Color StrongDividerColor => Theme.StrongDividerColor;
+        private Color SectionDividerColor => Theme.SectionDividerColor;
+        private Color SoftDividerColor => Theme.SoftDividerColor;
+        private Color SoftestDividerColor => Theme.SoftestDividerColor;
+        private Color GetSelectionOverlayColor(bool isHovered) => Theme.GetSelectionOverlayColor(isHovered);
     }
 }

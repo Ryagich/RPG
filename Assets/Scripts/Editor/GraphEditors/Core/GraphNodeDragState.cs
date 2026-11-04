@@ -42,6 +42,18 @@ namespace EditorTools
 
         public Vector2 GetCommittedPosition(Vector2 fallbackPosition) => hasPreviewPosition ? previewPosition : fallbackPosition;
 
+        public Vector2 ConstrainPreviewToViewport(Rect viewport, Vector2 nodeSize, float minimumVisibleHeight)
+        {
+            if (!hasPreviewPosition)
+            {
+                return previewPosition;
+            }
+
+            previewPosition = GraphEditorNodePositionRecovery.ClampPosition(
+                previewPosition, viewport, nodeSize, minimumVisibleHeight);
+            return previewPosition;
+        }
+
         public Vector2 GetEffectivePosition(TNode node, Vector2 persistedPosition) =>
             IsDragging(node) && hasPreviewPosition ? previewPosition : persistedPosition;
 

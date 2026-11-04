@@ -15,15 +15,19 @@ namespace Quests.Editor
         public static void ReplaceIncomingReferences(QuestGraph graph, QuestNodeData oldNode, QuestNodeData newNode) =>
             UpdateIncomingReferences(graph, oldNode, newNode);
 
-        public static void DeleteOwnedTransitions(QuestNodeData nodeData)
+        public static void DeleteUnsharedTransitions(QuestNodeData nodeData)
         {
             if (nodeData == null) return;
             EnsureTransitions(nodeData);
             foreach (QuestTransition transition in nodeData.Transitions.ToList())
-                if (transition != null) GraphEditorAssetService.DeleteAsset(transition, "Delete quest transition");
-            GraphEditorAssetService.MarkDirty(nodeData, "Delete owned quest transitions");
+                if (transition != null && QuestGraphTransitionReferenceIndex.CountReferencesOutside(nodeData, transition) == 0)
+                    GraphEditorAssetService.DeleteAsset(transition, "Delete quest transition");
+            GraphEditorAssetService.MarkDirty(nodeData, "Remove quest transition references");
             nodeData.Transitions.Clear();
         }
+
+        public static bool CanDeleteTransitionAsset(QuestTransition transition) =>
+            transition != null && QuestGraphTransitionReferenceIndex.CountReferencesOutside(null, transition) == 0;
 
         public static void ReleaseOwnershipIfUnused(QuestGraph graph, QuestNodeData nodeData)
         {

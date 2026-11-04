@@ -18,97 +18,71 @@ using UnityEngine.Localization.Tables;
 
 namespace Dialogs.Graph.Editor
 {
-    /// <summary>Owns IMGUI editing of dialog phrases, answers, conditions, and quest references.</summary>
-    public partial class DialogEditorWindow
+    /// <summary>Window-facing operations required to draw one dialogue phrase node.</summary>
+    internal interface IDialogPhraseNodeInspectorHost
     {
-        private void DrawNodeWindow(DialogNode node, bool allowWindowDrag = true)
-        {
-            if (TryHandleTargetPhraseSelection(node))
-            {
-                return;
-            }
+        DialogGraph CurrentGraph { get; }
+        GraphEditorTheme Theme { get; }
+        bool IsTargetSelectionActive { get; }
+        DialogNode ActiveConnectionNode { get; }
 
-            if (!targetSelection.IsActive &&
+        bool TrySelectTargetPhrase(DialogNode node);
+        void SelectConnectionNode(DialogNode node);
+        void DeleteNode(DialogNode node);
+        void DrawPhraseAssignment(DialogNode node);
+        void DrawPhraseEditor(DialogPhrase phrase);
+        void SetStartPhrase(DialogPhrase phrase);
+        bool IsOrphanPhrase(DialogPhrase phrase);
+    }
+
+    /// <summary>Renders the phrase-node composition while the window owns graph mutations.</summary>
+    internal sealed class DialogPhraseNodeInspector
+    {
+        private readonly IDialogPhraseNodeInspectorHost host;
+
+        public DialogPhraseNodeInspector(IDialogPhraseNodeInspectorHost host)
+        {
+            this.host = host;
+        }
+
+        public void Draw(DialogNode node, bool showInlineRemoveButton)
+        {
+            if (host.TrySelectTargetPhrase(node)) return;
+
+            if (!host.IsTargetSelectionActive &&
                 Event.current.rawType == EventType.MouseDown &&
                 Event.current.button == 0 &&
-                activeConnectionNode != node)
+                host.ActiveConnectionNode != node)
             {
-                activeConnectionNode = node;
-                toolkitCanvas?.RefreshGraphAppearance();
+                host.SelectConnectionNode(node);
             }
 
-            EditorGUI.BeginDisabledGroup(targetSelection.IsActive);
-
-            Rect removeButtonRect = new Rect(298f, 5f, 16f, 16f);
-            if (allowWindowDrag && DrawMiniButton(removeButtonRect, "x"))
+            EditorGUI.BeginDisabledGroup(host.IsTargetSelectionActive);
+            if (showInlineRemoveButton && GUI.Button(new Rect(298f, 5f, 16f, 16f), "x", host.Theme.MiniButtonStyle))
             {
-                DeleteNode(node);
+                host.DeleteNode(node);
                 EditorGUI.EndDisabledGroup();
                 return;
             }
 
-            EditorGUI.BeginChangeCheck();
-            List<EditorStyleTextOverride> objectFieldOverrides = useLightTheme && Event.current.type == EventType.Repaint
-                ? CreateTemporaryObjectFieldTextOverrides(Color.white)
-                : null;
-            DialogPhrase newPhrase;
-
-            try
-            {
-                newPhrase = (DialogPhrase)EditorGUILayout.ObjectField(node.Phrase, typeof(DialogPhrase), false);
-            }
-            finally
-            {
-                RestoreTemporaryStyleTextOverrides(objectFieldOverrides);
-            }
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                if (newPhrase != null && currentGraph.Nodes.Exists(n => n != node && n.Phrase == newPhrase))
-                {
-                    EditorUtility.DisplayDialog(
-                        "Duplicate Phrase Detected",
-                        $"Phrase \"{newPhrase.name}\" is already assigned to another node.",
-                        "OK");
-                }
-                else
-                {
-                    if (currentGraph.IsEntryPhrase(node.Phrase))
-                    {
-                        currentGraph.SetEntryPhrase(newPhrase);
-                    }
-
-                    InvalidatePhraseDisplayName(node.Phrase);
-                    InvalidatePhraseDisplayName(newPhrase);
-                    ReplacePhraseReferences(node.Phrase, newPhrase);
-                    node.Phrase = newPhrase;
-                    MarkDirty(currentGraph);
-                    InvalidateGraphStructure();
-                }
-            }
-
+            host.DrawPhraseAssignment(node);
             if (node.Phrase == null)
             {
                 EditorGUILayout.HelpBox("No phrase assigned.", MessageType.Warning);
-                if (allowWindowDrag)
-                {
-                    GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
-                }
-
                 EditorGUI.EndDisabledGroup();
                 return;
             }
 
-            DrawPhraseEditor(node.Phrase);
-
-            if (DrawButton(currentGraph.IsEntryPhrase(node.Phrase) ? "Start Phrase" : "Set As Start"))
+            host.DrawPhraseEditor(node.Phrase);
+            if (GUILayout.Button(
+                    host.CurrentGraph.IsEntryPhrase(node.Phrase) ? "Start Phrase" : "Set As Start",
+                    host.Theme.ButtonStyle))
             {
-                currentGraph.SetEntryPhrase(node.Phrase);
-                MarkDirty(currentGraph);
-                InvalidateGraphCaches();
+                host.SetStartPhrase(node.Phrase);
             }
 
-            if (node.Phrase.IsQuestPhrase || node.Phrase.IsConversationTopic || node.Phrase.IsConversationReturnAction || node.Phrase.IsDialogueExitAction)
+            if (node.Phrase.IsQuestPhrase || node.Phrase.IsConversationTopic ||
+                node.Phrase.IsConversationReturnAction || node.Phrase.IsDialogueExitAction)
             {
                 EditorGUILayout.HelpBox(
                     node.Phrase.IsQuestPhrase
@@ -121,7 +95,7 @@ namespace Dialogs.Graph.Editor
                     MessageType.Info);
             }
 
-            if (IsOrphanPhrase(node.Phrase))
+            if (host.IsOrphanPhrase(node.Phrase))
             {
                 EditorGUILayout.HelpBox(
                     "This phrase has no incoming answers and is not the entry phrase.",
@@ -129,6 +103,20 @@ namespace Dialogs.Graph.Editor
             }
 
             EditorGUI.EndDisabledGroup();
+        }
+    }
+
+    /// <summary>Owns IMGUI editing of dialog phrases, answers, conditions, and quest references.</summary>
+    public partial class DialogEditorWindow
+    {
+        private DialogPhraseNodeInspector phraseNodeInspector;
+
+        private DialogPhraseNodeInspector PhraseNodeInspector =>
+            phraseNodeInspector ??= new DialogPhraseNodeInspector(this);
+
+        private void DrawNodeWindow(DialogNode node, bool allowWindowDrag = true)
+        {
+            PhraseNodeInspector.Draw(node, allowWindowDrag);
             if (allowWindowDrag)
             {
                 GUI.DragWindow(new Rect(0f, 0f, 10000f, 20f));
@@ -155,6 +143,76 @@ namespace Dialogs.Graph.Editor
             GUIUtility.ExitGUI();
             return true;
         }
+
+        DialogGraph IDialogPhraseNodeInspectorHost.CurrentGraph => currentGraph;
+        GraphEditorTheme IDialogPhraseNodeInspectorHost.Theme => Theme;
+        bool IDialogPhraseNodeInspectorHost.IsTargetSelectionActive => targetSelection.IsActive;
+        DialogNode IDialogPhraseNodeInspectorHost.ActiveConnectionNode => activeConnectionNode;
+
+        bool IDialogPhraseNodeInspectorHost.TrySelectTargetPhrase(DialogNode node) =>
+            TryHandleTargetPhraseSelection(node);
+
+        void IDialogPhraseNodeInspectorHost.SelectConnectionNode(DialogNode node)
+        {
+            activeConnectionNode = node;
+            toolkitCanvas?.RefreshGraphAppearance();
+        }
+
+        void IDialogPhraseNodeInspectorHost.DeleteNode(DialogNode node) => DeleteNode(node);
+
+        void IDialogPhraseNodeInspectorHost.DrawPhraseAssignment(DialogNode node)
+        {
+            EditorGUI.BeginChangeCheck();
+            List<EditorStyleTextOverride> overrides = useLightTheme && Event.current.type == EventType.Repaint
+                ? CreateTemporaryObjectFieldTextOverrides(Color.white)
+                : null;
+            DialogPhrase newPhrase;
+            try
+            {
+                newPhrase = (DialogPhrase)EditorGUILayout.ObjectField(node.Phrase, typeof(DialogPhrase), false);
+            }
+            finally
+            {
+                RestoreTemporaryStyleTextOverrides(overrides);
+            }
+
+            if (!EditorGUI.EndChangeCheck())
+            {
+                return;
+            }
+
+            if (newPhrase != null && currentGraph.Nodes.Exists(item => item != node && item.Phrase == newPhrase))
+            {
+                EditorUtility.DisplayDialog(
+                    "Duplicate Phrase Detected",
+                    $"Phrase \"{newPhrase.name}\" is already assigned to another node.",
+                    "OK");
+                return;
+            }
+
+            if (currentGraph.IsEntryPhrase(node.Phrase))
+            {
+                currentGraph.SetEntryPhrase(newPhrase);
+            }
+
+            InvalidatePhraseDisplayName(node.Phrase);
+            InvalidatePhraseDisplayName(newPhrase);
+            ReplacePhraseReferences(node.Phrase, newPhrase);
+            node.Phrase = newPhrase;
+            MarkDirty(currentGraph);
+            InvalidateGraphStructure();
+        }
+
+        void IDialogPhraseNodeInspectorHost.DrawPhraseEditor(DialogPhrase phrase) => DrawPhraseEditor(phrase);
+
+        void IDialogPhraseNodeInspectorHost.SetStartPhrase(DialogPhrase phrase)
+        {
+            currentGraph.SetEntryPhrase(phrase);
+            MarkDirty(currentGraph);
+            InvalidateGraphCaches();
+        }
+
+        bool IDialogPhraseNodeInspectorHost.IsOrphanPhrase(DialogPhrase phrase) => IsOrphanPhrase(phrase);
 
         private void DrawPhraseEditor(DialogPhrase phrase)
         {
@@ -433,7 +491,7 @@ namespace Dialogs.Graph.Editor
 
                 if (i < phrase.Answers.Count)
                 {
-                    answerPickerAnchors.Record(phrase.Answers[i], GUILayoutUtility.GetLastRect());
+                    connectionPresenter.RecordPicker(phrase.Answers[i], GUILayoutUtility.GetLastRect());
                 }
 
                 if (pickPressed && i < phrase.Answers.Count)
