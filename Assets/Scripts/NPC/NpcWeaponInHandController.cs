@@ -685,8 +685,9 @@ namespace NPC
             }
 
             var localDirection = animator.transform.InverseTransformDirection(worldDirection.normalized);
-            animator.SetFloat(DirectionActionXParameterHash, Mathf.Clamp(localDirection.x, -1f, 1f));
-            animator.SetFloat(DirectionActionYParameterHash, Mathf.Clamp(localDirection.z, -1f, 1f));
+            var actionDirection = EvasionAnimationDirectionUtility.SnapToCardinal(localDirection);
+            animator.SetFloat(DirectionActionXParameterHash, actionDirection.x);
+            animator.SetFloat(DirectionActionYParameterHash, actionDirection.y);
         }
 
         private bool IsHeavyAttackDamageAnimationActive()

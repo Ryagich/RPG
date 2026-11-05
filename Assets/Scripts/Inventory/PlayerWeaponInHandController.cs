@@ -22,6 +22,7 @@ namespace Inventory
     public sealed class PlayerWeaponInHandController : IWeaponAnimationEventHandler, IEquippedWeaponVisual, IStartable, ITickable, IDisposable
     {
         private readonly GameModesController gameModesController;
+        private readonly CharacterController characterController;
         private readonly PlayerInventory playerInventory;
         private readonly PlayerMovement playerMovement;
         private readonly CharacterDamageReceiver ownerDamageReceiver;
@@ -44,6 +45,7 @@ namespace Inventory
             PlayerWeaponHandAnchor handAnchor,
             PlayerWeaponAnimationEventReceiver animationEventReceiver,
             Animator animator,
+            CharacterController characterController,
             CharacterRootMotionController rootMotionController,
             GameModesController gameModesController,
             PlayerMovement playerMovement,
@@ -64,6 +66,7 @@ namespace Inventory
             )
         {
             this.gameModesController = gameModesController;
+            this.characterController = characterController;
             this.playerInventory = playerInventory;
             this.playerMovement = playerMovement;
             this.ownerDamageReceiver = ownerDamageReceiver;
@@ -79,6 +82,7 @@ namespace Inventory
             var damageWindow = new EquippedWeaponDamageWindowController();
             combatActions = new PlayerWeaponCombatActionController(
                 animator,
+                characterController,
                 weaponCombatAnimator,
                 rootMotionController,
                 gameModesController,
@@ -118,6 +122,7 @@ namespace Inventory
         public bool IsWeaponSheathed => weaponTransitions.IsSheathed;
         public bool IsWeaponDrawn => weaponIntent.IsDrawRequested;
         public bool CanProcessWeaponSlotInput => isInitialized
+                                                  && CanChangeWeaponPresentation
                                                   && !actionState.IsActionBlocked
                                                   && !combatActions.IsAttackBlockingWeaponChanges;
         public int ActiveWeaponSlotIndex => weaponIntent.SelectedSlotIndex;
@@ -126,9 +131,10 @@ namespace Inventory
         /// An ordinary sheathing transition can begin only when no full-body combat action owns
         /// the Animator. Callers that need to sequence this operation should wait for this value.
         /// </summary>
-        public bool CanStartWeaponSheathing => IsWeaponSheathed
+        public bool CanStartWeaponSheathing => CanChangeWeaponPresentation
+                                              && (IsWeaponSheathed
                                               || (!weaponTransitions.IsAnimationInProgress
-                                                  && !combatActions.IsAttackRootMotionStateActive);
+                                                  && !combatActions.IsAttackRootMotionStateActive));
 
         public bool IsCombatActionLocked => combatActions.IsCombatActionLocked;
         public bool IsRollAnimationActive => combatActions.IsRollAnimationActive;
@@ -260,7 +266,8 @@ namespace Inventory
         /// </summary>
         public void RequestSheatheWeapon()
         {
-            if (!weaponIntent.IsDrawRequested && weaponTransitions.DisplayMode != WeaponDisplayMode.RightHand)
+            if (!CanChangeWeaponPresentation
+                || (!weaponIntent.IsDrawRequested && weaponTransitions.DisplayMode != WeaponDisplayMode.RightHand))
             {
                 return;
             }
@@ -390,6 +397,11 @@ namespace Inventory
 
             if (!weaponIntent.IsDrawRequested || !weaponTransitions.IsSelectionInHand(selectedWeapon))
             {
+                if (!CanChangeWeaponPresentation)
+                {
+                    return;
+                }
+
                 weaponIntent.RequestDraw();
                 if (weaponTransitions.IsAnimationInProgress)
                 {
@@ -482,8 +494,14 @@ namespace Inventory
 
         private bool CanReconcileWeaponPresentation()
         {
-            return !actionState.IsActionBlocked && !combatActions.IsAttackBlockingWeaponChanges;
+            return CanChangeWeaponPresentation
+                   && !actionState.IsActionBlocked
+                   && !combatActions.IsAttackBlockingWeaponChanges;
         }
+
+        private bool CanChangeWeaponPresentation => characterController != null
+                                                    && characterController.enabled
+                                                    && characterController.isGrounded;
 
         private void ReconcilePresentationAfterInitialization()
         {

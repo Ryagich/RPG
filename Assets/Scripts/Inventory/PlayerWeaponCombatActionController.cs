@@ -17,6 +17,7 @@ namespace Inventory
     internal sealed class PlayerWeaponCombatActionController : IDisposable
     {
         private readonly Animator animator;
+        private readonly CharacterController characterController;
         private readonly PlayerWeaponCombatAnimator combatAnimator;
         private readonly CharacterRootMotionController rootMotionController;
         private readonly GameModesController gameModesController;
@@ -35,9 +36,11 @@ namespace Inventory
 
         private bool isHitAttackInProgress;
         private bool isCombatActionLocked;
+        private Vector2? queuedEvasionDirection;
 
         public PlayerWeaponCombatActionController(
             Animator animator,
+            CharacterController characterController,
             PlayerWeaponCombatAnimator combatAnimator,
             CharacterRootMotionController rootMotionController,
             GameModesController gameModesController,
@@ -55,6 +58,7 @@ namespace Inventory
             Action fullBodyActionRequested)
         {
             this.animator = animator;
+            this.characterController = characterController;
             this.combatAnimator = combatAnimator;
             this.rootMotionController = rootMotionController;
             this.gameModesController = gameModesController;
@@ -93,6 +97,7 @@ namespace Inventory
 
         public void Dispose()
         {
+            queuedEvasionDirection = null;
             targetLockController?.SetAutomaticFacingPaused(this, false);
             ownerDamageReceiver?.SetWeaponDamageBlocked(false);
             damageWindow?.End();
@@ -108,6 +113,7 @@ namespace Inventory
                 return;
             }
 
+            queuedEvasionDirection = null;
             targetLockController?.TryFaceAttackTarget();
             var isHeavyAttack = button == MouseButtonType.Right;
             SpendStamina(isHeavyAttack ? GetStamina().HeavyAttackCost : GetStamina().LightAttackCost);
@@ -229,12 +235,14 @@ namespace Inventory
         public void ResetAnimationRequests()
         {
             SetAnimationRequests(lightAttackRequested: false, heavyAttackRequested: false, dodgeRequested: false, rollRequested: false);
+            ApplyQueuedEvasionDirection();
         }
 
         public void Cancel(bool restoreMovement = true)
         {
             DisableDamageImmunityFromAnimationEvent();
             isCombatActionLocked = false;
+            queuedEvasionDirection = null;
             targetLockController?.SetAutomaticFacingPaused(this, false);
             damageWindow?.End();
 
@@ -277,7 +285,11 @@ namespace Inventory
         private bool CanRequestEvasion()
         {
             return animator != null
+                   && characterController != null
+                   && characterController.enabled
+                   && characterController.isGrounded
                    && gameModesController.GameMode == GameMode.Game
+                   && !combatAnimator.IsAnyRequestActive()
                    && !combatAnimator.IsHitActive()
                    && (!actionState.IsActionBlocked || isHitAttackInProgress);
         }
@@ -311,7 +323,25 @@ namespace Inventory
 
         private void CaptureEvasionDirection()
         {
-            playerAnimationController?.CaptureEvasionDirection();
+            var direction = playerAnimationController?.ResolveEvasionDirection() ?? Vector2.zero;
+            if (IsEvasionInProgress())
+            {
+                queuedEvasionDirection = direction;
+                return;
+            }
+
+            playerAnimationController?.SetEvasionDirection(direction);
+        }
+
+        private void ApplyQueuedEvasionDirection()
+        {
+            if (!queuedEvasionDirection.HasValue || !IsEvasionInProgress())
+            {
+                return;
+            }
+
+            playerAnimationController?.SetEvasionDirection(queuedEvasionDirection.Value);
+            queuedEvasionDirection = null;
         }
 
         private void SetAnimationRequests(

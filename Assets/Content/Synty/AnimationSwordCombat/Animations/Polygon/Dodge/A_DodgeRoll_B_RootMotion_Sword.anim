@@ -131064,27 +131064,27 @@ AnimationClip:
     intParameter: 0
     messageOptions: 0
   - time: 0
-    functionName: LockMovement
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
-  - time: 0
     functionName: ResetAnimationRequests
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
-  - time: 0.93333334
+  - time: 0
+    functionName: LockMovement
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.8333333
     functionName: DisableDamageImmunity
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
-  - time: 0.93333334
+  - time: 0.8333333
     functionName: UnlockMovement
     data: 
     objectReferenceParameter: {fileID: 0}
