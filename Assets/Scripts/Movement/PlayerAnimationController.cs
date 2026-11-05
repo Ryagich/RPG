@@ -1,4 +1,5 @@
 using CameraScripts;
+using Combat;
 using GameModes;
 using MessagePipe;
 using Messages;
@@ -15,6 +16,8 @@ namespace Movement
         private const string DirectionActionXParameter = "DirectionActionX";
         private const string DirectionActionYParameter = "DirectionActionY";
         private const string IsRunParameter = "IsRun";
+        private static readonly int JumpTriggerHash = Animator.StringToHash("Jump");
+        private static readonly int IsFallParameterHash = Animator.StringToHash("IsFall");
 
         private readonly CameraMotor cameraMotor;
         private readonly Animator animator;
@@ -132,20 +135,62 @@ namespace Movement
             }
         }
 
+        public void TriggerJump()
+        {
+            if (animator != null)
+            {
+                animator.SetTrigger(JumpTriggerHash);
+            }
+        }
+
+        public void SetFalling(bool isFalling)
+        {
+            if (animator != null)
+            {
+                animator.SetBool(IsFallParameterHash, isFalling);
+            }
+        }
+
         /// <summary>
-        /// Writes the DirectionAction parameters used exclusively by Dodge and Roll before the
-        /// action request enters the Animator.
+        /// Applies the input buffered while movement was locked, without waiting for velocity
+        /// acceleration after landing.
         /// </summary>
-        public void CaptureEvasionDirection()
+        public void ApplyBufferedLocomotion()
+        {
+            var movementInput = playerMovement.CurrentInputDirection;
+            if (!isGameplayActive || movementInput.sqrMagnitude <= InputThreshold)
+            {
+                ApplyLocomotionParameters(Vector2.zero, isGameplayActive && playerMovement.IsRunning, force: true);
+                return;
+            }
+
+            var moveDirection = cameraMotor.GetGameplayPlanarRotation() *
+                                new Vector3(movementInput.x, 0f, movementInput.y);
+            var localMoveDirection = visualTransform.InverseTransformDirection(moveDirection);
+            var directionalInput = new Vector2(
+                Mathf.Clamp(localMoveDirection.x, -1f, 1f),
+                Mathf.Clamp(localMoveDirection.z, -1f, 1f));
+            ApplyLocomotionParameters(directionalInput, playerMovement.IsRunning, force: true);
+        }
+
+        /// <summary>
+        /// Resolves the direction for a Dodge or Roll from the current movement input.
+        /// </summary>
+        public Vector2 ResolveEvasionDirection()
         {
             var movementInput = playerMovement.CurrentInputDirection;
             var moveDirection = cameraMotor.GetGameplayPlanarRotation() *
                                 new Vector3(movementInput.x, 0f, movementInput.y);
             var localMoveDirection = visualTransform.InverseTransformDirection(moveDirection);
 
-            var actionDirection = new Vector2(
-                Mathf.Clamp(localMoveDirection.x, -1f, 1f),
-                Mathf.Clamp(localMoveDirection.z, -1f, 1f));
+            return EvasionAnimationDirectionUtility.SnapToCardinal(localMoveDirection);
+        }
+
+        /// <summary>
+        /// Writes the DirectionAction parameters used exclusively by Dodge and Roll.
+        /// </summary>
+        public void SetEvasionDirection(Vector2 actionDirection)
+        {
             animator.SetFloat(DirectionActionXParameter, actionDirection.x);
             animator.SetFloat(DirectionActionYParameter, actionDirection.y);
         }

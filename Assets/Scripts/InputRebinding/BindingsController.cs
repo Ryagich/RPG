@@ -41,14 +41,14 @@ public class BindingsController : MonoBehaviour
 
     private const string DodgeActionName = "Dodge";
     private const string RollActionName = "Roll";
-    private const string LessonSkipActionName = "LessonSkip";
+    private const string JumpActionName = "Jump";
     private const string QuestLogActionName = "QuestLog";
     private const string CameraZoomInActionName = "CameraZoomIn";
     private const string CameraZoomOutActionName = "CameraZoomOut";
     private const string EvasionLocalizationTable = "Tables";
     private const string DodgeLocalizationKey = "Input_Dodge";
     private const string RollLocalizationKey = "Input_Roll";
-    private const string LessonSkipLocalizationKey = "Input_LessonSkip";
+    private const string JumpLocalizationKey = "Input_Jump";
     private const string QuestLogLocalizationKey = "Input_QuestLog";
     private const string CameraZoomInLocalizationKey = "Bindings_Action_Camera_Zoom_In";
     private const string CameraZoomOutLocalizationKey = "Bindings_Action_Camera_Zoom_Out";
@@ -57,7 +57,7 @@ public class BindingsController : MonoBehaviour
 
     private InputRebinder dodgeRebinder;
     private InputRebinder rollRebinder;
-    private InputRebinder lessonSkipRebinder;
+    private InputRebinder jumpRebinder;
     private InputRebinder questLogRebinder;
     private InputRebinder cameraZoomInRebinder;
     private InputRebinder cameraZoomOutRebinder;
@@ -121,7 +121,7 @@ public class BindingsController : MonoBehaviour
     {
         dodgeRebinder = CreateBindingButton(DodgeActionName, transformAfter: null);
         rollRebinder = CreateBindingButton(RollActionName, dodgeRebinder?.transform);
-        lessonSkipRebinder = CreateBindingButton(LessonSkipActionName, rollRebinder?.transform);
+        jumpRebinder = CreateBindingButton(JumpActionName, rollRebinder?.transform);
 
         cameraZoomInRebinder = FindBindingButton(CameraZoomInActionName);
         cameraZoomOutRebinder = FindBindingButton(CameraZoomOutActionName);
@@ -176,7 +176,7 @@ public class BindingsController : MonoBehaviour
     {
         UpdateBindingDisplayName(dodgeRebinder, DodgeLocalizationKey);
         UpdateBindingDisplayName(rollRebinder, RollLocalizationKey);
-        UpdateBindingDisplayName(lessonSkipRebinder, LessonSkipLocalizationKey);
+        UpdateBindingDisplayName(jumpRebinder, JumpLocalizationKey);
         UpdateBindingDisplayName(questLogRebinder, QuestLogLocalizationKey);
         UpdateBindingDisplayName(cameraZoomInRebinder, CameraZoomInLocalizationKey);
         UpdateBindingDisplayName(cameraZoomOutRebinder, CameraZoomOutLocalizationKey);

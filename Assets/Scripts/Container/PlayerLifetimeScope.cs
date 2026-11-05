@@ -106,6 +106,7 @@ namespace Container
             builder.Register<TargetLockTargetFilter>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<TargetLockController>().AsSelf();
             builder.RegisterEntryPoint<PlayerGravity>().AsSelf();
+            builder.RegisterEntryPoint<PlayerJump>().AsSelf().As<System.IDisposable>();
             builder.RegisterEntryPoint<PlayerMovementController>().AsSelf();
             builder.RegisterEntryPoint<PlayerMovement>().AsSelf().As<IStaminaMovementState>();
             builder.RegisterEntryPoint<PlayerFootstepPlayer>().AsSelf();

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using CameraScripts;
 using Inventory.Inventories;
@@ -25,7 +26,10 @@ namespace Movement
         private Vector2 bufferedInputDirection;
         private Vector2 targetVelocity;
         private Vector2 currentVelocity;
-        private bool canMove = true;
+        private readonly HashSet<object> movementLockSources = new();
+        private readonly HashSet<object> airborneMomentumSources = new();
+        private Vector3 airborneMomentumVelocity;
+        private bool isMovementEnabled = true;
         private bool bufferedRunPressed;
         private bool wantsToRun;
         private bool isRunning;
@@ -60,7 +64,18 @@ namespace Movement
 
         public void Tick()
         {
-            if (controller == null || !controller.enabled || !canMove)
+            if (controller == null || !controller.enabled)
+            {
+                return;
+            }
+
+            if (HasAirborneMomentum)
+            {
+                controller.Move(airborneMomentumVelocity * Time.deltaTime);
+                return;
+            }
+
+            if (!CanMove)
             {
                 currentVelocity = Vector2.zero;
                 return;
@@ -99,31 +114,72 @@ namespace Movement
                 return;
             }
 
-            var moveDirection = cameraMotor.GetGameplayPlanarRotation() *
-                                new Vector3(currentVelocity.x, 0, currentVelocity.y);
-            var inputMagnitude = Mathf.Clamp01(currentVelocity.magnitude);
-            var moveSpeed = CalculateMoveSpeed(moveDirection) * inputMagnitude;
+            var worldVelocity = GetWorldVelocity(currentVelocity);
+            if (worldVelocity.sqrMagnitude <= InputThreshold)
+            {
+                return;
+            }
 
-            RotateTowardsMovement(moveDirection, currentVelocity);
-            controller.Move(moveDirection.normalized * (moveSpeed * Time.deltaTime));
+            RotateTowardsMovement(worldVelocity, currentVelocity);
+            controller.Move(worldVelocity * Time.deltaTime);
         }
 
         public void ChangeState(bool newState)
         {
-            canMove = newState;
+            isMovementEnabled = newState;
+            RefreshMovementState();
+        }
 
-            if (!newState)
+        /// <summary>
+        /// Applies an independent movement lock without overriding game-mode or other action locks.
+        /// Movement input continues to be buffered while at least one source owns a lock.
+        /// </summary>
+        public void SetMovementLocked(object source, bool isLocked)
+        {
+            if (source == null)
             {
-                targetVelocity = Vector2.zero;
-                currentVelocity = Vector2.zero;
-                wantsToRun = false;
-                isRunning = false;
-                currentAccelerationRate = playerMovementConfig.WalkSpeedChangeRate;
-                currentDecelerationRate = playerMovementConfig.WalkDecelerationRate;
                 return;
             }
 
-            ApplyBufferedInputState();
+            if (isLocked)
+            {
+                movementLockSources.Add(source);
+            }
+            else
+            {
+                movementLockSources.Remove(source);
+            }
+
+            RefreshMovementState();
+        }
+
+        /// <summary>
+        /// Preserves the current world-space planar velocity while airborne. This is
+        /// intentionally separate from an input lock: the latter blocks control,
+        /// whereas this keeps the take-off momentum moving the controller.
+        /// </summary>
+        public void SetAirborneMomentum(object source, bool isActive)
+        {
+            if (source == null)
+            {
+                return;
+            }
+
+            if (isActive)
+            {
+                if (airborneMomentumSources.Add(source) && airborneMomentumSources.Count == 1)
+                {
+                    airborneMomentumVelocity = GetWorldVelocity(currentVelocity);
+                }
+
+                return;
+            }
+
+            airborneMomentumSources.Remove(source);
+            if (!HasAirborneMomentum)
+            {
+                airborneMomentumVelocity = Vector3.zero;
+            }
         }
 
         public Vector2 CurrentVelocity => currentVelocity;
@@ -133,12 +189,12 @@ namespace Movement
         /// </summary>
         public Vector2 CurrentInputDirection => bufferedInputDirection;
         public bool IsRunning => isRunning;
-        public bool IsMoving => canMove && currentVelocity.sqrMagnitude > InputThreshold;
+        public bool IsMoving => CanMove && currentVelocity.sqrMagnitude > InputThreshold;
 
         public void SetRunAllowed(bool isAllowed)
         {
             isRunAllowed = isAllowed;
-            isRunning = canMove && wantsToRun && isRunAllowed && CanRunByStamina();
+            isRunning = CanMove && wantsToRun && isRunAllowed && CanRunByStamina();
         }
 
         public void SetMovementInput(Vector2 direction, bool isRunning)
@@ -152,7 +208,26 @@ namespace Movement
         {
             wantsToRun = bufferedRunPressed;
             targetVelocity = CanMoveByStamina() ? bufferedInputDirection : Vector2.zero;
-            isRunning = canMove && wantsToRun && isRunAllowed && CanRunByStamina();
+            isRunning = CanMove && wantsToRun && isRunAllowed && CanRunByStamina();
+        }
+
+        private bool CanMove => isMovementEnabled && movementLockSources.Count == 0;
+        private bool HasAirborneMomentum => airborneMomentumSources.Count > 0;
+
+        private void RefreshMovementState()
+        {
+            if (CanMove)
+            {
+                ApplyBufferedInputState();
+                return;
+            }
+
+            targetVelocity = Vector2.zero;
+            currentVelocity = Vector2.zero;
+            wantsToRun = false;
+            isRunning = false;
+            currentAccelerationRate = playerMovementConfig.WalkSpeedChangeRate;
+            currentDecelerationRate = playerMovementConfig.WalkDecelerationRate;
         }
 
         private void ApplyStaminaRestrictions()
@@ -165,7 +240,7 @@ namespace Movement
                 return;
             }
 
-            isRunning = wantsToRun && isRunAllowed && CanRunByStamina();
+            isRunning = CanMove && wantsToRun && isRunAllowed && CanRunByStamina();
         }
 
         private bool CanMoveByStamina()
@@ -184,6 +259,20 @@ namespace Movement
 
             var normalizedStamina = staminaStat.Value.Value / staminaStat.Max;
             return normalizedStamina > Mathf.Clamp01(staminaStat.MinSafePercent);
+        }
+
+        private Vector3 GetWorldVelocity(Vector2 velocity)
+        {
+            var moveDirection = cameraMotor.GetGameplayPlanarRotation() *
+                                new Vector3(velocity.x, 0f, velocity.y);
+            if (moveDirection.sqrMagnitude <= InputThreshold)
+            {
+                return Vector3.zero;
+            }
+
+            var inputMagnitude = Mathf.Clamp01(velocity.magnitude);
+            var moveSpeed = CalculateMoveSpeed(moveDirection) * inputMagnitude;
+            return moveDirection.normalized * moveSpeed;
         }
 
         private float CalculateMoveSpeed(Vector3 worldMoveDirection)

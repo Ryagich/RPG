@@ -93,6 +93,7 @@ namespace Container.Game
             builder.RegisterMessageBroker<MouseUp>(options);
             builder.RegisterMessageBroker<DodgeInputMessage>(options);
             builder.RegisterMessageBroker<RollInputMessage>(options);
+            builder.RegisterMessageBroker<JumpInputMessage>(options);
             builder.RegisterMessageBroker<LessonSkipInputMessage>(options);
             builder.RegisterMessageBroker<LessonEvasionInputMessage>(options);
             builder.RegisterMessageBroker<LessonAttackInputMessage>(options);

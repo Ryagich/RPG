@@ -606,7 +606,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 30000000000000003
-    m_Key: Input_LessonSkip
+    m_Key: Input_Jump
     m_Metadata:
       m_Items: []
   - m_Id: 30000000000000004

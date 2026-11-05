@@ -22,6 +22,7 @@ namespace Input
         private readonly IPublisher<MouseUp> mouseUp;
         private readonly IPublisher<DodgeInputMessage> dodgeInputPublisher;
         private readonly IPublisher<RollInputMessage> rollInputPublisher;
+        private readonly IPublisher<JumpInputMessage> jumpInputPublisher;
         private readonly IPublisher<LessonSkipInputMessage> lessonSkipInputPublisher;
         private readonly IPublisher<LessonEvasionInputMessage> lessonEvasionInputPublisher;
         private readonly IPublisher<LessonAttackInputMessage> lessonAttackInputPublisher;
@@ -51,6 +52,7 @@ namespace Input
                 IPublisher<MouseUp> mouseUp,
                 IPublisher<DodgeInputMessage> dodgeInputPublisher,
                 IPublisher<RollInputMessage> rollInputPublisher,
+                IPublisher<JumpInputMessage> jumpInputPublisher,
                 IPublisher<LessonSkipInputMessage> lessonSkipInputPublisher,
                 IPublisher<LessonEvasionInputMessage> lessonEvasionInputPublisher,
                 IPublisher<LessonAttackInputMessage> lessonAttackInputPublisher,
@@ -75,6 +77,7 @@ namespace Input
             this.mouseUp = mouseUp;
             this.dodgeInputPublisher = dodgeInputPublisher;
             this.rollInputPublisher = rollInputPublisher;
+            this.jumpInputPublisher = jumpInputPublisher;
             this.lessonSkipInputPublisher = lessonSkipInputPublisher;
             this.lessonEvasionInputPublisher = lessonEvasionInputPublisher;
             this.lessonAttackInputPublisher = lessonAttackInputPublisher;
@@ -104,6 +107,7 @@ namespace Input
             inputConfig.RightClick.action.canceled += RightMouseUp;
             inputConfig.Dodge.action.started += Dodge;
             inputConfig.Roll.action.started += Roll;
+            SubscribeJumpAction();
             SubscribeLessonSkipAction();
             inputConfig.FastSlot1.action.started += _ => PublishFastSlot(1);
             inputConfig.FastSlot2.action.started += _ => PublishFastSlot(2);
@@ -291,6 +295,27 @@ namespace Input
             }
 
             rollInputPublisher.Publish(new RollInputMessage());
+        }
+
+        private void Jump(InputAction.CallbackContext context)
+        {
+            if (!isPlayerDead && gameModesController.GameMode == GameMode.Game)
+            {
+                jumpInputPublisher.Publish(new JumpInputMessage());
+            }
+        }
+
+        private void SubscribeJumpAction()
+        {
+            var jumpAction = inputConfig.Jump?.action;
+
+            if (jumpAction == null)
+            {
+                Debug.LogError("Jump input action is not configured.");
+                return;
+            }
+
+            jumpAction.started += Jump;
         }
 
         private void SkipLesson(InputAction.CallbackContext context)

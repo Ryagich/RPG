@@ -83,6 +83,12 @@ namespace Messages
 
     public readonly struct RollInputMessage { }
 
+    /// <summary>
+    /// A player intent to start a ground jump. The movement domain decides whether
+    /// the character is currently able to perform it.
+    /// </summary>
+    public readonly struct JumpInputMessage { }
+
     public readonly struct ShowStatsInputMessage
     {
         public readonly bool IsPressed;
