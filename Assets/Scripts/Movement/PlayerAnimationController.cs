@@ -8,7 +8,7 @@ using VContainer.Unity;
 
 namespace Movement
 {
-    public class PlayerAnimationController : IStartable, ITickable
+    public class PlayerAnimationController : IStartable, ITickable, ILateTickable
     {
         private const float InputThreshold = 0.001f;
         private const string DirectionXParameter = "DirectionX";
@@ -16,6 +16,7 @@ namespace Movement
         private const string DirectionActionXParameter = "DirectionActionX";
         private const string DirectionActionYParameter = "DirectionActionY";
         private const string IsRunParameter = "IsRun";
+        private const string IsSprintParameter = "IsSprint";
         private static readonly int JumpTriggerHash = Animator.StringToHash("Jump");
         private static readonly int IsFallParameterHash = Animator.StringToHash("IsFall");
 
@@ -28,8 +29,12 @@ namespace Movement
         private float currentDirectionalX;
         private float currentDirectionalY;
         private bool currentIsRun;
+        private bool currentIsSprint;
+        private bool hasSprintParameter;
         private bool isGameplayActive = true;
         private bool isLocomotionLocked;
+        private bool isAirborneInputActive;
+        private bool clearJumpTriggerAtLateTick;
 
         private PlayerAnimationController(
             CameraMotor cameraMotor,
@@ -47,7 +52,9 @@ namespace Movement
         public void Start()
         {
             gameModeChangedSubscriber.Subscribe(OnGameModeChanged);
-            ApplyLocomotionParameters(Vector2.zero, false, force: true);
+            animator.ResetTrigger(JumpTriggerHash);
+            hasSprintParameter = HasBoolParameter(IsSprintParameter);
+            ApplyLocomotionParameters(Vector2.zero, false, false, force: true);
         }
 
         public void Tick()
@@ -62,26 +69,37 @@ namespace Movement
                 return;
             }
 
-            var movementInput = playerMovement.CurrentVelocity;
-            var isRunning = playerMovement.IsRunning;
+            var movementInput = isAirborneInputActive
+                ? playerMovement.CurrentInputDirection
+                : playerMovement.CurrentVelocity;
+            var isRunning = isAirborneInputActive
+                ? playerMovement.IsRunInputPressed
+                : playerMovement.IsRunning;
+            var isSprinting = isAirborneInputActive
+                ? playerMovement.IsSprintInputPressed
+                : playerMovement.IsSprinting;
 
             if (!isGameplayActive || movementInput.sqrMagnitude <= InputThreshold)
             {
                 // Keep the requested locomotion mode while momentum crosses zero. Otherwise a
                 // forward-to-backward run can briefly trigger the Run -> Walk transition before
                 // the next frame restores Run, despite continuous run input.
-                ApplyLocomotionParameters(Vector2.zero, isGameplayActive && isRunning);
+                ApplyLocomotionParameters(Vector2.zero, isGameplayActive && isRunning, isGameplayActive && isSprinting);
                 return;
             }
 
-            var moveDirection = cameraMotor.GetGameplayPlanarRotation() *
-                                new Vector3(movementInput.x, 0f, movementInput.y);
-            var localMoveDirection = visualTransform.InverseTransformDirection(moveDirection);
-            var directionalInput = new Vector2(
-                Mathf.Clamp(localMoveDirection.x, -1f, 1f),
-                Mathf.Clamp(localMoveDirection.z, -1f, 1f));
+            var directionalInput = Vector2.up;
+            if (!isSprinting)
+            {
+                var moveDirection = cameraMotor.GetGameplayPlanarRotation() *
+                                    new Vector3(movementInput.x, 0f, movementInput.y);
+                var localMoveDirection = visualTransform.InverseTransformDirection(moveDirection);
+                directionalInput = new Vector2(
+                    Mathf.Clamp(localMoveDirection.x, -1f, 1f),
+                    Mathf.Clamp(localMoveDirection.z, -1f, 1f));
+            }
 
-            ApplyLocomotionParameters(directionalInput, isRunning);
+            ApplyLocomotionParameters(directionalInput, isRunning, isSprinting);
         }
 
         private void OnGameModeChanged(GameModeChangedMessage msg)
@@ -90,16 +108,21 @@ namespace Movement
 
             if (!isGameplayActive)
             {
-                ApplyLocomotionParameters(Vector2.zero, false, force: true);
+                ApplyLocomotionParameters(Vector2.zero, false, false, force: true);
             }
         }
 
-        private void ApplyLocomotionParameters(Vector2 directionalInput, bool isRunning, bool force = false)
+        private void ApplyLocomotionParameters(
+            Vector2 directionalInput,
+            bool isRunning,
+            bool isSprinting,
+            bool force = false)
         {
             if (!force
              && Mathf.Approximately(currentDirectionalX, directionalInput.x)
              && Mathf.Approximately(currentDirectionalY, directionalInput.y)
-             && currentIsRun == isRunning)
+             && currentIsRun == isRunning
+             && currentIsSprint == isSprinting)
             {
                 return;
             }
@@ -112,6 +135,7 @@ namespace Movement
             currentDirectionalX = directionalInput.x;
             currentDirectionalY = directionalInput.y;
             currentIsRun = isRunning;
+            currentIsSprint = isSprinting;
 
             // CurrentVelocity carries both the physical direction and its normalized magnitude.
             // The blend tree uses the magnitude to reflect acceleration and braking, so it must
@@ -119,6 +143,10 @@ namespace Movement
             animator.SetFloat(DirectionXParameter, currentDirectionalX);
             animator.SetFloat(DirectionYParameter, currentDirectionalY);
             animator.SetBool(IsRunParameter, currentIsRun);
+            if (hasSprintParameter)
+            {
+                animator.SetBool(IsSprintParameter, currentIsSprint);
+            }
         }
 
         public void SetLocomotionLocked(bool isLocked)
@@ -127,11 +155,36 @@ namespace Movement
 
             if (isLocked)
             {
-                ApplyLocomotionParameters(Vector2.zero, false, force: true);
+                ApplyLocomotionParameters(Vector2.zero, false, false, force: true);
             }
             else
             {
-                ApplyLocomotionParameters(Vector2.zero, false, force: true);
+                ApplyLocomotionParameters(Vector2.zero, false, false, force: true);
+            }
+        }
+
+        /// <summary>
+        /// While airborne, locomotion parameters describe the player's buffered intent
+        /// rather than the deliberately frozen physical velocity.
+        /// </summary>
+        public void SetAirborneInputActive(bool isActive)
+        {
+            isAirborneInputActive = isActive;
+        }
+
+        public void LateTick()
+        {
+            if (!clearJumpTriggerAtLateTick)
+            {
+                return;
+            }
+
+            clearJumpTriggerAtLateTick = false;
+            if (animator != null)
+            {
+                // A trigger otherwise remains pending when its transition cannot run,
+                // which would make a past jump request fire in a later state.
+                animator.ResetTrigger(JumpTriggerHash);
             }
         }
 
@@ -139,15 +192,9 @@ namespace Movement
         {
             if (animator != null)
             {
+                animator.ResetTrigger(JumpTriggerHash);
                 animator.SetTrigger(JumpTriggerHash);
-            }
-        }
-
-        public void SetFalling(bool isFalling)
-        {
-            if (animator != null)
-            {
-                animator.SetBool(IsFallParameterHash, isFalling);
+                clearJumpTriggerAtLateTick = true;
             }
         }
 
@@ -158,9 +205,14 @@ namespace Movement
         public void ApplyBufferedLocomotion()
         {
             var movementInput = playerMovement.CurrentInputDirection;
+            var isSprintInputPressed = playerMovement.IsSprintInputPressed;
             if (!isGameplayActive || movementInput.sqrMagnitude <= InputThreshold)
             {
-                ApplyLocomotionParameters(Vector2.zero, isGameplayActive && playerMovement.IsRunning, force: true);
+                ApplyLocomotionParameters(
+                    Vector2.zero,
+                    isGameplayActive && playerMovement.IsRunInputPressed,
+                    isGameplayActive && isSprintInputPressed,
+                    force: true);
                 return;
             }
 
@@ -170,7 +222,16 @@ namespace Movement
             var directionalInput = new Vector2(
                 Mathf.Clamp(localMoveDirection.x, -1f, 1f),
                 Mathf.Clamp(localMoveDirection.z, -1f, 1f));
-            ApplyLocomotionParameters(directionalInput, playerMovement.IsRunning, force: true);
+            if (isSprintInputPressed)
+            {
+                directionalInput = Vector2.up;
+            }
+
+            ApplyLocomotionParameters(
+                directionalInput,
+                playerMovement.IsRunInputPressed,
+                isSprintInputPressed,
+                force: true);
         }
 
         /// <summary>
@@ -198,6 +259,19 @@ namespace Movement
         private static bool AllowsLocomotion(GameMode mode)
         {
             return mode is GameMode.Game or GameMode.Inventory;
+        }
+
+        private bool HasBoolParameter(string parameterName)
+        {
+            foreach (var parameter in animator.parameters)
+            {
+                if (parameter.name == parameterName && parameter.type == AnimatorControllerParameterType.Bool)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

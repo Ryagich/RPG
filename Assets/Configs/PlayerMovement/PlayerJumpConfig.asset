@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: PlayerJumpConfig
   m_EditorClassIdentifier: Assembly-CSharp::Movement.PlayerJumpConfig
   <Height>k__BackingField: 1.5
+  <HorizontalSpeedMultiplier>k__BackingField: 0.9

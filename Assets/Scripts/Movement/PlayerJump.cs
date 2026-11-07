@@ -18,6 +18,7 @@ namespace Movement
         private readonly PlayerGravity playerGravity;
         private readonly PlayerMovement playerMovement;
         private readonly PlayerAnimationController playerAnimationController;
+        private readonly CharacterLandingRootMotionController landingRootMotionController;
         private readonly TargetLockController targetLockController;
         private readonly PlayerJumpConfig config;
         private readonly GravityConfig gravityConfig;
@@ -28,6 +29,7 @@ namespace Movement
             PlayerGravity playerGravity,
             PlayerMovement playerMovement,
             PlayerAnimationController playerAnimationController,
+            CharacterLandingRootMotionController landingRootMotionController,
             TargetLockController targetLockController,
             PlayerJumpConfig config,
             GravityConfig gravityConfig,
@@ -36,6 +38,7 @@ namespace Movement
             this.playerGravity = playerGravity;
             this.playerMovement = playerMovement;
             this.playerAnimationController = playerAnimationController;
+            this.landingRootMotionController = landingRootMotionController;
             this.targetLockController = targetLockController;
             this.config = config;
             this.gravityConfig = gravityConfig;
@@ -47,7 +50,8 @@ namespace Movement
             jumpInputSubscription = jumpInputSubscriber.Subscribe(OnJumpInput);
             playerGravity.JumpStarted += OnJumpStarted;
             playerGravity.GroundedStateChanged += OnGroundedStateChanged;
-            playerAnimationController?.SetFalling(!playerGravity.IsGrounded);
+            landingRootMotionController.LandingStarted += OnLandingStarted;
+            landingRootMotionController.LandingFinished += OnLandingFinished;
 
             if (!playerGravity.IsGrounded)
             {
@@ -60,8 +64,12 @@ namespace Movement
             jumpInputSubscription?.Dispose();
             playerGravity.JumpStarted -= OnJumpStarted;
             playerGravity.GroundedStateChanged -= OnGroundedStateChanged;
+            landingRootMotionController.LandingStarted -= OnLandingStarted;
+            landingRootMotionController.LandingFinished -= OnLandingFinished;
+            playerAnimationController?.SetAirborneInputActive(false);
             playerMovement?.SetAirborneMomentum(this, false);
             playerMovement?.SetMovementLocked(this, false);
+            playerMovement?.SetMovementLocked(landingRootMotionController, false);
             targetLockController?.SetAutomaticFacingPaused(this, false);
         }
 
@@ -86,21 +94,24 @@ namespace Movement
 
         private void OnJumpStarted()
         {
-            EnterAirborneState();
+            EnterAirborneState(config.HorizontalSpeedMultiplier);
             playerAnimationController?.TriggerJump();
         }
 
-        private void EnterAirborneState()
+        private void EnterAirborneState(float horizontalSpeedMultiplier = 1f)
         {
             // Capture the planar velocity before the control lock clears the
-            // input-driven velocity. It remains constant until ground contact.
-            playerMovement?.SetAirborneMomentum(this, true);
+            // input-driven velocity. A jump-specific multiplier is applied once,
+            // then the resulting velocity remains constant until ground contact.
+            playerMovement?.SetAirborneMomentum(this, true, horizontalSpeedMultiplier);
             playerMovement?.SetMovementLocked(this, true);
             targetLockController?.SetAutomaticFacingPaused(this, true);
+            playerAnimationController?.SetAirborneInputActive(true);
         }
 
         private void ExitAirborneState()
         {
+            playerAnimationController?.SetAirborneInputActive(false);
             playerMovement?.SetAirborneMomentum(this, false);
             playerMovement?.SetMovementLocked(this, false);
             targetLockController?.SetAutomaticFacingPaused(this, false);
@@ -109,8 +120,6 @@ namespace Movement
 
         private void OnGroundedStateChanged(bool isGrounded)
         {
-            playerAnimationController?.SetFalling(!isGrounded);
-
             if (isGrounded)
             {
                 ExitAirborneState();
@@ -118,6 +127,19 @@ namespace Movement
             }
 
             EnterAirborneState();
+        }
+
+        private void OnLandingStarted()
+        {
+            playerMovement?.SetMovementLocked(landingRootMotionController, true);
+            targetLockController?.SetAutomaticFacingPaused(landingRootMotionController, true);
+        }
+
+        private void OnLandingFinished()
+        {
+            playerMovement?.SetMovementLocked(landingRootMotionController, false);
+            targetLockController?.SetAutomaticFacingPaused(landingRootMotionController, false);
+            playerAnimationController?.ApplyBufferedLocomotion();
         }
     }
 }

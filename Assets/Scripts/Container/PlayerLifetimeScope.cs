@@ -128,6 +128,9 @@ namespace Container
                    .AsSelf()
                    .As<IStartable>()
                    .As<System.IDisposable>();
+            builder.RegisterEntryPoint<CharacterLandingRootMotionController>()
+                   .AsSelf()
+                   .As<System.IDisposable>();
             builder.Register<PlayerHitReactionController>(Lifetime.Scoped)
                    .AsSelf()
                    .As<ICharacterHitReactionController>()

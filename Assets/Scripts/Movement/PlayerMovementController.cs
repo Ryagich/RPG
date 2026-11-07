@@ -52,7 +52,7 @@ namespace Movement
         
         private void OnMove(PlayerMoveMessage msg)
         {
-            playerMovement.SetMovementInput(msg.Direction, msg.IsRunning);
+            playerMovement.SetMovementInput(msg.Direction, msg.IsRunPressed, msg.IsSprintPressed);
         }
 
         private static bool AllowsPlayerMovement(GameMode mode)

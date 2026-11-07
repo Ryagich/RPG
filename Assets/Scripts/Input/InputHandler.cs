@@ -37,6 +37,8 @@ namespace Input
 
         private Vector2 currentMoveDirection;
         private bool isRunPressed;
+        private bool isSprintPressed;
+        private float lastRunReleaseTime = float.NegativeInfinity;
         private bool isPlayerDead;
 
         private InputHandler
@@ -143,13 +145,26 @@ namespace Input
                 return;
             }
 
-            isRunPressed = context.ReadValueAsButton();
+            if (context.ReadValueAsButton())
+            {
+                var doublePressWindow = Mathf.Max(0.01f, inputConfig.SprintDoublePressWindowSeconds);
+                isSprintPressed = Time.unscaledTime - lastRunReleaseTime <= doublePressWindow;
+                isRunPressed = true;
+                lastRunReleaseTime = float.NegativeInfinity;
+            }
+            else
+            {
+                isRunPressed = false;
+                isSprintPressed = false;
+                lastRunReleaseTime = Time.unscaledTime;
+            }
+
             PublishPlayerMove();
         }
 
         private void PublishPlayerMove()
         {
-            playerMovePublisher.Publish(new PlayerMoveMessage(currentMoveDirection, isRunPressed));
+            playerMovePublisher.Publish(new PlayerMoveMessage(currentMoveDirection, isRunPressed, isSprintPressed));
         }
         
         private void Interactable(InputAction.CallbackContext context)
@@ -418,6 +433,8 @@ namespace Input
             isPlayerDead = true;
             currentMoveDirection = Vector2.zero;
             isRunPressed = false;
+            isSprintPressed = false;
+            lastRunReleaseTime = float.NegativeInfinity;
             PublishPlayerMove();
             showStatsInputPublisher.Publish(new ShowStatsInputMessage(false));
         }

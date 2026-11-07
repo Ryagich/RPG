@@ -18,6 +18,14 @@ namespace Movement
         [field: SerializeField] public float RunStrafeSpeed { get; private set; } = 6f;
 
         [field: Space]
+        [field: Header("Sprint")]
+        [field: Tooltip("Sprint only moves forward; lateral input rotates the character without changing this speed.")]
+        [field: SerializeField, Min(0f)] public float SprintForwardSpeed { get; private set; } = 9f;
+        [field: SerializeField, Min(0.01f)] public float SprintSpeedChangeRate { get; private set; } = 2.5f;
+        [field: SerializeField, Min(0.01f)] public float SprintDecelerationRate { get; private set; } = 4f;
+        [field: SerializeField, Min(0f)] public float SprintRotationSpeed { get; private set; } = 360f;
+
+        [field: Space]
         [field: Header("Rotation")]
         [field: FormerlySerializedAs("RotationSpeed")]
         [field: SerializeField] public float WalkRotationSpeed { get; private set; } = 720f;

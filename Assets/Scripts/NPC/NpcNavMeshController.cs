@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEngine.AI;
+using System.Collections.Generic;
+using Movement;
 using Stats;
 using VContainer.Unity;
 
 namespace NPC
 {
-    public sealed class NpcNavMeshController : IStartable, ITickable, IStaminaMovementState
+    public sealed class NpcNavMeshController : IStartable, ITickable, IStaminaMovementState, System.IDisposable
     {
         private const float DefaultSampleRadius = 2f;
         private const float VelocityThreshold = 0.01f;
@@ -25,6 +27,9 @@ namespace NPC
 
         private bool isFacingLocked;
         private bool isActionMovementLocked;
+        private bool isActionMovementRequested;
+        private readonly HashSet<object> actionMovementLockSources = new();
+        private readonly CharacterLandingRootMotionController landingRootMotionController;
         private bool isNavigationDisabled;
         private bool isInitialized;
         private bool hasMoveRequest;
@@ -33,11 +38,16 @@ namespace NPC
         private float nextPathRefreshTime;
         private Vector3 currentPlanarVelocity;
 
-        public NpcNavMeshController(NavMeshAgent agent, CharacterController characterController, Animator animator)
+        public NpcNavMeshController(
+            NavMeshAgent agent,
+            CharacterController characterController,
+            Animator animator,
+            CharacterLandingRootMotionController landingRootMotionController)
         {
             this.agent = agent;
             this.characterController = characterController;
             this.animator = animator;
+            this.landingRootMotionController = landingRootMotionController;
             defaultStoppingDistance = agent != null ? agent.stoppingDistance : 0f;
             defaultSpeed = agent != null ? agent.speed : 0f;
         }
@@ -52,6 +62,7 @@ namespace NPC
                                 && !agent.isStopped
                                 && currentPlanarVelocity.sqrMagnitude > VelocityThreshold;
         public bool IsRunning => IsAgentActiveAndOnNavMesh && agent.speed > defaultSpeed + VelocityThreshold;
+        public bool IsSprinting => false;
         public bool IsFacingLocked => isFacingLocked;
         public bool IsActionMovementLocked => isActionMovementLocked;
 
@@ -71,6 +82,17 @@ namespace NPC
         public void Start()
         {
             EnsureAgentIsReady();
+            landingRootMotionController.LandingStarted += OnLandingStarted;
+            landingRootMotionController.LandingFinished += OnLandingFinished;
+        }
+
+        public void Dispose()
+        {
+            landingRootMotionController.LandingStarted -= OnLandingStarted;
+            landingRootMotionController.LandingFinished -= OnLandingFinished;
+            actionMovementLockSources.Remove(landingRootMotionController);
+            isActionMovementRequested = false;
+            RefreshActionMovementLock();
         }
 
         public void Tick()
@@ -254,13 +276,54 @@ namespace NPC
         /// </summary>
         public void SetActionMovementLocked(bool isLocked)
         {
-            if (isActionMovementLocked == isLocked)
+            if (isActionMovementRequested == isLocked)
             {
                 return;
             }
 
-            isActionMovementLocked = isLocked;
+            isActionMovementRequested = isLocked;
+            RefreshActionMovementLock();
+        }
+
+        private void OnLandingStarted()
+        {
+            SetActionMovementLocked(landingRootMotionController, true);
+        }
+
+        private void OnLandingFinished()
+        {
+            SetActionMovementLocked(landingRootMotionController, false);
+        }
+
+        private void SetActionMovementLocked(object source, bool isLocked)
+        {
+            if (source == null)
+            {
+                return;
+            }
+
             if (isLocked)
+            {
+                actionMovementLockSources.Add(source);
+            }
+            else
+            {
+                actionMovementLockSources.Remove(source);
+            }
+
+            RefreshActionMovementLock();
+        }
+
+        private void RefreshActionMovementLock()
+        {
+            var shouldBeLocked = isActionMovementRequested || actionMovementLockSources.Count > 0;
+            if (isActionMovementLocked == shouldBeLocked)
+            {
+                return;
+            }
+
+            isActionMovementLocked = shouldBeLocked;
+            if (shouldBeLocked)
             {
                 Stop();
             }

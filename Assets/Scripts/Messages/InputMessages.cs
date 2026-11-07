@@ -12,12 +12,14 @@ namespace Messages
     public readonly struct PlayerMoveMessage
     {
         public readonly Vector2 Direction;
-        public readonly bool IsRunning;
+        public readonly bool IsRunPressed;
+        public readonly bool IsSprintPressed;
 
-        public PlayerMoveMessage(Vector2 direction, bool isRunning)
+        public PlayerMoveMessage(Vector2 direction, bool isRunPressed, bool isSprintPressed)
         {
             Direction = direction;
-            IsRunning = isRunning;
+            IsRunPressed = isRunPressed;
+            IsSprintPressed = isSprintPressed;
         }
     }
     

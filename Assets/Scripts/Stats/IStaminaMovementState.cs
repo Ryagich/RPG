@@ -4,5 +4,6 @@ namespace Stats
     {
         bool IsMoving { get; }
         bool IsRunning { get; }
+        bool IsSprinting { get; }
     }
 }

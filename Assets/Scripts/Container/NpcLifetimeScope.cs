@@ -191,7 +191,7 @@ namespace Container
 
             var navMeshAgent = GetComponent<NavMeshAgent>() ?? gameObject.AddComponent<NavMeshAgent>();
             builder.RegisterComponent(navMeshAgent).AsSelf();
-            builder.RegisterEntryPoint<NpcNavMeshController>().AsSelf().As<IStaminaMovementState>();
+            builder.RegisterEntryPoint<NpcNavMeshController>().AsSelf().As<IStaminaMovementState>().As<System.IDisposable>();
             builder.RegisterEntryPoint<NpcFootstepPlayer>().AsSelf();
 
             builder.RegisterInstance(transform);
@@ -268,6 +268,9 @@ namespace Container
             builder.Register<CharacterRootMotionController>(Lifetime.Scoped)
                    .AsSelf()
                    .As<IStartable>()
+                   .As<System.IDisposable>();
+            builder.RegisterEntryPoint<CharacterLandingRootMotionController>()
+                   .AsSelf()
                    .As<System.IDisposable>();
             builder.Register<NpcHitReactionController>(Lifetime.Scoped)
                    .AsSelf()

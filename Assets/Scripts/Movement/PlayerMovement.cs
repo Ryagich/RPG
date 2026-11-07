@@ -31,11 +31,15 @@ namespace Movement
         private Vector3 airborneMomentumVelocity;
         private bool isMovementEnabled = true;
         private bool bufferedRunPressed;
+        private bool bufferedSprintPressed;
         private bool wantsToRun;
+        private bool wantsToSprint;
         private bool isRunning;
+        private bool isSprinting;
         private bool isRunAllowed = true;
         private float currentAccelerationRate;
         private float currentDecelerationRate;
+        private float sprintSpeedBlend;
 
         [SuppressMessage("ReSharper", "ParameterHidesMember")]
         private PlayerMovement
@@ -82,10 +86,13 @@ namespace Movement
             }
 
             ApplyStaminaRestrictions();
+            UpdateSprintSpeedBlend();
 
-            var targetAccelerationRate = isRunning
-                ? playerMovementConfig.RunSpeedChangeRate
-                : playerMovementConfig.WalkSpeedChangeRate;
+            var targetAccelerationRate = isSprinting
+                ? playerMovementConfig.SprintSpeedChangeRate
+                : isRunning
+                    ? playerMovementConfig.RunSpeedChangeRate
+                    : playerMovementConfig.WalkSpeedChangeRate;
             currentAccelerationRate = Mathf.MoveTowards(
                 currentAccelerationRate,
                 targetAccelerationRate,
@@ -95,9 +102,11 @@ namespace Movement
             {
                 // Remember the movement mode that produced the momentum. Releasing both
                 // the movement and run buttons in the same frame must still decelerate as a run.
-                currentDecelerationRate = isRunning
-                    ? playerMovementConfig.RunDecelerationRate
-                    : playerMovementConfig.WalkDecelerationRate;
+                currentDecelerationRate = isSprinting
+                    ? playerMovementConfig.SprintDecelerationRate
+                    : isRunning
+                        ? playerMovementConfig.RunDecelerationRate
+                        : playerMovementConfig.WalkDecelerationRate;
             }
 
             var velocityChangeRate = targetVelocity.sqrMagnitude > InputThreshold
@@ -158,7 +167,7 @@ namespace Movement
         /// intentionally separate from an input lock: the latter blocks control,
         /// whereas this keeps the take-off momentum moving the controller.
         /// </summary>
-        public void SetAirborneMomentum(object source, bool isActive)
+        public void SetAirborneMomentum(object source, bool isActive, float velocityMultiplier = 1f)
         {
             if (source == null)
             {
@@ -169,7 +178,7 @@ namespace Movement
             {
                 if (airborneMomentumSources.Add(source) && airborneMomentumSources.Count == 1)
                 {
-                    airborneMomentumVelocity = GetWorldVelocity(currentVelocity);
+                    airborneMomentumVelocity = GetWorldVelocity(currentVelocity) * Mathf.Max(0f, velocityMultiplier);
                 }
 
                 return;
@@ -188,27 +197,51 @@ namespace Movement
         /// it remains available when movement is temporarily disabled by an action animation.
         /// </summary>
         public Vector2 CurrentInputDirection => bufferedInputDirection;
+        /// <summary>
+        /// The latest run intent received from input. Unlike <see cref="IsRunning"/>,
+        /// it is preserved while movement is temporarily locked.
+        /// </summary>
+        public bool IsRunInputPressed => bufferedRunPressed;
+        /// <summary>
+        /// The buffered double-Shift gesture. Like <see cref="IsRunInputPressed"/>, this is
+        /// input intent rather than the currently executable sprint state.
+        /// </summary>
+        public bool IsSprintInputPressed => bufferedSprintPressed;
         public bool IsRunning => isRunning;
+        public bool IsSprinting => isSprinting;
         public bool IsMoving => CanMove && currentVelocity.sqrMagnitude > InputThreshold;
 
         public void SetRunAllowed(bool isAllowed)
         {
             isRunAllowed = isAllowed;
-            isRunning = CanMove && wantsToRun && isRunAllowed && CanRunByStamina();
+            ApplyBufferedInputState();
         }
 
-        public void SetMovementInput(Vector2 direction, bool isRunning)
+        public void SetMovementInput(Vector2 direction, bool isRunPressed, bool isSprintPressed)
         {
             bufferedInputDirection = direction;
-            bufferedRunPressed = isRunning;
+            bufferedRunPressed = isRunPressed;
+            bufferedSprintPressed = isSprintPressed;
             ApplyBufferedInputState();
         }
 
         private void ApplyBufferedInputState()
         {
-            wantsToRun = bufferedRunPressed;
-            targetVelocity = CanMoveByStamina() ? bufferedInputDirection : Vector2.zero;
+            wantsToRun = bufferedRunPressed || bufferedSprintPressed;
+            wantsToSprint = bufferedSprintPressed;
+            RefreshLocomotionState();
+        }
+
+        private void RefreshLocomotionState()
+        {
             isRunning = CanMove && wantsToRun && isRunAllowed && CanRunByStamina();
+            isSprinting = isRunning
+                          && wantsToSprint
+                          && HasForwardSprintInput()
+                          && !targetLockController.IsLocked;
+            targetVelocity = CanMoveByStamina()
+                ? isSprinting ? Vector2.up : bufferedInputDirection
+                : Vector2.zero;
         }
 
         private bool CanMove => isMovementEnabled && movementLockSources.Count == 0;
@@ -225,7 +258,10 @@ namespace Movement
             targetVelocity = Vector2.zero;
             currentVelocity = Vector2.zero;
             wantsToRun = false;
+            wantsToSprint = false;
             isRunning = false;
+            isSprinting = false;
+            sprintSpeedBlend = 0f;
             currentAccelerationRate = playerMovementConfig.WalkSpeedChangeRate;
             currentDecelerationRate = playerMovementConfig.WalkDecelerationRate;
         }
@@ -237,10 +273,28 @@ namespace Movement
                 targetVelocity = Vector2.zero;
                 currentVelocity = Vector2.zero;
                 isRunning = false;
+                isSprinting = false;
                 return;
             }
 
-            isRunning = CanMove && wantsToRun && isRunAllowed && CanRunByStamina();
+            RefreshLocomotionState();
+        }
+
+        private void UpdateSprintSpeedBlend()
+        {
+            var targetBlend = isSprinting ? 1f : 0f;
+            var changeRate = isSprinting
+                ? playerMovementConfig.SprintSpeedChangeRate
+                : playerMovementConfig.SprintDecelerationRate;
+            sprintSpeedBlend = Mathf.MoveTowards(
+                sprintSpeedBlend,
+                targetBlend,
+                changeRate * Time.deltaTime);
+        }
+
+        private bool HasForwardSprintInput()
+        {
+            return bufferedInputDirection.y > InputThreshold;
         }
 
         private bool CanMoveByStamina()
@@ -263,6 +317,18 @@ namespace Movement
 
         private Vector3 GetWorldVelocity(Vector2 velocity)
         {
+            var inputMagnitude = Mathf.Clamp01(velocity.magnitude);
+            if (inputMagnitude <= InputThreshold)
+            {
+                return Vector3.zero;
+            }
+
+            if (isSprinting)
+            {
+                var sprintSpeed = GetSprintAdjustedSpeed(playerMovementConfig.RunForwardSpeed);
+                return visualTransform.forward * (sprintSpeed * inputMagnitude * GetWeightSpeedMultiplier());
+            }
+
             var moveDirection = cameraMotor.GetGameplayPlanarRotation() *
                                 new Vector3(velocity.x, 0f, velocity.y);
             if (moveDirection.sqrMagnitude <= InputThreshold)
@@ -270,7 +336,6 @@ namespace Movement
                 return Vector3.zero;
             }
 
-            var inputMagnitude = Mathf.Clamp01(velocity.magnitude);
             var moveSpeed = CalculateMoveSpeed(moveDirection) * inputMagnitude;
             return moveDirection.normalized * moveSpeed;
         }
@@ -299,11 +364,16 @@ namespace Movement
 
             if (horizontalSpeed > 0f && verticalSpeed > 0f)
             {
-                return ((horizontalSpeed + verticalSpeed) * 0.5f) * GetWeightSpeedMultiplier();
+                return GetSprintAdjustedSpeed((horizontalSpeed + verticalSpeed) * 0.5f) * GetWeightSpeedMultiplier();
             }
 
             var baseSpeed = Mathf.Max(horizontalSpeed, verticalSpeed);
-            return baseSpeed * GetWeightSpeedMultiplier();
+            return GetSprintAdjustedSpeed(baseSpeed) * GetWeightSpeedMultiplier();
+        }
+
+        private float GetSprintAdjustedSpeed(float baseSpeed)
+        {
+            return Mathf.Lerp(baseSpeed, playerMovementConfig.SprintForwardSpeed, sprintSpeedBlend);
         }
 
         private float GetWeightSpeedMultiplier()
@@ -317,6 +387,23 @@ namespace Movement
         {
             if (targetLockController.IsLocked)
             {
+                return;
+            }
+
+            if (isSprinting)
+            {
+                var sprintDirection = cameraMotor.GetGameplayPlanarRotation() *
+                                      new Vector3(bufferedInputDirection.x, 0f, bufferedInputDirection.y);
+                if (sprintDirection.sqrMagnitude <= InputThreshold)
+                {
+                    return;
+                }
+
+                var sprintTargetRotation = Quaternion.LookRotation(sprintDirection.normalized, Vector3.up);
+                visualTransform.rotation = Quaternion.RotateTowards(
+                    visualTransform.rotation,
+                    sprintTargetRotation,
+                    playerMovementConfig.SprintRotationSpeed * Time.deltaTime);
                 return;
             }
 

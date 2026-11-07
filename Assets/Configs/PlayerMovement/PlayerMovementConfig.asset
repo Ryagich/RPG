@@ -18,6 +18,10 @@ MonoBehaviour:
   <RunForwardSpeed>k__BackingField: 7
   <RunBackwardSpeed>k__BackingField: 5.5
   <RunStrafeSpeed>k__BackingField: 6
+  <SprintForwardSpeed>k__BackingField: 9
+  <SprintSpeedChangeRate>k__BackingField: 2.5
+  <SprintDecelerationRate>k__BackingField: 4
+  <SprintRotationSpeed>k__BackingField: 360
   <WalkRotationSpeed>k__BackingField: 215
   <RunRotationSpeed>k__BackingField: 280
   <WalkSpeedChangeRate>k__BackingField: 3.5
