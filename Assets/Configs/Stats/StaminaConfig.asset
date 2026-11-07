@@ -52,3 +52,5 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   <RunDrainMultiplier>k__BackingField: 1.25
+  <SprintDrainPerSecond>k__BackingField: 8
+  <SprintWeightDrainMultiplier>k__BackingField: 1.5

@@ -68,17 +68,24 @@ namespace Stats
                 return;
             }
 
+            var interval = Mathf.Max(statsConfig.PeriodicChangeIntervalSeconds, float.Epsilon);
             var drainAmount = staminaConfig.EvaluateMovementDrainPerSecond(
                 inventoryCapacity.CurrentWeight,
-                inventory.MaxWeight) * Mathf.Max(statsConfig.PeriodicChangeIntervalSeconds, float.Epsilon);
+                inventory.MaxWeight) * interval;
+
+            if (movementState.IsSprinting)
+            {
+                drainAmount = drainAmount * staminaConfig.SprintWeightDrainMultiplier
+                              + staminaConfig.SprintDrainPerSecond * interval;
+            }
+            else if (movementState.IsRunning)
+            {
+                drainAmount *= staminaConfig.RunDrainMultiplier;
+            }
+
             if (Mathf.Approximately(drainAmount, 0f))
             {
                 return;
-            }
-
-            if (movementState.IsRunning)
-            {
-                drainAmount *= staminaConfig.RunDrainMultiplier;
             }
 
             statsController.AddValue(StatType.Stamina, -drainAmount, StatChangeSource.Periodic);

@@ -20,6 +20,12 @@ namespace Stats
         [field: SerializeField, FormerlySerializedAs("<RunMovementDrainMultiplier>k__BackingField"), Min(0f), Tooltip("Во сколько раз расход от веса больше во время бега. Например, 1.25 означает на 25% больше.")]
         public float RunDrainMultiplier { get; private set; } = 1.25f;
 
+        [field: Space, Header("Sprint drain")]
+        [field: SerializeField, Min(0f), Tooltip("Base stamina spent per second while sprinting, independent of carried weight.")]
+        public float SprintDrainPerSecond { get; private set; } = 8f;
+        [field: SerializeField, Min(0f), Tooltip("Multiplier for the existing weight-based movement drain while sprinting.")]
+        public float SprintWeightDrainMultiplier { get; private set; } = 1.5f;
+
         public float EvaluateMovementDrainPerSecond(float currentWeight, float maxWeight)
         {
             if (maxWeight <= 0f)
