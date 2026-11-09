@@ -159,6 +159,9 @@ namespace Container
                 var footIk = animator.GetComponent<CharacterFootIkRuntime>()
                              ?? animator.gameObject.AddComponent<CharacterFootIkRuntime>();
                 builder.RegisterComponent(footIk).AsSelf();
+                var animationEventReceiver = animator.GetComponent<CharacterAnimationEventReceiver>()
+                                             ?? animator.gameObject.AddComponent<CharacterAnimationEventReceiver>();
+                builder.RegisterComponent(animationEventReceiver).AsSelf();
             }
 
             var ragdollController = GetComponent<PlayerRagdollController>() ?? gameObject.AddComponent<PlayerRagdollController>();
@@ -191,7 +194,11 @@ namespace Container
 
             var navMeshAgent = GetComponent<NavMeshAgent>() ?? gameObject.AddComponent<NavMeshAgent>();
             builder.RegisterComponent(navMeshAgent).AsSelf();
-            builder.RegisterEntryPoint<NpcNavMeshController>().AsSelf().As<IStaminaMovementState>().As<System.IDisposable>();
+            builder.RegisterEntryPoint<NpcNavMeshController>()
+                   .AsSelf()
+                   .As<ICharacterPlanarMotionSource>()
+                   .As<IStaminaMovementState>()
+                   .As<System.IDisposable>();
             builder.RegisterEntryPoint<NpcFootstepPlayer>().AsSelf();
 
             builder.RegisterInstance(transform);
@@ -253,7 +260,10 @@ namespace Container
             var damageReceiverHost = GetComponent<DamageReceiverHost>() ?? gameObject.AddComponent<DamageReceiverHost>();
             builder.RegisterComponent(damageReceiverHost).AsSelf();
 
-            builder.RegisterEntryPoint<PlayerGravity>().AsSelf();
+            builder.Register<PlayerGravity>(Lifetime.Scoped)
+                   .AsSelf()
+                   .As<ICharacterVerticalMotionSource>();
+            builder.RegisterEntryPoint<CharacterMotor>().AsSelf();
             builder.Register<StatsController>(Lifetime.Singleton).AsSelf();
             builder.Register<StatFillers>(Lifetime.Singleton).AsSelf();
             builder.RegisterInstance(new AdditionalStatsPeriodicDrainPolicy(consumeAdditionalStatsOverTime)).As<IAdditionalStatsPeriodicDrainPolicy>();
@@ -269,7 +279,13 @@ namespace Container
                    .AsSelf()
                    .As<IStartable>()
                    .As<System.IDisposable>();
-            builder.RegisterEntryPoint<CharacterLandingRootMotionController>()
+            builder.RegisterEntryPoint<CharacterAirborneAnimationController>()
+                   .AsSelf()
+                   .As<System.IDisposable>();
+            builder.RegisterEntryPoint<CharacterFallController>()
+                   .AsSelf()
+                   .As<System.IDisposable>();
+            builder.RegisterEntryPoint<NpcCharacterAnimationControlHandler>()
                    .AsSelf()
                    .As<System.IDisposable>();
             builder.Register<NpcHitReactionController>(Lifetime.Scoped)

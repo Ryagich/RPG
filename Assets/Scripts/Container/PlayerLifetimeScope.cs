@@ -49,6 +49,9 @@ namespace Container
                 var footIk = animator.GetComponent<CharacterFootIkRuntime>()
                              ?? animator.gameObject.AddComponent<CharacterFootIkRuntime>();
                 builder.RegisterComponent(footIk).AsSelf();
+                var animationEventReceiver = animator.GetComponent<CharacterAnimationEventReceiver>()
+                                             ?? animator.gameObject.AddComponent<CharacterAnimationEventReceiver>();
+                builder.RegisterComponent(animationEventReceiver).AsSelf();
             }
             var ragdollController = GetComponent<PlayerRagdollController>() ?? gameObject.AddComponent<PlayerRagdollController>();
             builder.RegisterComponent(ragdollController).AsSelf();
@@ -105,10 +108,18 @@ namespace Container
             builder.RegisterEntryPoint<CameraMotor>().AsSelf();
             builder.Register<TargetLockTargetFilter>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<TargetLockController>().AsSelf();
-            builder.RegisterEntryPoint<PlayerGravity>().AsSelf();
+            builder.Register<PlayerGravity>(Lifetime.Scoped)
+                   .AsSelf()
+                   .As<ICharacterVerticalMotionSource>();
             builder.RegisterEntryPoint<PlayerJump>().AsSelf().As<System.IDisposable>();
+            builder.Register<PlayerMovementIntent>(Lifetime.Scoped).AsSelf();
+            builder.Register<PlayerFacingController>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<PlayerMovementController>().AsSelf();
-            builder.RegisterEntryPoint<PlayerMovement>().AsSelf().As<IStaminaMovementState>();
+            builder.Register<PlayerMovement>(Lifetime.Scoped)
+                   .AsSelf()
+                   .As<ICharacterPlanarMotionSource>()
+                   .As<IStaminaMovementState>();
+            builder.RegisterEntryPoint<CharacterMotor>().AsSelf();
             builder.RegisterEntryPoint<PlayerFootstepPlayer>().AsSelf();
             builder.RegisterEntryPoint<PlayerAnimationController>().AsSelf();
             builder.RegisterEntryPoint<PlayerInteractableLogic>().AsSelf();
@@ -124,11 +135,17 @@ namespace Container
             // Player and NPC must keep the same character systems; only the control source differs:
             // player input drives these systems for Player, while the state machine drives them for NPC.
             builder.Register<CharacterActionState>(Lifetime.Scoped).AsSelf();
-            builder.Register<CharacterRootMotionController>(Lifetime.Singleton)
+            builder.RegisterEntryPoint<PlayerCharacterAnimationControlHandler>()
+                   .AsSelf()
+                   .As<System.IDisposable>();
+            builder.Register<CharacterRootMotionController>(Lifetime.Scoped)
                    .AsSelf()
                    .As<IStartable>()
                    .As<System.IDisposable>();
-            builder.RegisterEntryPoint<CharacterLandingRootMotionController>()
+            builder.RegisterEntryPoint<CharacterAirborneAnimationController>()
+                   .AsSelf()
+                   .As<System.IDisposable>();
+            builder.RegisterEntryPoint<CharacterFallController>()
                    .AsSelf()
                    .As<System.IDisposable>();
             builder.Register<PlayerHitReactionController>(Lifetime.Scoped)

@@ -54,6 +54,7 @@ MonoBehaviour:
   <PlayerJumpConfig>k__BackingField: {fileID: 11400000, guid: 65e1a84e77654c5098d50047643b7751, type: 2}
   <FootIkConfig>k__BackingField: {fileID: 11400000, guid: a2e5105580ef4f17a7b8628c070706a1, type: 2}
   <GravityConfig>k__BackingField: {fileID: 11400000, guid: 585e9272bd2a2fd48b498ec705d82936, type: 2}
+  <FallConfig>k__BackingField: {fileID: 11400000, guid: 8d4c2b1a9f0e6d3c5b7a9e1f2d4c6b8a, type: 2}
   <UIConfig>k__BackingField: {fileID: 11400000, guid: 9a8de918ae5a2374e9c6b6f80731575a, type: 2}
   <StatsConfig>k__BackingField: {fileID: 11400000, guid: 1bd56eaa46a359a4f974395bfa35f427, type: 2}
   <StaminaConfig>k__BackingField: {fileID: 11400000, guid: 24c80f5a474b4586b7926d5a126fdbb4, type: 2}

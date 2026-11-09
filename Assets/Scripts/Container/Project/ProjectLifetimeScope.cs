@@ -42,6 +42,7 @@ namespace Container.Project
         [field: SerializeField] public PlayerJumpConfig PlayerJumpConfig { get; private set; }
         [field: SerializeField] public FootIkConfig FootIkConfig { get; private set; }
         [field: SerializeField] public GravityConfig GravityConfig { get; private set; }
+        [field: SerializeField] public FallConfig FallConfig { get; private set; }
         [field: SerializeField] public UIConfig UIConfig { get; private set; }
         [field: SerializeField] public StatsConfig StatsConfig { get; private set; }
         [field: SerializeField] public StaminaConfig StaminaConfig { get; private set; }
@@ -100,6 +101,7 @@ namespace Container.Project
             builder.RegisterInstance(PlayerJumpConfig).AsSelf();
             builder.RegisterInstance(FootIkConfig).AsSelf();
             builder.RegisterInstance(GravityConfig).AsSelf();
+            builder.RegisterInstance(FallConfig).AsSelf();
             builder.RegisterInstance(UIConfig).AsSelf();
             builder.RegisterInstance(StatsConfig).AsSelf();
             builder.RegisterInstance(StaminaConfig).AsSelf();

@@ -9,7 +9,8 @@ namespace Stats
     {
         Manual,
         Periodic,
-        Combat
+        Combat,
+        Environmental
     }
 
     public readonly struct StatChangeInfo
