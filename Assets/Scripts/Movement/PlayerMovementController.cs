@@ -12,6 +12,7 @@ namespace Movement
     {
         private readonly Transform transform;
         private readonly PlayerMovement playerMovement;
+        private readonly PlayerMovementIntent movementIntent;
         private readonly CameraMotor cameraMotor;
         private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
         
@@ -19,6 +20,7 @@ namespace Movement
             (
                 Transform transform,
                 PlayerMovement playerMovement,
+                PlayerMovementIntent movementIntent,
                 CameraMotor cameraMotor,
                 ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber,
                 ISubscriber<PlayerMoveMessage> playerMoveSubscriber
@@ -26,6 +28,7 @@ namespace Movement
         {
             this.transform = transform;
             this.playerMovement = playerMovement;
+            this.movementIntent = movementIntent;
             this.cameraMotor = cameraMotor;
             this.gameModeChangedSubscriber = gameModeChangedSubscriber;
 
@@ -52,7 +55,8 @@ namespace Movement
         
         private void OnMove(PlayerMoveMessage msg)
         {
-            playerMovement.SetMovementInput(msg.Direction, msg.IsRunPressed, msg.IsSprintPressed);
+            movementIntent.Set(msg.Direction, msg.IsRunPressed, msg.IsSprintPressed);
+            playerMovement.RefreshIntent();
         }
 
         private static bool AllowsPlayerMovement(GameMode mode)

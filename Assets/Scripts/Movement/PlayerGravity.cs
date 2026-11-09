@@ -6,7 +6,7 @@ using VContainer.Unity;
 namespace Movement
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class PlayerGravity : IFixedTickable
+    public class PlayerGravity : ICharacterVerticalMotionSource
     {
         private const float GroundedStickVelocity = -2f;
 
@@ -16,13 +16,16 @@ namespace Movement
         private float verticalVelocity;
         private bool isJumping;
         private bool? lastGroundedState;
+        private bool? lastFallingState;
 
         public event Action JumpStarted;
         public event Action JumpLanded;
         public event Action<bool> GroundedStateChanged;
+        public event Action<bool> FallingStateChanged;
 
         public bool IsJumping => isJumping;
         public bool IsGrounded => controller != null && controller.enabled && controller.isGrounded;
+        public bool IsFalling => !IsGrounded && verticalVelocity < 0f;
 
         public PlayerGravity
             (
@@ -34,14 +37,14 @@ namespace Movement
             this.config = config;
         }
 
-        public void FixedTick()
+        public float GetVerticalVelocity(float deltaTime, bool wasGrounded)
         {
             if (controller == null || !controller.enabled || !controller.gameObject.activeInHierarchy)
             {
-                return;
+                return 0f;
             }
 
-            if (controller.isGrounded && verticalVelocity <= 0f)
+            if (wasGrounded && verticalVelocity <= 0f)
             {
                 // CharacterController updates grounded state from movement resolution.
                 // Keep applying a small downward motion so the player starts falling as soon as support disappears.
@@ -50,13 +53,14 @@ namespace Movement
             else
             {
                 // v = v0 + g * dt
-                verticalVelocity -= config.Gravity * Time.fixedDeltaTime;
+                verticalVelocity -= config.Gravity * deltaTime;
             }
 
-            // Δs = v * dt
-            var displacement = new Vector3(0f, verticalVelocity * Time.fixedDeltaTime, 0f);
+            return verticalVelocity;
+        }
 
-            var collisionFlags = controller.Move(displacement);
+        public void OnMotionApplied(CollisionFlags collisionFlags, bool isGrounded)
+        {
             UpdateGroundedState();
             if (verticalVelocity > 0f && (collisionFlags & CollisionFlags.Above) != 0)
             {
@@ -67,12 +71,14 @@ namespace Movement
 
             if (isJumping
                 && verticalVelocity < 0f
-                && ((collisionFlags & CollisionFlags.Below) != 0 || controller.isGrounded))
+                && ((collisionFlags & CollisionFlags.Below) != 0 || isGrounded))
             {
                 verticalVelocity = GroundedStickVelocity;
                 isJumping = false;
                 JumpLanded?.Invoke();
             }
+
+            UpdateFallingState(isGrounded);
         }
 
         /// <summary>
@@ -108,45 +114,37 @@ namespace Movement
             lastGroundedState = isGrounded;
             GroundedStateChanged?.Invoke(isGrounded);
         }
+
+        private void UpdateFallingState(bool isGrounded)
+        {
+            var isFalling = !isGrounded && verticalVelocity < 0f;
+            if (lastFallingState == isFalling)
+            {
+                return;
+            }
+
+            lastFallingState = isFalling;
+            FallingStateChanged?.Invoke(isFalling);
+        }
     }
 
     /// <summary>
-    /// Connects the grounded state owned by <see cref="PlayerGravity"/> to the shared character
-    /// Animator. While a moving-landing state is entered, the existing root-motion coordinator
-    /// moves the CharacterController, so player and NPC follow the clip's authored displacement.
+    /// Maps the authoritative grounded state to the shared Air-layer parameter.
+    /// Animation events exclusively own landing movement locks and root motion.
     /// </summary>
-    public sealed class CharacterLandingRootMotionController : IStartable, ITickable, IDisposable
+    public sealed class CharacterAirborneAnimationController : IStartable, IDisposable
     {
-        // Landing states live on the dedicated Air layer. Root motion must follow the
-        // layer that evaluates the running and sprinting landing clips, not the locomotion layer.
-        private const string AirLayerName = "Air";
         private static readonly int IsFallParameterHash = Animator.StringToHash("IsFall");
-        private static readonly int RunningLandingStateHash = Animator.StringToHash("A_Land_Running_Masc");
-        private static readonly int SprintingLandingStateHash = Animator.StringToHash("A_Land_Sprinting_Masc 0");
 
         private readonly PlayerGravity gravity;
         private readonly Animator animator;
-        private readonly Combat.CharacterRootMotionController rootMotionController;
-        private readonly int airLayerIndex;
 
-        private bool isLandingTransitionExpected;
-        private bool isRootMotionActive;
-        private bool wasAirborne;
-        private bool isLandingInProgress;
-        private int landingTransitionExpectedFrame = -1;
-
-        public event Action LandingStarted;
-        public event Action LandingFinished;
-
-        public CharacterLandingRootMotionController(
+        public CharacterAirborneAnimationController(
             PlayerGravity gravity,
-            Animator animator,
-            Combat.CharacterRootMotionController rootMotionController)
+            Animator animator)
         {
             this.gravity = gravity;
             this.animator = animator;
-            this.rootMotionController = rootMotionController;
-            airLayerIndex = animator != null ? animator.GetLayerIndex(AirLayerName) : -1;
         }
 
         public void Start()
@@ -157,37 +155,7 @@ namespace Movement
             }
 
             gravity.GroundedStateChanged += OnGroundedStateChanged;
-            wasAirborne = !gravity.IsGrounded;
-            animator.SetBool(IsFallParameterHash, wasAirborne);
-        }
-
-        public void Tick()
-        {
-            if (animator == null || airLayerIndex < 0)
-            {
-                return;
-            }
-
-            var isRootMotionLandingStateActive = IsRootMotionLandingStateActive();
-            if (isRootMotionLandingStateActive)
-            {
-                isLandingTransitionExpected = false;
-            }
-            else if (isLandingTransitionExpected && Time.frameCount > landingTransitionExpectedFrame)
-            {
-                // GroundedStateChanged is raised from PlayerGravity's FixedTick before the Animator
-                // has evaluated IsFall=false. Retain the source for that render frame: otherwise
-                // applyRootMotion is reset before A_Land_Running_Masc can produce its first delta.
-                // On the following frame we can safely release it if the controller chose a
-                // different landing branch, such as the idle landing.
-                isLandingTransitionExpected = false;
-            }
-
-            SetRootMotionActive(isLandingTransitionExpected || isRootMotionLandingStateActive);
-            if (isLandingInProgress && !isLandingTransitionExpected && !isRootMotionLandingStateActive)
-            {
-                CompleteLanding();
-            }
+            animator.SetBool(IsFallParameterHash, !gravity.IsGrounded);
         }
 
         public void Dispose()
@@ -196,93 +164,11 @@ namespace Movement
             {
                 gravity.GroundedStateChanged -= OnGroundedStateChanged;
             }
-
-            isLandingTransitionExpected = false;
-            landingTransitionExpectedFrame = -1;
-            SetRootMotionActive(false);
-            isLandingInProgress = false;
         }
 
         private void OnGroundedStateChanged(bool isGrounded)
         {
-            if (animator == null)
-            {
-                return;
-            }
-
-            if (!isGrounded)
-            {
-                if (isLandingInProgress)
-                {
-                    isLandingTransitionExpected = false;
-                    landingTransitionExpectedFrame = -1;
-                    SetRootMotionActive(false);
-                    CompleteLanding();
-                }
-
-                wasAirborne = true;
-                animator.SetBool(IsFallParameterHash, true);
-                return;
-            }
-
-            animator.SetBool(IsFallParameterHash, false);
-            if (!wasAirborne)
-            {
-                return;
-            }
-
-            wasAirborne = false;
-            // Root motion must be available before the Animator evaluates the landing state;
-            // otherwise the first displacement frame of the clip is lost.
-            isLandingTransitionExpected = true;
-            landingTransitionExpectedFrame = Time.frameCount;
-            isLandingInProgress = true;
-            LandingStarted?.Invoke();
-            SetRootMotionActive(true);
-        }
-
-        private bool IsRootMotionLandingStateActive()
-        {
-            if (airLayerIndex < 0)
-            {
-                return false;
-            }
-
-            if (IsRootMotionLandingState(animator.GetCurrentAnimatorStateInfo(airLayerIndex)))
-            {
-                return true;
-            }
-
-            return animator.IsInTransition(airLayerIndex)
-                   && IsRootMotionLandingState(animator.GetNextAnimatorStateInfo(airLayerIndex));
-        }
-
-        private static bool IsRootMotionLandingState(AnimatorStateInfo state)
-        {
-            return state.shortNameHash == RunningLandingStateHash
-                   || state.shortNameHash == SprintingLandingStateHash;
-        }
-
-        private void SetRootMotionActive(bool isActive)
-        {
-            if (isRootMotionActive == isActive)
-            {
-                return;
-            }
-
-            isRootMotionActive = isActive;
-            rootMotionController?.SetRootMotionActive(this, isActive);
-        }
-
-        private void CompleteLanding()
-        {
-            if (!isLandingInProgress)
-            {
-                return;
-            }
-
-            isLandingInProgress = false;
-            LandingFinished?.Invoke();
+            animator?.SetBool(IsFallParameterHash, !isGrounded);
         }
     }
 }

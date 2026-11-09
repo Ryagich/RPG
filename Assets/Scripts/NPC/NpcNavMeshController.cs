@@ -7,7 +7,7 @@ using VContainer.Unity;
 
 namespace NPC
 {
-    public sealed class NpcNavMeshController : IStartable, ITickable, IStaminaMovementState, System.IDisposable
+    public sealed class NpcNavMeshController : IStartable, ICharacterPlanarMotionSource, ICharacterMotorMotionObserver, IStaminaMovementState, System.IDisposable
     {
         private const float DefaultSampleRadius = 2f;
         private const float VelocityThreshold = 0.01f;
@@ -18,9 +18,9 @@ namespace NPC
         private const string DirectionXParameter = "DirectionX";
         private const string DirectionYParameter = "DirectionY";
         private const string IsRunParameter = "IsRun";
+        private const string IsIdleParameter = "IsIdle";
 
         private readonly NavMeshAgent agent;
-        private readonly CharacterController characterController;
         private readonly Animator animator;
         private readonly float defaultStoppingDistance;
         private readonly float defaultSpeed;
@@ -29,7 +29,6 @@ namespace NPC
         private bool isActionMovementLocked;
         private bool isActionMovementRequested;
         private readonly HashSet<object> actionMovementLockSources = new();
-        private readonly CharacterLandingRootMotionController landingRootMotionController;
         private bool isNavigationDisabled;
         private bool isInitialized;
         private bool hasMoveRequest;
@@ -40,14 +39,10 @@ namespace NPC
 
         public NpcNavMeshController(
             NavMeshAgent agent,
-            CharacterController characterController,
-            Animator animator,
-            CharacterLandingRootMotionController landingRootMotionController)
+            Animator animator)
         {
             this.agent = agent;
-            this.characterController = characterController;
             this.animator = animator;
-            this.landingRootMotionController = landingRootMotionController;
             defaultStoppingDistance = agent != null ? agent.stoppingDistance : 0f;
             defaultSpeed = agent != null ? agent.speed : 0f;
         }
@@ -82,35 +77,27 @@ namespace NPC
         public void Start()
         {
             EnsureAgentIsReady();
-            landingRootMotionController.LandingStarted += OnLandingStarted;
-            landingRootMotionController.LandingFinished += OnLandingFinished;
         }
 
         public void Dispose()
         {
-            landingRootMotionController.LandingStarted -= OnLandingStarted;
-            landingRootMotionController.LandingFinished -= OnLandingFinished;
-            actionMovementLockSources.Remove(landingRootMotionController);
             isActionMovementRequested = false;
             RefreshActionMovementLock();
         }
 
-        public void Tick()
+        public Vector3 GetPlanarVelocity(float deltaTime)
         {
-            if (!EnsureAgentIsReady()
-                || characterController == null
-                || !characterController.enabled
-                || !characterController.gameObject.activeInHierarchy)
+            if (!EnsureAgentIsReady())
             {
                 ResetMotion();
-                return;
+                return Vector3.zero;
             }
 
             if (!agent.isOnNavMesh)
             {
                 ResetMotion();
                 WarpToNearestNavMesh(agent.transform.position);
-                return;
+                return Vector3.zero;
             }
 
             agent.nextPosition = agent.transform.position;
@@ -118,7 +105,7 @@ namespace NPC
             {
                 ResetMotion();
                 UpdateAnimator(Vector3.zero);
-                return;
+                return Vector3.zero;
             }
 
             var targetVelocity = agent.pathPending || !agent.hasPath
@@ -133,21 +120,26 @@ namespace NPC
             currentPlanarVelocity = Vector3.MoveTowards(
                 currentPlanarVelocity,
                 targetVelocity,
-                velocityChangeRate * Time.deltaTime);
+                velocityChangeRate * deltaTime);
 
             if (currentPlanarVelocity.sqrMagnitude <= VelocityThreshold)
             {
                 currentPlanarVelocity = Vector3.zero;
                 UpdateAnimator(Vector3.zero, hasMovementIntent: agent.hasPath && !agent.pathPending);
-                return;
+                return Vector3.zero;
             }
 
-            RotateToMovementDirection(currentPlanarVelocity);
-
-            var displacement = currentPlanarVelocity * Time.deltaTime;
-            characterController.Move(displacement);
-            agent.nextPosition = agent.transform.position;
+            RotateToMovementDirection(currentPlanarVelocity, deltaTime);
             UpdateAnimator(currentPlanarVelocity);
+            return currentPlanarVelocity;
+        }
+
+        public void OnMotorMoved()
+        {
+            if (IsAgentActiveAndOnNavMesh)
+            {
+                agent.nextPosition = agent.transform.position;
+            }
         }
 
         public bool MoveTo(Vector3 destination, float sampleRadius = DefaultSampleRadius, float? stoppingDistance = null)
@@ -181,8 +173,8 @@ namespace NPC
 
             agent.isStopped = false;
             agent.stoppingDistance = resolvedStoppingDistance;
-            agent.updatePosition = characterController == null;
-            agent.updateRotation = characterController == null;
+            agent.updatePosition = false;
+            agent.updateRotation = false;
             var didSetPath = agent.SetPath(path);
             if (didSetPath)
             {
@@ -285,17 +277,7 @@ namespace NPC
             RefreshActionMovementLock();
         }
 
-        private void OnLandingStarted()
-        {
-            SetActionMovementLocked(landingRootMotionController, true);
-        }
-
-        private void OnLandingFinished()
-        {
-            SetActionMovementLocked(landingRootMotionController, false);
-        }
-
-        private void SetActionMovementLocked(object source, bool isLocked)
+        internal void SetActionMovementLocked(object source, bool isLocked)
         {
             if (source == null)
             {
@@ -405,8 +387,8 @@ namespace NPC
             if (!isInitialized)
             {
                 agent.avoidancePriority = Random.Range(0, 100);
-                agent.updatePosition = characterController == null;
-                agent.updateRotation = characterController == null;
+                agent.updatePosition = false;
+                agent.updateRotation = false;
                 agent.nextPosition = agent.transform.position;
                 isInitialized = true;
             }
@@ -457,7 +439,7 @@ namespace NPC
             IsAgentActive
             && agent.isOnNavMesh;
 
-        private void RotateToMovementDirection(Vector3 direction)
+        private void RotateToMovementDirection(Vector3 direction, float deltaTime)
         {
             if (agent == null || isFacingLocked || direction.sqrMagnitude <= VelocityThreshold)
             {
@@ -468,7 +450,7 @@ namespace NPC
             agent.transform.rotation = Quaternion.RotateTowards(
                 agent.transform.rotation,
                 targetRotation,
-                Mathf.Max(0f, agent.angularSpeed) * Time.deltaTime);
+                Mathf.Max(0f, agent.angularSpeed) * deltaTime);
         }
 
         private void UpdateAnimator(Vector3 worldVelocity, bool hasMovementIntent = false)
@@ -485,6 +467,7 @@ namespace NPC
                 animator.SetFloat(DirectionXParameter, 0f);
                 animator.SetFloat(DirectionYParameter, 0f);
                 animator.SetBool(IsRunParameter, hasMovementIntent);
+                animator.SetBool(IsIdleParameter, true);
                 return;
             }
 
@@ -494,6 +477,7 @@ namespace NPC
             animator.SetFloat(DirectionXParameter, Mathf.Clamp(localVelocity.x, -1f, 1f));
             animator.SetFloat(DirectionYParameter, Mathf.Clamp(localVelocity.z, -1f, 1f));
             animator.SetBool(IsRunParameter, true);
+            animator.SetBool(IsIdleParameter, false);
         }
 
     }

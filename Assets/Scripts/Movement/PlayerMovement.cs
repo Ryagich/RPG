@@ -10,28 +10,25 @@ using VContainer.Unity;
 namespace Movement
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class PlayerMovement : ITickable, IStaminaMovementState
+    public class PlayerMovement : ICharacterPlanarMotionSource, IStaminaMovementState
     {
         private const float InputThreshold = 0.001f;
 
         private readonly CameraMotor cameraMotor;
-        private readonly Transform playerTransform;
         private readonly Transform visualTransform;
-        private readonly CharacterController controller;
         private readonly PlayerMovementConfig playerMovementConfig;
         private readonly PlayerInventory playerInventory;
         private readonly StatsController statsController;
         private readonly TargetLockController targetLockController;
+        private readonly PlayerMovementIntent intent;
+        private readonly PlayerFacingController facingController;
 
-        private Vector2 bufferedInputDirection;
         private Vector2 targetVelocity;
         private Vector2 currentVelocity;
         private readonly HashSet<object> movementLockSources = new();
         private readonly HashSet<object> airborneMomentumSources = new();
         private Vector3 airborneMomentumVelocity;
         private bool isMovementEnabled = true;
-        private bool bufferedRunPressed;
-        private bool bufferedSprintPressed;
         private bool wantsToRun;
         private bool wantsToSprint;
         private bool isRunning;
@@ -46,47 +43,41 @@ namespace Movement
             (
                 PlayerMovementConfig playerMovementConfig,
                 CameraMotor cameraMotor,
-                Transform playerTransform,
                 Animator animator,
-                CharacterController controller,
                 PlayerInventory playerInventory,
                 StatsController statsController,
-                TargetLockController targetLockController
+                TargetLockController targetLockController,
+                PlayerMovementIntent intent,
+                PlayerFacingController facingController
             )
         {
             this.playerMovementConfig = playerMovementConfig;
             this.cameraMotor = cameraMotor;
-            this.playerTransform = playerTransform;
             visualTransform = animator.transform;
-            this.controller = controller;
             this.playerInventory = playerInventory;
             this.statsController = statsController;
             this.targetLockController = targetLockController;
+            this.intent = intent;
+            this.facingController = facingController;
             currentAccelerationRate = playerMovementConfig.WalkSpeedChangeRate;
             currentDecelerationRate = playerMovementConfig.WalkDecelerationRate;
         }
 
-        public void Tick()
+        public Vector3 GetPlanarVelocity(float deltaTime)
         {
-            if (controller == null || !controller.enabled)
-            {
-                return;
-            }
-
             if (HasAirborneMomentum)
             {
-                controller.Move(airborneMomentumVelocity * Time.deltaTime);
-                return;
+                return airborneMomentumVelocity;
             }
 
             if (!CanMove)
             {
                 currentVelocity = Vector2.zero;
-                return;
+                return Vector3.zero;
             }
 
             ApplyStaminaRestrictions();
-            UpdateSprintSpeedBlend();
+            UpdateSprintSpeedBlend(deltaTime);
 
             var targetAccelerationRate = isSprinting
                 ? playerMovementConfig.SprintSpeedChangeRate
@@ -96,7 +87,7 @@ namespace Movement
             currentAccelerationRate = Mathf.MoveTowards(
                 currentAccelerationRate,
                 targetAccelerationRate,
-                playerMovementConfig.SpeedChangeRateBlendSpeed * Time.deltaTime);
+                playerMovementConfig.SpeedChangeRateBlendSpeed * deltaTime);
 
             if (targetVelocity.sqrMagnitude > InputThreshold)
             {
@@ -116,21 +107,21 @@ namespace Movement
             currentVelocity = Vector2.MoveTowards(
                 currentVelocity,
                 targetVelocity,
-                velocityChangeRate * Time.deltaTime);
+                velocityChangeRate * deltaTime);
 
             if (currentVelocity.sqrMagnitude <= InputThreshold)
             {
-                return;
+                return Vector3.zero;
             }
 
             var worldVelocity = GetWorldVelocity(currentVelocity);
             if (worldVelocity.sqrMagnitude <= InputThreshold)
             {
-                return;
+                return Vector3.zero;
             }
 
-            RotateTowardsMovement(worldVelocity, currentVelocity);
-            controller.Move(worldVelocity * Time.deltaTime);
+            facingController.Rotate(worldVelocity, intent.Direction, isRunning, isSprinting, deltaTime);
+            return worldVelocity;
         }
 
         public void ChangeState(bool newState)
@@ -150,6 +141,7 @@ namespace Movement
                 return;
             }
 
+            var hadActionMovementLock = movementLockSources.Count > 0;
             if (isLocked)
             {
                 movementLockSources.Add(source);
@@ -159,7 +151,9 @@ namespace Movement
                 movementLockSources.Remove(source);
             }
 
-            RefreshMovementState();
+            var restoreBufferedVelocity = hadActionMovementLock
+                                          && movementLockSources.Count == 0;
+            RefreshMovementState(restoreBufferedVelocity);
         }
 
         /// <summary>
@@ -192,21 +186,6 @@ namespace Movement
         }
 
         public Vector2 CurrentVelocity => currentVelocity;
-        /// <summary>
-        /// The latest movement input received from the input system. Unlike <see cref="CurrentVelocity"/>,
-        /// it remains available when movement is temporarily disabled by an action animation.
-        /// </summary>
-        public Vector2 CurrentInputDirection => bufferedInputDirection;
-        /// <summary>
-        /// The latest run intent received from input. Unlike <see cref="IsRunning"/>,
-        /// it is preserved while movement is temporarily locked.
-        /// </summary>
-        public bool IsRunInputPressed => bufferedRunPressed;
-        /// <summary>
-        /// The buffered double-Shift gesture. Like <see cref="IsRunInputPressed"/>, this is
-        /// input intent rather than the currently executable sprint state.
-        /// </summary>
-        public bool IsSprintInputPressed => bufferedSprintPressed;
         public bool IsRunning => isRunning;
         public bool IsSprinting => isSprinting;
         public bool IsMoving => CanMove && currentVelocity.sqrMagnitude > InputThreshold;
@@ -217,18 +196,12 @@ namespace Movement
             ApplyBufferedInputState();
         }
 
-        public void SetMovementInput(Vector2 direction, bool isRunPressed, bool isSprintPressed)
-        {
-            bufferedInputDirection = direction;
-            bufferedRunPressed = isRunPressed;
-            bufferedSprintPressed = isSprintPressed;
-            ApplyBufferedInputState();
-        }
+        public void RefreshIntent() => ApplyBufferedInputState();
 
         private void ApplyBufferedInputState()
         {
-            wantsToRun = bufferedRunPressed || bufferedSprintPressed;
-            wantsToSprint = bufferedSprintPressed;
+            wantsToRun = intent.IsRunPressed || intent.IsSprintPressed;
+            wantsToSprint = intent.IsSprintPressed;
             RefreshLocomotionState();
         }
 
@@ -240,18 +213,26 @@ namespace Movement
                           && HasForwardSprintInput()
                           && !targetLockController.IsLocked;
             targetVelocity = CanMoveByStamina()
-                ? isSprinting ? Vector2.up : bufferedInputDirection
+                ? isSprinting ? Vector2.up : intent.Direction
                 : Vector2.zero;
         }
 
         private bool CanMove => isMovementEnabled && movementLockSources.Count == 0;
         private bool HasAirborneMomentum => airborneMomentumSources.Count > 0;
 
-        private void RefreshMovementState()
+        private void RefreshMovementState(bool restoreBufferedVelocity = false)
         {
             if (CanMove)
             {
                 ApplyBufferedInputState();
+                if (restoreBufferedVelocity)
+                {
+                    // Root-motion actions own displacement while locked. Their final animation
+                    // frame can therefore be followed immediately by input-driven movement
+                    // rather than a zero-velocity acceleration frame.
+                    currentVelocity = targetVelocity;
+                }
+
                 return;
             }
 
@@ -280,7 +261,7 @@ namespace Movement
             RefreshLocomotionState();
         }
 
-        private void UpdateSprintSpeedBlend()
+        private void UpdateSprintSpeedBlend(float deltaTime)
         {
             var targetBlend = isSprinting ? 1f : 0f;
             var changeRate = isSprinting
@@ -289,12 +270,12 @@ namespace Movement
             sprintSpeedBlend = Mathf.MoveTowards(
                 sprintSpeedBlend,
                 targetBlend,
-                changeRate * Time.deltaTime);
+                changeRate * deltaTime);
         }
 
         private bool HasForwardSprintInput()
         {
-            return bufferedInputDirection.y > InputThreshold;
+            return intent.Direction.y > InputThreshold;
         }
 
         private bool CanMoveByStamina()
@@ -383,52 +364,5 @@ namespace Movement
             return Mathf.Clamp01(1f - weightEffect * playerMovementConfig.WeightSpeedPenaltyMultiplier);
         }
 
-        private void RotateTowardsMovement(Vector3 worldMoveDirection, Vector2 movementInput)
-        {
-            if (targetLockController.IsLocked)
-            {
-                return;
-            }
-
-            if (isSprinting)
-            {
-                var sprintDirection = cameraMotor.GetGameplayPlanarRotation() *
-                                      new Vector3(bufferedInputDirection.x, 0f, bufferedInputDirection.y);
-                if (sprintDirection.sqrMagnitude <= InputThreshold)
-                {
-                    return;
-                }
-
-                var sprintTargetRotation = Quaternion.LookRotation(sprintDirection.normalized, Vector3.up);
-                visualTransform.rotation = Quaternion.RotateTowards(
-                    visualTransform.rotation,
-                    sprintTargetRotation,
-                    playerMovementConfig.SprintRotationSpeed * Time.deltaTime);
-                return;
-            }
-
-            // Only forward-driven movement should rotate the character.
-            // Strafe and backward input must preserve the current facing so the player can move
-            // sideways/backwards relative to the camera instead of turning into the movement vector.
-            if (movementInput.y <= InputThreshold)
-            {
-                return;
-            }
-
-            worldMoveDirection.y = 0f;
-            if (worldMoveDirection.sqrMagnitude <= InputThreshold)
-            {
-                return;
-            }
-
-            var targetRotation = Quaternion.LookRotation(worldMoveDirection.normalized, Vector3.up);
-            var rotationSpeed = isRunning
-                ? playerMovementConfig.RunRotationSpeed
-                : playerMovementConfig.WalkRotationSpeed;
-            visualTransform.rotation = Quaternion.RotateTowards(
-                visualTransform.rotation,
-                targetRotation,
-                rotationSpeed * Time.deltaTime);
-        }
     }
 }
