@@ -2,7 +2,6 @@ using System;
 using Gravity;
 using MessagePipe;
 using Messages;
-using TargetLock;
 using UnityEngine;
 using VContainer.Unity;
 
@@ -18,8 +17,6 @@ namespace Movement
         private readonly PlayerGravity playerGravity;
         private readonly PlayerMovement playerMovement;
         private readonly PlayerAnimationController playerAnimationController;
-        private readonly CharacterLandingRootMotionController landingRootMotionController;
-        private readonly TargetLockController targetLockController;
         private readonly PlayerJumpConfig config;
         private readonly GravityConfig gravityConfig;
         private readonly ISubscriber<JumpInputMessage> jumpInputSubscriber;
@@ -29,8 +26,6 @@ namespace Movement
             PlayerGravity playerGravity,
             PlayerMovement playerMovement,
             PlayerAnimationController playerAnimationController,
-            CharacterLandingRootMotionController landingRootMotionController,
-            TargetLockController targetLockController,
             PlayerJumpConfig config,
             GravityConfig gravityConfig,
             ISubscriber<JumpInputMessage> jumpInputSubscriber)
@@ -38,8 +33,6 @@ namespace Movement
             this.playerGravity = playerGravity;
             this.playerMovement = playerMovement;
             this.playerAnimationController = playerAnimationController;
-            this.landingRootMotionController = landingRootMotionController;
-            this.targetLockController = targetLockController;
             this.config = config;
             this.gravityConfig = gravityConfig;
             this.jumpInputSubscriber = jumpInputSubscriber;
@@ -50,8 +43,6 @@ namespace Movement
             jumpInputSubscription = jumpInputSubscriber.Subscribe(OnJumpInput);
             playerGravity.JumpStarted += OnJumpStarted;
             playerGravity.GroundedStateChanged += OnGroundedStateChanged;
-            landingRootMotionController.LandingStarted += OnLandingStarted;
-            landingRootMotionController.LandingFinished += OnLandingFinished;
 
             if (!playerGravity.IsGrounded)
             {
@@ -64,13 +55,8 @@ namespace Movement
             jumpInputSubscription?.Dispose();
             playerGravity.JumpStarted -= OnJumpStarted;
             playerGravity.GroundedStateChanged -= OnGroundedStateChanged;
-            landingRootMotionController.LandingStarted -= OnLandingStarted;
-            landingRootMotionController.LandingFinished -= OnLandingFinished;
             playerAnimationController?.SetAirborneInputActive(false);
             playerMovement?.SetAirborneMomentum(this, false);
-            playerMovement?.SetMovementLocked(this, false);
-            playerMovement?.SetMovementLocked(landingRootMotionController, false);
-            targetLockController?.SetAutomaticFacingPaused(this, false);
         }
 
         private void OnJumpInput(JumpInputMessage _)
@@ -100,12 +86,9 @@ namespace Movement
 
         private void EnterAirborneState(float horizontalSpeedMultiplier = 1f)
         {
-            // Capture the planar velocity before the control lock clears the
-            // input-driven velocity. A jump-specific multiplier is applied once,
-            // then the resulting velocity remains constant until ground contact.
+            // Capture the take-off velocity once; animation events, not jump physics,
+            // own control locks and root motion during the Air-layer action.
             playerMovement?.SetAirborneMomentum(this, true, horizontalSpeedMultiplier);
-            playerMovement?.SetMovementLocked(this, true);
-            targetLockController?.SetAutomaticFacingPaused(this, true);
             playerAnimationController?.SetAirborneInputActive(true);
         }
 
@@ -113,8 +96,6 @@ namespace Movement
         {
             playerAnimationController?.SetAirborneInputActive(false);
             playerMovement?.SetAirborneMomentum(this, false);
-            playerMovement?.SetMovementLocked(this, false);
-            targetLockController?.SetAutomaticFacingPaused(this, false);
             playerAnimationController?.ApplyBufferedLocomotion();
         }
 
@@ -129,17 +110,5 @@ namespace Movement
             EnterAirborneState();
         }
 
-        private void OnLandingStarted()
-        {
-            playerMovement?.SetMovementLocked(landingRootMotionController, true);
-            targetLockController?.SetAutomaticFacingPaused(landingRootMotionController, true);
-        }
-
-        private void OnLandingFinished()
-        {
-            playerMovement?.SetMovementLocked(landingRootMotionController, false);
-            targetLockController?.SetAutomaticFacingPaused(landingRootMotionController, false);
-            playerAnimationController?.ApplyBufferedLocomotion();
-        }
     }
 }
