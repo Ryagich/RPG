@@ -86115,7 +86115,14 @@ AnimationClip:
   m_Events:
   - time: 0.6666667
     functionName: UnlockMovement
-    data: 
+    data: A_Attack_LightCombo01C_WindUp_RootMotion_Sword
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.6666667
+    functionName: DisableRootMotion
+    data: A_Attack_LightCombo01C_WindUp_RootMotion_Sword
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0

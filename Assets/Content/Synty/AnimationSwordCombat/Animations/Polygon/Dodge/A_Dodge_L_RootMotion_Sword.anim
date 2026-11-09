@@ -68533,7 +68533,7 @@ AnimationClip:
     messageOptions: 0
   - time: 0
     functionName: LockMovement
-    data: 
+    data: DodgeTree
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
@@ -68545,9 +68545,16 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
+  - time: 0
+    functionName: EnableRootMotion
+    data: DodgeTree
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 1.75
+    intParameter: 0
+    messageOptions: 0
   - time: 0.5
     functionName: UnlockMovement
-    data: 
+    data: DodgeTree
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
@@ -68555,6 +68562,20 @@ AnimationClip:
   - time: 0.5
     functionName: DisableDamageImmunity
     data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.5
+    functionName: EvasionFinished
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.5
+    functionName: DisableRootMotion
+    data: DodgeTree
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0

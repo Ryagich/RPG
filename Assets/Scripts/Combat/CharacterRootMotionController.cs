@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using CharacterAnimation;
+using Movement;
 using UnityEngine;
 using VContainer.Unity;
 
@@ -50,15 +52,16 @@ namespace Combat
         private const float RootMotionThreshold = 0.000001f;
 
         private readonly Animator animator;
-        private readonly CharacterController characterController;
+        private readonly CharacterMotor motor;
         private readonly Dictionary<object, float> activeSources = new();
 
         private CharacterAnimatorRootMotionRelay relay;
+        private CharacterAnimationEventReceiver animationEventReceiver;
 
-        public CharacterRootMotionController(Animator animator, CharacterController characterController)
+        public CharacterRootMotionController(Animator animator, CharacterMotor motor)
         {
             this.animator = animator;
-            this.characterController = characterController;
+            this.motor = motor;
         }
 
         public void Start()
@@ -71,6 +74,8 @@ namespace Combat
             relay = animator.GetComponent<CharacterAnimatorRootMotionRelay>()
                  ?? animator.gameObject.AddComponent<CharacterAnimatorRootMotionRelay>();
             relay.Bind(this);
+            animationEventReceiver = animator.GetComponent<CharacterAnimationEventReceiver>();
+            animationEventReceiver?.BindRootMotion(this);
             UpdateAnimatorRootMotion();
         }
 
@@ -79,6 +84,7 @@ namespace Combat
             activeSources.Clear();
             UpdateAnimatorRootMotion();
             relay?.Unbind(this);
+            animationEventReceiver?.UnbindRootMotion(this);
         }
 
         /// <summary>
@@ -107,16 +113,13 @@ namespace Combat
         public void ApplyAnimatorMove(Animator sourceAnimator)
         {
             if (activeSources.Count == 0
-             || characterController == null
-             || !characterController.enabled
              || sourceAnimator == null)
             {
                 return;
             }
 
-            // Animator provides root motion as a world-space delta. CharacterController.Move
-            // accepts the same coordinate space, so applying a visual parent's transform here
-            // would rotate the displacement a second time.
+            // Animator provides root motion as a world-space delta. CharacterMotor resolves it
+            // together with the other motion contributors in its one Move call per frame.
             var worldDelta = sourceAnimator.deltaPosition;
             worldDelta.y = 0f;
 
@@ -125,7 +128,7 @@ namespace Combat
                 return;
             }
 
-            characterController.Move(worldDelta * GetActivePositionMultiplier());
+            motor?.SubmitRootMotion(worldDelta * GetActivePositionMultiplier());
         }
 
         private float GetActivePositionMultiplier()

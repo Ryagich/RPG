@@ -1,14 +1,34 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Combat
 {
     public sealed class CharacterActionState
     {
-        public bool IsActionBlocked { get; private set; }
+        private readonly HashSet<object> blockSources = new();
+        private bool isDirectlyBlocked;
+
+        public bool IsActionBlocked => isDirectlyBlocked || blockSources.Count > 0;
 
         public void SetActionBlocked(bool isBlocked)
         {
-            IsActionBlocked = isBlocked;
+            isDirectlyBlocked = isBlocked;
+        }
+
+        public void SetActionBlocked(object source, bool isBlocked)
+        {
+            if (source == null)
+            {
+                return;
+            }
+
+            if (isBlocked)
+            {
+                blockSources.Add(source);
+                return;
+            }
+
+            blockSources.Remove(source);
         }
     }
 

@@ -9,6 +9,7 @@ namespace NPC
     {
         private readonly NpcNavMeshController navMeshController;
         private readonly NpcWeaponInHandController weaponInHandController;
+        private readonly NpcCharacterAnimationControlHandler animationControl;
 
         public NpcHitReactionController(
             HitReactionConfig config,
@@ -19,15 +20,18 @@ namespace NPC
             Animator animator,
             ISubscriber<CharacterDamagedMessage> damagedSubscriber,
             NpcNavMeshController navMeshController,
-            NpcWeaponInHandController weaponInHandController)
+            NpcWeaponInHandController weaponInHandController,
+            NpcCharacterAnimationControlHandler animationControl)
             : base(config, actionState, rootMotionController, ownerDamageReceiver, ownerTransform, animator, damagedSubscriber)
         {
             this.navMeshController = navMeshController;
             this.weaponInHandController = weaponInHandController;
+            this.animationControl = animationControl;
         }
 
         protected override void OnReactionStarted()
         {
+            animationControl?.ReleaseAnimationControl();
             weaponInHandController?.InterruptByHitReaction();
             navMeshController?.Stop();
         }

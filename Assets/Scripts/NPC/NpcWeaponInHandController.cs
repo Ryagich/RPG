@@ -3,7 +3,6 @@ using Combat;
 using Inventory;
 using Inventory.Inventories;
 using Inventory.Item;
-using Movement;
 using Stats;
 using UniRx;
 using UnityEngine;
@@ -45,9 +44,7 @@ namespace NPC
         private readonly Animator animator;
         private readonly CharacterDamageReceiver ownerDamageReceiver;
         private readonly CharacterActionState actionState;
-        private readonly CharacterRootMotionController rootMotionController;
         private readonly NpcNavMeshController navMeshController;
-        private readonly PlayerMovementConfig movementConfig;
         private readonly StatsController statsController;
         private readonly MessagePipe.IPublisher<Messages.NpcAttackStartedMessage> attackStartedPublisher;
         private readonly MessagePipe.IPublisher<Messages.WeaponSheathedMessage> weaponSheathedPublisher;
@@ -76,9 +73,7 @@ namespace NPC
             Animator animator,
             CharacterDamageReceiver ownerDamageReceiver,
             CharacterActionState actionState,
-            CharacterRootMotionController rootMotionController,
             NpcNavMeshController navMeshController,
-            PlayerMovementConfig movementConfig,
             StatsController statsController,
             MessagePipe.IPublisher<Messages.NpcAttackStartedMessage> attackStartedPublisher,
             MessagePipe.IPublisher<Messages.WeaponSheathedMessage> weaponSheathedPublisher)
@@ -89,9 +84,7 @@ namespace NPC
             this.animator = animator;
             this.ownerDamageReceiver = ownerDamageReceiver;
             this.actionState = actionState;
-            this.rootMotionController = rootMotionController;
             this.navMeshController = navMeshController;
-            this.movementConfig = movementConfig;
             this.statsController = statsController;
             this.attackStartedPublisher = attackStartedPublisher;
             this.weaponSheathedPublisher = weaponSheathedPublisher;
@@ -105,12 +98,10 @@ namespace NPC
         {
             inventory.Changed.Subscribe(_ => RefreshWeaponInHand()).AddTo(disposables);
             RefreshWeaponInHand();
-            UpdateRootMotionAvailability();
         }
 
         public void Tick()
         {
-            UpdateRootMotionAvailability();
             UpdateAttackProgress();
             ReleaseEvasionDirectionWhenFinished();
             SynchronizeSheatheCompletionWithAnimatorState();
@@ -120,7 +111,6 @@ namespace NPC
         {
             navMeshController?.SetActionMovementLocked(false);
             ReleaseEvasionDirection();
-            rootMotionController?.SetRootMotionActive(this, false);
             EndCurrentWeaponDamageWindow();
             DestroyCurrentWeaponInstance();
             disposables.Dispose();
@@ -141,26 +131,12 @@ namespace NPC
         public void EndDamageWindowFromAnimationEvent() => EndCurrentWeaponDamageWindow();
         public void EnableDamageImmunityFromAnimationEvent() => ownerDamageReceiver?.SetWeaponDamageBlocked(true);
         public void DisableDamageImmunityFromAnimationEvent() => ownerDamageReceiver?.SetWeaponDamageBlocked(false);
-        public void LockMovementFromAnimationEvent()
-        {
-            actionState?.SetActionBlocked(true);
-            navMeshController?.SetActionMovementLocked(true);
-        }
-
-        public void UnlockMovementFromAnimationEvent()
-        {
-            actionState?.SetActionBlocked(false);
-            navMeshController?.SetActionMovementLocked(false);
-            ReleaseEvasionDirection();
-        }
-
+        public void EvasionFinishedFromAnimationEvent() => ReleaseEvasionDirection();
         public void AttackFinishedFromAnimationEvent()
         {
             isAttackStartNotificationPending = false;
             isAttackInProgress = false;
             EndCurrentWeaponDamageWindow();
-            actionState?.SetActionBlocked(false);
-            navMeshController?.SetActionMovementLocked(false);
             ReleaseEvasionDirection();
         }
 
@@ -392,8 +368,6 @@ namespace NPC
         {
             EndCurrentWeaponDamageWindow();
             hasAttackComboWindow = false;
-            actionState?.SetActionBlocked(false);
-            navMeshController?.SetActionMovementLocked(false);
             ReleaseEvasionDirection();
             if (animator == null)
             {
@@ -618,9 +592,6 @@ namespace NPC
             animator.SetBool(HeavyAttackRequestedParameterHash, heavyAttackRequested);
             animator.SetBool(DodgeRequestedParameterHash, dodgeRequested);
             animator.SetBool(RollRequestedParameterHash, rollRequested);
-            // The player enables root motion as soon as its action is requested. Do the same
-            // for NPCs so the first displacement frame of Dodge/Roll is never discarded.
-            UpdateRootMotionAvailability();
         }
 
         private void QueueAttackStartNotification()
@@ -649,8 +620,6 @@ namespace NPC
             }
 
             isAttackInProgress = true;
-            actionState?.SetActionBlocked(true);
-            navMeshController?.SetActionMovementLocked(true);
             attackStartedPublisher?.Publish(new Messages.NpcAttackStartedMessage(ownerDamageReceiver?.OwnerTransform));
         }
 
@@ -710,41 +679,6 @@ namespace NPC
         {
             return stateInfo.shortNameHash == HeavyAttackHitRootMotionStateHash
                    || stateInfo.shortNameHash == HeavyAttackHitStateHash;
-        }
-
-        private void UpdateRootMotionAvailability()
-        {
-            if (animator == null || fullBodyLayerIndex < 0)
-            {
-                return;
-            }
-
-            var isRootMotionActive = IsCombatActionRequested()
-                                     || IsFullBodyActionState(animator.GetCurrentAnimatorStateInfo(fullBodyLayerIndex))
-                                     || (animator.IsInTransition(fullBodyLayerIndex)
-                                         && IsFullBodyActionState(animator.GetNextAnimatorStateInfo(fullBodyLayerIndex)));
-            rootMotionController?.SetRootMotionActive(this, isRootMotionActive, GetRootMotionMultiplier());
-        }
-
-        private float GetRootMotionMultiplier()
-        {
-            if (animator == null || fullBodyLayerIndex < 0)
-            {
-                return 1f;
-            }
-
-            var currentState = animator.GetCurrentAnimatorStateInfo(fullBodyLayerIndex);
-            var nextState = animator.IsInTransition(fullBodyLayerIndex)
-                ? animator.GetNextAnimatorStateInfo(fullBodyLayerIndex)
-                : default;
-            if (currentState.shortNameHash == RollStateHash || nextState.shortNameHash == RollStateHash)
-            {
-                return movementConfig != null ? movementConfig.RollRootMotionMultiplier : 3f;
-            }
-
-            return currentState.shortNameHash == DodgeStateHash || nextState.shortNameHash == DodgeStateHash
-                ? movementConfig != null ? movementConfig.DodgeRootMotionMultiplier : 2f
-                : 1f;
         }
 
         private static bool IsFullBodyActionState(AnimatorStateInfo stateInfo)
