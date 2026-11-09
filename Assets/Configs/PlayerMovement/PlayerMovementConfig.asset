@@ -56,3 +56,4 @@ MonoBehaviour:
     m_RotationOrder: 4
   <DodgeRootMotionMultiplier>k__BackingField: 1.75
   <RollRootMotionMultiplier>k__BackingField: 1
+  <BufferedCombatRequestLifetime>k__BackingField: 0.5

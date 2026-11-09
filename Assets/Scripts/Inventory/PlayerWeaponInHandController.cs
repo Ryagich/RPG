@@ -46,10 +46,10 @@ namespace Inventory
             PlayerWeaponAnimationEventReceiver animationEventReceiver,
             Animator animator,
             CharacterController characterController,
-            CharacterRootMotionController rootMotionController,
             GameModesController gameModesController,
             PlayerMovement playerMovement,
-            PlayerMovementConfig playerMovementConfig,
+            PlayerMovementConfig movementConfig,
+            PlayerMovementIntent movementIntent,
             PlayerAnimationController playerAnimationController,
             TargetLockController targetLockController,
             CharacterDamageReceiver ownerDamageReceiver,
@@ -84,10 +84,9 @@ namespace Inventory
                 animator,
                 characterController,
                 weaponCombatAnimator,
-                rootMotionController,
                 gameModesController,
-                playerMovement,
-                playerMovementConfig,
+                movementConfig,
+                movementIntent,
                 playerAnimationController,
                 targetLockController,
                 ownerDamageReceiver,
@@ -220,14 +219,9 @@ namespace Inventory
             combatActions.DisableDamageImmunityFromAnimationEvent();
         }
 
-        public void LockMovementFromAnimationEvent()
+        public void EvasionFinishedFromAnimationEvent()
         {
-            combatActions.LockMovementFromAnimationEvent();
-        }
-
-        public void UnlockMovementFromAnimationEvent()
-        {
-            combatActions.UnlockMovementFromAnimationEvent();
+            combatActions.EvasionFinishedFromAnimationEvent();
         }
 
         public void AttackFinishedFromAnimationEvent()
@@ -272,7 +266,7 @@ namespace Inventory
                 return;
             }
 
-            combatActions.Cancel(restoreMovement: false);
+            combatActions.Cancel();
             weaponIntent.RequestSheathe();
             HandleTransitionOutcome(weaponTransitions.RequestSheathe());
         }
@@ -541,7 +535,7 @@ namespace Inventory
                     weaponIntent.RequestSheathe();
                 }
 
-                combatActions.Cancel(restoreMovement: false);
+                combatActions.Cancel();
                 PublishWeaponSheathed();
 
                 // An interrupted transition can finish after the player has chosen another

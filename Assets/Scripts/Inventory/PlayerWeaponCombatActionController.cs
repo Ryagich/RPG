@@ -19,10 +19,9 @@ namespace Inventory
         private readonly Animator animator;
         private readonly CharacterController characterController;
         private readonly PlayerWeaponCombatAnimator combatAnimator;
-        private readonly CharacterRootMotionController rootMotionController;
         private readonly GameModesController gameModesController;
-        private readonly PlayerMovement playerMovement;
-        private readonly PlayerMovementConfig playerMovementConfig;
+        private readonly PlayerMovementConfig movementConfig;
+        private readonly PlayerMovementIntent movementIntent;
         private readonly PlayerAnimationController playerAnimationController;
         private readonly TargetLockController targetLockController;
         private readonly CharacterDamageReceiver ownerDamageReceiver;
@@ -35,17 +34,16 @@ namespace Inventory
         private readonly Action fullBodyActionRequested;
 
         private bool isHitAttackInProgress;
-        private bool isCombatActionLocked;
         private Vector2? queuedEvasionDirection;
+        private float? bufferedActionRequestExpiryTime;
 
         public PlayerWeaponCombatActionController(
             Animator animator,
             CharacterController characterController,
             PlayerWeaponCombatAnimator combatAnimator,
-            CharacterRootMotionController rootMotionController,
             GameModesController gameModesController,
-            PlayerMovement playerMovement,
-            PlayerMovementConfig playerMovementConfig,
+            PlayerMovementConfig movementConfig,
+            PlayerMovementIntent movementIntent,
             PlayerAnimationController playerAnimationController,
             TargetLockController targetLockController,
             CharacterDamageReceiver ownerDamageReceiver,
@@ -60,10 +58,9 @@ namespace Inventory
             this.animator = animator;
             this.characterController = characterController;
             this.combatAnimator = combatAnimator;
-            this.rootMotionController = rootMotionController;
             this.gameModesController = gameModesController;
-            this.playerMovement = playerMovement;
-            this.playerMovementConfig = playerMovementConfig;
+            this.movementConfig = movementConfig;
+            this.movementIntent = movementIntent;
             this.playerAnimationController = playerAnimationController;
             this.targetLockController = targetLockController;
             this.ownerDamageReceiver = ownerDamageReceiver;
@@ -76,7 +73,7 @@ namespace Inventory
             this.fullBodyActionRequested = fullBodyActionRequested;
         }
 
-        public bool IsCombatActionLocked => isCombatActionLocked;
+        public bool IsCombatActionLocked => IsCombatActionAnimationActive();
         public bool IsHitAttackInProgress => isHitAttackInProgress;
         public bool IsRollAnimationActive => IsRollInProgress();
         public bool IsAttackBlockingWeaponChanges => isHitAttackInProgress || IsCombatActionAnimationActive();
@@ -84,24 +81,18 @@ namespace Inventory
 
         public void Start()
         {
-            targetLockController?.SetAutomaticFacingPaused(this, false);
+            movementIntent.DirectionChanged += OnMovementDirectionChanged;
             ResetAnimationRequests();
             ownerDamageReceiver?.SetWeaponDamageBlocked(false);
-            UpdateRootMotionAvailability();
-        }
-
-        public void Tick()
-        {
-            UpdateRootMotionAvailability();
         }
 
         public void Dispose()
         {
+            movementIntent.DirectionChanged -= OnMovementDirectionChanged;
+            ClearBufferedActionRequestExpiry();
             queuedEvasionDirection = null;
-            targetLockController?.SetAutomaticFacingPaused(this, false);
             ownerDamageReceiver?.SetWeaponDamageBlocked(false);
             damageWindow?.End();
-            UpdateRootMotionAvailability(forceDisable: true);
         }
 
         public void TryTriggerAttack(MouseButtonType button)
@@ -159,10 +150,6 @@ namespace Inventory
         public void AttackStartedFromAnimationEvent()
         {
             isHitAttackInProgress = true;
-            isCombatActionLocked = true;
-            UpdateRootMotionAvailability();
-            playerMovement?.ChangeState(false);
-            playerAnimationController?.SetLocomotionLocked(true);
         }
 
         public void BeginDamageWindowFromAnimationEvent()
@@ -189,76 +176,49 @@ namespace Inventory
             ownerDamageReceiver?.SetWeaponDamageBlocked(false);
         }
 
-        public void LockMovementFromAnimationEvent()
-        {
-            isCombatActionLocked = true;
-            targetLockController?.SetAutomaticFacingPaused(this, true);
-
-            playerMovement?.ChangeState(false);
-            playerAnimationController?.SetLocomotionLocked(true);
-        }
-
-        public void UnlockMovementFromAnimationEvent()
-        {
-            var completedEvasion = IsEvasionInProgress();
-            var completedRoll = IsRollInProgress();
-            isCombatActionLocked = false;
-
-            if (gameModesController.GameMode == GameMode.Game)
-            {
-                playerMovement?.ChangeState(true);
-            }
-
-            targetLockController?.SetAutomaticFacingPaused(this, false);
-
-            playerAnimationController?.SetLocomotionLocked(false);
-            if (completedEvasion)
-            {
-                evasionCompletedPublisher.Publish(new PlayerEvasionCompletedMessage(completedRoll));
-            }
-        }
-
         public void AttackFinishedFromAnimationEvent()
         {
             isHitAttackInProgress = false;
-            isCombatActionLocked = false;
-            UpdateRootMotionAvailability();
+        }
 
-            if (gameModesController.GameMode == GameMode.Game)
+        public void EvasionFinishedFromAnimationEvent()
+        {
+            if (IsEvasionInProgress())
             {
-                playerMovement?.ChangeState(true);
+                evasionCompletedPublisher.Publish(new PlayerEvasionCompletedMessage(IsRollInProgress()));
+            }
+        }
+
+        public void Tick()
+        {
+            if (!bufferedActionRequestExpiryTime.HasValue
+                || Time.time < bufferedActionRequestExpiryTime.Value)
+            {
+                return;
             }
 
-            playerAnimationController?.SetLocomotionLocked(false);
+            SetAnimationRequests(lightAttackRequested: false, heavyAttackRequested: false, dodgeRequested: false, rollRequested: false);
+            ClearBufferedActionRequestExpiry();
+            queuedEvasionDirection = null;
         }
 
         public void ResetAnimationRequests()
         {
             SetAnimationRequests(lightAttackRequested: false, heavyAttackRequested: false, dodgeRequested: false, rollRequested: false);
+            ClearBufferedActionRequestExpiry();
             ApplyQueuedEvasionDirection();
         }
 
-        public void Cancel(bool restoreMovement = true)
+        public void Cancel()
         {
             DisableDamageImmunityFromAnimationEvent();
-            isCombatActionLocked = false;
+            ClearBufferedActionRequestExpiry();
             queuedEvasionDirection = null;
-            targetLockController?.SetAutomaticFacingPaused(this, false);
             damageWindow?.End();
 
             if (isHitAttackInProgress)
             {
                 isHitAttackInProgress = false;
-                UpdateRootMotionAvailability();
-                if (restoreMovement && gameModesController.GameMode == GameMode.Game)
-                {
-                    playerMovement?.ChangeState(true);
-                }
-
-                if (restoreMovement)
-                {
-                    playerAnimationController?.SetLocomotionLocked(false);
-                }
             }
 
             ResetAnimationRequests();
@@ -266,20 +226,7 @@ namespace Inventory
 
         public void InterruptByHitReaction()
         {
-            Cancel(restoreMovement: false);
-            UpdateRootMotionAvailability(forceDisable: true);
-        }
-
-        public void UpdateRootMotionAvailability(bool forceDisable = false)
-        {
-            if (animator == null)
-            {
-                return;
-            }
-
-            var isRootMotionActive = !forceDisable && IsAttackRootMotionStateActive;
-            var positionMultiplier = isRootMotionActive ? GetEvasionRootMotionMultiplier() : 1f;
-            rootMotionController?.SetRootMotionActive(this, isRootMotionActive, positionMultiplier);
+            Cancel();
         }
 
         private bool CanRequestEvasion()
@@ -309,18 +256,6 @@ namespace Inventory
             return combatAnimator.IsRollActive();
         }
 
-        private float GetEvasionRootMotionMultiplier()
-        {
-            if (combatAnimator.IsRollActive())
-            {
-                return playerMovementConfig.RollRootMotionMultiplier;
-            }
-
-            return combatAnimator.IsDodgeActive()
-                ? playerMovementConfig.DodgeRootMotionMultiplier
-                : 1f;
-        }
-
         private void CaptureEvasionDirection()
         {
             var direction = playerAnimationController?.ResolveEvasionDirection() ?? Vector2.zero;
@@ -344,6 +279,20 @@ namespace Inventory
             queuedEvasionDirection = null;
         }
 
+        private void OnMovementDirectionChanged(Vector2 direction)
+        {
+            if (!queuedEvasionDirection.HasValue || direction.sqrMagnitude <= 0f)
+            {
+                return;
+            }
+
+            var currentDirection = playerAnimationController?.ResolveEvasionDirection() ?? Vector2.zero;
+            if (currentDirection != Vector2.zero)
+            {
+                queuedEvasionDirection = currentDirection;
+            }
+        }
+
         private void SetAnimationRequests(
             bool lightAttackRequested,
             bool heavyAttackRequested,
@@ -364,8 +313,23 @@ namespace Inventory
             bool dodgeRequested,
             bool rollRequested)
         {
+            var isBufferedRequest = IsCombatActionAnimationActive();
             fullBodyActionRequested?.Invoke();
             SetAnimationRequests(lightAttackRequested, heavyAttackRequested, dodgeRequested, rollRequested);
+
+            if (isBufferedRequest)
+            {
+                bufferedActionRequestExpiryTime = Time.time + movementConfig.BufferedCombatRequestLifetime;
+            }
+            else
+            {
+                ClearBufferedActionRequestExpiry();
+            }
+        }
+
+        private void ClearBufferedActionRequestExpiry()
+        {
+            bufferedActionRequestExpiryTime = null;
         }
 
         private Stamina GetStamina()

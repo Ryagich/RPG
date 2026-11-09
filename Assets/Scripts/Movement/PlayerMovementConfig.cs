@@ -64,5 +64,10 @@ namespace Movement
         [field: Header("Evasion root motion")]
         [field: SerializeField, Min(0f)] public float DodgeRootMotionMultiplier { get; private set; } = 2f;
         [field: SerializeField, Min(0f)] public float RollRootMotionMultiplier { get; private set; } = 3f;
+
+        [field: Space]
+        [field: Header("Buffered combat requests")]
+        [field: Tooltip("How long an attack, dodge, or roll request made during another full-body action remains valid.")]
+        [field: SerializeField, Min(0f)] public float BufferedCombatRequestLifetime { get; private set; } = 0.5f;
     }
 }

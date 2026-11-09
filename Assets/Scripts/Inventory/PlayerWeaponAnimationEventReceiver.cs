@@ -10,8 +10,8 @@ namespace Inventory
     {
         // Animation event contract used on attack clips:
         // - ResetAnimationRequests: clears every action-request bool (Attack, HeavyAttack, Dodge and Roll).
-        // - LockMovement: blocks player movement/rotation at an arbitrary moment in an attack clip.
-        // - UnlockMovement: restores player movement/rotation at an arbitrary moment in an attack clip.
+        // Character-control events (LockMovement/UnlockMovement) are received by
+        // CharacterAnimationEventReceiver. This receiver owns weapon-specific clip events only.
         // AttackStarted/AttackFinished remain available as optional hooks, but they are not the core
         // events relied on by the current attack clips.
         private IWeaponAnimationEventHandler weaponInHandController;
@@ -82,14 +82,9 @@ namespace Inventory
             weaponInHandController?.DisableDamageImmunityFromAnimationEvent();
         }
 
-        public void LockMovement()
+        public void EvasionFinished()
         {
-            weaponInHandController?.LockMovementFromAnimationEvent();
-        }
-
-        public void UnlockMovement()
-        {
-            weaponInHandController?.UnlockMovementFromAnimationEvent();
+            weaponInHandController?.EvasionFinishedFromAnimationEvent();
         }
 
         public void AttackFinished()
