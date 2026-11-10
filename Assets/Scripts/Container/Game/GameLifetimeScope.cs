@@ -1,4 +1,5 @@
 ﻿using Dialogue;
+using CameraScripts;
 using Combat;
 using Factions;
 using GameModes;
@@ -88,6 +89,8 @@ namespace Container.Game
             builder.RegisterMessageBroker<MapInputMessage>(options);
             builder.RegisterMessageBroker<QuestLogInputMessage>(options);
             builder.RegisterMessageBroker<PauseInputMessage>(options);
+            builder.RegisterMessageBroker<CameraLookInputMessage>(options);
+            builder.RegisterMessageBroker<CameraZoomInputMessage>(options);
             builder.RegisterMessageBroker<TargetLockInputMessage>(options);
             builder.RegisterMessageBroker<MouseDown>(options);
             builder.RegisterMessageBroker<MouseUp>(options);
@@ -144,8 +147,9 @@ namespace Container.Game
                     resolver.Resolve<LocationTransitionContext>()),
                 Lifetime.Singleton).AsSelf();
              
-            // === InputHandler ===
+            // === Input ===
             builder.Register<InputHandler>(Lifetime.Singleton).AsSelf().As<IStartable>();
+            builder.RegisterEntryPoint<CameraInputHandler>().AsSelf();
 
             builder.RegisterEntryPoint<GameWorldBootstrapper>().AsSelf();
             if (sceneSessionConfiguration.IsGameplayScene)

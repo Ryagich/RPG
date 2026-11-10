@@ -43,6 +43,33 @@ namespace Messages
 
     public readonly struct PauseInputMessage { }
 
+    /// <summary>Raw mouse displacement accumulated by the Input System since its previous update.</summary>
+    public readonly struct CameraLookInputMessage
+    {
+        public readonly Vector2 Delta;
+
+        public CameraLookInputMessage(Vector2 delta)
+        {
+            Delta = delta;
+        }
+    }
+
+    public enum CameraZoomDirection
+    {
+        In,
+        Out
+    }
+
+    public readonly struct CameraZoomInputMessage
+    {
+        public readonly CameraZoomDirection Direction;
+
+        public CameraZoomInputMessage(CameraZoomDirection direction)
+        {
+            Direction = direction;
+        }
+    }
+
     public enum TargetLockCommand
     {
         Toggle,

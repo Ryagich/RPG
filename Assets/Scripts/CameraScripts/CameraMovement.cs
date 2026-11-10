@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using Input;
 using TargetLock;
 
@@ -23,6 +22,7 @@ namespace CameraScripts
         private float targetLockYawOffset;
         private float targetLockPitchOffset;
         private float distanceMultiplier = 1f;
+        private Vector2 pendingLookInput;
         private bool hasOrbitSeed;
         private bool isInitialized;
         private bool lookInputEnabled = true;
@@ -43,6 +43,7 @@ namespace CameraScripts
 
         public void Tick(float deltaTime)
         {
+            var lookInput = ConsumeLookInput();
             if (target == null)
             {
                 return;
@@ -51,11 +52,11 @@ namespace CameraScripts
             EnsureInitialized();
             if (lockTarget != null)
             {
-                UpdateTargetLockLook(deltaTime);
+                UpdateTargetLockLook(deltaTime, lookInput);
             }
             else
             {
-                UpdateManualLook();
+                UpdateManualLook(lookInput, deltaTime);
             }
 
             var pivotPosition = GetPivotPosition();
@@ -66,16 +67,13 @@ namespace CameraScripts
                 shoulderPivotPosition,
                 shoulderPivotPosition + desiredRotation * GetCameraOffset());
             var lookPoint = GetLookPoint(pivotPosition, shoulderOffset);
+            var desiredLookRotation = GetLookRotation(lookPoint, desiredPosition);
 
-            var positionLerp = 1f - Mathf.Exp(-config.PositionSharpness * deltaTime);
-            var rotationLerp = 1f - Mathf.Exp(-config.RotationSharpness * deltaTime);
-
-            var smoothedPosition = Vector3.Lerp(cameraTransform.position, desiredPosition, positionLerp);
-            var finalPosition = ResolveCollision(shoulderPivotPosition, smoothedPosition);
-            var desiredLookRotation = GetLookRotation(lookPoint, finalPosition);
-
-            cameraTransform.position = finalPosition;
-            cameraTransform.rotation = Quaternion.Slerp(cameraTransform.rotation, desiredLookRotation, rotationLerp);
+            // Gameplay orbit is a rigid third-person rig: position is solved around the current
+            // player pivot, collision may shorten only its arm, and the resulting camera always
+            // aims at the current focus point. Damping either position or aim here breaks the
+            // invariant that the player stays framed during a fast orbit.
+            cameraTransform.SetPositionAndRotation(desiredPosition, desiredLookRotation);
         }
 
         public void ChangeTarget(Transform t)
@@ -92,6 +90,24 @@ namespace CameraScripts
         public void SetLookInputEnabled(bool isEnabled)
         {
             lookInputEnabled = isEnabled;
+            if (!isEnabled)
+            {
+                pendingLookInput = Vector2.zero;
+            }
+        }
+
+        /// <summary>
+        /// Queues raw pointer delta supplied by the input layer. It is consumed once by the
+        /// camera tick so several input events in one frame are preserved.
+        /// </summary>
+        public void AddLookInput(Vector2 delta)
+        {
+            if (!lookInputEnabled || delta.sqrMagnitude <= Mathf.Epsilon)
+            {
+                return;
+            }
+
+            pendingLookInput += delta;
         }
 
         public void ZoomIn()
@@ -118,7 +134,12 @@ namespace CameraScripts
 
         public Quaternion GetPlanarRotation()
         {
-            return Quaternion.Euler(0f, yaw, 0f);
+            var forward = cameraTransform.forward;
+            forward.y = 0f;
+
+            return forward.sqrMagnitude <= Mathf.Epsilon
+                ? Quaternion.Euler(0f, yaw, 0f)
+                : Quaternion.LookRotation(forward.normalized, Vector3.up);
         }
 
         public bool IsSettled(float positionTolerance = 0.03f, float rotationTolerance = 0.5f)
@@ -298,35 +319,24 @@ namespace CameraScripts
             return collider.transform.root == target.root;
         }
 
-        private void UpdateManualLook()
+        private void UpdateManualLook(Vector2 lookInput, float deltaTime)
         {
-            if (!lookInputEnabled)
+            var rotationDelta = GetManualRotationDelta(lookInput, deltaTime);
+            if (rotationDelta.sqrMagnitude <= Mathf.Epsilon)
             {
                 return;
             }
 
-            var mouse = Mouse.current;
-            if (mouse == null)
-            {
-                return;
-            }
-
-            var delta = mouse.delta.ReadValue() * MouseSensitivitySettings.Multiplier;
-            if (delta.sqrMagnitude <= Mathf.Epsilon)
-            {
-                return;
-            }
-
-            yaw += delta.x * CameraSensitivitySettings.GetHorizontal(config.HorizontalSensitivity);
+            yaw += rotationDelta.x;
             pitch = Mathf.Clamp(
-                pitch - delta.y * CameraSensitivitySettings.GetVertical(config.VerticalSensitivity),
+                pitch - rotationDelta.y,
                 config.MinPitch,
                 config.MaxPitch);
         }
 
-        private void UpdateTargetLockLook(float deltaTime)
+        private void UpdateTargetLockLook(float deltaTime, Vector2 lookInput)
         {
-            UpdateTargetLockManualOffset();
+            UpdateTargetLockManualOffset(lookInput, deltaTime);
 
             var pivotPosition = GetPivotPosition();
             var lockPoint = lockTarget.position + targetLockConfig.CameraTargetOffset;
@@ -347,33 +357,48 @@ namespace CameraScripts
                 config.MaxPitch);
         }
 
-        private void UpdateTargetLockManualOffset()
+        private void UpdateTargetLockManualOffset(Vector2 lookInput, float deltaTime)
         {
-            if (!lookInputEnabled)
-            {
-                return;
-            }
-
-            var mouse = Mouse.current;
-            if (mouse == null)
-            {
-                return;
-            }
-
-            var delta = mouse.delta.ReadValue() * MouseSensitivitySettings.Multiplier;
-            if (delta.sqrMagnitude <= Mathf.Epsilon)
+            var rotationDelta = GetManualRotationDelta(lookInput, deltaTime);
+            if (rotationDelta.sqrMagnitude <= Mathf.Epsilon)
             {
                 return;
             }
 
             targetLockYawOffset = Mathf.Clamp(
-                targetLockYawOffset + delta.x * CameraSensitivitySettings.GetHorizontal(config.HorizontalSensitivity),
+                targetLockYawOffset + rotationDelta.x,
                 -targetLockConfig.CameraMaxManualYawOffset,
                 targetLockConfig.CameraMaxManualYawOffset);
             targetLockPitchOffset = Mathf.Clamp(
-                targetLockPitchOffset - delta.y * CameraSensitivitySettings.GetVertical(config.VerticalSensitivity),
+                targetLockPitchOffset - rotationDelta.y,
                 -targetLockConfig.CameraMaxManualPitchOffset,
                 targetLockConfig.CameraMaxManualPitchOffset);
+        }
+
+        private Vector2 GetManualRotationDelta(Vector2 lookInput, float deltaTime)
+        {
+            var pointerDelta = lookInput * MouseSensitivitySettings.Multiplier;
+            var horizontalRotation = pointerDelta.x
+                                     * CameraSensitivitySettings.GetHorizontal(config.HorizontalSensitivity);
+            var verticalRotation = pointerDelta.y
+                                   * CameraSensitivitySettings.GetVertical(config.VerticalSensitivity);
+
+            return new Vector2(
+                ClampRotationDelta(horizontalRotation, config.MaximumHorizontalRotationSpeed, deltaTime),
+                ClampRotationDelta(verticalRotation, config.MaximumVerticalRotationSpeed, deltaTime));
+        }
+
+        private static float ClampRotationDelta(float requestedRotation, float maximumSpeed, float deltaTime)
+        {
+            var maximumRotation = maximumSpeed * Mathf.Max(0f, deltaTime);
+            return Mathf.Clamp(requestedRotation, -maximumRotation, maximumRotation);
+        }
+
+        private Vector2 ConsumeLookInput()
+        {
+            var lookInput = pendingLookInput;
+            pendingLookInput = Vector2.zero;
+            return lookInput;
         }
     }
 }

@@ -239,6 +239,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "CameraLook",
+                    "type": "PassThrough",
+                    "id": "d93ae73c-7df1-4e6f-97f6-0d0869397738",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -569,6 +578,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "CameraZoomOut",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a8f8fed0-7d84-4a7d-8343-79fd363f3d46",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CameraLook",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

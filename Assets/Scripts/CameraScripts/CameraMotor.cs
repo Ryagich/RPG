@@ -3,9 +3,8 @@ using Inventory;
 using MessagePipe;
 using Messages;
 using TargetLock;
-using Input;
 using UnityEngine;
-using UnityEngine.InputSystem;
+using UniRx;
 using VContainer.Unity;
 
 namespace CameraScripts
@@ -16,10 +15,9 @@ namespace CameraScripts
         private readonly CameraMovement cameraMovement;
         private readonly CameraMovementInPlace cameraMovementInPlace;
         private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
-        private readonly InputConfig inputConfig;
-
-        private InputAction zoomInAction;
-        private InputAction zoomOutAction;
+        private readonly ISubscriber<CameraLookInputMessage> cameraLookInputSubscriber;
+        private readonly ISubscriber<CameraZoomInputMessage> cameraZoomInputSubscriber;
+        private readonly CompositeDisposable disposables = new();
 
         private CameraModes cameraMode = CameraModes.Gameplay;
 
@@ -29,46 +27,31 @@ namespace CameraScripts
             Camera cam,
             Transform target,
             CharacterVisualRoot characterVisualRoot,
-            InputConfig inputConfig,
-            ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
+            ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber,
+            ISubscriber<CameraLookInputMessage> cameraLookInputSubscriber,
+            ISubscriber<CameraZoomInputMessage> cameraZoomInputSubscriber)
         {
             var camTransform = cam.transform;
             var facingTarget = characterVisualRoot != null ? characterVisualRoot.transform : target;
 
             cameraMovement = new CameraMovement(config, targetLockConfig, camTransform, target, facingTarget);
             cameraMovementInPlace = new CameraMovementInPlace(config, camTransform);
-            this.inputConfig = inputConfig;
             this.gameModeChangedSubscriber = gameModeChangedSubscriber;
+            this.cameraLookInputSubscriber = cameraLookInputSubscriber;
+            this.cameraZoomInputSubscriber = cameraZoomInputSubscriber;
         }
 
         public void Start()
         {
-            gameModeChangedSubscriber.Subscribe(OnGameModeChanged);
+            gameModeChangedSubscriber.Subscribe(OnGameModeChanged).AddTo(disposables);
+            cameraLookInputSubscriber.Subscribe(OnLookInput).AddTo(disposables);
+            cameraZoomInputSubscriber.Subscribe(OnZoomInput).AddTo(disposables);
             cameraMovement.SetLookInputEnabled(true);
-            zoomInAction = inputConfig.CameraZoomIn?.action;
-            zoomOutAction = inputConfig.CameraZoomOut?.action;
-            zoomInAction?.Enable();
-            zoomOutAction?.Enable();
-            if (zoomInAction != null)
-            {
-                zoomInAction.performed += OnZoomIn;
-            }
-            if (zoomOutAction != null)
-            {
-                zoomOutAction.performed += OnZoomOut;
-            }
         }
 
         public void Dispose()
         {
-            if (zoomInAction != null)
-            {
-                zoomInAction.performed -= OnZoomIn;
-            }
-            if (zoomOutAction != null)
-            {
-                zoomOutAction.performed -= OnZoomOut;
-            }
+            disposables.Dispose();
         }
 
         public void Tick()
@@ -116,9 +99,18 @@ namespace CameraScripts
             cameraMovement.SetLookInputEnabled(msg.GameMode is GameMode.Game or GameMode.Death);
         }
 
-        private void OnZoomIn(InputAction.CallbackContext _) => cameraMovement.ZoomIn();
+        private void OnLookInput(CameraLookInputMessage message) => cameraMovement.AddLookInput(message.Delta);
 
-        private void OnZoomOut(InputAction.CallbackContext _) => cameraMovement.ZoomOut();
+        private void OnZoomInput(CameraZoomInputMessage message)
+        {
+            if (message.Direction == CameraZoomDirection.In)
+            {
+                cameraMovement.ZoomIn();
+                return;
+            }
+
+            cameraMovement.ZoomOut();
+        }
     }
 
     public enum CameraModes

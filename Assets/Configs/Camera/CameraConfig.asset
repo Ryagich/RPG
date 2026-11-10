@@ -18,8 +18,6 @@ MonoBehaviour:
   <ShoulderOffset>k__BackingField: 0.2
   <MinimumDistanceMultiplier>k__BackingField: 0.75
   <MaximumDistanceMultiplier>k__BackingField: 2
-  <PositionSharpness>k__BackingField: 10
-  <RotationSharpness>k__BackingField: 12
   <CollisionLayers>k__BackingField:
     serializedVersion: 2
     m_Bits: 4294951067
@@ -30,3 +28,5 @@ MonoBehaviour:
   <MaxPitch>k__BackingField: 55
   <HorizontalSensitivity>k__BackingField: 0.15
   <VerticalSensitivity>k__BackingField: 0.12
+  <MaximumHorizontalRotationSpeed>k__BackingField: 1200
+  <MaximumVerticalRotationSpeed>k__BackingField: 1200
