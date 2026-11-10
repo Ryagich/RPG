@@ -42,9 +42,9 @@ namespace Movement
         {
             jumpInputSubscription = jumpInputSubscriber.Subscribe(OnJumpInput);
             playerGravity.JumpStarted += OnJumpStarted;
-            playerGravity.GroundedStateChanged += OnGroundedStateChanged;
+            playerGravity.AirborneStateChanged += OnAirborneStateChanged;
 
-            if (!playerGravity.IsGrounded)
+            if (playerGravity.IsAirborne)
             {
                 EnterAirborneState();
             }
@@ -54,14 +54,18 @@ namespace Movement
         {
             jumpInputSubscription?.Dispose();
             playerGravity.JumpStarted -= OnJumpStarted;
-            playerGravity.GroundedStateChanged -= OnGroundedStateChanged;
+            playerGravity.AirborneStateChanged -= OnAirborneStateChanged;
             playerAnimationController?.SetAirborneInputActive(false);
             playerMovement?.SetAirborneMomentum(this, false);
         }
 
         private void OnJumpInput(JumpInputMessage _)
         {
-            if (playerGravity == null || config == null || gravityConfig == null)
+            if (playerGravity == null
+                || playerMovement == null
+                || playerMovement.IsMovementLocked
+                || config == null
+                || gravityConfig == null)
             {
                 return;
             }
@@ -99,15 +103,18 @@ namespace Movement
             playerAnimationController?.ApplyBufferedLocomotion();
         }
 
-        private void OnGroundedStateChanged(bool isGrounded)
+        private void OnAirborneStateChanged(bool isAirborne)
         {
-            if (isGrounded)
+            if (!isAirborne)
             {
                 ExitAirborneState();
                 return;
             }
 
-            EnterAirborneState();
+            if (!playerGravity.IsJumping)
+            {
+                EnterAirborneState();
+            }
         }
 
     }

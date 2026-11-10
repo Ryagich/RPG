@@ -13,3 +13,8 @@ MonoBehaviour:
   m_Name: GravityConfig
   m_EditorClassIdentifier: Assembly-CSharp::Gravity.GravityConfig
   <Gravity>k__BackingField: 9.81
+  <FallStartGroundClearance>k__BackingField: 0.2
+  <FallStartGraceDuration>k__BackingField: 0.3
+  <GroundProbeMask>k__BackingField:
+    serializedVersion: 2
+    m_Bits: -5

@@ -186,6 +186,11 @@ namespace Movement
         }
 
         public Vector2 CurrentVelocity => currentVelocity;
+        /// <summary>
+        /// True while an Animation Event owns character movement. Input actions that would
+        /// start their own locomotion, such as jumping, must not bypass this lock.
+        /// </summary>
+        public bool IsMovementLocked => movementLockSources.Count > 0;
         public bool IsRunning => isRunning;
         public bool IsSprinting => isSprinting;
         public bool IsMoving => CanMove && currentVelocity.sqrMagnitude > InputThreshold;

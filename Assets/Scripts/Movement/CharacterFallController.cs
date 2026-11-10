@@ -42,7 +42,7 @@ namespace Movement
                 return;
             }
 
-            gravity.GroundedStateChanged += OnGroundedStateChanged;
+            gravity.AirborneStateChanged += OnAirborneStateChanged;
             gravity.FallingStateChanged += OnFallingStateChanged;
             SetStage(FallStage.Safe);
         }
@@ -54,7 +54,7 @@ namespace Movement
                 return;
             }
 
-            gravity.GroundedStateChanged -= OnGroundedStateChanged;
+            gravity.AirborneStateChanged -= OnAirborneStateChanged;
             gravity.FallingStateChanged -= OnFallingStateChanged;
         }
 
@@ -68,9 +68,9 @@ namespace Movement
             SetStage(ResolveStage(Time.time - fallStartedAt));
         }
 
-        private void OnGroundedStateChanged(bool isGrounded)
+        private void OnAirborneStateChanged(bool isAirborne)
         {
-            if (!isGrounded)
+            if (isAirborne)
             {
                 // The previous landing stage must never leak into the next jump while the
                 // character is ascending. A new fall begins only after vertical velocity turns down.

@@ -9,23 +9,30 @@ namespace Movement
     public class PlayerGravity : ICharacterVerticalMotionSource
     {
         private const float GroundedStickVelocity = -2f;
+        private const int GroundProbeHitCapacity = 8;
 
         private readonly CharacterController controller;
         private readonly GravityConfig config;
+        private readonly RaycastHit[] groundProbeHits = new RaycastHit[GroundProbeHitCapacity];
 
         private float verticalVelocity;
+        private float airborneGraceElapsed;
         private bool isJumping;
+        private bool isAirborne;
+        private bool isAirborneGracePending;
         private bool? lastGroundedState;
         private bool? lastFallingState;
 
         public event Action JumpStarted;
         public event Action JumpLanded;
         public event Action<bool> GroundedStateChanged;
+        public event Action<bool> AirborneStateChanged;
         public event Action<bool> FallingStateChanged;
 
         public bool IsJumping => isJumping;
         public bool IsGrounded => controller != null && controller.enabled && controller.isGrounded;
-        public bool IsFalling => !IsGrounded && verticalVelocity < 0f;
+        public bool IsAirborne => isAirborne;
+        public bool IsFalling => isAirborne && verticalVelocity < 0f;
 
         public PlayerGravity
             (
@@ -44,7 +51,14 @@ namespace Movement
                 return 0f;
             }
 
-            if (wasGrounded && verticalVelocity <= 0f)
+            if (isAirborneGracePending && !isJumping)
+            {
+                // Keep pressing onto the nearby surface while its contact is briefly lost on
+                // uneven terrain. Starting gravity here would turn a 0.1-second gap into a fall.
+                airborneGraceElapsed += deltaTime;
+                verticalVelocity = GroundedStickVelocity;
+            }
+            else if (wasGrounded && verticalVelocity <= 0f)
             {
                 // CharacterController updates grounded state from movement resolution.
                 // Keep applying a small downward motion so the player starts falling as soon as support disappears.
@@ -78,7 +92,8 @@ namespace Movement
                 JumpLanded?.Invoke();
             }
 
-            UpdateFallingState(isGrounded);
+            UpdateAirborneState(isGrounded);
+            UpdateFallingState();
         }
 
         /// <summary>
@@ -99,6 +114,8 @@ namespace Movement
 
             verticalVelocity = initialVerticalVelocity;
             isJumping = true;
+            CancelAirborneGrace();
+            SetAirborne(true);
             JumpStarted?.Invoke();
             return true;
         }
@@ -115,9 +132,58 @@ namespace Movement
             GroundedStateChanged?.Invoke(isGrounded);
         }
 
-        private void UpdateFallingState(bool isGrounded)
+        private void UpdateAirborneState(bool isGrounded)
         {
-            var isFalling = !isGrounded && verticalVelocity < 0f;
+            if (isGrounded)
+            {
+                CancelAirborneGrace();
+                SetAirborne(false);
+                return;
+            }
+
+            if (isJumping)
+            {
+                CancelAirborneGrace();
+                SetAirborne(true);
+                return;
+            }
+
+            if (isAirborne)
+            {
+                return;
+            }
+
+            var hasNearbyGround = HasGroundWithinFallStartClearance();
+            if (!hasNearbyGround)
+            {
+                CancelAirborneGrace();
+                SetAirborne(true);
+                return;
+            }
+
+            if (config.FallStartGraceDuration <= 0f)
+            {
+                SetAirborne(true);
+                return;
+            }
+
+            if (!isAirborneGracePending)
+            {
+                isAirborneGracePending = true;
+                airborneGraceElapsed = 0f;
+                return;
+            }
+
+            if (airborneGraceElapsed >= config.FallStartGraceDuration)
+            {
+                CancelAirborneGrace();
+                SetAirborne(true);
+            }
+        }
+
+        private void UpdateFallingState()
+        {
+            var isFalling = IsFalling;
             if (lastFallingState == isFalling)
             {
                 return;
@@ -126,10 +192,74 @@ namespace Movement
             lastFallingState = isFalling;
             FallingStateChanged?.Invoke(isFalling);
         }
+
+        private bool HasGroundWithinFallStartClearance()
+        {
+            if (controller == null || config == null)
+            {
+                return false;
+            }
+
+            var radius = Mathf.Max(0.01f, controller.radius - controller.skinWidth);
+            var capsuleBottomOffset = Mathf.Max(0f, controller.height * 0.5f - controller.radius);
+            var origin = controller.transform.TransformPoint(controller.center)
+                         - controller.transform.up * capsuleBottomOffset
+                         + controller.transform.up * controller.skinWidth;
+            var castDistance = config.FallStartGroundClearance + controller.skinWidth;
+            var hitCount = Physics.SphereCastNonAlloc(
+                origin,
+                radius,
+                -controller.transform.up,
+                groundProbeHits,
+                castDistance,
+                config.GroundProbeMask,
+                QueryTriggerInteraction.Ignore);
+
+            for (var index = 0; index < hitCount; index++)
+            {
+                var hitCollider = groundProbeHits[index].collider;
+                if (hitCollider != null && !BelongsToCharacter(hitCollider.transform))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool BelongsToCharacter(Transform candidate)
+        {
+            if (candidate == null || controller == null)
+            {
+                return false;
+            }
+
+            var characterTransform = controller.transform;
+            return candidate == characterTransform
+                   || candidate.IsChildOf(characterTransform)
+                   || characterTransform.IsChildOf(candidate);
+        }
+
+        private void CancelAirborneGrace()
+        {
+            isAirborneGracePending = false;
+            airborneGraceElapsed = 0f;
+        }
+
+        private void SetAirborne(bool value)
+        {
+            if (isAirborne == value)
+            {
+                return;
+            }
+
+            isAirborne = value;
+            AirborneStateChanged?.Invoke(value);
+        }
     }
 
     /// <summary>
-    /// Maps the authoritative grounded state to the shared Air-layer parameter.
+    /// Maps the filtered airborne state to the shared Air-layer parameter.
     /// Animation events exclusively own landing movement locks and root motion.
     /// </summary>
     public sealed class CharacterAirborneAnimationController : IStartable, IDisposable
@@ -154,21 +284,21 @@ namespace Movement
                 return;
             }
 
-            gravity.GroundedStateChanged += OnGroundedStateChanged;
-            animator.SetBool(IsFallParameterHash, !gravity.IsGrounded);
+            gravity.AirborneStateChanged += OnAirborneStateChanged;
+            animator.SetBool(IsFallParameterHash, gravity.IsAirborne);
         }
 
         public void Dispose()
         {
             if (gravity != null)
             {
-                gravity.GroundedStateChanged -= OnGroundedStateChanged;
+                gravity.AirborneStateChanged -= OnAirborneStateChanged;
             }
         }
 
-        private void OnGroundedStateChanged(bool isGrounded)
+        private void OnAirborneStateChanged(bool isAirborne)
         {
-            animator?.SetBool(IsFallParameterHash, !isGrounded);
+            animator?.SetBool(IsFallParameterHash, isAirborne);
         }
     }
 }
