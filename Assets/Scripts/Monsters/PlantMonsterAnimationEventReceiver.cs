@@ -5,8 +5,8 @@ using VContainer;
 namespace Monsters
 {
     /// <summary>
-    /// Public parameterless contract called by PlantMonster_1 animation clips. It deliberately
-    /// contains no state-machine decisions or damage calculation.
+    /// Animation-event adapter for PlantMonster_1 clips. It deliberately contains no
+    /// state-machine decisions or damage calculation.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class PlantMonsterAnimationEventReceiver : MonoBehaviour
@@ -14,6 +14,7 @@ namespace Monsters
         private PlantMonsterCombatController combat;
         private PlantMonsterNavMeshController navigation;
         private CharacterActionState actionState;
+        private string controlLockOwnerAnimationName;
 
         [Inject]
         public void Construct(
@@ -31,14 +32,21 @@ namespace Monsters
 
         // Matches the NPC/player event contract: action state blocks new gameplay actions,
         // while navigation lock prevents NavMeshAgent from moving the monster mid-animation.
-        public void LockMovement()
+        public void LockMovement(string animationName)
         {
+            controlLockOwnerAnimationName = animationName;
             actionState?.SetActionBlocked(true);
             navigation?.SetMovementLocked(true);
         }
 
-        public void UnlockMovement()
+        public void UnlockMovement(string animationName)
         {
+            if (controlLockOwnerAnimationName != animationName)
+            {
+                return;
+            }
+
+            controlLockOwnerAnimationName = null;
             actionState?.SetActionBlocked(false);
             navigation?.SetMovementLocked(false);
         }

@@ -139274,14 +139274,14 @@ AnimationClip:
   m_Events:
   - time: 0
     functionName: LockMovement
-    data: 
+    data: WalkSkip
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
   - time: 1
     functionName: UnlockMovement
-    data: 
+    data: WalkSkip
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0

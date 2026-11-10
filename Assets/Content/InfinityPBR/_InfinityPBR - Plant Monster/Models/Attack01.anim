@@ -129824,7 +129824,7 @@ AnimationClip:
   m_Events:
   - time: 0
     functionName: LockMovement
-    data: 
+    data: Attack01
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
@@ -129845,7 +129845,7 @@ AnimationClip:
     messageOptions: 0
   - time: 1.1666666
     functionName: UnlockMovement
-    data: 
+    data: Attack01
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
