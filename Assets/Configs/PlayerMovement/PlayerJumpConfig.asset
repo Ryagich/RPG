@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51a5cc156bb843a488e9c7a6210f11c3, type: 3}
   m_Name: PlayerJumpConfig
   m_EditorClassIdentifier: Assembly-CSharp::Movement.PlayerJumpConfig
-  <Height>k__BackingField: 1.5
+  <Height>k__BackingField: 1
   <HorizontalSpeedMultiplier>k__BackingField: 0.9

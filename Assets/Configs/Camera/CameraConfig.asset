@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CameraConfig
   m_EditorClassIdentifier: Assembly-CSharp::CameraScripts.CameraConfig
   <Smoothing>k__BackingField: 3
-  <PivotOffset>k__BackingField: {x: 0, y: 1.5, z: -0.25}
+  <PivotOffset>k__BackingField: {x: 0, y: 1.53, z: -0.05}
   <Distance>k__BackingField: 2
   <ShoulderOffset>k__BackingField: 0.2
   <MinimumDistanceMultiplier>k__BackingField: 0.75
@@ -24,9 +24,9 @@ MonoBehaviour:
   <CollisionRadius>k__BackingField: 0.25
   <CollisionPadding>k__BackingField: 0.08
   <DefaultPitch>k__BackingField: 12
-  <MinPitch>k__BackingField: -20
-  <MaxPitch>k__BackingField: 55
+  <MinPitch>k__BackingField: -63
+  <MaxPitch>k__BackingField: 88
   <HorizontalSensitivity>k__BackingField: 0.15
-  <VerticalSensitivity>k__BackingField: 0.12
+  <VerticalSensitivity>k__BackingField: 0.15
   <MaximumHorizontalRotationSpeed>k__BackingField: 1200
   <MaximumVerticalRotationSpeed>k__BackingField: 1200
