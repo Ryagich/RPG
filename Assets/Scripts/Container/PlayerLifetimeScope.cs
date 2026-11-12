@@ -191,6 +191,9 @@ namespace Container
                    .As<IStartable>()
                    .As<ITickable>()
                    .As<System.IDisposable>();
+            builder.RegisterEntryPoint<PlayerWadingWeaponDrawingBlocker>()
+                   .AsSelf()
+                   .As<System.IDisposable>();
         }
 
         private void EnsureCorpseInteractionZone()

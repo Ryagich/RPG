@@ -16,6 +16,7 @@ namespace Movement
     {
         private readonly PlayerGravity playerGravity;
         private readonly PlayerMovement playerMovement;
+        private readonly CharacterWaterDetector waterDetector;
         private readonly PlayerAnimationController playerAnimationController;
         private readonly PlayerJumpConfig config;
         private readonly GravityConfig gravityConfig;
@@ -25,6 +26,7 @@ namespace Movement
         public PlayerJump(
             PlayerGravity playerGravity,
             PlayerMovement playerMovement,
+            CharacterWaterDetector waterDetector,
             PlayerAnimationController playerAnimationController,
             PlayerJumpConfig config,
             GravityConfig gravityConfig,
@@ -32,6 +34,7 @@ namespace Movement
         {
             this.playerGravity = playerGravity;
             this.playerMovement = playerMovement;
+            this.waterDetector = waterDetector;
             this.playerAnimationController = playerAnimationController;
             this.config = config;
             this.gravityConfig = gravityConfig;
@@ -64,6 +67,7 @@ namespace Movement
             if (playerGravity == null
                 || playerMovement == null
                 || playerMovement.IsMovementLocked
+                || waterDetector.IsWading
                 || config == null
                 || gravityConfig == null)
             {

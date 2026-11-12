@@ -4,31 +4,31 @@ using System.Collections.Generic;
 namespace Inventory
 {
     /// <summary>
-    /// Player-scoped record of weapon-drawing-blocked zones currently containing the player.
+    /// Player-scoped record of active sources that prohibit holding a weapon in hand.
     /// </summary>
     public sealed class PlayerWeaponDrawingBlockState : IDisposable
     {
-        private readonly HashSet<WeaponDrawingBlockedZone> activeZones = new();
+        private readonly HashSet<object> activeSources = new();
 
-        public bool IsWeaponDrawingBlocked => activeZones.Count > 0;
+        public bool IsWeaponDrawingBlocked => activeSources.Count > 0;
         public event Action Changed;
 
-        public void RegisterZone(WeaponDrawingBlockedZone zone)
+        public void RegisterSource(object source)
         {
-            if (zone != null)
+            if (source != null)
             {
-                if (activeZones.Add(zone) && activeZones.Count == 1)
+                if (activeSources.Add(source) && activeSources.Count == 1)
                 {
                     Changed?.Invoke();
                 }
             }
         }
 
-        public void UnregisterZone(WeaponDrawingBlockedZone zone)
+        public void UnregisterSource(object source)
         {
-            if (zone != null)
+            if (source != null)
             {
-                if (activeZones.Remove(zone) && activeZones.Count == 0)
+                if (activeSources.Remove(source) && activeSources.Count == 0)
                 {
                     Changed?.Invoke();
                 }
@@ -37,7 +37,7 @@ namespace Inventory
 
         public void Dispose()
         {
-            activeZones.Clear();
+            activeSources.Clear();
         }
     }
 }

@@ -18,6 +18,8 @@ namespace Inventory
     {
         private readonly Animator animator;
         private readonly CharacterController characterController;
+        private readonly PlayerGravity playerGravity;
+        private readonly CharacterWaterDetector waterDetector;
         private readonly PlayerWeaponCombatAnimator combatAnimator;
         private readonly GameModesController gameModesController;
         private readonly PlayerMovementConfig movementConfig;
@@ -40,6 +42,8 @@ namespace Inventory
         public PlayerWeaponCombatActionController(
             Animator animator,
             CharacterController characterController,
+            PlayerGravity playerGravity,
+            CharacterWaterDetector waterDetector,
             PlayerWeaponCombatAnimator combatAnimator,
             GameModesController gameModesController,
             PlayerMovementConfig movementConfig,
@@ -57,6 +61,8 @@ namespace Inventory
         {
             this.animator = animator;
             this.characterController = characterController;
+            this.playerGravity = playerGravity;
+            this.waterDetector = waterDetector;
             this.combatAnimator = combatAnimator;
             this.gameModesController = gameModesController;
             this.movementConfig = movementConfig;
@@ -82,13 +88,20 @@ namespace Inventory
         public void Start()
         {
             movementIntent.DirectionChanged += OnMovementDirectionChanged;
+            waterDetector.WadingStateChanged += OnWadingStateChanged;
             ResetAnimationRequests();
+            if (waterDetector.IsWading)
+            {
+                ClearActionRequestsForWading();
+            }
+
             ownerDamageReceiver?.SetWeaponDamageBlocked(false);
         }
 
         public void Dispose()
         {
             movementIntent.DirectionChanged -= OnMovementDirectionChanged;
+            waterDetector.WadingStateChanged -= OnWadingStateChanged;
             ClearBufferedActionRequestExpiry();
             queuedEvasionDirection = null;
             ownerDamageReceiver?.SetWeaponDamageBlocked(false);
@@ -99,6 +112,10 @@ namespace Inventory
         {
             if (animator == null
              || gameModesController.GameMode != GameMode.Game
+             // The Air layer is driven by PlayerGravity. A Full Body attack must not be
+             // requested while that layer owns the visible pose and its events can still fire.
+             || playerGravity.IsAirborne
+             || waterDetector.IsWading
              || (actionState.IsActionBlocked && !isHitAttackInProgress))
             {
                 return;
@@ -235,6 +252,7 @@ namespace Inventory
                    && characterController != null
                    && characterController.enabled
                    && characterController.isGrounded
+                   && !waterDetector.IsWading
                    && gameModesController.GameMode == GameMode.Game
                    && !combatAnimator.IsAnyRequestActive()
                    && !combatAnimator.IsHitActive()
@@ -291,6 +309,25 @@ namespace Inventory
             {
                 queuedEvasionDirection = currentDirection;
             }
+        }
+
+        private void OnWadingStateChanged(bool isWading)
+        {
+            if (isWading)
+            {
+                ClearActionRequestsForWading();
+            }
+        }
+
+        private void ClearActionRequestsForWading()
+        {
+            SetAnimationRequests(
+                lightAttackRequested: false,
+                heavyAttackRequested: false,
+                dodgeRequested: false,
+                rollRequested: false);
+            ClearBufferedActionRequestExpiry();
+            queuedEvasionDirection = null;
         }
 
         private void SetAnimationRequests(

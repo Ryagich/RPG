@@ -46,6 +46,8 @@ namespace Inventory
             PlayerWeaponAnimationEventReceiver animationEventReceiver,
             Animator animator,
             CharacterController characterController,
+            PlayerGravity playerGravity,
+            CharacterWaterDetector waterDetector,
             GameModesController gameModesController,
             PlayerMovement playerMovement,
             PlayerMovementConfig movementConfig,
@@ -83,6 +85,8 @@ namespace Inventory
             combatActions = new PlayerWeaponCombatActionController(
                 animator,
                 characterController,
+                playerGravity,
+                waterDetector,
                 weaponCombatAnimator,
                 gameModesController,
                 movementConfig,

@@ -21,7 +21,7 @@ namespace Inventory
 
             var playerScope = other.GetComponent<PlayerLifetimeScope>();
             registeredState = playerScope.Container.Resolve<PlayerWeaponDrawingBlockState>();
-            registeredState.RegisterZone(this);
+            registeredState.RegisterSource(this);
         }
 
         private void OnTriggerExit(Collider other)
@@ -51,7 +51,7 @@ namespace Inventory
                 return;
             }
 
-            registeredState.UnregisterZone(this);
+            registeredState.UnregisterSource(this);
             registeredState = null;
         }
 
