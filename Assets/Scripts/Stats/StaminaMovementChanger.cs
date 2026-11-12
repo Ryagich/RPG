@@ -68,6 +68,11 @@ namespace Stats
                 return;
             }
 
+            if (movementState is IStaminaMovementDrainBlockState { IsMovementDrainBlocked: true })
+            {
+                return;
+            }
+
             var interval = Mathf.Max(statsConfig.PeriodicChangeIntervalSeconds, float.Epsilon);
             var drainAmount = staminaConfig.EvaluateMovementDrainPerSecond(
                 inventoryCapacity.CurrentWeight,

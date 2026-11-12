@@ -19,6 +19,7 @@ namespace Movement
         private const string IsRunParameter = "IsRun";
         private const string IsSprintParameter = "IsSprint";
         private const string IsIdleParameter = "IsIdle";
+        private const string IsWadingParameter = "IsWading";
         private static readonly int JumpTriggerHash = Animator.StringToHash("Jump");
         private static readonly int IsFallParameterHash = Animator.StringToHash("IsFall");
 
@@ -26,6 +27,7 @@ namespace Movement
         private readonly Animator animator;
         private readonly PlayerMovement playerMovement;
         private readonly PlayerMovementIntent movementIntent;
+        private readonly CharacterWaterDetector waterDetector;
         private readonly Transform visualTransform;
         private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
 
@@ -34,7 +36,9 @@ namespace Movement
         private bool currentIsRun;
         private bool currentIsSprint;
         private bool currentIsIdle;
+        private bool currentIsWading;
         private bool hasSprintParameter;
+        private bool hasWadingParameter;
         private bool isGameplayActive = true;
         private bool isLocomotionLocked;
         private readonly HashSet<object> locomotionLockSources = new();
@@ -46,12 +50,14 @@ namespace Movement
             Animator animator,
             PlayerMovement playerMovement,
             PlayerMovementIntent movementIntent,
+            CharacterWaterDetector waterDetector,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
         {
             this.cameraMotor = cameraMotor;
             this.animator = animator;
             this.playerMovement = playerMovement;
             this.movementIntent = movementIntent;
+            this.waterDetector = waterDetector;
             visualTransform = animator.transform;
             this.gameModeChangedSubscriber = gameModeChangedSubscriber;
         }
@@ -61,7 +67,8 @@ namespace Movement
             gameModeChangedSubscriber.Subscribe(OnGameModeChanged);
             animator.ResetTrigger(JumpTriggerHash);
             hasSprintParameter = HasBoolParameter(IsSprintParameter);
-            ApplyLocomotionParameters(Vector2.zero, false, false, true, force: true);
+            hasWadingParameter = HasBoolParameter(IsWadingParameter);
+            ApplyLocomotionParameters(Vector2.zero, false, false, true, false, force: true);
         }
 
         public void Tick()
@@ -86,6 +93,11 @@ namespace Movement
                 ? movementIntent.IsSprintPressed
                 : playerMovement.IsSprinting;
             var isIdle = !playerMovement.IsMoving;
+            var isWading = waterDetector.IsWading;
+            if (isWading)
+            {
+                isSprinting = false;
+            }
 
             if (!isGameplayActive || movementInput.sqrMagnitude <= InputThreshold)
             {
@@ -96,7 +108,8 @@ namespace Movement
                     Vector2.zero,
                     isGameplayActive && isRunning,
                     isGameplayActive && isSprinting,
-                    isIdle);
+                    isIdle,
+                    isGameplayActive && isWading);
                 return;
             }
 
@@ -111,7 +124,7 @@ namespace Movement
                     Mathf.Clamp(localMoveDirection.z, -1f, 1f));
             }
 
-            ApplyLocomotionParameters(directionalInput, isRunning, isSprinting, isIdle);
+            ApplyLocomotionParameters(directionalInput, isRunning, isSprinting, isIdle, isWading);
         }
 
         private void OnGameModeChanged(GameModeChangedMessage msg)
@@ -120,7 +133,7 @@ namespace Movement
 
             if (!isGameplayActive)
             {
-                ApplyLocomotionParameters(Vector2.zero, false, false, true, force: true);
+                ApplyLocomotionParameters(Vector2.zero, false, false, true, false, force: true);
             }
         }
 
@@ -129,6 +142,7 @@ namespace Movement
             bool isRunning,
             bool isSprinting,
             bool isIdle,
+            bool isWading,
             bool force = false)
         {
             if (!force
@@ -136,7 +150,8 @@ namespace Movement
              && Mathf.Approximately(currentDirectionalY, directionalInput.y)
              && currentIsRun == isRunning
              && currentIsSprint == isSprinting
-             && currentIsIdle == isIdle)
+             && currentIsIdle == isIdle
+             && currentIsWading == isWading)
             {
                 return;
             }
@@ -151,6 +166,7 @@ namespace Movement
             currentIsRun = isRunning;
             currentIsSprint = isSprinting;
             currentIsIdle = isIdle;
+            currentIsWading = isWading;
 
             // CurrentVelocity carries both the physical direction and its normalized magnitude.
             // The blend tree uses the magnitude to reflect acceleration and braking, so it must
@@ -164,6 +180,10 @@ namespace Movement
             }
 
             animator.SetBool(IsIdleParameter, currentIsIdle);
+            if (hasWadingParameter)
+            {
+                animator.SetBool(IsWadingParameter, currentIsWading);
+            }
         }
 
         public void SetLocomotionLocked(bool isLocked)
@@ -250,13 +270,16 @@ namespace Movement
         {
             var movementInput = movementIntent.Direction;
             var isSprintInputPressed = movementIntent.IsSprintPressed;
+            var isWading = waterDetector.IsWading;
+            var isSprinting = isSprintInputPressed && !isWading;
             if (!isGameplayActive || movementInput.sqrMagnitude <= InputThreshold)
             {
                 ApplyLocomotionParameters(
                     Vector2.zero,
                     isGameplayActive && movementIntent.IsRunPressed,
-                    isGameplayActive && isSprintInputPressed,
+                    isGameplayActive && isSprinting,
                     !playerMovement.IsMoving,
+                    isGameplayActive && isWading,
                     force: true);
                 return;
             }
@@ -267,7 +290,7 @@ namespace Movement
             var directionalInput = new Vector2(
                 Mathf.Clamp(localMoveDirection.x, -1f, 1f),
                 Mathf.Clamp(localMoveDirection.z, -1f, 1f));
-            if (isSprintInputPressed)
+            if (isSprinting)
             {
                 directionalInput = Vector2.up;
             }
@@ -275,8 +298,9 @@ namespace Movement
             ApplyLocomotionParameters(
                 directionalInput,
                 movementIntent.IsRunPressed,
-                isSprintInputPressed,
+                isSprinting,
                 !playerMovement.IsMoving,
+                isWading,
                 force: true);
         }
 

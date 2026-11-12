@@ -22,6 +22,7 @@ namespace Movement
         private readonly TargetLockController targetLockController;
         private readonly PlayerMovementIntent intent;
         private readonly PlayerFacingController facingController;
+        private readonly CharacterWaterDetector waterDetector;
 
         private Vector2 targetVelocity;
         private Vector2 currentVelocity;
@@ -37,6 +38,7 @@ namespace Movement
         private float currentAccelerationRate;
         private float currentDecelerationRate;
         private float sprintSpeedBlend;
+        private float currentWaterSpeedMultiplier = 1f;
 
         [SuppressMessage("ReSharper", "ParameterHidesMember")]
         private PlayerMovement
@@ -48,7 +50,8 @@ namespace Movement
                 StatsController statsController,
                 TargetLockController targetLockController,
                 PlayerMovementIntent intent,
-                PlayerFacingController facingController
+                PlayerFacingController facingController,
+                CharacterWaterDetector waterDetector
             )
         {
             this.playerMovementConfig = playerMovementConfig;
@@ -59,12 +62,15 @@ namespace Movement
             this.targetLockController = targetLockController;
             this.intent = intent;
             this.facingController = facingController;
+            this.waterDetector = waterDetector;
             currentAccelerationRate = playerMovementConfig.WalkSpeedChangeRate;
             currentDecelerationRate = playerMovementConfig.WalkDecelerationRate;
         }
 
         public Vector3 GetPlanarVelocity(float deltaTime)
         {
+            UpdateWaterSpeedMultiplier(deltaTime);
+
             if (HasAirborneMomentum)
             {
                 return airborneMomentumVelocity;
@@ -278,6 +284,16 @@ namespace Movement
                 changeRate * deltaTime);
         }
 
+        private void UpdateWaterSpeedMultiplier(float deltaTime)
+        {
+            var targetMultiplier = waterDetector?.MovementSpeedMultiplier ?? 1f;
+            var changeRate = waterDetector?.MovementSpeedMultiplierChangeRate ?? 0f;
+            currentWaterSpeedMultiplier = Mathf.MoveTowards(
+                currentWaterSpeedMultiplier,
+                targetMultiplier,
+                changeRate * deltaTime);
+        }
+
         private bool HasForwardSprintInput()
         {
             return intent.Direction.y > InputThreshold;
@@ -312,7 +328,7 @@ namespace Movement
             if (isSprinting)
             {
                 var sprintSpeed = GetSprintAdjustedSpeed(playerMovementConfig.RunForwardSpeed);
-                return visualTransform.forward * (sprintSpeed * inputMagnitude * GetWeightSpeedMultiplier());
+                return visualTransform.forward * (sprintSpeed * inputMagnitude * GetWeightSpeedMultiplier() * currentWaterSpeedMultiplier);
             }
 
             var moveDirection = cameraMotor.GetGameplayPlanarRotation() *
@@ -331,35 +347,54 @@ namespace Movement
             var localMoveDirection = visualTransform.InverseTransformDirection(worldMoveDirection.normalized);
             var hasHorizontalInput = Mathf.Abs(localMoveDirection.x) > InputThreshold;
             var horizontalSpeed = hasHorizontalInput
-                ? (isRunning ? playerMovementConfig.RunStrafeSpeed : playerMovementConfig.StrafeSpeed)
+                ? GetStrafeSpeed()
                 : 0f;
             var verticalSpeed = 0f;
 
             if (localMoveDirection.z > InputThreshold)
             {
-                verticalSpeed = isRunning
-                    ? playerMovementConfig.RunForwardSpeed
-                    : playerMovementConfig.ForwardSpeed;
+                verticalSpeed = GetForwardSpeed();
             }
             else if (localMoveDirection.z < -InputThreshold)
             {
-                verticalSpeed = isRunning
-                    ? playerMovementConfig.RunBackwardSpeed
-                    : playerMovementConfig.BackwardSpeed;
+                verticalSpeed = GetBackwardSpeed();
             }
 
             if (horizontalSpeed > 0f && verticalSpeed > 0f)
             {
-                return GetSprintAdjustedSpeed((horizontalSpeed + verticalSpeed) * 0.5f) * GetWeightSpeedMultiplier();
+                return GetSprintAdjustedSpeed((horizontalSpeed + verticalSpeed) * 0.5f)
+                       * GetWeightSpeedMultiplier()
+                       * currentWaterSpeedMultiplier;
             }
 
             var baseSpeed = Mathf.Max(horizontalSpeed, verticalSpeed);
-            return GetSprintAdjustedSpeed(baseSpeed) * GetWeightSpeedMultiplier();
+            return GetSprintAdjustedSpeed(baseSpeed) * GetWeightSpeedMultiplier() * currentWaterSpeedMultiplier;
         }
 
         private float GetSprintAdjustedSpeed(float baseSpeed)
         {
             return Mathf.Lerp(baseSpeed, playerMovementConfig.SprintForwardSpeed, sprintSpeedBlend);
+        }
+
+        private float GetForwardSpeed()
+        {
+            return isRunning
+                ? playerMovementConfig.RunForwardSpeed
+                : playerMovementConfig.ForwardSpeed;
+        }
+
+        private float GetBackwardSpeed()
+        {
+            return isRunning
+                ? playerMovementConfig.RunBackwardSpeed
+                : playerMovementConfig.BackwardSpeed;
+        }
+
+        private float GetStrafeSpeed()
+        {
+            return isRunning
+                ? playerMovementConfig.RunStrafeSpeed
+                : playerMovementConfig.StrafeSpeed;
         }
 
         private float GetWeightSpeedMultiplier()

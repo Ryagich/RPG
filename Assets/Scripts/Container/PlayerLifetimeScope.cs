@@ -41,7 +41,14 @@ namespace Container
 
         protected override void Configure(IContainerBuilder builder)
         {
+            var characterController = GetComponentInChildren<CharacterController>(true);
             builder.RegisterComponentInHierarchy<CharacterController>().UnderTransform(transform).AsSelf();
+            if (characterController != null)
+            {
+                var waterContactTracker = characterController.GetComponent<CharacterWaterContactTracker>()
+                                          ?? characterController.gameObject.AddComponent<CharacterWaterContactTracker>();
+                builder.RegisterComponent(waterContactTracker).AsSelf();
+            }
             builder.RegisterComponentInHierarchy<Animator>().UnderTransform(transform).AsSelf();
             var animator = GetComponentInChildren<Animator>(true);
             if (animator != null)
@@ -115,9 +122,11 @@ namespace Container
             builder.Register<PlayerMovementIntent>(Lifetime.Scoped).AsSelf();
             builder.Register<PlayerFacingController>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<PlayerMovementController>().AsSelf();
+            builder.RegisterEntryPoint<CharacterWaterDetector>().AsSelf();
             builder.Register<PlayerMovement>(Lifetime.Scoped)
                    .AsSelf()
-                   .As<ICharacterPlanarMotionSource>()
+                   .As<ICharacterPlanarMotionSource>();
+            builder.Register<PlayerWadingStaminaMovementState>(Lifetime.Scoped)
                    .As<IStaminaMovementState>();
             builder.RegisterEntryPoint<CharacterMotor>().AsSelf();
             builder.RegisterEntryPoint<PlayerFootstepPlayer>().AsSelf();
@@ -130,6 +139,7 @@ namespace Container
             builder.RegisterEntryPoint<StatsPeriodicChanger>().AsSelf();
             builder.RegisterEntryPoint<StaminaPeriodicChanger>().AsSelf();
             builder.RegisterEntryPoint<StaminaMovementChanger>().AsSelf();
+            builder.RegisterEntryPoint<WadingStaminaChanger>().AsSelf();
             builder.RegisterEntryPoint<EquippedDefenseStatsChanger>().AsSelf();
 
             // Player and NPC must keep the same character systems; only the control source differs:
