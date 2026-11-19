@@ -142,6 +142,15 @@ namespace CameraScripts
                 : Quaternion.LookRotation(forward.normalized, Vector3.up);
         }
 
+        /// <summary>Offsets the gameplay orbit around its vertical axis.</summary>
+        public void RotateYaw(float degrees)
+        {
+            if (Mathf.Abs(degrees) > Mathf.Epsilon)
+            {
+                yaw = Mathf.Repeat(yaw + degrees, 360f);
+            }
+        }
+
         public bool IsSettled(float positionTolerance = 0.03f, float rotationTolerance = 0.5f)
         {
             if (!isInitialized || target == null)

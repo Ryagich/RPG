@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using VContainer.Unity;
 
@@ -44,9 +45,9 @@ namespace Movement
             }
 
             var deltaTime = Time.deltaTime;
+            var verticalVelocity = verticalMotionSource?.GetVerticalVelocity(deltaTime, controller.isGrounded) ?? 0f;
             var planarVelocity = planarMotionSource?.GetPlanarVelocity(deltaTime) ?? Vector3.zero;
             planarVelocity.y = 0f;
-            var verticalVelocity = verticalMotionSource?.GetVerticalVelocity(deltaTime, controller.isGrounded) ?? 0f;
             var displacement = planarVelocity * deltaTime
                                + Vector3.up * (verticalVelocity * deltaTime)
                                + pendingRootMotion;
@@ -72,6 +73,30 @@ namespace Movement
     {
         float GetVerticalVelocity(float deltaTime, bool wasGrounded);
         void OnMotionApplied(CollisionFlags collisionFlags, bool isGrounded);
+    }
+
+    /// <summary>
+    /// Supplies a contextual vertical velocity without owning CharacterController movement.
+    /// CharacterMotor and its vertical-motion source remain the sole owners of displacement
+    /// and velocity integration respectively.
+    /// </summary>
+    public interface ICharacterVerticalMotionConstraint
+    {
+        bool TryGetVerticalVelocity(
+            float deltaTime,
+            bool wasGrounded,
+            float currentVerticalVelocity,
+            out float verticalVelocity);
+    }
+
+    /// <summary>
+    /// Reports an explicit locomotion state that supersedes airborne presentation and fall
+    /// consequences without changing the physical CharacterController contact state.
+    /// </summary>
+    public interface ICharacterAirborneStateBlocker
+    {
+        bool BlocksAirborneState { get; }
+        event Action StateChanged;
     }
 
     /// <summary>Receives the completed motor step without gaining access to Move.</summary>

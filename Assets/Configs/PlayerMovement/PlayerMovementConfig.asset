@@ -15,20 +15,42 @@ MonoBehaviour:
   <ForwardSpeed>k__BackingField: 4.2
   <BackwardSpeed>k__BackingField: 1.9
   <StrafeSpeed>k__BackingField: 2.8
+  <WalkSpeedChangeRate>k__BackingField: 3.5
+  <WalkDecelerationRate>k__BackingField: 2.5
   <RunForwardSpeed>k__BackingField: 7
   <RunBackwardSpeed>k__BackingField: 5.5
   <RunStrafeSpeed>k__BackingField: 6
+  <RunSpeedChangeRate>k__BackingField: 4.5
+  <RunDecelerationRate>k__BackingField: 2
   <SprintForwardSpeed>k__BackingField: 9
   <SprintSpeedChangeRate>k__BackingField: 2.5
-  <SprintDecelerationRate>k__BackingField: 4
+  <SprintDecelerationRate>k__BackingField: 1.25
   <SprintRotationSpeed>k__BackingField: 240
+  <WadingForwardSpeed>k__BackingField: 1.5
+  <WadingBackwardSpeed>k__BackingField: 0.7
+  <WadingStrafeSpeed>k__BackingField: 1
+  <WadingSpeedChangeRate>k__BackingField: 1.25
+  <WadingDecelerationRate>k__BackingField: 1
+  <SwimForwardSpeed>k__BackingField: 1.3
+  <SwimBackwardSpeed>k__BackingField: 0.5
+  <SwimStrafeSpeed>k__BackingField: 0.8
+  <SwimSpeedChangeRate>k__BackingField: 1.1
+  <SwimDecelerationRate>k__BackingField: 0.75
+  <SwimRunForwardSpeed>k__BackingField: 2
+  <SwimRunStrafeSpeed>k__BackingField: 1.2
+  <SwimRunSpeedChangeRate>k__BackingField: 1.8
+  <SwimRunDecelerationRate>k__BackingField: 1.25
+  <SwimRunSidewaysForwardSpeed>k__BackingField: 0.5
+  <SwimRunSidewaysRotationSpeed>k__BackingField: 15
+  <SwimSprintForwardSpeed>k__BackingField: 2.6
+  <SwimSprintStrafeSpeed>k__BackingField: 1.55
+  <SwimSprintSpeedChangeRate>k__BackingField: 1
+  <SwimSprintDecelerationRate>k__BackingField: 0.78
+  <SwimSprintSidewaysForwardSpeed>k__BackingField: 0.5
+  <SwimSprintSidewaysRotationSpeed>k__BackingField: 7
   <WalkRotationSpeed>k__BackingField: 215
   <RunRotationSpeed>k__BackingField: 280
-  <WalkSpeedChangeRate>k__BackingField: 3.5
-  <RunSpeedChangeRate>k__BackingField: 4.5
   <SpeedChangeRateBlendSpeed>k__BackingField: 6
-  <WalkDecelerationRate>k__BackingField: 2.5
-  <RunDecelerationRate>k__BackingField: 2
   <WeightSpeedPenaltyMultiplier>k__BackingField: 3
   <WeightSpeedPenaltyCurve>k__BackingField:
     serializedVersion: 2

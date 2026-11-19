@@ -15,6 +15,7 @@ namespace CharacterAnimation
         private readonly PlayerMovement movement;
         private readonly PlayerAnimationController animation;
         private readonly TargetLockController targetLock;
+        private readonly CharacterWaterDetector waterDetector;
         private readonly ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber;
         private IDisposable gameModeSubscription;
 
@@ -23,12 +24,14 @@ namespace CharacterAnimation
             PlayerMovement movement,
             PlayerAnimationController animation,
             TargetLockController targetLock,
+            CharacterWaterDetector waterDetector,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber)
         {
             this.receiver = receiver;
             this.movement = movement;
             this.animation = animation;
             this.targetLock = targetLock;
+            this.waterDetector = waterDetector;
             this.gameModeChangedSubscriber = gameModeChangedSubscriber;
         }
 
@@ -36,11 +39,18 @@ namespace CharacterAnimation
         {
             receiver?.Bind(this);
             gameModeSubscription = gameModeChangedSubscriber?.Subscribe(OnGameModeChanged);
+            waterDetector.StateChanged += OnWaterStateChanged;
+
+            if (waterDetector.IsWaterLocomotionActive)
+            {
+                ReleaseAnimationControl();
+            }
         }
 
         public void Dispose()
         {
             gameModeSubscription?.Dispose();
+            waterDetector.StateChanged -= OnWaterStateChanged;
             ReleaseAnimationControl();
             receiver?.Unbind(this);
         }
@@ -73,6 +83,14 @@ namespace CharacterAnimation
         private void OnGameModeChanged(GameModeChangedMessage message)
         {
             if (message.GameMode != GameMode.Game)
+            {
+                ReleaseAnimationControl();
+            }
+        }
+
+        private void OnWaterStateChanged(CharacterWaterState _)
+        {
+            if (waterDetector.IsWaterLocomotionActive)
             {
                 ReleaseAnimationControl();
             }

@@ -91,6 +91,15 @@ namespace CameraScripts
             return cameraMovement.GetPlanarRotation();
         }
 
+        /// <summary>Rotates the gameplay orbit without going through pointer sensitivity.</summary>
+        public void RotateGameplayYaw(float degrees)
+        {
+            if (cameraMode == CameraModes.Gameplay)
+            {
+                cameraMovement.RotateYaw(degrees);
+            }
+        }
+
         /// <summary>True once the gameplay camera has reached its current follow pose.</summary>
         public bool IsGameplaySettled => cameraMovement.IsSettled();
 

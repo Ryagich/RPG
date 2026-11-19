@@ -88,11 +88,11 @@ namespace Inventory
         public void Start()
         {
             movementIntent.DirectionChanged += OnMovementDirectionChanged;
-            waterDetector.WadingStateChanged += OnWadingStateChanged;
+            waterDetector.StateChanged += OnWaterStateChanged;
             ResetAnimationRequests();
-            if (waterDetector.IsWading)
+            if (waterDetector.IsWaterLocomotionActive)
             {
-                ClearActionRequestsForWading();
+                CancelActionsForWaterLocomotion();
             }
 
             ownerDamageReceiver?.SetWeaponDamageBlocked(false);
@@ -101,7 +101,7 @@ namespace Inventory
         public void Dispose()
         {
             movementIntent.DirectionChanged -= OnMovementDirectionChanged;
-            waterDetector.WadingStateChanged -= OnWadingStateChanged;
+            waterDetector.StateChanged -= OnWaterStateChanged;
             ClearBufferedActionRequestExpiry();
             queuedEvasionDirection = null;
             ownerDamageReceiver?.SetWeaponDamageBlocked(false);
@@ -115,7 +115,7 @@ namespace Inventory
              // The Air layer is driven by PlayerGravity. A Full Body attack must not be
              // requested while that layer owns the visible pose and its events can still fire.
              || playerGravity.IsAirborne
-             || waterDetector.IsWading
+             || waterDetector.IsWaterLocomotionActive
              || (actionState.IsActionBlocked && !isHitAttackInProgress))
             {
                 return;
@@ -252,7 +252,7 @@ namespace Inventory
                    && characterController != null
                    && characterController.enabled
                    && characterController.isGrounded
-                   && !waterDetector.IsWading
+                   && !waterDetector.IsWaterLocomotionActive
                    && gameModesController.GameMode == GameMode.Game
                    && !combatAnimator.IsAnyRequestActive()
                    && !combatAnimator.IsHitActive()
@@ -311,23 +311,20 @@ namespace Inventory
             }
         }
 
-        private void OnWadingStateChanged(bool isWading)
+        private void OnWaterStateChanged(CharacterWaterState state)
         {
-            if (isWading)
+            if (state is CharacterWaterState.Wading or CharacterWaterState.Swim)
             {
-                ClearActionRequestsForWading();
+                CancelActionsForWaterLocomotion();
             }
         }
 
-        private void ClearActionRequestsForWading()
+        private void CancelActionsForWaterLocomotion()
         {
-            SetAnimationRequests(
-                lightAttackRequested: false,
-                heavyAttackRequested: false,
-                dodgeRequested: false,
-                rollRequested: false);
-            ClearBufferedActionRequestExpiry();
-            queuedEvasionDirection = null;
+            // Entering water may interrupt the clip before its matching cleanup events run.
+            // The combat-action owner must therefore close its damage window and immunity too,
+            // rather than merely clearing Animator requests.
+            Cancel();
         }
 
         private void SetAnimationRequests(

@@ -122,15 +122,27 @@ namespace Container
             builder.Register<PlayerMovementIntent>(Lifetime.Scoped).AsSelf();
             builder.Register<PlayerFacingController>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<PlayerMovementController>().AsSelf();
-            builder.RegisterEntryPoint<CharacterWaterDetector>().AsSelf();
+            builder.RegisterEntryPoint<CharacterWaterDetector>()
+                   .AsSelf()
+                   .As<ICharacterAirborneStateBlocker>();
+            builder.Register<CharacterWaterBottomProbe>(Lifetime.Scoped);
+            builder.Register<CharacterWaterSurfaceConstraint>(Lifetime.Scoped)
+                   .AsSelf()
+                   .As<ICharacterVerticalMotionConstraint>();
             builder.Register<PlayerMovement>(Lifetime.Scoped)
                    .AsSelf()
-                   .As<ICharacterPlanarMotionSource>();
+                   .As<ICharacterPlanarMotionSource>()
+                   .As<System.IDisposable>();
             builder.Register<PlayerWadingStaminaMovementState>(Lifetime.Scoped)
                    .As<IStaminaMovementState>();
             builder.RegisterEntryPoint<CharacterMotor>().AsSelf();
             builder.RegisterEntryPoint<PlayerFootstepPlayer>().AsSelf();
-            builder.RegisterEntryPoint<PlayerAnimationController>().AsSelf();
+            builder.RegisterEntryPoint<PlayerAnimationController>()
+                   .AsSelf()
+                   .As<System.IDisposable>();
+            builder.RegisterEntryPoint<CharacterWaterEntryControlLock>()
+                   .AsSelf()
+                   .As<System.IDisposable>();
             builder.RegisterEntryPoint<PlayerInteractableLogic>().AsSelf();
             builder.RegisterEntryPoint<ItemHolderInteractableLogic>().AsSelf();
             builder.Register<StatsController>(Lifetime.Singleton).AsSelf();
