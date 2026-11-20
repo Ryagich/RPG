@@ -68,8 +68,11 @@ namespace Movement
                 currentSurfaceHoldSubmersionHeight = targetSurfaceHoldSubmersionHeight;
                 hasSurfaceHoldTarget = true;
             }
-            else if (ShouldTransitionSurfaceHoldDepth())
+            else
             {
+                // Locomotion mode is state, not input. When normal, run, or sprint swimming
+                // selects another configured depth, the controller must move even if the
+                // input that caused that transition has already been released this frame.
                 currentSurfaceHoldSubmersionHeight = Mathf.MoveTowards(
                     currentSurfaceHoldSubmersionHeight,
                     targetSurfaceHoldSubmersionHeight,
@@ -166,14 +169,6 @@ namespace Movement
 
             isEntryControlLocked = value;
             EntryControlLockChanged?.Invoke(value);
-        }
-
-        private bool ShouldTransitionSurfaceHoldDepth()
-        {
-            // Releasing movement must preserve the depth reached by the active swim mode.
-            // In particular, it must not immediately replace the run/sprint target with the
-            // ordinary-swim target and create an artificial downward correction.
-            return playerMovement == null || playerMovement.HasMovementInput;
         }
 
         private bool IsSwimHoldActive()
