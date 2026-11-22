@@ -204,6 +204,8 @@ namespace Movement
         public bool IsMovementLocked => movementLockSources.Count > 0;
         public bool IsRunning => isRunning;
         public bool IsSprinting => isSprinting;
+        public bool IsSwimmingRun => waterDetector?.IsSwimming == true && isRunning && !isSprinting;
+        public bool IsSwimmingSprint => waterDetector?.IsSwimming == true && isSprinting;
         /// <summary>
         /// Raw locomotion intent for the current frame. Unlike <see cref="IsMoving"/>, this
         /// becomes false immediately when the player releases movement, before planar
@@ -581,9 +583,6 @@ namespace Movement
                 ? playerMovementConfig.RunStrafeSpeed
                 : playerMovementConfig.StrafeSpeed;
         }
-
-        private bool IsSwimmingRun => waterDetector?.IsSwimming == true && isRunning && !isSprinting;
-        private bool IsSwimmingSprint => waterDetector?.IsSwimming == true && isSprinting;
 
         private float GetSwimForwardSpeed()
         {

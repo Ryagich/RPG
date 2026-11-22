@@ -81,6 +81,11 @@ namespace Inventory
 
         public bool IsCombatActionLocked => IsCombatActionAnimationActive();
         public bool IsHitAttackInProgress => isHitAttackInProgress;
+        public bool IsAttackAnimationActive => isHitAttackInProgress
+                                               || combatAnimator.IsAttackRequestActive()
+                                               || (IsAttackRootMotionStateActive
+                                                   && !combatAnimator.IsDodgeActive()
+                                                   && !combatAnimator.IsRollActive());
         public bool IsRollAnimationActive => IsRollInProgress();
         public bool IsAttackBlockingWeaponChanges => isHitAttackInProgress || IsCombatActionAnimationActive();
         public bool IsAttackRootMotionStateActive => combatAnimator.IsFullBodyActionActive();

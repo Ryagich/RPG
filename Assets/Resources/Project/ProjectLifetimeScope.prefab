@@ -51,6 +51,7 @@ MonoBehaviour:
   <InputConfig>k__BackingField: {fileID: 11400000, guid: dfe59a2337fa82844aaeeffcb218cfc1, type: 2}
   <CameraConfig>k__BackingField: {fileID: 11400000, guid: 5a1160e670d77fd4a93cecdcf011a805, type: 2}
   <DialogueCameraConfig>k__BackingField: {fileID: 11400000, guid: e1b5984848d74dfe988ad7819a08d8e3, type: 2}
+  <PlayerHeadLookConfig>k__BackingField: {fileID: 11400000, guid: f94d99ad17454b78ac1dc26d6f3e13d1, type: 2}
   <PlayerMovementConfig>k__BackingField: {fileID: 11400000, guid: b1630b8c62dfa3545a9aa62c3b2310e1, type: 2}
   <CharacterWaterConfig>k__BackingField: {fileID: 11400000, guid: 1d19a45fec0b439c917d58451ec9f06b, type: 2}
   <PlayerJumpConfig>k__BackingField: {fileID: 11400000, guid: 65e1a84e77654c5098d50047643b7751, type: 2}

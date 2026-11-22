@@ -57,6 +57,9 @@ namespace Container
                 var footIk = animator.GetComponent<CharacterFootIkRuntime>()
                              ?? animator.gameObject.AddComponent<CharacterFootIkRuntime>();
                 builder.RegisterComponent(footIk).AsSelf();
+                var headLook = animator.GetComponent<PlayerHeadLookRuntime>()
+                               ?? animator.gameObject.AddComponent<PlayerHeadLookRuntime>();
+                builder.RegisterComponent(headLook).AsSelf();
                 var animationEventReceiver = animator.GetComponent<CharacterAnimationEventReceiver>()
                                              ?? animator.gameObject.AddComponent<CharacterAnimationEventReceiver>();
                 builder.RegisterComponent(animationEventReceiver).AsSelf();
@@ -160,6 +163,9 @@ namespace Container
             // Player and NPC must keep the same character systems; only the control source differs:
             // player input drives these systems for Player, while the state machine drives them for NPC.
             builder.Register<CharacterActionState>(Lifetime.Scoped).AsSelf();
+            builder.Register<PlayerCharacterAnimationState>(Lifetime.Scoped)
+                   .As<ICharacterAnimationState>()
+                   .AsSelf();
             builder.RegisterEntryPoint<PlayerCharacterAnimationControlHandler>()
                    .AsSelf()
                    .As<System.IDisposable>();

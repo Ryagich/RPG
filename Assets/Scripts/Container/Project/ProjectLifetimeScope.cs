@@ -39,6 +39,7 @@ namespace Container.Project
         [field: SerializeField] public InputConfig InputConfig { get; private set; }
         [field: SerializeField] public CameraConfig CameraConfig { get; private set; }
         [field: SerializeField] public DialogueCameraConfig DialogueCameraConfig { get; private set; }
+        [field: SerializeField] public PlayerHeadLookConfig PlayerHeadLookConfig { get; private set; }
         [field: SerializeField] public PlayerMovementConfig PlayerMovementConfig { get; private set; }
         [field: SerializeField] public CharacterWaterConfig CharacterWaterConfig { get; private set; }
         [field: SerializeField] public PlayerJumpConfig PlayerJumpConfig { get; private set; }
@@ -101,6 +102,7 @@ namespace Container.Project
             builder.RegisterInstance(InputConfig).AsSelf();
             builder.RegisterInstance(CameraConfig).AsSelf();
             builder.RegisterInstance(DialogueCameraConfig).AsSelf();
+            builder.RegisterInstance(PlayerHeadLookConfig).AsSelf();
             builder.RegisterInstance(PlayerMovementConfig).AsSelf();
             builder.RegisterInstance(CharacterWaterConfig).AsSelf();
             builder.RegisterInstance(PlayerJumpConfig).AsSelf();
