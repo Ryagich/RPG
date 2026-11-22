@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93ca6a2e0f24458b9862e54c83b701a6, type: 3}
   m_Name: DialogueCameraConfig
   m_EditorClassIdentifier: Assembly-CSharp::CameraScripts.DialogueCameraConfig
-  <CameraLocalOffset>k__BackingField: {x: 0, y: 1.6, z: 1.2}
-  <FocusLocalOffset>k__BackingField: {x: 0, y: 1.55, z: 0}
+  <CameraLocalOffset>k__BackingField: {x: 0, y: 1.6, z: 0.75}
+  <FocusLocalOffset>k__BackingField: {x: -0.15, y: 1.55, z: 0}
   <PositionSmoothTime>k__BackingField: 0.55
   <RotationSmoothTime>k__BackingField: 0.35
   <ReturnPositionSmoothTime>k__BackingField: 0.6
