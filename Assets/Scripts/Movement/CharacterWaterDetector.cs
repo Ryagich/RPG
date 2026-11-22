@@ -87,19 +87,23 @@ namespace Movement
 
         private CharacterWaterState ResolveState(bool hasStandableBottom)
         {
-            // A swimmer that has reached a physical bottom can stand. This transition must not
-            // wait for the Swim hysteresis threshold, otherwise a deep water trigger laid over
-            // a rising shore keeps the character swimming onto dry land.
-            if (IsSwimming && hasStandableBottom)
+            // A physical bottom inside the shallow-water probe range takes precedence over
+            // trigger volume depth. It lets a character stand at the whole wading range and
+            // prevents alternating Swim and Wading states at the boundary.
+            if (hasStandableBottom)
             {
-                return CharacterWaterState.Wading;
+                var bottomWadingThreshold = IsWading
+                    ? waterConfig.WadingExitSubmersionHeight
+                    : waterConfig.WadingEnterSubmersionHeight;
+                return SubmersionHeight + SurfaceEpsilon >= bottomWadingThreshold
+                    ? CharacterWaterState.Wading
+                    : CharacterWaterState.Dry;
             }
 
             // On the first frame in deep water the controller's bottom can still be at the
-            // surface, so submersion is near zero. A nearby physical bottom wins over trigger
-            // bounds; otherwise configured deep water enters Swim immediately.
-            if (!hasStandableBottom
-                && WaterDepth + SurfaceEpsilon >= waterConfig.DeepWaterEntryMinimumDepth)
+            // surface, so submersion is near zero. Without a nearby physical bottom, configured
+            // deep water enters Swim immediately.
+            if (WaterDepth + SurfaceEpsilon >= waterConfig.DeepWaterEntryMinimumDepth)
             {
                 return CharacterWaterState.Swim;
             }

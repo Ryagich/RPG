@@ -130,7 +130,15 @@ namespace Movement
             var characterRoot = waterContactTracker.transform;
             var origin = characterRoot.position;
             origin.y = surfaceHeight + SurfaceProbeOffset;
-            var maxDistance = SurfaceProbeOffset + waterConfig.SwimExitSubmersionHeight;
+            // A bottom anywhere in the complete wading state range must prevent a deep-water
+            // trigger from switching the character to swimming. Wading starts at its own entry
+            // threshold and ends at Swim entry, while Swim exit may be deeper in a custom config.
+            var maximumStandableBottomDepth = Mathf.Max(
+                waterConfig.WadingEnterSubmersionHeight,
+                Mathf.Max(
+                    waterConfig.SwimEnterSubmersionHeight,
+                    waterConfig.SwimExitSubmersionHeight));
+            var maxDistance = SurfaceProbeOffset + maximumStandableBottomDepth;
             var hitCount = Physics.RaycastNonAlloc(
                 origin,
                 Vector3.down,
