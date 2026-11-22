@@ -1,0 +1,76 @@
+#pragma kernel UpdateField
+
+Texture2D<float4> _PreviousField;
+RWTexture2D<float4> _NextField;
+// xyz = previous/current foot position, w = radius/strength.
+float4 _SourcePrevious[64];
+float4 _SourceCurrent[64];
+int _SourceCount;
+int _Resolution;
+int2 _HistoryOffset;
+int _ClearHistory;
+float4 _FieldOrigin; // xy = world XZ minimum, z = world metres per texel
+float _Decay;
+float _PressResponse;
+float _HeightTolerance;
+
+[numthreads(8, 8, 1)]
+void UpdateField(uint3 id : SV_DispatchThreadID)
+{
+    if (any(id.xy >= (uint)_Resolution)) return;
+    int2 historyPixel = (int2)id.xy + _HistoryOffset;
+    float4 field = 0;
+    if (!_ClearHistory && all(historyPixel >= 0) && all(historyPixel < _Resolution))
+        field = _PreviousField.Load(int3(historyPixel, 0)) * _Decay;
+
+    float2 position = _FieldOrigin.xy + (id.xy + 0.5) * _FieldOrigin.z;
+    float2 directionSum = 0;
+    float totalWeight = 0;
+    float pressure = 0;
+    float heightSum = 0;
+    float dominantHeight = field.b > 0.001 ? field.a / field.b : 0;
+    bool hasHeight = field.b > 0.001;
+    for (int i = 0; i < _SourceCount; ++i)
+    {
+        float4 start = _SourcePrevious[i];
+        float4 end = _SourceCurrent[i];
+        float2 segment = end.xz - start.xz;
+        float t = saturate(dot(position - start.xz, segment) / max(dot(segment, segment), 0.00001));
+        float2 closest = lerp(start.xz, end.xz, t);
+        float2 away = position - closest;
+        float distanceToSource = length(away);
+        float weight = (1 - smoothstep(0, max(start.w, 0.01), distanceToSource)) * end.w;
+        if (weight <= 0) continue;
+        float height = lerp(start.y, end.y, t);
+        // A 2D field can represent one contact height per texel. Keep the strongest layer.
+        if (hasHeight && abs(height - dominantHeight) > _HeightTolerance)
+        {
+            if (weight <= max(field.b, pressure)) continue;
+            field = 0;
+            directionSum = 0;
+            totalWeight = pressure = heightSum = 0;
+        }
+        if (!hasHeight || weight > max(field.b, pressure)) dominantHeight = height;
+        hasHeight = true;
+        float2 direction = distanceToSource > 0.001 ? away / distanceToSource
+            : segment / max(length(segment), 0.001);
+        directionSum += direction * weight;
+        heightSum += height * weight;
+        totalWeight += weight;
+        pressure = max(pressure, weight);
+    }
+
+    // A receding contact has a weaker falloff than the footprint it just left.
+    // It must not erase or reverse that footprint at the much faster press rate.
+    // Only recovery above can relax existing pressure; new contacts reinforce it.
+    if (totalWeight > 0 && pressure > field.b)
+    {
+        // RG and A are premultiplied by pressure: filtering at the edge of a footprint
+        // must not interpolate contact height toward world zero.
+        float4 target = float4(directionSum / totalWeight * pressure, pressure,
+            heightSum / totalWeight * pressure);
+        field = lerp(field, target, _PressResponse);
+    }
+    if (field.b < 0.001) field = 0;
+    _NextField[id.xy] = field;
+}

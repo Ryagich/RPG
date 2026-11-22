@@ -19,6 +19,7 @@ using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 using Saves;
+using World.Grass;
 
 namespace Container
 {
@@ -45,6 +46,9 @@ namespace Container
             builder.RegisterComponentInHierarchy<CharacterController>().UnderTransform(transform).AsSelf();
             if (characterController != null)
             {
+                builder.RegisterEntryPoint(resolver => new GrassDeformationSource(
+                        characterController, resolver.Resolve<GrassDeformationRegistry>(), isAnchor: true),
+                    Lifetime.Scoped).AsSelf();
                 var waterContactTracker = characterController.GetComponent<CharacterWaterContactTracker>()
                                           ?? characterController.gameObject.AddComponent<CharacterWaterContactTracker>();
                 builder.RegisterComponent(waterContactTracker).AsSelf();

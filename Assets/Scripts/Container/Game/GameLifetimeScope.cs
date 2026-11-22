@@ -21,6 +21,7 @@ using UI.Inventory;
 using Training;
 using Mill;
 using Saves;
+using World.Grass;
 
 namespace Container.Game
 {
@@ -29,6 +30,7 @@ namespace Container.Game
         private const string GlobalSoundsRootName = "Global Sounds";
 
         [field: SerializeField] public PlayerLifetimeScope PlayerPrefab { get; private set; } = null!;
+        [SerializeField] private GrassDeformationConfig grassDeformationConfig;
 
         private PlayerLifetimeScope playerScope;
         private Transform globalSoundsRoot;
@@ -61,6 +63,12 @@ namespace Container.Game
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterInstance(sceneSessionConfiguration);
+            builder.Register<GrassDeformationRegistry>(Lifetime.Singleton).AsSelf();
+            if (grassDeformationConfig != null)
+            {
+                builder.RegisterInstance(grassDeformationConfig);
+                builder.RegisterEntryPoint<GrassDeformationField>().AsSelf().As<System.IDisposable>();
+            }
 
             // Faction standing is mutable session state. Development scenes must begin from
             // authored relations instead of inheriting the project-level relations restored

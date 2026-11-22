@@ -22,6 +22,7 @@ using UnityEngine.AI;
 using GameAudio;
 using VContainer;
 using VContainer.Unity;
+using World.Grass;
 
 namespace Container
 {
@@ -154,6 +155,13 @@ namespace Container
             }
 
             builder.RegisterComponentInHierarchy<CharacterController>().UnderTransform(transform).AsSelf();
+            var grassController = GetComponentInChildren<CharacterController>(true);
+            if (grassController != null)
+            {
+                builder.RegisterEntryPoint(resolver => new GrassDeformationSource(
+                        grassController, resolver.Resolve<GrassDeformationRegistry>(), isAnchor: false),
+                    Lifetime.Scoped).AsSelf();
+            }
             builder.RegisterComponentInHierarchy<Animator>().UnderTransform(transform).AsSelf();
             var animator = GetComponentInChildren<Animator>(true);
             if (animator != null)
