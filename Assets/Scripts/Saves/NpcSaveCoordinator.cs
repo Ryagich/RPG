@@ -51,10 +51,15 @@ namespace Saves
 
         public async void Start()
         {
-            // Training and other runtime-spawned NPCs use the same combat scope, but they are
-            // not authored world characters and must not create save records.
-            if (npcScope == null || !npcScope.ParticipatesInPersistence)
+            if (npcScope == null)
             {
+                return;
+            }
+
+            // Runtime-spawned NPCs apply their initial health without entering the save registry.
+            if (!npcScope.ParticipatesInPersistence)
+            {
+                ApplyInitialHealth();
                 return;
             }
 
@@ -62,6 +67,18 @@ namespace Saves
             if (isDisposed)
             {
                 return;
+            }
+
+            if (string.IsNullOrWhiteSpace(CharacterId))
+            {
+                Debug.LogError($"NPC '{npcScope?.name ?? "Unknown"}' has no persistent character id. Open and save its scene to generate one.", npcScope);
+                return;
+            }
+
+            var hasSavedState = saveController.TryGetSavedNpc(CharacterId, out SavedCharacterState savedState);
+            if (!hasSavedState)
+            {
+                ApplyInitialHealth();
             }
 
             if (!await itemStorage.Ready)
@@ -75,13 +92,7 @@ namespace Saves
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(CharacterId))
-            {
-                Debug.LogError($"NPC '{npcScope?.name ?? "Unknown"}' has no persistent character id. Open and save its scene to generate one.", npcScope);
-                return;
-            }
-
-            if (saveController.TryGetSavedNpc(CharacterId, out SavedCharacterState savedState))
+            if (hasSavedState)
             {
                 RestoreState(savedState);
             }
@@ -127,6 +138,14 @@ namespace Saves
                 inventory = NpcInventorySaveMapper.Capture(inventory),
                 deathPose = deathPose
             };
+        }
+
+        private void ApplyInitialHealth()
+        {
+            if (npcScope.DieOnSpawn)
+            {
+                stats.ChangeValue(StatType.Hp, stats.Hp.Min);
+            }
         }
 
         private void RestoreState(SavedCharacterState savedState)
