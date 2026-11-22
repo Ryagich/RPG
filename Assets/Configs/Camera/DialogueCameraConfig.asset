@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93ca6a2e0f24458b9862e54c83b701a6, type: 3}
+  m_Name: DialogueCameraConfig
+  m_EditorClassIdentifier: Assembly-CSharp::CameraScripts.DialogueCameraConfig
+  <CameraLocalOffset>k__BackingField: {x: 0, y: 1.6, z: 1.2}
+  <FocusLocalOffset>k__BackingField: {x: 0, y: 1.55, z: 0}
+  <PositionSmoothTime>k__BackingField: 0.55
+  <RotationSmoothTime>k__BackingField: 0.35
+  <ReturnPositionSmoothTime>k__BackingField: 0.6
+  <ReturnRotationSmoothTime>k__BackingField: 0.4
+  <ReturnInputUnlockProgress>k__BackingField: 0.7
+  <ReturnPositionTolerance>k__BackingField: 0.03
+  <ReturnRotationTolerance>k__BackingField: 0.5
+  <ArcCompletionProgress>k__BackingField: 1
+  <CollisionLayers>k__BackingField:
+    serializedVersion: 2
+    m_Bits: 4294951049
+  <CollisionRadius>k__BackingField: 0.2
+  <CollisionPadding>k__BackingField: 0.08
+  <PlayerAvoidanceOffset>k__BackingField: 0.35

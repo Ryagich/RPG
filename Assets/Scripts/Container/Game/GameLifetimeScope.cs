@@ -21,6 +21,7 @@ using UI.Inventory;
 using Training;
 using Mill;
 using Saves;
+using Movement;
 
 namespace Container.Game
 {
@@ -110,6 +111,7 @@ namespace Container.Game
             builder.RegisterMessageBroker<GameModeChangedMessage>(options);
             builder.RegisterMessageBroker<DialogueExitRequestedMessage>(options);
             builder.RegisterMessageBroker<DialogueGameplayEventRaisedMessage>(options);
+            builder.RegisterMessageBroker<DialogueScreenFullyObscuredMessage>(options);
             builder.RegisterMessageBroker<PlayerDiedMessage>(options);
             builder.RegisterMessageBroker<CharacterDamagedMessage>(options);
             builder.RegisterMessageBroker<InteractableMessage>(options);
@@ -148,7 +150,8 @@ namespace Container.Game
                 Lifetime.Singleton).AsSelf();
              
             // === Input ===
-            builder.Register<InputHandler>(Lifetime.Singleton).AsSelf().As<IStartable>();
+            builder.Register<PlayerInputLock>(Lifetime.Singleton).AsSelf();
+            builder.Register<InputHandler>(Lifetime.Singleton).AsSelf().As<IStartable>().As<System.IDisposable>();
             builder.RegisterEntryPoint<CameraInputHandler>().AsSelf();
 
             builder.RegisterEntryPoint<GameWorldBootstrapper>().AsSelf();
@@ -215,12 +218,7 @@ namespace Container.Game
         private static void PlacePlayerAtSpawn(PlayerLifetimeScope player, Pose spawnPose)
         {
             var controller = player.Container.Resolve<CharacterController>();
-            controller.enabled = false;
-
-            player.transform.SetPositionAndRotation(spawnPose.position, spawnPose.rotation);
-            Physics.SyncTransforms();
-
-            controller.enabled = true;
+            CharacterPlacementUtility.SetPose(player.transform, controller, spawnPose);
         }
     }
 }

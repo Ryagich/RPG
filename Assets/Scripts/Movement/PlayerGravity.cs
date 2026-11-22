@@ -371,7 +371,12 @@ namespace Movement
 
         private void ApplyAirborneState()
         {
-            animator?.SetBool(IsFallParameterHash, gravity != null && gravity.IsAirborne && !HasAirborneStateBlocker());
+            if (animator == null)
+            {
+                return;
+            }
+
+            animator.SetBool(IsFallParameterHash, gravity != null && gravity.IsAirborne && !HasAirborneStateBlocker());
         }
 
         private bool HasAirborneStateBlocker()

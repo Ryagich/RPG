@@ -109377,6 +109377,8 @@ MonoBehaviour:
   inventoryConfig: {fileID: 0}
   defaultVisualConfig: {fileID: 11400000, guid: 70ad4b252e7a2ba47bf849d4bd4360d5, type: 2}
   canTalk: 1
+  teleportPlayerToDialoguePosition: 1
+  dialogueParticipantDistance: 1.5
   dialog: {fileID: 11400000, guid: e63f25576b6f29b489116d85284be19c, type: 2}
   stateMachineGraph: {fileID: 11400000, guid: 9fef677537be06b4e8a00a17d5132a30, type: 2}
   faction: {fileID: 11400000, guid: b0d1d20fc010f724ab3a4a56bd0ff239, type: 2}

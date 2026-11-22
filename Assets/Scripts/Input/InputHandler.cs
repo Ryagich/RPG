@@ -9,9 +9,10 @@ using VContainer.Unity;
 namespace Input
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class InputHandler : IStartable
+    public class InputHandler : IStartable, System.IDisposable
     {
         private readonly InputConfig inputConfig;
+        private readonly PlayerInputLock playerInputLock;
         private readonly IPublisher<PlayerMoveMessage> playerMovePublisher;
         private readonly IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher;
         private readonly IPublisher<InteractableInputMessage> interactableInputPublisher;
@@ -44,6 +45,7 @@ namespace Input
         private InputHandler
             (
                 InputConfig inputConfig,
+                PlayerInputLock playerInputLock,
                 IPublisher<PlayerMoveMessage> playerMovePublisher,
                 IPublisher<ChangeGameModeRequest> changeGameModeRequestPublisher,
                 IPublisher<InteractableInputMessage> interactableInputPublisher,
@@ -69,6 +71,7 @@ namespace Input
             )
         {
             this.inputConfig = inputConfig;
+            this.playerInputLock = playerInputLock;
             this.playerMovePublisher = playerMovePublisher;
             this.changeGameModeRequestPublisher = changeGameModeRequestPublisher;
             this.interactableInputPublisher = interactableInputPublisher;
@@ -95,6 +98,7 @@ namespace Input
 
         public void Start()
         {
+            playerInputLock.Changed += OnPlayerInputLockChanged;
             inputConfig.Movement.action.performed += OnMove;
             inputConfig.Movement.action.canceled += OnMove;
             inputConfig.Run.action.performed += OnRun;
@@ -126,7 +130,12 @@ namespace Input
             inputConfig.ShowStats.action.canceled += ShowStatsReleased;
             playerDiedSubscriber.Subscribe(OnPlayerDied);
         }
-        
+
+        public void Dispose()
+        {
+            playerInputLock.Changed -= OnPlayerInputLockChanged;
+        }
+
         private void OnMove(InputAction.CallbackContext context)
         {
             if (isPlayerDead)
@@ -135,6 +144,11 @@ namespace Input
             }
 
             currentMoveDirection = context.ReadValue<Vector2>();
+            if (playerInputLock.IsLocked)
+            {
+                return;
+            }
+
             PublishPlayerMove();
         }
 
@@ -159,6 +173,11 @@ namespace Input
                 lastRunReleaseTime = Time.unscaledTime;
             }
 
+            if (playerInputLock.IsLocked)
+            {
+                return;
+            }
+
             PublishPlayerMove();
         }
 
@@ -169,7 +188,7 @@ namespace Input
         
         private void Interactable(InputAction.CallbackContext context)
         {
-            if (isPlayerDead)
+            if (IsInputBlocked)
             {
                 return;
             }
@@ -200,7 +219,7 @@ namespace Input
         
         private void OpenInventory(InputAction.CallbackContext context)
         {
-            if (isPlayerDead)
+            if (IsInputBlocked)
             {
                 return;
             }
@@ -210,7 +229,7 @@ namespace Input
 
         private void OpenMap(InputAction.CallbackContext context)
         {
-            if (isPlayerDead)
+            if (IsInputBlocked)
             {
                 return;
             }
@@ -220,7 +239,7 @@ namespace Input
 
         private void OpenQuestLog(InputAction.CallbackContext context)
         {
-            if (isPlayerDead)
+            if (IsInputBlocked)
             {
                 return;
             }
@@ -230,7 +249,7 @@ namespace Input
 
         private void LeftMouseDown(InputAction.CallbackContext context)
         {
-            if (isPlayerDead)
+            if (IsInputBlocked)
             {
                 return;
             }
@@ -246,7 +265,7 @@ namespace Input
 
         private void LeftMouseUp(InputAction.CallbackContext context)
         {
-            if (isPlayerDead)
+            if (IsInputBlocked)
             {
                 return;
             }
@@ -256,7 +275,7 @@ namespace Input
 
         private void RightMouseDown(InputAction.CallbackContext context)
         {
-            if (isPlayerDead)
+            if (IsInputBlocked)
             {
                 return;
             }
@@ -272,7 +291,7 @@ namespace Input
 
         private void RightMouseUp(InputAction.CallbackContext context)
         {
-            if (isPlayerDead)
+            if (IsInputBlocked)
             {
                 return;
             }
@@ -282,7 +301,7 @@ namespace Input
 
         private void Dodge(InputAction.CallbackContext context)
         {
-            if (isPlayerDead)
+            if (IsInputBlocked)
             {
                 return;
             }
@@ -298,7 +317,7 @@ namespace Input
 
         private void Roll(InputAction.CallbackContext context)
         {
-            if (isPlayerDead)
+            if (IsInputBlocked)
             {
                 return;
             }
@@ -314,7 +333,7 @@ namespace Input
 
         private void Jump(InputAction.CallbackContext context)
         {
-            if (!isPlayerDead && gameModesController.GameMode == GameMode.Game)
+            if (!IsInputBlocked && gameModesController.GameMode == GameMode.Game)
             {
                 jumpInputPublisher.Publish(new JumpInputMessage());
             }
@@ -335,7 +354,7 @@ namespace Input
 
         private void SkipLesson(InputAction.CallbackContext context)
         {
-            if (!isPlayerDead && gameModesController.GameMode == GameMode.Lesson)
+            if (!IsInputBlocked && gameModesController.GameMode == GameMode.Lesson)
             {
                 lessonSkipInputPublisher.Publish(new LessonSkipInputMessage());
             }
@@ -356,7 +375,7 @@ namespace Input
 
         private void ShowStatsPressed(InputAction.CallbackContext context)
         {
-            if (isPlayerDead)
+            if (IsInputBlocked)
             {
                 return;
             }
@@ -366,7 +385,7 @@ namespace Input
 
         private void ShowStatsReleased(InputAction.CallbackContext context)
         {
-            if (isPlayerDead)
+            if (IsInputBlocked)
             {
                 return;
             }
@@ -376,7 +395,7 @@ namespace Input
 
         private void PublishFastSlot(int slotIndex)
         {
-            if (!isPlayerDead)
+            if (!IsInputBlocked)
             {
                 fastSlotInputPublisher.Publish(new FastSlotInputMessage(slotIndex));
             }
@@ -384,7 +403,7 @@ namespace Input
 
         private void PublishWeaponSlot(int slotIndex)
         {
-            if (!isPlayerDead)
+            if (!IsInputBlocked)
             {
                 weaponSlotInputPublisher.Publish(new WeaponSlotInputMessage(slotIndex));
             }
@@ -404,7 +423,7 @@ namespace Input
 
         private void Pause(InputAction.CallbackContext context)
         {
-            if (isPlayerDead)
+            if (IsInputBlocked)
             {
                 return;
             }
@@ -420,7 +439,7 @@ namespace Input
 
         private void PublishTargetLockCommand(TargetLockCommand command)
         {
-            if (isPlayerDead || gameModesController.GameMode != GameMode.Game)
+            if (IsInputBlocked || gameModesController.GameMode != GameMode.Game)
             {
                 return;
             }
@@ -438,5 +457,16 @@ namespace Input
             PublishPlayerMove();
             showStatsInputPublisher.Publish(new ShowStatsInputMessage(false));
         }
+
+        private bool IsInputBlocked => isPlayerDead || playerInputLock.IsLocked;
+
+        private void OnPlayerInputLockChanged(bool isLocked)
+        {
+            if (!isLocked && !isPlayerDead)
+            {
+                PublishPlayerMove();
+            }
+        }
+
     }
 }

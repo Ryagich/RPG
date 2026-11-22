@@ -208,13 +208,18 @@ namespace Movement
 
         private void SetStage(FallStage stage)
         {
-            if (currentStage == stage && animator != null)
+            if (currentStage == stage)
             {
                 return;
             }
 
             currentStage = stage;
-            animator?.SetInteger(FallStageParameterHash, (int)stage);
+            if (animator == null)
+            {
+                return;
+            }
+
+            animator.SetInteger(FallStageParameterHash, (int)stage);
         }
     }
 

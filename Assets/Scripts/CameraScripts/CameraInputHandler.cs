@@ -15,6 +15,7 @@ namespace CameraScripts
     public sealed class CameraInputHandler : IStartable, System.IDisposable
     {
         private readonly InputConfig inputConfig;
+        private readonly PlayerInputLock playerInputLock;
         private readonly IPublisher<CameraLookInputMessage> lookInputPublisher;
         private readonly IPublisher<CameraZoomInputMessage> zoomInputPublisher;
 
@@ -24,10 +25,12 @@ namespace CameraScripts
 
         public CameraInputHandler(
             InputConfig inputConfig,
+            PlayerInputLock playerInputLock,
             IPublisher<CameraLookInputMessage> lookInputPublisher,
             IPublisher<CameraZoomInputMessage> zoomInputPublisher)
         {
             this.inputConfig = inputConfig;
+            this.playerInputLock = playerInputLock;
             this.lookInputPublisher = lookInputPublisher;
             this.zoomInputPublisher = zoomInputPublisher;
         }
@@ -52,6 +55,11 @@ namespace CameraScripts
 
         private void OnLook(InputAction.CallbackContext context)
         {
+            if (playerInputLock.IsLocked)
+            {
+                return;
+            }
+
             var delta = context.ReadValue<Vector2>();
             if (delta.sqrMagnitude > Mathf.Epsilon)
             {
@@ -59,11 +67,21 @@ namespace CameraScripts
             }
         }
 
-        private void OnZoomIn(InputAction.CallbackContext _) =>
-            zoomInputPublisher.Publish(new CameraZoomInputMessage(CameraZoomDirection.In));
+        private void OnZoomIn(InputAction.CallbackContext _)
+        {
+            if (!playerInputLock.IsLocked)
+            {
+                zoomInputPublisher.Publish(new CameraZoomInputMessage(CameraZoomDirection.In));
+            }
+        }
 
-        private void OnZoomOut(InputAction.CallbackContext _) =>
-            zoomInputPublisher.Publish(new CameraZoomInputMessage(CameraZoomDirection.Out));
+        private void OnZoomOut(InputAction.CallbackContext _)
+        {
+            if (!playerInputLock.IsLocked)
+            {
+                zoomInputPublisher.Publish(new CameraZoomInputMessage(CameraZoomDirection.Out));
+            }
+        }
 
         private static void Subscribe(
             InputAction action,

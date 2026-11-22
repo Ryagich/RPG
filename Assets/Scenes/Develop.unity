@@ -20990,6 +20990,10 @@ PrefabInstance:
       propertyPath: participatesInPersistence
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 9143284009748708437, guid: 472f6e4d3fbdffb40a93001bd5e82aa9, type: 3}
+      propertyPath: teleportPlayerToDialoguePosition
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

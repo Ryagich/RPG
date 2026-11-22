@@ -23,6 +23,13 @@ namespace CameraScripts
         public float MaximumDistanceMultiplier { get; private set; } = 2.5f;
 
         [field: Space]
+        [field: Header("Gameplay Default Pose")]
+        [field: SerializeField, Tooltip("Позиция камеры относительно корня префаба игрока, к которой она плавно возвращается после диалога.")]
+        public Vector3 DefaultLocalPosition { get; private set; } = new(0.2f, 1.9458f, -2.0063f);
+        [field: SerializeField, Tooltip("Поворот камеры относительно корня префаба игрока в позиции возврата после диалога.")]
+        public Vector3 DefaultLocalEulerAngles { get; private set; } = new(12f, 0f, 0f);
+
+        [field: Space]
         [field: Header("Gameplay Collision")]
         [field: SerializeField, Tooltip("Слои, которые препятствуют камере. Коллайдеры персонажа всегда игнорируются.")]
         public LayerMask CollisionLayers { get; private set; } = Physics.DefaultRaycastLayers;

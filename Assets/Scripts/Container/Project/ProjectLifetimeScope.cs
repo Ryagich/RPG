@@ -38,6 +38,7 @@ namespace Container.Project
 
         [field: SerializeField] public InputConfig InputConfig { get; private set; }
         [field: SerializeField] public CameraConfig CameraConfig { get; private set; }
+        [field: SerializeField] public DialogueCameraConfig DialogueCameraConfig { get; private set; }
         [field: SerializeField] public PlayerMovementConfig PlayerMovementConfig { get; private set; }
         [field: SerializeField] public CharacterWaterConfig CharacterWaterConfig { get; private set; }
         [field: SerializeField] public PlayerJumpConfig PlayerJumpConfig { get; private set; }
@@ -45,6 +46,7 @@ namespace Container.Project
         [field: SerializeField] public GravityConfig GravityConfig { get; private set; }
         [field: SerializeField] public FallConfig FallConfig { get; private set; }
         [field: SerializeField] public UIConfig UIConfig { get; private set; }
+        [field: SerializeField] public DialogueScreenTransitionConfig DialogueScreenTransitionConfig { get; private set; }
         [field: SerializeField] public StatsConfig StatsConfig { get; private set; }
         [field: SerializeField] public StaminaConfig StaminaConfig { get; private set; }
         [field: SerializeField] public LocalizationConfig LocalizationConfig { get; private set; }
@@ -98,6 +100,7 @@ namespace Container.Project
             // === Общие зависимости ===
             builder.RegisterInstance(InputConfig).AsSelf();
             builder.RegisterInstance(CameraConfig).AsSelf();
+            builder.RegisterInstance(DialogueCameraConfig).AsSelf();
             builder.RegisterInstance(PlayerMovementConfig).AsSelf();
             builder.RegisterInstance(CharacterWaterConfig).AsSelf();
             builder.RegisterInstance(PlayerJumpConfig).AsSelf();
@@ -105,6 +108,7 @@ namespace Container.Project
             builder.RegisterInstance(GravityConfig).AsSelf();
             builder.RegisterInstance(FallConfig).AsSelf();
             builder.RegisterInstance(UIConfig).AsSelf();
+            builder.RegisterInstance(DialogueScreenTransitionConfig).AsSelf();
             builder.RegisterInstance(StatsConfig).AsSelf();
             builder.RegisterInstance(StaminaConfig).AsSelf();
             builder.RegisterInstance(LocalizationConfig).AsSelf();

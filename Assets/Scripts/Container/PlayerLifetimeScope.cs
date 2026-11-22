@@ -1,6 +1,7 @@
 using CameraScripts;
 using Combat;
 using CharacterAnimation;
+using Dialogue;
 using Factions;
 using Interactable;
 using Inventory;
@@ -113,6 +114,8 @@ namespace Container
                                           });
 
             builder.RegisterEntryPoint<CameraMotor>().AsSelf();
+            builder.RegisterEntryPoint<DialogueCameraCoordinator>().AsSelf();
+            builder.RegisterEntryPoint<DialogueParticipantPositioningCoordinator>().AsSelf();
             builder.Register<TargetLockTargetFilter>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<TargetLockController>().AsSelf();
             builder.Register<PlayerGravity>(Lifetime.Scoped)

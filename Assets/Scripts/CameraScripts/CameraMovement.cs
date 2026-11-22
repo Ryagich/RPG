@@ -7,13 +7,11 @@ namespace CameraScripts
     // ReSharper disable once ClassNeverInstantiated.Global
     public class CameraMovement
     {
-        private const int MaxCollisionHits = 16;
-
         private readonly CameraConfig config;
         private readonly TargetLockConfig targetLockConfig;
         private readonly Transform cameraTransform;
         private readonly Transform facingTarget;
-        private readonly RaycastHit[] collisionHits = new RaycastHit[MaxCollisionHits];
+        private readonly CameraPoseSolver poseSolver = new();
 
         private Transform target;
         private Transform lockTarget;
@@ -43,10 +41,38 @@ namespace CameraScripts
 
         public void Tick(float deltaTime)
         {
+            if (!TryUpdateDesiredPose(deltaTime, out var desiredPose))
+            {
+                return;
+            }
+
+            ApplyPose(desiredPose);
+        }
+
+        /// <summary>
+        /// Applies a pose already resolved by this gameplay rig. Transitional modes use this
+        /// when player camera input explicitly takes ownership of the camera again.
+        /// </summary>
+        public void ApplyPose(Pose desiredPose)
+        {
+            // Gameplay orbit is a rigid third-person rig: position is solved around the current
+            // player pivot, collision may shorten only its arm, and the resulting camera always
+            // aims at the current focus point. Damping either position or aim here breaks the
+            // invariant that the player stays framed during a fast orbit.
+            cameraTransform.SetPositionAndRotation(desiredPose.position, desiredPose.rotation);
+        }
+
+        /// <summary>
+        /// Applies queued look input and calculates the current gameplay pose without moving the
+        /// camera. Transitional camera modes use it so player rotation remains responsive.
+        /// </summary>
+        public bool TryUpdateDesiredPose(float deltaTime, out Pose desiredPose)
+        {
             var lookInput = ConsumeLookInput();
             if (target == null)
             {
-                return;
+                desiredPose = default;
+                return false;
             }
 
             EnsureInitialized();
@@ -59,21 +85,8 @@ namespace CameraScripts
                 UpdateManualLook(lookInput, deltaTime);
             }
 
-            var pivotPosition = GetPivotPosition();
-            var desiredRotation = Quaternion.Euler(pitch, yaw, 0f);
-            var shoulderOffset = GetShoulderWorldOffset();
-            var shoulderPivotPosition = pivotPosition + shoulderOffset;
-            var desiredPosition = ResolveCollision(
-                shoulderPivotPosition,
-                shoulderPivotPosition + desiredRotation * GetCameraOffset());
-            var lookPoint = GetLookPoint(pivotPosition, shoulderOffset);
-            var desiredLookRotation = GetLookRotation(lookPoint, desiredPosition);
-
-            // Gameplay orbit is a rigid third-person rig: position is solved around the current
-            // player pivot, collision may shorten only its arm, and the resulting camera always
-            // aims at the current focus point. Damping either position or aim here breaks the
-            // invariant that the player stays framed during a fast orbit.
-            cameraTransform.SetPositionAndRotation(desiredPosition, desiredLookRotation);
+            desiredPose = GetDesiredPose();
+            return true;
         }
 
         public void ChangeTarget(Transform t)
@@ -153,22 +166,102 @@ namespace CameraScripts
 
         public bool IsSettled(float positionTolerance = 0.03f, float rotationTolerance = 0.5f)
         {
-            if (!isInitialized || target == null)
+            if (!TryGetDesiredPose(out var desiredPose))
             {
                 return false;
             }
 
+            return Vector3.Distance(cameraTransform.position, desiredPose.position) <= positionTolerance
+                   && Quaternion.Angle(cameraTransform.rotation, desiredPose.rotation) <= rotationTolerance;
+        }
+
+        /// <summary>
+        /// Returns the pose the rigid gameplay rig would use this frame without moving the camera.
+        /// It is used as the destination of non-gameplay camera transitions.
+        /// </summary>
+        public bool TryGetDesiredPose(out Pose desiredPose)
+        {
+            if (!isInitialized || target == null)
+            {
+                desiredPose = default;
+                return false;
+            }
+
+            desiredPose = GetDesiredPose();
+            return true;
+        }
+
+        /// <summary>
+        /// Returns the configured default gameplay pose used as the stable destination when
+        /// leaving a dialogue. The values are local to the player prefab, so the pose follows
+        /// a teleported or otherwise repositioned player without inheriting the previous orbit.
+        /// </summary>
+        public bool TryGetDefaultPose(out Pose desiredPose)
+        {
+            if (target == null)
+            {
+                desiredPose = default;
+                return false;
+            }
+
+            var pivotPosition = GetPivotPosition();
+            var desiredPosition = target.TransformPoint(config.DefaultLocalPosition);
+            desiredPosition = poseSolver.ResolveCollision(
+                pivotPosition,
+                desiredPosition,
+                config.CollisionLayers,
+                config.CollisionRadius,
+                config.CollisionPadding,
+                target);
+            var desiredRotation = poseSolver.GetLookRotation(
+                GetDefaultLookPoint(),
+                desiredPosition,
+                cameraTransform.rotation);
+            desiredPose = new Pose(desiredPosition, desiredRotation);
+            return true;
+        }
+
+        /// <summary>
+        /// Aligns the gameplay orbit with the configured default pose before control returns to
+        /// the player. This prevents the first gameplay tick from snapping back to the orbit
+        /// that was active before the dialogue.
+        /// </summary>
+        public void ResetToDefaultOrbit()
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            var localEulerAngles = config.DefaultLocalEulerAngles;
+            yaw = Mathf.Repeat(target.eulerAngles.y + localEulerAngles.y, 360f);
+            pitch = Mathf.Clamp(NormalizeAngle(localEulerAngles.x), config.MinPitch, config.MaxPitch);
+            distanceMultiplier = GetDefaultDistanceMultiplier();
+            targetLockYawOffset = 0f;
+            targetLockPitchOffset = 0f;
+            pendingLookInput = Vector2.zero;
+            hasOrbitSeed = true;
+            isInitialized = true;
+        }
+
+        private Pose GetDesiredPose()
+        {
             var pivotPosition = GetPivotPosition();
             var desiredRotation = Quaternion.Euler(pitch, yaw, 0f);
             var shoulderOffset = GetShoulderWorldOffset();
             var shoulderPivotPosition = pivotPosition + shoulderOffset;
-            var desiredPosition = ResolveCollision(
+            var desiredPosition = poseSolver.ResolveCollision(
                 shoulderPivotPosition,
-                shoulderPivotPosition + desiredRotation * GetCameraOffset());
-            var desiredLookRotation = GetLookRotation(GetLookPoint(pivotPosition, shoulderOffset), desiredPosition);
-
-            return Vector3.Distance(cameraTransform.position, desiredPosition) <= positionTolerance
-                   && Quaternion.Angle(cameraTransform.rotation, desiredLookRotation) <= rotationTolerance;
+                shoulderPivotPosition + desiredRotation * GetCameraOffset(),
+                config.CollisionLayers,
+                config.CollisionRadius,
+                config.CollisionPadding,
+                target);
+            var desiredLookRotation = poseSolver.GetLookRotation(
+                GetLookPoint(pivotPosition, shoulderOffset),
+                desiredPosition,
+                cameraTransform.rotation);
+            return new Pose(desiredPosition, desiredLookRotation);
         }
 
         private void EnsureInitialized()
@@ -196,11 +289,18 @@ namespace CameraScripts
                 var shoulderOffset = GetShoulderWorldOffset();
                 var shoulderPivotPosition = pivotPosition + shoulderOffset;
                 var desiredPosition = shoulderPivotPosition + desiredRotation * GetCameraOffset();
-                desiredPosition = ResolveCollision(shoulderPivotPosition, desiredPosition);
+                desiredPosition = poseSolver.ResolveCollision(
+                    shoulderPivotPosition,
+                    desiredPosition,
+                    config.CollisionLayers,
+                    config.CollisionRadius,
+                    config.CollisionPadding,
+                    target);
                 cameraTransform.position = desiredPosition;
-                cameraTransform.rotation = GetLookRotation(
+                cameraTransform.rotation = poseSolver.GetLookRotation(
                     GetLookPoint(pivotPosition, shoulderOffset),
-                    desiredPosition);
+                    desiredPosition,
+                    cameraTransform.rotation);
             }
 
             isInitialized = true;
@@ -257,75 +357,37 @@ namespace CameraScripts
             return Vector3.Lerp(pivotPosition, lockPoint, targetLockConfig.CameraFocusBlend) + shoulderOffset;
         }
 
-        private Quaternion GetLookRotation(Vector3 lookPoint, Vector3 cameraPosition)
+        private Vector3 GetDefaultLookPoint()
         {
-            var direction = lookPoint - cameraPosition;
-            if (direction.sqrMagnitude <= Mathf.Epsilon)
-            {
-                return cameraTransform.rotation;
-            }
-
-            return Quaternion.LookRotation(direction.normalized, Vector3.up);
+            var localYaw = config.DefaultLocalEulerAngles.y;
+            var distanceMultiplierForDefaultPose = GetDefaultDistanceMultiplier();
+            var shoulderOffset = Quaternion.Euler(0f, localYaw, 0f)
+                                 * (Vector3.right * config.ShoulderOffset * distanceMultiplierForDefaultPose);
+            return target.TransformPoint(config.PivotOffset + shoulderOffset);
         }
 
-        private Vector3 ResolveCollision(Vector3 pivotPosition, Vector3 desiredPosition)
+        private float GetDefaultDistanceMultiplier()
         {
-            var pivotToCamera = desiredPosition - pivotPosition;
-            var desiredDistance = pivotToCamera.magnitude;
-            if (desiredDistance <= Mathf.Epsilon)
+            var localPositionFromPivot = config.DefaultLocalPosition - config.PivotOffset;
+            var localPitch = NormalizeAngle(config.DefaultLocalEulerAngles.x);
+            var localYaw = config.DefaultLocalEulerAngles.y;
+            var defaultOrbitOffset = Quaternion.Euler(0f, localYaw, 0f) * (Vector3.right * config.ShoulderOffset)
+                                     + Quaternion.Euler(localPitch, localYaw, 0f) * (Vector3.back * config.Distance);
+            var squaredLength = defaultOrbitOffset.sqrMagnitude;
+            if (squaredLength <= Mathf.Epsilon)
             {
-                return desiredPosition;
+                return 1f;
             }
 
-            var direction = pivotToCamera / desiredDistance;
-            var hitCount = config.CollisionRadius > 0f
-                ? Physics.SphereCastNonAlloc(
-                    pivotPosition,
-                    config.CollisionRadius,
-                    direction,
-                    collisionHits,
-                    desiredDistance,
-                    config.CollisionLayers,
-                    QueryTriggerInteraction.Ignore)
-                : Physics.RaycastNonAlloc(
-                    pivotPosition,
-                    direction,
-                    collisionHits,
-                    desiredDistance,
-                    config.CollisionLayers,
-                    QueryTriggerInteraction.Ignore);
-
-            var closestDistance = desiredDistance;
-            var hasBlockingHit = false;
-            for (var i = 0; i < hitCount; i++)
-            {
-                var hit = collisionHits[i];
-                if (IsIgnoredCollision(hit.collider) || hit.distance >= closestDistance)
-                {
-                    continue;
-                }
-
-                closestDistance = hit.distance;
-                hasBlockingHit = true;
-            }
-
-            if (!hasBlockingHit)
-            {
-                return desiredPosition;
-            }
-
-            var adjustedDistance = Mathf.Max(0f, closestDistance - config.CollisionPadding);
-            return pivotPosition + direction * adjustedDistance;
+            return Mathf.Clamp(
+                Vector3.Dot(localPositionFromPivot, defaultOrbitOffset) / squaredLength,
+                config.MinimumDistanceMultiplier,
+                config.MaximumDistanceMultiplier);
         }
 
-        private bool IsIgnoredCollision(Collider collider)
+        private static float NormalizeAngle(float angle)
         {
-            if (collider == null || target == null)
-            {
-                return false;
-            }
-
-            return collider.transform.root == target.root;
+            return Mathf.Repeat(angle + 180f, 360f) - 180f;
         }
 
         private void UpdateManualLook(Vector2 lookInput, float deltaTime)

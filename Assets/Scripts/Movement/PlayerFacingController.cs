@@ -61,6 +61,12 @@ namespace Movement
                 Quaternion.LookRotation(worldDirection.normalized, Vector3.up), speed * deltaTime);
         }
 
+        /// <summary>Applies an externally authored player facing without synthesizing movement input.</summary>
+        public void ForceFacing(Quaternion rotation)
+        {
+            visualTransform.rotation = rotation;
+        }
+
         private bool TryGetSwimSidewaysRotationSpeed(
             Vector2 acceptedDirection,
             bool isRunning,
