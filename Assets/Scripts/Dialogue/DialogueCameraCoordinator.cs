@@ -54,7 +54,10 @@ namespace Dialogue
             dialogueContext.Closed -= OnDialogueClosed;
             gameModeChangedSubscription?.Dispose();
             gameModeChangedSubscription = null;
-            RestoreGameplayCamera();
+            // Scope disposal is not a dialogue completion. At this point Unity may already have
+            // destroyed the player or camera transforms, so starting a gameplay camera return
+            // would read invalid scene objects. The next player scope owns its own camera state.
+            isDialogueCameraActive = false;
             ReleaseReturnInputLock();
         }
 
