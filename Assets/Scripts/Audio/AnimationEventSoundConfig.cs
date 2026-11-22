@@ -11,18 +11,10 @@ namespace GameAudio
     [CreateAssetMenu(fileName = "Animation Event Sound Config", menuName = "configs/Audio/Animation Event Sound Config")]
     public sealed class AnimationEventSoundConfig : ScriptableObject
     {
-        [Header("Weapon / attack")]
-        [SerializeField] private SoundConfig firstWeaponAttackHitSound;
-        [SerializeField] private SoundConfig secondWeaponAttackHitSound;
-        [SerializeField] private SoundConfig thirdWeaponAttackHitSound;
-
         [Header("Weapon / draw-hide")]
         [SerializeField] private SoundConfig drawWeaponSound;
         [SerializeField] private SoundConfig hideWeaponSound;
 
-        public SoundConfig FirstWeaponAttackHitSound => firstWeaponAttackHitSound;
-        public SoundConfig SecondWeaponAttackHitSound => secondWeaponAttackHitSound;
-        public SoundConfig ThirdWeaponAttackHitSound => thirdWeaponAttackHitSound;
         public SoundConfig DrawWeaponSound => drawWeaponSound;
         public SoundConfig HideWeaponSound => hideWeaponSound;
     }

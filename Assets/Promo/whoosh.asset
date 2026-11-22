@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1233149941 &-7730903131788120838
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: whoosh1_{-7730903131788120838}
+  m_AudioClip: {fileID: 8300000, guid: 1472a8aaa4754054b916933e1c35f791, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &-7425088763078356849
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: whoosh3_{-7425088763078356849}
+  m_AudioClip: {fileID: 8300000, guid: 04662546a6790ed4596750c77c3f076f, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &-5517357612087361902
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: whoosh6_{-5517357612087361902}
+  m_AudioClip: {fileID: 8300000, guid: 335c3ff9766fbd747b7244beceba38f1, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &-3343396611582219286
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: whoosh2_{-3343396611582219286}
+  m_AudioClip: {fileID: 8300000, guid: 87f3b8a2c7ef46d439021caad2befdca, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &1053237256048187362
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: whoosh5_{1053237256048187362}
+  m_AudioClip: {fileID: 8300000, guid: 9cba20190aeea0c4a996ababedf591eb, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1233149941 &3024180407777586726
+AudioContainerElement:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: whoosh4_{3024180407777586726}
+  m_AudioClip: {fileID: 8300000, guid: 3840089b2586f394d802a56e0b9463e4, type: 3}
+  m_Volume: 0
+  m_Enabled: 1
+--- !u!1307931743 &6418180475301049370
+AudioRandomContainer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: whoosh
+  m_Volume: -16.1
+  m_Pitch: -518
+  m_AutomaticTriggerTime: 0.02
+  m_LoopCount: 2
+  m_VolumeRandomizationRange: {x: 0, y: 0}
+  m_PitchRandomizationRange: {x: -96.594444, y: 471.8266}
+  m_AutomaticTriggerTimeRandomizationRange: {x: 0, y: 0}
+  m_LoopCountRandomizationRange: {x: 0, y: 0}
+  m_Elements:
+  - {fileID: -7730903131788120838}
+  - {fileID: -3343396611582219286}
+  - {fileID: -7425088763078356849}
+  - {fileID: 3024180407777586726}
+  - {fileID: 1053237256048187362}
+  - {fileID: -5517357612087361902}
+  m_AvoidRepeatingLast: 0
+  m_PlaybackMode: 1
+  m_TriggerMode: 1
+  m_AutomaticTriggerMode: 0
+  m_LoopMode: 1
+  m_VolumeRandomizationEnabled: 0
+  m_PitchRandomizationEnabled: 1
+  m_AutomaticTriggerTimeRandomizationEnabled: 0
+  m_LoopCountRandomizationEnabled: 0

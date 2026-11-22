@@ -100,23 +100,6 @@ namespace Inventory
         // Keeps existing clips working while their Animation Event is renamed.
         public void ResetAttackRequest() => ResetAnimationRequests();
 
-        // Parameterless methods are intentionally kept as the public animation-event contract.
-        // Each clip can select its sound without serializing object references into the clip itself.
-        public void PlayFirstWeaponAttackHitSound()
-        {
-            PlaySound(animationEventSoundConfig?.FirstWeaponAttackHitSound);
-        }
-
-        public void PlaySecondWeaponAttackHitSound()
-        {
-            PlaySound(animationEventSoundConfig?.SecondWeaponAttackHitSound);
-        }
-
-        public void PlayThirdWeaponAttackHitSound()
-        {
-            PlaySound(animationEventSoundConfig?.ThirdWeaponAttackHitSound);
-        }
-
         public void PlayDrawWeaponSound()
         {
             PlaySound(animationEventSoundConfig?.DrawWeaponSound);

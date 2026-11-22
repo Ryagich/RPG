@@ -46,13 +46,13 @@ namespace NPC
         private readonly CharacterActionState actionState;
         private readonly NpcNavMeshController navMeshController;
         private readonly StatsController statsController;
+        private readonly EquippedWeaponDamageWindowController damageWindow;
         private readonly MessagePipe.IPublisher<Messages.NpcAttackStartedMessage> attackStartedPublisher;
         private readonly MessagePipe.IPublisher<Messages.WeaponSheathedMessage> weaponSheathedPublisher;
         private readonly CompositeDisposable disposables = new();
 
         private GameObject currentWeaponInstance;
         private ItemConfig currentWeaponItemConfig;
-        private WeaponDamageZone activeDamageZone;
         private bool isWeaponDrawn;
         private bool isSheatheAnimationInProgress;
         private bool hasEnteredSheatheAnimationState;
@@ -75,6 +75,7 @@ namespace NPC
             CharacterActionState actionState,
             NpcNavMeshController navMeshController,
             StatsController statsController,
+            EquippedWeaponDamageWindowController damageWindow,
             MessagePipe.IPublisher<Messages.NpcAttackStartedMessage> attackStartedPublisher,
             MessagePipe.IPublisher<Messages.WeaponSheathedMessage> weaponSheathedPublisher)
         {
@@ -86,6 +87,7 @@ namespace NPC
             this.actionState = actionState;
             this.navMeshController = navMeshController;
             this.statsController = statsController;
+            this.damageWindow = damageWindow;
             this.attackStartedPublisher = attackStartedPublisher;
             this.weaponSheathedPublisher = weaponSheathedPublisher;
             fullBodyLayerIndex = animator != null ? animator.GetLayerIndex("Full Body") : -1;
@@ -511,25 +513,12 @@ namespace NPC
 
         private void BeginCurrentWeaponDamageWindow()
         {
-            if (activeDamageZone != null || currentWeaponInstance == null || currentWeaponItemConfig == null)
-            {
-                return;
-            }
-
-            var weapon = currentWeaponInstance.GetComponentInChildren<Weapon>(true);
-            activeDamageZone = weapon != null ? weapon.DamageZone : null;
-            activeDamageZone?.BeginDamageWindow(ownerDamageReceiver, currentWeaponItemConfig, IsHeavyAttackDamageAnimationActive());
+            damageWindow.Begin(currentWeaponInstance, currentWeaponItemConfig, ownerDamageReceiver, IsHeavyAttackDamageAnimationActive());
         }
 
         private void EndCurrentWeaponDamageWindow()
         {
-            if (activeDamageZone == null)
-            {
-                return;
-            }
-
-            activeDamageZone.EndDamageWindow();
-            activeDamageZone = null;
+            damageWindow.End();
         }
 
         private void MoveCurrentWeapon(WeaponDisplayMode displayMode)

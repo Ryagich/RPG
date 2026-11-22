@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Inventory.Item;
+using MessagePipe;
+using Messages;
 using UnityEngine;
 
 namespace Combat
@@ -15,6 +17,7 @@ namespace Combat
         private CharacterDamageReceiver attacker;
         private CharacterDamageReceiver intendedTarget;
         private ItemConfig weaponConfig;
+        private IPublisher<PhysicalContactMessage> contactPublisher;
         private bool isHeavyAttack;
         private bool isDamageWindowOpen;
         private bool intendedTargetWasHostile;
@@ -37,13 +40,15 @@ namespace Combat
             EndDamageWindow();
         }
 
-        public void BeginDamageWindow(
+        public bool BeginDamageWindow(
             CharacterDamageReceiver currentAttacker,
             ItemConfig currentWeaponConfig,
+            IPublisher<PhysicalContactMessage> currentContactPublisher,
             bool useHeavyAttackDamage = false)
         {
             attacker = currentAttacker;
             weaponConfig = currentWeaponConfig;
+            contactPublisher = currentContactPublisher;
             isHeavyAttack = useHeavyAttackDamage;
             intendedTarget = null;
             intendedTargetWasHostile = false;
@@ -53,6 +58,7 @@ namespace Combat
             isDamageWindowOpen = attacker != null
                                  && weaponConfig != null
                                  && !attacker.IsWeaponAttackSuppressed;
+            return isDamageWindowOpen;
         }
 
         public void EndDamageWindow()
@@ -61,6 +67,7 @@ namespace Combat
             attacker = null;
             intendedTarget = null;
             weaponConfig = null;
+            contactPublisher = null;
             isHeavyAttack = false;
             intendedTargetWasHostile = false;
             hitReceivers.Clear();
@@ -92,7 +99,9 @@ namespace Combat
             {
                 if (hitObjectReceivers.Add(objectReceiver))
                 {
+                    var publisher = contactPublisher;
                     objectReceiver.ReceiveHit(hit);
+                    publisher.Publish(new PhysicalContactMessage(hit.WeaponConfig, null, hit.Point));
                 }
 
                 return;

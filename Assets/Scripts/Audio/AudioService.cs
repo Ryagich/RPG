@@ -26,6 +26,11 @@ namespace GameAudio
         // reach the actual floor after filtering the actor's own colliders, without
         // allocating an array for each step.
         private const int FootstepRaycastHitLimit = 64;
+        private static readonly SoundSettings ResourcePlaybackSettings = new()
+        {
+            volume = Vector2.one,
+            pitch = Vector2.one
+        };
 
         private sealed class SourcePool
         {
@@ -322,12 +327,23 @@ namespace GameAudio
 
         private bool CanPlayAt(Vector3 position, float distanceToPlay)
         {
-            return listenerTransform == null
-                   || distanceToPlay <= 0f
-                   || Vector3.SqrMagnitude(listenerTransform.position - position) <= distanceToPlay * distanceToPlay;
+            return true;
         }
 
         public void Play(SoundSettings settings, Vector3 position, Transform parent = null)
+        {
+            Play(settings, position, parent, null);
+        }
+
+        public void PlayResource(AudioResource resource, Vector3 position)
+        {
+            if (resource != null)
+            {
+                Play(ResourcePlaybackSettings, position, null, resource);
+            }
+        }
+
+        private void Play(SoundSettings settings, Vector3 position, Transform parent, AudioResource resource)
         {
             if (settings == null || gamePool == null)
             {
@@ -339,8 +355,8 @@ namespace GameAudio
                 return;
             }
 
-            var clip = GetRandomClip(settings.Clips);
-            if (clip == null)
+            resource ??= GetRandomClip(settings.Clips);
+            if (resource == null)
             {
                 return;
             }
@@ -357,7 +373,7 @@ namespace GameAudio
             source.reverbZoneMix = settings.reverbZoneMix;
             source.minDistance = settings.MinDistance;
             source.maxDistance = Mathf.Max(settings.MinDistance, settings.MaxDistance);
-            source.clip = clip;
+            source.resource = resource;
             source.Play();
         }
 

@@ -43,6 +43,7 @@ MonoBehaviour:
   weaponInHandPrefab: {fileID: 4549924156844888184, guid: f2c6d43b032895447ad30ed5e346033f, type: 3}
   weaponDamageRange: {x: 9, y: 11}
   heavyWeaponDamageRange: {x: 15, y: 19}
+  weaponAudio: {fileID: 11400000, guid: f075424f1cef4fa69b8f90f865cd741e, type: 2}
   rightHandWeaponAttachment:
     localPosition: {x: 0, y: 0, z: 0}
     localEulerAngles: {x: 0, y: 0, z: 0}
