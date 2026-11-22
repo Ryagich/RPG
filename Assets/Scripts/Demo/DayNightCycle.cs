@@ -68,6 +68,9 @@ namespace World
         [SerializeField] private bool hideSunDiskAtNight = true;
         [Tooltip("Sun disk/halo fade duration as a fraction of a full cycle, inside dawn and dusk.")]
         [SerializeField, Range(0f, 0.125f)] private float sunDiskFade = 0.025f;
+        [Tooltip("Override the skybox material's angular sun softness for this cycle.")]
+        [SerializeField] private bool overrideSunDispersion;
+        [SerializeField, Range(0f, 10f)] private float sunDispersion = 0.25f;
 
         [Header("Four lighting values (smoothly interpolated)")]
         [SerializeField] private LightingSettings night = new LightingSettings
@@ -263,11 +266,13 @@ namespace World
                 * Mathf.SmoothStep(0f, 1f, (0.75f - time) / sunDiskFade);
         }
 
+        private float? SunDispersionOverride => overrideSunDispersion ? Mathf.Clamp(sunDispersion, 0f, 10f) : (float?)null;
+
         private void ApplyLighting()
         {
             if (controlledSun == null || runtimeSkybox == null)
                 return;
-            CloudSkyboxParameters.Apply(sourceSkybox, runtimeSkybox);
+            CloudSkyboxParameters.Apply(sourceSkybox, runtimeSkybox, SunDispersionOverride);
             LightingSettings value = EvaluateLighting();
             controlledSun.transform.rotation = Quaternion.Euler(value.sunRotation, sunAzimuth, 0f);
             Vector3 direction = -controlledSun.transform.forward;
@@ -441,7 +446,7 @@ namespace World
             }
             bool rebind = NeedsRebind();
             if (!previewRefreshRequested && !rebind
-                && !CloudSkyboxParameters.HaveChanges(sourceSkybox, runtimeSkybox))
+                && !CloudSkyboxParameters.HaveChanges(sourceSkybox, runtimeSkybox, SunDispersionOverride))
                 return;
             previewRefreshRequested = false;
             if (rebind)

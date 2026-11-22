@@ -16,14 +16,15 @@ namespace World
             "_UpperCloudWindStretch", "_UpperCloudHaze", "_SunRadius", "_SunHaloSize", "_SunHaloIntensity"
         };
 
-        public static bool HaveChanges(Material source, Material target)
+        public static bool HaveChanges(Material source, Material target, float? sunDispersionOverride = null)
         {
             if (source == null || target == null)
                 return false;
             foreach (string property in FloatProperties)
                 if (source.GetFloat(property) != target.GetFloat(property))
                     return true;
-            return source.GetVector("_CloudOffset") != target.GetVector("_CloudOffset")
+            return (sunDispersionOverride ?? source.GetFloat("_SunDispersion")) != target.GetFloat("_SunDispersion")
+                || source.GetVector("_CloudOffset") != target.GetVector("_CloudOffset")
                 || source.GetVector("_UpperCloudOffset") != target.GetVector("_UpperCloudOffset")
                 || source.GetTexture("_CloudField") != target.GetTexture("_CloudField")
                 || source.GetTexture("_UpperCloudField") != target.GetTexture("_UpperCloudField")
@@ -31,7 +32,7 @@ namespace World
                 || source.GetVector("_UpperCloudFieldParams") != target.GetVector("_UpperCloudFieldParams");
         }
 
-        public static void Apply(Material source, Material target)
+        public static void Apply(Material source, Material target, float? sunDispersionOverride = null)
         {
             foreach (string property in FloatProperties)
             {
@@ -39,6 +40,7 @@ namespace World
                 if (value != target.GetFloat(property))
                     target.SetFloat(property, value);
             }
+            target.SetFloat("_SunDispersion", sunDispersionOverride ?? source.GetFloat("_SunDispersion"));
             target.SetVector("_CloudOffset", source.GetVector("_CloudOffset"));
             target.SetVector("_UpperCloudOffset", source.GetVector("_UpperCloudOffset"));
             target.SetTexture("_CloudField", source.GetTexture("_CloudField"));

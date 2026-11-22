@@ -59,6 +59,7 @@ Shader "RPG/Skybox/Low Poly Clouds"
         _SunIntensity ("Sun Intensity", Range(0, 100)) = 4
         _SunDiskVisibility ("Sun Disk Visibility", Range(0, 1)) = 1
         _SunRadius ("Sun Radius (Degrees)", Range(0.01, 45)) = 1.5
+        _SunDispersion ("Sun Dispersion (Degrees)", Range(0, 10)) = 0
         _SunHaloSize ("Halo Radius Multiplier", Range(1, 64)) = 6
         _SunHaloIntensity ("Halo Intensity", Range(0, 8)) = 0.15
     }
@@ -132,6 +133,7 @@ Shader "RPG/Skybox/Low Poly Clouds"
                 float _SunIntensity;
                 float _SunDiskVisibility;
                 float _SunRadius;
+                float _SunDispersion;
                 float _SunHaloSize;
                 float _SunHaloIntensity;
             CBUFFER_END
@@ -245,8 +247,12 @@ Shader "RPG/Skybox/Low Poly Clouds"
                 float3 sunDirection = SunDirection();
                 float sunDistance = length(direction - sunDirection);
                 float sunRadius = 2.0 * sin(radians(_SunRadius) * 0.5);
-                float sunAA = max(fwidth(sunDistance), 0.00001);
+                // Independent angular softness; zero preserves the original disk.
+                float dispersion = 2.0 * sin(radians(_SunDispersion) * 0.5);
+                float sunAA = max(fwidth(sunDistance) + dispersion, 0.00001);
                 float sunDisk = 1.0 - smoothstep(sunRadius - sunAA, sunRadius + sunAA, sunDistance);
+                // Keep a wider disk from adding unbounded radiance to bloom.
+                sunDisk *= sunRadius * sunRadius / max(sunRadius * sunRadius + dispersion * dispersion, 0.00000001);
                 float haloRadius = max(sunRadius * _SunHaloSize, 0.0001);
                 float halo = exp2(-4.0 * sunDistance * sunDistance / (haloRadius * haloRadius));
                 float aboveHorizon = smoothstep(-0.01, 0.02, direction.y);
