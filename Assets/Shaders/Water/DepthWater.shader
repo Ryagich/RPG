@@ -18,6 +18,7 @@ Shader "RPG/Water/Depth Water"
         _NoiseTex ("Noise (RG)", 2D) = "gray" {}
         _NoiseTiling ("Noise tiling (per metre)", Float) = 0.25
         _NoiseSpeed ("Noise velocity", Vector) = (0.02, -0.015, 0, 0)
+        _PatternDistance ("Pattern scale start distance (m)", Float) = 25
         _Refraction ("Bottom distortion (screen UV)", Range(0, 0.1)) = 0.012
         _BottomDispersion ("Bottom chromatic separation", Range(0, 1)) = 0.15
         [Header(Surface overlay)]

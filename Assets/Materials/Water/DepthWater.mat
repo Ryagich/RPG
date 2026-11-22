@@ -61,8 +61,8 @@ Material:
     - _NormalScale: 0.5
     - _Refraction: 0.0185
     - _ShoreBlend: 0.3
-    - _Smoothness: 0.79
-    - _SpecularStrength: 1.38
+    - _Smoothness: 0.883
+    - _SpecularStrength: 1.03
     - _SunPathStretch: 3.63
     - _SurfaceDistortion: 0.289
     - _SurfaceTiling: 0.62

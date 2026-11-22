@@ -11,7 +11,7 @@ CBUFFER_START(UnityPerMaterial)
     float4 _ShallowColor, _DeepColor, _SurfaceColor;
     float4 _NormalTiling, _NormalSpeed, _NoiseSpeed, _SurfaceSpeed, _CausticsSpeed;
     float _ColorDepth, _Absorption, _ShoreBlend, _NormalScale;
-    float _NoiseTiling, _Refraction, _BottomDispersion;
+    float _NoiseTiling, _Refraction, _BottomDispersion, _PatternDistance;
     float _SurfaceTiling, _SurfaceDistortion;
     float _CausticsTiling, _CausticsStrength, _CausticsDepth, _CausticsDispersion, _CausticsDistortion;
     float _Smoothness, _SpecularStrength, _FresnelStrength;
@@ -77,6 +77,47 @@ float2 WaterSafeRefractionUV(float2 uv, float2 offset, float surfaceY)
     // Reject geometry above the water independently for each colour channel.
     // The original UV is safe because the water already passed the depth test.
     return lerp(uv, candidate, valid * step(bottom.y + 0.001, surfaceY));
+}
+
+// Blend adjacent world-anchored scales indefinitely instead of stretching UVs
+// continuously or returning to a fixed, visibly repeating far-distance pattern.
+// At each octave boundary the old second sample is exactly the new first one.
+float3 WaterPatternScales(float3 positionWS)
+{
+    float level = log2(max(distance(GetCameraPositionWS(), positionWS)
+        / max(_PatternDistance, 0.001), 1.0));
+    float scale = exp2(-floor(level));
+    return float3(scale, scale * 0.5, smoothstep(0.0, 1.0, frac(level)));
+}
+
+half4 WaterPatternSample(TEXTURE2D_PARAM(tex, texSampler), float2 spatialUV,
+    float2 motionUV, float3 scales)
+{
+    // Different pixels can straddle an octave boundary. Derive the footprint
+    // before selecting scales, so that the level change cannot create mip seams.
+    float2 dx = ddx(spatialUV);
+    float2 dy = ddy(spatialUV);
+    float2 motionDx = ddx(motionUV);
+    float2 motionDy = ddy(motionUV);
+    half4 a = SAMPLE_TEXTURE2D_GRAD(tex, texSampler, spatialUV * scales.x + motionUV,
+        dx * scales.x + motionDx, dy * scales.x + motionDy);
+    half4 b = SAMPLE_TEXTURE2D_GRAD(tex, texSampler, spatialUV * scales.y + motionUV,
+        dx * scales.y + motionDx, dy * scales.y + motionDy);
+    return lerp(a, b, scales.z);
+}
+
+half3 WaterPatternNormal(TEXTURE2D_PARAM(tex, texSampler), float2 spatialUV,
+    float2 motionUV, float3 scales, float strength)
+{
+    float2 dx = ddx(spatialUV);
+    float2 dy = ddy(spatialUV);
+    half3 a = UnpackNormalScale(SAMPLE_TEXTURE2D_GRAD(tex, texSampler,
+        spatialUV * scales.x + motionUV, dx * scales.x, dy * scales.x), strength);
+    half3 b = UnpackNormalScale(SAMPLE_TEXTURE2D_GRAD(tex, texSampler,
+        spatialUV * scales.y + motionUV, dx * scales.y, dy * scales.y), strength);
+    // Blend decoded directions: interpolating packed normal texels is incorrect
+    // for normal-map formats whose Z component is reconstructed during unpacking.
+    return SafeNormalize(lerp(a, b, scales.z));
 }
 
 half WaterCausticsSample(float2 uv)
@@ -214,19 +255,20 @@ half4 WaterFragment(WaterVaryings input) : SV_Target
     rayDepth = lerp(columnDepth, rayDepth, validBottom);
     float shore = smoothstep(0.0, max(_ShoreBlend, 0.0001), columnDepth);
     float2 worldUV = input.positionWS.xz;
-    float2 noiseUV = worldUV * _NoiseTiling + _Time.y * _NoiseSpeed.xy;
-    float2 noise = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, noiseUV).rg * 2.0 - 1.0;
-    half3 normalA = UnpackNormalScale(SAMPLE_TEXTURE2D(_NormalA, sampler_NormalA,
-        worldUV * _NormalTiling.xy + _Time.y * _NormalSpeed.xy), _NormalScale);
-    half3 normalB = UnpackNormalScale(SAMPLE_TEXTURE2D(_NormalB, sampler_NormalB,
-        worldUV * _NormalTiling.zw + _Time.y * _NormalSpeed.zw), _NormalScale);
+    float3 patternScales = WaterPatternScales(input.positionWS);
+    float2 noise = WaterPatternSample(TEXTURE2D_ARGS(_NoiseTex, sampler_NoiseTex),
+        worldUV * _NoiseTiling, _Time.y * _NoiseSpeed.xy, patternScales).rg * 2.0 - 1.0;
+    half3 normalA = WaterPatternNormal(TEXTURE2D_ARGS(_NormalA, sampler_NormalA),
+        worldUV * _NormalTiling.xy, _Time.y * _NormalSpeed.xy, patternScales, _NormalScale);
+    half3 normalB = WaterPatternNormal(TEXTURE2D_ARGS(_NormalB, sampler_NormalB),
+        worldUV * _NormalTiling.zw, _Time.y * _NormalSpeed.zw, patternScales, _NormalScale);
     half3 tangentNormal = BlendNormalRNM(SafeNormalize(normalA), SafeNormalize(normalB));
     tangentNormal = SafeNormalize(half3(tangentNormal.xy, max(tangentNormal.z, 0.001h)));
     half3 normalWS = half3(tangentNormal.x, tangentNormal.z, tangentNormal.y);
     // Reuse the assigned second normal map for moving capillary-scale ripples.
     // They affect direct glints only, preserving the larger reflection/refraction waves.
-    half3 detailNormal = UnpackNormalScale(SAMPLE_TEXTURE2D(_NormalB, sampler_NormalB,
-        worldUV * max(_GlintDetailTiling, 0.0) + _Time.y * _NormalSpeed.zw),
+    half3 detailNormal = WaterPatternNormal(TEXTURE2D_ARGS(_NormalB, sampler_NormalB),
+        worldUV * max(_GlintDetailTiling, 0.0), _Time.y * _NormalSpeed.zw, patternScales,
         _GlintDetailStrength * _NormalScale);
     half3 glintTangent = BlendNormalRNM(tangentNormal, SafeNormalize(detailNormal));
     glintTangent = SafeNormalize(half3(glintTangent.xy, max(glintTangent.z, 0.001h)));
@@ -279,8 +321,9 @@ half4 WaterFragment(WaterVaryings input) : SV_Target
     half transmission = exp(-max(_Absorption, 0.0) * rayDepth);
     // The opaque scene and caustics are already lit; only tint and foam are albedo.
     float3 color = lerp(waterTint * lighting.volume, bottomColor, transmission);
-    half4 surface = SAMPLE_TEXTURE2D(_SurfaceTex, sampler_SurfaceTex,
-        worldUV * _SurfaceTiling + _Time.y * _SurfaceSpeed.xy + distortion * _SurfaceDistortion);
+    half4 surface = WaterPatternSample(TEXTURE2D_ARGS(_SurfaceTex, sampler_SurfaceTex),
+        worldUV * _SurfaceTiling, _Time.y * _SurfaceSpeed.xy + distortion * _SurfaceDistortion,
+        patternScales);
     // Use the macroscopic interface for the environment Fresnel approximation.
     // Wave normals still steer reflection and highlights, but cannot turn isolated
     // texels into grazing-angle mirrors that replace the water with a dark probe.
