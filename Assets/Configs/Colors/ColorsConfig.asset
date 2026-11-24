@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Colors.ColorsConfig
   <White>k__BackingField: {r: 0.93710685, g: 0.93710685, b: 0.93710685, a: 1}
   <Gray>k__BackingField: {r: 0.7610062, g: 0.710751, b: 0.710751, a: 1}
+  <Yellow>k__BackingField: {r: 1, g: 0.92156863, b: 0, a: 1}
