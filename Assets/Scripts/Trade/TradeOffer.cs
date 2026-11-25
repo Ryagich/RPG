@@ -180,6 +180,57 @@ namespace Trade
             return returnedCount > 0;
         }
 
+        /// <summary>
+        /// Returns an item from the player's offer using the inventory-page priority: an empty
+        /// compatible equipment slot first, then only the player grid. The source offer is changed
+        /// after a destination accepts at least part of the stack, so a failed transfer leaves it intact.
+        /// </summary>
+        public bool TryReturnPlayerOfferItemToEmptySlotOrGrid(
+            TradeSession session,
+            IInventory offerInventory,
+            ItemInInventory itemInInventory,
+            Func<SlotModel, Vector2?> slotSizeProvider)
+        {
+            if (session == null
+             || offerInventory != session.PlayerOffer.Inventory
+             || itemInInventory?.ItemStack?.ItemConfig == null
+             || !offerInventory.CanGet(itemInInventory))
+            {
+                return false;
+            }
+
+            var returningStack = itemInInventory.ItemStack.Clone();
+            ItemStack remainder;
+            if (!playerInventory.TryPlaceInEmptySlot(returningStack, slotSizeProvider, out remainder))
+            {
+                remainder = playerInventory.TryAddToGrid(returningStack);
+            }
+            else if (remainder != null)
+            {
+                remainder = playerInventory.TryAddToGrid(remainder);
+            }
+
+            var returnedCount = returningStack.Count - (remainder?.Count ?? 0);
+            if (returnedCount <= 0)
+            {
+                return false;
+            }
+
+            var originalPosition = itemInInventory.Position;
+            offerInventory.Remove(itemInInventory);
+            if (remainder != null)
+            {
+                offerInventory.Add(remainder, originalPosition);
+            }
+
+            if (returningStack.ItemConfig.ItemType == ItemType.Backpack)
+            {
+                RebuildPlayerInventoryAndDropOverflow();
+            }
+
+            return true;
+        }
+
         public void ReturnAllOfferItems(TradeSession session, Func<SlotModel, Vector2?> slotSizeProvider)
         {
             if (session == null)
@@ -216,9 +267,12 @@ namespace Trade
 
         private ItemStack TryAddToInventory(IInventory inventory, ItemStack itemStack, Func<SlotModel, Vector2?> slotSizeProvider)
         {
-            return inventory == playerInventory
-                ? playerInventory.TryAdd(itemStack, slotSizeProvider)
-                : inventory?.TryAdd(itemStack) ?? itemStack;
+            if (inventory == playerInventory)
+            {
+                return playerInventory.TryAdd(itemStack, slotSizeProvider);
+            }
+
+            return inventory == null ? itemStack : inventory.TryAdd(itemStack);
         }
 
         private void RebuildPlayerInventoryAfterBackpackChange(ItemType slotType, ItemConfig itemConfig)
@@ -264,6 +318,58 @@ namespace Trade
             None,
             Player,
             Target
+        }
+    }
+
+    /// <summary>
+    /// Applies the fixed double-click routes of an active trade. The UI resolves the clicked model;
+    /// this coordinator decides the destination without depending on views or pointer state.
+    /// </summary>
+    public sealed class TradeDoubleClickActionService
+    {
+        private readonly PlayerInventory playerInventory;
+        private readonly TradeOfferService tradeOfferService;
+
+        public TradeDoubleClickActionService(PlayerInventory playerInventory, TradeOfferService tradeOfferService)
+        {
+            this.playerInventory = playerInventory ?? throw new ArgumentNullException(nameof(playerInventory));
+            this.tradeOfferService = tradeOfferService ?? throw new ArgumentNullException(nameof(tradeOfferService));
+        }
+
+        public bool TryMoveInventoryItem(
+            TradeSession session,
+            IInventory sourceInventory,
+            ItemInInventory itemInInventory,
+            Func<SlotModel, Vector2?> slotSizeProvider)
+        {
+            if (session == null || sourceInventory == null || itemInInventory?.ItemStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            if (sourceInventory == session.PlayerInventory || sourceInventory == session.TargetInventory)
+            {
+                return tradeOfferService.TryMoveInventoryItemToOffer(session, sourceInventory, itemInInventory, itemInInventory.Count);
+            }
+
+            if (sourceInventory == session.TargetOffer.Inventory)
+            {
+                return tradeOfferService.TryReturnOfferItem(session, sourceInventory, itemInInventory, slotSizeProvider);
+            }
+
+            return sourceInventory == session.PlayerOffer.Inventory
+                   && tradeOfferService.TryReturnPlayerOfferItemToEmptySlotOrGrid(session, sourceInventory, itemInInventory, slotSizeProvider);
+        }
+
+        public bool TryMovePlayerSlot(TradeSession session, SlotModel slotModel)
+        {
+            if (session == null || slotModel?.ItemStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            return playerInventory.TryMoveSlotItemToGrid(slotModel)
+                   || tradeOfferService.TryMovePlayerSlotToOffer(session, slotModel, slotModel.ItemStack.Count);
         }
     }
 }

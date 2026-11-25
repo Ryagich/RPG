@@ -97,7 +97,7 @@ namespace Inventory.Inventories
 
         public bool CanAdd(ItemConfig config)
         {
-            return config != null && TryFindFreeItemTiles(Tiles, config.Size, out _);
+            return config != null && InventoryGridPlacement.CanFit(Tiles, new ItemStack(config));
         }
 
         public bool TryGetFastSlot(int index, out FastSlotModel fastSlot)
@@ -390,7 +390,7 @@ namespace Inventory.Inventories
             }
 
             var changed = FillExistingGridStacks(remainingStack);
-            while (remainingStack.Count > 0 && TryFindFreeItemTiles(Tiles, remainingStack.Size, out var itemTiles))
+            while (remainingStack.Count > 0 && InventoryGridPlacement.TryFindFirstFreeTiles(Tiles, remainingStack, out var itemTiles))
             {
                 var countToPlace = Mathf.Min(remainingStack.Count, remainingStack.MaxStack);
                 AddItem(new ItemStack(remainingStack.ItemConfig, countToPlace, remainingStack.IsRotated, remainingStack.RuntimeTag), itemTiles);
@@ -575,6 +575,16 @@ namespace Inventory.Inventories
 
         public bool TryPlaceInSlot(ItemType slotType, ItemStack newItemStack, out ItemStack remainderStack, out ItemStack replacedStack)
         {
+            return TryPlaceInSlot(slotType, newItemStack, null, out remainderStack, out replacedStack);
+        }
+
+        public bool TryPlaceInSlot(
+            ItemType slotType,
+            ItemStack newItemStack,
+            Func<SlotModel, Vector2?> slotSizeProvider,
+            out ItemStack remainderStack,
+            out ItemStack replacedStack)
+        {
             remainderStack = null;
             replacedStack = null;
             if (newItemStack == null || newItemStack.ItemConfig == null || !TryGetSlotForPlacement(slotType, newItemStack, out var slot))
@@ -582,12 +592,43 @@ namespace Inventory.Inventories
                 return false;
             }
 
-            return TryPlaceInSlot(slot, newItemStack, out remainderStack, out replacedStack);
+            return TryPlaceInSlot(slot, newItemStack, slotSizeProvider?.Invoke(slot), out remainderStack, out replacedStack);
         }
 
         public bool TryPlaceInSlot(SlotModel slot, ItemStack newItemStack, out ItemStack remainderStack, out ItemStack replacedStack)
         {
             return TryPlaceInSlot(slot, newItemStack, null, out remainderStack, out replacedStack);
+        }
+
+        /// <summary>
+        /// Places a stack only into an empty compatible equipment slot. This intentionally does not
+        /// merge with an occupied slot and never replaces its item; callers that need those policies
+        /// should use <see cref="TryPlaceInSlot(ItemType,ItemStack,System.Func{SlotModel,Vector2?},out ItemStack,out ItemStack)"/>.
+        /// </summary>
+        public bool TryPlaceInEmptySlot(
+            ItemStack newItemStack,
+            Func<SlotModel, Vector2?> slotSizeProvider,
+            out ItemStack remainderStack)
+        {
+            remainderStack = null;
+            if (newItemStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            foreach (var slot in GetSlots())
+            {
+                if (slot.ItemStack != null
+                 || slot.ItemType != newItemStack.ItemConfig.ItemType
+                 || !CanAcceptItemInSlot(slot, newItemStack))
+                {
+                    continue;
+                }
+
+                return TryPlaceInSlot(slot, newItemStack, slotSizeProvider?.Invoke(slot), out remainderStack, out _);
+            }
+
+            return false;
         }
 
         public bool TryPlaceInSlot(
@@ -843,19 +884,7 @@ namespace Inventory.Inventories
         private bool TryGetAvailableTiles(ItemStack itemStack, Tile tile, out List<Tile> itemTiles)
         {
             itemTiles = null;
-            if (itemStack?.ItemConfig == null || tile == null)
-            {
-                return false;
-            }
-
-            var availableTiles = Tiles.GetTilesAround(tile.Index, itemStack.Size);
-            if (availableTiles.Count != itemStack.Size.x * itemStack.Size.y || availableTiles.Any(currentTile => !currentTile.IsFree))
-            {
-                return false;
-            }
-
-            itemTiles = availableTiles;
-            return true;
+            return tile != null && InventoryGridPlacement.TryFindFreeTilesAt(Tiles, tile.Index, itemStack, out itemTiles);
         }
 
         private bool FillExistingSlotStacks(ItemStack remainingStack)
@@ -926,25 +955,6 @@ namespace Inventory.Inventories
             return itemStack;
         }
 
-        private static bool TryFindFreeItemTiles(Tiles tiles, Vector2Int size, out List<Tile> itemTiles)
-        {
-            for (var y = 0; y < tiles.tiles.GetLength(1); y++)
-            for (var x = 0; x < tiles.tiles.GetLength(0); x++)
-            {
-                var availableTiles = tiles.GetTilesAround(new Vector2Int(x, y), size);
-                if (availableTiles.Count != size.x * size.y || availableTiles.Any(tile => !tile.IsFree))
-                {
-                    continue;
-                }
-
-                itemTiles = availableTiles;
-                return true;
-            }
-
-            itemTiles = null;
-            return false;
-        }
-
         private static List<TransferEntry> CollectItemsInTileOrder(Tiles sourceTiles)
         {
             var result = new List<TransferEntry>();
@@ -988,13 +998,7 @@ namespace Inventory.Inventories
 
         private static bool TryAddAtPosition(Tiles targetTiles, List<ItemInInventory> targetItems, ItemStack itemStack, Vector2Int position)
         {
-            if (!targetTiles.TryGetTile(position.x, position.y, out var tile))
-            {
-                return false;
-            }
-
-            var itemTiles = targetTiles.GetTilesAround(tile.Index, itemStack.Size);
-            if (itemTiles.Count != itemStack.Size.x * itemStack.Size.y || itemTiles.Any(currentTile => !currentTile.IsFree))
+            if (!InventoryGridPlacement.TryFindFreeTilesAt(targetTiles, position, itemStack, out var itemTiles))
             {
                 return false;
             }
@@ -1005,25 +1009,13 @@ namespace Inventory.Inventories
 
         private static bool TryAddToFirstFreePosition(Tiles targetTiles, List<ItemInInventory> targetItems, ItemStack itemStack)
         {
-            for (var y = 0; y < targetTiles.tiles.GetLength(1); y++)
-            for (var x = 0; x < targetTiles.tiles.GetLength(0); x++)
+            if (!InventoryGridPlacement.TryFindFirstFreeTiles(targetTiles, itemStack, out var itemTiles))
             {
-                if (!targetTiles.TryGetTile(x, y, out var tile))
-                {
-                    continue;
-                }
-
-                var itemTiles = targetTiles.GetTilesAround(tile.Index, itemStack.Size);
-                if (itemTiles.Count != itemStack.Size.x * itemStack.Size.y || itemTiles.Any(currentTile => !currentTile.IsFree))
-                {
-                    continue;
-                }
-
-                AddItemToCollections(targetItems, itemStack.Clone(), itemTiles);
-                return true;
+                return false;
             }
 
-            return false;
+            AddItemToCollections(targetItems, itemStack.Clone(), itemTiles);
+            return true;
         }
 
         private bool TryBuildGridWithAdditionalItem(

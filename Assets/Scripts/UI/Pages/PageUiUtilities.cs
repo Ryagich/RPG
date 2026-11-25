@@ -612,6 +612,17 @@ namespace UI.Pages
 
             canvasGroup.blocksRaycasts = blocksRaycasts;
             canvasGroup.interactable = blocksRaycasts;
+
+            if (blocksRaycasts)
+            {
+                return;
+            }
+
+            foreach (var childCanvasGroup in popupRect.GetComponentsInChildren<CanvasGroup>(true))
+            {
+                childCanvasGroup.blocksRaycasts = false;
+                childCanvasGroup.interactable = false;
+            }
         }
 
         public static RectTransform CreateSectionsLayout(RectTransform parent, string pageName)

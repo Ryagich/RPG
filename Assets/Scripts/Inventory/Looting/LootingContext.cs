@@ -1,5 +1,6 @@
 ﻿using Character;
 using Inventory.Inventories;
+using Inventory.Slot;
 using Factions;
 using Money;
 
@@ -108,6 +109,16 @@ namespace Inventory.Looting
             Inventory.Item.ItemInInventory itemInInventory,
             int count)
         {
+            return TryMoveInventoryItem(targetInventory, sourceInventory, itemInInventory, count, null);
+        }
+
+        public bool TryMoveInventoryItem(
+            IInventory targetInventory,
+            IInventory sourceInventory,
+            Inventory.Item.ItemInInventory itemInInventory,
+            int count,
+            System.Func<SlotModel, UnityEngine.Vector2?> slotSizeProvider)
+        {
             if (sourceInventory == null || itemInInventory?.ItemStack?.ItemConfig == null)
             {
                 return false;
@@ -121,11 +132,14 @@ namespace Inventory.Looting
 
             var itemConfig = itemInInventory.ItemConfig;
             var isRotated = itemInInventory.ItemStack.IsRotated;
+            var runtimeTag = itemInInventory.ItemStack.RuntimeTag;
             var originalPosition = itemInInventory.Position;
             var originalCount = itemInInventory.Count;
             var moveCount = UnityEngine.Mathf.Clamp(count, 1, originalCount);
-            var movingStack = new Inventory.Item.ItemStack(itemConfig, moveCount, isRotated);
-            var remainder = destinationInventory.TryAdd(movingStack);
+            var movingStack = new Inventory.Item.ItemStack(itemConfig, moveCount, isRotated, runtimeTag);
+            var remainder = ReferenceEquals(destinationInventory, playerInventory)
+                ? playerInventory.TryAdd(movingStack, slotSizeProvider)
+                : destinationInventory.TryAdd(movingStack);
             var movedCount = moveCount - (remainder?.Count ?? 0);
             if (movedCount <= 0)
             {
@@ -136,7 +150,7 @@ namespace Inventory.Looting
             var remainingSourceCount = originalCount - movedCount;
             if (remainingSourceCount > 0)
             {
-                sourceInventory.Add(new Inventory.Item.ItemStack(itemConfig, remainingSourceCount, isRotated), originalPosition);
+                sourceInventory.Add(new Inventory.Item.ItemStack(itemConfig, remainingSourceCount, isRotated, runtimeTag), originalPosition);
             }
 
             return true;
@@ -237,33 +251,62 @@ namespace Inventory.Looting
                 }
             }
 
-            foreach (var tile in inventory.Tiles.tiles)
+            return InventoryGridPlacement.CanFit(inventory.Tiles, itemStack);
+        }
+    }
+
+    /// <summary>
+    /// Coordinates loot-page double-click intents. A failed transfer is resolved through the
+    /// same inventory actions used by the inventory page, not by the UI itself.
+    /// </summary>
+    public sealed class LootingDoubleClickActionService
+    {
+        private readonly LootTransferService lootTransferService;
+        private readonly System.Func<IInventory, Inventory.Item.ItemInInventory, bool> tryUseInventoryItem;
+        private readonly System.Func<SlotModel, bool> tryMoveSlotToGrid;
+
+        public LootingDoubleClickActionService(
+            LootTransferService lootTransferService,
+            System.Func<IInventory, Inventory.Item.ItemInInventory, bool> tryUseInventoryItem,
+            System.Func<SlotModel, bool> tryMoveSlotToGrid)
+        {
+            this.lootTransferService = lootTransferService ?? throw new System.ArgumentNullException(nameof(lootTransferService));
+            this.tryUseInventoryItem = tryUseInventoryItem ?? throw new System.ArgumentNullException(nameof(tryUseInventoryItem));
+            this.tryMoveSlotToGrid = tryMoveSlotToGrid ?? throw new System.ArgumentNullException(nameof(tryMoveSlotToGrid));
+        }
+
+        public bool TryMoveOrUseInventoryItem(
+            IInventory targetInventory,
+            IInventory sourceInventory,
+            Inventory.Item.ItemInInventory itemInInventory,
+            int count,
+            System.Func<SlotModel, UnityEngine.Vector2?> slotSizeProvider)
+        {
+            if (lootTransferService.TryMoveInventoryItem(
+                    targetInventory,
+                    sourceInventory,
+                    itemInInventory,
+                    count,
+                    slotSizeProvider))
             {
-                var itemTiles = inventory.Tiles.GetTilesAround(tile.Index, itemStack.Size);
-                if (itemTiles.Count != itemStack.Size.x * itemStack.Size.y)
-                {
-                    continue;
-                }
-
-                var allTilesFree = true;
-                foreach (var itemTile in itemTiles)
-                {
-                    if (itemTile.IsFree)
-                    {
-                        continue;
-                    }
-
-                    allTilesFree = false;
-                    break;
-                }
-
-                if (allTilesFree)
-                {
-                    return true;
-                }
+                return true;
             }
 
-            return false;
+            return tryUseInventoryItem(sourceInventory, itemInInventory);
+        }
+
+        public bool TryMoveOrStorePlayerSlot(
+            IInventory targetInventory,
+            SlotModel slotModel,
+            int count)
+        {
+            if (slotModel?.ItemStack?.ItemConfig == null)
+            {
+                return false;
+            }
+
+            return lootTransferService.TryMovePlayerSlot(targetInventory, slotModel, count)
+                   || tryMoveSlotToGrid(slotModel);
         }
     }
 }

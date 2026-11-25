@@ -45,7 +45,7 @@ namespace UI.Inventory
             return true;
         }
 
-        private static bool TryGetCursorCell(RectTransform rect, Camera camera, Vector2 point, out Vector2Int cell, out GridLayoutGroup layout)
+        public static bool TryGetCursorCell(RectTransform rect, Camera camera, Vector2 point, out Vector2Int cell, out GridLayoutGroup layout)
         {
             cell = default;
             layout = rect ? rect.GetComponent<GridLayoutGroup>() : null;

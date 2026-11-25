@@ -42,7 +42,7 @@ namespace Inventory.Inventories
             }
 
             var changed = FillExistingStacks(remainingStack);
-            while (remainingStack.Count > 0 && TryFindFreeItemTiles(remainingStack.Size, out var itemTiles))
+            while (remainingStack.Count > 0 && InventoryGridPlacement.TryFindFirstFreeTiles(Tiles, remainingStack, out var itemTiles))
             {
                 var countToPlace = Mathf.Min(remainingStack.Count, remainingStack.MaxStack);
                 AddItem(new ItemStack(remainingStack.ItemConfig, countToPlace, remainingStack.IsRotated), itemTiles);
@@ -165,19 +165,7 @@ namespace Inventory.Inventories
         private bool TryGetAvailableTiles(ItemStack itemStack, Tile tile, out List<Tile> itemTiles)
         {
             itemTiles = null;
-            if (itemStack?.ItemConfig == null || tile == null)
-            {
-                return false;
-            }
-
-            var availableTiles = Tiles.GetTilesAround(tile.Index, itemStack.Size);
-            if (availableTiles.Count != itemStack.Size.x * itemStack.Size.y || availableTiles.Any(currentTile => !currentTile.IsFree))
-            {
-                return false;
-            }
-
-            itemTiles = availableTiles;
-            return true;
+            return tile != null && InventoryGridPlacement.TryFindFreeTilesAt(Tiles, tile.Index, itemStack, out itemTiles);
         }
 
         private bool FillExistingStacks(ItemStack remainingStack)
@@ -198,25 +186,6 @@ namespace Inventory.Inventories
             }
 
             return changed;
-        }
-
-        private bool TryFindFreeItemTiles(Vector2Int size, out List<Tile> itemTiles)
-        {
-            for (var y = 0; y < Tiles.tiles.GetLength(1); y++)
-            for (var x = 0; x < Tiles.tiles.GetLength(0); x++)
-            {
-                var availableTiles = Tiles.GetTilesAround(new Vector2Int(x, y), size);
-                if (availableTiles.Count != size.x * size.y || availableTiles.Any(tile => !tile.IsFree))
-                {
-                    continue;
-                }
-
-                itemTiles = availableTiles;
-                return true;
-            }
-
-            itemTiles = null;
-            return false;
         }
 
         private void AddItem(ItemStack itemStack, List<Tile> itemTiles)
