@@ -64,8 +64,7 @@ namespace Inventory
             ISubscriber<DodgeInputMessage> dodgeInputSubscriber,
             ISubscriber<RollInputMessage> rollInputSubscriber,
             ISubscriber<GameModeChangedMessage> gameModeChangedSubscriber,
-            PlayerWeaponDrawingBlockState weaponDrawingBlockState,
-            EquippedWeaponDamageWindowController damageWindow
+            PlayerWeaponDrawingBlockState weaponDrawingBlockState
             )
         {
             this.gameModesController = gameModesController;
@@ -82,6 +81,7 @@ namespace Inventory
             var transitionAnimator = new PlayerWeaponTransitionAnimator(animator);
             var weaponVisual = new PlayerWeaponVisualController(handAnchor, animator, transitionAnimator.LayerIndex);
             var weaponCombatAnimator = new PlayerWeaponCombatAnimator(animator);
+            var damageWindow = new EquippedWeaponDamageWindowController();
             combatActions = new PlayerWeaponCombatActionController(
                 animator,
                 characterController,

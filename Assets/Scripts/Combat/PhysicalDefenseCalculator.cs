@@ -17,17 +17,6 @@ namespace Combat
             DamageBodyPart.Feet
         };
 
-        private static readonly ItemType[] ArmorSlots =
-        {
-            ItemType.Helm,
-            ItemType.Face,
-            ItemType.Body,
-            ItemType.Arms,
-            ItemType.Hands,
-            ItemType.Hips,
-            ItemType.Legs
-        };
-
         public static float CalculateEffective(IEquipmentInventory inventory)
         {
             return CalculateEffective(inventory, ItemType.None, null);
@@ -46,7 +35,7 @@ namespace Combat
             foreach (var bodyPart in ProtectedBodyParts)
             {
                 var weight = DamageBodyPartUtility.GetDefaultDamageMultiplier(bodyPart);
-                weightedProtection += ResolveProtection(inventory, bodyPart, overrideSlotType, overrideItemConfig, out _) * weight;
+                weightedProtection += ResolveProtection(inventory, bodyPart, overrideSlotType, overrideItemConfig) * weight;
                 totalWeight += weight;
             }
 
@@ -57,50 +46,49 @@ namespace Combat
 
         public static float ResolveProtection(IEquipmentInventory inventory, DamageBodyPart bodyPart)
         {
-            return ResolveProtection(inventory, bodyPart, out _);
-        }
-
-        public static float ResolveProtection(IEquipmentInventory inventory, DamageBodyPart bodyPart, out ItemConfig primaryArmor)
-        {
-            return ResolveProtection(inventory, bodyPart, ItemType.None, null, out primaryArmor);
+            return ResolveProtection(inventory, bodyPart, ItemType.None, null);
         }
 
         private static float ResolveProtection(
             IEquipmentInventory inventory,
             DamageBodyPart bodyPart,
             ItemType overrideSlotType,
-            ItemConfig overrideItemConfig,
-            out ItemConfig primaryArmor)
+            ItemConfig overrideItemConfig)
         {
-            primaryArmor = null;
             if (inventory == null || bodyPart == DamageBodyPart.None)
             {
                 return 0f;
             }
 
-            var protection = 0f;
-            var primaryProtection = 0f;
-            foreach (var slotType in ArmorSlots)
-            {
-                var itemConfig = overrideSlotType == slotType
-                    ? overrideItemConfig
-                    : GetEquippedItemConfig(inventory, slotType);
-                if (itemConfig == null || !DamageBodyPartUtility.IsProtectedBy(itemConfig.ItemType, bodyPart))
-                {
-                    continue;
-                }
-
-                var slotProtection = Mathf.Clamp01(itemConfig.PhysicalDefense);
-                protection += slotProtection;
-                // Keep equipment slot order as the tie-breaker when protection is equal.
-                if (slotProtection > primaryProtection)
-                {
-                    primaryProtection = slotProtection;
-                    primaryArmor = itemConfig;
-                }
-            }
+            var protection =
+                GetSlotProtection(inventory, ItemType.Helm, bodyPart, overrideSlotType, overrideItemConfig)
+              + GetSlotProtection(inventory, ItemType.Face, bodyPart, overrideSlotType, overrideItemConfig)
+              + GetSlotProtection(inventory, ItemType.Body, bodyPart, overrideSlotType, overrideItemConfig)
+              + GetSlotProtection(inventory, ItemType.Arms, bodyPart, overrideSlotType, overrideItemConfig)
+              + GetSlotProtection(inventory, ItemType.Hands, bodyPart, overrideSlotType, overrideItemConfig)
+              + GetSlotProtection(inventory, ItemType.Hips, bodyPart, overrideSlotType, overrideItemConfig)
+              + GetSlotProtection(inventory, ItemType.Legs, bodyPart, overrideSlotType, overrideItemConfig);
 
             return Mathf.Clamp01(protection);
+        }
+
+        private static float GetSlotProtection(
+            IEquipmentInventory inventory,
+            ItemType slotType,
+            DamageBodyPart bodyPart,
+            ItemType overrideSlotType,
+            ItemConfig overrideItemConfig)
+        {
+            var itemConfig = overrideSlotType == slotType
+                ? overrideItemConfig
+                : GetEquippedItemConfig(inventory, slotType);
+
+            if (itemConfig == null || !DamageBodyPartUtility.IsProtectedBy(itemConfig.ItemType, bodyPart))
+            {
+                return 0f;
+            }
+
+            return Mathf.Clamp01(itemConfig.PhysicalDefense);
         }
 
         private static ItemConfig GetEquippedItemConfig(IEquipmentInventory inventory, ItemType slotType)

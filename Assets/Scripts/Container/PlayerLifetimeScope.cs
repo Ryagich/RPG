@@ -169,7 +169,6 @@ namespace Container
                    .As<ITickable>()
                    .As<System.IDisposable>();
             builder.Register<CharacterDamageReceiver>(Lifetime.Scoped).AsSelf();
-            builder.Register<EquippedWeaponDamageWindowController>(Lifetime.Scoped);
             builder.RegisterEntryPoint<EquippedItemVisualController>().AsSelf();
             builder.RegisterEntryPoint<PlayerDeathController>().AsSelf();
             builder.RegisterEntryPoint<CorpseLootInteractableLogic>().AsSelf();

@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using GameAudio;
 using NaughtyAttributes;
 using UnityEngine;
-using UnityEngine.Audio;
 using UnityEngine.Localization;
 using UnityEngine.Serialization;
 
@@ -47,8 +45,6 @@ namespace Inventory.Item
         [SerializeField, ShowIf(nameof(HasWeaponPrefab))] private GameObject weaponInHandPrefab;
         [SerializeField, ShowIf(nameof(HasWeaponDamage))] private Vector2Int weaponDamageRange = new(9, 11);
         [SerializeField, ShowIf(nameof(HasWeaponDamage))] private Vector2Int heavyWeaponDamageRange = new(9, 11);
-        [SerializeField, ShowIf(nameof(HasWeaponPrefab))] private WeaponAudioProfile weaponAudio;
-        [SerializeField, ShowIf(nameof(HasDefenseModifiers))] private AudioResource armorImpactSound;
         [SerializeField, ShowIf(nameof(HasWeaponPrefab))] private WeaponAttachmentTransformData rightHandWeaponAttachment = new();
         [SerializeField, ShowIf(nameof(HasWeaponPrefab))] private WeaponAttachmentTransformData beltWeaponAttachment = new();
         [SerializeField, ShowIf(nameof(HasDefenseModifiers)), Range(0f, 1f)] private float physicalDefense;
@@ -77,8 +73,6 @@ namespace Inventory.Item
         public float MagicDefense => magicDefense;
         public Vector2Int WeaponDamageRange => weaponDamageRange;
         public Vector2Int HeavyWeaponDamageRange => heavyWeaponDamageRange;
-        public WeaponAudioProfile WeaponAudio => weaponAudio;
-        public AudioResource ArmorImpactSound => armorImpactSound;
         public bool BlocksFaceSlot => blocksFaceSlot;
         public float HpStat => hpStat;
         public float WaterStat => waterStat;

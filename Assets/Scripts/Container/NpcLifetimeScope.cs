@@ -6,8 +6,6 @@ using Inventory;
 using Inventory.Inventories;
 using Inventory.Item;
 using Inventory.Looting;
-using MessagePipe;
-using Messages;
 using Money;
 using Movement;
 using NPC;
@@ -46,8 +44,6 @@ namespace Container
         [Header("Stats")]
         [Tooltip("When enabled, water and food decrease periodically like they do for the player.")]
         [SerializeField] private bool consumeAdditionalStatsOverTime;
-        [Tooltip("A newly spawned NPC dies immediately. An existing save takes precedence.")]
-        [SerializeField] private bool dieOnSpawn;
         [Header("Initial Inventory")]
         [Tooltip("If empty, this NPC randomly selects an item set from its faction.")]
         [SerializeField] private ItemSetConfig itemSetConfigOverride;
@@ -64,7 +60,6 @@ namespace Container
             ? characterInfo.CharacterId
             : persistentCharacterId;
         public bool ParticipatesInPersistence => participatesInPersistence;
-        public bool DieOnSpawn => dieOnSpawn;
         public NpcCombatProfile CombatProfile => assignedCombatProfile ?? combatProfileOverride ?? faction?.CombatProfile;
         public bool CanTalk => canTalk;
         public float CurrentHp => currentHp;
@@ -308,7 +303,6 @@ namespace Container
                    .As<ITickable>()
                    .As<System.IDisposable>();
             builder.Register<CharacterDamageReceiver>(Lifetime.Scoped).AsSelf();
-            builder.Register<EquippedWeaponDamageWindowController>(Lifetime.Scoped);
             builder.RegisterEntryPoint<EquippedItemVisualController>().AsSelf();
             builder.Register<NpcWeaponInHandController>(Lifetime.Scoped)
                    .AsSelf()
@@ -337,7 +331,6 @@ namespace Container
                    .AsSelf()
                    .As<System.IDisposable>();
 
-            
         }
 
         protected virtual void RegisterCharacterInventory(IContainerBuilder builder)

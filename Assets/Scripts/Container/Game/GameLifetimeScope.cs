@@ -120,8 +120,6 @@ namespace Container.Game
             builder.RegisterMessageBroker<DialogueGameplayEventRaisedMessage>(options);
             builder.RegisterMessageBroker<PlayerDiedMessage>(options);
             builder.RegisterMessageBroker<CharacterDamagedMessage>(options);
-            builder.RegisterMessageBroker<WeaponSwingMessage>(options);
-            builder.RegisterMessageBroker<PhysicalContactMessage>(options);
             builder.RegisterMessageBroker<InteractableMessage>(options);
             builder.RegisterMessageBroker<InteractableEndMessage>(options);
             builder.RegisterMessageBroker<PlayerRelocatedMessage>(options);
@@ -181,7 +179,6 @@ namespace Container.Game
             builder.Register<Player.PlayerDeathState>(Lifetime.Singleton).AsSelf();
             builder.RegisterEntryPoint<GameModesController>().AsSelf();
             builder.RegisterEntryPoint<SoundMessagePlayer>().AsSelf();
-            builder.RegisterEntryPoint<CombatAudioPlayer>();
             builder.RegisterEntryPoint<AmbientController>().AsSelf();
         }
 

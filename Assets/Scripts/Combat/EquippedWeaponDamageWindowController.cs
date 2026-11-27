@@ -1,6 +1,4 @@
 using Inventory.Item;
-using MessagePipe;
-using Messages;
 using UnityEngine;
 
 namespace Combat
@@ -10,17 +8,7 @@ namespace Combat
     /// </summary>
     public sealed class EquippedWeaponDamageWindowController
     {
-        private readonly IPublisher<WeaponSwingMessage> swingPublisher;
-        private readonly IPublisher<PhysicalContactMessage> contactPublisher;
         private WeaponDamageZone activeDamageZone;
-
-        public EquippedWeaponDamageWindowController(
-            IPublisher<WeaponSwingMessage> swingPublisher,
-            IPublisher<PhysicalContactMessage> contactPublisher)
-        {
-            this.swingPublisher = swingPublisher;
-            this.contactPublisher = contactPublisher;
-        }
 
         public void Begin(
             GameObject weaponVisual,
@@ -41,10 +29,7 @@ namespace Combat
             }
 
             activeDamageZone = damageZone;
-            if (activeDamageZone.BeginDamageWindow(ownerDamageReceiver, weaponConfig, contactPublisher, isHeavyAttack))
-            {
-                swingPublisher.Publish(new WeaponSwingMessage(weaponConfig, damageZone.transform.position));
-            }
+            activeDamageZone.BeginDamageWindow(ownerDamageReceiver, weaponConfig, isHeavyAttack);
         }
 
         public void End()

@@ -14,7 +14,6 @@ namespace Combat
         private readonly IEquipmentInventory inventory;
         private readonly INonLethalCombatSessionRegistry nonLethalCombatSessions;
         private readonly IPublisher<CharacterDamagedMessage> damagedPublisher;
-        private readonly IPublisher<PhysicalContactMessage> contactPublisher;
         private bool isWeaponDamageBlocked;
         private bool isWeaponAttackSuppressed;
         private CharacterDamageReceiver weaponAttackIntentTarget;
@@ -25,15 +24,13 @@ namespace Combat
             StatsController statsController,
             IEquipmentInventory inventory,
             INonLethalCombatSessionRegistry nonLethalCombatSessions,
-            IPublisher<CharacterDamagedMessage> damagedPublisher,
-            IPublisher<PhysicalContactMessage> contactPublisher)
+            IPublisher<CharacterDamagedMessage> damagedPublisher)
         {
             this.ownerTransform = ownerTransform;
             this.statsController = statsController;
             this.inventory = inventory;
             this.nonLethalCombatSessions = nonLethalCombatSessions;
             this.damagedPublisher = damagedPublisher;
-            this.contactPublisher = contactPublisher;
         }
 
         public float CurrentHp => statsController.Hp.Value.Value;
@@ -99,8 +96,7 @@ namespace Combat
             }
 
             var bodyMultiplier = Mathf.Max(0f, hitbox.DamageMultiplier);
-            var physicalDefense = PhysicalDefenseCalculator.ResolveProtection(inventory, hitbox.BodyPart, out var armor);
-            contactPublisher.Publish(new PhysicalContactMessage(hit.WeaponConfig, armor, hit.Point));
+            var physicalDefense = PhysicalDefenseCalculator.ResolveProtection(inventory, hitbox.BodyPart);
             var mitigatedDamage = hit.Damage * bodyMultiplier * (1f - physicalDefense);
             mitigatedDamage = nonLethalCombatSessions.ClampIncomingWeaponDamage(this, mitigatedDamage);
 
@@ -148,8 +144,7 @@ namespace Combat
             }
 
             var bodyMultiplier = Mathf.Max(0f, hitbox.DamageMultiplier);
-            var physicalDefense = PhysicalDefenseCalculator.ResolveProtection(inventory, hitbox.BodyPart, out var armor);
-            contactPublisher.Publish(new PhysicalContactMessage(null, armor, point));
+            var physicalDefense = PhysicalDefenseCalculator.ResolveProtection(inventory, hitbox.BodyPart);
             var mitigatedDamage = baseDamage * bodyMultiplier * (1f - physicalDefense);
             if (mitigatedDamage <= 0f)
             {
