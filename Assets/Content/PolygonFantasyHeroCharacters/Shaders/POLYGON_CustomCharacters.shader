@@ -39,6 +39,38 @@ Shader "Shader Graphs/POLYGON_CustomCharacters"
             "UniversalMaterialType" = "SimpleLit"
         }
 
+        HLSLINCLUDE
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/DebugMipmapStreamingMacros.hlsl"
+
+        CBUFFER_START(UnityPerMaterial)
+        float4 _Texture_ST;
+        float4 _Mask_01_ST;
+        float4 _Mask_02_ST;
+        float4 _Mask_03_ST;
+        float4 _Mask_04_ST;
+        float4 _Mask_05_ST;
+        half4 _Color_Primary;
+        half4 _Color_Secondary;
+        half4 _Color_Leather_Primary;
+        half4 _Color_Metal_Primary;
+        half4 _Color_Leather_Secondary;
+        half4 _Color_Metal_Dark;
+        half4 _Color_Metal_Secondary;
+        half4 _Color_Hair;
+        half4 _Color_Skin;
+        half4 _Color_Stubble;
+        half4 _Color_Scar;
+        half4 _Color_BodyArt;
+        half4 _Color_Eyes;
+        half _Metallic;
+        half _Smoothness;
+        half _Emission;
+        half _BodyArt_Amount;
+        UNITY_TEXTURE_STREAMING_DEBUG_VARS;
+        CBUFFER_END
+        ENDHLSL
+
         Pass
         {
             Name "ForwardLit"
@@ -50,14 +82,17 @@ Shader "Shader Graphs/POLYGON_CustomCharacters"
 
             HLSLPROGRAM
             #pragma target 2.0
-            #pragma vertex vert
-            #pragma fragment frag
+            #pragma vertex LitPassVertexSimple
+            #pragma fragment LitPassFragmentSimple
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+            #pragma multi_compile _ _CLUSTER_LIGHT_LOOP
             #pragma multi_compile _ EVALUATE_SH_MIXED EVALUATE_SH_VERTEX
             #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
-            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
             #pragma multi_compile_fragment _ _SCREEN_SPACE_OCCLUSION
+            #pragma multi_compile_fragment _ _SCREEN_SPACE_IRRADIANCE
             #pragma multi_compile_fragment _ _DBUFFER_MRT1 _DBUFFER_MRT2 _DBUFFER_MRT3
             #pragma multi_compile_fragment _ _LIGHT_COOKIES
             #pragma multi_compile _ _LIGHT_LAYERS
@@ -66,14 +101,16 @@ Shader "Shader Graphs/POLYGON_CustomCharacters"
             #pragma multi_compile _ DIRLIGHTMAP_COMBINED
             #pragma multi_compile _ LIGHTMAP_ON
             #pragma multi_compile _ DYNAMICLIGHTMAP_ON
+            #pragma multi_compile _ USE_LEGACY_LIGHTMAPS
             #pragma multi_compile_fragment _ LIGHTMAP_BICUBIC_SAMPLING
             #pragma multi_compile _ LOD_FADE_CROSSFADE
             #pragma multi_compile_fragment _ DEBUG_DISPLAY
-            #pragma multi_compile_fog
             #pragma multi_compile_instancing
+            #pragma instancing_options renderinglayer
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Fog.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ProbeVolumeVariants.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
 
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceData.hlsl"
 
             TEXTURE2D(_Texture);
@@ -89,72 +126,18 @@ Shader "Shader Graphs/POLYGON_CustomCharacters"
             TEXTURE2D(_Mask_05);
             SAMPLER(sampler_Mask_05);
 
-            CBUFFER_START(UnityPerMaterial)
-            float4 _Texture_ST;
-            float4 _Mask_01_ST;
-            float4 _Mask_02_ST;
-            float4 _Mask_03_ST;
-            float4 _Mask_04_ST;
-            float4 _Mask_05_ST;
-            half4 _Color_Primary;
-            half4 _Color_Secondary;
-            half4 _Color_Leather_Primary;
-            half4 _Color_Metal_Primary;
-            half4 _Color_Leather_Secondary;
-            half4 _Color_Metal_Dark;
-            half4 _Color_Metal_Secondary;
-            half4 _Color_Hair;
-            half4 _Color_Skin;
-            half4 _Color_Stubble;
-            half4 _Color_Scar;
-            half4 _Color_BodyArt;
-            half4 _Color_Eyes;
-            half _Metallic;
-            half _Smoothness;
-            half _Emission;
-            half _BodyArt_Amount;
-            CBUFFER_END
-
-            struct Attributes
-            {
-                float4 positionOS : POSITION;
-                float3 normalOS : NORMAL;
-                float4 tangentOS : TANGENT;
-                float2 uv : TEXCOORD0;
-                float2 staticLightmapUV : TEXCOORD1;
-                float2 dynamicLightmapUV : TEXCOORD2;
-                UNITY_VERTEX_INPUT_INSTANCE_ID
-            };
-
-            struct Varyings
-            {
-                float2 uv : TEXCOORD0;
-                float3 positionWS : TEXCOORD1;
-                float3 normalWS : TEXCOORD2;
-                half fogFactor : TEXCOORD3;
-                float4 shadowCoord : TEXCOORD4;
-                DECLARE_LIGHTMAP_OR_SH(staticLightmapUV, vertexSH, 5);
-            #ifdef DYNAMICLIGHTMAP_ON
-                float2 dynamicLightmapUV : TEXCOORD7;
-            #endif
-                float4 positionCS : SV_POSITION;
-                UNITY_VERTEX_INPUT_INSTANCE_ID
-                UNITY_VERTEX_OUTPUT_STEREO
-            };
-
             inline half MaskStep(half channel)
             {
                 return step(channel, 0.5h);
             }
 
-            inline half3 EvaluateCharacterAlbedo(float2 uv)
+            inline half3 EvaluateCharacterAlbedo(float2 uv, half eyeMask)
             {
                 half4 baseTex = SAMPLE_TEXTURE2D(_Texture, sampler_Texture, uv);
                 half4 mask01 = SAMPLE_TEXTURE2D(_Mask_01, sampler_Mask_01, uv);
                 half4 mask02 = SAMPLE_TEXTURE2D(_Mask_02, sampler_Mask_02, uv);
                 half4 mask03 = SAMPLE_TEXTURE2D(_Mask_03, sampler_Mask_03, uv);
                 half4 mask04 = SAMPLE_TEXTURE2D(_Mask_04, sampler_Mask_04, uv);
-                half4 mask05 = SAMPLE_TEXTURE2D(_Mask_05, sampler_Mask_05, uv);
 
                 half4 color = lerp(baseTex, _Color_Primary, MaskStep(mask01.r));
                 color = lerp(color, _Color_Secondary, MaskStep(mask01.g));
@@ -167,91 +150,36 @@ Shader "Shader Graphs/POLYGON_CustomCharacters"
                 color = lerp(color, _Color_Skin, MaskStep(mask03.r));
                 color = lerp(color, _Color_Stubble, MaskStep(mask03.b));
                 color = lerp(color, _Color_Scar, MaskStep(mask03.g));
-                color = lerp(_Color_Eyes, color, mask05.r);
+                color = lerp(_Color_Eyes, color, eyeMask);
 
                 half bodyArtMask = lerp(mask01.b, 1.0h, 1.0h - _BodyArt_Amount);
                 color = lerp(_Color_BodyArt, color, bodyArtMask);
                 return color.rgb;
             }
 
-            inline void InitializeSurfaceDataCustom(float2 uv, out SurfaceData surfaceData)
+            inline void InitializeSimpleLitSurfaceData(float2 uv, out SurfaceData surfaceData)
             {
                 surfaceData = (SurfaceData)0;
-                half4 mask05 = SAMPLE_TEXTURE2D(_Mask_05, sampler_Mask_05, uv);
-                half3 albedo = EvaluateCharacterAlbedo(uv);
+                half eyeMask = SAMPLE_TEXTURE2D(_Mask_05, sampler_Mask_05, uv).r;
+                half3 albedo = EvaluateCharacterAlbedo(uv, eyeMask);
 
                 surfaceData.albedo = albedo;
                 surfaceData.specular = half3(0.04h, 0.04h, 0.04h);
                 surfaceData.metallic = _Metallic;
                 surfaceData.smoothness = saturate(_Smoothness * 0.75h);
                 surfaceData.normalTS = half3(0.0h, 0.0h, 1.0h);
-                surfaceData.emission = albedo * ((1.0h - mask05.r) * _Emission);
+                surfaceData.emission = albedo * ((1.0h - eyeMask) * _Emission);
                 surfaceData.occlusion = 1.0h;
                 surfaceData.alpha = 1.0h;
                 surfaceData.clearCoatMask = 0.0h;
                 surfaceData.clearCoatSmoothness = 0.0h;
             }
 
-            inline void InitializeInputDataCustom(Varyings input, out InputData inputData)
-            {
-                inputData = (InputData)0;
-                inputData.positionWS = input.positionWS;
-                inputData.normalWS = NormalizeNormalPerPixel(input.normalWS);
-                inputData.viewDirectionWS = GetWorldSpaceNormalizeViewDir(input.positionWS);
-                inputData.shadowCoord = input.shadowCoord;
-                inputData.fogCoord = input.fogFactor;
-                inputData.vertexLighting = half3(0.0h, 0.0h, 0.0h);
-                inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
-            #if defined(DYNAMICLIGHTMAP_ON)
-                inputData.bakedGI = SAMPLE_GI(input.staticLightmapUV, input.dynamicLightmapUV, input.vertexSH, inputData.normalWS);
-                inputData.shadowMask = SAMPLE_SHADOWMASK(input.staticLightmapUV);
-            #else
-                inputData.bakedGI = SAMPLE_GI(input.staticLightmapUV, input.vertexSH, inputData.normalWS);
-                inputData.shadowMask = SAMPLE_SHADOWMASK(input.staticLightmapUV);
-            #endif
-            }
-
-            Varyings vert(Attributes input)
-            {
-                Varyings output = (Varyings)0;
-                UNITY_SETUP_INSTANCE_ID(input);
-                UNITY_TRANSFER_INSTANCE_ID(input, output);
-                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
-
-                VertexPositionInputs positionInputs = GetVertexPositionInputs(input.positionOS.xyz);
-                VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normalOS, input.tangentOS);
-
-                output.positionWS = positionInputs.positionWS;
-                output.normalWS = normalInputs.normalWS;
-                output.uv = TRANSFORM_TEX(input.uv, _Texture);
-                output.fogFactor = ComputeFogFactor(positionInputs.positionCS.z);
-                output.shadowCoord = TransformWorldToShadowCoord(positionInputs.positionWS);
-                OUTPUT_LIGHTMAP_UV(input.staticLightmapUV, unity_LightmapST, output.staticLightmapUV);
-            #ifdef DYNAMICLIGHTMAP_ON
-                output.dynamicLightmapUV = input.dynamicLightmapUV.xy * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
-            #endif
-                OUTPUT_SH(output.normalWS, output.vertexSH);
-                output.positionCS = positionInputs.positionCS;
-                return output;
-            }
-
-            half4 frag(Varyings input) : SV_Target
-            {
-                UNITY_SETUP_INSTANCE_ID(input);
-                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
-
-                SurfaceData surfaceData;
-                InitializeSurfaceDataCustom(input.uv, surfaceData);
-
-                InputData inputData;
-                InitializeInputDataCustom(input, inputData);
-
-                half4 color = UniversalFragmentBlinnPhong(inputData, surfaceData);
-                color.rgb = lerp(color.rgb, surfaceData.albedo, 0.15h);
-                color.rgb = MixFog(color.rgb, inputData.fogCoord);
-                color.a = 1.0h;
-                return color;
-            }
+            // Supply the character texture transform and opaque surface to URP's Simple Lit pass.
+            #define _BaseMap_ST _Texture_ST
+            static const half _Surface = 0.0h;
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/SimpleLitForwardPass.hlsl"
+            #undef _BaseMap_ST
             ENDHLSL
         }
 
@@ -292,6 +220,27 @@ Shader "Shader Graphs/POLYGON_CustomCharacters"
             #pragma multi_compile _ LOD_FADE_CROSSFADE
             #pragma multi_compile_instancing
             #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthOnlyPass.hlsl"
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "DepthNormalsOnly"
+            Tags { "LightMode" = "DepthNormalsOnly" }
+
+            ZWrite On
+            Cull Back
+
+            HLSLPROGRAM
+            #pragma target 2.0
+            #pragma vertex DepthNormalsVertex
+            #pragma fragment DepthNormalsFragment
+            #pragma multi_compile _ LOD_FADE_CROSSFADE
+            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+            #pragma multi_compile_instancing
+            #pragma instancing_options renderinglayer
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthNormalsPass.hlsl"
             ENDHLSL
         }
     }

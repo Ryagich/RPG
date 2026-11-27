@@ -19,13 +19,20 @@
         "com.unity.modules.imageconversion": "1.0.0",
         "com.unity.modules.physics": "1.0.0",
         "com.unity.modules.physics2d": "1.0.0",
-        "com.unity.modules.screencapture": "1.0.0",
         "com.unity.modules.uielements": "1.0.0",
+        "com.unity.modules.screencapture": "1.0.0",
         "com.unity.modules.unitywebrequest": "1.0.0",
         "com.unity.nuget.newtonsoft-json": "3.0.2",
         "com.unity.test-framework": "1.1.31"
       },
       "hash": "30d22075093d1d35dfb0091c1c7550e9ad948577"
+    },
+    "com.cqf.urpvolumetricfog": {
+      "version": "https://github.com/CristianQiu/Unity-URP-Volumetric-Light.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "354ebc5b6ed3c2c40dc9797c813b56d5da213c4e"
     },
     "com.cysharp.messagepipe": {
       "version": "https://github.com/Cysharp/MessagePipe.git?path=src/MessagePipe.Unity/Assets/Plugins/MessagePipe",

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 775c34ec4a29c8945b0087d2a6e79036, type: 3}
+  m_Name: Grass Deformation
+  m_EditorClassIdentifier: Assembly-CSharp::World.Grass.GrassDeformationConfig
+  <Enabled>k__BackingField: 1
+  <Compute>k__BackingField: {fileID: 7200000, guid: 59a22c3a9f571c34185a71558b7204a4, type: 3}
+  <GrassShader>k__BackingField: {fileID: 4800000, guid: 14b9f74bb5134de5afd579ad3aa94dbc, type: 3}
+  <Resolution>k__BackingField: 64
+  <WorldSize>k__BackingField: 24
+  <EntitySlots>k__BackingField: 16
+  <SourceRadiusMultiplier>k__BackingField: 4
+  <SourceStrength>k__BackingField: 1
+  <RecoveryHalfLife>k__BackingField: 3
+  <PressSpeed>k__BackingField: 16
+  <SelectionHysteresis>k__BackingField: 0.75
+  <MaxSweepDistance>k__BackingField: 3
+  <HorizontalBend>k__BackingField: 0.95
+  <DownwardBend>k__BackingField: 0.95
+  <HeightTolerance>k__BackingField: 0.05
+  <MaxBladeHeight>k__BackingField: 4
