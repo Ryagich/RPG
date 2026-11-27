@@ -64,6 +64,7 @@ namespace TargetLock
 
         public TargetLockTarget CurrentTarget { get; private set; }
         public TargetLockMode Mode { get; private set; } = TargetLockMode.Disabled;
+        public bool IsEnabled => config != null && config.ControlMode != TargetLockControlMode.Off;
         public bool IsLocked => CurrentTarget != null && Mode != TargetLockMode.Disabled;
         public bool IsHardLocked => CurrentTarget != null && Mode == TargetLockMode.Hard;
         public bool IsSoftLocked => CurrentTarget != null && Mode == TargetLockMode.Soft;
@@ -186,6 +187,33 @@ namespace TargetLock
             // speed would only rotate for a single frame, after which LockMovement pauses
             // automatic facing and leaves the character visibly under-rotated.
             return RotateVisualTowardsTarget(Mode == TargetLockMode.Hard);
+        }
+
+        /// <summary>
+        /// Fills <paramref name="results"/> with targets that can be acquired at this instant.
+        /// The controller remains the sole owner of target eligibility, so presentation does not
+        /// duplicate faction, life-state, range, screen-angle, or line-of-sight rules.
+        /// </summary>
+        public void CollectAvailableTargets(List<TargetLockTarget> results)
+        {
+            if (results == null)
+            {
+                throw new ArgumentNullException(nameof(results));
+            }
+
+            results.Clear();
+            if (!IsEnabled)
+            {
+                return;
+            }
+
+            foreach (var target in targetRegistry.Targets)
+            {
+                if (TryGetScore(target, out _))
+                {
+                    results.Add(target);
+                }
+            }
         }
 
         private void OnTargetLockInput(TargetLockInputMessage message)

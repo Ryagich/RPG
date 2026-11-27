@@ -12,42 +12,45 @@ namespace Movement
         private readonly Transform visualTransform;
         private readonly PlayerMovementConfig config;
         private readonly TargetLockController targetLockController;
+        private readonly CharacterWaterDetector waterDetector;
 
         public PlayerFacingController(CameraMotor cameraMotor, Animator animator,
-            PlayerMovementConfig config, TargetLockController targetLockController)
+            PlayerMovementConfig config, TargetLockController targetLockController,
+            CharacterWaterDetector waterDetector)
         {
             this.cameraMotor = cameraMotor;
             visualTransform = animator.transform;
             this.config = config;
             this.targetLockController = targetLockController;
+            this.waterDetector = waterDetector;
         }
 
-        public void Rotate(Vector3 worldDirection, Vector2 input, bool isRunning, bool isSprinting, float deltaTime)
+        public void Rotate(Vector2 acceptedDirection, Vector2 input, bool isRunning, bool isSprinting, float deltaTime)
         {
             if (targetLockController.IsLocked)
             {
                 return;
             }
 
-            if (isSprinting)
+            if (TryGetSwimSidewaysRotationSpeed(acceptedDirection, isRunning, isSprinting, out var swimRotationSpeed))
             {
-                var direction = cameraMotor.GetGameplayPlanarRotation() * new Vector3(input.x, 0f, input.y);
-                if (direction.sqrMagnitude <= Threshold)
-                {
-                    return;
-                }
-
-                visualTransform.rotation = Quaternion.RotateTowards(visualTransform.rotation,
-                    Quaternion.LookRotation(direction.normalized, Vector3.up), config.SprintRotationSpeed * deltaTime);
+                RotateTowardsInput(acceptedDirection, swimRotationSpeed, deltaTime, rotateCameraWithCharacter: true);
                 return;
             }
 
-            if (input.y <= Threshold)
+            if (isSprinting && waterDetector?.IsSwimming != true)
+            {
+                RotateTowardsInput(input, config.SprintRotationSpeed, deltaTime);
+                return;
+            }
+
+            if (acceptedDirection.y <= Threshold)
             {
                 return;
             }
 
-            worldDirection.y = 0f;
+            var worldDirection = cameraMotor.GetGameplayPlanarRotation() *
+                                 new Vector3(acceptedDirection.x, 0f, acceptedDirection.y);
             if (worldDirection.sqrMagnitude <= Threshold)
             {
                 return;
@@ -56,6 +59,62 @@ namespace Movement
             var speed = isRunning ? config.RunRotationSpeed : config.WalkRotationSpeed;
             visualTransform.rotation = Quaternion.RotateTowards(visualTransform.rotation,
                 Quaternion.LookRotation(worldDirection.normalized, Vector3.up), speed * deltaTime);
+        }
+
+        /// <summary>Applies an externally authored player facing without synthesizing movement input.</summary>
+        public void ForceFacing(Quaternion rotation)
+        {
+            visualTransform.rotation = rotation;
+        }
+
+        private bool TryGetSwimSidewaysRotationSpeed(
+            Vector2 acceptedDirection,
+            bool isRunning,
+            bool isSprinting,
+            out float rotationSpeed)
+        {
+            rotationSpeed = 0f;
+            if (waterDetector?.IsSwimming != true
+                || !isRunning
+                || Mathf.Abs(acceptedDirection.x) <= Threshold
+                || Mathf.Abs(acceptedDirection.y) > Threshold)
+            {
+                return false;
+            }
+
+            rotationSpeed = isSprinting
+                ? config.SwimSprintSidewaysRotationSpeed
+                : config.SwimRunSidewaysRotationSpeed;
+            return true;
+        }
+
+        private void RotateTowardsInput(
+            Vector2 directionInput,
+            float rotationSpeed,
+            float deltaTime,
+            bool rotateCameraWithCharacter = false)
+        {
+            var direction = cameraMotor.GetGameplayPlanarRotation() *
+                            new Vector3(directionInput.x, 0f, directionInput.y);
+            if (direction.sqrMagnitude <= Threshold)
+            {
+                return;
+            }
+
+            var currentRotation = visualTransform.rotation;
+            var nextRotation = Quaternion.RotateTowards(
+                currentRotation,
+                Quaternion.LookRotation(direction.normalized, Vector3.up),
+                rotationSpeed * deltaTime);
+            visualTransform.rotation = nextRotation;
+
+            if (rotateCameraWithCharacter)
+            {
+                var yawDelta = Mathf.DeltaAngle(
+                    currentRotation.eulerAngles.y,
+                    nextRotation.eulerAngles.y);
+                cameraMotor.RotateGameplayYaw(yawDelta);
+            }
         }
 
     }

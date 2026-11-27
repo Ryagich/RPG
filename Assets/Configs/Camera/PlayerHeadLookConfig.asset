@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c634c1f9aee94b6dbcf62ae9b80770a4, type: 3}
+  m_Name: PlayerHeadLookConfig
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterAnimation.PlayerHeadLookConfig
+  <HeadWeight>k__BackingField: 0.4
+  <ClampWeight>k__BackingField: 0.4
+  <EnterWeightSpeed>k__BackingField: 8
+  <ExitWeightSpeed>k__BackingField: 1
+  <MaximumYawAngle>k__BackingField: 60
+  <MaximumUpPitchAngle>k__BackingField: 25
+  <MaximumDownPitchAngle>k__BackingField: 20
+  <YawFollowSpeed>k__BackingField: 200
+  <PitchFollowSpeed>k__BackingField: 130
+  <LookDistance>k__BackingField: 4

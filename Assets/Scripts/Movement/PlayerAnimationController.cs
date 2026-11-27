@@ -9,7 +9,7 @@ using VContainer.Unity;
 
 namespace Movement
 {
-    public class PlayerAnimationController : IStartable, ITickable, ILateTickable
+    public class PlayerAnimationController : IStartable, ITickable, ILateTickable, System.IDisposable
     {
         private const float InputThreshold = 0.001f;
         private const string DirectionXParameter = "DirectionX";
@@ -20,6 +20,8 @@ namespace Movement
         private const string IsSprintParameter = "IsSprint";
         private const string IsIdleParameter = "IsIdle";
         private const string IsWadingParameter = "IsWading";
+        private const string IsSwimParameter = "IsSwim";
+        private const string IsUnderwaterParameter = "IsUnderwater";
         private static readonly int JumpTriggerHash = Animator.StringToHash("Jump");
         private static readonly int IsFallParameterHash = Animator.StringToHash("IsFall");
 
@@ -37,8 +39,12 @@ namespace Movement
         private bool currentIsSprint;
         private bool currentIsIdle;
         private bool currentIsWading;
+        private bool currentIsSwim;
+        private bool currentIsUnderwater;
         private bool hasSprintParameter;
         private bool hasWadingParameter;
+        private bool hasSwimParameter;
+        private bool hasUnderwaterParameter;
         private bool isGameplayActive = true;
         private bool isLocomotionLocked;
         private readonly HashSet<object> locomotionLockSources = new();
@@ -65,10 +71,19 @@ namespace Movement
         public void Start()
         {
             gameModeChangedSubscriber.Subscribe(OnGameModeChanged);
+            playerMovement.WaterLocomotionStateChanged += OnWaterLocomotionStateChanged;
             animator.ResetTrigger(JumpTriggerHash);
             hasSprintParameter = HasBoolParameter(IsSprintParameter);
             hasWadingParameter = HasBoolParameter(IsWadingParameter);
-            ApplyLocomotionParameters(Vector2.zero, false, false, true, false, force: true);
+            hasSwimParameter = HasBoolParameter(IsSwimParameter);
+            hasUnderwaterParameter = HasBoolParameter(IsUnderwaterParameter);
+            ApplyLocomotionParameters(Vector2.zero, false, false, true, force: true);
+            ApplyWaterStateParameters(force: true);
+        }
+
+        public void Dispose()
+        {
+            playerMovement.WaterLocomotionStateChanged -= OnWaterLocomotionStateChanged;
         }
 
         public void Tick()
@@ -77,6 +92,8 @@ namespace Movement
             {
                 return;
             }
+
+            ApplyWaterStateParameters();
 
             if (IsLocomotionLocked)
             {
@@ -108,13 +125,16 @@ namespace Movement
                     Vector2.zero,
                     isGameplayActive && isRunning,
                     isGameplayActive && isSprinting,
-                    isIdle,
-                    isGameplayActive && isWading);
+                    isIdle);
                 return;
             }
 
             var directionalInput = Vector2.up;
-            if (!isSprinting)
+            if (ShouldPreserveSwimSidewaysInput(movementInput, isRunning))
+            {
+                directionalInput = movementInput;
+            }
+            else if (!isSprinting || waterDetector?.IsSwimming == true)
             {
                 var moveDirection = cameraMotor.GetGameplayPlanarRotation() *
                                     new Vector3(movementInput.x, 0f, movementInput.y);
@@ -124,7 +144,7 @@ namespace Movement
                     Mathf.Clamp(localMoveDirection.z, -1f, 1f));
             }
 
-            ApplyLocomotionParameters(directionalInput, isRunning, isSprinting, isIdle, isWading);
+            ApplyLocomotionParameters(directionalInput, isRunning, isSprinting, isIdle);
         }
 
         private void OnGameModeChanged(GameModeChangedMessage msg)
@@ -133,8 +153,20 @@ namespace Movement
 
             if (!isGameplayActive)
             {
-                ApplyLocomotionParameters(Vector2.zero, false, false, true, false, force: true);
+                ApplyLocomotionParameters(Vector2.zero, false, false, true, force: true);
             }
+        }
+
+        private void OnWaterLocomotionStateChanged(CharacterWaterState state)
+        {
+            if (state != CharacterWaterState.Swim)
+            {
+                return;
+            }
+
+            animator.SetBool(IsFallParameterHash, false);
+            ApplyWaterStateParameters(force: true);
+            ApplyBufferedLocomotion();
         }
 
         private void ApplyLocomotionParameters(
@@ -142,7 +174,6 @@ namespace Movement
             bool isRunning,
             bool isSprinting,
             bool isIdle,
-            bool isWading,
             bool force = false)
         {
             if (!force
@@ -150,8 +181,7 @@ namespace Movement
              && Mathf.Approximately(currentDirectionalY, directionalInput.y)
              && currentIsRun == isRunning
              && currentIsSprint == isSprinting
-             && currentIsIdle == isIdle
-             && currentIsWading == isWading)
+             && currentIsIdle == isIdle)
             {
                 return;
             }
@@ -166,7 +196,6 @@ namespace Movement
             currentIsRun = isRunning;
             currentIsSprint = isSprinting;
             currentIsIdle = isIdle;
-            currentIsWading = isWading;
 
             // CurrentVelocity carries both the physical direction and its normalized magnitude.
             // The blend tree uses the magnitude to reflect acceleration and braking, so it must
@@ -180,9 +209,37 @@ namespace Movement
             }
 
             animator.SetBool(IsIdleParameter, currentIsIdle);
+        }
+
+        private void ApplyWaterStateParameters(bool force = false)
+        {
+            var isWading = waterDetector != null && waterDetector.State == CharacterWaterState.Wading;
+            var isSwim = waterDetector != null && waterDetector.State == CharacterWaterState.Swim;
+            var isUnderwater = waterDetector != null && waterDetector.State == CharacterWaterState.Underwater;
+            if (!force
+             && currentIsWading == isWading
+             && currentIsSwim == isSwim
+             && currentIsUnderwater == isUnderwater)
+            {
+                return;
+            }
+
+            currentIsWading = isWading;
+            currentIsSwim = isSwim;
+            currentIsUnderwater = isUnderwater;
             if (hasWadingParameter)
             {
                 animator.SetBool(IsWadingParameter, currentIsWading);
+            }
+
+            if (hasSwimParameter)
+            {
+                animator.SetBool(IsSwimParameter, currentIsSwim);
+            }
+
+            if (hasUnderwaterParameter)
+            {
+                animator.SetBool(IsUnderwaterParameter, currentIsUnderwater);
             }
         }
 
@@ -269,39 +326,51 @@ namespace Movement
         public void ApplyBufferedLocomotion()
         {
             var movementInput = movementIntent.Direction;
-            var isSprintInputPressed = movementIntent.IsSprintPressed;
-            var isWading = waterDetector.IsWading;
-            var isSprinting = isSprintInputPressed && !isWading;
+            var isSprinting = playerMovement.IsSprinting;
             if (!isGameplayActive || movementInput.sqrMagnitude <= InputThreshold)
             {
                 ApplyLocomotionParameters(
                     Vector2.zero,
-                    isGameplayActive && movementIntent.IsRunPressed,
+                    isGameplayActive && playerMovement.IsRunning,
                     isGameplayActive && isSprinting,
                     !playerMovement.IsMoving,
-                    isGameplayActive && isWading,
                     force: true);
                 return;
             }
 
-            var moveDirection = cameraMotor.GetGameplayPlanarRotation() *
-                                new Vector3(movementInput.x, 0f, movementInput.y);
-            var localMoveDirection = visualTransform.InverseTransformDirection(moveDirection);
-            var directionalInput = new Vector2(
-                Mathf.Clamp(localMoveDirection.x, -1f, 1f),
-                Mathf.Clamp(localMoveDirection.z, -1f, 1f));
-            if (isSprinting)
+            Vector2 directionalInput;
+            if (ShouldPreserveSwimSidewaysInput(movementInput, playerMovement.IsRunning))
             {
-                directionalInput = Vector2.up;
+                directionalInput = movementInput;
+            }
+            else
+            {
+                var moveDirection = cameraMotor.GetGameplayPlanarRotation() *
+                                    new Vector3(movementInput.x, 0f, movementInput.y);
+                var localMoveDirection = visualTransform.InverseTransformDirection(moveDirection);
+                directionalInput = new Vector2(
+                    Mathf.Clamp(localMoveDirection.x, -1f, 1f),
+                    Mathf.Clamp(localMoveDirection.z, -1f, 1f));
+                if (isSprinting && waterDetector?.IsSwimming != true)
+                {
+                    directionalInput = Vector2.up;
+                }
             }
 
             ApplyLocomotionParameters(
                 directionalInput,
-                movementIntent.IsRunPressed,
+                playerMovement.IsRunning,
                 isSprinting,
                 !playerMovement.IsMoving,
-                isWading,
                 force: true);
+        }
+
+        private bool ShouldPreserveSwimSidewaysInput(Vector2 movementInput, bool isRunning)
+        {
+            return waterDetector?.IsSwimming == true
+                   && isRunning
+                   && Mathf.Abs(movementInput.x) > InputThreshold
+                   && Mathf.Abs(movementInput.y) <= InputThreshold;
         }
 
         /// <summary>

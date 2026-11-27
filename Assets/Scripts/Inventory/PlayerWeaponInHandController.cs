@@ -140,6 +140,7 @@ namespace Inventory
                                                   && !combatActions.IsAttackRootMotionStateActive));
 
         public bool IsCombatActionLocked => combatActions.IsCombatActionLocked;
+        public bool IsAttackAnimationActive => combatActions.IsAttackAnimationActive;
         public bool IsRollAnimationActive => combatActions.IsRollAnimationActive;
 
         public void Start()

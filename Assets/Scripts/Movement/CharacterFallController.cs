@@ -1,4 +1,5 @@
 using Gravity;
+using System.Collections.Generic;
 using Stats;
 using UnityEngine;
 using VContainer.Unity;
@@ -15,6 +16,7 @@ namespace Movement
         private static readonly int FallStageParameterHash = Animator.StringToHash("FallStage");
 
         private readonly PlayerGravity gravity;
+        private readonly IEnumerable<ICharacterAirborneStateBlocker> airborneStateBlockers;
         private readonly FallConfig config;
         private readonly StatsController statsController;
         private readonly Animator animator;
@@ -25,11 +27,13 @@ namespace Movement
 
         public CharacterFallController(
             PlayerGravity gravity,
+            IEnumerable<ICharacterAirborneStateBlocker> airborneStateBlockers,
             FallConfig config,
             StatsController statsController,
             Animator animator)
         {
             this.gravity = gravity;
+            this.airborneStateBlockers = airborneStateBlockers;
             this.config = config;
             this.statsController = statsController;
             this.animator = animator;
@@ -44,6 +48,16 @@ namespace Movement
 
             gravity.AirborneStateChanged += OnAirborneStateChanged;
             gravity.FallingStateChanged += OnFallingStateChanged;
+            if (airborneStateBlockers != null)
+            {
+                foreach (var blocker in airborneStateBlockers)
+                {
+                    if (blocker != null)
+                    {
+                        blocker.StateChanged += OnAirborneStateBlockerChanged;
+                    }
+                }
+            }
             SetStage(FallStage.Safe);
         }
 
@@ -56,6 +70,16 @@ namespace Movement
 
             gravity.AirborneStateChanged -= OnAirborneStateChanged;
             gravity.FallingStateChanged -= OnFallingStateChanged;
+            if (airborneStateBlockers != null)
+            {
+                foreach (var blocker in airborneStateBlockers)
+                {
+                    if (blocker != null)
+                    {
+                        blocker.StateChanged -= OnAirborneStateBlockerChanged;
+                    }
+                }
+            }
         }
 
         public void Tick()
@@ -70,6 +94,12 @@ namespace Movement
 
         private void OnAirborneStateChanged(bool isAirborne)
         {
+            if (HasAirborneStateBlocker())
+            {
+                ResetFall();
+                return;
+            }
+
             if (isAirborne)
             {
                 // The previous landing stage must never leak into the next jump while the
@@ -96,6 +126,12 @@ namespace Movement
 
         private void OnFallingStateChanged(bool startedFalling)
         {
+            if (HasAirborneStateBlocker())
+            {
+                ResetFall();
+                return;
+            }
+
             if (!startedFalling)
             {
                 isFalling = false;
@@ -105,6 +141,36 @@ namespace Movement
             isFalling = true;
             fallStartedAt = Time.time;
             SetStage(FallStage.Safe);
+        }
+
+        private void OnAirborneStateBlockerChanged()
+        {
+            if (HasAirborneStateBlocker())
+            {
+                ResetFall();
+            }
+        }
+
+        private void ResetFall()
+        {
+            isFalling = false;
+            SetStage(FallStage.Safe);
+        }
+
+        private bool HasAirborneStateBlocker()
+        {
+            if (airborneStateBlockers != null)
+            {
+                foreach (var blocker in airborneStateBlockers)
+                {
+                    if (blocker != null && blocker.BlocksAirborneState)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private FallStage ResolveStage(float fallDuration)
@@ -142,13 +208,18 @@ namespace Movement
 
         private void SetStage(FallStage stage)
         {
-            if (currentStage == stage && animator != null)
+            if (currentStage == stage)
             {
                 return;
             }
 
             currentStage = stage;
-            animator?.SetInteger(FallStageParameterHash, (int)stage);
+            if (animator == null)
+            {
+                return;
+            }
+
+            animator.SetInteger(FallStageParameterHash, (int)stage);
         }
     }
 

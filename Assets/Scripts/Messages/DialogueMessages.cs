@@ -21,4 +21,7 @@ namespace Messages
             Event = @event;
         }
     }
+
+    /// <summary>Raised when the dialogue screen transition has reached full opacity.</summary>
+    public readonly struct DialogueScreenFullyObscuredMessage { }
 }

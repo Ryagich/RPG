@@ -1,5 +1,6 @@
 ﻿using Gravity;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using VContainer.Unity;
 
@@ -13,6 +14,7 @@ namespace Movement
 
         private readonly CharacterController controller;
         private readonly GravityConfig config;
+        private readonly IEnumerable<ICharacterVerticalMotionConstraint> verticalMotionConstraints;
         private readonly RaycastHit[] groundProbeHits = new RaycastHit[GroundProbeHitCapacity];
 
         private float verticalVelocity;
@@ -37,11 +39,13 @@ namespace Movement
         public PlayerGravity
             (
                 CharacterController controller,
-                GravityConfig config
+                GravityConfig config,
+                IEnumerable<ICharacterVerticalMotionConstraint> verticalMotionConstraints
             )
         {
             this.controller = controller;
             this.config = config;
+            this.verticalMotionConstraints = verticalMotionConstraints;
         }
 
         public float GetVerticalVelocity(float deltaTime, bool wasGrounded)
@@ -49,6 +53,15 @@ namespace Movement
             if (controller == null || !controller.enabled || !controller.gameObject.activeInHierarchy)
             {
                 return 0f;
+            }
+
+            if (TryGetConstrainedVerticalVelocity(deltaTime, wasGrounded, out var constrainedVelocity))
+            {
+                verticalVelocity = constrainedVelocity;
+                // A surface constraint can interrupt an upward jump before its normal landing
+                // transition. It is no longer a jump, but it is not a landing either.
+                isJumping = false;
+                return verticalVelocity;
             }
 
             if (isAirborneGracePending && !isJumping)
@@ -71,6 +84,31 @@ namespace Movement
             }
 
             return verticalVelocity;
+        }
+
+        private bool TryGetConstrainedVerticalVelocity(
+            float deltaTime,
+            bool wasGrounded,
+            out float constrainedVelocity)
+        {
+            if (verticalMotionConstraints != null)
+            {
+                foreach (var constraint in verticalMotionConstraints)
+                {
+                    if (constraint != null
+                        && constraint.TryGetVerticalVelocity(
+                            deltaTime,
+                            wasGrounded,
+                            verticalVelocity,
+                            out constrainedVelocity))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            constrainedVelocity = 0f;
+            return false;
         }
 
         public void OnMotionApplied(CollisionFlags collisionFlags, bool isGrounded)
@@ -256,6 +294,7 @@ namespace Movement
             isAirborne = value;
             AirborneStateChanged?.Invoke(value);
         }
+
     }
 
     /// <summary>
@@ -267,13 +306,16 @@ namespace Movement
         private static readonly int IsFallParameterHash = Animator.StringToHash("IsFall");
 
         private readonly PlayerGravity gravity;
+        private readonly IEnumerable<ICharacterAirborneStateBlocker> airborneStateBlockers;
         private readonly Animator animator;
 
         public CharacterAirborneAnimationController(
             PlayerGravity gravity,
+            IEnumerable<ICharacterAirborneStateBlocker> airborneStateBlockers,
             Animator animator)
         {
             this.gravity = gravity;
+            this.airborneStateBlockers = airborneStateBlockers;
             this.animator = animator;
         }
 
@@ -285,7 +327,17 @@ namespace Movement
             }
 
             gravity.AirborneStateChanged += OnAirborneStateChanged;
-            animator.SetBool(IsFallParameterHash, gravity.IsAirborne);
+            if (airborneStateBlockers != null)
+            {
+                foreach (var blocker in airborneStateBlockers)
+                {
+                    if (blocker != null)
+                    {
+                        blocker.StateChanged += OnAirborneStateBlockerChanged;
+                    }
+                }
+            }
+            ApplyAirborneState();
         }
 
         public void Dispose()
@@ -294,11 +346,53 @@ namespace Movement
             {
                 gravity.AirborneStateChanged -= OnAirborneStateChanged;
             }
+
+            if (airborneStateBlockers != null)
+            {
+                foreach (var blocker in airborneStateBlockers)
+                {
+                    if (blocker != null)
+                    {
+                        blocker.StateChanged -= OnAirborneStateBlockerChanged;
+                    }
+                }
+            }
         }
 
-        private void OnAirborneStateChanged(bool isAirborne)
+        private void OnAirborneStateChanged(bool _)
         {
-            animator?.SetBool(IsFallParameterHash, isAirborne);
+            ApplyAirborneState();
+        }
+
+        private void OnAirborneStateBlockerChanged()
+        {
+            ApplyAirborneState();
+        }
+
+        private void ApplyAirborneState()
+        {
+            if (animator == null)
+            {
+                return;
+            }
+
+            animator.SetBool(IsFallParameterHash, gravity != null && gravity.IsAirborne && !HasAirborneStateBlocker());
+        }
+
+        private bool HasAirborneStateBlocker()
+        {
+            if (airborneStateBlockers != null)
+            {
+                foreach (var blocker in airborneStateBlockers)
+                {
+                    if (blocker != null && blocker.BlocksAirborneState)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

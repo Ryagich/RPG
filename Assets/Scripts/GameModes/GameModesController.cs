@@ -115,6 +115,9 @@ namespace GameModes
                 case GameMode.Pause:
                     ExitPauseMode();
                     return;
+                case GameMode.Trade:
+                    ApplyGameMode(GameMode.Dialogue);
+                    return;
                 case GameMode.SwitchLocation:
                     return;
                 default:

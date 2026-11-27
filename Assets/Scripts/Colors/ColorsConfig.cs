@@ -7,5 +7,6 @@ namespace Colors
     {
         [field: SerializeField] public Color White { get; private set; } = Color.white;
         [field: SerializeField] public Color Gray { get; private set; } = Color.gray;
+        [field: SerializeField] public Color Yellow { get; private set; } = Color.yellow;
     }
 }

@@ -166,7 +166,6 @@ namespace UI.Inventory
         private readonly Func<bool> canUseFastSlots;
         private readonly IReadOnlyList<RectTransform> itemRects;
         private readonly IReadOnlyList<RectTransform> itemGrabRects;
-        private readonly List<InventoryItemTarget> inventoryItemTargets = new();
 
         public InventoryInteractionPresenter(
             PlayerInventory playerInventory,
@@ -206,39 +205,42 @@ namespace UI.Inventory
             return inventory != null;
         }
 
-        public void ClearInventoryItems() => inventoryItemTargets.Clear();
-
-        public void RegisterInventoryItem(IInventory inventory, RectTransform rect, ItemInInventory itemInInventory)
-        {
-            if (inventory == null || rect == null || itemInInventory?.ItemStack?.ItemConfig == null)
-            {
-                return;
-            }
-
-            inventoryItemTargets.Add(new InventoryItemTarget(inventory, rect, itemInInventory));
-        }
-
         public bool TryGetInventoryItemAt(Vector2 screenPoint, out IInventory inventory, out ItemInInventory itemInInventory)
         {
-            for (var i = inventoryItemTargets.Count - 1; i >= 0; i--)
+            inventory = inventoryAtScreenPointProvider(screenPoint);
+            if (inventory != null
+                && gridViewProvider(inventory)?.TryGetTileAt(eventCameraProvider(), screenPoint, out var tile) == true
+                && inventory.CanGet(tile.ItemInInventory))
             {
-                var target = inventoryItemTargets[i];
-                if (target.Rect == null
-                    || !target.Inventory.CanGet(target.Item)
-                    || inventoryAtScreenPointProvider(screenPoint) != target.Inventory
-                    || !RectTransformUtility.RectangleContainsScreenPoint(target.Rect, screenPoint, eventCameraProvider()))
-                {
-                    continue;
-                }
-
-                inventory = target.Inventory;
-                itemInInventory = target.Item;
+                itemInInventory = tile.ItemInInventory;
                 return true;
             }
 
             inventory = null;
             itemInInventory = null;
             return false;
+        }
+
+        /// <summary>
+        /// Resolves the single inventory target beneath the pointer. Popups and input commands
+        /// must use this same lookup so they cannot address different items for one screen point.
+        /// </summary>
+        public bool TryGetInventoryItemOrSlotAt(
+            Vector2 screenPoint,
+            out IInventory inventory,
+            out ItemInInventory itemInInventory,
+            out SlotModel slotModel)
+        {
+            slotModel = null;
+            if (TryGetInventoryItemAt(screenPoint, out inventory, out itemInInventory))
+            {
+                return true;
+            }
+
+            inventory = null;
+            itemInInventory = null;
+            return TryGetHoveredSlot(screenPoint, out slotModel)
+                   && slotModel?.ItemStack?.ItemConfig != null;
         }
 
         public bool TryGetHoveredSlot(Vector2 screenPoint, out SlotModel slotModel)
@@ -316,19 +318,6 @@ namespace UI.Inventory
             return PageUiUtilities.TryGetSlotUnderPointer(slotView, slotModel, screenPoint, requiredType, eventCameraProvider(), out hoveredSlot);
         }
 
-        private readonly struct InventoryItemTarget
-        {
-            public InventoryItemTarget(IInventory inventory, RectTransform rect, ItemInInventory item)
-            {
-                Inventory = inventory;
-                Rect = rect;
-                Item = item;
-            }
-
-            public IInventory Inventory { get; }
-            public RectTransform Rect { get; }
-            public ItemInInventory Item { get; }
-        }
     }
 
     /// <summary>

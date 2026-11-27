@@ -4,7 +4,6 @@ using Inventory.Looting;
 using StateMachine.Graph.Model;
 using UnityEngine;
 using NPC;
-using Object = UnityEngine.Object;
 
 namespace StateMachine.Behaviours
 {
@@ -26,7 +25,7 @@ namespace StateMachine.Behaviours
             var animator = context?.GetService<Animator>();
             if (animator != null)
             {
-                Object.Destroy(animator);
+                animator.enabled = false;
             }
         }
 

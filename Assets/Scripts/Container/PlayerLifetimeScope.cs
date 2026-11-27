@@ -1,6 +1,7 @@
 using CameraScripts;
 using Combat;
 using CharacterAnimation;
+using Dialogue;
 using Factions;
 using Interactable;
 using Inventory;
@@ -60,6 +61,9 @@ namespace Container
                 var footIk = animator.GetComponent<CharacterFootIkRuntime>()
                              ?? animator.gameObject.AddComponent<CharacterFootIkRuntime>();
                 builder.RegisterComponent(footIk).AsSelf();
+                var headLook = animator.GetComponent<PlayerHeadLookRuntime>()
+                               ?? animator.gameObject.AddComponent<PlayerHeadLookRuntime>();
+                builder.RegisterComponent(headLook).AsSelf();
                 var animationEventReceiver = animator.GetComponent<CharacterAnimationEventReceiver>()
                                              ?? animator.gameObject.AddComponent<CharacterAnimationEventReceiver>();
                 builder.RegisterComponent(animationEventReceiver).AsSelf();
@@ -117,6 +121,8 @@ namespace Container
                                           });
 
             builder.RegisterEntryPoint<CameraMotor>().AsSelf();
+            builder.RegisterEntryPoint<DialogueCameraCoordinator>().AsSelf();
+            builder.RegisterEntryPoint<DialogueParticipantPositioningCoordinator>().AsSelf();
             builder.Register<TargetLockTargetFilter>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<TargetLockController>().AsSelf();
             builder.Register<PlayerGravity>(Lifetime.Scoped)
@@ -126,15 +132,27 @@ namespace Container
             builder.Register<PlayerMovementIntent>(Lifetime.Scoped).AsSelf();
             builder.Register<PlayerFacingController>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<PlayerMovementController>().AsSelf();
-            builder.RegisterEntryPoint<CharacterWaterDetector>().AsSelf();
+            builder.RegisterEntryPoint<CharacterWaterDetector>()
+                   .AsSelf()
+                   .As<ICharacterAirborneStateBlocker>();
+            builder.Register<CharacterWaterBottomProbe>(Lifetime.Scoped);
+            builder.Register<CharacterWaterSurfaceConstraint>(Lifetime.Scoped)
+                   .AsSelf()
+                   .As<ICharacterVerticalMotionConstraint>();
             builder.Register<PlayerMovement>(Lifetime.Scoped)
                    .AsSelf()
-                   .As<ICharacterPlanarMotionSource>();
+                   .As<ICharacterPlanarMotionSource>()
+                   .As<System.IDisposable>();
             builder.Register<PlayerWadingStaminaMovementState>(Lifetime.Scoped)
                    .As<IStaminaMovementState>();
             builder.RegisterEntryPoint<CharacterMotor>().AsSelf();
             builder.RegisterEntryPoint<PlayerFootstepPlayer>().AsSelf();
-            builder.RegisterEntryPoint<PlayerAnimationController>().AsSelf();
+            builder.RegisterEntryPoint<PlayerAnimationController>()
+                   .AsSelf()
+                   .As<System.IDisposable>();
+            builder.RegisterEntryPoint<CharacterWaterEntryControlLock>()
+                   .AsSelf()
+                   .As<System.IDisposable>();
             builder.RegisterEntryPoint<PlayerInteractableLogic>().AsSelf();
             builder.RegisterEntryPoint<ItemHolderInteractableLogic>().AsSelf();
             builder.Register<StatsController>(Lifetime.Singleton).AsSelf();
@@ -149,6 +167,9 @@ namespace Container
             // Player and NPC must keep the same character systems; only the control source differs:
             // player input drives these systems for Player, while the state machine drives them for NPC.
             builder.Register<CharacterActionState>(Lifetime.Scoped).AsSelf();
+            builder.Register<PlayerCharacterAnimationState>(Lifetime.Scoped)
+                   .As<ICharacterAnimationState>()
+                   .AsSelf();
             builder.RegisterEntryPoint<PlayerCharacterAnimationControlHandler>()
                    .AsSelf()
                    .As<System.IDisposable>();

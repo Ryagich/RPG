@@ -1,7 +1,5 @@
 using Combat;
-using Movement;
 using System;
-using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
@@ -9,32 +7,28 @@ namespace NPC
 {
     public sealed class NpcDialogueController
     {
-        private readonly Transform ownerTransform;
         private readonly NpcNavMeshController navMeshController;
         private readonly NpcCombatService combatService;
         private readonly CharacterDamageReceiver ownerDamageReceiver;
-        private readonly PlayerMovementConfig playerMovementConfig;
+        private readonly NpcDialoguePositioning dialoguePositioning;
         private readonly bool canTalk;
 
         public NpcDialogueController(
-            Transform ownerTransform,
             NpcNavMeshController navMeshController,
             NpcCombatService combatService,
             CharacterDamageReceiver ownerDamageReceiver,
-            PlayerMovementConfig playerMovementConfig,
+            NpcDialoguePositioning dialoguePositioning,
             [Key("Can Talk")] bool canTalk)
         {
-            this.ownerTransform = ownerTransform;
             this.navMeshController = navMeshController;
             this.combatService = combatService;
             this.ownerDamageReceiver = ownerDamageReceiver;
-            this.playerMovementConfig = playerMovementConfig;
+            this.dialoguePositioning = dialoguePositioning;
             this.canTalk = canTalk;
         }
 
         public bool IsDialogueRequested { get; private set; }
         public bool IsInDialogueState { get; private set; }
-        public Transform InteractorTransform { get; private set; }
         public event Action DialogueInterrupted;
 
         public bool CanStartDialogue(LifetimeScope interactorScope)
@@ -77,7 +71,6 @@ namespace NPC
                 return false;
             }
 
-            InteractorTransform = interactorScope != null ? interactorScope.transform : null;
             IsDialogueRequested = true;
             return true;
         }
@@ -85,25 +78,30 @@ namespace NPC
         public void EndDialogue()
         {
             IsDialogueRequested = false;
-            InteractorTransform = null;
         }
 
         public void EnterDialogueState()
         {
             IsInDialogueState = true;
-            navMeshController?.Stop();
+            if (dialoguePositioning?.IsActive != true)
+            {
+                navMeshController?.Stop();
+            }
             navMeshController?.SetFacingLocked(true);
         }
 
         public void TickDialogue()
         {
-            navMeshController?.Stop();
-            FaceInteractor();
+            if (dialoguePositioning?.Tick() != true)
+            {
+                navMeshController?.Stop();
+            }
         }
 
         public void ExitDialogueState()
         {
             IsInDialogueState = false;
+            dialoguePositioning?.Cancel();
             navMeshController?.SetFacingLocked(false);
 
             if (!IsDialogueRequested)
@@ -115,31 +113,5 @@ namespace NPC
             DialogueInterrupted?.Invoke();
         }
 
-        private void FaceInteractor()
-        {
-            if (ownerTransform == null || InteractorTransform == null)
-            {
-                return;
-            }
-
-            var direction = InteractorTransform.position - ownerTransform.position;
-            direction.y = 0f;
-            if (direction.sqrMagnitude <= 0.0001f)
-            {
-                return;
-            }
-
-            ownerTransform.rotation = Quaternion.RotateTowards(
-                ownerTransform.rotation,
-                Quaternion.LookRotation(direction.normalized, Vector3.up),
-                GetDialogueRotationSpeed() * Time.deltaTime);
-        }
-
-        private float GetDialogueRotationSpeed()
-        {
-            return playerMovementConfig != null
-                ? playerMovementConfig.WalkRotationSpeed
-                : 215f;
-        }
     }
 }

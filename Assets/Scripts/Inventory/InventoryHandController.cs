@@ -794,7 +794,10 @@ namespace Inventory
             }
         }
 
-        public bool TryUseFromInventory(ItemStack itemStack, Func<ItemStack, ItemStack> tryStoreOverflow = null)
+        public bool TryUseFromInventory(
+            ItemStack itemStack,
+            Func<ItemStack, ItemStack> tryStoreOverflow = null,
+            Func<SlotModel, Vector2?> slotSizeProvider = null)
         {
             if (itemStack?.ItemConfig == null)
             {
@@ -807,7 +810,12 @@ namespace Inventory
                 return true;
             }
 
-            if (!playerInventory.TryPlaceInSlot(itemStack.ItemConfig.ItemType, itemStack, out var remainderStack, out var replacedStack))
+            if (!playerInventory.TryPlaceInSlot(
+                    itemStack.ItemConfig.ItemType,
+                    itemStack,
+                    slotSizeProvider,
+                    out var remainderStack,
+                    out var replacedStack))
             {
                 return false;
             }
@@ -819,7 +827,7 @@ namespace Inventory
 
             if (replacedStack != null)
             {
-                var replacedRemainder = TryStoreOverflow(replacedStack, tryStoreOverflow);
+                var replacedRemainder = TryStoreOverflow(replacedStack, tryStoreOverflow, slotSizeProvider);
                 if (replacedRemainder != null)
                 {
                     SpawnItemInWorld(replacedRemainder);
@@ -828,7 +836,7 @@ namespace Inventory
 
             if (remainderStack != null)
             {
-                var remainderAfterInventory = TryStoreOverflow(remainderStack, tryStoreOverflow);
+                var remainderAfterInventory = TryStoreOverflow(remainderStack, tryStoreOverflow, slotSizeProvider);
                 if (remainderAfterInventory != null)
                 {
                     SpawnItemInWorld(remainderAfterInventory);
@@ -839,7 +847,10 @@ namespace Inventory
             return true;
         }
 
-        private ItemStack TryStoreOverflow(ItemStack itemStack, Func<ItemStack, ItemStack> tryStoreOverflow)
+        private ItemStack TryStoreOverflow(
+            ItemStack itemStack,
+            Func<ItemStack, ItemStack> tryStoreOverflow,
+            Func<SlotModel, Vector2?> slotSizeProvider)
         {
             if (itemStack?.ItemConfig == null)
             {
@@ -848,7 +859,7 @@ namespace Inventory
 
             return tryStoreOverflow != null
                 ? tryStoreOverflow(itemStack)
-                : playerInventory.TryAdd(itemStack);
+                : playerInventory.TryAdd(itemStack, slotSizeProvider);
         }
 
         private void ApplyUsableItem(ItemConfig itemConfig)
@@ -870,11 +881,16 @@ namespace Inventory
     {
         private readonly PlayerInventory playerInventory;
         private readonly InventoryHandController inventoryHandController;
+        private readonly Func<SlotModel, Vector2?> slotSizeProvider;
 
-        public InventoryItemActionService(PlayerInventory playerInventory, InventoryHandController inventoryHandController)
+        public InventoryItemActionService(
+            PlayerInventory playerInventory,
+            InventoryHandController inventoryHandController,
+            Func<SlotModel, Vector2?> slotSizeProvider = null)
         {
             this.playerInventory = playerInventory ?? throw new ArgumentNullException(nameof(playerInventory));
             this.inventoryHandController = inventoryHandController ?? throw new ArgumentNullException(nameof(inventoryHandController));
+            this.slotSizeProvider = slotSizeProvider;
         }
 
         public bool CanMoveSlotToGrid(SlotModel slotModel)
@@ -896,7 +912,7 @@ namespace Inventory
 
             return itemInInventory.ItemStack.ItemConfig.ItemType == ItemType.Usable
                 ? TryUseUsableInventoryItem(sourceInventory, itemInInventory)
-                : TryUseEquippableInventoryItem(sourceInventory, itemInInventory, tryStoreOverflow);
+                : TryUseEquippableInventoryItem(sourceInventory, itemInInventory, tryStoreOverflow, slotSizeProvider);
         }
 
         public bool TryUseSlotItem(SlotModel slotModel, Func<ItemStack, ItemStack> tryStoreOverflow = null)
@@ -906,12 +922,12 @@ namespace Inventory
                 return false;
             }
 
-            if (inventoryHandController.TryUseFromInventory(itemStack, tryStoreOverflow))
+            if (inventoryHandController.TryUseFromInventory(itemStack, tryStoreOverflow, slotSizeProvider))
             {
                 return true;
             }
 
-            RestorePlayerSlot(slotModel, itemStack);
+            RestorePlayerSlot(slotModel, itemStack, slotSizeProvider);
             return false;
         }
 
@@ -988,13 +1004,17 @@ namespace Inventory
             return true;
         }
 
-        private bool TryUseEquippableInventoryItem(IInventory sourceInventory, ItemInInventory itemInInventory, Func<ItemStack, ItemStack> tryStoreOverflow)
+        private bool TryUseEquippableInventoryItem(
+            IInventory sourceInventory,
+            ItemInInventory itemInInventory,
+            Func<ItemStack, ItemStack> tryStoreOverflow,
+            Func<SlotModel, Vector2?> slotSizeProvider)
         {
             var itemStack = itemInInventory.ItemStack.Clone();
             var originalPosition = itemInInventory.Position;
             sourceInventory.Remove(itemInInventory);
 
-            if (inventoryHandController.TryUseFromInventory(itemStack, tryStoreOverflow))
+            if (inventoryHandController.TryUseFromInventory(itemStack, tryStoreOverflow, slotSizeProvider))
             {
                 return true;
             }
@@ -1003,9 +1023,17 @@ namespace Inventory
             return false;
         }
 
-        private void RestorePlayerSlot(SlotModel slotModel, ItemStack itemStack)
+        private void RestorePlayerSlot(
+            SlotModel slotModel,
+            ItemStack itemStack,
+            Func<SlotModel, Vector2?> slotSizeProvider)
         {
-            playerInventory.TryPlaceInSlot(slotModel, itemStack, out var remainderStack, out var replacedStack);
+            playerInventory.TryPlaceInSlot(
+                slotModel,
+                itemStack,
+                slotSizeProvider?.Invoke(slotModel),
+                out var remainderStack,
+                out var replacedStack);
             StoreOrDrop(replacedStack);
             StoreOrDrop(remainderStack);
         }
@@ -1017,7 +1045,7 @@ namespace Inventory
                 return;
             }
 
-            var remainder = playerInventory.TryAdd(itemStack);
+            var remainder = playerInventory.TryAdd(itemStack, slotSizeProvider);
             if (remainder != null)
             {
                 inventoryHandController.Drop(remainder);

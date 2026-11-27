@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Colors;
 using Interactable;
 using Inventory.Inventories;
 using Inventory.Slot;
@@ -17,6 +18,7 @@ using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
 using Utils;
+using TargetLock;
 
 namespace UI.Pages
 {
@@ -58,6 +60,7 @@ namespace UI.Pages
 
         private readonly UIConfig uiConfig;
         private readonly InputConfig inputConfig;
+        private readonly ColorsConfig colorsConfig;
         private readonly StatsConfig statsConfig;
         private readonly StatsController statsController;
         private readonly StatFillers statFillers;
@@ -67,6 +70,9 @@ namespace UI.Pages
         private readonly PlayerInteractableLogic playerInteractableLogic;
         private readonly ItemHolderInteractableLogic itemHolderInteractableLogic;
         private readonly RectTransform canvasRect;
+        private readonly Canvas canvas;
+        private readonly Camera worldCamera;
+        private readonly TargetLockController targetLockController;
         private readonly IObjectResolver resolver;
         private readonly QuestNotificationService questNotifications;
         private readonly QuestController questController;
@@ -75,6 +81,11 @@ namespace UI.Pages
         private readonly CompositeDisposable drawDisposables = new();
         private readonly Dictionary<StatType, StatVisibilityState> statVisibilityStates = new();
         private readonly Dictionary<FastSlotModel, StatVisibilityState> fastSlotVisibilityStates = new();
+        private readonly List<TargetLockTarget> availableTargetLockTargets = new();
+        private readonly HashSet<TargetLockTarget> visibleTargetLockTargets = new();
+        private readonly Dictionary<TargetLockTarget, Image> targetLockMarkerImages = new();
+        private readonly List<TargetLockTarget> staleTargetLockTargets = new();
+        private readonly Stack<Image> targetLockMarkerImagePool = new();
 
         public override PageType Type { get; } = PageType.MainGame;
 
@@ -105,17 +116,22 @@ namespace UI.Pages
         private VisibilityPhase questDescriptionPhase;
         private bool holdQuestDescriptionAtFull;
         private bool isShowStatsPressed;
+        private RectTransform targetLockMarkerParent;
+        private float nextTargetLockCandidateRefreshTime;
 
         public MainPage
             (
                 UIConfig uiConfig,
                 InputConfig inputConfig,
+                ColorsConfig colorsConfig,
                 StatsConfig statsConfig,
                 StatsController statsController,
                 StatFillers statFillers,
                 global::Inventory.InventoryConfig inventoryConfig,
                 PlayerInventory playerInventory,
                 Canvas canvas,
+                Camera worldCamera,
+                TargetLockController targetLockController,
                 PlayerInteractableLogic playerInteractableLogic,
                 ItemHolderInteractableLogic itemHolderInteractableLogic,
                 IObjectResolver resolver,
@@ -130,11 +146,15 @@ namespace UI.Pages
             this.resolver = resolver;
             this.uiConfig = uiConfig;
             this.inputConfig = inputConfig;
+            this.colorsConfig = colorsConfig;
             this.statsConfig = statsConfig;
             this.statsController = statsController;
             this.statFillers = statFillers;
             this.inventoryConfig = inventoryConfig;
             this.playerInventory = playerInventory;
+            this.canvas = canvas;
+            this.worldCamera = worldCamera;
+            this.targetLockController = targetLockController;
             hpFiller = statFillers.Get(StatType.Hp);
             this.playerInteractableLogic = playerInteractableLogic;
             this.itemHolderInteractableLogic = itemHolderInteractableLogic;
@@ -205,6 +225,8 @@ namespace UI.Pages
             heartbeatPulse = new HeartbeatPulse(statsConfig, statsController.Hp, hpFiller);
             beatingHeart = new BeatingHeart(statsConfig, heartbeatPulse, statsHolder.HPHolder);
             bloodScreenController = new BloodScreenController(statsConfig, statsController.Hp, hpFiller, heartbeatPulse, bloodScreen);
+            CreateTargetLockMarkerParent();
+            Observable.EveryUpdate().Subscribe(_ => TickTargetLockMarkers()).AddTo(drawDisposables);
         }
 
         public override void Hide()
@@ -220,6 +242,7 @@ namespace UI.Pages
 
             drawDisposables.Clear();
             playerStatsHud.Detach();
+            DestroyTargetLockMarkerParent();
 
             interactableInterface?.Dispose();
             interactableInterface = null;
@@ -248,6 +271,194 @@ namespace UI.Pages
             }
 
             playerStatsHudContinuity.Clear();
+        }
+
+        private void CreateTargetLockMarkerParent()
+        {
+            DestroyTargetLockMarkerParent();
+            if (contentRect == null || uiConfig.TargetLockMarkerConfig == null)
+            {
+                return;
+            }
+
+            var parentObject = new GameObject("Target Lock Markers", typeof(RectTransform));
+            targetLockMarkerParent = parentObject.GetComponent<RectTransform>();
+            targetLockMarkerParent.SetParent(contentRect, false);
+            targetLockMarkerParent.anchorMin = Vector2.zero;
+            targetLockMarkerParent.anchorMax = Vector2.one;
+            targetLockMarkerParent.offsetMin = Vector2.zero;
+            targetLockMarkerParent.offsetMax = Vector2.zero;
+            targetLockMarkerParent.SetAsLastSibling();
+        }
+
+        private void DestroyTargetLockMarkerParent()
+        {
+            targetLockMarkerImages.Clear();
+            availableTargetLockTargets.Clear();
+            visibleTargetLockTargets.Clear();
+            staleTargetLockTargets.Clear();
+            targetLockMarkerImagePool.Clear();
+            nextTargetLockCandidateRefreshTime = 0f;
+
+            if (targetLockMarkerParent != null)
+            {
+                Object.Destroy(targetLockMarkerParent.gameObject);
+                targetLockMarkerParent = null;
+            }
+        }
+
+        private void TickTargetLockMarkers()
+        {
+            var markerConfig = uiConfig.TargetLockMarkerConfig;
+            if (targetLockMarkerParent == null
+                || targetLockController == null
+                || worldCamera == null
+                || markerConfig == null
+                || markerConfig.AvailableTargetSprite == null
+                || markerConfig.CurrentTargetSprite == null
+                || !targetLockController.IsEnabled)
+            {
+                HideAllTargetLockMarkers();
+                return;
+            }
+
+            RefreshAvailableTargetLockTargetsIfDue(markerConfig);
+            visibleTargetLockTargets.Clear();
+
+            foreach (var target in availableTargetLockTargets)
+            {
+                RenderTargetLockMarker(target, targetLockController.IsLocked && target == targetLockController.CurrentTarget, markerConfig);
+            }
+
+            if (targetLockController.IsLocked)
+            {
+                RenderTargetLockMarker(targetLockController.CurrentTarget, isCurrentTarget: true, markerConfig);
+            }
+
+            staleTargetLockTargets.Clear();
+            foreach (var pair in targetLockMarkerImages)
+            {
+                if (!visibleTargetLockTargets.Contains(pair.Key))
+                {
+                    staleTargetLockTargets.Add(pair.Key);
+                }
+            }
+
+            foreach (var target in staleTargetLockTargets)
+            {
+                ReleaseTargetLockMarker(target);
+            }
+        }
+
+        private void RefreshAvailableTargetLockTargetsIfDue(TargetLockMarkerConfig markerConfig)
+        {
+            if (Time.unscaledTime < nextTargetLockCandidateRefreshTime)
+            {
+                return;
+            }
+
+            targetLockController.CollectAvailableTargets(availableTargetLockTargets);
+            nextTargetLockCandidateRefreshTime = Time.unscaledTime + markerConfig.CandidateRefreshInterval;
+        }
+
+        private void RenderTargetLockMarker(
+            TargetLockTarget target,
+            bool isCurrentTarget,
+            TargetLockMarkerConfig markerConfig)
+        {
+            if (target == null || !TryGetTargetLockMarkerPosition(target, markerConfig, out var localPosition))
+            {
+                return;
+            }
+
+            visibleTargetLockTargets.Add(target);
+            var marker = GetOrCreateTargetLockMarker(target);
+            marker.sprite = isCurrentTarget ? markerConfig.CurrentTargetSprite : markerConfig.AvailableTargetSprite;
+            marker.rectTransform.sizeDelta = Vector2.one * (isCurrentTarget
+                ? markerConfig.CurrentTargetDiameter
+                : markerConfig.AvailableTargetDiameter);
+            marker.color = isCurrentTarget ? colorsConfig.Yellow : colorsConfig.White;
+            marker.rectTransform.anchoredPosition = localPosition;
+            marker.gameObject.name = isCurrentTarget ? "Current Target Lock Marker" : "Available Target Lock Marker";
+        }
+
+        private bool TryGetTargetLockMarkerPosition(
+            TargetLockTarget target,
+            TargetLockMarkerConfig markerConfig,
+            out Vector2 localPosition)
+        {
+            localPosition = default;
+            var worldPosition = target.AimPosition + markerConfig.WorldOffset;
+            var viewportPosition = worldCamera.WorldToViewportPoint(worldPosition);
+            var inset = markerConfig.ScreenEdgeInset;
+            if (viewportPosition.z <= 0f
+                || viewportPosition.x < inset || viewportPosition.x > 1f - inset
+                || viewportPosition.y < inset || viewportPosition.y > 1f - inset)
+            {
+                return false;
+            }
+
+            var eventCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+            var screenPosition = worldCamera.WorldToScreenPoint(worldPosition);
+            return RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                targetLockMarkerParent,
+                screenPosition,
+                eventCamera,
+                out localPosition);
+        }
+
+        private Image GetOrCreateTargetLockMarker(TargetLockTarget target)
+        {
+            if (targetLockMarkerImages.TryGetValue(target, out var marker))
+            {
+                return marker;
+            }
+
+            marker = targetLockMarkerImagePool.Count > 0
+                ? targetLockMarkerImagePool.Pop()
+                : CreateTargetLockMarkerImage();
+            marker.gameObject.SetActive(true);
+            targetLockMarkerImages.Add(target, marker);
+            return marker;
+        }
+
+        private Image CreateTargetLockMarkerImage()
+        {
+            var markerObject = new GameObject("Available Target Lock Marker", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            var marker = markerObject.GetComponent<Image>();
+            marker.raycastTarget = false;
+            marker.preserveAspect = true;
+            marker.color = Color.white;
+            marker.rectTransform.SetParent(targetLockMarkerParent, false);
+            marker.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            marker.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            marker.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            return marker;
+        }
+
+        private void ReleaseTargetLockMarker(TargetLockTarget target)
+        {
+            if (!targetLockMarkerImages.Remove(target, out var marker))
+            {
+                return;
+            }
+
+            marker.gameObject.SetActive(false);
+            targetLockMarkerImagePool.Push(marker);
+        }
+
+        private void HideAllTargetLockMarkers()
+        {
+            staleTargetLockTargets.Clear();
+            foreach (var target in targetLockMarkerImages.Keys)
+            {
+                staleTargetLockTargets.Add(target);
+            }
+
+            foreach (var target in staleTargetLockTargets)
+            {
+                ReleaseTargetLockMarker(target);
+            }
         }
 
         private void RefreshHpFill()

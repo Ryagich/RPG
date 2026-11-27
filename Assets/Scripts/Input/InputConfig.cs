@@ -18,6 +18,8 @@ namespace Input
         [field: SerializeField] public InputActionReference Run { get; private set; }
         [field: SerializeField, Min(0.01f), Tooltip("Maximum time between releasing Shift and pressing it again to start sprinting.")]
         public float SprintDoublePressWindowSeconds { get; private set; } = .25f;
+        [field: SerializeField, Min(0.01f), Tooltip("Maximum time between two clicks on the same inventory item to transfer it.")]
+        public float InventoryDoubleClickWindowSeconds { get; private set; } = .3f;
         [field: SerializeField] public InputActionReference ShowStats { get; private set; }
         [field: SerializeField] public InputActionReference Pause { get; private set; }
         [field: SerializeField] public InputActionReference Map { get; private set; }

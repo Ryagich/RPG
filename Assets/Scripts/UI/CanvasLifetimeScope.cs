@@ -1,5 +1,6 @@
 ﻿using UI.Pages;
 using UI.UIElements;
+using UI.Configs;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -15,6 +16,7 @@ namespace UI
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterInstance(Canvas).As<Canvas>();
+            builder.RegisterEntryPoint<DialogueScreenTransition>().AsSelf();
             builder.RegisterEntryPoint<QuestNotificationService>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueAnswerProvider>(Lifetime.Singleton).AsSelf();
             builder.Register<DialogueAnswerExecutionService>(Lifetime.Singleton).AsSelf();

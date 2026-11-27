@@ -51,6 +51,14 @@ namespace UI.Inventory
                    && tiledInventory.Tiles.TryGetTile(cell.x, cell.y, out tile);
         }
 
+        public bool TryGetTileAt(Camera eventCamera, Vector2 screenPoint, out Tile tile)
+        {
+            tile = null;
+            return inventory is ITiledInventory tiledInventory
+                   && InventoryGridGeometry.TryGetCursorCell(view.ContentForTiles, eventCamera, screenPoint, out var cell, out _)
+                   && tiledInventory.Tiles.TryGetTile(cell.x, cell.y, out tile);
+        }
+
         public bool TryGetSnappedLocalPosition(Camera eventCamera, Vector2 screenPoint, ItemStack stack, Vector2 grabOffset, out Vector3 position)
         {
             position = default;

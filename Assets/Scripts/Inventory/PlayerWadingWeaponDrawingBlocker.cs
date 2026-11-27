@@ -5,7 +5,7 @@ using VContainer.Unity;
 namespace Inventory
 {
     /// <summary>
-    /// Adds Wading as a source of the existing weapon-drawing block. The weapon controller
+    /// Adds water locomotion as a source of the existing weapon-drawing block. The weapon controller
     /// remains the sole owner of sheathing transitions and draw requests.
     /// </summary>
     public sealed class PlayerWadingWeaponDrawingBlocker : IStartable, IDisposable
@@ -23,19 +23,19 @@ namespace Inventory
 
         public void Start()
         {
-            waterDetector.WadingStateChanged += OnWadingStateChanged;
-            SetBlocked(waterDetector.IsWading);
+            waterDetector.StateChanged += OnWaterStateChanged;
+            SetBlocked(waterDetector.IsWaterLocomotionActive);
         }
 
         public void Dispose()
         {
-            waterDetector.WadingStateChanged -= OnWadingStateChanged;
+            waterDetector.StateChanged -= OnWaterStateChanged;
             SetBlocked(false);
         }
 
-        private void OnWadingStateChanged(bool isWading)
+        private void OnWaterStateChanged(CharacterWaterState _)
         {
-            SetBlocked(isWading);
+            SetBlocked(waterDetector.IsWaterLocomotionActive);
         }
 
         private void SetBlocked(bool isBlocked)

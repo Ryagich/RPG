@@ -59,6 +59,8 @@ namespace Inventory
                        || animator.GetBool(RollRequestHash));
         }
 
+        public bool IsAttackRequestActive() => IsRequestSet(AttackRequestHash) || IsRequestSet(HeavyAttackRequestHash);
+
         public bool IsFullBodyActionActive() => IsCurrentOrNextState(IsActionState);
         public bool IsHitActive() => IsCurrentOrNextState(IsHitState);
         public bool IsHeavyAttackHitActive() => IsCurrentOrNextState(IsHeavyAttackHitState);

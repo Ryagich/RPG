@@ -46,8 +46,9 @@ namespace Movement
             jumpInputSubscription = jumpInputSubscriber.Subscribe(OnJumpInput);
             playerGravity.JumpStarted += OnJumpStarted;
             playerGravity.AirborneStateChanged += OnAirborneStateChanged;
+            waterDetector.StateChanged += OnWaterStateChanged;
 
-            if (playerGravity.IsAirborne)
+            if (playerGravity.IsAirborne && !waterDetector.IsSwimming)
             {
                 EnterAirborneState();
             }
@@ -58,6 +59,7 @@ namespace Movement
             jumpInputSubscription?.Dispose();
             playerGravity.JumpStarted -= OnJumpStarted;
             playerGravity.AirborneStateChanged -= OnAirborneStateChanged;
+            waterDetector.StateChanged -= OnWaterStateChanged;
             playerAnimationController?.SetAirborneInputActive(false);
             playerMovement?.SetAirborneMomentum(this, false);
         }
@@ -67,7 +69,7 @@ namespace Movement
             if (playerGravity == null
                 || playerMovement == null
                 || playerMovement.IsMovementLocked
-                || waterDetector.IsWading
+                || waterDetector.IsWaterLocomotionActive
                 || config == null
                 || gravityConfig == null)
             {
@@ -109,6 +111,12 @@ namespace Movement
 
         private void OnAirborneStateChanged(bool isAirborne)
         {
+            if (waterDetector.IsSwimming)
+            {
+                ExitAirborneState();
+                return;
+            }
+
             if (!isAirborne)
             {
                 ExitAirborneState();
@@ -116,6 +124,20 @@ namespace Movement
             }
 
             if (!playerGravity.IsJumping)
+            {
+                EnterAirborneState();
+            }
+        }
+
+        private void OnWaterStateChanged(CharacterWaterState state)
+        {
+            if (state == CharacterWaterState.Swim)
+            {
+                ExitAirborneState();
+                return;
+            }
+
+            if (playerGravity.IsAirborne && !playerGravity.IsJumping)
             {
                 EnterAirborneState();
             }

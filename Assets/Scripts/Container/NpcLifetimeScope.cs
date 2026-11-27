@@ -37,6 +37,8 @@ namespace Container
         [SerializeField] private CharacterVisualConfig defaultVisualConfig;
         [Header("Dialogue")]
         [SerializeField] private bool canTalk = true;
+        [SerializeField] private bool teleportPlayerToDialoguePosition = true;
+        [SerializeField, Min(0f)] private float dialogueParticipantDistance = 1.5f;
         [SerializeField] private DialogGraph dialog;
         [SerializeField] private StateMachineGraph stateMachineGraph;
         [Header("Faction")]
@@ -212,6 +214,9 @@ namespace Container
             builder.RegisterInstance(transform);
             builder.RegisterInstance("NPC").Keyed("Scope ID");
             builder.RegisterInstance(canTalk).Keyed("Can Talk");
+            builder.RegisterInstance(
+                new NpcDialoguePositioningSettings(teleportPlayerToDialoguePosition, dialogueParticipantDistance));
+            builder.Register<NpcDialoguePositioning>(Lifetime.Scoped).AsSelf();
             if (stateMachineGraph != null)
             {
                 builder.RegisterInstance(stateMachineGraph).AsSelf();

@@ -10,7 +10,7 @@ using VContainer.Unity;
 namespace Movement
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class PlayerMovement : ICharacterPlanarMotionSource, IStaminaMovementState
+    public class PlayerMovement : ICharacterPlanarMotionSource, IStaminaMovementState, System.IDisposable
     {
         private const float InputThreshold = 0.001f;
 
@@ -38,7 +38,13 @@ namespace Movement
         private float currentAccelerationRate;
         private float currentDecelerationRate;
         private float sprintSpeedBlend;
-        private float currentWaterSpeedMultiplier = 1f;
+        private bool wasWaterLocomotionActive;
+
+        /// <summary>
+        /// Raised after input has been resolved for a water-state change. Consumers can therefore
+        /// use the same normal/run/sprint decision on the first animation frame in water.
+        /// </summary>
+        public event System.Action<CharacterWaterState> WaterLocomotionStateChanged;
 
         [SuppressMessage("ReSharper", "ParameterHidesMember")]
         private PlayerMovement
@@ -63,13 +69,19 @@ namespace Movement
             this.intent = intent;
             this.facingController = facingController;
             this.waterDetector = waterDetector;
+            waterDetector.StateChanged += OnWaterStateChanged;
             currentAccelerationRate = playerMovementConfig.WalkSpeedChangeRate;
             currentDecelerationRate = playerMovementConfig.WalkDecelerationRate;
         }
 
+        public void Dispose()
+        {
+            waterDetector.StateChanged -= OnWaterStateChanged;
+        }
+
         public Vector3 GetPlanarVelocity(float deltaTime)
         {
-            UpdateWaterSpeedMultiplier(deltaTime);
+            RefreshWaterLocomotionState();
 
             if (HasAirborneMomentum)
             {
@@ -85,11 +97,7 @@ namespace Movement
             ApplyStaminaRestrictions();
             UpdateSprintSpeedBlend(deltaTime);
 
-            var targetAccelerationRate = isSprinting
-                ? playerMovementConfig.SprintSpeedChangeRate
-                : isRunning
-                    ? playerMovementConfig.RunSpeedChangeRate
-                    : playerMovementConfig.WalkSpeedChangeRate;
+            var targetAccelerationRate = GetTargetAccelerationRate();
             currentAccelerationRate = Mathf.MoveTowards(
                 currentAccelerationRate,
                 targetAccelerationRate,
@@ -98,12 +106,9 @@ namespace Movement
             if (targetVelocity.sqrMagnitude > InputThreshold)
             {
                 // Remember the movement mode that produced the momentum. Releasing both
-                // the movement and run buttons in the same frame must still decelerate as a run.
-                currentDecelerationRate = isSprinting
-                    ? playerMovementConfig.SprintDecelerationRate
-                    : isRunning
-                        ? playerMovementConfig.RunDecelerationRate
-                        : playerMovementConfig.WalkDecelerationRate;
+                // the movement and run buttons in the same frame must still use the
+                // deceleration rate of the mode that was actually moving.
+                currentDecelerationRate = GetCurrentDecelerationRate();
             }
 
             var velocityChangeRate = targetVelocity.sqrMagnitude > InputThreshold
@@ -126,7 +131,7 @@ namespace Movement
                 return Vector3.zero;
             }
 
-            facingController.Rotate(worldVelocity, intent.Direction, isRunning, isSprinting, deltaTime);
+            facingController.Rotate(targetVelocity, intent.Direction, isRunning, isSprinting, deltaTime);
             return worldVelocity;
         }
 
@@ -199,6 +204,14 @@ namespace Movement
         public bool IsMovementLocked => movementLockSources.Count > 0;
         public bool IsRunning => isRunning;
         public bool IsSprinting => isSprinting;
+        public bool IsSwimmingRun => waterDetector?.IsSwimming == true && isRunning && !isSprinting;
+        public bool IsSwimmingSprint => waterDetector?.IsSwimming == true && isSprinting;
+        /// <summary>
+        /// Raw locomotion intent for the current frame. Unlike <see cref="IsMoving"/>, this
+        /// becomes false immediately when the player releases movement, before planar
+        /// deceleration finishes.
+        /// </summary>
+        public bool HasMovementInput => intent.Direction.sqrMagnitude > InputThreshold;
         public bool IsMoving => CanMove && currentVelocity.sqrMagnitude > InputThreshold;
 
         public void SetRunAllowed(bool isAllowed)
@@ -218,18 +231,52 @@ namespace Movement
 
         private void RefreshLocomotionState()
         {
-            isRunning = CanMove && wantsToRun && isRunAllowed && CanRunByStamina();
+            isRunning = CanMove
+                        && wantsToRun
+                        && isRunAllowed
+                        && CanRunByStamina()
+                        && HasMovementInputForCurrentLocomotion()
+                        && CanRunInCurrentDirection();
             isSprinting = isRunning
                           && wantsToSprint
-                          && HasForwardSprintInput()
+                          && HasSprintInputInCurrentLocomotion()
+                          && CanSprintInCurrentLocomotion()
                           && !targetLockController.IsLocked;
             targetVelocity = CanMoveByStamina()
-                ? isSprinting ? Vector2.up : intent.Direction
+                ? GetTargetVelocity()
                 : Vector2.zero;
+        }
+
+        private Vector2 GetTargetVelocity()
+        {
+            if (isSprinting && !IsSwimmingSprint)
+            {
+                return Vector2.up;
+            }
+
+            return intent.Direction;
         }
 
         private bool CanMove => isMovementEnabled && movementLockSources.Count == 0;
         private bool HasAirborneMomentum => airborneMomentumSources.Count > 0;
+
+        private bool CanRunInCurrentDirection()
+        {
+            return !HasBlockedSwimmingRunDirection();
+        }
+
+        private bool HasMovementInputForCurrentLocomotion()
+        {
+            return waterDetector?.IsSwimming != true
+                   || intent.Direction.sqrMagnitude > InputThreshold;
+        }
+
+        private bool HasBlockedSwimmingRunDirection()
+        {
+            return waterDetector?.IsSwimming == true
+                   && wantsToRun
+                   && intent.Direction.y < -InputThreshold;
+        }
 
         private void RefreshMovementState(bool restoreBufferedVelocity = false)
         {
@@ -284,19 +331,98 @@ namespace Movement
                 changeRate * deltaTime);
         }
 
-        private void UpdateWaterSpeedMultiplier(float deltaTime)
+        private float GetTargetAccelerationRate()
         {
-            var targetMultiplier = waterDetector?.MovementSpeedMultiplier ?? 1f;
-            var changeRate = waterDetector?.MovementSpeedMultiplierChangeRate ?? 0f;
-            currentWaterSpeedMultiplier = Mathf.MoveTowards(
-                currentWaterSpeedMultiplier,
-                targetMultiplier,
-                changeRate * deltaTime);
+            if (waterDetector?.IsSwimming == true)
+            {
+                if (IsSwimmingSprint)
+                {
+                    return playerMovementConfig.SwimSprintSpeedChangeRate;
+                }
+
+                return IsSwimmingRun
+                    ? playerMovementConfig.SwimRunSpeedChangeRate
+                    : playerMovementConfig.SwimSpeedChangeRate;
+            }
+
+            if (waterDetector?.IsWading == true)
+            {
+                return playerMovementConfig.WadingSpeedChangeRate;
+            }
+
+            if (isSprinting)
+            {
+                return playerMovementConfig.SprintSpeedChangeRate;
+            }
+
+            return isRunning
+                ? playerMovementConfig.RunSpeedChangeRate
+                : playerMovementConfig.WalkSpeedChangeRate;
         }
 
-        private bool HasForwardSprintInput()
+        private float GetCurrentDecelerationRate()
         {
+            if (waterDetector?.IsSwimming == true)
+            {
+                if (IsSwimmingSprint)
+                {
+                    return playerMovementConfig.SwimSprintDecelerationRate;
+                }
+
+                return IsSwimmingRun
+                    ? playerMovementConfig.SwimRunDecelerationRate
+                    : playerMovementConfig.SwimDecelerationRate;
+            }
+
+            if (waterDetector?.IsWading == true)
+            {
+                return playerMovementConfig.WadingDecelerationRate;
+            }
+
+            if (isSprinting)
+            {
+                return playerMovementConfig.SprintDecelerationRate;
+            }
+
+            return isRunning
+                ? playerMovementConfig.RunDecelerationRate
+                : playerMovementConfig.WalkDecelerationRate;
+        }
+
+        private void RefreshWaterLocomotionState()
+        {
+            var isWaterLocomotionActive = waterDetector != null && waterDetector.IsWaterLocomotionActive;
+            if (wasWaterLocomotionActive == isWaterLocomotionActive)
+            {
+                return;
+            }
+
+            wasWaterLocomotionActive = isWaterLocomotionActive;
+            RefreshLocomotionState();
+        }
+
+        private void OnWaterStateChanged(CharacterWaterState state)
+        {
+            wasWaterLocomotionActive = waterDetector.IsWaterLocomotionActive;
+            RefreshLocomotionState();
+            WaterLocomotionStateChanged?.Invoke(state);
+        }
+
+        private bool HasSprintInputInCurrentLocomotion()
+        {
+            if (waterDetector?.IsSwimming == true)
+            {
+                return intent.Direction.sqrMagnitude > InputThreshold
+                       && intent.Direction.y >= -InputThreshold;
+            }
+
             return intent.Direction.y > InputThreshold;
+        }
+
+        private bool CanSprintInCurrentLocomotion()
+        {
+            return waterDetector?.IsWaterLocomotionActive != true
+                   || waterDetector.IsSwimming;
         }
 
         private bool CanMoveByStamina()
@@ -325,10 +451,14 @@ namespace Movement
                 return Vector3.zero;
             }
 
-            if (isSprinting)
+            if (isSprinting && !IsSwimmingSprint)
             {
                 var sprintSpeed = GetSprintAdjustedSpeed(playerMovementConfig.RunForwardSpeed);
-                return visualTransform.forward * (sprintSpeed * inputMagnitude * GetWeightSpeedMultiplier() * currentWaterSpeedMultiplier);
+                var waterAdjustedSprintSpeed = GetWaterAdjustedSpeed(
+                    sprintSpeed,
+                    playerMovementConfig.WadingForwardSpeed,
+                    playerMovementConfig.SwimForwardSpeed);
+                return visualTransform.forward * (waterAdjustedSprintSpeed * inputMagnitude * GetWeightSpeedMultiplier());
             }
 
             var moveDirection = cameraMotor.GetGameplayPlanarRotation() *
@@ -338,8 +468,35 @@ namespace Movement
                 return Vector3.zero;
             }
 
+            if (TryGetSwimSidewaysForwardSpeed(velocity, out var sidewaysForwardSpeed))
+            {
+                var cameraPlanarRotation = cameraMotor.GetGameplayPlanarRotation();
+                var sidewaysDirection = cameraPlanarRotation * new Vector3(Mathf.Sign(velocity.x), 0f, 0f);
+                var forwardDirection = cameraPlanarRotation * Vector3.forward;
+                var sidewaysSpeed = GetSwimStrafeSpeed();
+                return (sidewaysDirection * sidewaysSpeed + forwardDirection * sidewaysForwardSpeed)
+                       * (inputMagnitude * GetWeightSpeedMultiplier());
+            }
+
             var moveSpeed = CalculateMoveSpeed(moveDirection) * inputMagnitude;
             return moveDirection.normalized * moveSpeed;
+        }
+
+        private bool TryGetSwimSidewaysForwardSpeed(Vector2 velocity, out float forwardSpeed)
+        {
+            forwardSpeed = 0f;
+            if (waterDetector?.IsSwimming != true
+                || !isRunning
+                || Mathf.Abs(velocity.x) <= InputThreshold
+                || Mathf.Abs(velocity.y) > InputThreshold)
+            {
+                return false;
+            }
+
+            forwardSpeed = IsSwimmingSprint
+                ? playerMovementConfig.SwimSprintSidewaysForwardSpeed
+                : playerMovementConfig.SwimRunSidewaysForwardSpeed;
+            return forwardSpeed > 0f;
         }
 
         private float CalculateMoveSpeed(Vector3 worldMoveDirection)
@@ -349,26 +506,56 @@ namespace Movement
             var horizontalSpeed = hasHorizontalInput
                 ? GetStrafeSpeed()
                 : 0f;
+            var wadingHorizontalSpeed = hasHorizontalInput
+                ? playerMovementConfig.WadingStrafeSpeed
+                : 0f;
+            var swimHorizontalSpeed = hasHorizontalInput
+                ? GetSwimStrafeSpeed()
+                : 0f;
             var verticalSpeed = 0f;
+            var wadingVerticalSpeed = 0f;
+            var swimVerticalSpeed = 0f;
 
             if (localMoveDirection.z > InputThreshold)
             {
                 verticalSpeed = GetForwardSpeed();
+                wadingVerticalSpeed = playerMovementConfig.WadingForwardSpeed;
+                swimVerticalSpeed = GetSwimForwardSpeed();
             }
             else if (localMoveDirection.z < -InputThreshold)
             {
                 verticalSpeed = GetBackwardSpeed();
+                wadingVerticalSpeed = playerMovementConfig.WadingBackwardSpeed;
+                swimVerticalSpeed = playerMovementConfig.SwimBackwardSpeed;
             }
 
             if (horizontalSpeed > 0f && verticalSpeed > 0f)
             {
-                return GetSprintAdjustedSpeed((horizontalSpeed + verticalSpeed) * 0.5f)
-                       * GetWeightSpeedMultiplier()
-                       * currentWaterSpeedMultiplier;
+                var landSpeed = GetSprintAdjustedSpeed((horizontalSpeed + verticalSpeed) * 0.5f);
+                var wadingSpeed = (wadingHorizontalSpeed + wadingVerticalSpeed) * 0.5f;
+                var swimSpeed = (swimHorizontalSpeed + swimVerticalSpeed) * 0.5f;
+                return GetWaterAdjustedSpeed(landSpeed, wadingSpeed, swimSpeed) * GetWeightSpeedMultiplier();
             }
 
             var baseSpeed = Mathf.Max(horizontalSpeed, verticalSpeed);
-            return GetSprintAdjustedSpeed(baseSpeed) * GetWeightSpeedMultiplier() * currentWaterSpeedMultiplier;
+            var wadingBaseSpeed = Mathf.Max(wadingHorizontalSpeed, wadingVerticalSpeed);
+            var swimBaseSpeed = Mathf.Max(swimHorizontalSpeed, swimVerticalSpeed);
+            return GetWaterAdjustedSpeed(
+                       GetSprintAdjustedSpeed(baseSpeed),
+                       wadingBaseSpeed,
+                       swimBaseSpeed)
+                   * GetWeightSpeedMultiplier();
+        }
+
+        private float GetWaterAdjustedSpeed(float landSpeed, float wadingSpeed, float swimSpeed)
+        {
+            if (waterDetector?.IsSwimming == true)
+            {
+                return swimSpeed;
+            }
+
+            var wadingBlend = waterDetector?.WadingMovementSpeedBlend ?? 0f;
+            return Mathf.Lerp(landSpeed, wadingSpeed, wadingBlend);
         }
 
         private float GetSprintAdjustedSpeed(float baseSpeed)
@@ -395,6 +582,30 @@ namespace Movement
             return isRunning
                 ? playerMovementConfig.RunStrafeSpeed
                 : playerMovementConfig.StrafeSpeed;
+        }
+
+        private float GetSwimForwardSpeed()
+        {
+            if (IsSwimmingSprint)
+            {
+                return playerMovementConfig.SwimSprintForwardSpeed;
+            }
+
+            return IsSwimmingRun
+                ? playerMovementConfig.SwimRunForwardSpeed
+                : playerMovementConfig.SwimForwardSpeed;
+        }
+
+        private float GetSwimStrafeSpeed()
+        {
+            if (IsSwimmingSprint)
+            {
+                return playerMovementConfig.SwimSprintStrafeSpeed;
+            }
+
+            return IsSwimmingRun
+                ? playerMovementConfig.SwimRunStrafeSpeed
+                : playerMovementConfig.SwimStrafeSpeed;
         }
 
         private float GetWeightSpeedMultiplier()

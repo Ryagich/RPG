@@ -9,7 +9,6 @@ using Stats;
 using UniRx;
 using UnityEngine;
 using VContainer.Unity;
-using Object = UnityEngine.Object;
 
 namespace Player
 {
@@ -103,7 +102,7 @@ namespace Player
 
             if (animator != null)
             {
-                Object.Destroy(animator);
+                animator.enabled = false;
             }
 
             changeGameModeRequestPublisher.Publish(new ChangeGameModeRequest(GameMode.Death));

@@ -37,7 +37,6 @@ namespace UI.Pages
     {
         private sealed class PopupTarget
         {
-            public RectTransform Rect;
             public IInventory SourceInventory;
             public ItemInInventory InventoryItem;
             public SlotModel SlotModel;
@@ -62,6 +61,7 @@ namespace UI.Pages
         private readonly TradeHandInteractionService tradeHandInteractionService;
         private readonly TradeSettlementService tradeSettlementService;
         private readonly TradeOfferService tradeOfferService;
+        private readonly TradeDoubleClickActionService tradeDoubleClickActionService;
         private readonly MoneyStorage playerMoneyStorage;
         private readonly Character.CharacterInfo playerCharacterInfo;
         private readonly FactionConfig playerFaction;
@@ -98,7 +98,8 @@ namespace UI.Pages
         private readonly PlayerInventorySlotStateTracker slotStateTracker;
         private readonly List<RectTransform> itemRects = new();
         private readonly List<RectTransform> itemGrabRects = new();
-        private readonly List<PopupTarget> popupTargets = new();
+        private readonly InventoryItemDoubleClickTracker inventoryItemDoubleClickTracker = new();
+        private readonly InventorySlotDoubleClickTracker inventorySlotDoubleClickTracker = new();
         private HeartbeatPulse heartbeatPulse;
         private BloodScreenController bloodScreenController;
         private Image bloodScreen;
@@ -142,6 +143,7 @@ namespace UI.Pages
             this.tradeHandInteractionService = tradeHandInteractionService;
             tradeSettlementService = new TradeSettlementService();
             tradeOfferService = new TradeOfferService(playerInventory, itemStack => inventoryHandController?.Drop(itemStack));
+            tradeDoubleClickActionService = new TradeDoubleClickActionService(playerInventory, tradeOfferService);
             this.playerMoneyStorage = playerMoneyStorage;
             this.playerCharacterInfo = playerCharacterInfo;
             playerFaction = resolver.TryResolve<FactionConfig>(out var resolvedFaction) ? resolvedFaction : null;
@@ -309,30 +311,40 @@ namespace UI.Pages
             {
                 popupController?.Close();
                 ResetHoverPopupState();
+                ResetDoubleClickTrackers();
                 TryOpenPopup(screenPoint, InventoryPopupMode.ContextMenu);
                 return true;
             }
 
-            if (button != MouseButtonType.Left || popupController?.IsOpen != true)
+            if (button != MouseButtonType.Left)
             {
                 return false;
             }
 
-            if (popupController.Mode == InventoryPopupMode.ContextMenu
-             && popupController.ContainsScreenPoint(screenPoint))
+            if (popupController?.IsOpen == true)
+            {
+                if (popupController.Mode == InventoryPopupMode.ContextMenu)
+                {
+                    if (popupController.ContainsScreenPoint(screenPoint))
+                    {
+                        return true;
+                    }
+
+                    popupController.Close();
+                    ResetHoverPopupState();
+                    ResetDoubleClickTrackers();
+                    return false;
+                }
+
+                popupController.Close();
+                ResetHoverPopupState();
+            }
+
+            if (TryHandleDoubleClick(screenPoint))
             {
                 return true;
             }
 
-            if (popupController.Mode == InventoryPopupMode.Hover)
-            {
-                popupController?.Close();
-                ResetHoverPopupState();
-                return false;
-            }
-
-            popupController?.Close();
-            ResetHoverPopupState();
             return false;
         }
 
@@ -353,7 +365,6 @@ namespace UI.Pages
             redrawDisposables.Clear();
             itemRects.Clear();
             itemGrabRects.Clear();
-            popupTargets.Clear();
             inventoryGrids.Clear();
             popupController?.Close();
             ResetHoverPopupState();
@@ -521,20 +532,9 @@ namespace UI.Pages
             inventoryGrids.SetScrollEnabled(playerInventory.HandSlot.Value?.ItemStack == null);
             itemRects.Clear();
             itemGrabRects.Clear();
-            popupTargets.Clear();
-            interactionPresenter.ClearInventoryItems();
 
             inventoryGrids.ClearItems();
-            inventoryGrids.RenderItems(itemsView, (inventory, itemRect, item) =>
-            {
-                interactionPresenter.RegisterInventoryItem(inventory, itemRect, item);
-                popupTargets.Add(new PopupTarget
-                {
-                    Rect = itemRect,
-                    SourceInventory = inventory,
-                    InventoryItem = item
-                });
-            });
+            inventoryGrids.RenderItems(itemsView, (_, _, _) => { });
 
             DrawSlotItems();
             handPresenter?.RenderAndPosition(handGrabOffset, TryGetSnappedHandPosition);
@@ -643,12 +643,7 @@ namespace UI.Pages
 
         private void DrawSlotItems()
         {
-            playerSlotsView.Render((slotRect, slotModel) => popupTargets.Add(new PopupTarget
-            {
-                Rect = slotRect,
-                SourceInventory = playerInventory,
-                SlotModel = slotModel
-            }));
+            playerSlotsView.Render();
         }
 
         private bool TryGetSnappedHandPosition(Vector2 screenPoint, Camera eventCamera, RectTransform dragParentRect, out Vector2 snappedPosition)
@@ -755,6 +750,53 @@ namespace UI.Pages
         private void ResetHoverPopupState()
         {
             tooltipPresenter?.Reset();
+        }
+
+        private void ResetDoubleClickTrackers()
+        {
+            inventoryItemDoubleClickTracker.Reset();
+            inventorySlotDoubleClickTracker.Reset();
+        }
+
+        private bool TryHandleDoubleClick(Vector2 screenPoint)
+        {
+            if (!interactionPresenter.TryGetInventoryItemOrSlotAt(screenPoint, out var sourceInventory, out var itemInInventory, out var slotModel))
+            {
+                ResetDoubleClickTrackers();
+                return false;
+            }
+
+            if (itemInInventory != null)
+            {
+                inventorySlotDoubleClickTracker.Reset();
+                if (!inventoryItemDoubleClickTracker.RegisterClick(
+                        sourceInventory,
+                        itemInInventory,
+                        Time.unscaledTime,
+                        inputConfig.InventoryDoubleClickWindowSeconds))
+                {
+                    return false;
+                }
+
+                popupController?.Close();
+                ResetHoverPopupState();
+                tradeDoubleClickActionService.TryMoveInventoryItem(tradeSession, sourceInventory, itemInInventory, GetSlotSizeOrNull);
+                return true;
+            }
+
+            inventoryItemDoubleClickTracker.Reset();
+            if (slotModel == null || !inventorySlotDoubleClickTracker.RegisterClick(
+                    slotModel,
+                    Time.unscaledTime,
+                    inputConfig.InventoryDoubleClickWindowSeconds))
+            {
+                return false;
+            }
+
+            popupController?.Close();
+            ResetHoverPopupState();
+            tradeDoubleClickActionService.TryMovePlayerSlot(tradeSession, slotModel);
+            return true;
         }
 
         private PopupTarget FindPopupTarget(Vector2 screenPoint)
@@ -890,45 +932,17 @@ namespace UI.Pages
 
         private bool TryGetPopupTarget(Vector2 screenPoint, out PopupTarget target)
         {
-            var eventCamera = GetEventCamera();
-            for (var i = popupTargets.Count - 1; i >= 0; i--)
-            {
-                var currentTarget = popupTargets[i];
-                if (currentTarget?.Rect == null)
-                {
-                    continue;
-                }
-
-                if (!RectTransformUtility.RectangleContainsScreenPoint(currentTarget.Rect, screenPoint, eventCamera))
-                {
-                    continue;
-                }
-
-                target = currentTarget;
-                return true;
-            }
-
-            if (TryGetGridPopupTarget(screenPoint, out target))
-            {
-                return true;
-            }
-
             target = null;
-            return false;
-        }
-
-        private bool TryGetGridPopupTarget(Vector2 screenPoint, out PopupTarget target)
-        {
-            target = null;
-            if (!interactionPresenter.TryGetInventoryItemAt(screenPoint, out var hoveredInventory, out var itemInInventory))
+            if (!interactionPresenter.TryGetInventoryItemOrSlotAt(screenPoint, out var sourceInventory, out var itemInInventory, out var slotModel))
             {
                 return false;
             }
 
             target = new PopupTarget
             {
-                SourceInventory = hoveredInventory,
-                InventoryItem = itemInInventory
+                SourceInventory = sourceInventory,
+                InventoryItem = itemInInventory,
+                SlotModel = slotModel
             };
             return true;
         }
